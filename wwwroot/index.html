@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MCP Router Gateway Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="background-decor">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+    </div>
+    
+    <div class="dashboard-container">
+        <header class="dashboard-header">
+            <div class="header-logo">
+                <i class="fa-solid fa-network-wired logo-icon"></i>
+                <div class="header-title">
+                    <h1>MCP Router Gateway</h1>
+                    <span class="badge badge-primary">v0.1.0</span>
+                </div>
+            </div>
+            <div class="header-status">
+                <div class="status-item">
+                    <span class="label">API Gateway Status</span>
+                    <span class="value"><span class="indicator online"></span> Online</span>
+                </div>
+                <div class="status-item">
+                    <span class="label">Endpoint</span>
+                    <span class="value code">https://mcp.wileyriley.com/sse</span>
+                </div>
+                <div class="status-item" id="user-status-item" style="display: none;">
+                    <span class="label">User Session</span>
+                    <span class="value" id="user-display"><i class="fa-solid fa-user-shield" style="margin-right:4px;"></i> Guest</span>
+                </div>
+            </div>
+        </header>
+
+        <main class="dashboard-main">
+            <!-- Left Panel: Stats and OAuth -->
+            <section class="left-panel">
+                <div class="glass-card stats-card">
+                    <h2><i class="fa-solid fa-chart-simple"></i> System Stats</h2>
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <span class="stat-number" id="server-count">0</span>
+                            <span class="stat-label">Total Servers</span>
+                        </div>
+                        <div class="stat-box">
+                            <span class="stat-number" id="active-servers">0</span>
+                            <span class="stat-label">Active Backends</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="glass-card dcr-card">
+                    <div class="card-header-btn">
+                        <h2><i class="fa-solid fa-key"></i> Registered Clients (DCR)</h2>
+                    </div>
+                    <div class="table-container">
+                        <table id="clients-table">
+                            <thead>
+                                <tr>
+                                    <th>Client Name</th>
+                                    <th>Client ID</th>
+                                    <th>Created At</th>
+                                </tr>
+                            </thead>
+                            <tbody id="clients-body">
+                                <tr>
+                                    <td colspan="3" class="empty-state">No dynamic clients registered yet. Connect Gemini Spark to register.</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right Panel: Backend Servers -->
+            <section class="right-panel">
+                <div class="glass-card servers-card">
+                    <div class="card-header-btn">
+                        <h2><i class="fa-solid fa-server"></i> Backend MCP Servers</h2>
+                        <button class="btn btn-secondary" onclick="loadServers()"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                    </div>
+                    
+                    <div class="servers-list" id="servers-list">
+                        <!-- Dynamic Server Cards Go Here -->
+                        <div class="loading-state">
+                            <i class="fa-solid fa-spinner fa-spin"></i> Loading backend servers...
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="dashboard-footer">
+            <p>WileyRiley Infrastructure &bull; Protected by TinyAuth Forward Auth &bull; 2026</p>
+        </footer>
+    </div>
+</body>
+</html>
