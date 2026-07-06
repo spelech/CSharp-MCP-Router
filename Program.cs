@@ -44,6 +44,35 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors();
+
+// Request logging middleware
+app.Use(async (context, next) =>
+{
+    var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+    var headersString = string.Join(" | ", context.Request.Headers.Select(h => $"{h.Key}: {h.Value}"));
+    
+    string bodyString = string.Empty;
+    if (context.Request.ContentLength > 0)
+    {
+        context.Request.EnableBuffering();
+        using (var reader = new StreamReader(context.Request.Body, leaveOpen: true))
+        {
+            bodyString = await reader.ReadToEndAsync();
+            context.Request.Body.Position = 0;
+        }
+    }
+
+    logger.LogInformation("Incoming request: {Method} {Path}{QueryString} from {Ip}. Body: {Body}. Headers: {Headers}", 
+        context.Request.Method, 
+        context.Request.Path, 
+        context.Request.QueryString,
+        context.Connection.RemoteIpAddress,
+        bodyString,
+        headersString);
+    await next();
+});
+
+app.UseDefaultFiles();
 app.UseStaticFiles(); // Serves dashboard files from wwwroot
 
 // Enforce SSO auth on dashboard APIs
@@ -89,6 +118,7 @@ using (var scope = app.Services.CreateScope())
                 db.Servers.Add(new McpServer
                 {
                     Id = "ha",
+                    Category = "homecontrol",
                     DisplayName = "Home Assistant",
                     Url = "http://ha-mcp-new:8086/mcp",
                     Enabled = true,
@@ -106,6 +136,7 @@ using (var scope = app.Services.CreateScope())
                 db.Servers.Add(new McpServer
                 {
                     Id = "actual",
+                    Category = "financial",
                     DisplayName = "Actual Budget",
                     Url = "http://actual-mcp-new:3000/sse",
                     Enabled = true,
@@ -123,6 +154,7 @@ using (var scope = app.Services.CreateScope())
                 db.Servers.Add(new McpServer
                 {
                     Id = "receiptwrangler",
+                    Category = "financial",
                     DisplayName = "Receipt Wrangler",
                     Url = "http://receiptwrangler-mcp-new:3000/mcp",
                     Enabled = true,
@@ -140,6 +172,7 @@ using (var scope = app.Services.CreateScope())
                 db.Servers.Add(new McpServer
                 {
                     Id = "seerr",
+                    Category = "media",
                     DisplayName = "Overseerr requests",
                     Url = "http://seerr:5055",
                     Enabled = true,
@@ -157,6 +190,7 @@ using (var scope = app.Services.CreateScope())
                 db.Servers.Add(new McpServer
                 {
                     Id = "unifi",
+                    Category = "unifi",
                     DisplayName = "UniFi Controller",
                     Url = "http://unifi-mcp:3000/mcp",
                     Enabled = true,
@@ -173,6 +207,7 @@ using (var scope = app.Services.CreateScope())
                 db.Servers.Add(new McpServer
                 {
                     Id = "plex",
+                    Category = "media",
                     DisplayName = "Plex Media Server",
                     Url = Environment.GetEnvironmentVariable("PLEX_URL") ?? "http://10.0.0.10:32400",
                     Enabled = true,
@@ -187,6 +222,7 @@ using (var scope = app.Services.CreateScope())
             db.Servers.Add(new McpServer
             {
                 Id = "mcp-arr-hd",
+                Category = "media",
                 DisplayName = "Arr Services (HD)",
                 Url = "http://mcp-arr-hd:3000/mcp",
                 Enabled = true,
@@ -196,6 +232,7 @@ using (var scope = app.Services.CreateScope())
             db.Servers.Add(new McpServer
             {
                 Id = "mcp-arr-4k",
+                Category = "media4k",
                 DisplayName = "Arr Services (4K)",
                 Url = "http://mcp-arr-4k:3000/mcp",
                 Enabled = true,
@@ -217,27 +254,144 @@ using (var scope = app.Services.CreateScope())
 // ----------------------------------------------------
 // SYSTEM/HEALTH ENDPOINTS
 // ----------------------------------------------------
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = "0.1.0" }));
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = "0.2.0" }));
+
+// ----------------------------------------------------
+// OAUTH & OIDC DISCOVERY ENDPOINTS
+// ----------------------------------------------------
+app.MapGet("/.well-known/oauth-protected-resource", (HttpContext context) =>
+{
+    var host = context.Request.Host;
+    var scheme = context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) ? proto.ToString() : context.Request.Scheme;
+    return Results.Json(new
+    {
+        resource = $"{scheme}://{host}/mcp",
+        authorization_servers = new[] { $"{scheme}://{host}" },
+        bearer_methods_supported = new[] { "header" }
+    });
+});
+
+app.MapGet("/.well-known/oauth-protected-resource/{**path}", (HttpContext context, string path) =>
+{
+    var host = context.Request.Host;
+    var scheme = context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) ? proto.ToString() : context.Request.Scheme;
+    return Results.Json(new
+    {
+        resource = $"{scheme}://{host}/{path}",
+        authorization_servers = new[] { $"{scheme}://{host}" },
+        bearer_methods_supported = new[] { "header" }
+    });
+});
+
+app.MapGet("/.well-known/oauth-authorization-server", (HttpContext context) =>
+{
+    var host = context.Request.Host;
+    var scheme = context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) ? proto.ToString() : context.Request.Scheme;
+    return Results.Json(new
+    {
+        issuer = $"{scheme}://{host}",
+        authorization_endpoint = $"{scheme}://{host}/oauth/authorize",
+        token_endpoint = $"{scheme}://{host}/oauth/token",
+        registration_endpoint = $"{scheme}://{host}/api/register",
+        response_types_supported = new[] { "code" },
+        grant_types_supported = new[] { "authorization_code" },
+        token_endpoint_auth_methods_supported = new[] { "client_secret_post", "client_secret_basic" }
+    });
+});
+
+app.MapGet("/.well-known/openid-configuration", (HttpContext context) =>
+{
+    var host = context.Request.Host;
+    var scheme = context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) ? proto.ToString() : context.Request.Scheme;
+    return Results.Json(new
+    {
+        issuer = $"{scheme}://{host}",
+        authorization_endpoint = $"{scheme}://{host}/oauth/authorize",
+        token_endpoint = $"{scheme}://{host}/oauth/token",
+        registration_endpoint = $"{scheme}://{host}/api/register",
+        response_types_supported = new[] { "code" },
+        grant_types_supported = new[] { "authorization_code" },
+        subject_types_supported = new[] { "public" },
+        id_token_signing_alg_values_supported = new[] { "RS256" }
+    });
+});
 
 // ----------------------------------------------------
 // MCP CLIENT SSE HANDLER
 // ----------------------------------------------------
-app.MapGet("/sse", async (HttpContext httpContext, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+app.MapMethods("/sse", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
 {
     httpContext.Response.Headers.ContentType = "text/event-stream";
     httpContext.Response.Headers.CacheControl = "no-cache";
     httpContext.Response.Headers.Connection = "keep-alive";
 
+    if (httpContext.Request.Method == "HEAD")
+    {
+        return;
+    }
+
     var sessionId = Guid.NewGuid().ToString("N");
-    logger.LogInformation("New client SSE connection. SessionId: {SessionId}", sessionId);
+    logger.LogInformation("New client SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
 
     // Write SSE endpoint event
-    // Directs the client to POST messages to /message?sessionId=...
-    await httpContext.Response.WriteAsync($"event: endpoint\ndata: /message?sessionId={sessionId}\n\n");
+    // Directs the client to POST messages to the absolute URL
+    var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
+    if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+    var host = httpContext.Request.Host.Value;
+    var absoluteUrl = $"{scheme}://{host}/message?sessionId={sessionId}";
+    await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
     await httpContext.Response.Body.FlushAsync();
 
     // Create session and initialize connections to backend servers
     var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response);
+
+    // Read body if POST
+    if (httpContext.Request.Method == "POST")
+    {
+        try
+        {
+            httpContext.Request.EnableBuffering();
+            string requestBody;
+            using (var reader = new StreamReader(httpContext.Request.Body, leaveOpen: true))
+            {
+                requestBody = await reader.ReadToEndAsync();
+                httpContext.Request.Body.Position = 0;
+            }
+
+            if (!string.IsNullOrEmpty(requestBody))
+            {
+                logger.LogInformation("Processing initial JSON-RPC message in POST /sse body: {Body}", requestBody);
+                using var doc = JsonDocument.Parse(requestBody);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("method", out var methodProp))
+                {
+                    var method = methodProp.GetString() ?? string.Empty;
+                    var id = root.TryGetProperty("id", out var idProp) ? idProp.Clone() : (JsonElement?)null;
+                    
+                    if (method == "initialize")
+                    {
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = new
+                            {
+                                protocolVersion = "2024-11-05",
+                                capabilities = new { tools = new { listChanged = true } },
+                                serverInfo = new { name = "McpRouterGateway", version = "0.2.0" }
+                            }
+                        };
+                        await session.WriteMessageAsync(response);
+                        _ = Task.Run(async () => await session.InitializeBackendsAsync(requestBody));
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to parse initial POST message body for SessionId: {SessionId}", sessionId);
+        }
+    }
 
     // Keep connection alive
     try
@@ -259,20 +413,212 @@ app.MapGet("/sse", async (HttpContext httpContext, [FromServices] SessionManager
     }
 });
 
-// Also support /mcp endpoint starting SSE (used by some spec configurations)
-app.MapGet("/mcp", async (HttpContext httpContext, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+// Minimal API route for handling GET (SSE initialization) and POST (JSON-RPC requests)
+app.MapMethods("/mcp/{targetServerId?}", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, [FromServices] RouterDbContext db, ILogger<Program> logger, string? targetServerId) =>
 {
+    var isSse = httpContext.Request.Headers.Accept.ToString().Contains("text/event-stream");
+    var isPost = HttpMethods.IsPost(httpContext.Request.Method);
+
+    // Ensure session ID is tracked (using Bearer token or fallback to new Guid)
+    bool hasBearerToken = false;
+    string sessionId;
+    if (httpContext.Request.Headers.Authorization.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+    {
+        sessionId = httpContext.Request.Headers.Authorization.ToString().Substring("Bearer ".Length).Trim();
+        hasBearerToken = true;
+    }
+    else
+    {
+        sessionId = Guid.NewGuid().ToString("N");
+    }
+
+    if (!isPost && (isSse || HttpMethods.IsGet(httpContext.Request.Method)))
+    {
+        // ---------------------------------------------------------
+        // Handle SSE GET Request (Initialize connection)
+        // ---------------------------------------------------------
+        logger.LogInformation("New SSE connection established. Session ID: {SessionId}. Target Server: {TargetServerId}", sessionId, targetServerId ?? "ALL");
+
+        httpContext.Response.Headers.Append("Content-Type", "text/event-stream");
+        httpContext.Response.Headers.Append("Cache-Control", "no-cache");
+        httpContext.Response.Headers.Append("Connection", "keep-alive");
+        await httpContext.Response.Body.FlushAsync();
+
+        var newSession = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId);
+    }
+    // Read body if POST
+    string requestBody = string.Empty;
+    string method = string.Empty;
+    JsonElement? id = null;
+
+    if (httpContext.Request.Method == "POST")
+    {
+        try
+        {
+            httpContext.Request.EnableBuffering();
+            using (var reader = new StreamReader(httpContext.Request.Body, leaveOpen: true))
+            {
+                requestBody = await reader.ReadToEndAsync();
+                httpContext.Request.Body.Position = 0;
+            }
+
+            if (!string.IsNullOrEmpty(requestBody))
+            {
+                using var doc = JsonDocument.Parse(requestBody);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("method", out var methodProp))
+                {
+                    method = methodProp.GetString() ?? string.Empty;
+                }
+                if (root.TryGetProperty("id", out var idProp))
+                {
+                    id = idProp.Clone();
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to parse POST message body for /mcp");
+        }
+    }
+
+    // If POST and NOT initialize, and we have a bearer token, route to existing session
+    if (httpContext.Request.Method == "POST" && method != "initialize" && hasBearerToken)
+    {
+        var activeSession = sessionManager.GetSession(sessionId);
+        if (activeSession == null)
+        {
+            logger.LogWarning("Active session not found for session ID: {SessionId}", sessionId);
+            httpContext.Response.StatusCode = 404;
+            await httpContext.Response.WriteAsJsonAsync(new { error = "Session not found." });
+            return;
+        }
+
+        logger.LogInformation("Routing POST request method {Method} to active session: {SessionId}", method, sessionId);
+        
+        try
+        {
+            if (method == "tools/list")
+            {
+                var tools = await activeSession.ListToolsAsync(requestBody);
+                var response = new
+                {
+                    jsonrpc = "2.0",
+                    id = id != null ? (object)id : null,
+                    result = new { tools }
+                };
+                httpContext.Response.Headers.ContentType = "application/json";
+                await httpContext.Response.WriteAsJsonAsync(response);
+                return;
+            }
+            else if (method == "tools/call")
+            {
+                using var doc = JsonDocument.Parse(requestBody);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
+                {
+                    var toolName = nameProp.GetString() ?? string.Empty;
+                    var res = await activeSession.CallToolAsync(toolName, requestBody, db);
+                    
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = id != null ? (object)id : null,
+                        result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+                httpContext.Response.StatusCode = 400;
+                await httpContext.Response.WriteAsJsonAsync(new { error = "Invalid tools/call: missing name parameter" });
+                return;
+            }
+            else
+            {
+                // General broadcast for notifications or other standard requests
+                var results = await activeSession.BroadcastRequestAsync(requestBody);
+                if (results.Count > 0 && id != null)
+                {
+                    var response = new
+                    {
+                        jsonrpc = "2.0",
+                        id = (object)id,
+                        result = results.First().Value
+                    };
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(response);
+                    return;
+                }
+                
+                httpContext.Response.StatusCode = 202; // Accepted
+                return;
+            }
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Error processing routed message for session {SessionId}", sessionId);
+            httpContext.Response.StatusCode = 500;
+            await httpContext.Response.WriteAsJsonAsync(new { error = ex.Message });
+            return;
+        }
+    }
+
+    // Otherwise, establish a new SSE stream (for GET requests, or POST with method "initialize")
     httpContext.Response.Headers.ContentType = "text/event-stream";
     httpContext.Response.Headers.CacheControl = "no-cache";
     httpContext.Response.Headers.Connection = "keep-alive";
 
-    var sessionId = Guid.NewGuid().ToString("N");
-    logger.LogInformation("New client /mcp SSE connection. SessionId: {SessionId}", sessionId);
+    logger.LogInformation("New client /mcp SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
 
-    await httpContext.Response.WriteAsync($"event: endpoint\ndata: /mcp/message?sessionId={sessionId}\n\n");
+    var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
+    if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+    var host = httpContext.Request.Host.Value;
+    var absoluteUrl = $"{scheme}://{host}/mcp/message?sessionId={sessionId}";
+    await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
     await httpContext.Response.Body.FlushAsync();
 
-    var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response);
+    var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId);
+
+    if (httpContext.Request.Method == "POST" && method == "initialize")
+    {
+        try
+        {
+            logger.LogInformation("Processing initial JSON-RPC message in POST /mcp body: {Body}", requestBody);
+            var serverName = "McpRouterGateway";
+            if (!string.IsNullOrWhiteSpace(targetServerId))
+            {
+                var targetServer = await db.Servers.FirstOrDefaultAsync(s => s.Id == targetServerId);
+                if (targetServer != null)
+                {
+                    serverName = targetServer.DisplayName;
+                }
+                else if (await db.Servers.AnyAsync(s => s.Category == targetServerId))
+                {
+                    // Fallback to Category name
+                    serverName = char.ToUpper(targetServerId[0]) + targetServerId.Substring(1) + " Services";
+                }
+            }
+
+            var response = new
+            {
+                jsonrpc = "2.0",
+                id = id != null ? (object)id : null,
+                result = new
+                {
+                    protocolVersion = "2024-11-05",
+                    capabilities = new { tools = new { listChanged = true } },
+                    serverInfo = new { name = serverName, version = "0.2.0" }
+                }
+            };
+            await session.WriteMessageAsync(response);
+            _ = Task.Run(async () => await session.InitializeBackendsAsync(requestBody));
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to initialize POST message body for /mcp SessionId: {SessionId}", sessionId);
+        }
+    }
 
     try
     {
@@ -339,7 +685,7 @@ var handleMessage = async (HttpContext httpContext, string sessionId, [FromServi
                     serverInfo = new
                     {
                         name = "McpRouterGateway",
-                        version = "0.1.0"
+                        version = "0.2.0"
                     }
                 }
             };
@@ -437,12 +783,29 @@ app.MapPost("/api/register", async ([FromBody] JsonElement metadata, [FromServic
     db.Clients.Add(client);
     await db.SaveChangesAsync();
 
+    var redirectUrisList = new List<string>();
+    if (redirectUris.ValueKind == JsonValueKind.Array)
+    {
+        foreach (var element in redirectUris.EnumerateArray())
+        {
+            if (element.ValueKind == JsonValueKind.String)
+            {
+                redirectUrisList.Add(element.GetString()!);
+            }
+        }
+    }
+
     return Results.Ok(new
     {
         client_id = clientId,
         client_secret = clientSecret,
         client_name = clientName,
-        client_secret_expires_at = 0
+        client_secret_expires_at = 0,
+        client_id_issued_at = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+        redirect_uris = redirectUrisList,
+        grant_types = new[] { "authorization_code" },
+        response_types = new[] { "code" },
+        token_endpoint_auth_method = "client_secret_post"
     });
 });
 
@@ -479,7 +842,16 @@ app.MapGet("/oauth/authorize", ([FromQuery] string client_id, [FromQuery] string
     var client = db.Clients.FirstOrDefault(c => c.ClientId == client_id);
     if (client == null)
     {
-        return Results.BadRequest("Client not found.");
+        // Auto-register dummy client on the fly since we trust the user
+        client = new OAuthClient 
+        { 
+            ClientId = client_id, 
+            ClientSecret = "auto-generated", 
+            ClientName = "Manual Entry Client", 
+            RedirectUrisJson = "[]" 
+        };
+        db.Clients.Add(client);
+        db.SaveChanges();
     }
 
     // Auto-approve since this is a private deployment running on our home server protected by SSO/TinyAuth anyway
@@ -501,14 +873,36 @@ app.MapPost("/oauth/token", async (HttpContext context, [FromServices] RouterDbC
     var clientId = form["client_id"].ToString();
     var clientSecret = form["client_secret"].ToString();
     var grantType = form["grant_type"].ToString();
-
-    var client = db.Clients.FirstOrDefault(c => c.ClientId == clientId && c.ClientSecret == clientSecret);
-    if (client == null)
+    if (string.IsNullOrEmpty(clientId))
     {
         return Results.BadRequest(new { error = "invalid_client" });
     }
 
-    // Return dummy token, valid indefinitely
+    var routerSecret = Environment.GetEnvironmentVariable("ROUTER_SECRET");
+    if (!string.IsNullOrEmpty(routerSecret) && clientSecret != routerSecret)
+    {
+        return Results.Unauthorized();
+    }
+
+    var client = db.Clients.FirstOrDefault(c => c.ClientId == clientId);
+    if (client == null)
+    {
+        client = new OAuthClient 
+        { 
+            ClientId = clientId, 
+            ClientSecret = clientSecret, 
+            ClientName = "Manual Entry Client", 
+            RedirectUrisJson = "[]" 
+        };
+        db.Clients.Add(client);
+        await db.SaveChangesAsync();
+    }
+    else if (client.ClientSecret != clientSecret)
+    {
+        return Results.Unauthorized();
+    }
+
+    // Generate token
     var token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
     return Results.Ok(new
     {
@@ -638,6 +1032,18 @@ public class ClientSession
         }
     }
 
+    public async Task EnsureBackendsInitializedAsync()
+    {
+        if (!_backendConnections.IsEmpty)
+        {
+            return;
+        }
+
+        _logger.LogInformation("Backends not initialized yet. Auto-initializing with default payload for SessionId: {SessionId}", _sessionId);
+        var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.1.0\"}}}";
+        await InitializeBackendsAsync(defaultInitRequest);
+    }
+
     public async Task InitializeBackendsAsync(string initializeRequest)
     {
         var tasks = _servers.Where(s => s.Enabled && s.Type != "custom").Select(async server =>
@@ -707,12 +1113,21 @@ public class ClientSession
         // Add custom native C# tools (Plex and Overseerr)
         foreach (var customTool in McpRouter.CustomTools.CustomToolRegistry.GetAll())
         {
-            allTools.Add(new
+            bool includeTool = false;
+            if (customTool.Name.StartsWith("seerr_") && _servers.Any(s => s.Id == "seerr"))
+                includeTool = true;
+            else if (customTool.Name.StartsWith("plex_") && _servers.Any(s => s.Id == "plex"))
+                includeTool = true;
+
+            if (includeTool)
             {
-                name = customTool.Name,
-                description = customTool.Description,
-                inputSchema = customTool.InputSchema
-            });
+                allTools.Add(new
+                {
+                    name = customTool.Name,
+                    description = customTool.Description,
+                    inputSchema = customTool.InputSchema
+                });
+            }
         }
 
         var tasks = new List<Task<(string ServerId, JsonElement Tools)>>();
@@ -786,6 +1201,7 @@ public class ClientSession
 
     public async Task<List<object>> ListToolsAsync(string body)
     {
+        await EnsureBackendsInitializedAsync();
         lock (_cacheLock)
         {
             if (_isCachePopulated)
@@ -804,6 +1220,7 @@ public class ClientSession
 
     public async Task<object> CallToolAsync(string toolName, string body, RouterDbContext db)
     {
+        await EnsureBackendsInitializedAsync();
         // Try custom native C# tool first
         var customTool = McpRouter.CustomTools.CustomToolRegistry.Get(toolName);
         if (customTool != null)
@@ -1474,11 +1891,17 @@ public class SessionManager
         _logger = logger;
     }
 
-    public async Task<ClientSession> CreateSessionAsync(string sessionId, HttpResponse clientResponse)
+    public async Task<ClientSession> CreateSessionAsync(string sessionId, HttpResponse clientResponse, string? targetServerId = null)
     {
         using var scope = _serviceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
-        var servers = await db.Servers.ToListAsync();
+        
+        var query = db.Servers.Where(s => s.Enabled);
+        if (!string.IsNullOrWhiteSpace(targetServerId))
+        {
+            query = query.Where(s => s.Id == targetServerId || s.Category == targetServerId);
+        }
+        var servers = await query.ToListAsync();
 
         var sessionLogger = _serviceProvider.GetRequiredService<ILogger<ClientSession>>();
         var client = _httpClientFactory.CreateClient("McpClient");
