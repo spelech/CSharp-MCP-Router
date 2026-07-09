@@ -8,7 +8,7 @@ RUN dotnet restore mcp-router.csproj
 
 # Copy source and publish
 COPY . ./
-RUN dotnet publish mcp-router.csproj -c Release -o /app --no-restore
+RUN dotnet publish mcp-router.csproj -c Release -o /app
 
 # Stage 2: Final runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final

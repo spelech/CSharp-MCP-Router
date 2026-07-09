@@ -11,6 +11,7 @@ namespace McpRouter.Models
         public bool Enabled { get; set; }
         public bool Hidden { get; set; }
         public string Type { get; set; } = "sse"; // "sse" or "http"
+        public string Category { get; set; } = "default";
         public string? ApiKey { get; set; }
         public string? HeadersJson { get; set; } // JSON dictionary of custom headers
     }

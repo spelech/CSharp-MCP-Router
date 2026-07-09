@@ -239,6 +239,17 @@ using (var scope = app.Services.CreateScope())
                 Hidden = false,
                 Type = "streamable"
             });
+            db.Servers.Add(new McpServer
+            {
+                Id = "docker",
+                Category = "infrastructure",
+                DisplayName = "Docker Containers",
+                Url = "http://docker-mcp:8000/sse",
+                Enabled = true,
+                Hidden = false,
+                Type = "sse"
+            });
+            logger.LogInformation("Imported Docker MCP config.");
             logger.LogInformation("Imported Arr MCP configurations.");
 
             db.SaveChanges();
