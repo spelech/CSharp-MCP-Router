@@ -73,7 +73,15 @@ app.Use(async (context, next) =>
 });
 
 app.UseDefaultFiles();
-app.UseStaticFiles(); // Serves dashboard files from wwwroot
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        ctx.Context.Response.Headers.Append("Cache-Control", "no-cache, no-store, must-revalidate");
+        ctx.Context.Response.Headers.Append("Pragma", "no-cache");
+        ctx.Context.Response.Headers.Append("Expires", "0");
+    }
+}); // Serves dashboard files from wwwroot with no-cache headers
 
 // Enforce SSO auth on dashboard APIs
 app.Use(async (context, next) =>
@@ -174,10 +182,10 @@ using (var scope = app.Services.CreateScope())
                     Id = "seerr",
                     Category = "media",
                     DisplayName = "Overseerr requests",
-                    Url = "http://seerr:5055",
+                    Url = "http://seerr-mcp:8000/sse",
                     Enabled = true,
                     Hidden = false,
-                    Type = "custom",
+                    Type = "sse",
                     ApiKey = seerrKey
                 });
                 logger.LogInformation("Imported Overseerr config.");
@@ -209,10 +217,10 @@ using (var scope = app.Services.CreateScope())
                     Id = "plex",
                     Category = "media",
                     DisplayName = "Plex Media Server",
-                    Url = Environment.GetEnvironmentVariable("PLEX_URL") ?? "http://10.0.0.10:32400",
+                    Url = "http://plex-mcp:8000/sse",
                     Enabled = true,
                     Hidden = false,
-                    Type = "custom",
+                    Type = "sse",
                     ApiKey = plexToken
                 });
                 logger.LogInformation("Imported Plex config.");
@@ -265,7 +273,7 @@ using (var scope = app.Services.CreateScope())
 // ----------------------------------------------------
 // SYSTEM/HEALTH ENDPOINTS
 // ----------------------------------------------------
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = "0.2.0" }));
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = "0.2.1" }));
 
 // ----------------------------------------------------
 // OAUTH & OIDC DISCOVERY ENDPOINTS
@@ -425,7 +433,7 @@ app.MapMethods("/sse", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpC
 });
 
 // Minimal API route for handling GET (SSE initialization) and POST (JSON-RPC requests)
-app.MapMethods("/mcp/{targetServerId?}", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, [FromServices] RouterDbContext db, ILogger<Program> logger, string? targetServerId) =>
+app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, [FromServices] RouterDbContext db, ILogger<Program> logger, string targetServerId) =>
 {
     var isSse = httpContext.Request.Headers.Accept.ToString().Contains("text/event-stream");
     var isPost = HttpMethods.IsPost(httpContext.Request.Method);
