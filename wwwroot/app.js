@@ -62,6 +62,7 @@ async function loadClients() {
 }
 
 function renderServers(servers) {
+    window.allServers = servers; // Cache for edit lookup
     const list = document.getElementById('servers-list');
     if (servers.length === 0) {
         list.innerHTML = '<div class="empty-state">No backend servers configured.</div>';
@@ -69,20 +70,29 @@ function renderServers(servers) {
     }
     
     list.innerHTML = servers.map(server => {
-        // Exclude internal-only helpers or display them nicely
         const nameClass = server.enabled ? 'server-name' : 'server-name text-muted';
+        const categoryBadge = server.category && server.category !== 'default' 
+            ? `<span class="server-badge" style="background: rgba(59,130,246,0.1); color: var(--primary);">${escapeHtml(server.category)}</span>`
+            : '';
         return `
             <div class="server-item">
                 <div class="server-info">
                     <div class="server-name-row">
                         <span class="${nameClass}">${escapeHtml(server.displayName)}</span>
                         <span class="server-badge">${escapeHtml(server.type.toUpperCase())}</span>
+                        ${categoryBadge}
                         ${server.hasApiKey ? '<span class="server-badge badge-key"><i class="fa-solid fa-lock"></i> Secured</span>' : ''}
                         ${server.hidden ? '<span class="server-badge"><i class="fa-solid fa-eye-slash"></i> Hidden</span>' : ''}
                     </div>
                     <span class="server-url">${escapeHtml(server.url)}</span>
                 </div>
                 <div class="server-actions">
+                    <button class="btn-icon btn-edit" title="Edit Server" onclick="openEditModal('${server.id}')">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                    </button>
+                    <button class="btn-icon btn-delete" title="Delete Server" onclick="deleteServer('${server.id}', '${escapeHtml(server.displayName)}')">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
                     <label class="switch">
                         <input type="checkbox" ${server.enabled ? 'checked' : ''} onchange="toggleServer('${server.id}', 'enabled', this.checked)">
                         <span class="slider"></span>
@@ -132,12 +142,100 @@ async function toggleServer(id, property, value) {
         });
         
         if (!response.ok) throw new Error('Failed to update server status');
-        
-        // Refresh stats/servers list
         loadServers();
     } catch (error) {
         alert(`Error: ${error.message}`);
-        loadServers(); // Revert toggle visually
+        loadServers();
+    }
+}
+
+function openAddModal() {
+    document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-server"></i> Add MCP Server';
+    document.getElementById('server-id').value = '';
+    document.getElementById('server-form').reset();
+    document.getElementById('server-enabled').checked = true;
+    document.getElementById('server-hidden').checked = false;
+    document.getElementById('server-modal').style.display = 'flex';
+}
+
+function openEditModal(id) {
+    const server = window.allServers.find(s => s.id === id);
+    if (!server) return;
+
+    document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-server"></i> Edit MCP Server';
+    document.getElementById('server-id').value = server.id;
+    document.getElementById('server-name').value = server.displayName;
+    document.getElementById('server-type').value = server.type;
+    document.getElementById('server-category').value = server.category || 'default';
+    document.getElementById('server-url').value = server.url;
+    document.getElementById('server-key').value = ''; // Let's keep it empty, only update if typed
+    document.getElementById('server-enabled').checked = server.enabled;
+    document.getElementById('server-hidden').checked = server.hidden;
+    document.getElementById('server-modal').style.display = 'flex';
+}
+
+function closeModal() {
+    document.getElementById('server-modal').style.display = 'none';
+}
+
+async function saveServer(event) {
+    event.preventDefault();
+    const id = document.getElementById('server-id').value;
+    const keyVal = document.getElementById('server-key').value;
+    
+    const server = {
+        displayName: document.getElementById('server-name').value,
+        type: document.getElementById('server-type').value,
+        category: document.getElementById('server-category').value,
+        url: document.getElementById('server-url').value,
+        enabled: document.getElementById('server-enabled').checked,
+        hidden: document.getElementById('server-hidden').checked
+    };
+
+    if (keyVal) {
+        server.apiKey = keyVal;
+    } else if (id) {
+        // For updates, pass undefined to keep key, or null to clear it.
+        // We will keep existing key if empty field.
+    } else {
+        server.apiKey = null;
+    }
+
+    try {
+        let response;
+        if (id) {
+            server.id = id;
+            response = await fetch(`/api/servers/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(server)
+            });
+        } else {
+            response = await fetch('/api/servers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(server)
+            });
+        }
+
+        if (!response.ok) throw new Error('Failed to save server settings');
+        closeModal();
+        loadServers();
+    } catch (error) {
+        alert(`Error saving server: ${error.message}`);
+    }
+}
+
+async function deleteServer(id, name) {
+    if (!confirm(`Are you sure you want to delete the MCP server '${name}'?`)) return;
+    try {
+        const response = await fetch(`/api/servers/${id}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Failed to delete server');
+        loadServers();
+    } catch (error) {
+        alert(`Error deleting server: ${error.message}`);
     }
 }
 

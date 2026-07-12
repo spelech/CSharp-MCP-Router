@@ -22,7 +22,7 @@
                 <i class="fa-solid fa-network-wired logo-icon"></i>
                 <div class="header-title">
                     <h1>MCP Router Gateway</h1>
-                    <span class="badge badge-primary">v0.2.1</span>
+                    <span class="badge badge-primary">v0.3.0</span>
                 </div>
             </div>
             <div class="header-status">
@@ -86,7 +86,10 @@
                 <div class="glass-card servers-card">
                     <div class="card-header-btn">
                         <h2><i class="fa-solid fa-server"></i> Backend MCP Servers</h2>
-                        <button class="btn btn-secondary" onclick="loadServers()"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                        <div class="header-actions">
+                            <button class="btn btn-secondary" onclick="loadServers()"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                            <button class="btn btn-primary" onclick="openAddModal()"><i class="fa-solid fa-plus"></i> Add Server</button>
+                        </div>
                     </div>
                     
                     <div class="servers-list" id="servers-list">
@@ -103,6 +106,71 @@
             <p>WileyRiley Infrastructure &bull; Protected by TinyAuth Forward Auth &bull; 2026</p>
         </footer>
     </div>
+    <!-- Add/Edit Server Modal -->
+    <div class="modal-backdrop" id="server-modal" style="display: none;">
+        <div class="glass-card modal-card">
+            <div class="modal-header">
+                <h2 id="modal-title"><i class="fa-solid fa-server"></i> Add MCP Server</h2>
+                <button class="btn-close" onclick="closeModal()">&times;</button>
+            </div>
+            <form id="server-form" onsubmit="saveServer(event)">
+                <input type="hidden" id="server-id">
+                
+                <div class="form-group">
+                    <label for="server-name">Display Name</label>
+                    <input type="text" id="server-name" placeholder="e.g. Notes RAG" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="server-type">Transport Type</label>
+                        <select id="server-type" required>
+                            <option value="sse">SSE</option>
+                            <option value="http">HTTP</option>
+                            <option value="streamable">Streamable HTTP</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="server-category">Category</label>
+                        <input type="text" id="server-category" placeholder="e.g. infrastructure" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="server-url">Connection URL</label>
+                    <input type="text" id="server-url" placeholder="e.g. http://notes-rag-mcp:3000/sse" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="server-key">API Token / Secret (Optional)</label>
+                    <input type="password" id="server-key" placeholder="Bearer auth token">
+                </div>
+
+                <div class="form-row checkbox-row">
+                    <div class="checkbox-group">
+                        <label class="switch">
+                            <input type="checkbox" id="server-enabled" checked>
+                            <span class="slider"></span>
+                        </label>
+                        <span class="checkbox-label">Enabled</span>
+                    </div>
+                    <div class="checkbox-group">
+                        <label class="switch">
+                            <input type="checkbox" id="server-hidden">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="checkbox-label">Hidden</span>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save">Save Server</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script src="app.js"></script>
 </body>
 </html>

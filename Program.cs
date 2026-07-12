@@ -263,6 +263,48 @@ using (var scope = app.Services.CreateScope())
             db.SaveChanges();
             logger.LogInformation("Database migration completed successfully.");
         }
+
+        // Load custom servers from configuration JSON if it exists
+        var customServersPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "custom_servers.json");
+        if (File.Exists(customServersPath))
+        {
+            try
+            {
+                logger.LogInformation("Found custom_servers.json. Processing configuration...");
+                var jsonContent = File.ReadAllText(customServersPath);
+                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+                var customServers = JsonSerializer.Deserialize<List<McpServer>>(jsonContent, options);
+                if (customServers != null)
+                {
+                    foreach (var server in customServers)
+                    {
+                        var existing = db.Servers.FirstOrDefault(s => s.Id == server.Id);
+                        if (existing == null)
+                        {
+                            logger.LogInformation($"Registering custom server '{server.DisplayName}' ({server.Id}) from config...");
+                            db.Servers.Add(server);
+                        }
+                        else
+                        {
+                            logger.LogInformation($"Updating custom server '{server.DisplayName}' ({server.Id}) from config...");
+                            existing.DisplayName = server.DisplayName;
+                            existing.Url = server.Url;
+                            existing.Type = server.Type;
+                            existing.Category = server.Category;
+                            existing.Enabled = server.Enabled;
+                            existing.Hidden = server.Hidden;
+                            existing.ApiKey = server.ApiKey;
+                            existing.HeadersJson = server.HeadersJson;
+                        }
+                    }
+                    db.SaveChanges();
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to load custom servers from JSON.");
+            }
+        }
     }
     catch (Exception ex)
     {
@@ -273,7 +315,7 @@ using (var scope = app.Services.CreateScope())
 // ----------------------------------------------------
 // SYSTEM/HEALTH ENDPOINTS
 // ----------------------------------------------------
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = "0.2.1" }));
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = "0.3.0" }));
 
 // ----------------------------------------------------
 // OAUTH & OIDC DISCOVERY ENDPOINTS
@@ -945,6 +987,8 @@ app.MapGet("/api/servers", async ([FromServices] RouterDbContext db) =>
         s.Enabled,
         s.Hidden,
         s.Type,
+        s.Category,
+        s.HeadersJson,
         HasApiKey = !string.IsNullOrEmpty(s.ApiKey)
     });
     return Results.Ok(sanitized);
@@ -960,13 +1004,30 @@ app.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [
 
     server.Enabled = update.Enabled;
     server.Hidden = update.Hidden;
+    
+    if (!string.IsNullOrEmpty(update.DisplayName))
+    {
+        server.DisplayName = update.DisplayName;
+    }
     if (!string.IsNullOrEmpty(update.Url))
     {
         server.Url = update.Url;
     }
+    if (!string.IsNullOrEmpty(update.Type))
+    {
+        server.Type = update.Type;
+    }
+    if (!string.IsNullOrEmpty(update.Category))
+    {
+        server.Category = update.Category;
+    }
     if (update.ApiKey != null)
     {
         server.ApiKey = update.ApiKey;
+    }
+    if (update.HeadersJson != null)
+    {
+        server.HeadersJson = update.HeadersJson;
     }
     
     await db.SaveChangesAsync();
