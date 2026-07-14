@@ -1,0 +1,38 @@
+[
+  {
+    "Id": "notes-rag",
+    "DisplayName": "Notes RAG",
+    "Url": "http://notes-rag-mcp:3000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "excel",
+    "DisplayName": "Excel MCP",
+    "Url": "http://excel-mcp:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "context7",
+    "DisplayName": "Context7 Documentation",
+    "Url": "http://context7-mcp:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "sequential-thinking",
+    "DisplayName": "Sequential Thinking",
+    "Url": "http://sequential-thinking-mcp:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  }
+]
