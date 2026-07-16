@@ -403,7 +403,7 @@ app.MapMethods("/sse", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpC
     await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
     await httpContext.Response.Body.FlushAsync();
 
-    bool metaMode = httpContext.Request.Query["meta"] == "true";
+    bool metaMode = httpContext.Request.Query["meta"] != "false";
     // Create session and initialize connections to backend servers
     var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId: null, metaMode);
 
