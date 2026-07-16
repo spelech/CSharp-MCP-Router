@@ -128,7 +128,7 @@ using (var scope = app.Services.CreateScope())
                     Id = "ha",
                     Category = "homecontrol",
                     DisplayName = "Home Assistant",
-                    Url = "http://ha-mcp-new:8086/mcp",
+                    Url = "http://ha-mcp:8086/mcp",
                     Enabled = true,
                     Hidden = false,
                     Type = "http",
@@ -146,7 +146,7 @@ using (var scope = app.Services.CreateScope())
                     Id = "actual",
                     Category = "financial",
                     DisplayName = "Actual Budget",
-                    Url = "http://actual-mcp-new:3000/sse",
+                    Url = "http://actual-mcp:3000/sse",
                     Enabled = true,
                     Hidden = false,
                     Type = "sse",
@@ -164,7 +164,7 @@ using (var scope = app.Services.CreateScope())
                     Id = "receiptwrangler",
                     Category = "financial",
                     DisplayName = "Receipt Wrangler",
-                    Url = "http://receiptwrangler-mcp-new:3000/mcp",
+                    Url = "http://receiptwrangler-mcp:3000/mcp",
                     Enabled = true,
                     Hidden = false,
                     Type = "sse",
@@ -403,8 +403,9 @@ app.MapMethods("/sse", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpC
     await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
     await httpContext.Response.Body.FlushAsync();
 
+    bool metaMode = httpContext.Request.Query["meta"] == "true";
     // Create session and initialize connections to backend servers
-    var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response);
+    var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId: null, metaMode);
 
     // Read body if POST
     if (httpContext.Request.Method == "POST")
@@ -443,7 +444,7 @@ app.MapMethods("/sse", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpC
                             }
                         };
                         await session.WriteMessageAsync(response);
-                        _ = Task.Run(async () => await session.InitializeBackendsAsync(requestBody));
+                        session.StartInitialization(requestBody);
                     }
                 }
             }
@@ -479,6 +480,7 @@ app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST
 {
     var isSse = httpContext.Request.Headers.Accept.ToString().Contains("text/event-stream");
     var isPost = HttpMethods.IsPost(httpContext.Request.Method);
+    bool metaMode = httpContext.Request.Query["meta"] == "true";
 
     // Ensure session ID is tracked (using Bearer token or fallback to new Guid)
     bool hasBearerToken = false;
@@ -505,7 +507,7 @@ app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST
         httpContext.Response.Headers.Append("Connection", "keep-alive");
         await httpContext.Response.Body.FlushAsync();
 
-        var newSession = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId);
+        var newSession = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId, metaMode);
     }
     // Read body if POST
     string requestBody = string.Empty;
@@ -639,7 +641,7 @@ app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST
     await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
     await httpContext.Response.Body.FlushAsync();
 
-    var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId);
+    var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId, metaMode);
 
     if (httpContext.Request.Method == "POST" && method == "initialize")
     {
@@ -673,7 +675,7 @@ app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST
                 }
             };
             await session.WriteMessageAsync(response);
-            _ = Task.Run(async () => await session.InitializeBackendsAsync(requestBody));
+            session.StartInitialization(requestBody);
         }
         catch (Exception ex)
         {
@@ -754,8 +756,7 @@ var handleMessage = async (HttpContext httpContext, string sessionId, [FromServi
             // Write SSE event to client stream
             await session.WriteMessageAsync(response);
             
-            // Forward initialize to backends in background
-            _ = Task.Run(async () => await session.InitializeBackendsAsync(body));
+            session.StartInitialization(body);
             
             return Results.Accepted();
         }
@@ -1087,6 +1088,9 @@ public class ClientSession
     private readonly List<object> _cachedTools = new();
     private readonly object _cacheLock = new();
     private bool _isCachePopulated = false;
+    public bool IsMetaMode { get; set; } = false;
+    private Task? _initializeTask = null;
+    public readonly object _initLock = new();
 
     public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, ILogger logger)
     {
@@ -1112,16 +1116,31 @@ public class ClientSession
         }
     }
 
-    public async Task EnsureBackendsInitializedAsync()
+    public Task EnsureBackendsInitializedAsync()
     {
-        if (!_backendConnections.IsEmpty)
+        lock (_initLock)
         {
-            return;
-        }
+            if (_initializeTask != null)
+            {
+                return _initializeTask;
+            }
 
-        _logger.LogInformation("Backends not initialized yet. Auto-initializing with default payload for SessionId: {SessionId}", _sessionId);
-        var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.1.0\"}}}";
-        await InitializeBackendsAsync(defaultInitRequest);
+            _logger.LogInformation("Backends not initialized yet. Auto-initializing with default payload for SessionId: {SessionId}", _sessionId);
+            var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.1.0\"}}}";
+            _initializeTask = InitializeBackendsAsync(defaultInitRequest);
+            return _initializeTask;
+        }
+    }
+
+    public void StartInitialization(string initializeRequest)
+    {
+        lock (_initLock)
+        {
+            if (_initializeTask == null)
+            {
+                _initializeTask = Task.Run(async () => await InitializeBackendsAsync(initializeRequest));
+            }
+        }
     }
 
     public async Task InitializeBackendsAsync(string initializeRequest)
@@ -1171,19 +1190,16 @@ public class ClientSession
 
         await Task.WhenAll(tasks);
 
-        // Pre-populate tools cache and routing table in the background
-        _ = Task.Run(async () =>
+        // Pre-populate tools cache and routing table
+        try
         {
-            try
-            {
-                await PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"init-list\"}");
-                _logger.LogInformation("Pre-populated tools cache and routing table (total {Count} tools).", _cachedTools.Count);
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to pre-populate tools cache during backend connection initialization.");
-            }
-        });
+            await PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"init-list\"}");
+            _logger.LogInformation("Pre-populated tools cache and routing table (total {Count} tools).", _cachedTools.Count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to pre-populate tools cache during backend connection initialization.");
+        }
     }
 
     private async Task PopulateToolsCacheAsync(string body)
@@ -1281,7 +1297,44 @@ public class ClientSession
 
     public async Task<List<object>> ListToolsAsync(string body)
     {
+        if (IsMetaMode)
+        {
+            return new List<object>
+            {
+                new
+                {
+                    name = "search_tools",
+                    description = "Semantically search across all registered internal MCP tools (Excel, Docker, Plex, Home Assistant, etc.) using keywords. Returns the matching tool names, descriptions, and input schemas. Use this first to discover what tools are available.",
+                    inputSchema = new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            query = new { type = "string", description = "The natural language query describing what you want to do (e.g. 'read Excel file data', 'restart Docker container')." }
+                        },
+                        required = new[] { "query" }
+                    }
+                },
+                new
+                {
+                    name = "execute_tool",
+                    description = "Execute a specific internal MCP tool by name with arguments. Obtain the correct tool name and arguments schema by calling search_tools first.",
+                    inputSchema = new
+                    {
+                        type = "object",
+                        properties = new
+                        {
+                            name = new { type = "string", description = "The exact name of the tool to execute (e.g., 'docker/list_containers')." },
+                            arguments = new { type = "object", description = "The arguments JSON object expected by the target tool." }
+                        },
+                        required = new[] { "name", "arguments" }
+                    }
+                }
+            };
+        }
+
         await EnsureBackendsInitializedAsync();
+
         lock (_cacheLock)
         {
             if (_isCachePopulated)
@@ -1301,6 +1354,101 @@ public class ClientSession
     public async Task<object> CallToolAsync(string toolName, string body, RouterDbContext db)
     {
         await EnsureBackendsInitializedAsync();
+
+        if (toolName == "search_tools")
+        {
+            using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
+            
+            string query = "";
+            if (root.TryGetProperty("params", out var paramsProp) && 
+                paramsProp.TryGetProperty("arguments", out var argsProp) && 
+                argsProp.TryGetProperty("query", out var queryProp))
+            {
+                query = queryProp.GetString() ?? "";
+            }
+
+            var results = await SearchToolsInternalAsync(query);
+            return new {
+                content = new[] {
+                    new {
+                        type = "text",
+                        text = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true })
+                    }
+                }
+            };
+        }
+        else if (toolName == "execute_tool")
+        {
+            using var doc = JsonDocument.Parse(body);
+            var root = doc.RootElement;
+            
+            string targetName = "";
+            JsonElement targetArgs = default;
+            
+            if (root.TryGetProperty("params", out var paramsProp) && 
+                paramsProp.TryGetProperty("arguments", out var argsProp))
+            {
+                if (argsProp.TryGetProperty("name", out var nameProp))
+                {
+                    targetName = nameProp.GetString() ?? "";
+                }
+                if (argsProp.TryGetProperty("arguments", out var targetArgsProp))
+                {
+                    targetArgs = targetArgsProp.Clone();
+                }
+            }
+
+            if (string.IsNullOrEmpty(targetName))
+            {
+                return new {
+                    isError = true,
+                    content = new[] {
+                        new {
+                            type = "text",
+                            text = "Error: target tool name is required."
+                        }
+                    }
+                };
+            }
+
+            // Reconstruct a standard tools/call payload for the target tool
+            var targetPayload = new
+            {
+                jsonrpc = "2.0",
+                method = "tools/call",
+                @params = new
+                {
+                    name = targetName,
+                    arguments = targetArgs.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : targetArgs
+                }
+            };
+            var targetBody = JsonSerializer.Serialize(targetPayload);
+
+            try
+            {
+                var result = await ExecuteTargetToolAsync(targetName, targetBody, db);
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new {
+                    isError = true,
+                    content = new[] {
+                        new {
+                            type = "text",
+                            text = $"Error executing target tool {targetName}: {ex.Message}"
+                        }
+                    }
+                };
+            }
+        }
+
+        return await ExecuteTargetToolAsync(toolName, body, db);
+    }
+
+    public async Task<object> ExecuteTargetToolAsync(string toolName, string body, RouterDbContext db)
+    {
         // Try custom native C# tool first
         var customTool = McpRouter.CustomTools.CustomToolRegistry.Get(toolName);
         if (customTool != null)
@@ -1369,6 +1517,110 @@ public class ClientSession
         }
         
         throw new KeyNotFoundException($"Tool {toolName} not found in routing table.");
+    }
+
+    private async Task<List<object>> SearchToolsInternalAsync(string query)
+    {
+        var tools = new List<object>();
+        lock (_cacheLock)
+        {
+            tools.AddRange(_cachedTools);
+        }
+
+        if (string.IsNullOrWhiteSpace(query))
+        {
+            return tools;
+        }
+
+        var queryWords = query.ToLower()
+            .Split(new[] { ' ', ',', '.', ';', ':', '-', '_', '/' }, StringSplitOptions.RemoveEmptyEntries)
+            .Where(w => w.Length > 2)
+            .ToList();
+
+        if (queryWords.Count == 0)
+        {
+            queryWords = query.ToLower()
+                .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                .ToList();
+        }
+
+        var scoredTools = new List<(object Tool, double Score)>();
+
+        foreach (var tool in tools)
+        {
+            string name = "";
+            string description = "";
+
+            if (tool is JsonElement je)
+            {
+                name = je.TryGetProperty("name", out var n) ? n.GetString() ?? "" : "";
+                description = je.TryGetProperty("description", out var d) ? d.GetString() ?? "" : "";
+            }
+            else if (tool is System.Collections.IDictionary dict)
+            {
+                name = dict.Contains("name") ? dict["name"]?.ToString() ?? "" : "";
+                description = dict.Contains("description") ? dict["description"]?.ToString() ?? "" : "";
+            }
+            else
+            {
+                var type = tool.GetType();
+                name = type.GetProperty("name")?.GetValue(tool)?.ToString() ?? 
+                       type.GetProperty("Name")?.GetValue(tool)?.ToString() ?? "";
+                description = type.GetProperty("description")?.GetValue(tool)?.ToString() ?? 
+                              type.GetProperty("Description")?.GetValue(tool)?.ToString() ?? "";
+            }
+
+            var fullText = (name + " " + description).ToLower();
+            double score = 0;
+            int matches = 0;
+
+            if (fullText.Contains(query.ToLower()))
+            {
+                score += 10.0;
+            }
+
+            if (name.ToLower().Contains(query.ToLower()))
+            {
+                score += 5.0;
+            }
+
+            foreach (var word in queryWords)
+            {
+                if (name.ToLower().Contains(word))
+                {
+                    score += 3.0;
+                    matches++;
+                }
+                else if (description.ToLower().Contains(word))
+                {
+                    score += 1.0;
+                    matches++;
+                }
+            }
+
+            if (matches > 1)
+            {
+                score += matches * 2.0;
+            }
+
+            if (score > 0)
+            {
+                scoredTools.Add((tool, score));
+            }
+        }
+
+        var results = scoredTools
+            .OrderByDescending(x => x.Score)
+            .Select(x => x.Tool)
+            .Take(15)
+            .ToList();
+
+        if (results.Count == 0)
+        {
+            results = tools.Take(10).ToList();
+        }
+
+        return results;
     }
 
     public async Task<Dictionary<string, JsonElement>> BroadcastRequestAsync(string body)
@@ -1971,7 +2223,7 @@ public class SessionManager
         _logger = logger;
     }
 
-    public async Task<ClientSession> CreateSessionAsync(string sessionId, HttpResponse clientResponse, string? targetServerId = null)
+    public async Task<ClientSession> CreateSessionAsync(string sessionId, HttpResponse clientResponse, string? targetServerId = null, bool metaMode = false)
     {
         using var scope = _serviceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
@@ -1987,6 +2239,7 @@ public class SessionManager
         var client = _httpClientFactory.CreateClient("McpClient");
 
         var session = new ClientSession(sessionId, clientResponse, servers, client, sessionLogger);
+        session.IsMetaMode = metaMode;
         _sessions[sessionId] = session;
         return session;
     }
