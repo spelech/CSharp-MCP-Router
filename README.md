@@ -1,0 +1,107 @@
+# MCP Router Gateway & Semantic Proxy
+
+An enterprise-ready, high-performance C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the **Model Context Protocol (MCP)**. 
+
+The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex, Home Assistant, Actual Budget, Excel, etc.) and presents them to client LLMs, IDEs, and agents as a single unified connection.
+
+![MCP Router Gateway Dashboard](docs/assets/dashboard.jpg)
+
+---
+
+## 🌟 Key Features
+
+* **Consolidated Tools Gateway:** Merges 300+ tools from dozens of isolated backend servers into a single endpoint.
+* **Meta-Mode Dynamic Tool Filtering:** 
+  * Defaults to Meta-Mode on the main `/sse` connection path to prevent context window bloat and tool confusion.
+  * Instantly returns only two bootstrap tools: `search_tools` and `execute_tool`.
+  * Asynchronously warms backend caches in the background using a thread-safe, single-execution initialization lock.
+  * Performs semantic scoring and ranking of backend tools on-demand when `search_tools` is called.
+* **Target-Specific Proxying:** Exposes separate endpoints (`/{targetServerId}`) to route directly to specific backends (e.g., `/plex`, `/docker`).
+* **OAuth 2.0 Security:** Integrates a lightweight OAuth 2.0 authorization server for secure API access.
+* **Built-in Web Dashboard:** A responsive, dark-mode, glassmorphic UI to monitor connected clients, stats, and backend health status.
+
+---
+
+## 🏗️ Architecture & Connection Flow
+
+The gateway bridges incoming client HTTP requests to backend MCP transports:
+
+```
+                  ┌──────────────────────────────┐
+                  │   IDE / CLI Client / LLM     │
+                  └──────────────┬───────────────┘
+                                 │
+                                 ▼
+                     GET /sse?meta=true (Default)
+                                 │
+                  ┌──────────────┴───────────────┐
+                  │    mcp-router (Meta-Mode)    │
+                  └──────┬────────────────┬──────┘
+                         │                │
+          search_tools() │                │ execute_tool()
+                         ▼                ▼
+         ┌──────────────────────┐  ┌──────────────────────┐
+         │ Semantic Tool Search │  │  Target Tool Relay   │
+         │  (Warmed Cache Dict) │  │  (JSON-RPC over SSE) │
+         └──────────────────────┘  └──────────┬───────────┘
+                                              │
+                    ┌─────────────────────────┼─────────────────────────┐
+                    ▼                         ▼                         ▼
+         ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
+         │      docker-mcp      │  │        ha-mcp        │  │      actual-mcp      │
+         └──────────────────────┘  └──────────────────────┘  └──────────────────────┘
+```
+
+---
+
+## 🚀 Setup & Usage
+
+### 1. Configuration (`.env`)
+Create a `.env` file in the root of the router directory:
+```ini
+DB_ENCRYPTION_KEY=your-sqlcipher-database-key
+ROUTER_SECRET=your-oauth-router-secret
+```
+
+### 2. Run with Docker Compose
+Add the router service to your `docker-compose.yaml` stack:
+```yaml
+services:
+  mcp-router:
+    build:
+      context: ./router
+    container_name: mcp-router
+    ports:
+      - "8026:8080"
+    volumes:
+      - ./router/data:/app/data
+    env_file:
+      - ./router/.env
+    restart: unless-stopped
+```
+
+### 3. Connect a Client
+Point your MCP client (Cursor, VS Code, or Claude Desktop) to the gateway:
+
+#### Option A: Meta-Mode (Recommended - 2 Tools)
+Keeps context windows clean by resolving tools semantically on-the-fly:
+* **SSE Endpoint:** `http://10.0.0.10:8026/sse`
+
+#### Option B: Full-List Mode
+Exposes all 300+ underlying tools directly:
+* **SSE Endpoint:** `http://10.0.0.10:8026/sse?meta=false`
+
+#### Option C: Target-Specific Mode
+Binds the connection to a single backend (e.g. Docker only):
+* **SSE Endpoint:** `http://10.0.0.10:8026/docker`
+* *Note: You can also pass `?meta=true` on target routes to filter them.*
+
+---
+
+## 🛠️ API & Endpoint Specs
+
+* `GET /sse` — Establishes client SSE event stream.
+* `POST /message?sessionId={id}` — Relays incoming client JSON-RPC requests.
+* `GET /{targetServerId}` — Proxies to a single backend server (e.g. `/ha`, `/plex`).
+* `POST /oauth/token` — Exchange credentials for bearer authorization tokens.
+* `GET /health` — Status healthcheck.
