@@ -23,8 +23,15 @@ namespace McpRouter.CustomTools
 
         static CustomToolRegistry()
         {
-            // All native Plex and Overseerr/Seerr tools have been extracted 
-            // into standalone containerized HTTP/SSE services.
+            Register(new SeerrSearchMediaTool());
+            Register(new SeerrRequestMediaTool());
+            Register(new SeerrGetRequestsTool());
+            Register(new SeerrGetMediaDetailsTool());
+            Register(new PlexSearchLibraryTool());
+            Register(new PlexGetLibrarySectionsTool());
+            Register(new PlexGetSessionsTool());
+            Register(new PlexGetRecentlyAddedTool());
+            Register(new PlexGetMetadataTool());
         }
 
         private static void Register(IMcpTool tool)

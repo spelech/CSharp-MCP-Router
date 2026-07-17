@@ -30,6 +30,11 @@ namespace McpRouter
         private Task? _initializeTask = null;
         public readonly object _initLock = new();
 
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            Converters = { new JsonRpcMessageConverter() }
+        };
+
         public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, Microsoft.Extensions.Logging.ILogger logger)
         {
             _sessionId = sessionId;
@@ -100,7 +105,7 @@ namespace McpRouter
                         if (message is JsonRpcResponse response && response.Id != null)
                         {
                             var idStr = response.Id.ToString();
-                            if (conn.PendingRequests.TryRemove(idStr, out var tcs))
+                            if (idStr != null && conn.PendingRequests.TryRemove(idStr, out var tcs))
                             {
                                 tcs.SetResult(response);
                                 return;
@@ -108,7 +113,7 @@ namespace McpRouter
                         }
                         
                         // Otherwise, it is a notification (e.g. logMessage, resourceUpdated) - forward to client
-                        var serialized = JsonSerializer.Serialize(message);
+                        var serialized = JsonSerializer.Serialize(message, message.GetType(), _jsonOptions);
                         using var doc = JsonDocument.Parse(serialized);
                         await WriteMessageAsync(doc.RootElement.Clone());
                     });
@@ -444,7 +449,7 @@ namespace McpRouter
                 if (toolName.StartsWith(prefix))
                 {
                     var realToolName = toolName.Substring(prefix.Length);
-                    routingBody = body.Replace($"\"name\":\"{toolName}\"", $"\"name\":\"{realToolName}\"");
+                    routingBody = RewriteRequestJson(body, "name", realToolName);
                 }
                 
                 return await conn.SendRequestAsync("tools/call", routingBody);
@@ -608,6 +613,49 @@ namespace McpRouter
                 conn.Dispose();
             }
             _backendConnections.Clear();
+        }
+
+        private string RewriteRequestJson(string body, string paramKey, string newValue)
+        {
+            try
+            {
+                var docOptions = new JsonDocumentOptions
+                {
+                    AllowTrailingCommas = true,
+                    CommentHandling = JsonCommentHandling.Skip
+                };
+                var node = System.Text.Json.Nodes.JsonNode.Parse(body, null, docOptions);
+                if (node == null) return body;
+
+                if (node is System.Text.Json.Nodes.JsonObject obj)
+                {
+                    RewriteObject(obj, paramKey, newValue);
+                }
+                else if (node is System.Text.Json.Nodes.JsonArray array)
+                {
+                    foreach (var item in array)
+                    {
+                        if (item is System.Text.Json.Nodes.JsonObject itemObj)
+                        {
+                            RewriteObject(itemObj, paramKey, newValue);
+                        }
+                    }
+                }
+                return node.ToJsonString();
+            }
+            catch (Exception ex)
+            {
+                _logger?.LogError(ex, "Failed to parse and rewrite JSON body for key '{ParamKey}' to '{NewValue}'", paramKey, newValue);
+                return body;
+            }
+        }
+
+        private static void RewriteObject(System.Text.Json.Nodes.JsonObject obj, string paramKey, string newValue)
+        {
+            if (obj.TryGetPropertyValue("params", out var paramsNode) && paramsNode is System.Text.Json.Nodes.JsonObject paramsObj)
+            {
+                paramsObj[paramKey] = newValue;
+            }
         }
     }
 }

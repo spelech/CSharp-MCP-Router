@@ -28,6 +28,13 @@ namespace McpRouter
 
         public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests { get; } = new();
 
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            Converters = { new JsonRpcMessageConverter() }
+        };
+
+        public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
+
         public BackendConnection(McpServer server, HttpClient httpClient, ILogger logger)
         {
             _server = server;
@@ -44,27 +51,21 @@ namespace McpRouter
             request.Headers.Host = "localhost";
         }
 
-        public async Task ConnectAsync()
+        private void ApplyAuthAndCustomHeaders(HttpRequestMessage request)
         {
-            var request = new HttpRequestMessage(HttpMethod.Get, _server.Url);
-            ConfigureRequest(request, _server.Url);
-            request.Headers.Add("Mcp-Session-Id", _sessionId);
             if (!string.IsNullOrEmpty(_server.ApiKey))
             {
-                // Standard MCP auth headers: X-API-Key or Bearer token
                 if (_server.Id == "ha")
                 {
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
                 }
                 else
                 {
-                    request.Headers.Add("X-API-Key", _server.ApiKey);
-                    // Also support Bearer Token header just in case
+                    request.Headers.TryAddWithoutValidation("X-API-Key", _server.ApiKey);
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
                 }
             }
 
-            // Add custom headers if configured
             if (!string.IsNullOrEmpty(_server.HeadersJson))
             {
                 try
@@ -74,7 +75,7 @@ namespace McpRouter
                     {
                         foreach (var kvp in customHeaders)
                         {
-                            request.Headers.Add(kvp.Key, kvp.Value);
+                            request.Headers.TryAddWithoutValidation(kvp.Key, kvp.Value);
                         }
                     }
                 }
@@ -83,6 +84,14 @@ namespace McpRouter
                     _logger.LogError(ex, "Failed to parse custom headers for server {ServerId}", _server.Id);
                 }
             }
+        }
+
+        public async Task ConnectAsync()
+        {
+            var request = new HttpRequestMessage(HttpMethod.Get, _server.Url);
+            ConfigureRequest(request, _server.Url);
+            request.Headers.Add("Mcp-Session-Id", _sessionId);
+            ApplyAuthAndCustomHeaders(request);
 
             _logger.LogInformation("Connecting to backend {ServerId} SSE stream at {Url}...", _server.Id, _server.Url);
         }
@@ -108,38 +117,7 @@ namespace McpRouter
                         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
                         request.Headers.Add("Mcp-Session-Id", _sessionId);
                         
-                        if (!string.IsNullOrEmpty(_server.ApiKey))
-                        {
-                            if (_server.Id == "ha")
-                            {
-                                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                            }
-                            else
-                            {
-                                request.Headers.Add("X-API-Key", _server.ApiKey);
-                                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                            }
-                        }
-
-                        // Add custom headers if configured
-                        if (!string.IsNullOrEmpty(_server.HeadersJson))
-                        {
-                            try
-                            {
-                                var customHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(_server.HeadersJson);
-                                if (customHeaders != null)
-                                {
-                                    foreach (var kvp in customHeaders)
-                                    {
-                                        request.Headers.Add(kvp.Key, kvp.Value);
-                                    }
-                                }
-                            }
-                            catch (Exception ex)
-                            {
-                                _logger.LogError(ex, "Failed to parse custom headers for server {ServerId}", _server.Id);
-                            }
-                        }
+                        ApplyAuthAndCustomHeaders(request);
                         
                         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cts.Token);
                         response.EnsureSuccessStatusCode();
@@ -211,7 +189,7 @@ namespace McpRouter
                                 {
                                     try
                                     {
-                                        var responseObj = JsonSerializer.Deserialize<JsonRpcMessage>(data);
+                                        var responseObj = JsonSerializer.Deserialize<JsonRpcMessage>(data, _jsonOptions);
                                         if (responseObj != null) await onMessageReceived(responseObj);
                                     }
                                     catch (Exception ex)
@@ -229,6 +207,12 @@ namespace McpRouter
                     catch (Exception ex)
                     {
                         _logger.LogWarning("Disconnected from backend {ServerId}. Reconnecting in 5s... Error: {Msg}", _server.Id, ex.Message);
+                        var pending = PendingRequests.Values.ToList();
+                        PendingRequests.Clear();
+                        foreach (var tcs in pending)
+                        {
+                            tcs.TrySetException(new HttpRequestException($"Backend disconnected: {ex.Message}", ex));
+                        }
                         await Task.Delay(5000, _cts.Token);
                     }
                 }
@@ -268,31 +252,7 @@ namespace McpRouter
             if (!string.IsNullOrEmpty(_sessionId))
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
 
-            if (!string.IsNullOrEmpty(_server.ApiKey))
-            {
-                if (_server.Id == "ha")
-                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                else
-                {
-                    req.Headers.TryAddWithoutValidation("X-API-Key", _server.ApiKey);
-                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                }
-            }
-
-            if (!string.IsNullOrEmpty(_server.HeadersJson))
-            {
-                try
-                {
-                    var customHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(_server.HeadersJson);
-                    if (customHeaders != null)
-                        foreach (var kvp in customHeaders)
-                            req.Headers.TryAddWithoutValidation(kvp.Key, kvp.Value);
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to parse custom headers for {ServerId}", _server.Id);
-                }
-            }
+            ApplyAuthAndCustomHeaders(req);
 
             using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);
@@ -364,56 +324,32 @@ namespace McpRouter
             var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             PendingRequests[requestId] = tcs;
 
-            var content = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            
-            // Build post message
-            using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
-            ConfigureRequest(req, _messageUrl);
-            req.Headers.Accept.Clear();
-            req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            if (!string.IsNullOrEmpty(_sessionId))
+            try
             {
-                req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
-            }
+                var content = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                
+                // Build post message
+                using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
+                ConfigureRequest(req, _messageUrl);
+                req.Headers.Accept.Clear();
+                req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                if (!string.IsNullOrEmpty(_sessionId))
+                {
+                    req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+                }
 
-            if (!string.IsNullOrEmpty(_server.ApiKey))
+                ApplyAuthAndCustomHeaders(req);
+
+                using var res = await _httpClient.SendAsync(req, _cts.Token);
+                res.EnsureSuccessStatusCode();
+
+                return await tcs.Task.WaitAsync(RequestTimeout, _cts.Token);
+            }
+            finally
             {
-                if (_server.Id == "ha")
-                {
-                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                }
-                else
-                {
-                    req.Headers.Add("X-API-Key", _server.ApiKey);
-                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                }
+                PendingRequests.TryRemove(requestId, out _);
             }
-
-            // Add custom headers if configured
-            if (!string.IsNullOrEmpty(_server.HeadersJson))
-            {
-                try
-                {
-                    var customHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(_server.HeadersJson);
-                    if (customHeaders != null)
-                    {
-                        foreach (var kvp in customHeaders)
-                        {
-                            req.Headers.Add(kvp.Key, kvp.Value);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to parse custom headers for server {ServerId}", _server.Id);
-                }
-            }
-
-            using var res = await _httpClient.SendAsync(req);
-            res.EnsureSuccessStatusCode();
-
-            return await tcs.Task;
         }
 
         public async Task<JsonRpcResponse> CallMethodAsync(string method, object parameters, string? overrideId = null)
@@ -445,94 +381,69 @@ namespace McpRouter
             var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             PendingRequests[requestId] = tcs;
 
-            var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
-            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-            
-            // Build post message
-            using var postReq = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
-            ConfigureRequest(postReq, _messageUrl);
-            postReq.Headers.Accept.Clear();
-            postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-            if (!string.IsNullOrEmpty(_sessionId))
-            {
-                postReq.Headers.Add("Mcp-Session-Id", _sessionId);
-            }
-            
-            if (!string.IsNullOrEmpty(_server.ApiKey))
-            {
-                if (_server.Id == "ha")
-                {
-                    postReq.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                }
-                else
-                {
-                    postReq.Headers.Add("X-API-Key", _server.ApiKey);
-                    postReq.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                }
-            }
-
-            // Add custom headers if configured
-            if (!string.IsNullOrEmpty(_server.HeadersJson))
-            {
-                try
-                {
-                    var customHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(_server.HeadersJson);
-                    if (customHeaders != null)
-                    {
-                        foreach (var kvp in customHeaders)
-                        {
-                            postReq.Headers.Add(kvp.Key, kvp.Value);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to parse custom headers for server {ServerId}", _server.Id);
-                }
-            }
-
-            var postResp = await _httpClient.SendAsync(postReq, HttpCompletionOption.ResponseHeadersRead, _cts.Token);
-            postResp.EnsureSuccessStatusCode();
-
-            // Capture session ID from POST response headers if not already set
-            if (string.IsNullOrEmpty(_sessionId))
-            {
-                IEnumerable<string>? postSessionValues = null;
-                if (postResp.Headers.TryGetValues("Mcp-Session-Id", out var phVals))
-                {
-                    postSessionValues = phVals;
-                }
-                else if (postResp.Content.Headers.TryGetValues("Mcp-Session-Id", out var pcVals))
-                {
-                    postSessionValues = pcVals;
-                }
-
-                if (postSessionValues != null)
-                {
-                    _sessionId = postSessionValues.FirstOrDefault() ?? string.Empty;
-                    _logger.LogInformation("Captured Mcp-Session-Id from POST response for {ServerId}: {_sessionId}", _server.Id, _sessionId);
-                }
-            }
-
-            // Await the response from the SSE stream reader (max 10s timeout)
-            using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
-            using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);
-            
-            linkedCts.Token.Register(() => tcs.TrySetCanceled());
-
             try
             {
-                return await tcs.Task;
+                var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+                
+                // Build post message
+                using var postReq = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
+                ConfigureRequest(postReq, _messageUrl);
+                postReq.Headers.Accept.Clear();
+                postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+                if (!string.IsNullOrEmpty(_sessionId))
+                {
+                    postReq.Headers.Add("Mcp-Session-Id", _sessionId);
+                }
+                
+                ApplyAuthAndCustomHeaders(postReq);
+
+                var postResp = await _httpClient.SendAsync(postReq, HttpCompletionOption.ResponseHeadersRead, _cts.Token);
+                postResp.EnsureSuccessStatusCode();
+
+                // Capture session ID from POST response headers if not already set
+                if (string.IsNullOrEmpty(_sessionId))
+                {
+                    IEnumerable<string>? postSessionValues = null;
+                    if (postResp.Headers.TryGetValues("Mcp-Session-Id", out var phVals))
+                    {
+                        postSessionValues = phVals;
+                    }
+                    else if (postResp.Content.Headers.TryGetValues("Mcp-Session-Id", out var pcVals))
+                    {
+                        postSessionValues = pcVals;
+                    }
+
+                    if (postSessionValues != null)
+                    {
+                        _sessionId = postSessionValues.FirstOrDefault() ?? string.Empty;
+                        _logger.LogInformation("Captured Mcp-Session-Id from POST response for {ServerId}: {_sessionId}", _server.Id, _sessionId);
+                    }
+                }
+
+                // Await the response from the SSE stream reader (max 10s timeout)
+                using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+                using var linkedCts = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);
+                
+                linkedCts.Token.Register(() => tcs.TrySetCanceled());
+
+                try
+                {
+                    return await tcs.Task;
+                }
+                catch (OperationCanceledException)
+                {
+                    if (ctsTimeout.IsCancellationRequested)
+                    {
+                        throw new TimeoutException($"Request to backend {_server.Id} timed out after 30 seconds.");
+                    }
+                    throw;
+                }
             }
-            catch (OperationCanceledException)
+            finally
             {
                 PendingRequests.TryRemove(requestId, out _);
-                if (ctsTimeout.IsCancellationRequested)
-                {
-                    throw new TimeoutException($"Request to backend {_server.Id} timed out after 30 seconds.");
-                }
-                throw;
             }
         }
 
@@ -555,38 +466,7 @@ namespace McpRouter
                 postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
                 
-                if (!string.IsNullOrEmpty(_server.ApiKey))
-                {
-                    if (_server.Id == "ha")
-                    {
-                        postReq.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                    }
-                    else
-                    {
-                        postReq.Headers.Add("X-API-Key", _server.ApiKey);
-                        postReq.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                    }
-                }
-
-                // Add custom headers if configured
-                if (!string.IsNullOrEmpty(_server.HeadersJson))
-                {
-                    try
-                    {
-                        var customHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(_server.HeadersJson);
-                        if (customHeaders != null)
-                        {
-                            foreach (var kvp in customHeaders)
-                            {
-                                postReq.Headers.Add(kvp.Key, kvp.Value);
-                            }
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to parse custom headers for server {ServerId}", _server.Id);
-                    }
-                }
+                ApplyAuthAndCustomHeaders(postReq);
 
                 await _httpClient.SendAsync(postReq, HttpCompletionOption.ResponseHeadersRead, _cts.Token);
                 return;
@@ -609,38 +489,7 @@ namespace McpRouter
             postReq2.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
             postReq2.Headers.Add("Mcp-Session-Id", _sessionId);
             
-            if (!string.IsNullOrEmpty(_server.ApiKey))
-            {
-                if (_server.Id == "ha")
-                {
-                    postReq2.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                }
-                else
-                {
-                    postReq2.Headers.Add("X-API-Key", _server.ApiKey);
-                    postReq2.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                }
-            }
-
-            // Add custom headers if configured
-            if (!string.IsNullOrEmpty(_server.HeadersJson))
-            {
-                try
-                {
-                    var customHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(_server.HeadersJson);
-                    if (customHeaders != null)
-                    {
-                        foreach (var kvp in customHeaders)
-                        {
-                            postReq2.Headers.Add(kvp.Key, kvp.Value);
-                        }
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to parse custom headers for server {ServerId}", _server.Id);
-                }
-            }
+            ApplyAuthAndCustomHeaders(postReq2);
 
             await _httpClient.SendAsync(postReq2, HttpCompletionOption.ResponseHeadersRead, _cts.Token);
         }

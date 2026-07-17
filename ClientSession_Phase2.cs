@@ -69,7 +69,7 @@ namespace McpRouter
             return allResources;
         }
 
-        public async Task<object> ReadResourceAsync(string resourceUri, string body)
+        public async Task<object?> ReadResourceAsync(string resourceUri, string body)
         {
             await EnsureBackendsInitializedAsync();
 
@@ -77,10 +77,9 @@ namespace McpRouter
             {
                 var prefix = $"mcp://{serverId}/";
                 var rawUri = Uri.UnescapeDataString(resourceUri.Substring(prefix.Length));
-                var routingBody = body.Replace($"\"uri\":\"{resourceUri}\"", $"\"uri\":\"{rawUri}\"");
-                
+                string routingBody = RewriteRequestJson(body, "uri", rawUri);
                 var resp = await conn.SendRequestAsync("resources/read", routingBody);
-                return resp.Result ?? default(object);
+                return resp.Result;
             }
             throw new KeyNotFoundException($"Resource {resourceUri} not found in routing table.");
         }
@@ -143,7 +142,7 @@ namespace McpRouter
             return allPrompts;
         }
 
-        public async Task<object> GetPromptAsync(string promptName, string body)
+        public async Task<object?> GetPromptAsync(string promptName, string body)
         {
             await EnsureBackendsInitializedAsync();
 
@@ -151,10 +150,9 @@ namespace McpRouter
             {
                 var prefix = serverId + "__";
                 var rawName = promptName.Substring(prefix.Length);
-                var routingBody = body.Replace($"\"name\":\"{promptName}\"", $"\"name\":\"{rawName}\"");
-                
+                string routingBody = RewriteRequestJson(body, "name", rawName);
                 var resp = await conn.SendRequestAsync("prompts/get", routingBody);
-                return resp.Result ?? default(object);
+                return resp.Result;
             }
             throw new KeyNotFoundException($"Prompt {promptName} not found in routing table.");
         }

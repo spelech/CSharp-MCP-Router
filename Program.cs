@@ -98,7 +98,9 @@ app.UseStaticFiles(new StaticFileOptions
 app.Use(async (context, next) =>
 {
     var path = context.Request.Path.Value ?? string.Empty;
-    if (path.StartsWith("/api/") && !path.StartsWith("/api/register") && !path.StartsWith("/api/me"))
+    if (path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) && 
+        !path.StartsWith("/api/register", StringComparison.OrdinalIgnoreCase) && 
+        !path.StartsWith("/api/me", StringComparison.OrdinalIgnoreCase))
     {
         var user = context.Request.Headers["Remote-User"].ToString();
         if (string.IsNullOrEmpty(user))
@@ -690,12 +692,6 @@ app.MapPost("/mcp/message", async (HttpContext httpContext, [FromQuery] string s
 // ----------------------------------------------------
 // DCR & OAUTH ENDPOINTS
 // ----------------------------------------------------
-
-app.MapGet("/api/clients", async ([FromServices] RouterDbContext db) =>
-{
-    var clients = await db.Clients.ToListAsync();
-    return Results.Ok(clients);
-});
 
 app.MapGet("/api/me", (HttpContext context) =>
 {
