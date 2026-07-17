@@ -24,6 +24,7 @@ namespace McpRouter
         private string? _messageUrl;
         private string _sessionId = Guid.NewGuid().ToString("N");
         private Task? _readerTask;
+        private Task? _pingTask;
 
         public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests { get; } = new();
 
@@ -229,6 +230,26 @@ namespace McpRouter
                     {
                         _logger.LogWarning("Disconnected from backend {ServerId}. Reconnecting in 5s... Error: {Msg}", _server.Id, ex.Message);
                         await Task.Delay(5000, _cts.Token);
+                    }
+                }
+            });
+
+            _pingTask = Task.Run(async () =>
+            {
+                while (!_cts.Token.IsCancellationRequested)
+                {
+                    await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token);
+                    try
+                    {
+                        var resp = await CallMethodAsync("ping", new { });
+                        if (resp.Error != null)
+                        {
+                            _logger.LogWarning("Ping failed for backend {ServerId}: {Code} {Message}", _server.Id, resp.Error.Code, resp.Error.Message);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Ping exception for backend {ServerId}", _server.Id);
                     }
                 }
             });

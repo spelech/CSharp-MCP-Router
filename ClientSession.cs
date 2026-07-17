@@ -591,6 +591,16 @@ namespace McpRouter
             return results;
         }
 
+        public async Task BroadcastNotificationAsync(string method, string body)
+        {
+            var tasks = new List<Task>();
+            foreach (var conn in _backendConnections.Values)
+            {
+                tasks.Add(conn.SendNotificationAsync(method, body));
+            }
+            await Task.WhenAll(tasks);
+        }
+
         public void Close()
         {
             foreach (var conn in _backendConnections.Values)

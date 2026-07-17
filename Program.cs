@@ -650,6 +650,11 @@ var handleMessage = async (HttpContext httpContext, string sessionId, [FromServi
             }
             return Results.BadRequest(new { error = "Invalid prompts/get: missing name parameter" });
         }
+        else if (method.StartsWith("notifications/"))
+        {
+            await session.BroadcastNotificationAsync(method, body);
+            return Results.Accepted();
+        }
         else
         {
             // Forward other JSON-RPC requests (like resources/list, prompts/list) directly to all backends, returning combined or first valid
