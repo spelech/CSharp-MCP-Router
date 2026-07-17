@@ -592,6 +592,64 @@ var handleMessage = async (HttpContext httpContext, string sessionId, [FromServi
             }
             return Results.BadRequest(new { error = "Invalid tools/call: missing name parameter" });
         }
+        else if (method == "resources/list")
+        {
+            var resources = await session.ListResourcesAsync(body);
+            var response = new
+            {
+                jsonrpc = "2.0",
+                id = id != null ? (object)id : null,
+                result = new { resources }
+            };
+            await session.WriteMessageAsync(response);
+            return Results.Accepted();
+        }
+        else if (method == "resources/read")
+        {
+            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("uri", out var uriProp))
+            {
+                var uri = uriProp.GetString() ?? string.Empty;
+                var res = await session.ReadResourceAsync(uri, body);
+                var response = new
+                {
+                    jsonrpc = "2.0",
+                    id = id != null ? (object)id : null,
+                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                };
+                await session.WriteMessageAsync(response);
+                return Results.Accepted();
+            }
+            return Results.BadRequest(new { error = "Invalid resources/read: missing uri parameter" });
+        }
+        else if (method == "prompts/list")
+        {
+            var prompts = await session.ListPromptsAsync(body);
+            var response = new
+            {
+                jsonrpc = "2.0",
+                id = id != null ? (object)id : null,
+                result = new { prompts }
+            };
+            await session.WriteMessageAsync(response);
+            return Results.Accepted();
+        }
+        else if (method == "prompts/get")
+        {
+            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
+            {
+                var name = nameProp.GetString() ?? string.Empty;
+                var res = await session.GetPromptAsync(name, body);
+                var response = new
+                {
+                    jsonrpc = "2.0",
+                    id = id != null ? (object)id : null,
+                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                };
+                await session.WriteMessageAsync(response);
+                return Results.Accepted();
+            }
+            return Results.BadRequest(new { error = "Invalid prompts/get: missing name parameter" });
+        }
         else
         {
             // Forward other JSON-RPC requests (like resources/list, prompts/list) directly to all backends, returning combined or first valid

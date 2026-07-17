@@ -11,7 +11,7 @@ using McpRouter.Models;
 
 namespace McpRouter
 {
-    public class ClientSession
+    public partial class ClientSession
     {
         private readonly string _sessionId;
         private readonly HttpResponse _clientResponse;
@@ -202,10 +202,7 @@ namespace McpRouter
                         {
                             var rawToolName = nameProp.GetString() ?? string.Empty;
                             
-                            // Suffix tools from 4K arr instance to avoid name collisions with HD
-                            var exposedName = item.ServerId == "mcp-arr-4k"
-                                ? rawToolName + "_4k"
-                                : rawToolName;
+                            var exposedName = item.ServerId + "__" + rawToolName;
                             
                             _toolRoutingTable[exposedName] = item.ServerId;
                             
@@ -213,13 +210,9 @@ namespace McpRouter
                             var toolDict = JsonSerializer.Deserialize<Dictionary<string, object>>(tool.GetRawText());
                             if (toolDict != null)
                             {
-                                if (item.ServerId == "mcp-arr-4k")
-                                {
-                                    toolDict["name"] = exposedName;
-                                    // Prefix description so users know it's the 4K instance
-                                    if (toolDict.TryGetValue("description", out var desc))
-                                        toolDict["description"] = "[4K] " + desc;
-                                }
+                                toolDict["name"] = exposedName;
+                                if (toolDict.TryGetValue("description", out var desc))
+                                    toolDict["description"] = $"[{item.ServerId}] " + desc;
                                 allTools.Add(toolDict);
                             }
                         }
@@ -445,11 +438,12 @@ namespace McpRouter
             {
                 _logger.LogInformation("Routing tool call '{ToolName}' to server '{ServerId}'", toolName, serverId);
                 
-                // If the tool was exposed with a _4k suffix, rewrite the body to use the real tool name
+                // Restore the original tool name by stripping the serverId__ prefix
                 string routingBody = body;
-                if (toolName.EndsWith("_4k") && serverId == "mcp-arr-4k")
+                var prefix = serverId + "__";
+                if (toolName.StartsWith(prefix))
                 {
-                    var realToolName = toolName.Substring(0, toolName.Length - 3); // strip "_4k"
+                    var realToolName = toolName.Substring(prefix.Length);
                     routingBody = body.Replace($"\"name\":\"{toolName}\"", $"\"name\":\"{realToolName}\"");
                 }
                 
