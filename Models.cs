@@ -59,6 +59,9 @@ namespace McpRouter.Models
         {
             modelBuilder.Entity<McpServer>().HasKey(s => s.Id);
             modelBuilder.Entity<OAuthClient>().HasKey(c => c.ClientId);
+
+            // Register OpenIddict Entity Framework Core entities
+            modelBuilder.UseOpenIddict();
         }
     }
 }

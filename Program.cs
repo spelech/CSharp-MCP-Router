@@ -18,6 +18,8 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
 using McpRouter;
+using McpRouter.Extensions;
+using McpRouter.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +30,11 @@ builder.Logging.AddDebug();
 
 // Register SQLite Database
 builder.Services.AddDbContext<RouterDbContext>();
+
+// Register OpenIddict & Controllers
+builder.Services.AddMcpOpenIddict();
+builder.Services.AddControllers();
+
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<SessionManager>();
 
@@ -45,6 +52,9 @@ builder.Services.AddCors(options =>
 var app = builder.Build();
 
 app.UseCors();
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
 
 // Request logging middleware
 app.Use(async (context, next) =>
@@ -101,222 +111,12 @@ app.Use(async (context, next) =>
     await next();
 });
 
-// ----------------------------------------------------
-// DATABASE INITIALIZATION & ENV MIGRATION
-// ----------------------------------------------------
-using (var scope = app.Services.CreateScope())
-{
-    var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-    
-    try
-    {
-        logger.LogInformation("Initializing database...");
-        db.Database.EnsureCreated();
-        
-        // Migration script: if empty, import from environment
-        if (!db.Servers.Any())
-        {
-            logger.LogInformation("Database empty. Performing initial migration from environment variables...");
-
-            // 1. Home Assistant MCP
-            var haUrl = Environment.GetEnvironmentVariable("HOMEASSISTANT_URL") ?? "http://10.0.0.10:8123";
-            var haToken = Environment.GetEnvironmentVariable("HOMEASSISTANT_TOKEN");
-            if (!string.IsNullOrEmpty(haToken))
-            {
-                db.Servers.Add(new McpServer
-                {
-                    Id = "ha",
-                    Category = "homecontrol",
-                    DisplayName = "Home Assistant",
-                    Url = "http://ha-mcp:8086/mcp",
-                    Enabled = true,
-                    Hidden = false,
-                    Type = "http",
-                    ApiKey = haToken
-                });
-                logger.LogInformation("Imported HA MCP config.");
-            }
-
-            // 2. Actual Budget MCP
-            var actualPass = Environment.GetEnvironmentVariable("ACTUAL_PASSWORD");
-            if (!string.IsNullOrEmpty(actualPass))
-            {
-                db.Servers.Add(new McpServer
-                {
-                    Id = "actual",
-                    Category = "financial",
-                    DisplayName = "Actual Budget",
-                    Url = "http://actual-mcp:3000/sse",
-                    Enabled = true,
-                    Hidden = false,
-                    Type = "sse",
-                    ApiKey = Environment.GetEnvironmentVariable("ACTUAL_BEARER_TOKEN")
-                });
-                logger.LogInformation("Imported Actual Budget MCP config.");
-            }
-
-            // 3. Receipt Wrangler MCP
-            var rwKey = Environment.GetEnvironmentVariable("RECEIPTWRANGLER_API_KEY");
-            if (!string.IsNullOrEmpty(rwKey) && rwKey != "YOUR_RECEIPTWRANGLER_API_KEY_HERE")
-            {
-                db.Servers.Add(new McpServer
-                {
-                    Id = "receiptwrangler",
-                    Category = "financial",
-                    DisplayName = "Receipt Wrangler",
-                    Url = "http://receiptwrangler-mcp:3000/mcp",
-                    Enabled = true,
-                    Hidden = false,
-                    Type = "sse",
-                    ApiKey = rwKey
-                });
-                logger.LogInformation("Imported Receipt Wrangler MCP config.");
-            }
-
-            // 5. Overseerr/Seerr MCP
-            var seerrKey = Environment.GetEnvironmentVariable("SEERR_API_KEY");
-            if (!string.IsNullOrEmpty(seerrKey))
-            {
-                db.Servers.Add(new McpServer
-                {
-                    Id = "seerr",
-                    Category = "media",
-                    DisplayName = "Overseerr requests",
-                    Url = "http://seerr-mcp:8000/sse",
-                    Enabled = true,
-                    Hidden = false,
-                    Type = "sse",
-                    ApiKey = seerrKey
-                });
-                logger.LogInformation("Imported Overseerr config.");
-            }
-
-            // 6. UniFi MCP
-            var unifiUser = Environment.GetEnvironmentVariable("UNIFI_USERNAME");
-            if (!string.IsNullOrEmpty(unifiUser))
-            {
-                db.Servers.Add(new McpServer
-                {
-                    Id = "unifi",
-                    Category = "unifi",
-                    DisplayName = "UniFi Controller",
-                    Url = "http://unifi-mcp:3000/mcp",
-                    Enabled = true,
-                    Hidden = false,
-                    Type = "streamable"
-                });
-                logger.LogInformation("Imported UniFi MCP config.");
-            }
-
-            // 7. Plex Media Server
-            var plexToken = Environment.GetEnvironmentVariable("PLEX_TOKEN");
-            if (!string.IsNullOrEmpty(plexToken))
-            {
-                db.Servers.Add(new McpServer
-                {
-                    Id = "plex",
-                    Category = "media",
-                    DisplayName = "Plex Media Server",
-                    Url = "http://plex-mcp:8000/sse",
-                    Enabled = true,
-                    Hidden = false,
-                    Type = "sse",
-                    ApiKey = plexToken
-                });
-                logger.LogInformation("Imported Plex config.");
-            }
-
-            // 7. Arr HD / 4K MCP
-            db.Servers.Add(new McpServer
-            {
-                Id = "mcp-arr-hd",
-                Category = "media",
-                DisplayName = "Arr Services (HD)",
-                Url = "http://mcp-arr-hd:3000/mcp",
-                Enabled = true,
-                Hidden = false,
-                Type = "streamable"
-            });
-            db.Servers.Add(new McpServer
-            {
-                Id = "mcp-arr-4k",
-                Category = "media4k",
-                DisplayName = "Arr Services (4K)",
-                Url = "http://mcp-arr-4k:3000/mcp",
-                Enabled = true,
-                Hidden = false,
-                Type = "streamable"
-            });
-            db.Servers.Add(new McpServer
-            {
-                Id = "docker",
-                Category = "infrastructure",
-                DisplayName = "Docker Containers",
-                Url = "http://docker-mcp:8000/sse",
-                Enabled = true,
-                Hidden = false,
-                Type = "sse"
-            });
-            logger.LogInformation("Imported Docker MCP config.");
-            logger.LogInformation("Imported Arr MCP configurations.");
-
-            db.SaveChanges();
-            logger.LogInformation("Database migration completed successfully.");
-        }
-
-        // Load custom servers from configuration JSON if it exists
-        var customServersPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "custom_servers.json");
-        if (File.Exists(customServersPath))
-        {
-            try
-            {
-                logger.LogInformation("Found custom_servers.json. Processing configuration...");
-                var jsonContent = File.ReadAllText(customServersPath);
-                var options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-                var customServers = JsonSerializer.Deserialize<List<McpServer>>(jsonContent, options);
-                if (customServers != null)
-                {
-                    foreach (var server in customServers)
-                    {
-                        var existing = db.Servers.FirstOrDefault(s => s.Id == server.Id);
-                        if (existing == null)
-                        {
-                            logger.LogInformation($"Registering custom server '{server.DisplayName}' ({server.Id}) from config...");
-                            db.Servers.Add(server);
-                        }
-                        else
-                        {
-                            logger.LogInformation($"Updating custom server '{server.DisplayName}' ({server.Id}) from config...");
-                            existing.DisplayName = server.DisplayName;
-                            existing.Url = server.Url;
-                            existing.Type = server.Type;
-                            existing.Category = server.Category;
-                            existing.Enabled = server.Enabled;
-                            existing.Hidden = server.Hidden;
-                            existing.ApiKey = server.ApiKey;
-                            existing.HeadersJson = server.HeadersJson;
-                        }
-                    }
-                    db.SaveChanges();
-                }
-            }
-            catch (Exception ex)
-            {
-                logger.LogError(ex, "Failed to load custom servers from JSON.");
-            }
-        }
-    }
-    catch (Exception ex)
-    {
-        logger.LogError(ex, "Failed to initialize database.");
-    }
-}
+app.SeedDatabase();
 
 // ----------------------------------------------------
 // SYSTEM/HEALTH ENDPOINTS
 // ----------------------------------------------------
-app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = "0.3.0" }));
+app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = "0.4.0" }));
 
 // ----------------------------------------------------
 // OAUTH & OIDC DISCOVERY ENDPOINTS
@@ -441,7 +241,7 @@ app.MapMethods("/sse", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpC
                             {
                                 protocolVersion = "2024-11-05",
                                 capabilities = new { tools = new { listChanged = true } },
-                                serverInfo = new { name = "McpRouterGateway", version = "0.3.0" }
+                                serverInfo = new { name = "McpRouterGateway", version = "0.4.0" }
                             }
                         };
                         await session.WriteMessageAsync(response);
@@ -672,7 +472,7 @@ app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST
                 {
                     protocolVersion = "2024-11-05",
                     capabilities = new { tools = new { listChanged = true } },
-                    serverInfo = new { name = serverName, version = "0.3.0" }
+                    serverInfo = new { name = serverName, version = "0.4.0" }
                 }
             };
             await session.WriteMessageAsync(response);
@@ -749,7 +549,7 @@ var handleMessage = async (HttpContext httpContext, string sessionId, [FromServi
                     serverInfo = new
                     {
                         name = "McpRouterGateway",
-                        version = "0.3.0"
+                        version = "0.4.0"
                     }
                 }
             };
@@ -827,50 +627,6 @@ app.MapPost("/mcp/message", async (HttpContext httpContext, [FromQuery] string s
 // ----------------------------------------------------
 // DCR & OAUTH ENDPOINTS
 // ----------------------------------------------------
-app.MapPost("/api/register", async ([FromBody] JsonElement metadata, [FromServices] RouterDbContext db) =>
-{
-    var clientName = metadata.TryGetProperty("client_name", out var cn) ? cn.GetString() ?? "Unknown Client" : "Unknown Client";
-    var redirectUris = metadata.TryGetProperty("redirect_uris", out var ru) ? ru.Clone() : default;
-
-    var clientId = Guid.NewGuid().ToString("N");
-    var clientSecret = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N"); // Double guid size secret
-
-    var client = new OAuthClient
-    {
-        ClientId = clientId,
-        ClientSecret = clientSecret,
-        ClientName = clientName,
-        RedirectUrisJson = redirectUris.ValueKind == JsonValueKind.Array ? redirectUris.ToString() : "[]"
-    };
-
-    db.Clients.Add(client);
-    await db.SaveChangesAsync();
-
-    var redirectUrisList = new List<string>();
-    if (redirectUris.ValueKind == JsonValueKind.Array)
-    {
-        foreach (var element in redirectUris.EnumerateArray())
-        {
-            if (element.ValueKind == JsonValueKind.String)
-            {
-                redirectUrisList.Add(element.GetString()!);
-            }
-        }
-    }
-
-    return Results.Ok(new
-    {
-        client_id = clientId,
-        client_secret = clientSecret,
-        client_name = clientName,
-        client_secret_expires_at = 0,
-        client_id_issued_at = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-        redirect_uris = redirectUrisList,
-        grant_types = new[] { "authorization_code" },
-        response_types = new[] { "code" },
-        token_endpoint_auth_method = "client_secret_post"
-    });
-});
 
 app.MapGet("/api/clients", async ([FromServices] RouterDbContext db) =>
 {
@@ -900,80 +656,7 @@ app.MapGet("/api/me", (HttpContext context) =>
     });
 });
 
-app.MapGet("/oauth/authorize", ([FromQuery] string client_id, [FromQuery] string redirect_uri, [FromQuery] string response_type, [FromQuery] string? state, HttpContext context, [FromServices] RouterDbContext db) =>
-{
-    var client = db.Clients.FirstOrDefault(c => c.ClientId == client_id);
-    if (client == null)
-    {
-        // Auto-register dummy client on the fly since we trust the user
-        client = new OAuthClient 
-        { 
-            ClientId = client_id, 
-            ClientSecret = "auto-generated", 
-            ClientName = "Manual Entry Client", 
-            RedirectUrisJson = "[]" 
-        };
-        db.Clients.Add(client);
-        db.SaveChanges();
-    }
 
-    // Auto-approve since this is a private deployment running on our home server protected by SSO/TinyAuth anyway
-    var code = Guid.NewGuid().ToString("N");
-    
-    // Store code in memory or setting if we want to validate, for simplicity we just return it and validate it in /token
-    var redirectUrl = $"{redirect_uri}?code={code}";
-    if (!string.IsNullOrEmpty(state))
-    {
-        redirectUrl += $"&state={state}";
-    }
-
-    return Results.Redirect(redirectUrl);
-});
-
-app.MapPost("/oauth/token", async (HttpContext context, [FromServices] RouterDbContext db) =>
-{
-    var form = await context.Request.ReadFormAsync();
-    var clientId = form["client_id"].ToString();
-    var clientSecret = form["client_secret"].ToString();
-    var grantType = form["grant_type"].ToString();
-    if (string.IsNullOrEmpty(clientId))
-    {
-        return Results.BadRequest(new { error = "invalid_client" });
-    }
-
-    var routerSecret = Environment.GetEnvironmentVariable("ROUTER_SECRET");
-    if (!string.IsNullOrEmpty(routerSecret) && clientSecret != routerSecret)
-    {
-        return Results.Unauthorized();
-    }
-
-    var client = db.Clients.FirstOrDefault(c => c.ClientId == clientId);
-    if (client == null)
-    {
-        client = new OAuthClient 
-        { 
-            ClientId = clientId, 
-            ClientSecret = clientSecret, 
-            ClientName = "Manual Entry Client", 
-            RedirectUrisJson = "[]" 
-        };
-        db.Clients.Add(client);
-        await db.SaveChangesAsync();
-    }
-    else if (client.ClientSecret != clientSecret)
-    {
-        return Results.Unauthorized();
-    }
-
-    // Generate token
-    var token = Guid.NewGuid().ToString("N") + Guid.NewGuid().ToString("N");
-    return Results.Ok(new
-    {
-        access_token = token,
-        token_type = "Bearer",
-        expires_in = 3600 * 24 * 365 // 1 year
-    });
-});
 
 // ----------------------------------------------------
 // DASHBOARD MANAGEMENT ENDPOINTS
