@@ -61,6 +61,7 @@
                 <div class="glass-card dcr-card">
                     <div class="card-header-btn">
                         <h2><i class="fa-solid fa-key"></i> Registered Clients</h2>
+                        <button class="btn btn-secondary btn-sm" onclick="openAddClientModal()"><i class="fa-solid fa-plus"></i> New Client</button>
                     </div>
                     <div class="table-container">
                         <table id="clients-table">
@@ -68,7 +69,8 @@
                                 <tr>
                                     <th>Client Name</th>
                                     <th>Client ID</th>
-                                    <th>Created At</th>
+                                    <th>Type</th>
+                                    <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="clients-body">
@@ -168,6 +170,39 @@
                     <button type="submit" class="btn btn-primary" id="btn-save">Save Server</button>
                 </div>
             </form>
+        </div>
+    </div>
+    <div id="add-client-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Register New Client</h2>
+                <button class="close-btn" onclick="closeClientModal()">&times;</button>
+            </div>
+            <form id="client-form" onsubmit="handleClientSubmit(event)">
+                <div class="form-group">
+                    <label for="client-name">Client Name (Display Name)</label>
+                    <input type="text" id="client-name" placeholder="e.g. VSCode Extension" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="client-scopes">Roles / Scopes (Comma-separated)</label>
+                    <input type="text" id="client-scopes" placeholder="e.g. admin, ha_read">
+                    <small>Leave blank for default 'mcp_client' scope.</small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" onclick="closeClientModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-client">Generate Client</button>
+                </div>
+            </form>
+            
+            <div id="client-secret-result" style="display: none; margin-top: 15px; padding: 10px; background: rgba(16, 185, 129, 0.1); border: 1px solid var(--accent); border-radius: 8px;">
+                <h4>Client Created Successfully!</h4>
+                <p><strong>Client ID:</strong> <span id="res-client-id" class="code"></span></p>
+                <p><strong>Client Secret:</strong> <span id="res-client-secret" class="code"></span></p>
+                <p style="color: var(--warning); font-size: 13px;"><i class="fa-solid fa-triangle-exclamation"></i> Save this secret now. It will not be shown again.</p>
+                <button type="button" class="btn btn-secondary btn-sm" onclick="closeClientModal()" style="margin-top: 10px;">Close</button>
+            </div>
         </div>
     </div>
 
