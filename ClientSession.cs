@@ -64,7 +64,7 @@ namespace McpRouter
                 }
 
                 _logger.LogInformation("Backends not initialized yet. Auto-initializing with default payload for SessionId: {SessionId}", _sessionId);
-                var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.1.0\"}}}";
+                var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.3.0\"}}}";
                 _initializeTask = InitializeBackendsAsync(defaultInitRequest);
                 return _initializeTask;
             }

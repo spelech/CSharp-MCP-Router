@@ -441,7 +441,7 @@ app.MapMethods("/sse", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpC
                             {
                                 protocolVersion = "2024-11-05",
                                 capabilities = new { tools = new { listChanged = true } },
-                                serverInfo = new { name = "McpRouterGateway", version = "0.2.0" }
+                                serverInfo = new { name = "McpRouterGateway", version = "0.3.0" }
                             }
                         };
                         await session.WriteMessageAsync(response);
@@ -672,7 +672,7 @@ app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST
                 {
                     protocolVersion = "2024-11-05",
                     capabilities = new { tools = new { listChanged = true } },
-                    serverInfo = new { name = serverName, version = "0.2.0" }
+                    serverInfo = new { name = serverName, version = "0.3.0" }
                 }
             };
             await session.WriteMessageAsync(response);
@@ -749,7 +749,7 @@ var handleMessage = async (HttpContext httpContext, string sessionId, [FromServi
                     serverInfo = new
                     {
                         name = "McpRouterGateway",
-                        version = "0.2.0"
+                        version = "0.3.0"
                     }
                 }
             };
