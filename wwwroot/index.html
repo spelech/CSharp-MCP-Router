@@ -75,7 +75,7 @@
                             </thead>
                             <tbody id="clients-body">
                                 <tr>
-                                    <td colspan="3" class="empty-state">No clients registered yet. Add a manual connection in Gemini to register.</td>
+                                    <td colspan="4" class="empty-state">No clients registered yet. Add a manual connection in Gemini to register.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -172,11 +172,12 @@
             </form>
         </div>
     </div>
-    <div id="add-client-modal" class="modal">
-        <div class="modal-content">
+    <!-- Register New Client Modal -->
+    <div id="add-client-modal" class="modal-backdrop" style="display: none;">
+        <div class="glass-card modal-card">
             <div class="modal-header">
                 <h2>Register New Client</h2>
-                <button class="close-btn" onclick="closeClientModal()">&times;</button>
+                <button class="btn-close" onclick="closeClientModal()">&times;</button>
             </div>
             <form id="client-form" onsubmit="handleClientSubmit(event)">
                 <div class="form-group">

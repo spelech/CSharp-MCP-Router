@@ -108,21 +108,27 @@ function renderClients(clients) {
     if (clients.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="3" class="empty-state">No dynamic clients registered yet. Connect Gemini Spark to register.</td>
+                <td colspan="4" class="empty-state">No clients registered yet. Add a manual connection in Gemini to register.</td>
             </tr>
         `;
         return;
     }
     
     tbody.innerHTML = clients.map(client => {
-        const date = new Date(client.createdAt).toLocaleDateString(undefined, {
-            year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
-        });
+        const typeBadge = client.isDynamic
+            ? '<span class="server-badge" style="background: rgba(16, 185, 129, 0.1); color: var(--accent);">Dynamic</span>'
+            : '<span class="server-badge">Manual</span>';
+            
         return `
             <tr>
-                <td><strong>${escapeHtml(client.clientName)}</strong></td>
+                <td><strong>${escapeHtml(client.displayName)}</strong></td>
                 <td><code style="font-family: 'JetBrains Mono', monospace; font-size:11px; background: rgba(255,255,255,0.05); padding:2px 6px; border-radius:4px; color: var(--accent);">${escapeHtml(client.clientId)}</code></td>
-                <td>${date}</td>
+                <td>${typeBadge}</td>
+                <td>
+                    <button class="btn-icon btn-delete" title="Delete Client" onclick="deleteClient('${client.id}', '${escapeHtml(client.displayName)}')">
+                        <i class="fa-solid fa-trash-can"></i>
+                    </button>
+                </td>
             </tr>
         `;
     }).join('');
@@ -236,6 +242,66 @@ async function deleteServer(id, name) {
         loadServers();
     } catch (error) {
         alert(`Error deleting server: ${error.message}`);
+    }
+}
+
+function openAddClientModal() {
+    document.getElementById('client-form').reset();
+    document.getElementById('client-form').style.display = 'block';
+    document.getElementById('client-secret-result').style.display = 'none';
+    document.getElementById('add-client-modal').style.display = 'flex';
+}
+
+function closeClientModal() {
+    document.getElementById('add-client-modal').style.display = 'none';
+}
+
+async function handleClientSubmit(event) {
+    event.preventDefault();
+    const displayName = document.getElementById('client-name').value;
+    const scopesInput = document.getElementById('client-scopes').value;
+    
+    const scopes = scopesInput
+        ? scopesInput.split(',').map(s => s.trim()).filter(s => s.length > 0)
+        : [];
+        
+    try {
+        const response = await fetch('/api/clients', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ displayName, scopes })
+        });
+        
+        if (!response.ok) {
+            const errText = await response.text();
+            throw new Error(errText || 'Failed to register client');
+        }
+        
+        const result = await response.json();
+        
+        document.getElementById('client-form').style.display = 'none';
+        document.getElementById('res-client-id').textContent = result.clientId;
+        document.getElementById('res-client-secret').textContent = result.clientSecret;
+        document.getElementById('client-secret-result').style.display = 'block';
+        
+        loadClients();
+    } catch (error) {
+        alert(`Error registering client: ${error.message}`);
+    }
+}
+
+async function deleteClient(id, name) {
+    if (!confirm(`Are you sure you want to delete the registered client '${name}'?`)) return;
+    try {
+        const response = await fetch(`/api/clients/${id}`, {
+            method: 'DELETE'
+        });
+        if (!response.ok) throw new Error('Failed to delete client');
+        loadClients();
+    } catch (error) {
+        alert(`Error deleting client: ${error.message}`);
     }
 }
 
