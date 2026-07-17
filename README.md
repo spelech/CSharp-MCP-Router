@@ -148,3 +148,24 @@ The gateway auto-seeds common homelab services on its first run if they are spec
 * `POST /oauth/token` — Exchange credentials for bearer authorization tokens.
 * `GET /health` — Status healthcheck.
 
+
+## Architecture
+
+```mermaid
+graph TD
+    Client[Programmatic Client e.g. AGY CLI] --> |"Bearer Token (JWT)"| Router[MCP Router]
+    Human[Human User] --> |"TinyAuth (Remote-User)"| Router
+    Router --> |JSON-RPC over SSE| Backend1[Plex MCP]
+    Router --> |JSON-RPC over SSE| Backend2[Home Assistant MCP]
+    
+    subgraph "CSharp-MCP-Router"
+        Router
+        SessionManager[Session Manager]
+        OpenIddict[OpenIddict Identity Provider]
+        Router <--> SessionManager
+        Router <--> OpenIddict
+    end
+    
+    OpenIddict --> DB[(SQLCipher DB)]
+    SessionManager --> DB
+```
