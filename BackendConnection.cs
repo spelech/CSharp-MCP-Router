@@ -25,7 +25,7 @@ namespace McpRouter
         private string _sessionId = Guid.NewGuid().ToString("N");
         private Task? _readerTask;
 
-        public ConcurrentDictionary<string, TaskCompletionSource<JsonElement>> PendingRequests { get; } = new();
+        public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests { get; } = new();
 
         public BackendConnection(McpServer server, HttpClient httpClient, ILogger logger)
         {
@@ -86,7 +86,7 @@ namespace McpRouter
             _logger.LogInformation("Connecting to backend {ServerId} SSE stream at {Url}...", _server.Id, _server.Url);
         }
 
-        public void StartReader(Func<JsonElement, Task> onMessageReceived)
+        public void StartReader(Func<JsonRpcMessage, Task> onMessageReceived)
         {
             if (_server.Type == "http" || _server.Type == "custom" || _server.Type == "streamable")
             {
@@ -165,7 +165,7 @@ namespace McpRouter
 
                         if (sessionValues != null)
                         {
-                            _sessionId = sessionValues.FirstOrDefault();
+                            _sessionId = sessionValues.FirstOrDefault() ?? string.Empty;
                             _messageUrl = _server.Url;
                             _logger.LogInformation("Captured Mcp-Session-Id for {ServerId}: {_sessionId}. Using same URL for POST requests.", _server.Id, _sessionId);
                         }
@@ -179,7 +179,7 @@ namespace McpRouter
                         using var reader = new StreamReader(stream);
                         
                         string? currentEvent = null;
-                        while (!reader.EndOfStream && !_cts.Token.IsCancellationRequested)
+                        while (!_cts.Token.IsCancellationRequested)
                         {
                             var line = await reader.ReadLineAsync(_cts.Token);
                             if (line == null) break;
@@ -210,8 +210,8 @@ namespace McpRouter
                                 {
                                     try
                                     {
-                                        using var doc = JsonDocument.Parse(data);
-                                        await onMessageReceived(doc.RootElement.Clone());
+                                        var responseObj = JsonSerializer.Deserialize<JsonRpcMessage>(data);
+                                        if (responseObj != null) await onMessageReceived(responseObj);
                                     }
                                     catch (Exception ex)
                                     {
@@ -234,7 +234,7 @@ namespace McpRouter
             });
         }
 
-        private async Task<JsonElement> SendDirectPostAsync(string bodyJson)
+        private async Task<JsonRpcResponse> SendDirectPostAsync(string bodyJson)
         {
             var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
@@ -302,12 +302,104 @@ namespace McpRouter
                 if (!string.IsNullOrEmpty(dataValue)) responseBody = dataValue;
             }
 
-            using var doc = JsonDocument.Parse(responseBody);
-            return doc.RootElement.Clone();
+            var responseObj = JsonSerializer.Deserialize<JsonRpcResponse>(responseBody);
+            return responseObj ?? new JsonRpcResponse { Error = new JsonRpcError { Code = -32603, Message = "Failed to deserialize POST response" } };
         }
 
-        public async Task<JsonElement> SendRequestAsync(string method, string bodyJson)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
         {
+            if (_server.Type == "http" || _server.Type == "custom" || _server.Type == "streamable")
+            {
+                return await SendDirectPostAsync(bodyJson);
+            }
+
+            if (_messageUrl == null)
+            {
+                _logger.LogWarning("Cannot send request {Method} to {ServerId}: No message URL available (SSE endpoint not received).", method, _server.Id);
+                return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
+            }
+
+            // Extract client JSON-RPC request ID
+            string requestId = Guid.NewGuid().ToString("N");
+            string modifiedBody = bodyJson;
+            
+            try 
+            {
+                using var doc = JsonDocument.Parse(bodyJson);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("id", out var idProp))
+                {
+                    requestId = idProp.ToString();
+                }
+                else
+                {
+                    // Inject our own ID if missing
+                    var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyJson) ?? new();
+                    dict["id"] = requestId;
+                    modifiedBody = JsonSerializer.Serialize(dict);
+                }
+            } catch { }
+
+            var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+            PendingRequests[requestId] = tcs;
+
+            var content = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            
+            // Build post message
+            using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
+            ConfigureRequest(req, _messageUrl);
+            req.Headers.Accept.Clear();
+            req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            if (!string.IsNullOrEmpty(_sessionId))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+            }
+
+            if (!string.IsNullOrEmpty(_server.ApiKey))
+            {
+                if (_server.Id == "ha")
+                {
+                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
+                }
+                else
+                {
+                    req.Headers.Add("X-API-Key", _server.ApiKey);
+                    req.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
+                }
+            }
+
+            // Add custom headers if configured
+            if (!string.IsNullOrEmpty(_server.HeadersJson))
+            {
+                try
+                {
+                    var customHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(_server.HeadersJson);
+                    if (customHeaders != null)
+                    {
+                        foreach (var kvp in customHeaders)
+                        {
+                            req.Headers.Add(kvp.Key, kvp.Value);
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to parse custom headers for server {ServerId}", _server.Id);
+                }
+            }
+
+            using var res = await _httpClient.SendAsync(req);
+            res.EnsureSuccessStatusCode();
+
+            return await tcs.Task;
+        }
+
+        public async Task<JsonRpcResponse> CallMethodAsync(string method, object parameters, string? overrideId = null)
+        {
+            var bodyObj = new { jsonrpc = "2.0", method = method, @params = parameters, id = overrideId ?? Guid.NewGuid().ToString("N") };
+            var bodyJson = JsonSerializer.Serialize(bodyObj);
+
             if (_server.Type == "http" || _server.Type == "custom" || _server.Type == "streamable")
             {
                 return await SendDirectPostAsync(bodyJson);
@@ -327,29 +419,12 @@ namespace McpRouter
             }
 
             // Extract client JSON-RPC request ID
-            string requestId = Guid.NewGuid().ToString("N");
-            string modifiedBody = bodyJson;
+            string requestId = bodyObj.id;
             
-            using (var doc = JsonDocument.Parse(bodyJson))
-            {
-                var root = doc.RootElement;
-                if (root.TryGetProperty("id", out var idProp))
-                {
-                    requestId = idProp.ToString();
-                }
-                else
-                {
-                    // Inject our own ID if missing
-                    var dict = JsonSerializer.Deserialize<Dictionary<string, object>>(bodyJson) ?? new();
-                    dict["id"] = requestId;
-                    modifiedBody = JsonSerializer.Serialize(dict);
-                }
-            }
-
-            var tcs = new TaskCompletionSource<JsonElement>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             PendingRequests[requestId] = tcs;
 
-            var content = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
+            var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             
             // Build post message
@@ -414,7 +489,7 @@ namespace McpRouter
 
                 if (postSessionValues != null)
                 {
-                    _sessionId = postSessionValues.FirstOrDefault();
+                    _sessionId = postSessionValues.FirstOrDefault() ?? string.Empty;
                     _logger.LogInformation("Captured Mcp-Session-Id from POST response for {ServerId}: {_sessionId}", _server.Id, _sessionId);
                 }
             }

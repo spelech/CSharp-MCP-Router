@@ -64,7 +64,7 @@ namespace McpRouter
                 }
 
                 _logger.LogInformation("Backends not initialized yet. Auto-initializing with default payload for SessionId: {SessionId}", _sessionId);
-                var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.3.0\"}}}";
+                var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.4.0\"}}}";
                 _initializeTask = InitializeBackendsAsync(defaultInitRequest);
                 return _initializeTask;
             }
@@ -97,18 +97,20 @@ namespace McpRouter
                     conn.StartReader(async (message) =>
                     {
                         // If message is a response, complete the TaskCompletionSource
-                        if (message.TryGetProperty("id", out var idProp))
+                        if (message is JsonRpcResponse response && response.Id != null)
                         {
-                            var idStr = idProp.ToString();
+                            var idStr = response.Id.ToString();
                             if (conn.PendingRequests.TryRemove(idStr, out var tcs))
                             {
-                                tcs.SetResult(message.Clone());
+                                tcs.SetResult(response);
                                 return;
                             }
                         }
                         
                         // Otherwise, it is a notification (e.g. logMessage, resourceUpdated) - forward to client
-                        await WriteMessageAsync(message);
+                        var serialized = JsonSerializer.Serialize(message);
+                        using var doc = JsonDocument.Parse(serialized);
+                        await WriteMessageAsync(doc.RootElement.Clone());
                     });
 
                     // Send initialize request to this backend
@@ -176,7 +178,7 @@ namespace McpRouter
                     try
                     {
                         var resp = await conn.SendRequestAsync("tools/list", body);
-                        if (resp.TryGetProperty("result", out var result) && result.TryGetProperty("tools", out var toolsList))
+                        if (resp.Result != null && resp.Result.Value.TryGetProperty("tools", out var toolsList))
                         {
                             return (serverId, toolsList);
                         }
@@ -575,7 +577,7 @@ namespace McpRouter
                     try
                     {
                         var response = await conn.SendRequestAsync("unknown", body);
-                        return (serverId, response);
+                        return (serverId, response.Result ?? default(JsonElement));
                     }
                     catch
                     {
