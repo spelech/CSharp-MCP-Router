@@ -1,0 +1,17 @@
+# User secrets and local env
+.env
+*.user
+
+# Build and Output Folders
+bin/
+obj/
+publish/
+
+# Database files
+data/mcp_router.db
+data/mcp_router.db-shm
+data/mcp_router.db-wal
+
+# OS specific files
+.DS_Store
+Thumbs.db

@@ -98,6 +98,48 @@ Binds the connection to a single backend (e.g. Docker only):
 
 ---
 
+## ⚙️ Adding & Managing Backend MCP Servers
+
+The MCP Router supports three methods to add, update, and manage your backend MCP servers:
+
+### Method A: Web UI Dashboard (Recommended)
+You can manage servers dynamically on the fly without restarting the gateway:
+1. Open the router dashboard in your browser.
+2. Click the **+ Add Server** button in the top right.
+3. Fill out the **Add MCP Server** modal (Display Name, URL, Transport Type, Category, and API tokens).
+4. Click **Save Server** — the router automatically disconnects existing client sessions to warm up the new server connection.
+
+![Add MCP Server Modal](docs/assets/add_server_modal.jpg)
+
+---
+
+### Method B: Static JSON Configuration (`custom_servers.json`)
+For GitOps or automated deployments, you can seed servers via a JSON file. Create a `custom_servers.json` file inside the mapped `data/` volume directory:
+
+```json
+[
+  {
+    "id": "my-mcp-server",
+    "displayName": "My Custom Server",
+    "url": "http://10.0.0.15:3000/sse",
+    "type": "sse",
+    "category": "infrastructure",
+    "enabled": true,
+    "hidden": false,
+    "apiKey": "optional-bearer-or-api-key",
+    "headersJson": "{\"Custom-Header-Name\": \"Header-Value\"}"
+  }
+]
+```
+The router parses this file on startup, registering new servers or updating existing ones in the SQLCipher database.
+
+---
+
+### Method C: Environment Seed Migration
+The gateway auto-seeds common homelab services on its first run if they are specified in the environment (e.g., `HOMEASSISTANT_TOKEN`, `PLEX_TOKEN`, `SEERR_API_KEY`). See [Program.cs](Program.cs) for details.
+
+---
+
 ## 🛠️ API & Endpoint Specs
 
 * `GET /sse` — Establishes client SSE event stream.
@@ -105,3 +147,4 @@ Binds the connection to a single backend (e.g. Docker only):
 * `GET /{targetServerId}` — Proxies to a single backend server (e.g. `/ha`, `/plex`).
 * `POST /oauth/token` — Exchange credentials for bearer authorization tokens.
 * `GET /health` — Status healthcheck.
+
