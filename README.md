@@ -173,6 +173,8 @@ graph TD
     Human[Human User] --> |"TinyAuth (Remote-User)"| Router
     Router --> |JSON-RPC over SSE| Backend1[Plex MCP]
     Router --> |JSON-RPC over SSE| Backend2[Home Assistant MCP]
+    Router --> |JSON-RPC over SSE| Backend3[Docker MCP]
+    Router -.-> |JSON-RPC over SSE| BackendN[Other MCP Servers...]
     
     subgraph "CSharp-MCP-Router"
         Router
