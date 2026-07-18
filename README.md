@@ -16,6 +16,14 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
   * Instantly returns only two bootstrap tools: `search_tools` and `execute_tool`.
   * Asynchronously warms backend caches in the background using a thread-safe, single-execution initialization lock.
   * Performs semantic scoring and ranking of backend tools on-demand when `search_tools` is called.
+* **Dual-Provider Semantic Search**:
+  * **Local ONNX (In-Process)**: CPU-friendly vector embeddings using a local `all-MiniLM-L6-v2` model and `Microsoft.ML.Tokenizers` (no external APIs). Automatically downloads model/vocab files into persistent volumes.
+  * **API Provider**: OpenAI-compatible embedding calls (LiteLLM, Open WebUI, OpenAI, etc.).
+  * **Secure DB Storage**: Embedding configurations and API keys are stored securely inside the SQLCipher-encrypted SQLite database.
+* **Developer Test Bench & Dashboard**: 
+  * **Interactive UI**: Form builder renders interactive input controls directly from tools' JSON schema specs.
+  * **Logs Console**: Styled real-time terminal rendering thread-safe in-memory gateway logs.
+  * **Search Simulator**: Real-time evaluation panel for intent ranking.
 * **Target-Specific Proxying:** Exposes separate endpoints (`/{targetServerId}`) to route directly to specific backends (e.g., `/plex`, `/docker`).
 * **OAuth 2.0 Security:** Integrates a lightweight OAuth 2.0 authorization server for secure API access.
 * **Built-in Web Dashboard:** A responsive, dark-mode, glassmorphic UI to monitor connected clients, stats, and backend health status.

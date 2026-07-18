@@ -28,6 +28,14 @@ The routing layer is responsible for intercepting client requests, rewriting req
 - **`ICustomTool`**: An interface for defining natively executed C# tools.
 - **`CustomToolRegistry`**: A dynamic service locator that registers and retrieves native tools on-demand. Native tools bypass the backend transport layer entirely.
 
+### 5. Semantic Search & Embeddings (`McpRouter.Services` & `McpRouter.Core.Routing`)
+To support intent-based tool filtering, the router includes an advanced semantic vector scoring engine:
+- **`IEmbeddingService`**: Common interface for text tokenization and embedding generation.
+- **`DynamicEmbeddingService`**: A singleton proxy that manages configuration state. It resolves settings from the SQLCipher-encrypted SQLite database and dynamically hot-swaps between API-based and local ONNX-based providers.
+- **`OnnxEmbeddingService`**: Implements in-process, CPU-friendly embeddings using **ONNX Runtime** and a local **`all-MiniLM-L6-v2`** BERT tokenizer model.
+- **`ApiEmbeddingService`**: Implements client requests calling external OpenAI-compliant embeddings APIs (such as LiteLLM, Open WebUI, or OpenAI).
+- **`SemanticSearchService.SearchToolsSemanticAsync`**: Maps intent queries to tools by calculating cosine similarity scores between the query vector and cached tool description vectors.
+
 ## Dependency Injection & Pipeline Setup
 The router is built on ASP.NET Core. To keep `Program.cs` lightweight, configuration logic is encapsulated in extension methods under the `/Extensions` folder:
 - **`ServiceCollectionExtensions.cs`**: Registers Database, OpenIddict (OAuth), HTTP Clients, and custom singleton/scoped services.
