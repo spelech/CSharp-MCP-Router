@@ -24,6 +24,8 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 ## 🏗️ Architecture & Connection Flow
 
+For deep technical details on the router's internal design, dependency injection, routing managers, and transport layers, see [ARCHITECTURE.md](ARCHITECTURE.md).
+
 The gateway bridges incoming client HTTP requests to backend MCP transports:
 
 ```mermaid
@@ -157,7 +159,7 @@ The router seamlessly aggregates the following MCP protocol features across all 
   * `logMessage`, `resourceUpdated`, and other backend notifications are asynchronously forwarded directly to connected clients in real time.
 
 
-## Architecture
+## Internal Architecture Diagram
 
 ```mermaid
 graph TD
