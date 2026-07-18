@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
@@ -16,6 +17,9 @@ namespace McpRouter.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
+        private static readonly string AppVersion =
+            Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.2.2";
+
         public static void ConfigureMcpRouterPipeline(this WebApplication app)
         {
             app.UseCors();
@@ -85,7 +89,7 @@ namespace McpRouter.Extensions
             // ----------------------------------------------------
             // SYSTEM/HEALTH ENDPOINTS
             // ----------------------------------------------------
-            app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = "0.4.0" }));
+            app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = AppVersion }));
             
             // ----------------------------------------------------
             // OAUTH & OIDC DISCOVERY ENDPOINTS
@@ -210,7 +214,7 @@ namespace McpRouter.Extensions
                                         {
                                             protocolVersion = "2024-11-05",
                                             capabilities = new { tools = new { listChanged = true } },
-                                            serverInfo = new { name = "McpRouterGateway", version = "0.4.0" }
+                                            serverInfo = new { name = "McpRouterGateway", version = AppVersion }
                                         }
                                     };
                                     await session.WriteMessageAsync(response);
@@ -441,7 +445,7 @@ namespace McpRouter.Extensions
                             {
                                 protocolVersion = "2024-11-05",
                                 capabilities = new { tools = new { listChanged = true } },
-                                serverInfo = new { name = serverName, version = "0.4.0" }
+                                serverInfo = new { name = serverName, version = AppVersion }
                             }
                         };
                         await session.WriteMessageAsync(response);
@@ -518,7 +522,7 @@ namespace McpRouter.Extensions
                                 serverInfo = new
                                 {
                                     name = "McpRouterGateway",
-                                    version = "0.4.0"
+                                    version = AppVersion
                                 }
                             }
                         };
