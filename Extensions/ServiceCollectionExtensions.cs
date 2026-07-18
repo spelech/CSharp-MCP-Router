@@ -26,6 +26,10 @@ namespace McpRouter.Extensions
 
         builder.Services.AddHttpClient();
         builder.Services.AddSingleton<SessionManager>();
+        
+        // Register Dynamic Embedding Service (handles settings in encrypted DB)
+        builder.Services.AddSingleton<DynamicEmbeddingService>();
+        builder.Services.AddSingleton<IEmbeddingService>(sp => sp.GetRequiredService<DynamicEmbeddingService>());
 
         // Configure CORS
         builder.Services.AddCors(options =>

@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
+using McpRouter.Services;
 
 namespace McpRouter.Core.Routing
 {
@@ -164,6 +165,7 @@ namespace McpRouter.Core.Routing
             IEnumerable<McpServer> servers,
             ILogger logger,
             HttpClient httpClient,
+            IEmbeddingService embeddingService,
             Func<Task> ensureBackendsInitializedAsync,
             Func<string, string, string, string> rewriteRequestJson)
         {
@@ -188,7 +190,7 @@ namespace McpRouter.Core.Routing
                     tools.AddRange(_cachedTools);
                 }
 
-                var results = SemanticSearchService.SearchTools(query, tools);
+                var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService);
                 return new {
                     content = new[] {
                         new {

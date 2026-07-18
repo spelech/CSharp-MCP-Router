@@ -9,6 +9,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
 
+using Microsoft.EntityFrameworkCore;
+
 namespace McpRouter.Services
 {
     public static class DatabaseSeederService
@@ -23,6 +25,30 @@ namespace McpRouter.Services
             {
                 logger.LogInformation("Initializing database...");
                 db.Database.EnsureCreated();
+
+                // Ensure the Settings table exists and has a default row
+                try
+                {
+                    db.Database.ExecuteSqlRaw(
+                        "CREATE TABLE IF NOT EXISTS Settings (" +
+                        "Id TEXT PRIMARY KEY, " +
+                        "EmbeddingProvider TEXT, " +
+                        "EmbeddingApiUrl TEXT, " +
+                        "EmbeddingApiKey TEXT, " +
+                        "EmbeddingApiModel TEXT, " +
+                        "EmbeddingModelDir TEXT)");
+
+                    var hasSettings = db.Settings.Any();
+                    if (!hasSettings)
+                    {
+                        db.Settings.Add(new RouterSettings());
+                        db.SaveChanges();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to create or seed Settings table");
+                }
                 
                 // Migration script: if empty, import from environment
                 if (!db.Servers.Any())

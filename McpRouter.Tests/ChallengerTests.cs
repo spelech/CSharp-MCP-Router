@@ -14,6 +14,7 @@ using Moq;
 using Xunit;
 using FluentAssertions;
 using McpRouter.Models;
+using McpRouter.Services;
 using McpRouter;
 using Microsoft.AspNetCore.Mvc;
 
@@ -132,7 +133,8 @@ namespace McpRouter.Tests
         public void JsonNode_Rewrite_HandlesBatchCommentsAndCommas()
         {
             var loggerMock = new Mock<ILogger>();
-            var session = new ClientSession("session-id", null!, new List<McpServer>(), null!, loggerMock.Object);
+            var embeddingMock = new Mock<IEmbeddingService>();
+            var session = new ClientSession("session-id", null!, new List<McpServer>(), null!, embeddingMock.Object, loggerMock.Object);
             var methodInfo = typeof(ClientSession).GetMethod("RewriteRequestJson", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             
             // 1. Test batch request rewriting
@@ -394,7 +396,8 @@ namespace McpRouter.Tests
             var responseBody = new MemoryStream();
             context.Response.Body = responseBody;
 
-            var session = new ClientSession("test-session", context.Response, new List<McpServer> { server }, httpClient, loggerMock.Object);
+            var embeddingMock = new Mock<IEmbeddingService>();
+            var session = new ClientSession("test-session", context.Response, new List<McpServer> { server }, httpClient, embeddingMock.Object, loggerMock.Object);
 
             // Act
             // Start initialization, which connects, starts reader, and handles messages
@@ -497,7 +500,8 @@ namespace McpRouter.Tests
         public void JsonNode_Rewrite_HandlesAdversarialEdgeCases()
         {
             var loggerMock = new Mock<ILogger>();
-            var session = new ClientSession("session-id", null!, new List<McpServer>(), null!, loggerMock.Object);
+            var embeddingMock = new Mock<IEmbeddingService>();
+            var session = new ClientSession("session-id", null!, new List<McpServer>(), null!, embeddingMock.Object, loggerMock.Object);
             var methodInfo = typeof(ClientSession).GetMethod("RewriteRequestJson", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
 
             var mixedArrayJson = "[123, \"string\", null, {\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"name\":\"serverId__toolName\"}}, true]";

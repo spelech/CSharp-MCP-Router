@@ -787,6 +787,15 @@ namespace McpRouter.Extensions
                 return Results.Ok(new { success = true });
             });
 
+            // 1.5. Settings API
+            app.MapGet("/api/settings", (DynamicEmbeddingService embeddingService) => 
+                Results.Ok(embeddingService.GetSettings()));
+                
+            app.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService) => {
+                embeddingService.SaveSettings(settings);
+                return Results.Ok(new { success = true, settings = embeddingService.GetSettings() });
+            });
+
             // 2. Test Tools List API
             app.MapGet("/api/test/tools", async ([FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger) =>
             {
@@ -883,7 +892,7 @@ namespace McpRouter.Extensions
             });
 
             // 4. Test Semantic Search API
-            app.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger) =>
+            app.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, ILogger<Program> logger) =>
             {
                 var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
                 var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
@@ -917,7 +926,7 @@ namespace McpRouter.Extensions
                 }
 
                 var tools = routing.GetCachedTools();
-                var scoredResults = Core.Routing.SemanticSearchService.SearchTools(model.Query, tools);
+                var scoredResults = await Core.Routing.SemanticSearchService.SearchToolsSemanticAsync(model.Query, tools, embeddingService);
                 return Results.Ok(scoredResults);
             });
 

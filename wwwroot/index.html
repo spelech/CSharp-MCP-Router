@@ -44,6 +44,7 @@
         <nav class="tabs-nav">
             <button class="tab-btn active" data-view="view-dashboard"><i class="fa-solid fa-gauge"></i> Overview</button>
             <button class="tab-btn" data-view="view-testbench"><i class="fa-solid fa-vial"></i> Test Bench</button>
+            <button class="tab-btn" data-view="view-settings"><i class="fa-solid fa-gear"></i> Settings</button>
         </nav>
 
         <!-- View 1: Dashboard Overview -->
@@ -214,6 +215,56 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- View 3: Settings -->
+        <div id="view-settings" class="view-panel">
+            <div class="glass-card settings-card" style="max-width: 600px; margin: 0 auto;">
+                <h2><i class="fa-solid fa-gear"></i> Semantic Search Settings</h2>
+                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                    Configure the embedding model used for matching query intents to tools. Changes are saved securely to the database.
+                </p>
+                <form id="settings-form">
+                    <div class="form-group">
+                        <label for="settings-provider">Embedding Provider</label>
+                        <select id="settings-provider" required>
+                            <option value="local">Local ONNX Model (In-Process, CPU-Friendly)</option>
+                            <option value="api">External Embedding API (LiteLLM, Open WebUI, OpenAI)</option>
+                        </select>
+                    </div>
+
+                    <div id="settings-local-group">
+                        <div class="form-group">
+                            <label for="settings-model-dir">Local Model Directory (inside volume)</label>
+                            <input type="text" id="settings-model-dir" placeholder="data/models">
+                            <small style="color: var(--text-muted);">
+                                The <code>all-MiniLM-L6-v2</code> ONNX files will be downloaded automatically to this directory on first run.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div id="settings-api-group" style="display: none;">
+                        <div class="form-group">
+                            <label for="settings-api-url">Embedding API URL</label>
+                            <input type="text" id="settings-api-url" placeholder="http://litellm:4000/v1/embeddings">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="settings-api-model">API Model Name</label>
+                                <input type="text" id="settings-api-model" placeholder="all-MiniLM-L6-v2">
+                            </div>
+                            <div class="form-group">
+                                <label for="settings-api-key">API Key (Optional)</label>
+                                <input type="password" id="settings-api-key" placeholder="API password / auth token">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-actions" style="margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px;">
+                        <button type="submit" class="btn btn-primary" id="btn-save-settings"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+                    </div>
+                </form>
             </div>
         </div>
 

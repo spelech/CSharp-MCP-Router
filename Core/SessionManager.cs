@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
+using McpRouter.Services;
 
 namespace McpRouter
 {
@@ -39,8 +40,9 @@ namespace McpRouter
 
             var sessionLogger = _serviceProvider.GetRequiredService<ILogger<ClientSession>>();
             var client = _httpClientFactory.CreateClient("McpClient");
+            var embeddingService = scope.ServiceProvider.GetRequiredService<IEmbeddingService>();
 
-            var session = new ClientSession(sessionId, clientResponse, servers, client, sessionLogger);
+            var session = new ClientSession(sessionId, clientResponse, servers, client, embeddingService, sessionLogger);
             session.IsMetaMode = metaMode;
             _sessions[sessionId] = session;
             return session;

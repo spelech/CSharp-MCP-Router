@@ -2,6 +2,7 @@ import { loadServers, toggleServer, openAddModal, openEditModal, closeModal, sav
 import { loadClients, openAddClientModal, closeClientModal, handleClientSubmit, deleteClient } from './clients.js';
 import { initTester } from './tester.js';
 import { initLogs, stopLogging } from './logs.js';
+import { initSettings } from './settings.js';
 import { apiRequest } from './api.js';
 import { escapeHtml } from './utils.js';
 
@@ -55,7 +56,7 @@ async function loadUser() {
 }
 
 function setupGlobalNavigation() {
-    // Top-level Navigation Tabs (Overview vs Test Bench)
+    // Top-level Navigation Tabs (Overview vs Test Bench vs Settings)
     const tabBtns = document.querySelectorAll('.tab-btn');
     const viewPanels = document.querySelectorAll('.view-panel');
 
@@ -75,6 +76,10 @@ function setupGlobalNavigation() {
                 initLogs();
             } else {
                 stopLogging();
+            }
+
+            if (targetView === 'view-settings') {
+                initSettings();
             }
         });
     });

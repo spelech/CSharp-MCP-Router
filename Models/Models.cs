@@ -31,6 +31,7 @@ namespace McpRouter.Models
 
         public DbSet<McpServer> Servers => Set<McpServer>();
         public DbSet<OAuthClient> Clients => Set<OAuthClient>();
+        public DbSet<RouterSettings> Settings => Set<RouterSettings>();
 
         public RouterDbContext(DbContextOptions<RouterDbContext> options, IConfiguration configuration)
             : base(options)

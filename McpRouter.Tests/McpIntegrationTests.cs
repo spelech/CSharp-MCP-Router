@@ -12,6 +12,7 @@ using Moq;
 using Xunit;
 using FluentAssertions;
 using McpRouter.Models;
+using McpRouter.Services;
 using McpRouter;
 using Microsoft.AspNetCore.Mvc;
 
@@ -70,8 +71,40 @@ namespace McpRouter.Tests
             var response = context.Response;
             
             var loggerMock = new Mock<ILogger>();
+            var embeddingMock = new Mock<IEmbeddingService>();
             
-            return new ClientSession("test-session", response, servers, httpClient, loggerMock.Object);
+            embeddingMock.Setup(x => x.GetEmbeddingAsync(It.IsAny<string>()))
+                .ReturnsAsync((string txt) => {
+                    if (txt.Contains("Excel", StringComparison.OrdinalIgnoreCase) || txt.Contains("read_excel", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return new float[] { 1f, 0f, 0f };
+                    }
+                    if (txt.Contains("container log", StringComparison.OrdinalIgnoreCase) || txt.Contains("get_logs", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return new float[] { 0f, 1f, 0f };
+                    }
+                    if (txt.Contains("list_containers", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return new float[] { 0f, 0.7f, 0.3f };
+                    }
+                    return new float[] { 0f, 0f, 1f };
+                });
+
+            embeddingMock.Setup(x => x.CosineSimilarity(It.IsAny<float[]>(), It.IsAny<float[]>()))
+                .Returns((float[] v1, float[] v2) => {
+                    double dot = 0.0;
+                    double n1 = 0.0;
+                    double n2 = 0.0;
+                    for (int i = 0; i < v1.Length; i++) {
+                        dot += v1[i] * v2[i];
+                        n1 += v1[i] * v1[i];
+                        n2 += v2[i] * v2[i];
+                    }
+                    if (n1 == 0 || n2 == 0) return 0.0;
+                    return dot / (Math.Sqrt(n1) * Math.Sqrt(n2));
+                });
+            
+            return new ClientSession("test-session", response, servers, httpClient, embeddingMock.Object, loggerMock.Object);
         }
 
         private HttpResponseMessage CreateJsonResponse(object payload)

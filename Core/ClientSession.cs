@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using McpRouter.Models;
+using McpRouter.Services;
 
 namespace McpRouter
 {
@@ -20,6 +21,7 @@ namespace McpRouter
         private readonly List<McpServer> _servers;
         private readonly ConcurrentDictionary<string, BackendConnection> _backendConnections = new();
         private readonly SemaphoreSlim _writeLock = new(1, 1);
+        private readonly IEmbeddingService _embeddingService;
 
         private readonly Core.Routing.ToolRoutingManager _toolRoutingManager = new();
         private readonly Core.Routing.ResourceRoutingManager _resourceRoutingManager = new();
@@ -34,12 +36,13 @@ namespace McpRouter
             Converters = { new JsonRpcMessageConverter() }
         };
 
-        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, Microsoft.Extensions.Logging.ILogger logger)
+        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, Microsoft.Extensions.Logging.ILogger logger)
         {
             _sessionId = sessionId;
             _clientResponse = clientResponse;
             _servers = servers;
             _httpClient = httpClient;
+            _embeddingService = embeddingService;
             _logger = logger;
         }
 
@@ -153,7 +156,7 @@ namespace McpRouter
 
         public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db)
         {
-            return await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, EnsureBackendsInitializedAsync, RewriteRequestJson);
+            return await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson);
         }
 
 
