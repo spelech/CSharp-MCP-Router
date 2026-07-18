@@ -21,11 +21,10 @@ namespace McpRouter
         private readonly ConcurrentDictionary<string, BackendConnection> _backendConnections = new();
         private readonly SemaphoreSlim _writeLock = new(1, 1);
 
-        // Map toolName -> serverId
-        private readonly ConcurrentDictionary<string, string> _toolRoutingTable = new();
-        private readonly List<object> _cachedTools = new();
-        private readonly object _cacheLock = new();
-        private bool _isCachePopulated = false;
+        private readonly Core.Routing.ToolRoutingManager _toolRoutingManager = new();
+        private readonly Core.Routing.ResourceRoutingManager _resourceRoutingManager = new();
+        private readonly Core.Routing.PromptRoutingManager _promptRoutingManager = new();
+
         public bool IsMetaMode { get; set; } = false;
         private Task? _initializeTask = null;
         public readonly object _initLock = new();
@@ -138,8 +137,8 @@ namespace McpRouter
             // Pre-populate tools cache and routing table
             try
             {
-                await PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"init-list\"}");
-                _logger.LogInformation("Pre-populated tools cache and routing table (total {Count} tools).", _cachedTools.Count);
+                await _toolRoutingManager.PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"init-list\"}", _backendConnections, _logger, _servers);
+                _logger.LogInformation("Pre-populated tools cache and routing table.");
             }
             catch (Exception ex)
             {
@@ -147,327 +146,17 @@ namespace McpRouter
             }
         }
 
-        private async Task PopulateToolsCacheAsync(string body)
-        {
-            var allTools = new List<object>();
-
-            // Add custom native C# tools (Plex and Overseerr)
-            foreach (var customTool in McpRouter.CustomTools.CustomToolRegistry.GetAll())
-            {
-                bool includeTool = false;
-                if (customTool.Name.StartsWith("seerr_") && _servers.Any(s => s.Id == "seerr"))
-                    includeTool = true;
-                else if (customTool.Name.StartsWith("plex_") && _servers.Any(s => s.Id == "plex"))
-                    includeTool = true;
-
-                if (includeTool)
-                {
-                    allTools.Add(new
-                    {
-                        name = customTool.Name,
-                        description = customTool.Description,
-                        inputSchema = customTool.InputSchema
-                    });
-                }
-            }
-
-            var tasks = new List<Task<(string ServerId, JsonElement Tools)>>();
-
-            foreach (var entry in _backendConnections)
-            {
-                var conn = entry.Value;
-                var serverId = entry.Key;
-                
-                tasks.Add(Task.Run(async () =>
-                {
-                    try
-                    {
-                        var resp = await conn.SendRequestAsync("tools/list", body);
-                        if (resp.Result != null && resp.Result.Value.TryGetProperty("tools", out var toolsList))
-                        {
-                            return (serverId, toolsList);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error listing tools on server {ServerId}", serverId);
-                    }
-                    return (serverId, default(JsonElement));
-                }));
-            }
-
-            var completed = await Task.WhenAll(tasks);
-            foreach (var item in completed)
-            {
-                if (item.Tools.ValueKind == JsonValueKind.Array)
-                {
-                    foreach (var tool in item.Tools.EnumerateArray())
-                    {
-                        if (tool.TryGetProperty("name", out var nameProp))
-                        {
-                            var rawToolName = nameProp.GetString() ?? string.Empty;
-                            
-                            var exposedName = item.ServerId + "__" + rawToolName;
-                            
-                            _toolRoutingTable[exposedName] = item.ServerId;
-                            
-                            // Deserialize and rewrite name if needed
-                            var toolDict = JsonSerializer.Deserialize<Dictionary<string, object>>(tool.GetRawText());
-                            if (toolDict != null)
-                            {
-                                toolDict["name"] = exposedName;
-                                if (toolDict.TryGetValue("description", out var desc))
-                                    toolDict["description"] = $"[{item.ServerId}] " + desc;
-                                allTools.Add(toolDict);
-                            }
-                        }
-                    }
-                }
-            }
-
-            lock (_cacheLock)
-            {
-                _cachedTools.Clear();
-                _cachedTools.AddRange(allTools);
-                _isCachePopulated = true;
-            }
-        }
-
         public async Task<List<object>> ListToolsAsync(string body)
         {
-            if (IsMetaMode)
-            {
-                return new List<object>
-                {
-                    new
-                    {
-                        name = "search_tools",
-                        description = "Semantically search across all registered internal MCP tools (Excel, Docker, Plex, Home Assistant, etc.) using keywords. Returns the matching tool names, descriptions, and input schemas. Use this first to discover what tools are available.",
-                        inputSchema = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                query = new { type = "string", description = "The natural language query describing what you want to do (e.g. 'read Excel file data', 'restart Docker container')." }
-                            },
-                            required = new[] { "query" }
-                        }
-                    },
-                    new
-                    {
-                        name = "execute_tool",
-                        description = "Execute a specific internal MCP tool by name with arguments. Obtain the correct tool name and arguments schema by calling search_tools first.",
-                        inputSchema = new
-                        {
-                            type = "object",
-                            properties = new
-                            {
-                                name = new { type = "string", description = "The exact name of the tool to execute (e.g., 'docker/list_containers')." },
-                                arguments = new { type = "object", description = "The arguments JSON object expected by the target tool." }
-                            },
-                            required = new[] { "name", "arguments" }
-                        }
-                    }
-                };
-            }
-
-            await EnsureBackendsInitializedAsync();
-
-            lock (_cacheLock)
-            {
-                if (_isCachePopulated)
-                {
-                    return new List<object>(_cachedTools);
-                }
-            }
-
-            // Fallback: populate synchronously if cache isn't ready
-            await PopulateToolsCacheAsync(body);
-            lock (_cacheLock)
-            {
-                return new List<object>(_cachedTools);
-            }
+            return await _toolRoutingManager.ListToolsAsync(body, IsMetaMode, _backendConnections, _logger, EnsureBackendsInitializedAsync, _servers);
         }
 
-        public async Task<object> CallToolAsync(string toolName, string body, RouterDbContext db)
+        public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db)
         {
-            await EnsureBackendsInitializedAsync();
-
-            if (toolName == "search_tools")
-            {
-                using var doc = JsonDocument.Parse(body);
-                var root = doc.RootElement;
-                
-                string query = "";
-                if (root.TryGetProperty("params", out var paramsProp) && 
-                    paramsProp.TryGetProperty("arguments", out var argsProp) && 
-                    argsProp.TryGetProperty("query", out var queryProp))
-                {
-                    query = queryProp.GetString() ?? "";
-                }
-
-                var results = await SearchToolsInternalAsync(query);
-                return new {
-                    content = new[] {
-                        new {
-                            type = "text",
-                            text = JsonSerializer.Serialize(results, new JsonSerializerOptions { WriteIndented = true })
-                        }
-                    }
-                };
-            }
-            else if (toolName == "execute_tool")
-            {
-                using var doc = JsonDocument.Parse(body);
-                var root = doc.RootElement;
-                
-                string targetName = "";
-                JsonElement targetArgs = default;
-                
-                if (root.TryGetProperty("params", out var paramsProp) && 
-                    paramsProp.TryGetProperty("arguments", out var argsProp))
-                {
-                    if (argsProp.TryGetProperty("name", out var nameProp))
-                    {
-                        targetName = nameProp.GetString() ?? "";
-                    }
-                    if (argsProp.TryGetProperty("arguments", out var targetArgsProp))
-                    {
-                        targetArgs = targetArgsProp.Clone();
-                    }
-                }
-
-                if (string.IsNullOrEmpty(targetName))
-                {
-                    return new {
-                        isError = true,
-                        content = new[] {
-                            new {
-                                type = "text",
-                                text = "Error: target tool name is required."
-                            }
-                        }
-                    };
-                }
-
-                // Reconstruct a standard tools/call payload for the target tool
-                var targetPayload = new
-                {
-                    jsonrpc = "2.0",
-                    method = "tools/call",
-                    @params = new
-                    {
-                        name = targetName,
-                        arguments = targetArgs.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : targetArgs
-                    }
-                };
-                var targetBody = JsonSerializer.Serialize(targetPayload);
-
-                try
-                {
-                    var result = await ExecuteTargetToolAsync(targetName, targetBody, db);
-                    return result;
-                }
-                catch (Exception ex)
-                {
-                    return new {
-                        isError = true,
-                        content = new[] {
-                            new {
-                                type = "text",
-                                text = $"Error executing target tool {targetName}: {ex.Message}"
-                            }
-                        }
-                    };
-                }
-            }
-
-            return await ExecuteTargetToolAsync(toolName, body, db);
+            return await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, EnsureBackendsInitializedAsync, RewriteRequestJson);
         }
 
-        public async Task<object> ExecuteTargetToolAsync(string toolName, string body, RouterDbContext db)
-        {
-            // Try custom native C# tool first
-            var customTool = McpRouter.CustomTools.CustomToolRegistry.Get(toolName);
-            if (customTool != null)
-            {
-                _logger.LogInformation("Executing custom native C# tool '{ToolName}'", toolName);
-                using var doc = JsonDocument.Parse(body);
-                var root = doc.RootElement;
-                var parameters = root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("arguments", out var argsProp) 
-                    ? argsProp 
-                    : JsonDocument.Parse("{}").RootElement;
-                    
-                try
-                {
-                    var result = await customTool.ExecuteAsync(parameters, _httpClient, db);
-                    return new {
-                        content = new[] {
-                            new {
-                                type = "text",
-                                text = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true })
-                            }
-                        }
-                    };
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error executing custom tool {ToolName}", toolName);
-                    return new {
-                        isError = true,
-                        content = new[] {
-                            new {
-                                type = "text",
-                                text = $"Error executing custom tool {toolName}: {ex.Message}"
-                            }
-                        }
-                    };
-                }
-            }
 
-            // If not in routing table, try to refresh the cache once in case a new tool was registered
-            if (!_toolRoutingTable.ContainsKey(toolName))
-            {
-                _logger.LogInformation("Tool '{ToolName}' not found in routing table. Refreshing tools cache...", toolName);
-                try
-                {
-                    await PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"refresh-list\"}");
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Failed to refresh tools cache during CallToolAsync for '{ToolName}'", toolName);
-                }
-            }
-
-            if (_toolRoutingTable.TryGetValue(toolName, out var serverId) && _backendConnections.TryGetValue(serverId, out var conn))
-            {
-                _logger.LogInformation("Routing tool call '{ToolName}' to server '{ServerId}'", toolName, serverId);
-                
-                // Restore the original tool name by stripping the serverId__ prefix
-                string routingBody = body;
-                var prefix = serverId + "__";
-                if (toolName.StartsWith(prefix))
-                {
-                    var realToolName = toolName.Substring(prefix.Length);
-                    routingBody = RewriteRequestJson(body, "name", realToolName);
-                }
-                
-                return await conn.SendRequestAsync("tools/call", routingBody);
-            }
-            
-            throw new KeyNotFoundException($"Tool {toolName} not found in routing table.");
-        }
-
-        private async Task<List<object>> SearchToolsInternalAsync(string query)
-        {
-            var tools = new List<object>();
-            lock (_cacheLock)
-            {
-                tools.AddRange(_cachedTools);
-            }
-
-            return Core.Routing.SemanticSearchService.SearchTools(query, tools);
-        }
 
         public async Task<Dictionary<string, JsonElement>> BroadcastRequestAsync(string body)
         {
@@ -565,153 +254,24 @@ namespace McpRouter
             }
         }
 
-        private readonly Dictionary<string, string> _resourceRoutingTable = new();
-        private readonly Dictionary<string, string> _promptRoutingTable = new();
-
         public async Task<List<object>> ListResourcesAsync(string body)
         {
-            var allResources = new List<object>();
-            var tasks = new List<Task<(string ServerId, JsonElement Resources)>>();
-            
-            await EnsureBackendsInitializedAsync();
-
-            foreach (var entry in _backendConnections)
-            {
-                var conn = entry.Value;
-                var serverId = entry.Key;
-                tasks.Add(Task.Run(async () =>
-                {
-                    try
-                    {
-                        var resp = await conn.SendRequestAsync("resources/list", body);
-                        if (resp.Result != null && resp.Result.Value.TryGetProperty("resources", out var resourcesList))
-                        {
-                            return (serverId, resourcesList);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error listing resources on server {ServerId}", serverId);
-                    }
-                    return (serverId, default(JsonElement));
-                }));
-            }
-
-            var completed = await Task.WhenAll(tasks);
-            foreach (var item in completed)
-            {
-                if (item.Resources.ValueKind == JsonValueKind.Array)
-                {
-                    foreach (var resource in item.Resources.EnumerateArray())
-                    {
-                        if (resource.TryGetProperty("uri", out var uriProp))
-                        {
-                            var rawUri = uriProp.GetString() ?? string.Empty;
-                            var exposedUri = $"mcp://{item.ServerId}/{Uri.EscapeDataString(rawUri)}";
-                            
-                            _resourceRoutingTable[exposedUri] = item.ServerId;
-                            
-                            var resourceDict = JsonSerializer.Deserialize<Dictionary<string, object>>(resource.GetRawText());
-                            if (resourceDict != null)
-                            {
-                                resourceDict["uri"] = exposedUri;
-                                if (resourceDict.TryGetValue("name", out var nameVal))
-                                    resourceDict["name"] = $"[{item.ServerId}] {nameVal}";
-                                allResources.Add(resourceDict);
-                            }
-                        }
-                    }
-                }
-            }
-            return allResources;
+            return await _resourceRoutingManager.ListResourcesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync);
         }
 
         public async Task<object?> ReadResourceAsync(string resourceUri, string body)
         {
-            await EnsureBackendsInitializedAsync();
-
-            if (_resourceRoutingTable.TryGetValue(resourceUri, out var serverId) && _backendConnections.TryGetValue(serverId, out var conn))
-            {
-                var prefix = $"mcp://{serverId}/";
-                var rawUri = Uri.UnescapeDataString(resourceUri.Substring(prefix.Length));
-                string routingBody = RewriteRequestJson(body, "uri", rawUri);
-                var resp = await conn.SendRequestAsync("resources/read", routingBody);
-                return resp.Result;
-            }
-            throw new KeyNotFoundException($"Resource {resourceUri} not found in routing table.");
+            return await _resourceRoutingManager.ReadResourceAsync(resourceUri, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson);
         }
 
         public async Task<List<object>> ListPromptsAsync(string body)
         {
-            var allPrompts = new List<object>();
-            var tasks = new List<Task<(string ServerId, JsonElement Prompts)>>();
-            
-            await EnsureBackendsInitializedAsync();
-
-            foreach (var entry in _backendConnections)
-            {
-                var conn = entry.Value;
-                var serverId = entry.Key;
-                tasks.Add(Task.Run(async () =>
-                {
-                    try
-                    {
-                        var resp = await conn.SendRequestAsync("prompts/list", body);
-                        if (resp.Result != null && resp.Result.Value.TryGetProperty("prompts", out var promptsList))
-                        {
-                            return (serverId, promptsList);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Error listing prompts on server {ServerId}", serverId);
-                    }
-                    return (serverId, default(JsonElement));
-                }));
-            }
-
-            var completed = await Task.WhenAll(tasks);
-            foreach (var item in completed)
-            {
-                if (item.Prompts.ValueKind == JsonValueKind.Array)
-                {
-                    foreach (var prompt in item.Prompts.EnumerateArray())
-                    {
-                        if (prompt.TryGetProperty("name", out var nameProp))
-                        {
-                            var rawName = nameProp.GetString() ?? string.Empty;
-                            var exposedName = item.ServerId + "__" + rawName;
-                            
-                            _promptRoutingTable[exposedName] = item.ServerId;
-                            
-                            var promptDict = JsonSerializer.Deserialize<Dictionary<string, object>>(prompt.GetRawText());
-                            if (promptDict != null)
-                            {
-                                promptDict["name"] = exposedName;
-                                if (promptDict.TryGetValue("description", out var descVal))
-                                    promptDict["description"] = $"[{item.ServerId}] {descVal}";
-                                allPrompts.Add(promptDict);
-                            }
-                        }
-                    }
-                }
-            }
-            return allPrompts;
+            return await _promptRoutingManager.ListPromptsAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync);
         }
 
         public async Task<object?> GetPromptAsync(string promptName, string body)
         {
-            await EnsureBackendsInitializedAsync();
-
-            if (_promptRoutingTable.TryGetValue(promptName, out var serverId) && _backendConnections.TryGetValue(serverId, out var conn))
-            {
-                var prefix = serverId + "__";
-                var rawName = promptName.Substring(prefix.Length);
-                string routingBody = RewriteRequestJson(body, "name", rawName);
-                var resp = await conn.SendRequestAsync("prompts/get", routingBody);
-                return resp.Result;
-            }
-            throw new KeyNotFoundException($"Prompt {promptName} not found in routing table.");
+            return await _promptRoutingManager.GetPromptAsync(promptName, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson);
         }
     }
 }
