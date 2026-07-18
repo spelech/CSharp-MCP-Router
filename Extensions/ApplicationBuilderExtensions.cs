@@ -777,9 +777,164 @@ namespace McpRouter.Extensions
                 sessionManager.ResetAll();
                 return Results.Ok(new { success = true });
             });
-            
+
+            // --- TEST BENCH & LOGS ENDPOINTS ---
+
+            // 1. Logs API
+            app.MapGet("/api/logs", () => Results.Ok(LogBuffer.GetLogs()));
+            app.MapDelete("/api/logs", () => {
+                LogBuffer.Clear();
+                return Results.Ok(new { success = true });
+            });
+
+            // 2. Test Tools List API
+            app.MapGet("/api/test/tools", async ([FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger) =>
+            {
+                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
+
+                var tasks = servers.Where(s => s.Type != "custom").Select(async server =>
+                {
+                    try
+                    {
+                        var conn = new BackendConnection(server, httpClient, logger);
+                        if (server.Type != "http" && server.Type != "streamable")
+                        {
+                            await conn.ConnectAsync();
+                        }
+                        var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+                        await conn.SendRequestAsync("initialize", initReq);
+                        backendConnections[server.Id] = conn;
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to connect to server {ServerId} for tool listing", server.Id);
+                    }
+                });
+                await Task.WhenAll(tasks);
+
+                var routing = new Core.Routing.ToolRoutingManager();
+                await routing.PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"test-list\"}", backendConnections, logger, servers);
+
+                // Dispose backend connections after query
+                foreach (var conn in backendConnections.Values)
+                {
+                    conn.Dispose();
+                }
+
+                return Results.Ok(routing.GetCachedTools());
+            });
+
+            // 3. Test Call API
+            app.MapPost("/api/test/call", async ([FromBody] TestCallModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger) =>
+            {
+                var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == model.ServerId);
+                if (server == null && model.ServerId != "custom")
+                {
+                    return Results.NotFound($"Server {model.ServerId} not found");
+                }
+
+                // If executing a custom native tool
+                var customTool = McpRouter.CustomTools.CustomToolRegistry.Get(model.ToolName);
+                if (customTool != null)
+                {
+                    try
+                    {
+                        var args = model.Arguments.ValueKind == JsonValueKind.Undefined ? JsonDocument.Parse("{}").RootElement : model.Arguments;
+                        var res = await customTool.ExecuteAsync(args, httpClient, db);
+                        return Results.Ok(new {
+                            content = new[] {
+                                new { type = "text", text = JsonSerializer.Serialize(res, new JsonSerializerOptions { WriteIndented = true }) }
+                            }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.Problem(ex.Message);
+                    }
+                }
+
+                if (server == null) return Results.NotFound();
+
+                // Direct routing to backend
+                using var conn = new BackendConnection(server, httpClient, logger);
+                if (server.Type != "http" && server.Type != "streamable")
+                {
+                    await conn.ConnectAsync();
+                }
+                
+                var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+                await conn.SendRequestAsync("initialize", initReq);
+
+                var targetPayload = new
+                {
+                    jsonrpc = "2.0",
+                    id = "test-call-id",
+                    method = "tools/call",
+                    @params = new
+                    {
+                        name = model.ToolName,
+                        arguments = model.Arguments
+                    }
+                };
+                var targetBody = JsonSerializer.Serialize(targetPayload);
+                var result = await conn.SendRequestAsync("tools/call", targetBody);
+                return Results.Ok(result);
+            });
+
+            // 4. Test Semantic Search API
+            app.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger) =>
+            {
+                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
+
+                var tasks = servers.Where(s => s.Type != "custom").Select(async server =>
+                {
+                    try
+                    {
+                        var conn = new BackendConnection(server, httpClient, logger);
+                        if (server.Type != "http" && server.Type != "streamable")
+                        {
+                            await conn.ConnectAsync();
+                        }
+                        var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+                        await conn.SendRequestAsync("initialize", initReq);
+                        backendConnections[server.Id] = conn;
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to connect to server {ServerId} for tool search", server.Id);
+                    }
+                });
+                await Task.WhenAll(tasks);
+
+                var routing = new Core.Routing.ToolRoutingManager();
+                await routing.PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"test-list\"}", backendConnections, logger, servers);
+
+                foreach (var conn in backendConnections.Values)
+                {
+                    conn.Dispose();
+                }
+
+                var tools = routing.GetCachedTools();
+                var scoredResults = Core.Routing.SemanticSearchService.SearchTools(model.Query, tools);
+                return Results.Ok(scoredResults);
+            });
+
             app.Run();
             
         }
+    }
+
+    public class TestCallModel
+    {
+        public string ServerId { get; set; } = string.Empty;
+        public string ToolName { get; set; } = string.Empty;
+        public JsonElement Arguments { get; set; }
+    }
+
+    public class SearchModel
+    {
+        public string Query { get; set; } = string.Empty;
     }
 }

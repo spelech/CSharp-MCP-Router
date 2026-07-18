@@ -1,0 +1,203 @@
+/* Test Bench specific styles */
+.tester-container {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 25px;
+}
+
+@media (max-width: 900px) {
+    .tester-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.tester-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+/* Tool Schema Form Generator */
+.tool-parameters-form {
+    background: rgba(255, 255, 255, 0.01);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.tool-parameters-form h3 {
+    font-size: 14px;
+    margin-bottom: 12px;
+    color: var(--accent);
+}
+
+.param-field {
+    margin-bottom: 15px;
+}
+
+.param-field:last-child {
+    margin-bottom: 0;
+}
+
+.param-field label {
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+    display: block;
+}
+
+.param-field input[type="text"],
+.param-field input[type="number"],
+.param-field textarea,
+.param-field select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 8px 12px;
+    color: var(--text-main);
+    font-family: inherit;
+    font-size: 13px;
+    transition: all 0.2s ease;
+}
+
+.param-field input:focus,
+.param-field textarea:focus,
+.param-field select:focus {
+    outline: none;
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.param-field .field-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+}
+
+.param-field.checkbox-field {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.param-field.checkbox-field label {
+    margin-bottom: 0;
+}
+
+/* Console & Payload blocks */
+.payload-viewer {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+.payload-block {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.payload-block label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.code-block {
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    overflow-x: auto;
+    color: var(--text-main);
+    max-height: 250px;
+    white-space: pre-wrap;
+    word-break: break-all;
+}
+
+/* Tab container inside tester cards */
+.tester-tabs {
+    display: flex;
+    gap: 8px;
+    border-bottom: 1px solid var(--border-color);
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+}
+
+.tester-tab-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 4px;
+}
+
+.tester-tab-btn.active {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tester-tab-content {
+    display: none;
+}
+
+.tester-tab-content.active {
+    display: block;
+}
+
+/* Semantic Search Tester Results */
+.semantic-search-results {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 15px;
+    max-height: 300px;
+    overflow-y: auto;
+    padding-right: 5px;
+}
+
+.search-result-item {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    padding: 12px 15px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.search-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.search-result-name {
+    font-weight: 600;
+    font-size: 13px;
+}
+
+.search-result-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 2px 6px;
+    border-radius: 4px;
+}
+
+.search-result-desc {
+    font-size: 12px;
+    color: var(--text-muted);
+}

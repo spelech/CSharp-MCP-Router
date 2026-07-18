@@ -41,73 +41,187 @@
             </div>
         </header>
 
-        <main class="dashboard-main">
-            <!-- Left Panel: Stats and OAuth -->
-            <section class="left-panel">
-                <div class="glass-card stats-card">
-                    <h2><i class="fa-solid fa-chart-simple"></i> System Stats</h2>
-                    <div class="stats-grid">
-                        <div class="stat-box">
-                            <span class="stat-number" id="server-count">0</span>
-                            <span class="stat-label">Total Servers</span>
+        <nav class="tabs-nav">
+            <button class="tab-btn active" data-view="view-dashboard"><i class="fa-solid fa-gauge"></i> Overview</button>
+            <button class="tab-btn" data-view="view-testbench"><i class="fa-solid fa-vial"></i> Test Bench</button>
+        </nav>
+
+        <!-- View 1: Dashboard Overview -->
+        <div id="view-dashboard" class="view-panel active">
+            <main class="dashboard-main">
+                <!-- Left Panel: Stats and OAuth -->
+                <section class="left-panel">
+                    <div class="glass-card stats-card">
+                        <h2><i class="fa-solid fa-chart-simple"></i> System Stats</h2>
+                        <div class="stats-grid">
+                            <div class="stat-box">
+                                <span class="stat-number" id="server-count">0</span>
+                                <span class="stat-label">Total Servers</span>
+                            </div>
+                            <div class="stat-box">
+                                <span class="stat-number" id="active-servers">0</span>
+                                <span class="stat-label">Active Backends</span>
+                            </div>
                         </div>
-                        <div class="stat-box">
-                            <span class="stat-number" id="active-servers">0</span>
-                            <span class="stat-label">Active Backends</span>
+                    </div>
+
+                    <div class="glass-card dcr-card">
+                        <div class="card-header-btn">
+                            <h2><i class="fa-solid fa-key"></i> Registered Clients</h2>
+                            <button class="btn btn-secondary btn-sm" onclick="openAddClientModal()"><i class="fa-solid fa-plus"></i> New Client</button>
+                        </div>
+                        <div class="table-container">
+                            <table id="clients-table">
+                                <thead>
+                                    <tr>
+                                        <th>Client Name</th>
+                                        <th>Client ID</th>
+                                        <th>Type</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="clients-body">
+                                    <tr>
+                                        <td colspan="4" class="empty-state">No clients registered yet. Add a manual connection in Gemini to register.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Right Panel: Backend Servers -->
+                <section class="right-panel">
+                    <div class="glass-card servers-card">
+                        <div class="card-header-btn">
+                            <h2><i class="fa-solid fa-server"></i> Backend MCP Servers</h2>
+                            <div class="header-actions">
+                                <button class="btn btn-secondary" onclick="loadServers()"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+                                <button class="btn btn-primary" onclick="openAddModal()"><i class="fa-solid fa-plus"></i> Add Server</button>
+                            </div>
+                        </div>
+                        
+                        <div class="servers-list" id="servers-list">
+                            <!-- Dynamic Server Cards Go Here -->
+                            <div class="loading-state">
+                                <i class="fa-solid fa-spinner fa-spin"></i> Loading backend servers...
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </main>
+        </div>
+
+        <!-- View 2: Test Bench -->
+        <div id="view-testbench" class="view-panel">
+            <div class="tester-container">
+                <!-- Left Column: Tool Execution & Console -->
+                <div class="tester-panel">
+                    <div class="glass-card">
+                        <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Interactive Tool Tester</h2>
+                        <form id="tester-form">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="tester-server">Server</label>
+                                    <select id="tester-server" required>
+                                        <option value="">-- Choose Server --</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="tester-tool">Tool</label>
+                                    <select id="tester-tool" required>
+                                        <option value="">-- Choose Tool --</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="tester-tabs">
+                                <button type="button" class="tester-tab-btn active" data-tab="form">Interactive Form</button>
+                                <button type="button" class="tester-tab-btn" data-tab="json">Raw JSON Input</button>
+                            </div>
+
+                            <div id="tester-tab-form" class="tester-tab-content active">
+                                <div id="dynamic-form-fields">
+                                    <div class="empty-state">Select a tool to generate parameters.</div>
+                                </div>
+                            </div>
+
+                            <div id="tester-tab-json" class="tester-tab-content">
+                                <div class="form-group">
+                                    <label for="tester-raw-json">Arguments (JSON)</label>
+                                    <textarea id="tester-raw-json" rows="8" placeholder="{}"></textarea>
+                                </div>
+                            </div>
+
+                            <div style="margin-top: 20px;">
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-play"></i> Run Tool</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="glass-card">
+                        <h2><i class="fa-solid fa-terminal"></i> Execution Console</h2>
+                        <div class="payload-viewer">
+                            <div class="payload-block">
+                                <label>JSON-RPC Request</label>
+                                <pre class="code-block" id="jsonrpc-request">Ready</pre>
+                            </div>
+                            <div class="payload-block">
+                                <label>JSON-RPC Response</label>
+                                <pre class="code-block" id="jsonrpc-response">Waiting for execution...</pre>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="glass-card dcr-card">
-                    <div class="card-header-btn">
-                        <h2><i class="fa-solid fa-key"></i> Registered Clients</h2>
-                        <button class="btn btn-secondary btn-sm" onclick="openAddClientModal()"><i class="fa-solid fa-plus"></i> New Client</button>
-                    </div>
-                    <div class="table-container">
-                        <table id="clients-table">
-                            <thead>
-                                <tr>
-                                    <th>Client Name</th>
-                                    <th>Client ID</th>
-                                    <th>Type</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="clients-body">
-                                <tr>
-                                    <td colspan="4" class="empty-state">No clients registered yet. Add a manual connection in Gemini to register.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </section>
+                <!-- Right Column: Semantic Routing & Logs -->
+                <div class="tester-panel">
+                    <div class="glass-card">
+                        <h2><i class="fa-solid fa-magnifying-glass-chart"></i> Semantic Router Simulator</h2>
+                        <div class="form-group">
+                            <label for="semantic-search-query">Natural Language Prompt</label>
+                            <input type="text" id="semantic-search-query" placeholder="e.g. search matrix in plex">
+                        </div>
+                        <button type="button" class="btn btn-secondary" id="btn-semantic-search"><i class="fa-solid fa-ranking-star"></i> Test Filter Score</button>
 
-            <!-- Right Panel: Backend Servers -->
-            <section class="right-panel">
-                <div class="glass-card servers-card">
-                    <div class="card-header-btn">
-                        <h2><i class="fa-solid fa-server"></i> Backend MCP Servers</h2>
-                        <div class="header-actions">
-                            <button class="btn btn-secondary" onclick="loadServers()"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
-                            <button class="btn btn-primary" onclick="openAddModal()"><i class="fa-solid fa-plus"></i> Add Server</button>
+                        <div class="semantic-search-results" id="semantic-search-results">
+                            <div class="empty-state">Enter a prompt query to test tool matching scoring.</div>
                         </div>
                     </div>
-                    
-                    <div class="servers-list" id="servers-list">
-                        <!-- Dynamic Server Cards Go Here -->
-                        <div class="loading-state">
-                            <i class="fa-solid fa-spinner fa-spin"></i> Loading backend servers...
+
+                    <div class="glass-card logs-viewer-card">
+                        <h2><i class="fa-solid fa-list-check"></i> System Logs</h2>
+                        <div class="logs-controls">
+                            <div class="logs-filters">
+                                <select id="logs-level-filter">
+                                    <option value="ALL">All Levels</option>
+                                    <option value="INFO">Info & Above</option>
+                                    <option value="WARNING">Warnings</option>
+                                    <option value="ERROR">Errors</option>
+                                </select>
+                                <div class="checkbox-group">
+                                    <label class="switch">
+                                        <input type="checkbox" id="logs-autoscroll" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <span class="checkbox-label" style="font-size:11px">Auto-scroll</span>
+                                </div>
+                            </div>
+                            <button type="button" class="btn btn-danger btn-sm" id="btn-clear-logs"><i class="fa-solid fa-trash"></i> Clear Logs</button>
+                        </div>
+                        <div class="logs-terminal" id="logs-terminal">
+                            <div class="empty-state">Logs loading...</div>
                         </div>
                     </div>
                 </div>
-            </section>
-        </main>
+            </div>
+        </div>
 
         <footer class="dashboard-footer">
             <p>WileyRiley Infrastructure &bull; Protected by TinyAuth Forward Auth &bull; 2026</p>
         </footer>
     </div>
+
     <!-- Add/Edit Server Modal -->
     <div class="modal-backdrop" id="server-modal" style="display: none;">
         <div class="glass-card modal-card">
@@ -115,7 +229,7 @@
                 <h2 id="modal-title"><i class="fa-solid fa-server"></i> Add MCP Server</h2>
                 <button class="btn-close" onclick="closeModal()">&times;</button>
             </div>
-            <form id="server-form" onsubmit="saveServer(event)">
+            <form id="server-form">
                 <input type="hidden" id="server-id">
                 
                 <div class="form-group">
@@ -172,6 +286,7 @@
             </form>
         </div>
     </div>
+
     <!-- Register New Client Modal -->
     <div id="add-client-modal" class="modal-backdrop" style="display: none;">
         <div class="glass-card modal-card">
@@ -179,7 +294,7 @@
                 <h2>Register New Client</h2>
                 <button class="btn-close" onclick="closeClientModal()">&times;</button>
             </div>
-            <form id="client-form" onsubmit="handleClientSubmit(event)">
+            <form id="client-form">
                 <div class="form-group">
                     <label for="client-name">Client Name (Display Name)</label>
                     <input type="text" id="client-name" placeholder="e.g. VSCode Extension" required>
@@ -207,6 +322,6 @@
         </div>
     </div>
 
-    <script src="app.js"></script>
+    <script type="module" src="js/app.js"></script>
 </body>
 </html>

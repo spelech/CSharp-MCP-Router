@@ -344,5 +344,13 @@ namespace McpRouter.Core.Routing
             
             throw new KeyNotFoundException($"Tool {toolName} not found in routing table.");
         }
+
+        public List<object> GetCachedTools()
+        {
+            lock (_cacheLock)
+            {
+                return new List<object>(_cachedTools);
+            }
+        }
     }
 }

@@ -15,6 +15,7 @@ namespace McpRouter.Extensions
         builder.Logging.ClearProviders();
         builder.Logging.AddConsole();
         builder.Logging.AddDebug();
+        builder.Logging.AddProvider(new InMemoryLoggerProvider());
 
         // Register SQLite Database
         builder.Services.AddDbContext<RouterDbContext>();

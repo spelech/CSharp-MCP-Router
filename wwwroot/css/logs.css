@@ -1,0 +1,105 @@
+/* System Logs Terminal style */
+.logs-viewer-card {
+    display: flex;
+    flex-direction: column;
+    min-height: 400px;
+}
+
+.logs-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.logs-filters {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.logs-terminal {
+    background: #050811;
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 15px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    overflow-y: auto;
+    flex-grow: 1;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
+}
+
+.log-line {
+    display: flex;
+    gap: 10px;
+    line-height: 1.4;
+    word-break: break-all;
+}
+
+.log-time {
+    color: var(--text-muted);
+    white-space: nowrap;
+}
+
+.log-level-badge {
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-weight: bold;
+    font-size: 10px;
+    text-transform: uppercase;
+    display: inline-block;
+    min-width: 50px;
+    text-align: center;
+}
+
+.log-level-info {
+    background: rgba(59, 130, 246, 0.15);
+    color: HSL(217, 91%, 75%);
+}
+
+.log-level-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: HSL(38, 92%, 70%);
+}
+
+.log-level-error {
+    background: rgba(239, 68, 68, 0.15);
+    color: HSL(0, 84%, 75%);
+}
+
+.log-level-debug {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-muted);
+}
+
+.log-category {
+    color: var(--secondary);
+    white-space: nowrap;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.log-msg {
+    color: var(--text-main);
+    flex-grow: 1;
+}
+
+.log-exception {
+    color: HSL(0, 84%, 70%);
+    background: rgba(239, 68, 68, 0.05);
+    padding: 10px;
+    border-radius: 6px;
+    border-left: 3px solid var(--status-offline);
+    margin-top: 5px;
+    font-size: 11px;
+    white-space: pre-wrap;
+    width: 100%;
+}
