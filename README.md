@@ -26,30 +26,22 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 The gateway bridges incoming client HTTP requests to backend MCP transports:
 
-```
-                  ┌──────────────────────────────┐
-                  │   IDE / CLI Client / LLM     │
-                  └──────────────┬───────────────┘
-                                 │
-                                 ▼
-                     GET /sse?meta=true (Default)
-                                 │
-                  ┌──────────────┴───────────────┐
-                  │    mcp-router (Meta-Mode)    │
-                  └──────┬────────────────┬──────┘
-                         │                │
-          search_tools() │                │ execute_tool()
-                         ▼                ▼
-         ┌──────────────────────┐  ┌──────────────────────┐
-         │ Semantic Tool Search │  │  Target Tool Relay   │
-         │  (Warmed Cache Dict) │  │  (JSON-RPC over SSE) │
-         └──────────────────────┘  └──────────┬───────────┘
-                                              │
-                    ┌─────────────────────────┼─────────────────────────┐
-                    ▼                         ▼                         ▼
-         ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐
-         │      docker-mcp      │  │        ha-mcp        │  │      actual-mcp      │
-         └──────────────────────┘  └──────────────────────┘  └──────────────────────┘
+```mermaid
+graph TD
+    Client["IDE / CLI Client / LLM"]
+    Router["mcp-router (Meta-Mode)"]
+    Search["Semantic Tool Search<br>(Warmed Cache Dict)"]
+    Relay["Target Tool Relay<br>(JSON-RPC over SSE)"]
+    Docker["docker-mcp"]
+    HA["ha-mcp"]
+    Actual["actual-mcp"]
+    
+    Client -- "GET /sse?meta=true (Default)" --> Router
+    Router -- "search_tools()" --> Search
+    Router -- "execute_tool()" --> Relay
+    Relay --> Docker
+    Relay --> HA
+    Relay --> Actual
 ```
 
 ---
