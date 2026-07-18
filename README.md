@@ -148,6 +148,22 @@ The gateway auto-seeds common homelab services on its first run if they are spec
 * `POST /oauth/token` — Exchange credentials for bearer authorization tokens.
 * `GET /health` — Status healthcheck.
 
+---
+
+## 📡 Supported MCP Features
+
+The router seamlessly aggregates the following MCP protocol features across all connected backends:
+
+* **Tools** (`tools/list`, `tools/call`)
+  * Tools from backends are automatically prefixed with the `serverId` (e.g. `docker__list_containers`).
+  * In Meta-Mode, tools are hidden behind the semantic `search_tools` and `execute_tool` proxy layer.
+* **Resources** (`resources/list`, `resources/read`)
+  * URIs are safely mapped to unique virtual namespaces (e.g., `mcp://plex/resource_path`).
+* **Prompts** (`prompts/list`, `prompts/get`)
+  * Like tools, prompts are transparently prefixed and routed to the correct backend.
+* **Notifications & Logging**
+  * `logMessage`, `resourceUpdated`, and other backend notifications are asynchronously forwarded directly to connected clients in real time.
+
 
 ## Architecture
 
