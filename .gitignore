@@ -15,3 +15,6 @@ data/mcp_router.db-wal
 # OS specific files
 .DS_Store
 Thumbs.db
+
+# Large model files
+data/models/

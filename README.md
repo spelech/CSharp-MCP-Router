@@ -98,6 +98,31 @@ Binds the connection to a single backend (e.g. Docker only):
 * **SSE Endpoint:** `http://10.0.0.10:8026/docker`
 * *Note: You can also pass `?meta=true` on target routes to filter them.*
 
+#### Option D: Antigravity CLI (AGY)
+To connect the Antigravity CLI, add the router configuration in the `.gemini/settings.json` file inside your workspace root:
+```json
+{
+  "mcpServers": {
+    "mcp-router": {
+      "url": "http://10.0.0.10:8026/sse",
+      "type": "sse",
+      "trust": true,
+      "serverUrl": "http://10.0.0.10:8026/sse"
+    }
+  }
+}
+```
+
+---
+
+## 🤖 Client Agent Integration Guidelines
+
+When using agentic coding assistants (such as Antigravity/AGY) connected to this gateway, the agent should follow these core patterns:
+
+1. **Bootstrap Search (Meta-Mode)**: By default, the gateway hides all underlying tools to prevent context bloat. The agent must first query `search_tools` with a natural language query describing the desired action (e.g., `"restart actual budget container"`).
+2. **Namespaced Execution**: After `search_tools` returns matching namespaced tools (e.g. `docker__restart_container`), the agent must invoke it via `execute_tool(name, arguments)`.
+3. **Semantic Knowledge Retrieval (`notes-rag`)**: AI agents **MUST** query the `notes-rag` service first (using the `search_notes` tool) for system architecture or setup questions before attempting to grep the filesystem. This leverages the local SilverBullet/Obsidian notes database.
+
 ---
 
 ## ⚙️ Adding & Managing Backend MCP Servers

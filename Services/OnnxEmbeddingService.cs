@@ -101,24 +101,65 @@ namespace McpRouter.Services
         public async Task<float[]> GetEmbeddingAsync(string text)
         {
             await EnsureInitializedAsync();
-
+ 
             var tokens = _tokenizer!.EncodeToIds(text);
-
+ 
             int seqLength = tokens.Count;
             if (seqLength == 0) return new float[384];
-            
-            var inputIds = new long[seqLength];
-            var attentionMask = new long[seqLength];
-            var tokenTypeIds = new long[seqLength];
-
-            for (int i = 0; i < seqLength; i++)
+ 
+            if (seqLength <= 512)
             {
-                inputIds[i] = tokens[i];
+                return await GetEmbeddingForChunkAsync(tokens, 0, seqLength);
+            }
+
+            var hiddenDim = 384;
+            var averageVector = new float[hiddenDim];
+            int chunkCount = 0;
+
+            for (int offset = 0; offset < seqLength; offset += 512)
+            {
+                int count = Math.Min(512, seqLength - offset);
+                var chunkVector = await GetEmbeddingForChunkAsync(tokens, offset, count);
+                for (int i = 0; i < hiddenDim; i++)
+                {
+                    averageVector[i] += chunkVector[i];
+                }
+                chunkCount++;
+            }
+
+            double sumSquare = 0.0;
+            for (int i = 0; i < hiddenDim; i++)
+            {
+                averageVector[i] /= chunkCount;
+                sumSquare += Math.Pow(averageVector[i], 2);
+            }
+            
+            double magnitude = Math.Sqrt(sumSquare);
+            if (magnitude > 0)
+            {
+                for (int i = 0; i < hiddenDim; i++)
+                {
+                    averageVector[i] = (float)(averageVector[i] / magnitude);
+                }
+            }
+
+            return averageVector;
+        }
+
+        private async Task<float[]> GetEmbeddingForChunkAsync(IReadOnlyList<int> tokens, int offset, int count)
+        {
+            var inputIds = new long[count];
+            var attentionMask = new long[count];
+            var tokenTypeIds = new long[count];
+
+            for (int i = 0; i < count; i++)
+            {
+                inputIds[i] = tokens[offset + i];
                 attentionMask[i] = 1;
                 tokenTypeIds[i] = 0;
             }
 
-            var inputDimensions = new[] { 1, seqLength };
+            var inputDimensions = new[] { 1, count };
             
             var inputIdsTensor = new DenseTensor<long>(inputIds, inputDimensions);
             var attentionMaskTensor = new DenseTensor<long>(attentionMask, inputDimensions);
@@ -140,11 +181,11 @@ namespace McpRouter.Services
             for (int h = 0; h < hiddenDim; h++)
             {
                 float sum = 0f;
-                for (int s = 0; s < seqLength; s++)
+                for (int s = 0; s < count; s++)
                 {
                     sum += output[0, s, h];
                 }
-                pooled[h] = sum / seqLength;
+                pooled[h] = sum / count;
             }
 
             double sumSquare = 0.0;

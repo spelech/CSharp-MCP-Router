@@ -165,29 +165,15 @@ namespace McpRouter.Extensions
                     return;
                 }
             
-                var sessionId = Guid.NewGuid().ToString("N");
-                logger.LogInformation("New client SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
-            
-                // Write SSE endpoint event
-                // Directs the client to POST messages to the absolute URL
-                var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
-                if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
-                var host = httpContext.Request.Host.Value;
-                var absoluteUrl = $"{scheme}://{host}/message?sessionId={sessionId}";
-                await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
-                await httpContext.Response.Body.FlushAsync();
-            
-                bool metaMode = httpContext.Request.Query["meta"] != "false";
-                // Create session and initialize connections to backend servers
-                var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId: null, metaMode);
-            
                 // Read body if POST
+                string requestBody = string.Empty;
+                string method = string.Empty;
+                JsonElement? id = null;
                 if (httpContext.Request.Method == "POST")
                 {
                     try
                     {
                         httpContext.Request.EnableBuffering();
-                        string requestBody;
                         using (var reader = new StreamReader(httpContext.Request.Body, leaveOpen: true))
                         {
                             requestBody = await reader.ReadToEndAsync();
@@ -196,52 +182,158 @@ namespace McpRouter.Extensions
             
                         if (!string.IsNullOrEmpty(requestBody))
                         {
-                            logger.LogInformation("Processing initial JSON-RPC message in POST /sse body: {Body}", requestBody);
                             using var doc = JsonDocument.Parse(requestBody);
                             var root = doc.RootElement;
                             if (root.TryGetProperty("method", out var methodProp))
                             {
-                                var method = methodProp.GetString() ?? string.Empty;
-                                var id = root.TryGetProperty("id", out var idProp) ? idProp.Clone() : (JsonElement?)null;
-                                
-                                if (method == "initialize")
-                                {
-                                    var response = new
-                                    {
-                                        jsonrpc = "2.0",
-                                        id = id != null ? (object)id : null,
-                                        result = new
-                                        {
-                                            protocolVersion = "2024-11-05",
-                                            capabilities = new { tools = new { listChanged = true } },
-                                            serverInfo = new { name = "McpRouterGateway", version = AppVersion }
-                                        }
-                                    };
-                                    await session.WriteMessageAsync(response);
-                                    session.StartInitialization(requestBody);
-                                }
-                                else if (method == "server/discover")
-                                {
-                                    var response = new
-                                    {
-                                        jsonrpc = "2.0",
-                                        id = id != null ? (object)id : null,
-                                        result = new
-                                        {
-                                            supportedVersions = new[] { "2026-07-28" },
-                                            capabilities = new { tools = new { listChanged = true } },
-                                            serverInfo = new { name = "McpRouterGateway", version = AppVersion }
-                                        }
-                                    };
-                                    await session.WriteMessageAsync(response);
-                                    session.StartInitialization(requestBody);
-                                }
+                                method = methodProp.GetString() ?? string.Empty;
+                            }
+                            if (root.TryGetProperty("id", out var idProp))
+                            {
+                                id = idProp.Clone();
                             }
                         }
                     }
                     catch (Exception ex)
                     {
-                        logger.LogError(ex, "Failed to parse initial POST message body for SessionId: {SessionId}", sessionId);
+                        logger.LogError(ex, "Failed to parse POST /sse body");
+                    }
+                }
+
+                // Determine if this is a subsequent request for an existing stateless/global session
+                bool isSubsequentRequest = httpContext.Request.Method == "POST" && 
+                                           method != "initialize" && 
+                                           method != "server/discover" && 
+                                           method != string.Empty;
+
+                if (isSubsequentRequest)
+                {
+                    var globalSessionId = "global-stateless-session";
+                    var activeSession = sessionManager.GetSession(globalSessionId);
+                    if (activeSession == null)
+                    {
+                        logger.LogWarning("Global session not found for stateless request: {Method}", method);
+                        httpContext.Response.StatusCode = 404;
+                        await httpContext.Response.WriteAsJsonAsync(new { error = "Session not found." });
+                        return;
+                    }
+
+                    logger.LogInformation("Routing stateless POST /sse request method {Method} to global session", method);
+                    try
+                    {
+                        if (method == "tools/list")
+                        {
+                            var tools = await activeSession.ListToolsAsync(requestBody);
+                            var response = new
+                            {
+                                jsonrpc = "2.0",
+                                id = id != null ? (object)id : null,
+                                result = new { tools }
+                            };
+                            httpContext.Response.Headers.ContentType = "application/json";
+                            await httpContext.Response.WriteAsJsonAsync(response);
+                            return;
+                        }
+                        else if (method == "tools/call")
+                        {
+                            var db = httpContext.RequestServices.GetRequiredService<RouterDbContext>();
+                            using var doc = JsonDocument.Parse(requestBody);
+                            var root = doc.RootElement;
+                            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
+                            {
+                                var toolName = nameProp.GetString() ?? string.Empty;
+                                var res = await activeSession.CallToolAsync(toolName, requestBody, db);
+                                var response = new
+                                {
+                                    jsonrpc = "2.0",
+                                    id = id != null ? (object)id : null,
+                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                };
+                                httpContext.Response.Headers.ContentType = "application/json";
+                                await httpContext.Response.WriteAsJsonAsync(response);
+                                return;
+                            }
+                            httpContext.Response.StatusCode = 400;
+                            return;
+                        }
+                        else
+                        {
+                            await activeSession.BroadcastNotificationAsync(method, requestBody);
+                            httpContext.Response.StatusCode = 202;
+                            return;
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Error routing stateless message");
+                        httpContext.Response.StatusCode = 500;
+                        return;
+                    }
+                }
+
+                // Otherwise, this is a new session establishment request (GET /sse or POST with initialize/discover)
+                var sessionId = (httpContext.Request.Method == "POST") ? "global-stateless-session" : Guid.NewGuid().ToString("N");
+                logger.LogInformation("New client SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
+            
+                // Write SSE endpoint event
+                var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
+                if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+                var host = httpContext.Request.Host.Value;
+                var absoluteUrl = $"{scheme}://{host}/message?sessionId={sessionId}";
+                await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
+                await httpContext.Response.Body.FlushAsync();
+            
+                bool metaMode = httpContext.Request.Query["meta"] != "false";
+                
+                // Retrieve or create session
+                ClientSession session;
+                var existingSession = sessionManager.GetSession(sessionId);
+                if (existingSession != null)
+                {
+                    session = existingSession;
+                }
+                else
+                {
+                    session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId: null, metaMode);
+                }
+            
+                if (httpContext.Request.Method == "POST")
+                {
+                    if (method == "initialize")
+                    {
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = new
+                            {
+                                protocolVersion = "2024-11-05",
+                                capabilities = new { tools = new { listChanged = true } },
+                                serverInfo = new { name = "McpRouterGateway", version = AppVersion }
+                            }
+                        };
+                        var json = JsonSerializer.Serialize(response);
+                        await httpContext.Response.WriteAsync($"event: message\ndata: {json}\n\n");
+                        await httpContext.Response.Body.FlushAsync();
+                        session.StartInitialization(requestBody);
+                    }
+                    else if (method == "server/discover")
+                    {
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = new
+                            {
+                                supportedVersions = new[] { "2026-07-28" },
+                                capabilities = new { tools = new { listChanged = true } },
+                                serverInfo = new { name = "McpRouterGateway", version = AppVersion }
+                            }
+                        };
+                        var json = JsonSerializer.Serialize(response);
+                        await httpContext.Response.WriteAsync($"event: message\ndata: {json}\n\n");
+                        await httpContext.Response.Body.FlushAsync();
+                        session.StartInitialization(requestBody);
                     }
                 }
             
@@ -261,7 +353,10 @@ namespace McpRouter.Extensions
                 }
                 finally
                 {
-                    sessionManager.CloseSession(sessionId);
+                    if (sessionId != "global-stateless-session")
+                    {
+                        sessionManager.CloseSession(sessionId);
+                    }
                 }
             });
             
@@ -742,22 +837,48 @@ namespace McpRouter.Extensions
             // ----------------------------------------------------
             // DASHBOARD MANAGEMENT ENDPOINTS
             // ----------------------------------------------------
-            app.MapGet("/api/servers", async ([FromServices] RouterDbContext db) =>
+            app.MapGet("/api/servers", async ([FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
             {
                 var servers = await db.Servers.ToListAsync();
-                // Do not return actual keys to client
-                var sanitized = servers.Select(s => new {
-                    s.Id,
-                    s.DisplayName,
-                    s.Url,
-                    s.Enabled,
-                    s.Hidden,
-                    s.Type,
-                    s.Category,
-                    s.HeadersJson,
-                    HasApiKey = !string.IsNullOrEmpty(s.ApiKey)
+                var statuses = sessionManager.BackendStatuses;
+                
+                var sanitized = servers.Select(s => {
+                    statuses.TryGetValue(s.Id, out var status);
+                    return new {
+                        s.Id,
+                        s.DisplayName,
+                        s.Url,
+                        s.Enabled,
+                        s.Hidden,
+                        s.Type,
+                        s.Category,
+                        s.HeadersJson,
+                        HasApiKey = !string.IsNullOrEmpty(s.ApiKey),
+                        ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
+                        ConnectionAttempts = status?.Attempts ?? 0,
+                        ConnectionError = status?.Error ?? string.Empty
+                    };
                 });
                 return Results.Ok(sanitized);
+            });
+
+            app.MapPost("/api/servers/{id}/reconnect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            {
+                var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
+                if (server == null)
+                {
+                    return Results.NotFound();
+                }
+
+                logger.LogInformation("Triggering manual reconnect request for backend {ServerId} ({DisplayName})", id, server.DisplayName);
+                
+                var activeSessions = sessionManager.GetActiveSessions();
+                foreach (var session in activeSessions)
+                {
+                    session.StartInitializationForBackend(id);
+                }
+
+                return Results.Ok(new { success = true, message = $"Reconnection triggered for server {server.DisplayName}" });
             });
             
             app.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>

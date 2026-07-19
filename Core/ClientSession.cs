@@ -30,20 +30,30 @@ namespace McpRouter
         public bool IsMetaMode { get; set; } = false;
         private Task? _initializeTask = null;
         public readonly object _initLock = new();
+        private readonly CancellationTokenSource _cts = new();
+        private string _lastInitializeRequest = string.Empty;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             Converters = { new JsonRpcMessageConverter() }
         };
 
-        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, Microsoft.Extensions.Logging.ILogger logger)
+        private readonly SessionManager? _sessionManager;
+ 
+        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, SessionManager? sessionManager, Microsoft.Extensions.Logging.ILogger logger)
         {
             _sessionId = sessionId;
             _clientResponse = clientResponse;
             _servers = servers;
             _httpClient = httpClient;
             _embeddingService = embeddingService;
+            _sessionManager = sessionManager;
             _logger = logger;
+        }
+
+        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, Microsoft.Extensions.Logging.ILogger logger)
+            : this(sessionId, clientResponse, servers, httpClient, embeddingService, null, logger)
+        {
         }
 
         public async Task WriteMessageAsync(object payload)
@@ -63,20 +73,9 @@ namespace McpRouter
 
         public Task EnsureBackendsInitializedAsync()
         {
-            lock (_initLock)
-            {
-                if (_initializeTask != null)
-                {
-                    return _initializeTask;
-                }
-
-                _logger.LogInformation("Backends not initialized yet. Auto-initializing with default payload for SessionId: {SessionId}", _sessionId);
-                var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.4.0\"}}}";
-                _initializeTask = InitializeBackendsAsync(defaultInitRequest);
-                return _initializeTask;
-            }
+            return Task.CompletedTask;
         }
-
+ 
         public void StartInitialization(string initializeRequest)
         {
             lock (_initLock)
@@ -92,17 +91,51 @@ namespace McpRouter
                 }
             }
         }
-
+ 
         public async Task InitializeBackendsAsync(string initializeRequest)
         {
-            var tasks = _servers.Where(s => s.Enabled && s.Type != "custom").Select(async server =>
+            _lastInitializeRequest = initializeRequest;
+            foreach (var server in _servers.Where(s => s.Enabled && s.Type != "custom"))
             {
+                _ = Task.Run(async () => await ConnectAndInitializeBackendAsync(server));
+            }
+
+            // We do NOT block on backend initialization, but we trigger a background tools cache population
+            _ = Task.Run(async () =>
+            {
+                // Wait a couple seconds for some backends to finish initial connection
+                await Task.Delay(3000);
                 try
                 {
+                    await _toolRoutingManager.PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"init-list\"}", _backendConnections, _logger, _servers);
+                    _logger.LogInformation("Completed initial background tools cache population.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to run initial background tools cache population.");
+                }
+            });
+
+            await Task.CompletedTask;
+        }
+
+        private async Task ConnectAndInitializeBackendAsync(McpServer server)
+        {
+            int maxAttempts = 5;
+            int attempt = 0;
+            while (!_cts.Token.IsCancellationRequested && attempt < maxAttempts)
+            {
+                attempt++;
+                try
+                {
+                    _logger.LogInformation("Attempting to connect to backend {ServerId} (attempt {Attempt}/{MaxAttempts}) at {Url}...", server.Id, attempt, maxAttempts, server.Url);
+                    _sessionManager?.UpdateBackendStatus(server.Id, "Connecting", attempt, "");
+
                     var conn = new BackendConnection(server, _httpClient, _logger);
                     if (server.Type != "http" && server.Type != "streamable")
                     {
-                        await conn.ConnectAsync();
+                        using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                        await conn.ConnectAsync().WaitAsync(ctsTimeout.Token);
                     }
                     
                     // Start background reader
@@ -126,31 +159,61 @@ namespace McpRouter
                     });
 
                     // Send initialize request to this backend
-                    var resp = await conn.SendRequestAsync("initialize", initializeRequest);
+                    using (var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(15)))
+                    {
+                        var initReq = string.IsNullOrEmpty(_lastInitializeRequest)
+                            ? "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.4.0\"}}}"
+                            : _lastInitializeRequest;
+                        var resp = await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
+                        if (resp.Error != null)
+                        {
+                            throw new Exception($"Initialize failed: {resp.Error.Message}");
+                        }
+                    }
                     
                     // Send initialized notification to this backend
                     await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
 
                     _backendConnections[server.Id] = conn;
-                    _logger.LogInformation("Initialized backend server connection: {ServerId}", server.Id);
+                    _logger.LogInformation("Successfully connected and initialized backend server: {ServerId}", server.Id);
+                    _sessionManager?.UpdateBackendStatus(server.Id, "Connected", attempt, "");
+                    return; // Success, exit method
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to connect to backend: {ServerId} at {Url}", server.Id, server.Url);
+                    _logger.LogError("Failed to connect to backend {ServerId} at {Url} (attempt {Attempt}/{MaxAttempts}). Error: {Error}", 
+                        server.Id, server.Url, attempt, maxAttempts, ex.Message);
+                    
+                    _sessionManager?.UpdateBackendStatus(server.Id, attempt >= maxAttempts ? "Failed" : "Retrying", attempt, ex.Message);
+
+                    if (attempt >= maxAttempts)
+                    {
+                        _logger.LogError("Stopped retrying connection to backend {ServerId} after {MaxAttempts} failed attempts.", server.Id, maxAttempts);
+                        break;
+                    }
+
+                    try
+                    {
+                        await Task.Delay(TimeSpan.FromSeconds(15), _cts.Token);
+                    }
+                    catch (TaskCanceledException)
+                    {
+                        break;
+                    }
                 }
-            });
-
-            await Task.WhenAll(tasks);
-
-            // Pre-populate tools cache and routing table
-            try
-            {
-                await _toolRoutingManager.PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"init-list\"}", _backendConnections, _logger, _servers);
-                _logger.LogInformation("Pre-populated tools cache and routing table.");
             }
-            catch (Exception ex)
+        }
+
+        public void StartInitializationForBackend(string serverId)
+        {
+            var server = _servers.FirstOrDefault(s => s.Id == serverId);
+            if (server != null && server.Enabled && server.Type != "custom")
             {
-                _logger.LogError(ex, "Failed to pre-populate tools cache during backend connection initialization.");
+                if (_backendConnections.TryRemove(serverId, out var oldConn))
+                {
+                    oldConn.Dispose();
+                }
+                _ = Task.Run(async () => await ConnectAndInitializeBackendAsync(server));
             }
         }
 

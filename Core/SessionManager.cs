@@ -12,6 +12,14 @@ using McpRouter.Services;
 
 namespace McpRouter
 {
+    public class BackendStatus
+    {
+        public string ServerId { get; set; } = string.Empty;
+        public string Status { get; set; } = "Disconnected";
+        public int Attempts { get; set; } = 0;
+        public string Error { get; set; } = string.Empty;
+    }
+
     public class SessionManager
     {
         private readonly ConcurrentDictionary<string, ClientSession> _sessions = new();
@@ -19,11 +27,21 @@ namespace McpRouter
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<SessionManager> _logger;
 
+        public ConcurrentDictionary<string, BackendStatus> BackendStatuses { get; } = new();
+
         public SessionManager(IServiceProvider serviceProvider, IHttpClientFactory httpClientFactory, ILogger<SessionManager> logger)
         {
             _serviceProvider = serviceProvider;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+        }
+
+        public void UpdateBackendStatus(string serverId, string status, int attempts, string error)
+        {
+            var bStatus = BackendStatuses.GetOrAdd(serverId, id => new BackendStatus { ServerId = id });
+            bStatus.Status = status;
+            bStatus.Attempts = attempts;
+            bStatus.Error = error;
         }
 
         public async Task<ClientSession> CreateSessionAsync(string sessionId, HttpResponse clientResponse, string? targetServerId = null, bool metaMode = false)
@@ -42,7 +60,7 @@ namespace McpRouter
             var client = _httpClientFactory.CreateClient("McpClient");
             var embeddingService = scope.ServiceProvider.GetRequiredService<IEmbeddingService>();
 
-            var session = new ClientSession(sessionId, clientResponse, servers, client, embeddingService, sessionLogger);
+            var session = new ClientSession(sessionId, clientResponse, servers, client, embeddingService, this, sessionLogger);
             session.IsMetaMode = metaMode;
             _sessions[sessionId] = session;
             return session;
@@ -60,6 +78,11 @@ namespace McpRouter
             {
                 session.Close();
             }
+        }
+
+        public List<ClientSession> GetActiveSessions()
+        {
+            return _sessions.Values.ToList();
         }
 
         public void ResetAll()

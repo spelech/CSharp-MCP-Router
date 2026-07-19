@@ -33,6 +33,37 @@ function renderServers(servers) {
         const categoryBadge = server.category && server.category !== 'default' 
             ? `<span class="server-badge" style="background: rgba(59,130,246,0.1); color: var(--primary);">${escapeHtml(server.category)}</span>`
             : '';
+            
+        let statusBadge = '';
+        let retryBtn = '';
+        
+        if (server.enabled) {
+            const status = server.connectionStatus || 'Disconnected';
+            if (status === 'Connected') {
+                statusBadge = `<span class="server-badge badge-success"><span class="indicator online"></span> Connected</span>`;
+            } else if (status === 'Connecting' || status === 'Retrying') {
+                const attemptText = server.connectionAttempts > 0 ? ` (${server.connectionAttempts}/5)` : '';
+                statusBadge = `<span class="server-badge badge-warning"><i class="fa-solid fa-spinner fa-spin"></i> ${status}${attemptText}</span>`;
+            } else if (status === 'Failed') {
+                const errMsg = server.connectionError ? escapeHtml(server.connectionError) : 'Connection failed';
+                statusBadge = `<span class="server-badge badge-danger" title="${errMsg}"><i class="fa-solid fa-triangle-exclamation"></i> Failed</span>`;
+                retryBtn = `
+                    <button class="btn-icon btn-retry" title="Retry Connection (Attempts: ${server.connectionAttempts})" onclick="window.reconnectServer('${server.id}')" style="color: var(--accent);">
+                        <i class="fa-solid fa-arrows-rotate"></i>
+                    </button>
+                `;
+            } else {
+                statusBadge = `<span class="server-badge badge-secondary">Disconnected</span>`;
+                retryBtn = `
+                    <button class="btn-icon btn-retry" title="Connect Server" onclick="window.reconnectServer('${server.id}')" style="color: var(--primary);">
+                        <i class="fa-solid fa-plug"></i>
+                    </button>
+                `;
+            }
+        } else {
+            statusBadge = `<span class="server-badge badge-secondary">Disabled</span>`;
+        }
+
         return `
             <div class="server-item">
                 <div class="server-info">
@@ -42,10 +73,12 @@ function renderServers(servers) {
                         ${categoryBadge}
                         ${server.hasApiKey ? '<span class="server-badge badge-key"><i class="fa-solid fa-lock"></i> Secured</span>' : ''}
                         ${server.hidden ? '<span class="server-badge"><i class="fa-solid fa-eye-slash"></i> Hidden</span>' : ''}
+                        ${statusBadge}
                     </div>
                     <span class="server-url">${escapeHtml(server.url)}</span>
                 </div>
                 <div class="server-actions">
+                    ${retryBtn}
                     <button class="btn-icon btn-edit" title="Edit Server" onclick="window.openEditModal('${server.id}')">
                         <i class="fa-solid fa-pen-to-square"></i>
                     </button>
@@ -159,4 +192,15 @@ export async function deleteServer(id, name) {
 function updateStats(servers) {
     document.getElementById('server-count').textContent = servers.length;
     document.getElementById('active-servers').textContent = servers.filter(s => s.enabled).length;
+}
+
+export async function reconnectServer(id) {
+    try {
+        await apiRequest(`/api/servers/${id}/reconnect`, {
+            method: 'POST'
+        });
+        await loadServers();
+    } catch (error) {
+        console.error('Error triggering reconnect:', error);
+    }
 }

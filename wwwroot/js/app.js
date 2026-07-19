@@ -1,4 +1,4 @@
-import { loadServers, toggleServer, openAddModal, openEditModal, closeModal, saveServer, deleteServer } from './servers.js';
+import { loadServers, toggleServer, openAddModal, openEditModal, closeModal, saveServer, deleteServer, reconnectServer } from './servers.js';
 import { loadClients, openAddClientModal, closeClientModal, handleClientSubmit, deleteClient } from './clients.js';
 import { initTester } from './tester.js';
 import { initLogs, stopLogging } from './logs.js';
@@ -24,6 +24,7 @@ document.addEventListener('DOMContentLoaded', () => {
     window.saveServer = saveServer;
     window.deleteServer = deleteServer;
     window.toggleServer = toggleServer;
+    window.reconnectServer = reconnectServer;
 
     window.openAddClientModal = openAddClientModal;
     window.closeClientModal = closeClientModal;

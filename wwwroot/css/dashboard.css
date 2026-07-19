@@ -87,6 +87,31 @@
     border: 1px solid rgba(168, 85, 247, 0.2);
 }
 
+.server-badge.badge-success {
+    background: rgba(34, 197, 94, 0.15);
+    color: var(--status-online);
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.server-badge.badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #f59e0b;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.server-badge.badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: var(--status-offline);
+    border: 1px solid rgba(239, 68, 68, 0.2);
+    cursor: help;
+}
+
+.server-badge.badge-secondary {
+    background: rgba(161, 161, 170, 0.15);
+    color: var(--text-muted);
+    border: 1px solid rgba(161, 161, 170, 0.2);
+}
+
 .server-actions {
     display: flex;
     align-items: center;
