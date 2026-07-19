@@ -12,6 +12,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadServers();
     loadClients();
     setupGlobalNavigation();
+    initTheme();
     
     // 2. Poll servers status every 10s
     setInterval(loadServers, 10000);
@@ -33,6 +34,33 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('server-form').addEventListener('submit', saveServer);
     document.getElementById('client-form').addEventListener('submit', handleClientSubmit);
 });
+
+function initTheme() {
+    const toggleBtn = document.getElementById('theme-toggle');
+    if (!toggleBtn) return;
+
+    const savedTheme = localStorage.getItem('mcp-theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    updateThemeIcon(savedTheme);
+
+    toggleBtn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('mcp-theme', newTheme);
+        updateThemeIcon(newTheme);
+    });
+}
+
+function updateThemeIcon(theme) {
+    const toggleIcon = document.querySelector('#theme-toggle i');
+    if (!toggleIcon) return;
+    if (theme === 'light') {
+        toggleIcon.className = 'fa-solid fa-sun';
+    } else {
+        toggleIcon.className = 'fa-solid fa-moon';
+    }
+}
 
 async function loadUser() {
     try {

@@ -31,7 +31,12 @@ body {
     position: absolute;
     border-radius: 50%;
     filter: blur(120px);
-    opacity: 0.15;
+    opacity: 0.12;
+    transition: opacity 0.3s ease;
+}
+
+[data-theme="light"] .circle {
+    opacity: 0.05;
 }
 
 .circle-1 {
@@ -71,7 +76,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    box-shadow: var(--card-shadow);
     flex-wrap: wrap;
     gap: 15px;
 }
@@ -129,7 +134,8 @@ body {
 .status-item .value.code {
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--bg-code);
+    border: 1px solid var(--border-color);
     padding: 2px 8px;
     border-radius: 6px;
     color: var(--accent);
@@ -188,13 +194,13 @@ body {
 
 .tab-btn:hover {
     color: var(--text-main);
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-input);
 }
 
 .tab-btn.active {
-    color: var(--accent);
-    background: rgba(174, 90, 250, 0.08);
-    border: 1px solid rgba(174, 90, 250, 0.2);
+    color: var(--primary);
+    background: var(--primary-glow);
+    border: 1px solid var(--border-hover);
 }
 
 /* Footer */

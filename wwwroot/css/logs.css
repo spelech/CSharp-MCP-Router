@@ -21,7 +21,7 @@
 }
 
 .logs-terminal {
-    background: #050811;
+    background: var(--bg-code);
     border: 1px solid var(--border-color);
     border-radius: 10px;
     padding: 15px;
@@ -33,7 +33,6 @@
     display: flex;
     flex-direction: column;
     gap: 6px;
-    box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.8);
 }
 
 .log-line {

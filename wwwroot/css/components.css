@@ -6,7 +6,7 @@
     border: 1px solid var(--border-color);
     border-radius: 16px;
     padding: 25px;
-    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    box-shadow: var(--card-shadow);
     transition: border 0.3s ease, box-shadow 0.3s ease;
 }
 
@@ -273,7 +273,7 @@ input:checked + .slider:before {
 .form-group input[type="text"],
 .form-group input[type="password"],
 .form-group select {
-    background: rgba(255, 255, 255, 0.03);
+    background: var(--bg-input);
     border: 1px solid var(--border-color);
     border-radius: 8px;
     padding: 10px 14px;
