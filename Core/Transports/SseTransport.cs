@@ -118,11 +118,19 @@ namespace McpRouter.Core.Transports
                         if (sessionValues != null)
                         {
                             _sessionId = sessionValues.FirstOrDefault() ?? string.Empty;
-                            _messageUrl = _server.Url;
+                            _ = Task.Delay(1500, _cts.Token).ContinueWith(t => {
+                                if (!t.IsCanceled && _messageUrl == null) {
+                                    _messageUrl = _server.Url;
+                                }
+                            });
                         }
                         else if (response.Content.Headers.ContentType?.MediaType == "text/event-stream")
                         {
-                            _messageUrl = _server.Url;
+                            _ = Task.Delay(1500, _cts.Token).ContinueWith(t => {
+                                if (!t.IsCanceled && _messageUrl == null) {
+                                    _messageUrl = _server.Url;
+                                }
+                            });
                         }
                         
                         using var stream = await response.Content.ReadAsStreamAsync(_cts.Token);
@@ -204,6 +212,13 @@ namespace McpRouter.Core.Transports
 
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
         {
+            int attempts = 0;
+            while (_messageUrl == null && attempts < 50)
+            {
+                await Task.Delay(100);
+                attempts++;
+            }
+
             if (_messageUrl == null)
             {
                 return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };

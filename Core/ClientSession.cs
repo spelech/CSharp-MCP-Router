@@ -83,7 +83,12 @@ namespace McpRouter
             {
                 if (_initializeTask == null)
                 {
-                    _initializeTask = Task.Run(async () => await InitializeBackendsAsync(initializeRequest));
+                    var finalRequest = initializeRequest;
+                    if (initializeRequest.Contains("server/discover"))
+                    {
+                        finalRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.4.0\"}}}";
+                    }
+                    _initializeTask = Task.Run(async () => await InitializeBackendsAsync(finalRequest));
                 }
             }
         }

@@ -220,6 +220,22 @@ namespace McpRouter.Extensions
                                     await session.WriteMessageAsync(response);
                                     session.StartInitialization(requestBody);
                                 }
+                                else if (method == "server/discover")
+                                {
+                                    var response = new
+                                    {
+                                        jsonrpc = "2.0",
+                                        id = id != null ? (object)id : null,
+                                        result = new
+                                        {
+                                            supportedVersions = new[] { "2026-07-28" },
+                                            capabilities = new { tools = new { listChanged = true } },
+                                            serverInfo = new { name = "McpRouterGateway", version = AppVersion }
+                                        }
+                                    };
+                                    await session.WriteMessageAsync(response);
+                                    session.StartInitialization(requestBody);
+                                }
                             }
                         }
                     }
@@ -319,8 +335,8 @@ namespace McpRouter.Extensions
                     }
                 }
             
-                // If POST and NOT initialize, and we have a bearer token, route to existing session
-                if (httpContext.Request.Method == "POST" && method != "initialize" && hasBearerToken)
+                // If POST and NOT initialize/discover, and we have a bearer token, route to existing session
+                if (httpContext.Request.Method == "POST" && method != "initialize" && method != "server/discover" && hasBearerToken)
                 {
                     var activeSession = sessionManager.GetSession(sessionId);
                     if (activeSession == null)
@@ -417,7 +433,7 @@ namespace McpRouter.Extensions
             
                 var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId, metaMode);
             
-                if (httpContext.Request.Method == "POST" && method == "initialize")
+                if (httpContext.Request.Method == "POST" && (method == "initialize" || method == "server/discover"))
                 {
                     try
                     {
@@ -437,7 +453,17 @@ namespace McpRouter.Extensions
                             }
                         }
             
-                        var response = new
+                        var response = method == "server/discover" ? (object)new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = new
+                            {
+                                supportedVersions = new[] { "2026-07-28" },
+                                capabilities = new { tools = new { listChanged = true } },
+                                serverInfo = new { name = serverName, version = AppVersion }
+                            }
+                        } : new
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
@@ -532,6 +558,31 @@ namespace McpRouter.Extensions
                         
                         session.StartInitialization(body);
                         
+                        return Results.Accepted();
+                    }
+                    else if (method == "server/discover")
+                    {
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = new
+                            {
+                                supportedVersions = new[] { "2026-07-28" },
+                                capabilities = new
+                                {
+                                    tools = new { listChanged = true }
+                                },
+                                serverInfo = new
+                                {
+                                    name = "McpRouterGateway",
+                                    version = AppVersion
+                                }
+                            }
+                        };
+                        
+                        await session.WriteMessageAsync(response);
+                        session.StartInitialization(body);
                         return Results.Accepted();
                     }
                     else if (method == "tools/list")
