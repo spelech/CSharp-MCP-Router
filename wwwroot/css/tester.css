@@ -201,3 +201,16 @@
     font-size: 12px;
     color: var(--text-muted);
 }
+
+/* Full Width span for bottom grid row (System Logs) */
+.tester-full-width {
+    grid-column: 1 / -1;
+}
+
+/* Override select option background color in dropdown popup lists */
+.param-field select option,
+.form-group select option,
+select option {
+    background-color: #111424;
+    color: var(--text-main);
+}

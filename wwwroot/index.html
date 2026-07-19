@@ -159,6 +159,22 @@
                             </div>
                         </form>
                     </div>
+                </div>
+
+                <!-- Right Column: Semantic Routing & Console -->
+                <div class="tester-panel">
+                    <div class="glass-card">
+                        <h2><i class="fa-solid fa-magnifying-glass-chart"></i> Semantic Router Simulator</h2>
+                        <div class="form-group">
+                            <label for="semantic-search-query">Natural Language Prompt</label>
+                            <input type="text" id="semantic-search-query" placeholder="e.g. search matrix in plex">
+                        </div>
+                        <button type="button" class="btn btn-secondary" id="btn-semantic-search"><i class="fa-solid fa-ranking-star"></i> Test Filter Score</button>
+
+                        <div class="semantic-search-results" id="semantic-search-results">
+                            <div class="empty-state">Enter a prompt query to test tool matching scoring.</div>
+                        </div>
+                    </div>
 
                     <div class="glass-card">
                         <h2><i class="fa-solid fa-terminal"></i> Execution Console</h2>
@@ -175,21 +191,8 @@
                     </div>
                 </div>
 
-                <!-- Right Column: Semantic Routing & Logs -->
-                <div class="tester-panel">
-                    <div class="glass-card">
-                        <h2><i class="fa-solid fa-magnifying-glass-chart"></i> Semantic Router Simulator</h2>
-                        <div class="form-group">
-                            <label for="semantic-search-query">Natural Language Prompt</label>
-                            <input type="text" id="semantic-search-query" placeholder="e.g. search matrix in plex">
-                        </div>
-                        <button type="button" class="btn btn-secondary" id="btn-semantic-search"><i class="fa-solid fa-ranking-star"></i> Test Filter Score</button>
-
-                        <div class="semantic-search-results" id="semantic-search-results">
-                            <div class="empty-state">Enter a prompt query to test tool matching scoring.</div>
-                        </div>
-                    </div>
-
+                <!-- Bottom Row: System Logs (Full Width) -->
+                <div class="tester-full-width">
                     <div class="glass-card logs-viewer-card">
                         <h2><i class="fa-solid fa-list-check"></i> System Logs</h2>
                         <div class="logs-controls">
