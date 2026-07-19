@@ -3,8 +3,14 @@ import { escapeHtml } from './utils.js';
 
 let logInterval = null;
 let autoScroll = true;
+const renderedLogIds = new Set();
 
 export function initLogs() {
+    const terminal = document.getElementById('logs-terminal');
+    if (terminal) {
+        terminal.innerHTML = '<div class="empty-state">Logs loading...</div>';
+    }
+    renderedLogIds.clear();
     setupLogsEvents();
     startLogging();
 }
@@ -32,11 +38,21 @@ async function loadLogs() {
 
 function renderLogs(logs) {
     const terminal = document.getElementById('logs-terminal');
+    if (!terminal) return;
+
     const levelFilter = document.getElementById('logs-level-filter').value;
     
+    // Check if the server cleared the log buffer (e.g. response list has no overlap with already rendered items)
+    if (renderedLogIds.size > 0 && logs.length > 0) {
+        const hasOverlap = logs.some(log => renderedLogIds.has(log.id));
+        if (!hasOverlap) {
+            terminal.innerHTML = '';
+            renderedLogIds.clear();
+        }
+    }
+
     const filtered = logs.filter(log => {
         if (levelFilter === 'ALL') return true;
-        // Map C# LogLevel integers to string labels (0 = Trace, 1 = Debug, 2 = Info, 3 = Warning, 4 = Error, 5 = Critical)
         if (levelFilter === 'INFO' && log.level >= 2) return true;
         if (levelFilter === 'WARNING' && log.level >= 3) return true;
         if (levelFilter === 'ERROR' && log.level >= 4) return true;
@@ -44,33 +60,57 @@ function renderLogs(logs) {
     });
 
     if (filtered.length === 0) {
-        terminal.innerHTML = '<div class="empty-state">No log entries matching filter.</div>';
+        if (renderedLogIds.size === 0) {
+            terminal.innerHTML = '<div class="empty-state">No log entries matching filter.</div>';
+        }
         return;
     }
 
-    terminal.innerHTML = filtered.map(log => {
+    // Remove empty state message if we have actual logs to print
+    const emptyState = terminal.querySelector('.empty-state');
+    if (emptyState) {
+        emptyState.remove();
+    }
+
+    // Filter only new log entries that haven't been rendered yet
+    const newLogs = filtered.filter(log => !renderedLogIds.has(log.id));
+    if (newLogs.length === 0) {
+        return; // Nothing new to render
+    }
+
+    const fragment = document.createDocumentFragment();
+    newLogs.forEach(log => {
+        renderedLogIds.add(log.id);
         const time = new Date(log.timestamp).toLocaleTimeString();
         const levelName = getLogLevelName(log.level);
         const levelClass = `log-level-badge log-level-${levelName.toLowerCase()}`;
-        const cleanCategory = log.category.split('.').pop(); // Shorten namespace
+        const cleanCategory = log.category.split('.').pop();
         
         let exceptionHtml = '';
         if (log.exception) {
             exceptionHtml = `<div class="log-exception">${escapeHtml(log.exception)}</div>`;
         }
 
-        return `
-            <div class="log-line">
-                <span class="log-time">[${time}]</span>
-                <span class="${levelClass}">${levelName}</span>
-                <span class="log-category">${escapeHtml(cleanCategory)}:</span>
-                <div class="log-msg">
-                    <span>${escapeHtml(log.message)}</span>
-                    ${exceptionHtml}
-                </div>
+        const logLine = document.createElement('div');
+        logLine.className = 'log-line';
+        logLine.innerHTML = `
+            <span class="log-time">[${time}]</span>
+            <span class="${levelClass}">${levelName}</span>
+            <span class="log-category">${escapeHtml(cleanCategory)}:</span>
+            <div class="log-msg">
+                <span>${escapeHtml(log.message)}</span>
+                ${exceptionHtml}
             </div>
         `;
-    }).join('');
+        fragment.appendChild(logLine);
+    });
+
+    terminal.appendChild(fragment);
+
+    // Keep log output DOM size bounded (e.g. max 500 lines)
+    while (terminal.childElementCount > 500) {
+        terminal.firstElementChild.remove();
+    }
 
     if (autoScroll) {
         terminal.scrollTop = terminal.scrollHeight;
@@ -93,14 +133,24 @@ function setupLogsEvents() {
     const filter = document.getElementById('logs-level-filter');
     const clearBtn = document.getElementById('btn-clear-logs');
     const scrollToggle = document.getElementById('logs-autoscroll');
+    const terminal = document.getElementById('logs-terminal');
 
     filter.addEventListener('change', () => {
+        // Clear screen and redraw completely on filter change
+        if (terminal) {
+            terminal.innerHTML = '';
+        }
+        renderedLogIds.clear();
         loadLogs();
     });
 
     clearBtn.addEventListener('click', async () => {
         try {
             await apiRequest('/api/logs', { method: 'DELETE' });
+            if (terminal) {
+                terminal.innerHTML = '';
+            }
+            renderedLogIds.clear();
             await loadLogs();
         } catch (err) {
             console.error('Failed to clear logs:', err);
@@ -109,5 +159,27 @@ function setupLogsEvents() {
 
     scrollToggle.addEventListener('change', (e) => {
         autoScroll = e.target.checked;
+        if (autoScroll && terminal) {
+            terminal.scrollTop = terminal.scrollHeight;
+        }
     });
+
+    // Detect user scrolling up to temporarily pause auto-scroll
+    if (terminal) {
+        terminal.addEventListener('scroll', () => {
+            // Check if scroll is near the bottom (within 25px threshold)
+            const isAtBottom = terminal.scrollHeight - terminal.scrollTop - terminal.clientHeight < 25;
+            if (!isAtBottom) {
+                if (autoScroll) {
+                    autoScroll = false;
+                    scrollToggle.checked = false;
+                }
+            } else {
+                if (!autoScroll) {
+                    autoScroll = true;
+                    scrollToggle.checked = true;
+                }
+            }
+        });
+    }
 }

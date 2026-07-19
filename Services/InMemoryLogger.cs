@@ -7,6 +7,7 @@ namespace McpRouter.Services
 {
     public class LogEntry
     {
+        public string Id { get; set; } = Guid.NewGuid().ToString("N");
         public DateTime Timestamp { get; set; } = DateTime.UtcNow;
         public LogLevel Level { get; set; }
         public string Category { get; set; } = string.Empty;
