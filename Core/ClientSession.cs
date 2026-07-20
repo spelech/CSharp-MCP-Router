@@ -143,7 +143,7 @@ namespace McpRouter
                 await Task.Delay(3000);
                 try
                 {
-                    await _toolRoutingManager.PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"init-list\"}", _backendConnections, _logger, _servers);
+                    await _toolRoutingManager.PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"init-list\"}", _backendConnections, _logger, _servers, _sessionManager);
                     _logger.LogInformation("Completed initial background tools cache population.");
                 }
                 catch (Exception ex)
@@ -185,6 +185,25 @@ namespace McpRouter
                             {
                                 tcs.SetResult(response);
                                 return;
+                            }
+                        }
+
+                        if (message is JsonRpcNotification notification)
+                        {
+                            if (notification.Method == "notifications/tools/list_changed")
+                            {
+                                _logger.LogInformation("Received notifications/tools/list_changed from server {ServerId}. Invalidating tools cache.", server.Id);
+                                _sessionManager?.RemoveServerToolsCache(server.Id);
+                            }
+                            else if (notification.Method == "notifications/resources/list_changed")
+                            {
+                                _logger.LogInformation("Received notifications/resources/list_changed from server {ServerId}. Invalidating resources cache.", server.Id);
+                                _sessionManager?.RemoveServerResourcesCache(server.Id);
+                            }
+                            else if (notification.Method == "notifications/prompts/list_changed")
+                            {
+                                _logger.LogInformation("Received notifications/prompts/list_changed from server {ServerId}. Invalidating prompts cache.", server.Id);
+                                _sessionManager?.RemoveServerPromptsCache(server.Id);
                             }
                         }
                         
@@ -257,7 +276,8 @@ namespace McpRouter
 
         public async Task<List<object>> ListToolsAsync(string body)
         {
-            return await _toolRoutingManager.ListToolsAsync(body, IsMetaMode, _backendConnections, _logger, EnsureBackendsInitializedAsync, _servers);
+            var tools = await _toolRoutingManager.ListToolsAsync(body, IsMetaMode, _backendConnections, _logger, EnsureBackendsInitializedAsync, _servers, _sessionManager);
+            return tools;
         }
 
         public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db)
@@ -462,7 +482,8 @@ namespace McpRouter
 
         public async Task<List<object>> ListResourcesAsync(string body)
         {
-            return await _resourceRoutingManager.ListResourcesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync);
+            var resources = await _resourceRoutingManager.ListResourcesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager);
+            return resources;
         }
 
         public async Task<object?> ReadResourceAsync(string resourceUri, string body)
@@ -472,7 +493,8 @@ namespace McpRouter
 
         public async Task<List<object>> ListResourceTemplatesAsync(string body)
         {
-            return await _resourceRoutingManager.ListResourceTemplatesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync);
+            var templates = await _resourceRoutingManager.ListResourceTemplatesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager);
+            return templates;
         }
 
         public async Task<object> CompleteAsync(string body)
@@ -560,7 +582,8 @@ namespace McpRouter
 
         public async Task<List<object>> ListPromptsAsync(string body)
         {
-            return await _promptRoutingManager.ListPromptsAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync);
+            var prompts = await _promptRoutingManager.ListPromptsAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager);
+            return prompts;
         }
 
         public async Task<object?> GetPromptAsync(string promptName, string body)

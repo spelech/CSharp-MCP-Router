@@ -18,7 +18,7 @@ namespace McpRouter.Core.Routing
         private readonly object _cacheLock = new();
         private bool _isCachePopulated = false;
 
-        public async Task<List<object>> ListToolsAsync(string body, bool isMetaMode, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, IEnumerable<McpServer> servers)
+        public async Task<List<object>> ListToolsAsync(string body, bool isMetaMode, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, IEnumerable<McpServer> servers, SessionManager? sessionManager = null)
         {
             if (isMetaMode)
             {
@@ -66,14 +66,14 @@ namespace McpRouter.Core.Routing
                 }
             }
 
-            await PopulateToolsCacheAsync(body, backendConnections, logger, servers);
+            await PopulateToolsCacheAsync(body, backendConnections, logger, servers, sessionManager);
             lock (_cacheLock)
             {
                 return new List<object>(_cachedTools);
             }
         }
 
-        public async Task PopulateToolsCacheAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, IEnumerable<McpServer> servers)
+        public async Task PopulateToolsCacheAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, IEnumerable<McpServer> servers, SessionManager? sessionManager = null)
         {
             var allTools = new List<object>();
 
@@ -127,6 +127,7 @@ namespace McpRouter.Core.Routing
             {
                 if (item.Tools.ValueKind == JsonValueKind.Array)
                 {
+                    var serverTools = new List<object>();
                     foreach (var tool in item.Tools.EnumerateArray())
                     {
                         if (tool.TryGetProperty("name", out var nameProp))
@@ -143,9 +144,14 @@ namespace McpRouter.Core.Routing
                                 toolDict["name"] = exposedName;
                                 if (toolDict.TryGetValue("description", out var desc))
                                     toolDict["description"] = $"[{item.ServerId}] " + desc;
+                                serverTools.Add(toolDict);
                                 allTools.Add(toolDict);
                             }
                         }
+                    }
+                    if (sessionManager != null)
+                    {
+                        sessionManager.SetServerToolsCache(item.ServerId, serverTools);
                     }
                 }
             }

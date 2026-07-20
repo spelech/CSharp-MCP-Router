@@ -14,7 +14,7 @@ namespace McpRouter.Core.Routing
     {
         private readonly Dictionary<string, string> _resourceRoutingTable = new();
 
-        public async Task<List<object>> ListResourcesAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync)
+        public async Task<List<object>> ListResourcesAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, SessionManager? sessionManager = null)
         {
             var allResources = new List<object>();
             var tasks = new List<Task<(string ServerId, JsonElement Resources)>>();
@@ -47,6 +47,7 @@ namespace McpRouter.Core.Routing
             var completed = await Task.WhenAll(tasks);
             foreach (var item in completed)
             {
+                var serverResources = new List<object>();
                 if (item.Resources.ValueKind == JsonValueKind.Array)
                 {
                     foreach (var resource in item.Resources.EnumerateArray())
@@ -64,10 +65,15 @@ namespace McpRouter.Core.Routing
                                 resourceDict["uri"] = exposedUri;
                                 if (resourceDict.TryGetValue("name", out var nameVal))
                                     resourceDict["name"] = $"[{item.ServerId}] {nameVal}";
+                                serverResources.Add(resourceDict);
                                 allResources.Add(resourceDict);
                             }
                         }
                     }
+                }
+                if (sessionManager != null)
+                {
+                    sessionManager.SetServerResourcesCache(item.ServerId, serverResources);
                 }
             }
 
@@ -127,7 +133,7 @@ namespace McpRouter.Core.Routing
             return allResources;
         }
 
-        public async Task<List<object>> ListResourceTemplatesAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync)
+        public async Task<List<object>> ListResourceTemplatesAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, SessionManager? sessionManager = null)
         {
             var allTemplates = new List<object>();
             
@@ -172,6 +178,7 @@ namespace McpRouter.Core.Routing
             var completed = await Task.WhenAll(tasks);
             foreach (var item in completed)
             {
+                var serverTemplates = new List<object>();
                 if (item.Templates.ValueKind == JsonValueKind.Array)
                 {
                     foreach (var template in item.Templates.EnumerateArray())
@@ -187,10 +194,15 @@ namespace McpRouter.Core.Routing
                                 templateDict["uriTemplate"] = exposedTemplate;
                                 if (templateDict.TryGetValue("name", out var nameVal))
                                     templateDict["name"] = $"[{item.ServerId}] {nameVal}";
+                                serverTemplates.Add(templateDict);
                                 allTemplates.Add(templateDict);
                             }
                         }
                     }
+                }
+                if (sessionManager != null)
+                {
+                    sessionManager.SetServerResourceTemplatesCache(item.ServerId, serverTemplates);
                 }
             }
             return allTemplates;

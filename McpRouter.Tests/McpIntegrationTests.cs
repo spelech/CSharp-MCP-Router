@@ -1035,6 +1035,40 @@ namespace McpRouter.Tests
             Directory.Exists(resourcesPath).Should().BeTrue();
         }
 
+        [Fact]
+        public void SessionManager_PerServerCache_WorksCorrectly()
+        {
+            var logger = new Microsoft.Extensions.Logging.Abstractions.NullLogger<SessionManager>();
+            var sessionManager = new SessionManager(null!, null!, logger);
+
+            var tools = new List<object> { "tool1", "tool2" };
+            var prompts = new List<object> { "prompt1" };
+            var resources = new List<object> { "resource1" };
+            var templates = new List<object> { "template1" };
+
+            // Set caches
+            sessionManager.SetServerToolsCache("server-a", tools);
+            sessionManager.SetServerPromptsCache("server-a", prompts);
+            sessionManager.SetServerResourcesCache("server-a", resources);
+            sessionManager.SetServerResourceTemplatesCache("server-a", templates);
+
+            // Get caches
+            sessionManager.GetServerToolsCache("server-a").Should().BeEquivalentTo(tools);
+            sessionManager.GetServerPromptsCache("server-a").Should().BeEquivalentTo(prompts);
+            sessionManager.GetServerResourcesCache("server-a").Should().BeEquivalentTo(resources);
+            sessionManager.GetServerResourceTemplatesCache("server-a").Should().BeEquivalentTo(templates);
+
+            // Remove caches for single server
+            sessionManager.RemoveServerCache("server-a");
+            sessionManager.GetServerToolsCache("server-a").Should().BeNull();
+            sessionManager.GetServerPromptsCache("server-a").Should().BeNull();
+
+            // Clear all
+            sessionManager.SetServerToolsCache("server-b", tools);
+            sessionManager.ClearGlobalCache();
+            sessionManager.GetServerToolsCache("server-b").Should().BeNull();
+        }
+
         private class TestHttpClientFactory : IHttpClientFactory
         {
             private readonly HttpClient _client;

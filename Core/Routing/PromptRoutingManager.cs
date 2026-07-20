@@ -12,7 +12,7 @@ namespace McpRouter.Core.Routing
     {
         private readonly Dictionary<string, string> _promptRoutingTable = new();
 
-        public async Task<List<object>> ListPromptsAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync)
+        public async Task<List<object>> ListPromptsAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, SessionManager? sessionManager = null)
         {
             var allPrompts = new List<object>();
             var tasks = new List<Task<(string ServerId, JsonElement Prompts)>>();
@@ -45,6 +45,7 @@ namespace McpRouter.Core.Routing
             var completed = await Task.WhenAll(tasks);
             foreach (var item in completed)
             {
+                var serverPrompts = new List<object>();
                 if (item.Prompts.ValueKind == JsonValueKind.Array)
                 {
                     foreach (var prompt in item.Prompts.EnumerateArray())
@@ -62,10 +63,15 @@ namespace McpRouter.Core.Routing
                                 promptDict["name"] = exposedName;
                                 if (promptDict.TryGetValue("description", out var descVal))
                                     promptDict["description"] = $"[{item.ServerId}] {descVal}";
+                                serverPrompts.Add(promptDict);
                                 allPrompts.Add(promptDict);
                             }
                         }
                     }
+                }
+                if (sessionManager != null)
+                {
+                    sessionManager.SetServerPromptsCache(item.ServerId, serverPrompts);
                 }
             }
             // Append built-in meta-prompts
