@@ -372,6 +372,34 @@
                     </small>
                 </div>
             </div>
+
+            <div class="glass-card settings-card" style="max-width: 800px; margin: 20px auto 0 auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2><i class="fa-solid fa-folder-open"></i> Prompts &amp; Resources File Manager</h2>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-create-custom-file"><i class="fa-solid fa-plus"></i> Create File</button>
+                </div>
+                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                    Manage your own local JSON prompts and markdown/text resources. They will be registered directly under the <code>router</code> namespace.
+                </p>
+                <div class="custom-files-table-container" style="overflow-x: auto;">
+                    <table class="custom-files-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                        <thead>
+                            <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted);">
+                                <th style="padding: 10px;">Type</th>
+                                <th style="padding: 10px;">Name</th>
+                                <th style="padding: 10px;">Size</th>
+                                <th style="padding: 10px;">Modified</th>
+                                <th style="padding: 10px; text-align: right;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="custom-files-tbody">
+                            <tr>
+                                <td colspan="5" class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted);">Loading custom files...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <footer class="dashboard-footer">
@@ -476,6 +504,44 @@
                 <p style="color: var(--warning); font-size: 13px;"><i class="fa-solid fa-triangle-exclamation"></i> Save this secret now. It will not be shown again.</p>
                 <button type="button" class="btn btn-secondary btn-sm" onclick="closeClientModal()" style="margin-top: 10px;">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Custom File Editor Modal -->
+    <div class="modal-backdrop" id="custom-file-modal" style="display: none;">
+        <div class="glass-card modal-card" style="max-width: 700px; width: 90%;">
+            <div class="modal-header">
+                <h2 id="custom-file-modal-title"><i class="fa-solid fa-file-pen"></i> Edit Custom File</h2>
+                <button type="button" class="btn-close" id="btn-close-custom-file-modal">&times;</button>
+            </div>
+            <form id="custom-file-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="custom-file-type">File Type</label>
+                        <select id="custom-file-type" required>
+                            <option value="prompts">Prompt Template (JSON)</option>
+                            <option value="resources">Resource (Markdown/Text)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="custom-file-name">Filename</label>
+                        <input type="text" id="custom-file-name" placeholder="e.g. my-custom-prompt.json" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="custom-file-content">File Content</label>
+                    <textarea id="custom-file-content" rows="15" class="code-block" style="width: 100%; font-family: monospace; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; resize: vertical;" placeholder="File contents..."></textarea>
+                    <small id="custom-file-editor-hint" style="color: var(--text-muted); display: block; margin-top: 5px;">
+                        JSON prompts must match the MCP Prompt template schema (containing "description", "arguments", "messages").
+                    </small>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-custom-file-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="btn-save-custom-file">Save File</button>
+                </div>
+            </form>
         </div>
     </div>
 

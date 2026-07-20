@@ -1530,6 +1530,136 @@ namespace McpRouter.Extensions
                 return Results.Ok(res);
             });
 
+            // --- Custom Files Management APIs ---
+            
+            string SanitizeFileName(string name)
+            {
+                var invalidChars = Path.GetInvalidFileNameChars();
+                return new string(name.Where(c => !invalidChars.Contains(c) && c != '/' && c != '\\').ToArray());
+            }
+
+            string GetCustomFilesDirectory(string type)
+            {
+                string folder = type == "prompts" ? "prompts" : "resources";
+                var path = Path.Combine(AppContext.BaseDirectory, "data", folder);
+                if (!Directory.Exists(path))
+                {
+                    path = Path.Combine(Directory.GetCurrentDirectory(), "data", folder);
+                }
+                Directory.CreateDirectory(path);
+                return path;
+            }
+
+            app.MapGet("/api/custom-files", () =>
+            {
+                var result = new List<object>();
+                try
+                {
+                    foreach (var type in new[] { "prompts", "resources" })
+                    {
+                        var dir = GetCustomFilesDirectory(type);
+                        foreach (var file in Directory.GetFiles(dir))
+                        {
+                            var info = new FileInfo(file);
+                            result.Add(new
+                            {
+                                type = type,
+                                name = info.Name,
+                                sizeBytes = info.Length,
+                                lastModified = info.LastWriteTimeUtc
+                            });
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message);
+                }
+                return Results.Ok(result);
+            });
+
+            app.MapGet("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name) =>
+            {
+                if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
+                var cleanName = SanitizeFileName(name);
+                if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
+
+                var dir = GetCustomFilesDirectory(type);
+                var filePath = Path.Combine(dir, cleanName);
+                if (!File.Exists(filePath)) return Results.NotFound("File not found");
+
+                try
+                {
+                    var text = File.ReadAllText(filePath);
+                    return Results.Ok(new { content = text });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message);
+                }
+            });
+
+            app.MapPost("/api/custom-files/{type}/{name}", async ([FromRoute] string type, [FromRoute] string name, [FromBody] System.Text.Json.JsonElement body) =>
+            {
+                if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
+                var cleanName = SanitizeFileName(name);
+                if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
+
+                if (type == "prompts" && !cleanName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                {
+                    cleanName += ".json";
+                }
+
+                if (!body.TryGetProperty("content", out var contentProp)) return Results.BadRequest("Missing content field");
+                var content = contentProp.GetString() ?? "";
+
+                if (type == "prompts")
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(content);
+                    }
+                    catch (Exception ex)
+                    {
+                        return Results.BadRequest($"Invalid JSON format: {ex.Message}");
+                    }
+                }
+
+                var dir = GetCustomFilesDirectory(type);
+                var filePath = Path.Combine(dir, cleanName);
+
+                try
+                {
+                    await File.WriteAllTextAsync(filePath, content);
+                    return Results.Ok(new { success = true, name = cleanName });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message);
+                }
+            });
+
+            app.MapDelete("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name) =>
+            {
+                if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
+                var cleanName = SanitizeFileName(name);
+                if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
+
+                var dir = GetCustomFilesDirectory(type);
+                var filePath = Path.Combine(dir, cleanName);
+                if (!File.Exists(filePath)) return Results.NotFound("File not found");
+
+                try
+                {
+                    File.Delete(filePath);
+                    return Results.Ok(new { success = true });
+                }
+                catch (Exception ex)
+                {
+                    return Results.Problem(ex.Message);
+                }
+            });
+
             app.Run();
             
         }
