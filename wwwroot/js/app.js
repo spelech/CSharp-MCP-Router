@@ -9,6 +9,7 @@ import { escapeHtml } from './utils.js';
 document.addEventListener('DOMContentLoaded', () => {
     // 1. Initial Page Load
     loadUser();
+    loadVersion();
     loadServers();
     loadClients();
     setupGlobalNavigation();
@@ -137,6 +138,20 @@ async function loadUser() {
         }
     } catch (error) {
         console.error('Error loading user profile:', error);
+    }
+}
+
+async function loadVersion() {
+    try {
+        const data = await apiRequest('/health');
+        if (data && data.version) {
+            const badge = document.getElementById('version-badge');
+            if (badge) {
+                badge.textContent = `v${data.version}`;
+            }
+        }
+    } catch (error) {
+        console.error('Error loading version:', error);
     }
 }
 
