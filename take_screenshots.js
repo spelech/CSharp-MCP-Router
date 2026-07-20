@@ -14,12 +14,12 @@ const path = require('path');
     
     // Set extra headers to fake the SSO session user
     await page.setExtraHTTPHeaders({
-        'Remote-User': 'steve',
-        'Remote-Groups': 'full_admin,house_member',
-        'Remote-Name': 'Steve Pelech'
+        'Remote-User': process.env.SSO_USER || 'admin',
+        'Remote-Groups': process.env.SSO_GROUPS || 'admin',
+        'Remote-Name': process.env.SSO_NAME || 'Administrator'
     });
     
-    const url = 'http://mcp-router:8080/';
+    const url = process.env.DASHBOARD_URL || 'http://localhost:8080/';
     console.log(`Navigating to ${url}...`);
     
     // Navigate and wait for server list to render

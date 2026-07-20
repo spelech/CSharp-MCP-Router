@@ -43,6 +43,10 @@ A Puppeteer script, [`take_screenshots.js`](file:///containers/mcp/router/take_s
 ```bash
 docker run --rm --init --cap-add=SYS_ADMIN -u root \
   -e PUPPETEER_CACHE_DIR=/home/pptruser/.cache/puppeteer \
+  -e DASHBOARD_URL=http://mcp-router:8080/ \
+  -e SSO_USER=steve \
+  -e SSO_GROUPS=full_admin,house_member \
+  -e SSO_NAME="Steve Pelech" \
   --network net_cloud \
   -v $(pwd)/take_screenshots.js:/home/pptruser/app/take_screenshots.js \
   -v $(pwd)/docs/assets:/home/pptruser/app/screenshots \
