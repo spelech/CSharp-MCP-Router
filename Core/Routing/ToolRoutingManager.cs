@@ -107,7 +107,8 @@ namespace McpRouter.Core.Routing
                 {
                     try
                     {
-                        var resp = await conn.SendRequestAsync("tools/list", body);
+                        var reqBody = "{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"refresh-list\"}";
+                        var resp = await conn.SendRequestAsync("tools/list", reqBody);
                         if (resp.Result != null && resp.Result.Value.TryGetProperty("tools", out var toolsList))
                         {
                             return (serverId, toolsList);

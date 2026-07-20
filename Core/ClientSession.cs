@@ -32,6 +32,7 @@ namespace McpRouter
         public readonly object _initLock = new();
         private readonly CancellationTokenSource _cts = new();
         private string _lastInitializeRequest = string.Empty;
+        private readonly List<Task> _backendInitTasks = new();
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -56,14 +57,18 @@ namespace McpRouter
         {
         }
 
-        public async Task WriteMessageAsync(object payload)
+        public async Task WriteMessageAsync(object message)
         {
-            var json = JsonSerializer.Serialize(payload);
             await _writeLock.WaitAsync();
             try
             {
+                var json = JsonSerializer.Serialize(message, _jsonOptions);
                 await _clientResponse.WriteAsync($"event: message\ndata: {json}\n\n");
                 await _clientResponse.Body.FlushAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to write message to client SSE stream");
             }
             finally
             {
@@ -71,9 +76,30 @@ namespace McpRouter
             }
         }
 
-        public Task EnsureBackendsInitializedAsync()
+        public async Task EnsureBackendsInitializedAsync()
         {
-            return Task.CompletedTask;
+            if (_initializeTask == null)
+            {
+                lock (_initLock)
+                {
+                    if (_initializeTask == null)
+                    {
+                        var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.4.0\"}}}";
+                        _initializeTask = Task.Run(async () => await InitializeBackendsAsync(initReq));
+                    }
+                }
+            }
+            await _initializeTask;
+
+            List<Task> pending;
+            lock (_backendInitTasks)
+            {
+                pending = _backendInitTasks.ToList();
+            }
+            if (pending.Count > 0)
+            {
+                await Task.WhenAll(pending);
+            }
         }
  
         public void StartInitialization(string initializeRequest)
@@ -95,9 +121,15 @@ namespace McpRouter
         public async Task InitializeBackendsAsync(string initializeRequest)
         {
             _lastInitializeRequest = initializeRequest;
+            var tasks = new List<Task>();
             foreach (var server in _servers.Where(s => s.Enabled && s.Type != "custom"))
             {
-                _ = Task.Run(async () => await ConnectAndInitializeBackendAsync(server));
+                var task = Task.Run(async () => await ConnectAndInitializeBackendAsync(server));
+                tasks.Add(task);
+            }
+            lock (_backendInitTasks)
+            {
+                _backendInitTasks.AddRange(tasks);
             }
 
             // We do NOT block on backend initialization, but we trigger a background tools cache population
@@ -332,7 +364,95 @@ namespace McpRouter
 
         public async Task<object?> ReadResourceAsync(string resourceUri, string body)
         {
-            return await _resourceRoutingManager.ReadResourceAsync(resourceUri, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson);
+            return await _resourceRoutingManager.ReadResourceAsync(resourceUri, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson, _sessionManager);
+        }
+
+        public async Task<List<object>> ListResourceTemplatesAsync(string body)
+        {
+            return await _resourceRoutingManager.ListResourceTemplatesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync);
+        }
+
+        public async Task<object> CompleteAsync(string body)
+        {
+            try
+            {
+                using var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+                if (!root.TryGetProperty("params", out var paramsProp))
+                {
+                    return new { completion = new { values = Array.Empty<string>(), hasMore = false } };
+                }
+
+                if (paramsProp.TryGetProperty("ref", out var refProp))
+                {
+                    if (refProp.TryGetProperty("type", out var typeProp))
+                    {
+                        var refType = typeProp.GetString();
+                        if (refType == "ref/resource")
+                        {
+                            if (refProp.TryGetProperty("uriTemplate", out var templateProp))
+                            {
+                                var uriTemplate = templateProp.GetString() ?? string.Empty;
+                                if (uriTemplate == "logs://{server_name}/today")
+                                {
+                                    var argVal = string.Empty;
+                                    if (paramsProp.TryGetProperty("value", out var valProp))
+                                    {
+                                        argVal = valProp.GetString() ?? string.Empty;
+                                    }
+                                    var serverIds = _servers.Select(s => s.Id).ToList();
+                                    var matching = serverIds
+                                        .Where(id => id.StartsWith(argVal, StringComparison.OrdinalIgnoreCase))
+                                        .Take(10)
+                                        .ToList();
+                                    return new { completion = new { values = matching, hasMore = false } };
+                                }
+                                
+                                if (uriTemplate.StartsWith("mcp://"))
+                                {
+                                    var parts = uriTemplate.Substring("mcp://".Length).Split('/', 2);
+                                    if (parts.Length == 2)
+                                    {
+                                        var serverId = parts[0];
+                                        var backendTemplate = parts[1];
+                                        if (_backendConnections.TryGetValue(serverId, out var conn))
+                                        {
+                                            var rewrittenBody = RewriteRequestJson(body, "uriTemplate", backendTemplate);
+                                            var resp = await conn.SendRequestAsync("completion/complete", rewrittenBody);
+                                            if (resp.Result != null) return resp.Result.Value;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        else if (refType == "ref/prompt")
+                        {
+                            if (refProp.TryGetProperty("name", out var nameProp))
+                            {
+                                var promptName = nameProp.GetString() ?? string.Empty;
+                                var parts = promptName.Split("__", 2);
+                                if (parts.Length == 2)
+                                {
+                                    var serverId = parts[0];
+                                    var rawName = parts[1];
+                                    if (_backendConnections.TryGetValue(serverId, out var conn))
+                                    {
+                                        var rewrittenBody = RewriteRequestJson(body, "name", rawName);
+                                        var resp = await conn.SendRequestAsync("completion/complete", rewrittenBody);
+                                        if (resp.Result != null) return resp.Result.Value;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error handling completion/complete request");
+            }
+
+            return new { completion = new { values = Array.Empty<string>(), hasMore = false } };
         }
 
         public async Task<List<object>> ListPromptsAsync(string body)

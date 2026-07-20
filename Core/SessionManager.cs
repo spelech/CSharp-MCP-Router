@@ -27,6 +27,17 @@ namespace McpRouter
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<SessionManager> _logger;
 
+        public DateTime StartTime { get; } = DateTime.UtcNow;
+        private long _totalRequests = 0;
+        public long TotalRequests => _totalRequests;
+
+        public void IncrementTotalRequests()
+        {
+            System.Threading.Interlocked.Increment(ref _totalRequests);
+        }
+
+        public int ActiveSessionsCount => _sessions.Count;
+
         public ConcurrentDictionary<string, BackendStatus> BackendStatuses { get; } = new();
 
         public SessionManager(IServiceProvider serviceProvider, IHttpClientFactory httpClientFactory, ILogger<SessionManager> logger)

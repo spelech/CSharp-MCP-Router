@@ -625,5 +625,90 @@ namespace McpRouter.Tests
             names.Should().Contain("seerr_search_media");
             names.Should().Contain("plex_search_library");
         }
+
+        [Fact]
+        public async Task BuiltInResources_Templates_And_Autocompletion_Works_Correctly()
+        {
+            // Arrange
+            var servers = new List<McpServer>
+            {
+                new McpServer { Id = "testserver1", DisplayName = "Test Server 1", Url = "http://testserver1/mcp", Type = "http", Enabled = true }
+            };
+
+            var session = CreateSession(servers, out var httpHandler);
+
+            httpHandler.Handler = async (req) =>
+            {
+                var body = req.Content != null ? await req.Content.ReadAsStringAsync() : "";
+                if (body.Contains("initialize"))
+                {
+                    return CreateJsonResponse(new
+                    {
+                        jsonrpc = "2.0",
+                        id = "auto-init",
+                        result = new { protocolVersion = "2024-11-05" }
+                    });
+                }
+                else if (body.Contains("resources/list"))
+                {
+                    return CreateJsonResponse(new
+                    {
+                        jsonrpc = "2.0",
+                        id = "res-list",
+                        result = new
+                        {
+                            resources = new[]
+                            {
+                                new { uri = "file:///logs.txt", name = "System Logs" }
+                            }
+                        }
+                    });
+                }
+                else if (body.Contains("resources/templates/list"))
+                {
+                    return CreateJsonResponse(new
+                    {
+                        jsonrpc = "2.0",
+                        id = "temp-list",
+                        result = new
+                        {
+                            templates = new[]
+                            {
+                                new { uriTemplate = "file://{path}", name = "File Read Template", description = "Read a file" }
+                            }
+                        }
+                    });
+                }
+                return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            };
+
+            // Act - List resources
+            var resources = await session.ListResourcesAsync("{\"jsonrpc\":\"2.0\",\"id\":1}");
+            resources.Should().NotBeEmpty();
+            var resourceUris = resources.Select(r => (r as Dictionary<string, object>)?["uri"] as string).ToList();
+            resourceUris.Should().Contain("router://status");
+            resourceUris.Should().Contain("router://metrics");
+
+            // Act - Read built-in status resource
+            var readRes = await session.ReadResourceAsync("router://status", "{\"jsonrpc\":\"2.0\",\"id\":\"read-status\",\"params\":{\"uri\":\"router://status\"}}");
+            readRes.Should().NotBeNull();
+            var readResJson = JsonSerializer.Serialize(readRes);
+            readResJson.Should().Contain("router://status");
+            readResJson.Should().Contain("online");
+
+            // Act - List templates
+            var templates = await session.ListResourceTemplatesAsync("{\"jsonrpc\":\"2.0\",\"id\":1}");
+            templates.Should().NotBeEmpty();
+            var templateUris = templates.Select(t => (t as Dictionary<string, object>)?["uriTemplate"] as string).ToList();
+            templateUris.Should().Contain("logs://{server_name}/today");
+            templateUris.Should().Contain("mcp://testserver1/file://{path}");
+
+            // Act - Autocomplete server name for logs://{server_name}/today template
+            var completeBody = "{\"jsonrpc\":\"2.0\",\"id\":\"comp-1\",\"method\":\"completion/complete\",\"params\":{\"ref\":{\"type\":\"ref/resource\",\"uriTemplate\":\"logs://{server_name}/today\"},\"argumentName\":\"server_name\",\"value\":\"test\"}}";
+            var completeResult = await session.CompleteAsync(completeBody);
+            completeResult.Should().NotBeNull();
+            var completeJson = JsonSerializer.Serialize(completeResult);
+            completeJson.Should().Contain("testserver1");
+        }
     }
 }

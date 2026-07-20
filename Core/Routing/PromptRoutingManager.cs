@@ -26,7 +26,8 @@ namespace McpRouter.Core.Routing
                 {
                     try
                     {
-                        var resp = await conn.SendRequestAsync("prompts/list", body);
+                        var reqBody = "{\"jsonrpc\":\"2.0\",\"method\":\"prompts/list\",\"id\":\"refresh-prompt-list\"}";
+                        var resp = await conn.SendRequestAsync("prompts/list", reqBody);
                         if (resp.Result != null && resp.Result.Value.TryGetProperty("prompts", out var promptsList))
                         {
                             return (serverId, promptsList);

@@ -218,6 +218,7 @@ namespace McpRouter.Extensions
                         return;
                     }
 
+                    sessionManager.IncrementTotalRequests();
                     logger.LogInformation("Routing stateless POST /sse request method {Method} to global session", method);
                     try
                     {
@@ -254,6 +255,119 @@ namespace McpRouter.Extensions
                                 return;
                             }
                             httpContext.Response.StatusCode = 400;
+                            return;
+                        }
+                        else if (method == "resources/list")
+                        {
+                            var resources = await activeSession.ListResourcesAsync(requestBody);
+                            var response = new
+                            {
+                                jsonrpc = "2.0",
+                                id = id != null ? (object)id : null,
+                                result = new { resources }
+                            };
+                            httpContext.Response.Headers.ContentType = "application/json";
+                            await httpContext.Response.WriteAsJsonAsync(response);
+                            return;
+                        }
+                        else if (method == "resources/templates/list")
+                        {
+                            var templates = await activeSession.ListResourceTemplatesAsync(requestBody);
+                            var response = new
+                            {
+                                jsonrpc = "2.0",
+                                id = id != null ? (object)id : null,
+                                result = new { templates }
+                            };
+                            httpContext.Response.Headers.ContentType = "application/json";
+                            await httpContext.Response.WriteAsJsonAsync(response);
+                            return;
+                        }
+                        else if (method == "resources/read")
+                        {
+                            using var doc = JsonDocument.Parse(requestBody);
+                            var root = doc.RootElement;
+                            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("uri", out var uriProp))
+                            {
+                                var uri = uriProp.GetString() ?? string.Empty;
+                                var res = await activeSession.ReadResourceAsync(uri, requestBody);
+                                var response = new
+                                {
+                                    jsonrpc = "2.0",
+                                    id = id != null ? (object)id : null,
+                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                };
+                                httpContext.Response.Headers.ContentType = "application/json";
+                                await httpContext.Response.WriteAsJsonAsync(response);
+                                return;
+                            }
+                            httpContext.Response.StatusCode = 400;
+                            return;
+                        }
+                        else if (method == "prompts/list")
+                        {
+                            var prompts = await activeSession.ListPromptsAsync(requestBody);
+                            var response = new
+                            {
+                                jsonrpc = "2.0",
+                                id = id != null ? (object)id : null,
+                                result = new { prompts }
+                            };
+                            httpContext.Response.Headers.ContentType = "application/json";
+                            await httpContext.Response.WriteAsJsonAsync(response);
+                            return;
+                        }
+                        else if (method == "prompts/get")
+                        {
+                            using var doc = JsonDocument.Parse(requestBody);
+                            var root = doc.RootElement;
+                            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
+                            {
+                                var name = nameProp.GetString() ?? string.Empty;
+                                var res = await activeSession.GetPromptAsync(name, requestBody);
+                                var response = new
+                                {
+                                    jsonrpc = "2.0",
+                                    id = id != null ? (object)id : null,
+                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                };
+                                httpContext.Response.Headers.ContentType = "application/json";
+                                await httpContext.Response.WriteAsJsonAsync(response);
+                                return;
+                            }
+                            httpContext.Response.StatusCode = 400;
+                            return;
+                        }
+                        else if (method == "completion/complete")
+                        {
+                            var res = await activeSession.CompleteAsync(requestBody);
+                            var response = new
+                            {
+                                jsonrpc = "2.0",
+                                id = id != null ? (object)id : null,
+                                result = res
+                            };
+                            httpContext.Response.Headers.ContentType = "application/json";
+                            await httpContext.Response.WriteAsJsonAsync(response);
+                            return;
+                        }
+                        else if (method == "roots/list")
+                        {
+                            var response = new
+                            {
+                                jsonrpc = "2.0",
+                                id = id != null ? (object)id : null,
+                                result = new {
+                                    roots = new[] {
+                                        new {
+                                            uri = "file:///containers",
+                                            name = "Docker Containers Workspace"
+                                        }
+                                    }
+                                }
+                            };
+                            httpContext.Response.Headers.ContentType = "application/json";
+                            await httpContext.Response.WriteAsJsonAsync(response);
                             return;
                         }
                         else
@@ -607,6 +721,7 @@ namespace McpRouter.Extensions
                 {
                     return Results.NotFound(new { error = "Session not found." });
                 }
+                sessionManager.IncrementTotalRequests();
             
                 using var reader = new StreamReader(httpContext.Request.Body);
                 var body = await reader.ReadToEndAsync();
@@ -739,6 +854,48 @@ namespace McpRouter.Extensions
                             return Results.Accepted();
                         }
                         return Results.BadRequest(new { error = "Invalid resources/read: missing uri parameter" });
+                    }
+                    else if (method == "resources/templates/list")
+                    {
+                        var templates = await session.ListResourceTemplatesAsync(body);
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = new { templates }
+                        };
+                        await session.WriteMessageAsync(response);
+                        return Results.Accepted();
+                    }
+                    else if (method == "completion/complete")
+                    {
+                        var res = await session.CompleteAsync(body);
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = res
+                        };
+                        await session.WriteMessageAsync(response);
+                        return Results.Accepted();
+                    }
+                    else if (method == "roots/list")
+                    {
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = new {
+                                roots = new[] {
+                                    new {
+                                        uri = "file:///containers",
+                                        name = "Docker Containers Workspace"
+                                    }
+                                }
+                            }
+                        };
+                        await session.WriteMessageAsync(response);
+                        return Results.Accepted();
                     }
                     else if (method == "prompts/list")
                     {
