@@ -140,7 +140,7 @@ namespace McpRouter.Services
                             Url = "http://unifi-mcp:3000/mcp",
                             Enabled = true,
                             Hidden = false,
-                            Type = "streamable"
+                            Type = "http"
                         });
                         logger.LogInformation("Imported UniFi MCP config.");
                     }
@@ -172,7 +172,7 @@ namespace McpRouter.Services
                         Url = "http://mcp-arr-hd:3000/mcp",
                         Enabled = true,
                         Hidden = false,
-                        Type = "streamable"
+                        Type = "http"
                     });
                     db.Servers.Add(new McpServer
                     {
@@ -182,7 +182,7 @@ namespace McpRouter.Services
                         Url = "http://mcp-arr-4k:3000/mcp",
                         Enabled = true,
                         Hidden = false,
-                        Type = "streamable"
+                        Type = "http"
                     });
                     db.Servers.Add(new McpServer
                     {
@@ -199,6 +199,46 @@ namespace McpRouter.Services
 
                     db.SaveChanges();
                     logger.LogInformation("Database migration completed successfully.");
+                }
+
+                // Auto-fix server types for ha, unifi, and arr backends to http (stateless Streamable HTTP)
+                try
+                {
+                    bool changed = false;
+                    var ha = db.Servers.FirstOrDefault(s => s.Id == "ha");
+                    if (ha != null && ha.Type != "http")
+                    {
+                        ha.Type = "http";
+                        changed = true;
+                    }
+                    var unifi = db.Servers.FirstOrDefault(s => s.Id == "unifi");
+                    if (unifi != null && unifi.Type != "http")
+                    {
+                        unifi.Type = "http";
+                        changed = true;
+                    }
+                    var arrHd = db.Servers.FirstOrDefault(s => s.Id == "mcp-arr-hd");
+                    if (arrHd != null && arrHd.Type != "http")
+                    {
+                        arrHd.Type = "http";
+                        changed = true;
+                    }
+                    var arr4k = db.Servers.FirstOrDefault(s => s.Id == "mcp-arr-4k");
+                    if (arr4k != null && arr4k.Type != "http")
+                    {
+                        arr4k.Type = "http";
+                        changed = true;
+                    }
+                    
+                    if (changed)
+                    {
+                        logger.LogInformation("Applying database type fixes for ha, unifi, and arr backends to http...");
+                        db.SaveChanges();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Failed to update server types in database.");
                 }
 
                 // Load custom servers from configuration JSON if it exists

@@ -101,18 +101,32 @@ namespace McpRouter.Core.Transports
             else if (resp.Content.Headers.TryGetValues("Mcp-Session-Id", out var scVals))
                 _sessionId = scVals.FirstOrDefault() ?? _sessionId;
 
-            var responseBody = await resp.Content.ReadAsStringAsync(linked.Token);
-
-            if (responseBody.TrimStart().StartsWith("event:") || responseBody.TrimStart().StartsWith("data:"))
+            string responseBody = string.Empty;
+            using (var stream = await resp.Content.ReadAsStreamAsync(linked.Token))
+            using (var reader = new StreamReader(stream))
             {
-                using var sr = new StringReader(responseBody);
-                string? dataValue = null;
                 string? line;
-                while ((line = sr.ReadLine()) != null)
+                while ((line = await reader.ReadLineAsync(linked.Token)) != null)
                 {
-                    if (line.StartsWith("data:")) dataValue = line.Substring(5).Trim();
+                    var trimmed = line.Trim();
+                    if (trimmed.StartsWith("data:"))
+                    {
+                        responseBody = trimmed.Substring(5).Trim();
+                        break;
+                    }
+                    else if (trimmed.StartsWith("{"))
+                    {
+                        responseBody = trimmed;
+                        break;
+                    }
                 }
-                if (!string.IsNullOrEmpty(dataValue)) responseBody = dataValue;
+            }
+
+            _logger.LogInformation("[HttpTransport DEBUG] Server {ServerId} responded with status {StatusCode}. Body: '{Body}'", _server.Id, resp.StatusCode, responseBody);
+
+            if (string.IsNullOrWhiteSpace(responseBody))
+            {
+                return new JsonRpcResponse();
             }
 
             var responseObj = JsonSerializer.Deserialize<JsonRpcResponse>(responseBody);
