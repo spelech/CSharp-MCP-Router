@@ -1336,6 +1336,200 @@ namespace McpRouter.Extensions
                 return Results.Ok(scoredResults);
             });
 
+            // 2b. Test Prompts List API
+            app.MapGet("/api/test/prompts", async ([FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger) =>
+            {
+                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
+
+                var tasks = servers.Where(s => s.Type != "custom").Select(async server =>
+                {
+                    try
+                    {
+                        var conn = new BackendConnection(server, httpClient, logger);
+                        if (server.Type != "http" && server.Type != "streamable")
+                        {
+                            await conn.ConnectAsync();
+                        }
+                        var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+                        await conn.SendRequestAsync("initialize", initReq);
+                        backendConnections[server.Id] = conn;
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to connect to server {ServerId} for prompt listing", server.Id);
+                    }
+                });
+                await Task.WhenAll(tasks);
+
+                var routing = new Core.Routing.PromptRoutingManager();
+                var prompts = await routing.ListPromptsAsync("{\"jsonrpc\":\"2.0\",\"method\":\"prompts/list\",\"id\":\"test-list\"}", backendConnections, logger, () => Task.CompletedTask);
+
+                // Dispose backend connections after query
+                foreach (var conn in backendConnections.Values)
+                {
+                    conn.Dispose();
+                }
+
+                return Results.Ok(prompts);
+            });
+
+            // 2c. Test Resources List API
+            app.MapGet("/api/test/resources", async ([FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            {
+                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
+
+                var tasks = servers.Where(s => s.Type != "custom").Select(async server =>
+                {
+                    try
+                    {
+                        var conn = new BackendConnection(server, httpClient, logger);
+                        if (server.Type != "http" && server.Type != "streamable")
+                        {
+                            await conn.ConnectAsync();
+                        }
+                        var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+                        await conn.SendRequestAsync("initialize", initReq);
+                        backendConnections[server.Id] = conn;
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to connect to server {ServerId} for resource listing", server.Id);
+                    }
+                });
+                await Task.WhenAll(tasks);
+
+                var routing = new Core.Routing.ResourceRoutingManager();
+                var resources = await routing.ListResourcesAsync("{\"jsonrpc\":\"2.0\",\"method\":\"resources/list\",\"id\":\"test-list\"}", backendConnections, logger, () => Task.CompletedTask);
+                var templates = await routing.ListResourceTemplatesAsync("{\"jsonrpc\":\"2.0\",\"method\":\"resources/templates/list\",\"id\":\"test-list\"}", backendConnections, logger, () => Task.CompletedTask);
+
+                // Dispose backend connections after query
+                foreach (var conn in backendConnections.Values)
+                {
+                    conn.Dispose();
+                }
+
+                return Results.Ok(new { resources, templates });
+            });
+
+            // 3b. Test Prompt Get API
+            app.MapPost("/api/test/prompts/get", async ([FromBody] TestPromptGetModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger) =>
+            {
+                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
+
+                var serverId = model.ServerId;
+                if (serverId != "router" && !servers.Any(s => s.Id == serverId))
+                {
+                    return Results.NotFound($"Server {serverId} not found");
+                }
+
+                var routing = new Core.Routing.PromptRoutingManager();
+                var promptName = model.PromptName;
+                
+                Func<string, string, string, string> rewriteRequestJson = (json, key, value) => {
+                    try {
+                        using var doc = JsonDocument.Parse(json);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("params", out var paramsProp)) {
+                            var paramsDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(paramsProp.GetRawText());
+                            if (paramsDict != null) {
+                                paramsDict[key] = JsonSerializer.SerializeToElement(value);
+                                var newParams = JsonSerializer.Serialize(paramsDict);
+                                var rootDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
+                                if (rootDict != null) {
+                                    rootDict["params"] = JsonDocument.Parse(newParams).RootElement;
+                                    return JsonSerializer.Serialize(rootDict);
+                                }
+                            }
+                        }
+                    } catch {}
+                    return json;
+                };
+
+                var payload = new {
+                    jsonrpc = "2.0",
+                    id = "test-prompt-id",
+                    method = "prompts/get",
+                    @params = new {
+                        name = promptName,
+                        arguments = model.Arguments.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : model.Arguments
+                    }
+                };
+                var body = JsonSerializer.Serialize(payload);
+
+                if (serverId == "router")
+                {
+                    var res = await routing.GetPromptAsync(promptName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
+                    return Results.Ok(res);
+                }
+
+                var targetServer = servers.First(s => s.Id == serverId);
+                using var conn = new BackendConnection(targetServer, httpClient, logger);
+                if (targetServer.Type != "http" && targetServer.Type != "streamable")
+                {
+                    await conn.ConnectAsync();
+                }
+                var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+                await conn.SendRequestAsync("initialize", initReq);
+                backendConnections[targetServer.Id] = conn;
+
+                var promptRes = await routing.GetPromptAsync(promptName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
+                return Results.Ok(promptRes);
+            });
+
+            // 3c. Test Resource Read API
+            app.MapPost("/api/test/resources/read", async ([FromBody] TestResourceReadModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            {
+                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
+
+                var uri = model.Uri;
+                var routing = new Core.Routing.ResourceRoutingManager();
+                Func<string, string, string, string> rewriteRequestJson = (json, key, value) => json;
+
+                var payload = new {
+                    jsonrpc = "2.0",
+                    id = "test-resource-id",
+                    method = "resources/read",
+                    @params = new {
+                        uri = uri
+                    }
+                };
+                var body = JsonSerializer.Serialize(payload);
+
+                if (uri.StartsWith("router://") || uri.StartsWith("logs://"))
+                {
+                    var localRes = await routing.ReadResourceAsync(uri, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson, sessionManager);
+                    return Results.Ok(localRes);
+                }
+
+                string serverId = "";
+                if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) && parsedUri.Scheme == "mcp")
+                {
+                    serverId = parsedUri.Host;
+                }
+
+                if (string.IsNullOrEmpty(serverId) || !servers.Any(s => s.Id == serverId))
+                {
+                    return Results.BadRequest("Invalid resource URI or server not found");
+                }
+
+                var targetServer = servers.First(s => s.Id == serverId);
+                using var conn = new BackendConnection(targetServer, httpClient, logger);
+                if (targetServer.Type != "http" && targetServer.Type != "streamable")
+                {
+                    await conn.ConnectAsync();
+                }
+                var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+                await conn.SendRequestAsync("initialize", initReq);
+                backendConnections[targetServer.Id] = conn;
+
+                var res = await routing.ReadResourceAsync(uri, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson, sessionManager);
+                return Results.Ok(res);
+            });
+
             app.Run();
             
         }
@@ -1346,6 +1540,18 @@ namespace McpRouter.Extensions
         public string ServerId { get; set; } = string.Empty;
         public string ToolName { get; set; } = string.Empty;
         public JsonElement Arguments { get; set; }
+    }
+
+    public class TestPromptGetModel
+    {
+        public string ServerId { get; set; } = string.Empty;
+        public string PromptName { get; set; } = string.Empty;
+        public JsonElement Arguments { get; set; }
+    }
+
+    public class TestResourceReadModel
+    {
+        public string Uri { get; set; } = string.Empty;
     }
 
     public class SearchModel

@@ -1,5 +1,6 @@
 import { apiRequest } from './api.js';
 import { escapeHtml } from './utils.js';
+import { initPromptsAndResourcesTester } from './tester-prompts-resources.js';
 
 let toolsList = [];
 let currentTool = null;
@@ -7,6 +8,7 @@ let currentTool = null;
 export async function initTester() {
     setupTesterEvents();
     await loadTestTools();
+    await initPromptsAndResourcesTester();
 }
 
 async function loadTestTools() {

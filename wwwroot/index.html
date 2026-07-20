@@ -130,49 +130,114 @@
 
         <!-- View 2: Test Bench -->
         <div id="view-testbench" class="view-panel">
+            <div class="tester-tabs" style="justify-content: flex-start; gap: 15px; margin-bottom: 20px; border-bottom: 1px solid var(--border); padding-bottom: 10px; width: 100%;">
+                <button type="button" class="tester-tab-btn active tb-nav-btn" data-tb-view="tb-tools"><i class="fa-solid fa-screwdriver-wrench"></i> Tools</button>
+                <button type="button" class="tester-tab-btn tb-nav-btn" data-tb-view="tb-prompts"><i class="fa-solid fa-comments"></i> Prompts</button>
+                <button type="button" class="tester-tab-btn tb-nav-btn" data-tb-view="tb-resources"><i class="fa-solid fa-file-invoice"></i> Resources</button>
+            </div>
+            
             <div class="tester-container">
-                <!-- Left Column: Tool Execution & Console -->
+                <!-- Left Column: Tool/Prompt/Resource Execution -->
                 <div class="tester-panel">
-                    <div class="glass-card">
-                        <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Interactive Tool Tester</h2>
-                        <form id="tester-form">
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label for="tester-server">Server</label>
-                                    <select id="tester-server" required>
-                                        <option value="">-- Choose Server --</option>
-                                    </select>
+                    <div id="tb-tools" class="tb-view-panel active">
+                        <div class="glass-card">
+                            <h2><i class="fa-solid fa-wand-magic-sparkles"></i> Interactive Tool Tester</h2>
+                            <form id="tester-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="tester-server">Server</label>
+                                        <select id="tester-server" required>
+                                            <option value="">-- Choose Server --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="tester-tool">Tool</label>
+                                        <select id="tester-tool" required>
+                                            <option value="">-- Choose Tool --</option>
+                                        </select>
+                                    </div>
                                 </div>
-                                <div class="form-group">
-                                    <label for="tester-tool">Tool</label>
-                                    <select id="tester-tool" required>
-                                        <option value="">-- Choose Tool --</option>
-                                    </select>
+
+                                <div class="tester-tabs">
+                                    <button type="button" class="tester-tab-btn active" data-tab="form">Interactive Form</button>
+                                    <button type="button" class="tester-tab-btn" data-tab="json">Raw JSON Input</button>
                                 </div>
-                            </div>
 
-                            <div class="tester-tabs">
-                                <button type="button" class="tester-tab-btn active" data-tab="form">Interactive Form</button>
-                                <button type="button" class="tester-tab-btn" data-tab="json">Raw JSON Input</button>
-                            </div>
-
-                            <div id="tester-tab-form" class="tester-tab-content active">
-                                <div id="dynamic-form-fields">
-                                    <div class="empty-state">Select a tool to generate parameters.</div>
+                                <div id="tester-tab-form" class="tester-tab-content active">
+                                    <div id="dynamic-form-fields">
+                                        <div class="empty-state">Select a tool to generate parameters.</div>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div id="tester-tab-json" class="tester-tab-content">
-                                <div class="form-group">
-                                    <label for="tester-raw-json">Arguments (JSON)</label>
-                                    <textarea id="tester-raw-json" rows="8" placeholder="{}"></textarea>
+                                <div id="tester-tab-json" class="tester-tab-content">
+                                    <div class="form-group">
+                                        <label for="tester-raw-json">Arguments (JSON)</label>
+                                        <textarea id="tester-raw-json" rows="8" placeholder="{}"></textarea>
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div style="margin-top: 20px;">
-                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-play"></i> Run Tool</button>
-                            </div>
-                        </form>
+                                <div style="margin-top: 20px;">
+                                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-play"></i> Run Tool</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div id="tb-prompts" class="tb-view-panel" style="display: none;">
+                        <div class="glass-card">
+                            <h2><i class="fa-solid fa-comments"></i> Interactive Prompt Tester</h2>
+                            <form id="prompt-tester-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="tester-prompt-server">Server</label>
+                                        <select id="tester-prompt-server" required>
+                                            <option value="">-- Choose Server --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="tester-prompt-name">Prompt</label>
+                                        <select id="tester-prompt-name" required>
+                                            <option value="">-- Choose Prompt --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="prompt-dynamic-fields" style="margin-top: 15px;">
+                                    <div class="empty-state">Select a prompt to generate arguments.</div>
+                                </div>
+                                <div style="margin-top: 20px;">
+                                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-play"></i> Get Prompt Messages</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div id="tb-resources" class="tb-view-panel" style="display: none;">
+                        <div class="glass-card">
+                            <h2><i class="fa-solid fa-file-invoice"></i> Interactive Resource Tester</h2>
+                            <form id="resource-tester-form">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="tester-resource-server">Server</label>
+                                        <select id="tester-resource-server" required>
+                                            <option value="">-- Choose Server --</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="tester-resource-name">Resource</label>
+                                        <select id="tester-resource-name" required>
+                                            <option value="">-- Choose Resource / Template --</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="form-group" style="margin-top: 15px;">
+                                    <label for="tester-resource-uri">Resource URI</label>
+                                    <input type="text" id="tester-resource-uri" placeholder="e.g. mcp://plex/library/sections" required>
+                                </div>
+                                <div style="margin-top: 20px;">
+                                    <button type="submit" class="btn btn-primary"><i class="fa-solid fa-play"></i> Read Resource</button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
 
