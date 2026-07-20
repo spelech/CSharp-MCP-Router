@@ -145,6 +145,11 @@ namespace McpRouter.Core.Transports
             await SendRequestAsync(method, bodyJson);
         }
 
+        public Task SendResponseAsync(string responseJson)
+        {
+            return Task.CompletedTask;
+        }
+
         public void Dispose()
         {
             _cts.Cancel();

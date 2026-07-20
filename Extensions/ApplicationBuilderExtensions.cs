@@ -203,8 +203,7 @@ namespace McpRouter.Extensions
                 // Determine if this is a subsequent request for an existing stateless/global session
                 bool isSubsequentRequest = httpContext.Request.Method == "POST" && 
                                            method != "initialize" && 
-                                           method != "server/discover" && 
-                                           method != string.Empty;
+                                           method != "server/discover";
 
                 if (isSubsequentRequest)
                 {
@@ -222,6 +221,34 @@ namespace McpRouter.Extensions
                     logger.LogInformation("Routing stateless POST /sse request method {Method} to global session", method);
                     try
                     {
+                        if (string.IsNullOrEmpty(method))
+                        {
+                            if (id != null)
+                            {
+                                var idStr = id.Value.GetString() ?? id.Value.GetRawText();
+                                if (activeSession.TryHandleClientResponse(idStr, requestBody))
+                                {
+                                    httpContext.Response.StatusCode = 202;
+                                    return;
+                                }
+                            }
+                            httpContext.Response.StatusCode = 400;
+                            return;
+                        }
+
+                        if (method == "notifications/cancelled")
+                        {
+                            using var doc = JsonDocument.Parse(requestBody);
+                            var root = doc.RootElement;
+                            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("requestId", out var reqIdProp))
+                            {
+                                var reqId = reqIdProp.GetString() ?? reqIdProp.GetRawText();
+                                activeSession.CancelRequest(reqId);
+                            }
+                            httpContext.Response.StatusCode = 202;
+                            return;
+                        }
+
                         if (method == "tools/list")
                         {
                             var tools = await activeSession.ListToolsAsync(requestBody);
@@ -735,6 +762,14 @@ namespace McpRouter.Extensions
                     
                     if (!root.TryGetProperty("method", out var methodProp))
                     {
+                        if (root.TryGetProperty("id", out var idPropClient))
+                        {
+                            var idStr = idPropClient.GetString() ?? idPropClient.GetRawText();
+                            if (session.TryHandleClientResponse(idStr, body))
+                            {
+                                return Results.Accepted();
+                            }
+                        }
                         return Results.BadRequest(new { error = "Invalid JSON-RPC: missing method" });
                     }
             
@@ -925,6 +960,16 @@ namespace McpRouter.Extensions
                             return Results.Accepted();
                         }
                         return Results.BadRequest(new { error = "Invalid prompts/get: missing name parameter" });
+                    }
+                    else if (method == "notifications/cancelled")
+                    {
+                        if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("requestId", out var reqIdProp))
+                        {
+                            var reqId = reqIdProp.GetString() ?? reqIdProp.GetRawText();
+                            session.CancelRequest(reqId);
+                        }
+                        await session.BroadcastNotificationAsync(method, body);
+                        return Results.Accepted();
                     }
                     else if (method.StartsWith("notifications/"))
                     {

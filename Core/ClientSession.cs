@@ -33,6 +33,8 @@ namespace McpRouter
         private readonly CancellationTokenSource _cts = new();
         private string _lastInitializeRequest = string.Empty;
         private readonly List<Task> _backendInitTasks = new();
+        private readonly ConcurrentDictionary<string, CancellationTokenSource> _activeRequestCancellationTokens = new();
+        private readonly ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> _clientPendingRequests = new();
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -256,7 +258,104 @@ namespace McpRouter
 
         public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db)
         {
-            return await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson);
+            string? requestId = null;
+            using (var cts = new CancellationTokenSource())
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(body);
+                    var root = doc.RootElement;
+                    if (root.TryGetProperty("id", out var idProp))
+                    {
+                        requestId = idProp.GetString() ?? idProp.GetRawText();
+                        _activeRequestCancellationTokens[requestId] = cts;
+                    }
+                }
+                catch { }
+
+                try
+                {
+                    return await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token);
+                }
+                finally
+                {
+                    if (requestId != null)
+                    {
+                        _activeRequestCancellationTokens.TryRemove(requestId, out _);
+                    }
+                }
+            }
+        }
+
+        public void CancelRequest(string requestId)
+        {
+            if (_activeRequestCancellationTokens.TryRemove(requestId, out var cts))
+            {
+                try
+                {
+                    cts.Cancel();
+                    _logger.LogInformation("Cancelled active request: {RequestId}", requestId);
+                }
+                catch (ObjectDisposedException) { }
+            }
+        }
+
+        public bool TryHandleClientResponse(string requestId, string responseJson)
+        {
+            if (_clientPendingRequests.TryRemove(requestId, out var tcs))
+            {
+                try
+                {
+                    var response = JsonSerializer.Deserialize<JsonRpcResponse>(responseJson, _jsonOptions);
+                    if (response != null)
+                    {
+                        tcs.SetResult(response);
+                        return true;
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to parse client response for ID {RequestId}", requestId);
+                }
+                tcs.TrySetResult(new JsonRpcResponse { Id = requestId, Error = new JsonRpcError { Code = -32603, Message = "Failed to parse response payload." } });
+                return true;
+            }
+            return false;
+        }
+
+        public async Task<JsonRpcResponse> ForwardRequestToClientAsync(JsonRpcRequest request)
+        {
+            var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+            var requestId = request.Id?.ToString() ?? Guid.NewGuid().ToString("N");
+            
+            _clientPendingRequests[requestId] = tcs;
+
+            var clientRequest = new {
+                jsonrpc = "2.0",
+                method = request.Method,
+                id = requestId,
+                @params = request.Params
+            };
+            
+            await WriteMessageAsync(clientRequest);
+
+            using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
+            using var reg = cts.Token.Register(() => tcs.TrySetCanceled());
+            try
+            {
+                return await tcs.Task;
+            }
+            catch (TaskCanceledException)
+            {
+                return new JsonRpcResponse {
+                    Id = requestId,
+                    Error = new JsonRpcError { Code = -32000, Message = "Sampling request timed out or cancelled by client." }
+                };
+            }
+            finally
+            {
+                _clientPendingRequests.TryRemove(requestId, out _);
+            }
         }
 
 

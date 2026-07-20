@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Net.Http;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
@@ -13,6 +14,11 @@ namespace McpRouter
         private readonly McpServer _server;
         private readonly ITransport _transport;
         private readonly JsonRpcStateManager _stateManager;
+        
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            Converters = { new JsonRpcMessageConverter() }
+        };
         
         public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests => _stateManager.PendingRequests;
         public TimeSpan RequestTimeout { get => _transport.RequestTimeout; set => _transport.RequestTimeout = value; }
@@ -81,6 +87,12 @@ namespace McpRouter
         public async Task SendNotificationAsync(string method, string bodyJson)
         {
             await _transport.SendNotificationAsync(method, bodyJson);
+        }
+
+        public async Task SendResponseAsync(JsonRpcResponse response)
+        {
+            var json = JsonSerializer.Serialize(response, _jsonOptions);
+            await _transport.SendResponseAsync(json);
         }
 
         public void Dispose()

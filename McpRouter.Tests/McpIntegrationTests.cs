@@ -736,5 +736,99 @@ namespace McpRouter.Tests
             json.Should().Contain("File locked");
             json.Should().Contain("diagnosing");
         }
+
+        [Fact]
+        public async Task ErrorTransformation_Cancellation_And_Sampling_Works_Correctly()
+        {
+            // Arrange
+            var servers = new List<McpServer>
+            {
+                new McpServer { Id = "testserver1", DisplayName = "Test Server 1", Url = "http://testserver1/mcp", Type = "http", Enabled = true }
+            };
+
+            var session = CreateSession(servers, out var httpHandler);
+
+            httpHandler.Handler = async (req) =>
+            {
+                var body = req.Content != null ? await req.Content.ReadAsStringAsync() : "";
+                if (body.Contains("initialize"))
+                {
+                    return CreateJsonResponse(new
+                    {
+                        jsonrpc = "2.0",
+                        id = "auto-init",
+                        result = new { protocolVersion = "2024-11-05" }
+                    });
+                }
+                else if (body.Contains("tools/list"))
+                {
+                    return CreateJsonResponse(new
+                    {
+                        jsonrpc = "2.0",
+                        id = "tools-list-id",
+                        result = new
+                        {
+                            tools = new[]
+                            {
+                                new { name = "fail_tool", description = "A tool that fails", inputSchema = new { } }
+                            }
+                        }
+                    });
+                }
+                else if (body.Contains("fail_tool"))
+                {
+                    if (body.Contains("test-call-cancel"))
+                    {
+                        await Task.Delay(2000);
+                    }
+                    return CreateJsonResponse(new
+                    {
+                        jsonrpc = "2.0",
+                        id = "tool-call-id",
+                        error = new
+                        {
+                            code = -32000,
+                            message = "Permission denied: Invalid API Key"
+                        }
+                    });
+                }
+                return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            };
+
+            // Initialize cache
+            await session.ListToolsAsync("{\"jsonrpc\":\"2.0\",\"id\":1}");
+
+            // Act 1: Actionable Error Transformation
+            var callBody = "{\"jsonrpc\":\"2.0\",\"id\":\"test-call-1\",\"method\":\"tools/call\",\"params\":{\"name\":\"testserver1__fail_tool\",\"arguments\":{}}}";
+            var result = await session.CallToolAsync("testserver1__fail_tool", callBody, _db);
+            result.Should().NotBeNull();
+            var resultJson = JsonSerializer.Serialize(result);
+            resultJson.Should().Contain("isError");
+            resultJson.Should().Contain("Authentication/Authorization failure");
+            resultJson.Should().Contain("remediation");
+
+            // Act 2: Cancellation
+            var cancelBody = "{\"jsonrpc\":\"2.0\",\"id\":\"test-call-cancel\",\"method\":\"tools/call\",\"params\":{\"name\":\"testserver1__fail_tool\",\"arguments\":{}}}";
+            var cancelTask = session.CallToolAsync("testserver1__fail_tool", cancelBody, _db);
+            await Task.Delay(100);
+            // Simulate client cancellation
+            session.CancelRequest("test-call-cancel");
+            var cancelResult = await cancelTask;
+            var cancelJson = JsonSerializer.Serialize(cancelResult);
+            // WaitAsync cancellation check should return the cancellation error text
+            cancelJson.Should().Contain("cancelled");
+
+            // Act 3: Bidirectional Client Response / Sampling
+            var sampleRequest = new JsonRpcRequest {
+                Method = "sampling/createMessage",
+                Id = "sample-request-1",
+                Params = JsonDocument.Parse("{\"prompt\":\"Hello\"}").RootElement
+            };
+            var forwardTask = session.ForwardRequestToClientAsync(sampleRequest);
+            session.TryHandleClientResponse("sample-request-1", "{\"jsonrpc\":\"2.0\",\"id\":\"sample-request-1\",\"result\":{\"choices\":[]}}");
+            var sampleResponse = await forwardTask;
+            sampleResponse.Should().NotBeNull();
+            sampleResponse.Id?.ToString().Should().Be("sample-request-1");
+        }
     }
 }

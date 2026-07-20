@@ -168,6 +168,39 @@ namespace McpRouter.Core.Routing
             HttpClient httpClient,
             IEmbeddingService embeddingService,
             Func<Task> ensureBackendsInitializedAsync,
+            Func<string, string, string, string> rewriteRequestJson,
+            CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                var task = CallToolInternalAsync(toolName, body, db, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson);
+                return await task.WaitAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.LogWarning("Execution of tool '{ToolName}' was cancelled.", toolName);
+                return new {
+                    isError = true,
+                    content = new[] {
+                        new {
+                            type = "text",
+                            text = "Error: request was cancelled by the client."
+                        }
+                    }
+                };
+            }
+        }
+
+        private async Task<object> CallToolInternalAsync(
+            string toolName, 
+            string body, 
+            McpRouter.Models.RouterDbContext db,
+            ConcurrentDictionary<string, BackendConnection> backendConnections,
+            IEnumerable<McpServer> servers,
+            ILogger logger,
+            HttpClient httpClient,
+            IEmbeddingService embeddingService,
+            Func<Task> ensureBackendsInitializedAsync,
             Func<string, string, string, string> rewriteRequestJson)
         {
             await ensureBackendsInitializedAsync();
@@ -342,10 +375,86 @@ namespace McpRouter.Core.Routing
                     routingBody = rewriteRequestJson(body, "name", realToolName);
                 }
                 
-                return await conn.SendRequestAsync("tools/call", routingBody);
+                try
+                {
+                    var resp = await conn.SendRequestAsync("tools/call", routingBody);
+                    if (resp.Error != null)
+                    {
+                        var transformed = TransformError(resp.Error, toolName, serverId);
+                        return new {
+                            isError = true,
+                            content = new[] {
+                                new {
+                                    type = "text",
+                                    text = transformed
+                                }
+                            }
+                        };
+                    }
+                    return resp;
+                }
+                catch (Exception ex)
+                {
+                    var transformed = TransformException(ex, toolName, serverId);
+                    return new {
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = transformed
+                            }
+                        }
+                    };
+                }
             }
             
             throw new KeyNotFoundException($"Tool {toolName} not found in routing table.");
+        }
+
+        private string TransformError(JsonRpcError error, string toolName, string serverId)
+        {
+            var suggestion = GetActionableSuggestion(error.Message, toolName, serverId);
+            var errObj = new {
+                error = error.Message,
+                code = error.Code,
+                suggestion = suggestion,
+                remediation = $"Check the logs using resources path: logs://{serverId}/today to diagnose connectivity issues."
+            };
+            return JsonSerializer.Serialize(errObj, new JsonSerializerOptions { WriteIndented = true });
+        }
+
+        private string TransformException(Exception ex, string toolName, string serverId)
+        {
+            var suggestion = GetActionableSuggestion(ex.Message, toolName, serverId);
+            var errObj = new {
+                error = ex.Message,
+                code = -32603,
+                suggestion = suggestion,
+                remediation = $"Check the logs using resources path: logs://{serverId}/today to diagnose connectivity issues."
+            };
+            return JsonSerializer.Serialize(errObj, new JsonSerializerOptions { WriteIndented = true });
+        }
+
+        private string GetActionableSuggestion(string message, string toolName, string serverId)
+        {
+            var msg = message.ToLowerInvariant();
+            if (msg.Contains("auth") || msg.Contains("unauthorized") || msg.Contains("forbidden") || msg.Contains("key") || msg.Contains("token"))
+            {
+                return $"Authentication/Authorization failure on backend '{serverId}'. Please verify your credentials or api keys in settings.";
+            }
+            if (msg.Contains("timeout") || msg.Contains("deadline") || msg.Contains("timed out"))
+            {
+                return $"Request to '{serverId}' timed out. Please check if the service is running, responsive, or under heavy load.";
+            }
+            if (msg.Contains("conn") || msg.Contains("refused") || msg.Contains("socket") || msg.Contains("unreachable"))
+            {
+                return $"Network connection refused by backend '{serverId}'. Ensure that the container is running and host/port routes are open.";
+            }
+            if (msg.Contains("argument") || msg.Contains("parameter") || msg.Contains("invalid value") || msg.Contains("required"))
+            {
+                return $"Invalid arguments passed to tool '{toolName}'. Please call search_tools to audit the parameters schema.";
+            }
+            return $"An unexpected error occurred while executing '{toolName}' on backend '{serverId}'. Review the backend logs.";
         }
 
         public List<object> GetCachedTools()

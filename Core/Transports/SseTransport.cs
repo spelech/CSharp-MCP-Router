@@ -335,6 +335,21 @@ namespace McpRouter.Core.Transports
             using var res = await _httpClient.SendAsync(req, _cts.Token);
         }
 
+        public async Task SendResponseAsync(string responseJson)
+        {
+            if (_messageUrl == null) return;
+            var content = new StringContent(responseJson, Encoding.UTF8, "application/json");
+            content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+            using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
+            req.Headers.Host = "localhost";
+            ApplyAuthAndCustomHeaders(req);
+            if (!string.IsNullOrEmpty(_sessionId))
+                req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+            
+            using var res = await _httpClient.SendAsync(req, _cts.Token);
+            res.EnsureSuccessStatusCode();
+        }
+
         public void Dispose()
         {
             _cts.Cancel();
