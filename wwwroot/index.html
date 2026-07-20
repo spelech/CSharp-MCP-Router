@@ -104,6 +104,23 @@
                             </table>
                         </div>
                     </div>
+
+                    <div class="glass-card dcr-card" style="margin-top: 20px;">
+                        <h2><i class="fa-solid fa-circle-info"></i> MCP Client Setup Guide</h2>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">
+                            Copy the configuration below to register this gateway as an SSE server in your favorite AI clients.
+                        </p>
+                        
+                        <div class="tester-tabs" style="margin-bottom: 10px;">
+                            <button type="button" class="tester-tab-btn active client-guide-tab" data-client="claude">Claude Desktop</button>
+                            <button type="button" class="tester-tab-btn client-guide-tab" data-client="cursor">Cursor / VSCode</button>
+                        </div>
+
+                        <div class="payload-viewer" style="margin-top: 10px;">
+                            <pre class="code-block" id="client-guide-config" style="max-height: 200px; font-size: 12px;">Loading guide...</pre>
+                        </div>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-copy-client-guide" style="margin-top: 10px; width: 100%;"><i class="fa-solid fa-copy"></i> Copy Configuration</button>
+                    </div>
                 </section>
 
                 <!-- Right Panel: Backend Servers -->
@@ -528,13 +545,47 @@
                         <input type="text" id="custom-file-name" placeholder="e.g. my-custom-prompt.json" required>
                     </div>
                 </div>
+
+                <div class="tester-tabs" id="custom-file-tabs-bar" style="margin-bottom: 15px;">
+                    <button type="button" class="tester-tab-btn active" id="btn-custom-file-tab-editor" style="padding: 6px 12px; font-size: 13px;"><i class="fa-solid fa-code"></i> Raw Code Editor</button>
+                    <button type="button" class="tester-tab-btn" id="btn-custom-file-tab-builder" style="padding: 6px 12px; font-size: 13px;"><i class="fa-solid fa-wand-magic-sparkles"></i> Prompt Builder</button>
+                </div>
                 
-                <div class="form-group">
-                    <label for="custom-file-content">File Content</label>
-                    <textarea id="custom-file-content" rows="15" class="code-block" style="width: 100%; font-family: monospace; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; resize: vertical;" placeholder="File contents..."></textarea>
-                    <small id="custom-file-editor-hint" style="color: var(--text-muted); display: block; margin-top: 5px;">
-                        JSON prompts must match the MCP Prompt template schema (containing "description", "arguments", "messages").
-                    </small>
+                <div id="custom-file-panel-editor">
+                    <div class="form-group">
+                        <label for="custom-file-content">File Content</label>
+                        <textarea id="custom-file-content" rows="15" class="code-block" style="width: 100%; font-family: monospace; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: #fff; padding: 10px; border-radius: 6px; resize: vertical;" placeholder="File contents..."></textarea>
+                        <small id="custom-file-editor-hint" style="color: var(--text-muted); display: block; margin-top: 5px;">
+                            JSON prompts must match the MCP Prompt template schema (containing "description", "arguments", "messages").
+                        </small>
+                    </div>
+                </div>
+
+                <div id="custom-file-panel-builder" style="display: none; max-height: 400px; overflow-y: auto; padding: 15px; border: 1px solid var(--border); border-radius: 6px; background: rgba(0,0,0,0.2); margin-bottom: 15px;">
+                    <div class="form-group">
+                        <label for="builder-prompt-desc">Prompt Description</label>
+                        <input type="text" id="builder-prompt-desc" placeholder="e.g. Assist the user with codebase refactoring">
+                    </div>
+
+                    <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="margin: 0; font-size: 14px;"><i class="fa-solid fa-list-ul"></i> Arguments</h4>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-builder-add-arg" style="padding: 2px 8px; font-size: 11px;"><i class="fa-solid fa-plus"></i> Add Arg</button>
+                        </div>
+                        <div id="builder-args-list" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Dynamically built args -->
+                        </div>
+                    </div>
+
+                    <div style="margin-top: 15px; border-top: 1px solid var(--border); padding-top: 10px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <h4 style="margin: 0; font-size: 14px;"><i class="fa-solid fa-message"></i> Messages</h4>
+                            <button type="button" class="btn btn-secondary btn-sm" id="btn-builder-add-msg" style="padding: 2px 8px; font-size: 11px;"><i class="fa-solid fa-plus"></i> Add Message</button>
+                        </div>
+                        <div id="builder-msgs-list" style="display: flex; flex-direction: column; gap: 8px;">
+                            <!-- Dynamically built messages -->
+                        </div>
+                    </div>
                 </div>
 
                 <div class="modal-footer">

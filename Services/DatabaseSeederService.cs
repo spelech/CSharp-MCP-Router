@@ -36,7 +36,17 @@ namespace McpRouter.Services
                         "EmbeddingApiUrl TEXT, " +
                         "EmbeddingApiKey TEXT, " +
                         "EmbeddingApiModel TEXT, " +
-                        "EmbeddingModelDir TEXT)");
+                        "EmbeddingModelDir TEXT, " +
+                        "RequireManualApproval INTEGER DEFAULT 0)");
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Settings ADD COLUMN RequireManualApproval INTEGER DEFAULT 0");
+                    }
+                    catch
+                    {
+                        // Ignore if column already exists
+                    }
 
                     var hasSettings = db.Settings.Any();
                     if (!hasSettings)

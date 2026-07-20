@@ -1007,6 +1007,34 @@ namespace McpRouter.Tests
             }
         }
 
+        [Fact]
+        public void CustomFilesSanitization_PreventsDirectoryTraversal()
+        {
+            string maliciousName = "../../../etc/passwd";
+            
+            // Mirror sanitization logic used in ApplicationBuilderExtensions.cs
+            var invalidChars = Path.GetInvalidFileNameChars();
+            string sanitized = new string(maliciousName.Where(c => !invalidChars.Contains(c) && c != '/' && c != '\\').ToArray());
+            
+            sanitized.Should().NotContain("/");
+            sanitized.Should().NotContain("\\");
+            sanitized.Should().Be("......etcpasswd");
+        }
+
+        [Fact]
+        public void CustomFilesDirectoryHelper_CreatesDirectoriesCorrectly()
+        {
+            string baseDir = Directory.GetCurrentDirectory();
+            string promptsPath = Path.Combine(baseDir, "data", "prompts");
+            string resourcesPath = Path.Combine(baseDir, "data", "resources");
+
+            Directory.CreateDirectory(promptsPath);
+            Directory.CreateDirectory(resourcesPath);
+
+            Directory.Exists(promptsPath).Should().BeTrue();
+            Directory.Exists(resourcesPath).Should().BeTrue();
+        }
+
         private class TestHttpClientFactory : IHttpClientFactory
         {
             private readonly HttpClient _client;

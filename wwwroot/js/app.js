@@ -35,10 +35,62 @@ document.addEventListener('DOMContentLoaded', () => {
     
     window.actionApproval = actionApproval;
 
+    setupClientGuide();
+
     // Attach form submit listeners
     document.getElementById('server-form').addEventListener('submit', saveServer);
     document.getElementById('client-form').addEventListener('submit', handleClientSubmit);
 });
+
+function setupClientGuide() {
+    const pre = document.getElementById('client-guide-config');
+    const tabs = document.querySelectorAll('.client-guide-tab');
+    const copyBtn = document.getElementById('btn-copy-client-guide');
+    if (!pre || tabs.length === 0 || !copyBtn) return;
+
+    let currentClient = 'claude';
+
+    function renderGuide() {
+        const origin = window.location.origin;
+        if (currentClient === 'claude') {
+            pre.textContent = JSON.stringify({
+                "mcpServers": {
+                    "mcp-router": {
+                        "command": "npx",
+                        "args": [
+                            "-y",
+                            "@modelcontextprotocol/client-sse",
+                            `${origin}/sse?meta=true`
+                        ]
+                    }
+                }
+            }, null, 2);
+        } else {
+            pre.textContent = `Type: SSE\nURL: ${origin}/sse?meta=true\n\nOr JSON client integration configuration block:\n{\n  "mcpServers": {\n    "mcp-router": {\n      "command": "npx",\n      "args": [\n        "-y",\n        "@modelcontextprotocol/client-sse",\n        "${origin}/sse?meta=true"\n      ]\n    }\n  }\n}`;
+        }
+    }
+
+    tabs.forEach(btn => {
+        btn.addEventListener('click', () => {
+            tabs.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            currentClient = btn.dataset.client;
+            renderGuide();
+        });
+    });
+
+    copyBtn.addEventListener('click', () => {
+        navigator.clipboard.writeText(pre.textContent).then(() => {
+            const originalText = copyBtn.innerHTML;
+            copyBtn.innerHTML = '<i class="fa-solid fa-check"></i> Copied!';
+            setTimeout(() => {
+                copyBtn.innerHTML = originalText;
+            }, 2000);
+        });
+    });
+
+    renderGuide();
+}
 
 function initTheme() {
     const toggleBtn = document.getElementById('theme-toggle');
@@ -118,12 +170,13 @@ function setupGlobalNavigation() {
     });
 
     // Sub-Tabs inside Test Bench (Form Input vs Raw JSON Input)
-    const subTabBtns = document.querySelectorAll('.tester-tab-btn');
-    const subTabContents = document.querySelectorAll('.tester-tab-content');
+    const subTabBtns = document.querySelectorAll('#view-testbench .tester-tab-btn');
+    const subTabContents = document.querySelectorAll('#view-testbench .tester-tab-content');
 
     subTabBtns.forEach(btn => {
         btn.addEventListener('click', () => {
             const targetTab = btn.dataset.tab;
+            if (!targetTab) return;
 
             subTabBtns.forEach(b => b.classList.remove('active'));
             subTabContents.forEach(c => c.classList.remove('active'));
