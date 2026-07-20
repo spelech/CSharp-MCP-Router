@@ -199,10 +199,22 @@ The router seamlessly aggregates the following MCP protocol features across all 
 * **Tools** (`tools/list`, `tools/call`)
   * Tools from backends are automatically prefixed with the `serverId` (e.g. `docker__list_containers`).
   * In Meta-Mode, tools are hidden behind the semantic `search_tools` and `execute_tool` proxy layer.
-* **Resources** (`resources/list`, `resources/read`)
+* **Resources & Templates** (`resources/list`, `resources/read`, `resources/templates/list`)
   * URIs are safely mapped to unique virtual namespaces (e.g., `mcp://plex/resource_path`).
-* **Prompts** (`prompts/list`, `prompts/get`)
-  * Like tools, prompts are transparently prefixed and routed to the correct backend.
+  * Supports local built-in resources (`router://status`, `router://active-servers`, and `router://metrics`).
+  * Parameterized resource templates are fully resolved (e.g., `logs://{server_name}/today` dynamically streams filtered backend logs).
+* **Prompts & Meta-Prompts** (`prompts/list`, `prompts/get`)
+  * Downstream prompts are mapped and transparently prefixed under unified catalogs (`{serverId}__{promptName}`).
+  * Built-in local meta-prompts expose ready-to-run system diagnostics workflows (e.g., `router__diagnose_failure`, `router__route_multi_task`, and `router__audit_permissions`).
+* **Autocompletion** (`completion/complete`)
+  * Supports dynamic arguments and template parameters autocompletion.
+* **Sampling & Request Cancellation**
+  * **Sampling Relay**: Bridges backend `sampling/createMessage` requests back to the client event stream to leverage client-side model orchestration.
+  * **Async Cancellation**: Safely stops ongoing execution using CancellationToken cancellation tokens linked to client `notifications/cancelled` events.
+* **Safety Controls & Telemetry**
+  * **Approval Gateway**: Enabling "Require Manual Approval for Dangerous Tools" inside Settings blocks execution of sensitive/mutative backend commands (databases, docker writes, smart home switches) awaiting user input on the dashboard.
+  * **JSON-RPC Stream Log Inspector**: Collapsible viewer filters system logs from raw Client-Gateway and Gateway-Backend JSON-RPC message frames in real-time.
+  * **Token Estimates**: Telemetry charts record characters-based input/output token approximations and execution latencies.
 * **Notifications & Logging**
   * `logMessage`, `resourceUpdated`, and other backend notifications are asynchronously forwarded directly to connected clients in real time.
 
