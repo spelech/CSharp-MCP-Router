@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -66,6 +67,39 @@ namespace McpRouter.Core.Routing
                                 allResources.Add(resourceDict);
                             }
                         }
+                    }
+                }
+            }
+
+            // Load custom file-based resources from data/resources
+            var resourcesDir = Path.Combine(AppContext.BaseDirectory, "data", "resources");
+            if (!Directory.Exists(resourcesDir))
+            {
+                resourcesDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "resources");
+            }
+            if (Directory.Exists(resourcesDir))
+            {
+                foreach (var file in Directory.GetFiles(resourcesDir))
+                {
+                    try
+                    {
+                        var filename = Path.GetFileName(file);
+                        var ext = Path.GetExtension(file).ToLowerInvariant();
+                        var mimeType = "text/plain";
+                        if (ext == ".md") mimeType = "text/markdown";
+                        else if (ext == ".json") mimeType = "application/json";
+                        else if (ext == ".html") mimeType = "text/html";
+
+                        allResources.Add(new Dictionary<string, object> {
+                            { "uri", "router://resources/" + filename },
+                            { "name", "Local File: " + filename },
+                            { "mimeType", mimeType },
+                            { "description", "[custom] User-configured local resource file." }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to load custom resource file {File}", file);
                     }
                 }
             }
@@ -188,6 +222,55 @@ namespace McpRouter.Core.Routing
 
         private object ResolveLocalResource(string uri, ConcurrentDictionary<string, BackendConnection> backendConnections, SessionManager? sessionManager)
         {
+            if (uri.StartsWith("router://resources/"))
+            {
+                var filename = uri.Substring("router://resources/".Length);
+                filename = Path.GetFileName(filename);
+
+                var resourcesDir = Path.Combine(AppContext.BaseDirectory, "data", "resources");
+                if (!Directory.Exists(resourcesDir))
+                {
+                    resourcesDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "resources");
+                }
+                var filePath = Path.Combine(resourcesDir, filename);
+
+                if (File.Exists(filePath))
+                {
+                    try
+                    {
+                        var ext = Path.GetExtension(filePath).ToLowerInvariant();
+                        var mimeType = "text/plain";
+                        if (ext == ".md") mimeType = "text/markdown";
+                        else if (ext == ".json") mimeType = "application/json";
+                        else if (ext == ".html") mimeType = "text/html";
+
+                        var text = File.ReadAllText(filePath);
+                        return new {
+                            contents = new[] {
+                                new {
+                                    uri = uri,
+                                    mimeType = mimeType,
+                                    text = text
+                                }
+                            }
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        return new {
+                            contents = new[] {
+                                new {
+                                    uri = uri,
+                                    mimeType = "text/plain",
+                                    text = $"Error reading local resource file: {ex.Message}"
+                                }
+                            }
+                        };
+                    }
+                }
+                throw new KeyNotFoundException($"Local resource file '{filename}' was not found in data/resources/.");
+            }
+
             string jsonText = "{}";
             if (uri == "router://status")
             {

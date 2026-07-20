@@ -1,4 +1,6 @@
 using System;
+using System.IO;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text.Json;
@@ -941,6 +943,68 @@ namespace McpRouter.Tests
             // Reset settings
             _db.Settings.Remove(settings);
             await _db.SaveChangesAsync();
+        }
+
+        [Fact]
+        public async Task CustomUserPrompts_And_Resources_Work_Correctly()
+        {
+            var baseDir = Directory.GetCurrentDirectory();
+            var promptsDir = Path.Combine(baseDir, "data", "prompts");
+            var resourcesDir = Path.Combine(baseDir, "data", "resources");
+            Directory.CreateDirectory(promptsDir);
+            Directory.CreateDirectory(resourcesDir);
+
+            var promptPath = Path.Combine(promptsDir, "test-prompt.json");
+            var resourcePath = Path.Combine(resourcesDir, "test-resource.md");
+
+            try
+            {
+                var promptContent = @"{
+                    ""description"": ""Test custom template"",
+                    ""arguments"": [
+                        { ""name"": ""name"", ""description"": ""The name"", ""required"": true }
+                    ],
+                    ""messages"": [
+                        {
+                            ""role"": ""user"",
+                            ""content"": {
+                                ""type"": ""text"",
+                                ""text"": ""Hello {{name}}!""
+                            }
+                        }
+                    ]
+                }";
+                File.WriteAllText(promptPath, promptContent);
+
+                var resourceContent = "# Test resource content";
+                File.WriteAllText(resourcePath, resourceContent);
+
+                var promptRouting = new Core.Routing.PromptRoutingManager();
+                var logger = new Mock<ILogger>().Object;
+                var promptsList = await promptRouting.ListPromptsAsync("{}", new Dictionary<string, BackendConnection>(), logger, () => Task.CompletedTask);
+                promptsList.Should().Contain(p => ((Dictionary<string, object>)p)["name"].ToString() == "router__test-prompt");
+
+                var getBody = "{\"params\":{\"name\":\"router__test-prompt\",\"arguments\":{\"name\":\"Wiley\"}}}";
+                var getResult = await promptRouting.GetPromptAsync("router__test-prompt", getBody, new ConcurrentDictionary<string, BackendConnection>(), () => Task.CompletedTask, (j, k, v) => j);
+                getResult.Should().NotBeNull();
+                string promptJson = JsonSerializer.Serialize(getResult);
+                promptJson.Should().Contain("Wiley");
+                promptJson.Should().Contain("Hello Wiley!");
+
+                var resourceRouting = new Core.Routing.ResourceRoutingManager();
+                var resourcesList = await resourceRouting.ListResourcesAsync("{}", new Dictionary<string, BackendConnection>(), logger, () => Task.CompletedTask);
+                resourcesList.Should().Contain(r => ((Dictionary<string, object>)r)["uri"].ToString() == "router://resources/test-resource.md");
+
+                var readResult = await resourceRouting.ReadResourceAsync("router://resources/test-resource.md", "{}", new ConcurrentDictionary<string, BackendConnection>(), () => Task.CompletedTask, (j, k, v) => j, null);
+                readResult.Should().NotBeNull();
+                var readJson = JsonSerializer.Serialize(readResult);
+                readJson.Should().Contain("# Test resource content");
+            }
+            finally
+            {
+                if (File.Exists(promptPath)) File.Delete(promptPath);
+                if (File.Exists(resourcePath)) File.Delete(resourcePath);
+            }
         }
 
         private class TestHttpClientFactory : IHttpClientFactory

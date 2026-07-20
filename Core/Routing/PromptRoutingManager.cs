@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -91,6 +92,50 @@ namespace McpRouter.Core.Routing
                 } }
             });
 
+            // Load custom file-based prompts from data/prompts/
+            var promptsDir = Path.Combine(AppContext.BaseDirectory, "data", "prompts");
+            if (!Directory.Exists(promptsDir))
+            {
+                promptsDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "prompts");
+            }
+            if (Directory.Exists(promptsDir))
+            {
+                foreach (var file in Directory.GetFiles(promptsDir, "*.json"))
+                {
+                    try
+                    {
+                        var name = Path.GetFileNameWithoutExtension(file);
+                        var content = File.ReadAllText(file);
+                        using var doc = JsonDocument.Parse(content);
+                        var root = doc.RootElement;
+
+                        var description = root.TryGetProperty("description", out var descProp) ? descProp.GetString() ?? "" : "Custom user prompt.";
+                        
+                        var argumentsList = new List<object>();
+                        if (root.TryGetProperty("arguments", out var argsProp) && argsProp.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var arg in argsProp.EnumerateArray())
+                            {
+                                var argName = arg.TryGetProperty("name", out var nProp) ? nProp.GetString() ?? "" : "";
+                                var argDesc = arg.TryGetProperty("description", out var dProp) ? dProp.GetString() ?? "" : "";
+                                var argReq = arg.TryGetProperty("required", out var rProp) && rProp.GetBoolean();
+                                argumentsList.Add(new { name = argName, description = argDesc, required = argReq });
+                            }
+                        }
+
+                        allPrompts.Add(new Dictionary<string, object> {
+                            { "name", "router__" + name },
+                            { "description", "[custom] " + description },
+                            { "arguments", argumentsList }
+                        });
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogError(ex, "Failed to load custom prompt file {File}", file);
+                    }
+                }
+            }
+
             return allPrompts;
         }
 
@@ -114,7 +159,7 @@ namespace McpRouter.Core.Routing
             throw new KeyNotFoundException($"Prompt {promptName} not found in routing table.");
         }
 
-        private object ResolveLocalPrompt(string promptName, string body)
+        private object? ResolveLocalPrompt(string promptName, string body)
         {
             using var doc = JsonDocument.Parse(body);
             var root = doc.RootElement;
@@ -123,7 +168,7 @@ namespace McpRouter.Core.Routing
             {
                 foreach (var prop in argsProp.EnumerateObject())
                 {
-                    args[prop.Name] = prop.Value.GetString() ?? string.Empty;
+                    args[prop.Name] = prop.Value.ValueKind == JsonValueKind.String ? prop.Value.GetString() ?? string.Empty : prop.Value.GetRawText();
                 }
             }
 
@@ -147,7 +192,64 @@ namespace McpRouter.Core.Routing
             }
             else
             {
-                throw new KeyNotFoundException($"Built-in prompt {promptName} is not implemented.");
+                // Check custom prompt templates inside data/prompts/
+                var rawName = promptName.Substring("router__".Length);
+                var promptsDir = Path.Combine(AppContext.BaseDirectory, "data", "prompts");
+                if (!Directory.Exists(promptsDir))
+                {
+                    promptsDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "prompts");
+                }
+                var filePath = Path.Combine(promptsDir, $"{rawName}.json");
+                if (File.Exists(filePath))
+                {
+                    try
+                    {
+                        var fileContent = File.ReadAllText(filePath);
+                        using var fileDoc = JsonDocument.Parse(fileContent);
+                        var fileRoot = fileDoc.RootElement;
+
+                        var compiledMessages = new List<object>();
+                        if (fileRoot.TryGetProperty("messages", out var messagesProp) && messagesProp.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var msg in messagesProp.EnumerateArray())
+                            {
+                                var role = msg.GetProperty("role").GetString() ?? "user";
+                                var contentObj = msg.GetProperty("content");
+                                
+                                if (contentObj.ValueKind == JsonValueKind.Object)
+                                {
+                                    var type = contentObj.GetProperty("type").GetString() ?? "text";
+                                    var msgText = contentObj.GetProperty("text").GetString() ?? "";
+
+                                    // Interpolate arguments in msgText
+                                    foreach (var arg in args)
+                                    {
+                                        msgText = msgText.Replace("{{" + arg.Key + "}}", arg.Value);
+                                    }
+
+                                    compiledMessages.Add(new {
+                                        role = role,
+                                        content = new {
+                                            type = type,
+                                            text = msgText
+                                        }
+                                    });
+                                }
+                            }
+                        }
+
+                        return new {
+                            description = fileRoot.TryGetProperty("description", out var descProp) ? descProp.GetString() : "Custom prompt template.",
+                            messages = compiledMessages
+                        };
+                    }
+                    catch (Exception ex)
+                    {
+                        throw new InvalidOperationException($"Error compiling custom prompt '{promptName}': {ex.Message}", ex);
+                    }
+                }
+                
+                throw new KeyNotFoundException($"Prompt {promptName} is not registered on the router.");
             }
 
             return new {
