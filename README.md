@@ -56,6 +56,21 @@ graph TD
 
 ---
 
+## 📡 Supported Transports & Protocols
+
+The MCP Router supports both legacy and modern transport implementations of the Model Context Protocol, automatically negotiating them based on server configuration:
+
+1. **Server-Sent Events (SSE) (Stateful / Legacy)**:
+   * Used by servers implementing the legacy SSE client-server model (e.g., establishing a GET connection to receive events and relaying POST commands via `/messages`).
+   * Monitored asynchronously with active session tracking.
+
+2. **Stateless Streamable HTTP (Modern MCP SDKs)**:
+   * Native support for newer Node.js/Python SDK implementations that serve stateless endpoints (e.g., standard `FastMCP` or Hono-based packages).
+   * **No-Hang Streaming Buffer**: Implements line-by-line stream reading (`ReadLineAsync`) on chunked `text/event-stream` responses. It breaks and returns the parsed JSON-RPC payload as soon as the first `data:` or `{` block is read, preventing connections from hanging indefinitely.
+   * **Empty-Response Resilience**: Gracefully handles `202 Accepted` empty-body payloads for client-to-server notifications (like `notifications/initialized`), avoiding protocol deserialization crashes.
+
+---
+
 ## 🚀 Setup & Usage
 
 ### 1. Configuration (`.env`)

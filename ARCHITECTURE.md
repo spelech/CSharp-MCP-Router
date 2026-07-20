@@ -13,8 +13,8 @@ The router's core logic resides within the `/Core` namespace, which is broken do
 ### 2. Transport Layer (`McpRouter.Core.Transports`)
 The transport system abstracts the physical connection to backend servers.
 - **`ITransport`**: Defines the standard interface for sending requests, notifications, and starting background readers.
-- **`SseTransport`**: Implements asynchronous, persistent Server-Sent Events connections.
-- **`HttpTransport`**: Implements synchronous POST-based HTTP connections.
+- **`SseTransport`**: Implements asynchronous, persistent Server-Sent Events connections (Stateful / Legacy).
+- **`HttpTransport`**: Implements stateless Streamable HTTP connections (Modern). Reads response streams line-by-line using a streaming buffer to prevent hanging on persistent chunked event streams, and handles empty responses for one-way notifications.
 - **`JsonRpcStateManager`**: A thread-safe concurrency manager that tracks pending JSON-RPC requests across transports using `ConcurrentDictionary` and `TaskCompletionSource`.
 
 ### 3. Routing Layer (`McpRouter.Core.Routing`)
