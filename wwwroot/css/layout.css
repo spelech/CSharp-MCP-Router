@@ -1,3 +1,7 @@
+html {
+    scrollbar-gutter: stable;
+}
+
 * {
     box-sizing: border-box;
     margin: 0;
@@ -11,7 +15,7 @@ body {
     min-height: 100vh;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
     position: relative;
     overflow-x: hidden;
 }

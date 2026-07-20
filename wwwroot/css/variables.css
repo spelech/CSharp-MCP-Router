@@ -8,9 +8,9 @@
     --border-hover: #3f3f46;
     --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
     
-    --primary: #a855f7; /* Violet */
-    --primary-glow: rgba(168, 85, 247, 0.15);
-    --secondary: #6366f1; /* Indigo */
+    --primary: #f97316; /* Orange */
+    --primary-glow: rgba(249, 115, 22, 0.15);
+    --secondary: #eab308; /* Yellow */
     --accent: #14b8a6; /* Teal */
     
     --text-main: #fafafa;
@@ -30,9 +30,9 @@
     --border-hover: #d4d4d8;
     --card-shadow: 0 4px 20px 0 rgba(0, 0, 0, 0.05);
     
-    --primary: #7c3aed; /* Violet */
-    --primary-glow: rgba(124, 58, 237, 0.1);
-    --secondary: #4f46e5;
+    --primary: #ea580c; /* Orange */
+    --primary-glow: rgba(234, 88, 12, 0.1);
+    --secondary: #ca8a04; /* Yellow */
     --accent: #0d9488;
     
     --text-main: #09090b;
