@@ -830,5 +830,124 @@ namespace McpRouter.Tests
             sampleResponse.Should().NotBeNull();
             sampleResponse.Id?.ToString().Should().Be("sample-request-1");
         }
+
+        [Fact]
+        public async Task ManualApproval_And_Telemetry_Works_Correctly()
+        {
+            // Arrange
+            var servers = new List<McpServer>
+            {
+                new McpServer { Id = "ha", DisplayName = "Home Assistant", Url = "http://ha/mcp", Type = "http", Enabled = true }
+            };
+
+            var serviceProvider = new Mock<IServiceProvider>().Object;
+            var logger = new Mock<ILogger>().Object;
+            var smLogger = new Mock<ILogger<SessionManager>>().Object;
+
+            var httpHandler = new MockHttpMessageHandler();
+            var httpClient = new HttpClient(httpHandler);
+            var sessionManager = new SessionManager(serviceProvider, new TestHttpClientFactory(httpClient), smLogger);
+
+            var session = new ClientSession("test-session", null!, servers, httpClient, new Mock<IEmbeddingService>().Object, sessionManager, logger);
+            session.IsMetaMode = false;
+
+            httpHandler.Handler = async (req) =>
+            {
+                var body = req.Content != null ? await req.Content.ReadAsStringAsync() : "";
+                if (body.Contains("initialize"))
+                {
+                    return CreateJsonResponse(new
+                    {
+                        jsonrpc = "2.0",
+                        id = "auto-init",
+                        result = new { protocolVersion = "2024-11-05" }
+                    });
+                }
+                else if (body.Contains("tools/list"))
+                {
+                    return CreateJsonResponse(new
+                    {
+                        jsonrpc = "2.0",
+                        id = "tools-list-id",
+                        result = new
+                        {
+                            tools = new[]
+                            {
+                                new { name = "turn_on", description = "Turn on switch", inputSchema = new { } }
+                            }
+                        }
+                    });
+                }
+                else if (body.Contains("turn_on"))
+                {
+                    return CreateJsonResponse(new
+                    {
+                        jsonrpc = "2.0",
+                        id = "tool-call-id",
+                        result = new { success = true }
+                    });
+                }
+                return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            };
+
+            // Set manual approval to true in settings
+            var settings = _db.Settings.FirstOrDefault();
+            if (settings == null)
+            {
+                settings = new RouterSettings { Id = "test-default", RequireManualApproval = true };
+                _db.Settings.Add(settings);
+            }
+            else
+            {
+                settings.RequireManualApproval = true;
+                _db.Settings.Update(settings);
+            }
+            await _db.SaveChangesAsync();
+
+            var loadedSettings = _db.Settings.FirstOrDefault();
+            loadedSettings.Should().NotBeNull();
+            loadedSettings!.RequireManualApproval.Should().BeTrue();
+
+            // Act 1: Call sensitive tool "ha-mcp__turn_on" -> blocks waiting for approval!
+            await session.ListToolsAsync("{\"jsonrpc\":\"2.0\",\"id\":1}");
+
+            var callBody = "{\"jsonrpc\":\"2.0\",\"id\":\"appr-call-1\",\"method\":\"tools/call\",\"params\":{\"name\":\"ha__turn_on\",\"arguments\":{}}}";
+            var approvalTask = session.CallToolAsync("ha__turn_on", callBody, _db);
+
+            // Await a short moment for it to block and register approval
+            await Task.Delay(200);
+
+            if (approvalTask.IsFaulted)
+            {
+                throw approvalTask.Exception!.Flatten().InnerException!;
+            }
+
+            // SessionManager should have 1 pending approval!
+            var sm = session.GetSessionManager();
+            sm.Should().NotBeNull();
+            sm!.PendingApprovals.Should().NotBeEmpty();
+
+            var approval = sm.PendingApprovals.Values.First();
+            approval.ToolName.Should().Be("ha__turn_on");
+
+            // Approve it!
+            sm.PendingApprovals.TryRemove(approval.Id, out _);
+            approval.Tcs.SetResult(true);
+
+            var result = await approvalTask;
+            var resultJson = JsonSerializer.Serialize(result);
+            resultJson.Should().Contain("success");
+
+            // Reset settings
+            _db.Settings.Remove(settings);
+            await _db.SaveChangesAsync();
+        }
+
+        private class TestHttpClientFactory : IHttpClientFactory
+        {
+            private readonly HttpClient _client;
+            public TestHttpClientFactory(HttpClient client) => _client = client;
+            public HttpClient CreateClient(string name) => _client;
+        }
     }
 }

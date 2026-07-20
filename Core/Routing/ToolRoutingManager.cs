@@ -169,11 +169,12 @@ namespace McpRouter.Core.Routing
             IEmbeddingService embeddingService,
             Func<Task> ensureBackendsInitializedAsync,
             Func<string, string, string, string> rewriteRequestJson,
-            CancellationToken cancellationToken = default)
+            CancellationToken cancellationToken = default,
+            SessionManager? sessionManager = null)
         {
             try
             {
-                var task = CallToolInternalAsync(toolName, body, db, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson);
+                var task = CallToolInternalAsync(toolName, body, db, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
                 return await task.WaitAsync(cancellationToken);
             }
             catch (OperationCanceledException)
@@ -201,7 +202,8 @@ namespace McpRouter.Core.Routing
             HttpClient httpClient,
             IEmbeddingService embeddingService,
             Func<Task> ensureBackendsInitializedAsync,
-            Func<string, string, string, string> rewriteRequestJson)
+            Func<string, string, string, string> rewriteRequestJson,
+            SessionManager? sessionManager)
         {
             await ensureBackendsInitializedAsync();
 
@@ -282,7 +284,7 @@ namespace McpRouter.Core.Routing
 
                 try
                 {
-                    var result = await ExecuteTargetToolAsync(targetName, targetBody, db, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson);
+                    var result = await ExecuteTargetToolAsync(targetName, targetBody, db, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
                     return result;
                 }
                 catch (Exception ex)
@@ -299,7 +301,7 @@ namespace McpRouter.Core.Routing
                 }
             }
 
-            return await ExecuteTargetToolAsync(toolName, body, db, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson);
+            return await ExecuteTargetToolAsync(toolName, body, db, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
         }
 
         private async Task<object> ExecuteTargetToolAsync(
@@ -311,7 +313,8 @@ namespace McpRouter.Core.Routing
             ILogger logger,
             HttpClient httpClient,
             Func<Task> ensureBackendsInitializedAsync,
-            Func<string, string, string, string> rewriteRequestJson)
+            Func<string, string, string, string> rewriteRequestJson,
+            SessionManager? sessionManager)
         {
             var customTool = McpRouter.CustomTools.CustomToolRegistry.Get(toolName);
             if (customTool != null)
@@ -366,6 +369,24 @@ namespace McpRouter.Core.Routing
             if (_toolRoutingTable.TryGetValue(toolName, out var serverId) && backendConnections.TryGetValue(serverId, out var conn))
             {
                 logger.LogInformation("Routing tool call '{ToolName}' to server '{ServerId}'", toolName, serverId);
+
+                var settings = db.Settings.FirstOrDefault();
+                if (settings != null && settings.RequireManualApproval && IsSensitiveTool(toolName))
+                {
+                    var approved = await RequestManualApprovalAsync(toolName, body, sessionManager, serverId, logger);
+                    if (!approved)
+                    {
+                        return new {
+                            isError = true,
+                            content = new[] {
+                                new {
+                                    type = "text",
+                                    text = "Error: tool execution denied by security policy (Requires Manual Approval)."
+                                }
+                            }
+                        };
+                    }
+                }
                 
                 string routingBody = body;
                 var prefix = serverId + "__";
@@ -455,6 +476,52 @@ namespace McpRouter.Core.Routing
                 return $"Invalid arguments passed to tool '{toolName}'. Please call search_tools to audit the parameters schema.";
             }
             return $"An unexpected error occurred while executing '{toolName}' on backend '{serverId}'. Review the backend logs.";
+        }
+
+        private bool IsSensitiveTool(string toolName)
+        {
+            var name = toolName.ToLowerInvariant();
+            return name.Contains("docker") || 
+                   name.Contains("actual") || 
+                   name.Contains("write") || 
+                   name.Contains("delete") || 
+                   name.Contains("update") || 
+                   name.Contains("remove") || 
+                   name.Contains("restart") || 
+                   name.Contains("stop") || 
+                   name.Contains("start") || 
+                   name.Contains("ha__") || 
+                   name.Contains("ha-mcp__") || 
+                   name.Contains("unifi");
+        }
+
+        private async Task<bool> RequestManualApprovalAsync(string toolName, string body, SessionManager? sessionManager, string serverId, ILogger logger)
+        {
+            if (sessionManager == null) return true;
+            
+            string argumentsText = "{}";
+            try
+            {
+                using var doc = JsonDocument.Parse(body);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("arguments", out var argsProp))
+                {
+                    argumentsText = JsonSerializer.Serialize(argsProp, new JsonSerializerOptions { WriteIndented = true });
+                }
+            }
+            catch { }
+
+            var approval = new PendingApproval
+            {
+                ToolName = toolName,
+                Arguments = argumentsText,
+                SessionId = serverId
+            };
+
+            sessionManager.PendingApprovals[approval.Id] = approval;
+            logger.LogWarning("Tool call '{ToolName}' is pending user approval. Approval ID: {ApprovalId}", toolName, approval.Id);
+
+            return await approval.Tcs.Task;
         }
 
         public List<object> GetCachedTools()

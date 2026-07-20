@@ -192,6 +192,7 @@ namespace McpRouter.Extensions
                             {
                                 id = idProp.Clone();
                             }
+                            logger.LogInformation("[JSON-RPC Client -> Gateway] {Payload}", requestBody);
                         }
                     }
                     catch (Exception ex)
@@ -753,7 +754,7 @@ namespace McpRouter.Extensions
                 using var reader = new StreamReader(httpContext.Request.Body);
                 var body = await reader.ReadToEndAsync();
                 
-                logger.LogDebug("Received JSON-RPC message for Session {SessionId}: {Body}", sessionId, body);
+                logger.LogInformation("[JSON-RPC Client -> Gateway] {Payload}", body);
             
                 try
                 {
@@ -1172,6 +1173,33 @@ namespace McpRouter.Extensions
             app.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService) => {
                 embeddingService.SaveSettings(settings);
                 return Results.Ok(new { success = true, settings = embeddingService.GetSettings() });
+            });
+
+            app.MapGet("/api/approvals", ([FromServices] SessionManager sessionManager) =>
+            {
+                var approvals = sessionManager.PendingApprovals.Values.Select(a => new
+                {
+                    id = a.Id,
+                    toolName = a.ToolName,
+                    arguments = a.Arguments,
+                    sessionId = a.SessionId
+                }).ToList();
+                return Results.Ok(approvals);
+            });
+
+            app.MapPost("/api/approvals/{id}/action", ([FromRoute] string id, [FromBody] System.Text.Json.JsonElement body, [FromServices] SessionManager sessionManager) =>
+            {
+                if (sessionManager.PendingApprovals.TryRemove(id, out var approval))
+                {
+                    bool approved = false;
+                    if (body.TryGetProperty("approved", out var appProp))
+                    {
+                        approved = appProp.GetBoolean();
+                    }
+                    approval.Tcs.SetResult(approved);
+                    return Results.Ok(new { success = true });
+                }
+                return Results.NotFound(new { error = "Approval request not found." });
             });
 
             // 2. Test Tools List API

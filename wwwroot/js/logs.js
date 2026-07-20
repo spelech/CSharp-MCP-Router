@@ -51,7 +51,13 @@ function renderLogs(logs) {
         }
     }
 
+    const typeFilter = document.getElementById('logs-type-filter').value;
+
     const filtered = logs.filter(log => {
+        const isRpc = log.message.startsWith('[JSON-RPC');
+        if (typeFilter === 'system' && isRpc) return false;
+        if (typeFilter === 'rpc' && !isRpc) return false;
+
         if (levelFilter === 'ALL') return true;
         if (levelFilter === 'INFO' && log.level >= 2) return true;
         if (levelFilter === 'WARNING' && log.level >= 3) return true;
@@ -82,26 +88,59 @@ function renderLogs(logs) {
     newLogs.forEach(log => {
         renderedLogIds.add(log.id);
         const time = new Date(log.timestamp).toLocaleTimeString();
-        const levelName = getLogLevelName(log.level);
-        const levelClass = `log-level-badge log-level-${levelName.toLowerCase()}`;
-        const cleanCategory = log.category.split('.').pop();
         
-        let exceptionHtml = '';
-        if (log.exception) {
-            exceptionHtml = `<div class="log-exception">${escapeHtml(log.exception)}</div>`;
-        }
-
         const logLine = document.createElement('div');
         logLine.className = 'log-line';
-        logLine.innerHTML = `
-            <span class="log-time">[${time}]</span>
-            <span class="${levelClass}">${levelName}</span>
-            <span class="log-category">${escapeHtml(cleanCategory)}:</span>
-            <div class="log-msg">
-                <span>${escapeHtml(log.message)}</span>
-                ${exceptionHtml}
-            </div>
-        `;
+
+        if (typeFilter === 'rpc') {
+            const match = log.message.match(/^\[JSON-RPC ([^\]]+)\]\s*(.*)$/);
+            if (match) {
+                const direction = match[1];
+                let payload = match[2];
+                try {
+                    const obj = JSON.parse(payload);
+                    payload = JSON.stringify(obj, null, 2);
+                } catch { }
+                const badgeClass = direction.includes('->') ? 'log-level-badge log-level-info' : 'log-level-badge log-level-warning';
+                
+                logLine.style.borderLeft = '2px solid var(--accent)';
+                logLine.style.paddingLeft = '8px';
+                logLine.style.marginBottom = '8px';
+                logLine.innerHTML = `
+                    <span class="log-time">[${time}]</span>
+                    <span class="${badgeClass}" style="cursor:default;">${escapeHtml(direction)}</span>
+                    <div class="log-msg" style="width: 100%;">
+                        <pre style="margin: 4px 0 0 0; background: rgba(0,0,0,0.3); padding: 8px; border-radius: 6px; font-family: monospace; font-size: 11px; overflow-x: auto; color: #fff; border: 1px solid rgba(255,255,255,0.05); max-height: 250px;">${escapeHtml(payload)}</pre>
+                    </div>
+                `;
+            } else {
+                logLine.innerHTML = `
+                    <span class="log-time">[${time}]</span>
+                    <div class="log-msg">
+                        <span>${escapeHtml(log.message)}</span>
+                    </div>
+                `;
+            }
+        } else {
+            const levelName = getLogLevelName(log.level);
+            const levelClass = `log-level-badge log-level-${levelName.toLowerCase()}`;
+            const cleanCategory = log.category.split('.').pop();
+            
+            let exceptionHtml = '';
+            if (log.exception) {
+                exceptionHtml = `<div class="log-exception">${escapeHtml(log.exception)}</div>`;
+            }
+            
+            logLine.innerHTML = `
+                <span class="log-time">[${time}]</span>
+                <span class="${levelClass}">${levelName}</span>
+                <span class="log-category">${escapeHtml(cleanCategory)}:</span>
+                <div class="log-msg">
+                    <span>${escapeHtml(log.message)}</span>
+                    ${exceptionHtml}
+                </div>
+            `;
+        }
         fragment.appendChild(logLine);
     });
 
@@ -130,10 +169,19 @@ function getLogLevelName(level) {
 }
 
 function setupLogsEvents() {
+    const typeFilter = document.getElementById('logs-type-filter');
     const filter = document.getElementById('logs-level-filter');
     const clearBtn = document.getElementById('btn-clear-logs');
     const scrollToggle = document.getElementById('logs-autoscroll');
     const terminal = document.getElementById('logs-terminal');
+
+    typeFilter.addEventListener('change', () => {
+        if (terminal) {
+            terminal.innerHTML = '';
+        }
+        renderedLogIds.clear();
+        loadLogs();
+    });
 
     filter.addEventListener('change', () => {
         // Clear screen and redraw completely on filter change

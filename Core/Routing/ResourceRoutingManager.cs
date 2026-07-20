@@ -223,7 +223,13 @@ namespace McpRouter.Core.Routing
                     totalRequests = sessionManager?.TotalRequests ?? 0,
                     activeConnections = sessionManager?.ActiveSessionsCount ?? 0,
                     memoryUsageBytes = GC.GetTotalMemory(false),
-                    upTimeSeconds = (DateTime.UtcNow - (sessionManager?.StartTime ?? DateTime.UtcNow)).TotalSeconds
+                    upTimeSeconds = (DateTime.UtcNow - (sessionManager?.StartTime ?? DateTime.UtcNow)).TotalSeconds,
+                    totalInputTokens = sessionManager?.TotalInputTokens ?? 0,
+                    totalOutputTokens = sessionManager?.TotalOutputTokens ?? 0,
+                    totalDurationMs = sessionManager?.TotalDurationMs ?? 0,
+                    averageLatencyMs = (sessionManager?.TotalRequests ?? 0) > 0 
+                        ? (sessionManager!.TotalDurationMs / (double)sessionManager.TotalRequests) 
+                        : 0
                 };
                 jsonText = JsonSerializer.Serialize(metricsObj);
             }

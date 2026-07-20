@@ -13,9 +13,11 @@ document.addEventListener('DOMContentLoaded', () => {
     loadClients();
     setupGlobalNavigation();
     initTheme();
+    loadApprovals();
     
-    // 2. Poll servers status every 10s
+    // 2. Poll servers status every 10s and approvals every 2s
     setInterval(loadServers, 10000);
+    setInterval(loadApprovals, 2000);
 
     // 3. Expose CRUD/Modal methods to window object so inline onclick attributes continue to work
     window.openAddModal = openAddModal;
@@ -30,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     window.closeClientModal = closeClientModal;
     window.handleClientSubmit = handleClientSubmit;
     window.deleteClient = deleteClient;
+    
+    window.actionApproval = actionApproval;
 
     // Attach form submit listeners
     document.getElementById('server-form').addEventListener('submit', saveServer);
@@ -128,4 +132,43 @@ function setupGlobalNavigation() {
             document.getElementById(`tester-tab-${targetTab}`).classList.add('active');
         });
     });
+}
+
+async function loadApprovals() {
+    const card = document.getElementById('approvals-card');
+    const list = document.getElementById('approvals-list');
+    if (!card || !list) return;
+
+    try {
+        const res = await apiRequest('/api/approvals');
+        if (res && res.length > 0) {
+            card.style.display = 'block';
+            list.innerHTML = res.map(app => `
+                <div class="approval-item" style="background: rgba(255,255,255,0.05); padding: 12px; border-radius: 8px; border: 1px solid var(--border); border-left: 4px solid var(--warning); margin-bottom: 10px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px;">
+                        <strong style="color: var(--accent);">${escapeHtml(app.toolName)}</strong>
+                        <span style="font-size: 11px; color: var(--text-muted);">${escapeHtml(app.sessionId)}</span>
+                    </div>
+                    <pre style="font-size: 11px; max-height: 100px; overflow: auto; background: rgba(0,0,0,0.3); padding: 6px; border-radius: 4px; color: #fff; margin: 0;">${escapeHtml(app.arguments)}</pre>
+                    <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px;">
+                        <button class="btn btn-secondary btn-sm" onclick="actionApproval('${app.id}', false)">Deny</button>
+                        <button class="btn btn-primary btn-sm" onclick="actionApproval('${app.id}', true)">Approve</button>
+                    </div>
+                </div>
+            `).join('');
+        } else {
+            card.style.display = 'none';
+        }
+    } catch (e) {
+        console.error('Failed to load approvals:', e);
+    }
+}
+
+async function actionApproval(id, approved) {
+    try {
+        await apiRequest(`/api/approvals/${id}/action`, 'POST', { approved });
+        loadApprovals();
+    } catch (e) {
+        console.error('Failed to action approval:', e);
+    }
 }

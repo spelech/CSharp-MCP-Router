@@ -65,6 +65,8 @@ namespace McpRouter
             try
             {
                 var json = JsonSerializer.Serialize(message, _jsonOptions);
+                _logger.LogInformation("[JSON-RPC Gateway -> Client] {Payload}", json);
+                _sessionManager?.AddPerformanceMetrics(0, json.Length / 4, 0);
                 await _clientResponse.WriteAsync($"event: message\ndata: {json}\n\n");
                 await _clientResponse.Body.FlushAsync();
             }
@@ -251,6 +253,8 @@ namespace McpRouter
             }
         }
 
+        public SessionManager? GetSessionManager() => _sessionManager;
+
         public async Task<List<object>> ListToolsAsync(string body)
         {
             return await _toolRoutingManager.ListToolsAsync(body, IsMetaMode, _backendConnections, _logger, EnsureBackendsInitializedAsync, _servers);
@@ -275,7 +279,7 @@ namespace McpRouter
 
                 try
                 {
-                    return await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token);
+                    return await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager);
                 }
                 finally
                 {

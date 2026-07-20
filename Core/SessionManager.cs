@@ -12,6 +12,15 @@ using McpRouter.Services;
 
 namespace McpRouter
 {
+    public class PendingApproval
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString("N");
+        public string ToolName { get; set; } = string.Empty;
+        public string Arguments { get; set; } = string.Empty;
+        public string SessionId { get; set; } = string.Empty;
+        public TaskCompletionSource<bool> Tcs { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
+    }
+
     public class BackendStatus
     {
         public string ServerId { get; set; } = string.Empty;
@@ -27,9 +36,26 @@ namespace McpRouter
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<SessionManager> _logger;
 
+        public ConcurrentDictionary<string, PendingApproval> PendingApprovals { get; } = new();
+
         public DateTime StartTime { get; } = DateTime.UtcNow;
         private long _totalRequests = 0;
         public long TotalRequests => _totalRequests;
+
+        private long _totalInputTokens = 0;
+        private long _totalOutputTokens = 0;
+        private long _totalDurationMs = 0;
+
+        public long TotalInputTokens => _totalInputTokens;
+        public long TotalOutputTokens => _totalOutputTokens;
+        public long TotalDurationMs => _totalDurationMs;
+
+        public void AddPerformanceMetrics(long inputTokens, long outputTokens, long durationMs)
+        {
+            System.Threading.Interlocked.Add(ref _totalInputTokens, inputTokens);
+            System.Threading.Interlocked.Add(ref _totalOutputTokens, outputTokens);
+            System.Threading.Interlocked.Add(ref _totalDurationMs, durationMs);
+        }
 
         public void IncrementTotalRequests()
         {

@@ -71,6 +71,16 @@
                         </div>
                     </div>
 
+                    <div class="glass-card approvals-card" id="approvals-card" style="display: none; margin-bottom: 20px; border-color: var(--warning);">
+                        <h2><i class="fa-solid fa-triangle-exclamation" style="color: var(--warning);"></i> Pending Tool Approvals</h2>
+                        <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 15px;">
+                            The following tools require confirmation before execution.
+                        </p>
+                        <div id="approvals-list" style="display: flex; flex-direction: column; gap: 15px;">
+                            <!-- Dynamic pending approvals -->
+                        </div>
+                    </div>
+
                     <div class="glass-card dcr-card">
                         <div class="card-header-btn">
                             <h2><i class="fa-solid fa-key"></i> Registered Clients</h2>
@@ -202,6 +212,10 @@
                         <h2><i class="fa-solid fa-list-check"></i> System Logs</h2>
                         <div class="logs-controls">
                             <div class="logs-filters">
+                                <select id="logs-type-filter" style="margin-right: 10px;">
+                                    <option value="system">System Logs</option>
+                                    <option value="rpc">JSON-RPC Stream</option>
+                                </select>
                                 <select id="logs-level-filter">
                                     <option value="ALL">All Levels</option>
                                     <option value="INFO">Info & Above</option>
@@ -273,6 +287,25 @@
                         <button type="submit" class="btn btn-primary" id="btn-save-settings"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
                     </div>
                 </form>
+            </div>
+            
+            <div class="glass-card settings-card" style="max-width: 600px; margin: 20px auto 0 auto;">
+                <h2><i class="fa-solid fa-shield-halved"></i> Security &amp; Safety Controls</h2>
+                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                    Enforce human-in-the-loop validation for executing destructive or sensitive tools.
+                </p>
+                <div class="form-group">
+                    <div class="checkbox-group" style="display: flex; align-items: center; gap: 10px;">
+                        <label class="switch">
+                            <input type="checkbox" id="settings-require-approval">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="checkbox-label" style="font-weight: 500;">Require Manual Approval for Dangerous Tools</span>
+                    </div>
+                    <small style="color: var(--text-muted); display: block; margin-top: 5px; margin-left: 50px;">
+                        When enabled, tool execution requests targeting databases, docker containers, files, or smart devices will prompt the user in the UI before running.
+                    </small>
+                </div>
             </div>
         </div>
 

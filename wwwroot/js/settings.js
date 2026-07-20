@@ -36,6 +36,7 @@ async function loadSettings() {
             document.getElementById('settings-api-url').value = settings.embeddingApiUrl || '';
             document.getElementById('settings-api-model').value = settings.embeddingApiModel || 'all-MiniLM-L6-v2';
             document.getElementById('settings-api-key').value = settings.embeddingApiKey || '';
+            document.getElementById('settings-require-approval').checked = settings.requireManualApproval || false;
 
             // Trigger change event to update group visibility
             document.getElementById('settings-provider').dispatchEvent(new Event('change'));
@@ -56,7 +57,8 @@ async function saveSettings() {
         embeddingModelDir: document.getElementById('settings-model-dir').value,
         embeddingApiUrl: document.getElementById('settings-api-url').value,
         embeddingApiModel: document.getElementById('settings-api-model').value,
-        embeddingApiKey: document.getElementById('settings-api-key').value
+        embeddingApiKey: document.getElementById('settings-api-key').value,
+        requireManualApproval: document.getElementById('settings-require-approval').checked
     };
 
     try {
