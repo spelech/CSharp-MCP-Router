@@ -432,7 +432,7 @@ namespace McpRouter.Tests
 
             // Act - List prompts to aggregate and map
             var prompts = await session.ListPromptsAsync("{\"jsonrpc\":\"2.0\",\"method\":\"prompts/list\",\"id\":1}");
-            prompts.Should().HaveCount(2);
+            prompts.Should().HaveCount(5);
 
             var names = new List<string>();
             foreach (var prompt in prompts)
@@ -709,6 +709,32 @@ namespace McpRouter.Tests
             completeResult.Should().NotBeNull();
             var completeJson = JsonSerializer.Serialize(completeResult);
             completeJson.Should().Contain("testserver1");
+        }
+
+        [Fact]
+        public async Task MetaPrompts_Works_Correctly()
+        {
+            // Arrange
+            var servers = new List<McpServer>();
+            var session = CreateSession(servers, out _);
+
+            // Act - List prompts
+            var prompts = await session.ListPromptsAsync("{\"jsonrpc\":\"2.0\",\"id\":1}");
+            prompts.Should().NotBeEmpty();
+            var names = prompts.Select(p => (p as Dictionary<string, object>)?["name"] as string).ToList();
+            names.Should().Contain("router__diagnose_failure");
+            names.Should().Contain("router__route_multi_task");
+            names.Should().Contain("router__audit_permissions");
+
+            // Act - Get specific prompt
+            var getBody = "{\"jsonrpc\":\"2.0\",\"id\":\"get-1\",\"method\":\"prompts/get\",\"params\":{\"name\":\"router__diagnose_failure\",\"arguments\":{\"tool_name\":\"excel-read\",\"error_message\":\"File locked\"}}}";
+            var result = await session.GetPromptAsync("router__diagnose_failure", getBody);
+            result.Should().NotBeNull();
+            
+            var json = JsonSerializer.Serialize(result);
+            json.Should().Contain("excel-read");
+            json.Should().Contain("File locked");
+            json.Should().Contain("diagnosing");
         }
     }
 }
