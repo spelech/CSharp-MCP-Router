@@ -61,9 +61,40 @@ namespace McpRouter.Core.Routing
                     }
                 }
 
-                double score = embeddingService.CosineSimilarity(queryVector, toolVector);
-                scoredTools.Add((tool, score));
+                double vectorScore = embeddingService.CosineSimilarity(queryVector, toolVector);
+
+                // Hybrid keyword boosting to prioritize direct keyword matches
+                double keywordBoost = 0;
+                var queryLower = query.ToLower();
+                var queryWords = queryLower
+                    .Split(new[] { ' ', ',', '.', ';', ':', '-', '_', '/' }, StringSplitOptions.RemoveEmptyEntries)
+                    .Where(w => w.Length > 2)
+                    .ToList();
+
+                var nameLower = name.ToLower();
+                var descLower = description.ToLower();
+
+                if (nameLower.Contains(queryLower) || descLower.Contains(queryLower))
+                {
+                    keywordBoost += 0.25;
+                }
+
+                foreach (var word in queryWords)
+                {
+                    if (nameLower.Contains(word))
+                    {
+                        keywordBoost += 0.15;
+                    }
+                    else if (descLower.Contains(word))
+                    {
+                        keywordBoost += 0.08;
+                    }
+                }
+
+                double finalScore = vectorScore + keywordBoost;
+                scoredTools.Add((tool, finalScore));
             }
+
 
             return scoredTools
                 .OrderByDescending(x => x.Score)

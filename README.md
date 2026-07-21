@@ -221,9 +221,15 @@ The router seamlessly aggregates the following MCP protocol features across all 
 
 ## 📝 Changelog
 
+- **v1.6.5**:
+  - Implemented Hybrid Vector + Keyword scoring in `SemanticSearchService` to ensure exact term matches (e.g. `notes`, `container mapping`, `ports`) rank at the top.
+- **v1.6.4**:
+  - Handled `ObjectDisposedException` and `OperationCanceledException` cleanly in `WriteMessageAsync` when broadcasting notifications to closed client SSE streams.
+
 - **v1.6.3**:
   - Implemented automatic global `ToolRoutingManager` cache invalidation upon receiving `notifications/tools/list_changed` JSON-RPC SSE notifications from backends.
   - Bumped project version to `1.6.3`.
+
 
 ## Internal Architecture Diagram
 
