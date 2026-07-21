@@ -194,7 +194,9 @@ namespace McpRouter
                             {
                                 _logger.LogInformation("Received notifications/tools/list_changed from server {ServerId}. Invalidating tools cache.", server.Id);
                                 _sessionManager?.RemoveServerToolsCache(server.Id);
+                                _toolRoutingManager.InvalidateCache();
                             }
+
                             else if (notification.Method == "notifications/resources/list_changed")
                             {
                                 _logger.LogInformation("Received notifications/resources/list_changed from server {ServerId}. Invalidating resources cache.", server.Id);

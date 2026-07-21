@@ -164,6 +164,16 @@ namespace McpRouter.Core.Routing
             }
         }
 
+        public void InvalidateCache()
+        {
+            lock (_cacheLock)
+            {
+                _isCachePopulated = false;
+                _cachedTools.Clear();
+            }
+        }
+
+
         public async Task<object> CallToolAsync(
             string toolName, 
             string body, 
