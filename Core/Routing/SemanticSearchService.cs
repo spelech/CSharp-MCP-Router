@@ -63,7 +63,7 @@ namespace McpRouter.Core.Routing
 
                 double vectorScore = embeddingService.CosineSimilarity(queryVector, toolVector);
 
-                // Hybrid keyword boosting to prioritize direct keyword matches
+                // Strong hybrid keyword boosting
                 double keywordBoost = 0;
                 var queryLower = query.ToLower();
                 var queryWords = queryLower
@@ -74,26 +74,42 @@ namespace McpRouter.Core.Routing
                 var nameLower = name.ToLower();
                 var descLower = description.ToLower();
 
-                if (nameLower.Contains(queryLower) || descLower.Contains(queryLower))
+                // Substring phrase match boost
+                if (nameLower.Contains(queryLower))
                 {
-                    keywordBoost += 0.25;
+                    keywordBoost += 2.0;
+                }
+                else if (descLower.Contains(queryLower))
+                {
+                    keywordBoost += 1.5;
                 }
 
+                // Per-word matches
+                int wordMatches = 0;
                 foreach (var word in queryWords)
                 {
                     if (nameLower.Contains(word))
                     {
-                        keywordBoost += 0.15;
+                        keywordBoost += 1.0;
+                        wordMatches++;
                     }
                     else if (descLower.Contains(word))
                     {
-                        keywordBoost += 0.08;
+                        keywordBoost += 0.5;
+                        wordMatches++;
                     }
+                }
+
+                // Multi-word match multiplier bonus
+                if (wordMatches > 1)
+                {
+                    keywordBoost += wordMatches * 0.5;
                 }
 
                 double finalScore = vectorScore + keywordBoost;
                 scoredTools.Add((tool, finalScore));
             }
+
 
 
             return scoredTools

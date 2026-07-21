@@ -221,8 +221,11 @@ The router seamlessly aggregates the following MCP protocol features across all 
 
 ## 📝 Changelog
 
+- **v1.6.6**:
+  - Upgraded hybrid keyword boosting weights (phrase matches +2.0, word matches +1.0/+0.5, multi-word bonus) to guarantee target tools rank #1.
 - **v1.6.5**:
   - Implemented Hybrid Vector + Keyword scoring in `SemanticSearchService` to ensure exact term matches (e.g. `notes`, `container mapping`, `ports`) rank at the top.
+
 - **v1.6.4**:
   - Handled `ObjectDisposedException` and `OperationCanceledException` cleanly in `WriteMessageAsync` when broadcasting notifications to closed client SSE streams.
 
