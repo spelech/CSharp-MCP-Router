@@ -64,21 +64,34 @@ namespace McpRouter
             await _writeLock.WaitAsync();
             try
             {
+                if (_clientResponse.HttpContext.RequestAborted.IsCancellationRequested)
+                {
+                    return;
+                }
                 var json = JsonSerializer.Serialize(message, _jsonOptions);
                 _logger.LogInformation("[JSON-RPC Gateway -> Client] {Payload}", json);
                 _sessionManager?.AddPerformanceMetrics(0, json.Length / 4, 0);
                 await _clientResponse.WriteAsync($"event: message\ndata: {json}\n\n");
                 await _clientResponse.Body.FlushAsync();
             }
+            catch (ObjectDisposedException)
+            {
+                // Client connection closed cleanly
+            }
+            catch (OperationCanceledException)
+            {
+                // Request cancelled
+            }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to write message to client SSE stream");
+                _logger.LogWarning("Notice writing to client SSE stream: {Message}", ex.Message);
             }
             finally
             {
                 _writeLock.Release();
             }
         }
+
 
         public async Task EnsureBackendsInitializedAsync()
         {
