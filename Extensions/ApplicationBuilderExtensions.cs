@@ -18,7 +18,8 @@ namespace McpRouter.Extensions
     public static class ApplicationBuilderExtensions
     {
         private static readonly string AppVersion =
-            Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.0";
+            Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.3";
+
 
         public static void ConfigureMcpRouterPipeline(this WebApplication app)
         {

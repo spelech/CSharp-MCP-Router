@@ -219,6 +219,12 @@ The router seamlessly aggregates the following MCP protocol features across all 
   * `logMessage`, `resourceUpdated`, and other backend notifications are asynchronously forwarded directly to connected clients in real time.
 
 
+## 📝 Changelog
+
+- **v1.6.3**:
+  - Implemented automatic global `ToolRoutingManager` cache invalidation upon receiving `notifications/tools/list_changed` JSON-RPC SSE notifications from backends.
+  - Bumped project version to `1.6.3`.
+
 ## Internal Architecture Diagram
 
 ```mermaid
@@ -241,3 +247,4 @@ graph TD
     OpenIddict --> DB[(SQLCipher DB)]
     SessionManager --> DB
 ```
+
