@@ -93,8 +93,7 @@ namespace McpRouter
             {
                 servers = servers.Where(s => 
                     s.Id == targetServerId || 
-                    s.Category == targetServerId ||
-                    (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(targetServerId))
+                    (s.Categories != null && s.Categories.Contains(targetServerId))
                 ).ToList();
             }
 

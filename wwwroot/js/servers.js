@@ -30,8 +30,8 @@ function renderServers(servers) {
     
     list.innerHTML = servers.map(server => {
         const nameClass = server.enabled ? 'server-name' : 'server-name text-muted';
-        const categoryBadge = server.category && server.category !== 'default' 
-            ? `<span class="server-badge" style="background: rgba(59,130,246,0.1); color: var(--primary);">${escapeHtml(server.category)}</span>`
+        const categoryBadge = (server.categories && server.categories.length > 0)
+            ? server.categories.map(cat => `<span class="server-badge" style="background: rgba(59,130,246,0.1); color: var(--primary);">${escapeHtml(cat)}</span>`).join('')
             : '';
             
         let statusBadge = '';
@@ -127,7 +127,7 @@ export function openEditModal(id) {
     document.getElementById('server-id').value = server.id;
     document.getElementById('server-name').value = server.displayName;
     document.getElementById('server-type').value = server.type;
-    document.getElementById('server-category').value = server.category || 'default';
+    document.getElementById('server-category').value = server.categories ? server.categories.join(', ') : 'default';
     document.getElementById('server-url').value = server.url;
     document.getElementById('server-key').value = '';
     document.getElementById('server-enabled').checked = server.enabled;
@@ -147,7 +147,7 @@ export async function saveServer(event) {
     const server = {
         displayName: document.getElementById('server-name').value,
         type: document.getElementById('server-type').value,
-        category: document.getElementById('server-category').value,
+        categories: document.getElementById('server-category').value.split(',').map(s => s.trim()).filter(Boolean),
         url: document.getElementById('server-url').value,
         enabled: document.getElementById('server-enabled').checked,
         hidden: document.getElementById('server-hidden').checked

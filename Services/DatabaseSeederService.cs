@@ -73,7 +73,7 @@ namespace McpRouter.Services
                         db.Servers.Add(new McpServer
                         {
                             Id = "ha",
-                            Category = "homecontrol",
+                            Categories = new List<string> { "homecontrol" },
                             DisplayName = "Home Assistant",
                             Url = "http://ha-mcp:8086/mcp",
                             Enabled = true,
@@ -91,7 +91,7 @@ namespace McpRouter.Services
                         db.Servers.Add(new McpServer
                         {
                             Id = "actual",
-                            Category = "financial",
+                            Categories = new List<string> { "financial" },
                             DisplayName = "Actual Budget",
                             Url = "http://actual-mcp:3000/sse",
                             Enabled = true,
@@ -109,7 +109,7 @@ namespace McpRouter.Services
                         db.Servers.Add(new McpServer
                         {
                             Id = "receiptwrangler",
-                            Category = "financial",
+                            Categories = new List<string> { "financial" },
                             DisplayName = "Receipt Wrangler",
                             Url = "http://receiptwrangler-mcp:3000/mcp",
                             Enabled = true,
@@ -127,7 +127,7 @@ namespace McpRouter.Services
                         db.Servers.Add(new McpServer
                         {
                             Id = "seerr",
-                            Category = "media",
+                            Categories = new List<string> { "media" },
                             DisplayName = "Overseerr requests",
                             Url = "http://seerr-mcp:8000/sse",
                             Enabled = true,
@@ -145,7 +145,7 @@ namespace McpRouter.Services
                         db.Servers.Add(new McpServer
                         {
                             Id = "unifi",
-                            Category = "unifi",
+                            Categories = new List<string> { "unifi" },
                             DisplayName = "UniFi Controller",
                             Url = "http://unifi-mcp:3000/mcp",
                             Enabled = true,
@@ -162,7 +162,7 @@ namespace McpRouter.Services
                         db.Servers.Add(new McpServer
                         {
                             Id = "plex",
-                            Category = "media",
+                            Categories = new List<string> { "media" },
                             DisplayName = "Plex Media Server",
                             Url = "http://plex-mcp:8000/sse",
                             Enabled = true,
@@ -177,7 +177,7 @@ namespace McpRouter.Services
                     db.Servers.Add(new McpServer
                     {
                         Id = "mcp-arr-hd",
-                        Category = "media",
+                        Categories = new List<string> { "media" },
                         DisplayName = "Arr Services (HD)",
                         Url = "http://mcp-arr-hd:3000/mcp",
                         Enabled = true,
@@ -187,7 +187,7 @@ namespace McpRouter.Services
                     db.Servers.Add(new McpServer
                     {
                         Id = "mcp-arr-4k",
-                        Category = "media4k",
+                        Categories = new List<string> { "media4k" },
                         DisplayName = "Arr Services (4K)",
                         Url = "http://mcp-arr-4k:3000/mcp",
                         Enabled = true,
@@ -197,7 +197,7 @@ namespace McpRouter.Services
                     db.Servers.Add(new McpServer
                     {
                         Id = "docker",
-                        Category = "infrastructure",
+                        Categories = new List<string> { "infrastructure" },
                         DisplayName = "Docker Containers",
                         Url = "http://docker-mcp:8000/sse",
                         Enabled = true,
@@ -277,7 +277,7 @@ namespace McpRouter.Services
                                     existing.DisplayName = server.DisplayName;
                                     existing.Url = server.Url;
                                     existing.Type = server.Type;
-                                    existing.Category = server.Category;
+                                    existing.Categories = server.Categories;
                                     existing.Enabled = server.Enabled;
                                     existing.Hidden = server.Hidden;
                                     existing.ApiKey = server.ApiKey;

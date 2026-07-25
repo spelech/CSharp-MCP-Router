@@ -676,7 +676,7 @@ namespace McpRouter.Extensions
                             {
                                 serverName = targetServer.DisplayName;
                             }
-                            else if (allServers.Any(s => s.Category == targetServerId || (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(targetServerId))))
+                            else if (allServers.Any(s => s.Categories != null && s.Categories.Contains(targetServerId)))
                             {
                                 // Fallback to Category name
                                 serverName = char.ToUpper(targetServerId[0]) + targetServerId.Substring(1) + " Services";
@@ -1057,7 +1057,7 @@ namespace McpRouter.Extensions
                         s.Enabled,
                         s.Hidden,
                         s.Type,
-                        s.Category,
+                        s.Categories,
                         s.HeadersJson,
                         HasApiKey = !string.IsNullOrEmpty(s.ApiKey),
                         ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
@@ -1110,9 +1110,9 @@ namespace McpRouter.Extensions
                 {
                     server.Type = update.Type;
                 }
-                if (!string.IsNullOrEmpty(update.Category))
+                if (update.Categories != null)
                 {
-                    server.Category = update.Category;
+                    server.Categories = update.Categories;
                 }
                 if (update.ApiKey != null)
                 {
@@ -1220,8 +1220,7 @@ namespace McpRouter.Extensions
                 {
                     servers = servers.Where(s => 
                         s.Id == serverId || 
-                        s.Category == serverId ||
-                        (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(serverId))
+                        (s.Categories != null && s.Categories.Contains(serverId))
                     ).ToList();
                 }
                 var allTools = new System.Collections.Generic.List<object>();
@@ -1471,8 +1470,7 @@ namespace McpRouter.Extensions
                 {
                     servers = servers.Where(s => 
                         s.Id == serverId || 
-                        s.Category == serverId ||
-                        (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(serverId))
+                        (s.Categories != null && s.Categories.Contains(serverId))
                     ).ToList();
                 }
                 var allPrompts = new System.Collections.Generic.List<object>();
@@ -1568,8 +1566,7 @@ namespace McpRouter.Extensions
                 {
                     servers = servers.Where(s => 
                         s.Id == serverId || 
-                        s.Category == serverId ||
-                        (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(serverId))
+                        (s.Categories != null && s.Categories.Contains(serverId))
                     ).ToList();
                 }
                 var allResources = new System.Collections.Generic.List<object>();
