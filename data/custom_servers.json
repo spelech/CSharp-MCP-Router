@@ -43,5 +43,104 @@
     "Hidden": false,
     "Type": "http",
     "Category": "infrastructure"
+  },
+  {
+    "Id": "postgres-homebox",
+    "DisplayName": "PostgreSQL (Homebox)",
+    "Url": "http://postgres-mcp-homebox:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "postgres-mealie",
+    "DisplayName": "PostgreSQL (Mealie)",
+    "Url": "http://postgres-mcp-mealie:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "postgres-paperless",
+    "DisplayName": "PostgreSQL (Paperless)",
+    "Url": "http://postgres-mcp-paperless:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "postgres-sure",
+    "DisplayName": "PostgreSQL (Sure)",
+    "Url": "http://postgres-mcp-sure:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "postgres-litellm",
+    "DisplayName": "PostgreSQL (LiteLLM)",
+    "Url": "http://postgres-mcp-litellm:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "postgres-riven",
+    "DisplayName": "PostgreSQL (Riven)",
+    "Url": "http://postgres-mcp-riven:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "postgres-autopulse",
+    "DisplayName": "PostgreSQL (Autopulse)",
+    "Url": "http://postgres-mcp-autopulse:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "postgres-comet",
+    "DisplayName": "PostgreSQL (Comet)",
+    "Url": "http://postgres-mcp-comet:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "mysql-pricebuddy",
+    "DisplayName": "MySQL (PriceBuddy)",
+    "Url": "http://mysql-mcp-pricebuddy:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "mysql-receiptwrangler",
+    "DisplayName": "MySQL (ReceiptWrangler)",
+    "Url": "http://mysql-mcp-receiptwrangler:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
+  },
+  {
+    "Id": "mysql-homeassistant",
+    "DisplayName": "MySQL (HomeAssistant)",
+    "Url": "http://mysql-mcp-homeassistant:8000/sse",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "sse",
+    "Category": "infrastructure"
   }
 ]

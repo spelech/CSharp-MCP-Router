@@ -1270,6 +1270,7 @@ namespace McpRouter.Extensions
                             }
                             var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
                             await conn.SendRequestAsync("initialize", initReq);
+                            await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                             backendConnections[server.Id] = conn;
                         }
                         catch (Exception ex)
@@ -1338,10 +1339,12 @@ namespace McpRouter.Extensions
                 if (server.Type != "http" && server.Type != "streamable")
                 {
                     await conn.ConnectAsync();
+                    conn.StartReader(msg => Task.CompletedTask);
                 }
                 
                 var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
                 await conn.SendRequestAsync("initialize", initReq);
+                await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
 
                 var targetPayload = new
                 {
@@ -1416,6 +1419,7 @@ namespace McpRouter.Extensions
                             }
                             var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
                             await conn.SendRequestAsync("initialize", initReq);
+                            await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                             backendConnections[server.Id] = conn;
                         }
                         catch (Exception ex)
@@ -1484,6 +1488,7 @@ namespace McpRouter.Extensions
                             }
                             var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
                             await conn.SendRequestAsync("initialize", initReq);
+                            await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                             backendConnections[server.Id] = conn;
                         }
                         catch (Exception ex)
@@ -1618,6 +1623,7 @@ namespace McpRouter.Extensions
                             }
                             var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
                             await conn.SendRequestAsync("initialize", initReq);
+                            await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                             backendConnections[server.Id] = conn;
                         }
                         catch (Exception ex)
@@ -1720,9 +1726,11 @@ namespace McpRouter.Extensions
                 if (targetServer.Type != "http" && targetServer.Type != "streamable")
                 {
                     await conn.ConnectAsync();
+                    conn.StartReader(msg => Task.CompletedTask);
                 }
                 var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
                 await conn.SendRequestAsync("initialize", initReq);
+                await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                 backendConnections[targetServer.Id] = conn;
 
                 var promptRes = await routing.GetPromptAsync(promptName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
@@ -1771,9 +1779,11 @@ namespace McpRouter.Extensions
                 if (targetServer.Type != "http" && targetServer.Type != "streamable")
                 {
                     await conn.ConnectAsync();
+                    conn.StartReader(msg => Task.CompletedTask);
                 }
                 var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
                 await conn.SendRequestAsync("initialize", initReq);
+                await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                 backendConnections[targetServer.Id] = conn;
 
                 var res = await routing.ReadResourceAsync(uri, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson, sessionManager);
