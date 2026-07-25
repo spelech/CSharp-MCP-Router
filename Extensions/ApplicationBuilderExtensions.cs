@@ -670,12 +670,13 @@ namespace McpRouter.Extensions
                         var serverName = "McpRouterGateway";
                         if (!string.IsNullOrWhiteSpace(targetServerId))
                         {
-                            var targetServer = await db.Servers.FirstOrDefaultAsync(s => s.Id == targetServerId);
+                            var allServers = await db.Servers.ToListAsync();
+                            var targetServer = allServers.FirstOrDefault(s => s.Id == targetServerId);
                             if (targetServer != null)
                             {
                                 serverName = targetServer.DisplayName;
                             }
-                            else if (await db.Servers.AnyAsync(s => s.Category == targetServerId))
+                            else if (allServers.Any(s => s.Category == targetServerId || (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(targetServerId))))
                             {
                                 // Fallback to Category name
                                 serverName = char.ToUpper(targetServerId[0]) + targetServerId.Substring(1) + " Services";
@@ -1210,10 +1211,19 @@ namespace McpRouter.Extensions
                 return Results.NotFound(new { error = "Approval request not found." });
             });
 
-            // 2. Test Tools List API
-            app.MapGet("/api/test/tools", async ([FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            app.MapGet("/api/test/tools", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
             {
-                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                var query = db.Servers.Where(s => s.Enabled);
+                var servers = await query.ToListAsync();
+                
+                if (!string.IsNullOrWhiteSpace(serverId))
+                {
+                    servers = servers.Where(s => 
+                        s.Id == serverId || 
+                        s.Category == serverId ||
+                        (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(serverId))
+                    ).ToList();
+                }
                 var allTools = new System.Collections.Generic.List<object>();
                 var missingServers = new System.Collections.Generic.List<McpServer>();
 
@@ -1452,9 +1462,19 @@ namespace McpRouter.Extensions
             });
 
             // 2b. Test Prompts List API
-            app.MapGet("/api/test/prompts", async ([FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            app.MapGet("/api/test/prompts", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
             {
-                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                var query = db.Servers.Where(s => s.Enabled);
+                var servers = await query.ToListAsync();
+                
+                if (!string.IsNullOrWhiteSpace(serverId))
+                {
+                    servers = servers.Where(s => 
+                        s.Id == serverId || 
+                        s.Category == serverId ||
+                        (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(serverId))
+                    ).ToList();
+                }
                 var allPrompts = new System.Collections.Generic.List<object>();
                 var missingServers = new System.Collections.Generic.List<McpServer>();
 
@@ -1539,9 +1559,19 @@ namespace McpRouter.Extensions
             });
 
             // 2c. Test Resources List API
-            app.MapGet("/api/test/resources", async ([FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            app.MapGet("/api/test/resources", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
             {
-                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                var query = db.Servers.Where(s => s.Enabled);
+                var servers = await query.ToListAsync();
+                
+                if (!string.IsNullOrWhiteSpace(serverId))
+                {
+                    servers = servers.Where(s => 
+                        s.Id == serverId || 
+                        s.Category == serverId ||
+                        (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(serverId))
+                    ).ToList();
+                }
                 var allResources = new System.Collections.Generic.List<object>();
                 var allTemplates = new System.Collections.Generic.List<object>();
                 var missingServers = new System.Collections.Generic.List<McpServer>();

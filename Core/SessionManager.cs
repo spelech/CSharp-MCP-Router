@@ -87,11 +87,16 @@ namespace McpRouter
             var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
             
             var query = db.Servers.Where(s => s.Enabled);
+            var servers = await query.ToListAsync();
+            
             if (!string.IsNullOrWhiteSpace(targetServerId))
             {
-                query = query.Where(s => s.Id == targetServerId || s.Category == targetServerId);
+                servers = servers.Where(s => 
+                    s.Id == targetServerId || 
+                    s.Category == targetServerId ||
+                    (s.Category != null && s.Category.Split(',').Select(c => c.Trim()).Contains(targetServerId))
+                ).ToList();
             }
-            var servers = await query.ToListAsync();
 
             var sessionLogger = _serviceProvider.GetRequiredService<ILogger<ClientSession>>();
             var client = _httpClientFactory.CreateClient("McpClient");
