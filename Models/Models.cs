@@ -14,6 +14,7 @@ namespace McpRouter.Models
         public System.Collections.Generic.List<string> Categories { get; set; } = new();
         public string? ApiKey { get; set; }
         public string? HeadersJson { get; set; } // JSON dictionary of custom headers
+        public bool AutoDiscovered { get; set; } = false;
     }
 
     public class OAuthClient
