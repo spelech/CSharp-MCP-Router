@@ -1,5 +1,5 @@
 import { apiRequest } from './api.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, showToast } from './utils.js';
 import { initPromptsAndResourcesTester } from './tester-prompts-resources.js';
 
 let toolsList = [];
@@ -302,6 +302,7 @@ async function runToolCall() {
     requestBlock.textContent = JSON.stringify(clientRequestPayload, null, 2);
 
     try {
+        showToast(`Executing tool '${cleanToolName}'...`, 'info', 2500);
         const result = await apiRequest('/api/test/call', {
             method: 'POST',
             body: {
@@ -312,7 +313,25 @@ async function runToolCall() {
         });
 
         responseBlock.textContent = JSON.stringify(result, null, 2);
+        
+        const errObj = result && (result.error || result.Error);
+        if (errObj) {
+            showToast(`Tool returned error: ${errObj.message || errObj.Message || 'Unknown error'}`, 'error');
+        } else {
+            showToast(`Tool '${cleanToolName}' executed successfully!`, 'success');
+        }
     } catch (err) {
         responseBlock.textContent = `Call failed:\n${err.message}`;
+        
+        // Try parsing the error if it contains a ProblemDetails JSON
+        let errorMsg = err.message;
+        try {
+            if (err.message.startsWith('{') || err.message.startsWith('[')) {
+                const prob = JSON.parse(err.message);
+                errorMsg = prob.detail || prob.title || errorMsg;
+            }
+        } catch {}
+        
+        showToast(`Tool execution failed: ${errorMsg}`, 'error');
     }
 }

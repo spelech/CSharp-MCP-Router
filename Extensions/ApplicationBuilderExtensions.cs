@@ -526,24 +526,12 @@ namespace McpRouter.Extensions
                     sessionId = Guid.NewGuid().ToString("N");
                 }
             
-                if (!isPost && (isSse || HttpMethods.IsGet(httpContext.Request.Method)))
-                {
-                    // ---------------------------------------------------------
-                    // Handle SSE GET Request (Initialize connection)
-                    // ---------------------------------------------------------
-                    logger.LogInformation("New SSE connection established. Session ID: {SessionId}. Target Server: {TargetServerId}", sessionId, targetServerId ?? "ALL");
-            
-                    httpContext.Response.Headers.Append("Content-Type", "text/event-stream");
-                    httpContext.Response.Headers.Append("Cache-Control", "no-cache");
-                    httpContext.Response.Headers.Append("Connection", "keep-alive");
-                    await httpContext.Response.Body.FlushAsync();
-            
-                    var newSession = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId, metaMode);
-                }
                 // Read body if POST
                 string requestBody = string.Empty;
                 string method = string.Empty;
                 JsonElement? id = null;
+
+
             
                 if (httpContext.Request.Method == "POST")
                 {
@@ -749,6 +737,16 @@ namespace McpRouter.Extensions
             var handleMessage = async (HttpContext httpContext, string sessionId, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
             {
                 var session = sessionManager.GetSession(sessionId);
+                if (session == null)
+                {
+                    // Retry for up to 1 second to handle the asynchronous initialization race
+                    for (int i = 0; i < 20; i++)
+                    {
+                        await Task.Delay(50);
+                        session = sessionManager.GetSession(sessionId);
+                        if (session != null) break;
+                    }
+                }
                 if (session == null)
                 {
                     return Results.NotFound(new { error = "Session not found." });

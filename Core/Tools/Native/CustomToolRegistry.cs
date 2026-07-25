@@ -8,15 +8,15 @@ public static class CustomToolRegistry
 
         static CustomToolRegistry()
         {
-            Register(new SeerrSearchMediaTool());
-            Register(new SeerrRequestMediaTool());
-            Register(new SeerrGetRequestsTool());
-            Register(new SeerrGetMediaDetailsTool());
-            Register(new PlexSearchLibraryTool());
-            Register(new PlexGetLibrarySectionsTool());
-            Register(new PlexGetSessionsTool());
-            Register(new PlexGetRecentlyAddedTool());
-            Register(new PlexGetMetadataTool());
+            // Register(new SeerrSearchMediaTool());
+            // Register(new SeerrRequestMediaTool());
+            // Register(new SeerrGetRequestsTool());
+            // Register(new SeerrGetMediaDetailsTool());
+            // Register(new PlexSearchLibraryTool());
+            // Register(new PlexGetLibrarySectionsTool());
+            // Register(new PlexGetSessionsTool());
+            // Register(new PlexGetRecentlyAddedTool());
+            // Register(new PlexGetMetadataTool());
         }
 
         private static void Register(ICustomTool tool)

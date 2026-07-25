@@ -1,5 +1,5 @@
 import { apiRequest } from './api.js';
-import { escapeHtml } from './utils.js';
+import { escapeHtml, showToast } from './utils.js';
 
 let promptsList = [];
 let resourcesData = { resources: [], templates: [] };
@@ -181,6 +181,7 @@ async function runPromptGet() {
     const cleanPromptName = promptName.includes('__') ? promptName.split('__')[1] : promptName;
 
     try {
+        showToast(`Retrieving prompt '${cleanPromptName}'...`, 'info', 2500);
         const result = await apiRequest('/api/test/prompts/get', {
             method: 'POST',
             body: {
@@ -190,8 +191,25 @@ async function runPromptGet() {
             }
         });
         responseBlock.textContent = JSON.stringify(result, null, 2);
+        
+        const errObj = result && (result.error || result.Error);
+        if (errObj) {
+            showToast(`Prompt error: ${errObj.message || errObj.Message || 'Unknown error'}`, 'error');
+        } else {
+            showToast(`Prompt '${cleanPromptName}' retrieved successfully!`, 'success');
+        }
     } catch (err) {
         responseBlock.textContent = `Prompt execution failed:\n${err.message}`;
+        
+        let errorMsg = err.message;
+        try {
+            if (err.message.startsWith('{') || err.message.startsWith('[')) {
+                const prob = JSON.parse(err.message);
+                errorMsg = prob.detail || prob.title || errorMsg;
+            }
+        } catch {}
+        
+        showToast(`Prompt retrieval failed: ${errorMsg}`, 'error');
     }
 }
 
@@ -341,12 +359,30 @@ async function runResourceRead() {
     requestBlock.textContent = JSON.stringify(clientRequestPayload, null, 2);
 
     try {
+        showToast(`Reading resource...`, 'info', 2500);
         const result = await apiRequest('/api/test/resources/read', {
             method: 'POST',
             body: { uri }
         });
         responseBlock.textContent = JSON.stringify(result, null, 2);
+        
+        const errObj = result && (result.error || result.Error);
+        if (errObj) {
+            showToast(`Resource error: ${errObj.message || errObj.Message || 'Unknown error'}`, 'error');
+        } else {
+            showToast(`Resource read successfully!`, 'success');
+        }
     } catch (err) {
         responseBlock.textContent = `Resource read failed:\n${err.message}`;
+        
+        let errorMsg = err.message;
+        try {
+            if (err.message.startsWith('{') || err.message.startsWith('[')) {
+                const prob = JSON.parse(err.message);
+                errorMsg = prob.detail || prob.title || errorMsg;
+            }
+        } catch {}
+        
+        showToast(`Resource read failed: ${errorMsg}`, 'error');
     }
 }

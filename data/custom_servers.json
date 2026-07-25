@@ -34,5 +34,14 @@
     "Hidden": false,
     "Type": "sse",
     "Category": "infrastructure"
+  },
+  {
+    "Id": "codebase-memory",
+    "DisplayName": "Codebase Memory",
+    "Url": "http://codebase-memory-mcp:8000/mcp",
+    "Enabled": true,
+    "Hidden": false,
+    "Type": "http",
+    "Category": "infrastructure"
   }
 ]

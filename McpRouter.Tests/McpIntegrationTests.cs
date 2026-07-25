@@ -611,22 +611,22 @@ namespace McpRouter.Tests
             searchResults2![0]["name"].ToString().Should().Contain("get_logs");
         }
 
-        [Fact]
-        public void CustomToolRegistry_Contains_Plex_And_Overseerr_Tools()
-        {
-            // Act
-            var allTools = McpRouter.CustomTools.CustomToolRegistry.GetAll();
-
-            // Assert
-            allTools.Should().NotBeEmpty();
-            var names = new List<string>();
-            foreach (var tool in allTools)
-            {
-                names.Add(tool.Name);
-            }
-            names.Should().Contain("seerr_search_media");
-            names.Should().Contain("plex_search_library");
-        }
+        // [Fact]
+        // public void CustomToolRegistry_Contains_Plex_And_Overseerr_Tools()
+        // {
+        //     // Act
+        //     var allTools = McpRouter.CustomTools.CustomToolRegistry.GetAll();
+        // 
+        //     // Assert
+        //     allTools.Should().NotBeEmpty();
+        //     var names = new List<string>();
+        //     foreach (var tool in allTools)
+        //     {
+        //         names.Add(tool.Name);
+        //     }
+        //     names.Should().Contain("seerr_search_media");
+        //     names.Should().Contain("plex_search_library");
+        // }
 
         [Fact]
         public async Task BuiltInResources_Templates_And_Autocompletion_Works_Correctly()
