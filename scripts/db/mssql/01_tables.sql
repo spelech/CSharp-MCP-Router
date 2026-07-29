@@ -21,6 +21,7 @@ BEGIN
         [Description]       NVARCHAR(MAX) NULL,
         [BaseUrl]           VARCHAR(500) NOT NULL,
         [TransportType]     VARCHAR(20) NOT NULL DEFAULT 'SSE',
+        [SecretProvider]    VARCHAR(50) NOT NULL DEFAULT 'Vault',
         [HealthStatus]      VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
         [HealthCheckUrl]    VARCHAR(500) NULL,
         [IsActive]          BIT NOT NULL DEFAULT 1,
@@ -30,7 +31,36 @@ BEGIN
 END;
 GO
 
--- 2. User & Group Security Groups
+-- 2. Secret Providers Configuration Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SecretProviders')
+BEGIN
+    CREATE TABLE [dbo].[SecretProviders] (
+        [ProviderId]          INT IDENTITY(1,1) PRIMARY KEY,
+        [ProviderName]        VARCHAR(50) NOT NULL UNIQUE, -- 'Vault', 'WindowsRegistry', 'Environment'
+        [DisplayName]         NVARCHAR(100) NOT NULL,
+        [EncryptedConfigJson] NVARCHAR(MAX) NULL,
+        [IsEnabled]           BIT NOT NULL DEFAULT 1,
+        [UpdatedAt]           DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END;
+GO
+
+-- 3. Identity & Auth Providers Configuration Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AuthProviderConfigs')
+BEGIN
+    CREATE TABLE [dbo].[AuthProviderConfigs] (
+        [AuthId]              INT IDENTITY(1,1) PRIMARY KEY,
+        [ProviderName]        VARCHAR(50) NOT NULL UNIQUE, -- 'ActiveDirectory', 'PocketID_TinyAuth'
+        [DisplayName]         NVARCHAR(100) NOT NULL,
+        [UserHeader]          VARCHAR(100) NULL DEFAULT 'Remote-User',
+        [GroupsHeader]        VARCHAR(100) NULL DEFAULT 'Remote-Groups',
+        [IsEnabled]           BIT NOT NULL DEFAULT 1,
+        [UpdatedAt]           DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END;
+GO
+
+-- 4. User & Group Security Groups
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AdGroups')
 BEGIN
     CREATE TABLE [dbo].[AdGroups] (
@@ -44,7 +74,7 @@ BEGIN
 END;
 GO
 
--- 3. Tools Registry & Access Control
+-- 5. Tools Registry & Access Control
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Tools')
 BEGIN
     CREATE TABLE [dbo].[Tools] (
@@ -54,6 +84,7 @@ BEGIN
         [Description]       NVARCHAR(MAX) NULL,
         [InputSchemaJson]   NVARCHAR(MAX) NULL,
         [VaultSecretPath]   VARCHAR(250) NULL,
+        [SecretProvider]    VARCHAR(50) NOT NULL DEFAULT 'Vault',
         [IsEnabled]         BIT NOT NULL DEFAULT 1,
         [CreatedAt]         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
         CONSTRAINT [UQ_Server_ToolName] UNIQUE ([ServerId], [ToolName])
@@ -75,7 +106,7 @@ BEGIN
 END;
 GO
 
--- 4. Audit Logging Table
+-- 6. Audit Logging Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AuditLogs')
 BEGIN
     CREATE TABLE [dbo].[AuditLogs] (

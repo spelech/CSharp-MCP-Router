@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS `McpServers` (
     `Description`       TEXT NULL,
     `BaseUrl`           VARCHAR(500) NOT NULL,
     `TransportType`     VARCHAR(20) NOT NULL DEFAULT 'SSE',
+    `SecretProvider`    VARCHAR(50) NOT NULL DEFAULT 'Vault',
     `HealthStatus`      VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
     `HealthCheckUrl`    VARCHAR(500) NULL,
     `IsActive`          TINYINT(1) NOT NULL DEFAULT 1,
@@ -20,7 +21,28 @@ CREATE TABLE IF NOT EXISTS `McpServers` (
     `UpdatedAt`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 2. User & Group Security Groups
+-- 2. Secret Providers Configuration Table
+CREATE TABLE IF NOT EXISTS `SecretProviders` (
+    `ProviderId`          INT AUTO_INCREMENT PRIMARY KEY,
+    `ProviderName`        VARCHAR(50) NOT NULL UNIQUE,
+    `DisplayName`         VARCHAR(100) NOT NULL,
+    `EncryptedConfigJson` LONGTEXT NULL,
+    `IsEnabled`           TINYINT(1) NOT NULL DEFAULT 1,
+    `UpdatedAt`           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 3. Identity & Auth Providers Configuration Table
+CREATE TABLE IF NOT EXISTS `AuthProviderConfigs` (
+    `AuthId`              INT AUTO_INCREMENT PRIMARY KEY,
+    `ProviderName`        VARCHAR(50) NOT NULL UNIQUE,
+    `DisplayName`         VARCHAR(100) NOT NULL,
+    `UserHeader`          VARCHAR(100) NULL DEFAULT 'Remote-User',
+    `GroupsHeader`        VARCHAR(100) NULL DEFAULT 'Remote-Groups',
+    `IsEnabled`           TINYINT(1) NOT NULL DEFAULT 1,
+    `UpdatedAt`           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 4. User & Group Security Groups
 CREATE TABLE IF NOT EXISTS `AdGroups` (
     `GroupId`           INT AUTO_INCREMENT PRIMARY KEY,
     `ObjectSid`         VARCHAR(180) NOT NULL UNIQUE,
@@ -30,7 +52,7 @@ CREATE TABLE IF NOT EXISTS `AdGroups` (
     `CreatedAt`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 3. Tools Registry & Access Control
+-- 5. Tools Registry & Access Control
 CREATE TABLE IF NOT EXISTS `Tools` (
     `ToolId`            INT AUTO_INCREMENT PRIMARY KEY,
     `ServerId`          INT NOT NULL,
@@ -38,6 +60,7 @@ CREATE TABLE IF NOT EXISTS `Tools` (
     `Description`       TEXT NULL,
     `InputSchemaJson`   LONGTEXT NULL,
     `VaultSecretPath`   VARCHAR(250) NULL,
+    `SecretProvider`    VARCHAR(50) NOT NULL DEFAULT 'Vault',
     `IsEnabled`         TINYINT(1) NOT NULL DEFAULT 1,
     `CreatedAt`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     CONSTRAINT `FK_Tools_McpServers` FOREIGN KEY (`ServerId`) REFERENCES `McpServers` (`ServerId`) ON DELETE CASCADE,
@@ -56,7 +79,7 @@ CREATE TABLE IF NOT EXISTS `ToolAccessPolicies` (
     CONSTRAINT `UQ_Tool_Group` UNIQUE (`ToolId`, `GroupId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. Audit Logging Table
+-- 6. Audit Logging Table
 CREATE TABLE IF NOT EXISTS `AuditLogs` (
     `AuditId`           BIGINT AUTO_INCREMENT PRIMARY KEY,
     `RequestId`         VARCHAR(64) NOT NULL,
