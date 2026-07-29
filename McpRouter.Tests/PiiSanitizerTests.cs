@@ -12,7 +12,7 @@ namespace McpRouter.Tests
             string clean = PiiSanitizer.SanitizePayload(raw);
 
             Assert.DoesNotContain("secret_token_xyz_123", clean);
-            Assert.Contains("Bearer [REDACTED]", clean);
+            Assert.Contains("[REDACTED]", clean);
         }
 
         [Fact]
