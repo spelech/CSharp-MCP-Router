@@ -1,8 +1,10 @@
-import { apiRequest } from './api.js';
+import { apiRequest, getSecretProviders, saveSecretProvider, getAuthProviders, saveAuthProvider } from './api.js';
 
 export async function initSettings() {
     setupSettingsEvents();
+    setupProviderEvents();
     await loadSettings();
+    await loadProviders();
     await initCustomFilesManager();
 }
 
@@ -49,6 +51,90 @@ async function loadSettings() {
         }
     } catch (e) {
         console.error('Failed to load settings:', e);
+    }
+}
+
+function setupProviderEvents() {
+    const authForm = document.getElementById('auth-providers-form');
+    if (authForm) {
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await saveAuthProvider({
+                    providerName: 'ActiveDirectory',
+                    displayName: 'Active Directory',
+                    isEnabled: document.getElementById('auth-ad-enabled').checked
+                });
+                await saveAuthProvider({
+                    providerName: 'PocketID_TinyAuth',
+                    displayName: 'PocketID / TinyAuth OIDC',
+                    userHeader: document.getElementById('auth-user-header').value,
+                    groupsHeader: document.getElementById('auth-groups-header').value,
+                    isEnabled: document.getElementById('auth-oidc-enabled').checked
+                });
+                alert('Auth Provider configurations saved successfully!');
+            } catch (err) {
+                alert('Failed to save Auth Providers: ' + err.message);
+            }
+        });
+    }
+
+    const secretForm = document.getElementById('secret-providers-form');
+    if (secretForm) {
+        secretForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            try {
+                await saveSecretProvider({
+                    providerName: 'Vault',
+                    displayName: 'HashiCorp Vault (KV v2)',
+                    isEnabled: document.getElementById('secret-vault-enabled').checked
+                });
+                await saveSecretProvider({
+                    providerName: 'WindowsRegistry',
+                    displayName: 'Windows Registry (DPAPI)',
+                    isEnabled: document.getElementById('secret-winreg-enabled').checked
+                });
+                await saveSecretProvider({
+                    providerName: 'Environment',
+                    displayName: 'Container Environment',
+                    isEnabled: document.getElementById('secret-env-enabled').checked
+                });
+                alert('Secret Provider configurations saved successfully!');
+            } catch (err) {
+                alert('Failed to save Secret Providers: ' + err.message);
+            }
+        });
+    }
+}
+
+async function loadProviders() {
+    try {
+        const authProviders = await getAuthProviders();
+        if (Array.isArray(authProviders)) {
+            const ad = authProviders.find(p => p.providerName === 'ActiveDirectory');
+            if (ad) document.getElementById('auth-ad-enabled').checked = ad.isEnabled;
+
+            const oidc = authProviders.find(p => p.providerName === 'PocketID_TinyAuth');
+            if (oidc) {
+                document.getElementById('auth-oidc-enabled').checked = oidc.isEnabled;
+                if (oidc.userHeader) document.getElementById('auth-user-header').value = oidc.userHeader;
+                if (oidc.groupsHeader) document.getElementById('auth-groups-header').value = oidc.groupsHeader;
+            }
+        }
+
+        const secretProviders = await getSecretProviders();
+        if (Array.isArray(secretProviders)) {
+            const vault = secretProviders.find(p => p.providerName === 'Vault');
+            if (vault) document.getElementById('secret-vault-enabled').checked = vault.isEnabled;
+
+            const winreg = secretProviders.find(p => p.providerName === 'WindowsRegistry');
+            if (winreg) document.getElementById('secret-winreg-enabled').checked = winreg.isEnabled;
+
+            const env = secretProviders.find(p => p.providerName === 'Environment');
+            if (env) document.getElementById('secret-env-enabled').checked = env.isEnabled;
+        }
+    } catch (e) {
+        console.warn('Providers not yet initialized or endpoints unavailable:', e);
     }
 }
 

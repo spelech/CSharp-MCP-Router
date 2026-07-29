@@ -390,6 +390,97 @@
                 </div>
             </div>
 
+            <!-- Enterprise Identity & Auth Providers Card -->
+            <div class="glass-card settings-card" style="max-width: 800px; margin: 20px auto 0 auto;">
+                <h2><i class="fa-solid fa-id-card"></i> Identity & Auth Providers</h2>
+                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                    Enable authentication providers for user identity context and group policy authorization.
+                </p>
+                <form id="auth-providers-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                        <div style="padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4 style="margin:0;"><i class="fa-solid fa-brands fa-windows"></i> Active Directory</h4>
+                                <label class="switch">
+                                    <input type="checkbox" id="auth-ad-enabled">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <p style="font-size: 12px; color: var(--text-muted);">Integrate Kerberos/NTLM Windows SIDs for enterprise group policies.</p>
+                        </div>
+
+                        <div style="padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h4 style="margin:0;"><i class="fa-solid fa-key"></i> PocketID / TinyAuth OIDC</h4>
+                                <label class="switch">
+                                    <input type="checkbox" id="auth-oidc-enabled" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <p style="font-size: 12px; color: var(--text-muted);">Parse Remote-User and Remote-Groups HTTP headers from reverse proxies.</p>
+                            <div class="form-group" style="margin-top: 10px;">
+                                <label for="auth-user-header" style="font-size: 11px;">User Header Name</label>
+                                <input type="text" id="auth-user-header" value="Remote-User" style="font-size: 12px;">
+                            </div>
+                            <div class="form-group" style="margin-top: 5px;">
+                                <label for="auth-groups-header" style="font-size: 11px;">Groups Header Name</label>
+                                <input type="text" id="auth-groups-header" value="Remote-Groups" style="font-size: 12px;">
+                            </div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; text-align: right;">
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Auth Config</button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Enterprise Secret Providers Card -->
+            <div class="glass-card settings-card" style="max-width: 800px; margin: 20px auto 0 auto;">
+                <h2><i class="fa-solid fa-vault"></i> Secret Providers</h2>
+                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                    Configure external vault and registry secret providers for resolving downstream MCP tokens.
+                </p>
+                <form id="secret-providers-form">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                        <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h4 style="margin:0; font-size: 13px;"><i class="fa-solid fa-lock"></i> Vault (KV v2)</h4>
+                                <label class="switch">
+                                    <input type="checkbox" id="secret-vault-enabled" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <span class="badge badge-secondary" style="font-size: 10px;">HashiCorp Vault</span>
+                        </div>
+
+                        <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h4 style="margin:0; font-size: 13px;"><i class="fa-solid fa-database"></i> Win Registry</h4>
+                                <label class="switch">
+                                    <input type="checkbox" id="secret-winreg-enabled" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <span class="badge badge-secondary" style="font-size: 10px;">DPAPI Encrypted</span>
+                        </div>
+
+                        <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h4 style="margin:0; font-size: 13px;"><i class="fa-solid fa-terminal"></i> Environment</h4>
+                                <label class="switch">
+                                    <input type="checkbox" id="secret-env-enabled" checked>
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                            <span class="badge badge-secondary" style="font-size: 10px;">Container Env</span>
+                        </div>
+                    </div>
+                    <div style="margin-top: 15px; text-align: right;">
+                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Secret Config</button>
+                    </div>
+                </form>
+            </div>
+
             <div class="glass-card settings-card" style="max-width: 800px; margin: 20px auto 0 auto;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h2><i class="fa-solid fa-folder-open"></i> Prompts &amp; Resources File Manager</h2>
@@ -462,6 +553,15 @@
                 <div class="form-group">
                     <label for="server-key">API Token / Secret (Optional)</label>
                     <input type="password" id="server-key" placeholder="Bearer auth token">
+                </div>
+
+                <div class="form-group">
+                    <label for="server-secret-provider">Secret Provider</label>
+                    <select id="server-secret-provider">
+                        <option value="Vault">HashiCorp Vault (KV v2)</option>
+                        <option value="WindowsRegistry">Windows Registry (DPAPI)</option>
+                        <option value="Environment">Environment Variables</option>
+                    </select>
                 </div>
 
                 <div class="form-row checkbox-row">

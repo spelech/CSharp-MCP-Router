@@ -21,3 +21,25 @@ export async function apiRequest(url, options = {}) {
     if (response.status === 204) return null;
     return response.json();
 }
+
+export async function getSecretProviders() {
+    return await apiRequest('/api/providers/secrets');
+}
+
+export async function saveSecretProvider(providerData) {
+    return await apiRequest('/api/providers/secrets', {
+        method: 'POST',
+        body: providerData
+    });
+}
+
+export async function getAuthProviders() {
+    return await apiRequest('/api/providers/auth');
+}
+
+export async function saveAuthProvider(authData) {
+    return await apiRequest('/api/providers/auth', {
+        method: 'POST',
+        body: authData
+    });
+}

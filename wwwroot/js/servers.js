@@ -110,26 +110,32 @@ export async function toggleServer(id, property, value) {
     }
 }
 
-export function openAddModal() {
+export function openModal() {
     document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-server"></i> Add MCP Server';
     document.getElementById('server-id').value = '';
-    document.getElementById('server-form').reset();
+    document.getElementById('server-name').value = '';
+    document.getElementById('server-type').value = 'sse';
+    document.getElementById('server-category').value = 'infrastructure';
+    document.getElementById('server-url').value = '';
+    document.getElementById('server-key').value = '';
+    document.getElementById('server-secret-provider').value = 'Vault';
     document.getElementById('server-enabled').checked = true;
     document.getElementById('server-hidden').checked = false;
     document.getElementById('server-modal').style.display = 'flex';
 }
 
-export function openEditModal(id) {
+export function editServer(id) {
     const server = allServers.find(s => s.id === id);
     if (!server) return;
 
-    document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-server"></i> Edit MCP Server';
+    document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-pen"></i> Edit MCP Server';
     document.getElementById('server-id').value = server.id;
     document.getElementById('server-name').value = server.displayName;
-    document.getElementById('server-type').value = server.type;
+    document.getElementById('server-type').value = server.type || 'sse';
     document.getElementById('server-category').value = server.categories ? server.categories.join(', ') : 'default';
     document.getElementById('server-url').value = server.url;
     document.getElementById('server-key').value = '';
+    document.getElementById('server-secret-provider').value = server.secretProvider || 'Vault';
     document.getElementById('server-enabled').checked = server.enabled;
     document.getElementById('server-hidden').checked = server.hidden;
     document.getElementById('server-modal').style.display = 'flex';
@@ -149,6 +155,7 @@ export async function saveServer(event) {
         type: document.getElementById('server-type').value,
         categories: document.getElementById('server-category').value.split(',').map(s => s.trim()).filter(Boolean),
         url: document.getElementById('server-url').value,
+        secretProvider: document.getElementById('server-secret-provider').value,
         enabled: document.getElementById('server-enabled').checked,
         hidden: document.getElementById('server-hidden').checked
     };
