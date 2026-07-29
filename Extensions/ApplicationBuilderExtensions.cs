@@ -29,6 +29,7 @@ namespace McpRouter.Extensions
             app.UseCors();
             app.UseAuthentication();
             app.UseAuthorization();
+            app.UseMiddleware<McpRouter.Middleware.McpDualSpecMiddleware>();
             app.MapControllers();
             
             // Request logging middleware
