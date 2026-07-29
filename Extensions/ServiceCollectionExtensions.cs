@@ -32,6 +32,9 @@ namespace McpRouter.Extensions
         builder.Services.AddSingleton<McpRouter.Core.Secrets.ISecretRetriever, McpRouter.Core.Secrets.WindowsRegistrySecretRetriever>();
         builder.Services.AddSingleton<McpRouter.Core.Secrets.CompositeSecretRetriever>();
 
+        // Register Observability & Audit Logger
+        builder.Services.AddSingleton<McpRouter.Core.Logging.IAuditLogger, McpRouter.Core.Logging.AuditLogger>();
+
         // Register OpenIddict & Controllers
         builder.Services.AddMcpOpenIddict();
         builder.Services.AddControllers();
