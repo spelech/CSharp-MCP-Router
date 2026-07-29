@@ -1,0 +1,47 @@
+using System;
+using System.Data;
+using Microsoft.Data.SqlClient;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
+using MySqlConnector;
+
+namespace McpRouter.Core.Database
+{
+    public interface IDbConnectionFactory
+    {
+        string ProviderName { get; }
+        IDbConnection CreateConnection();
+    }
+
+    public class DbConnectionFactory : IDbConnectionFactory
+    {
+        private readonly string _provider;
+        private readonly string _connectionString;
+
+        public string ProviderName => _provider;
+
+        public DbConnectionFactory(IConfiguration config)
+        {
+            _provider = config["DB_PROVIDER"]?.ToLower() ?? "sqlite";
+            _connectionString = config.GetConnectionString("DefaultConnection") ?? "";
+            
+            if (_provider == "sqlite" && string.IsNullOrEmpty(_connectionString))
+            {
+                var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");
+                var encryptionKey = config["DB_ENCRYPTION_KEY"] ?? "DefaultSecureKey123!";
+                _connectionString = $"Data Source={dbPath};Password={encryptionKey}";
+            }
+        }
+
+        public IDbConnection CreateConnection()
+        {
+            return _provider switch
+            {
+                "mssql" => new SqlConnection(_connectionString),
+                "mysql" => new MySqlConnection(_connectionString),
+                "sqlite" => new SqliteConnection(_connectionString),
+                _ => throw new InvalidOperationException($"Unsupported DB_PROVIDER '{_provider}'. Supported values: mssql, mysql, sqlite.")
+            };
+        }
+    }
+}

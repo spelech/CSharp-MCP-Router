@@ -17,7 +17,8 @@ namespace McpRouter.Extensions
         builder.Logging.AddDebug();
         builder.Logging.AddProvider(new InMemoryLoggerProvider());
 
-        // Register SQLite Database
+        // Register Multi-Database Provider Factory & DbContext
+        builder.Services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory, McpRouter.Core.Database.DbConnectionFactory>();
         builder.Services.AddDbContext<RouterDbContext>();
 
         // Register OpenIddict & Controllers
