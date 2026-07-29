@@ -48,6 +48,24 @@ namespace McpRouter.Services
                         // Ignore if column already exists
                     }
 
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
+                    }
+                    catch
+                    {
+                        // Ignore if column already exists
+                    }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Tools ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
+                    }
+                    catch
+                    {
+                        // Ignore if column already exists
+                    }
+
                     var hasSettings = db.Settings.Any();
                     if (!hasSettings)
                     {
