@@ -455,7 +455,12 @@ namespace McpRouter.Extensions
                             result = new
                             {
                                 protocolVersion = "2024-11-05",
-                                capabilities = new { tools = new { listChanged = true } },
+                                capabilities = new
+                                {
+                                    tools = new { listChanged = true },
+                                    prompts = new { listChanged = true },
+                                    resources = new { subscribe = false, listChanged = true }
+                                },
                                 serverInfo = new { name = "McpRouterGateway", version = AppVersion }
                             }
                         };
@@ -473,7 +478,12 @@ namespace McpRouter.Extensions
                             result = new
                             {
                                 supportedVersions = new[] { "2026-07-28" },
-                                capabilities = new { tools = new { listChanged = true } },
+                                capabilities = new
+                                {
+                                    tools = new { listChanged = true },
+                                    prompts = new { listChanged = true },
+                                    resources = new { subscribe = false, listChanged = true }
+                                },
                                 serverInfo = new { name = "McpRouterGateway", version = AppVersion }
                             }
                         };
@@ -691,7 +701,12 @@ namespace McpRouter.Extensions
                             result = new
                             {
                                 supportedVersions = new[] { "2026-07-28" },
-                                capabilities = new { tools = new { listChanged = true } },
+                                capabilities = new
+                                {
+                                    tools = new { listChanged = true },
+                                    prompts = new { listChanged = true },
+                                    resources = new { subscribe = false, listChanged = true }
+                                },
                                 serverInfo = new { name = serverName, version = AppVersion }
                             }
                         } : new
@@ -701,7 +716,12 @@ namespace McpRouter.Extensions
                             result = new
                             {
                                 protocolVersion = "2024-11-05",
-                                capabilities = new { tools = new { listChanged = true } },
+                                capabilities = new
+                                {
+                                    tools = new { listChanged = true },
+                                    prompts = new { listChanged = true },
+                                    resources = new { subscribe = false, listChanged = true }
+                                },
                                 serverInfo = new { name = serverName, version = AppVersion }
                             }
                         };
@@ -793,7 +813,9 @@ namespace McpRouter.Extensions
                                 protocolVersion = "2024-11-05",
                                 capabilities = new
                                 {
-                                    tools = new { listChanged = true }
+                                    tools = new { listChanged = true },
+                                    prompts = new { listChanged = true },
+                                    resources = new { subscribe = false, listChanged = true }
                                 },
                                 serverInfo = new
                                 {
@@ -821,7 +843,9 @@ namespace McpRouter.Extensions
                                 supportedVersions = new[] { "2026-07-28" },
                                 capabilities = new
                                 {
-                                    tools = new { listChanged = true }
+                                    tools = new { listChanged = true },
+                                    prompts = new { listChanged = true },
+                                    resources = new { subscribe = false, listChanged = true }
                                 },
                                 serverInfo = new
                                 {
