@@ -10,6 +10,11 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 ## 🌟 Key Features
 
+* **MCP 2026-07-28 Spec Support**: Sub-millisecond header-based routing (`Mcp-Method` & `Mcp-Name`) via `McpDualSpecMiddleware` with legacy JSON body fallback.
+* **Pluggable Identity Providers**: Dual authentication support for **Active Directory** (Kerberos/NTLM Windows SIDs) and **PocketID / TinyAuth OIDC** (`Remote-User`, `Remote-Groups` headers).
+* **Pluggable Secret Retrievers**: Fetch downstream server API keys and tokens dynamically from **HashiCorp Vault (KV v2)**, **Windows Registry (DPAPI)**, or **Environment Variables** per server (`SecretProvider` column).
+* **Multi-Database & Stored Procedure Engine**: Complete stored procedure suites for **MS SQL Server** (`Microsoft.Data.SqlClient`), **MySQL** (`MySqlConnector`), and **SQLite** (`Microsoft.Data.Sqlite`) using Dapper.
+* **Observability & PII Audit Logging**: Automatic payload redaction of Bearer tokens, API keys, and passwords (`PiiSanitizer`) paired with stored procedure audit logging (`sp_InsertAuditLog`).
 * **Consolidated Tools Gateway:** Merges 300+ tools from dozens of isolated backend servers into a single endpoint.
 * **Meta-Mode Dynamic Tool Filtering:** 
   * Defaults to Meta-Mode on the main `/sse` connection path to prevent context window bloat and tool confusion.
@@ -24,9 +29,24 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
   * **Interactive UI**: Form builder renders interactive input controls directly from tools' JSON schema specs.
   * **Logs Console**: Styled real-time terminal rendering thread-safe in-memory gateway logs.
   * **Search Simulator**: Real-time evaluation panel for intent ranking.
+  * **Provider Management Controls**: Interactive UI cards in Settings to toggle and configure Auth and Secret providers.
 * **Target-Specific Proxying:** Exposes separate endpoints (`/{targetServerId}`) to route directly to specific backends (e.g., `/plex`, `/docker`).
 * **OAuth 2.0 Security:** Integrates a lightweight OAuth 2.0 authorization server for secure API access.
 * **Built-in Web Dashboard:** A responsive, dark-mode, glassmorphic UI to monitor connected clients, stats, and backend health status.
+
+---
+
+## 📜 Release Changelog
+
+| Version | Release Date | Summary of Key Changes |
+| :--- | :--- | :--- |
+| **`v2.6.0`** | 2026-07-28 | Added Web Dashboard UI settings cards for **Identity & Auth Providers** and **Secret Providers**, plus per-server `SecretProvider` dropdown selection in the Add/Edit Server modal. |
+| **`v2.5.0`** | 2026-07-28 | Created `ProvidersController` REST API (`/api/providers/auth`, `/api/providers/secrets`), explicit `SecretProvider` columns on `McpServers`/`Tools` tables, and completed full T-SQL and MySQL stored procedure suites (`sp_EvaluateUserAccess`, `sp_GetServerSecrets`, `sp_SaveSecretProvider`, `sp_SaveAuthProvider`). |
+| **`v2.4.0`** | 2026-07-28 | Implemented `PiiSanitizer` payload masking (redacting Bearer tokens, API keys, passwords) and `AuditLogger` calling `sp_InsertAuditLog`. |
+| **`v2.3.0`** | 2026-07-28 | Added pluggable `ISecretRetriever` abstraction with `VaultSecretRetriever` (HashiCorp Vault KV v2) and `WindowsRegistrySecretRetriever` (DPAPI-encrypted keys). |
+| **`v2.2.0`** | 2026-07-28 | Added pluggable `IIdentityProvider` abstraction supporting `ActiveDirectoryIdentityProvider` (Kerberos/NTLM SIDs) and `OidcIdentityProvider` (PocketID / TinyAuth headers). |
+| **`v2.1.0`** | 2026-07-28 | Created multi-database `DbConnectionFactory` supporting MS SQL Server (`Microsoft.Data.SqlClient`), MySQL (`MySqlConnector`), and SQLite (`Microsoft.Data.Sqlite`) with Dapper and stored procedure scripts (`scripts/db/mssql/`, `scripts/db/mysql/`). |
+| **`v2.0.0`** | 2026-07-28 | Major release adopting **MCP 2026-07-28 Specification** (`Mcp-Method`, `Mcp-Name` HTTP headers) via `McpDualSpecMiddleware` with dual-spec JSON body fallback. |
 
 ---
 
