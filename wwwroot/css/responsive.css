@@ -1,0 +1,250 @@
+/* ==========================================================================
+   MCP Router Gateway Mobile Reflow and Viewport Responsiveness
+   ========================================================================== */
+
+/* Tablet & Mobile Breakpoint (max-width: 900px) */
+@media (max-width: 900px) {
+    /* Layout */
+    .dashboard-container {
+        width: 95%;
+        margin: 20px auto;
+        gap: 15px;
+    }
+
+    /* Header */
+    .dashboard-header {
+        padding: 20px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        text-align: center;
+    }
+
+    .header-logo {
+        flex-direction: column;
+        gap: 10px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .header-title {
+        flex-direction: column;
+        gap: 5px;
+    }
+
+    .header-status {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .status-item {
+        align-items: center;
+        gap: 2px;
+    }
+
+    .status-item .value.code {
+        word-break: break-all;
+        font-size: 12px;
+        text-align: center;
+    }
+
+    /* Tabs Navigation */
+    .tabs-nav {
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .tab-btn {
+        flex-grow: 1;
+        justify-content: center;
+        padding: 8px 12px;
+        font-size: 13px;
+    }
+
+    /* Forms */
+    .form-row {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+
+    /* Checkboxes */
+    .checkbox-row {
+        flex-direction: column;
+        gap: 12px;
+        margin: 15px 0;
+    }
+}
+
+/* General Mobile Breakpoint (max-width: 600px) */
+@media (max-width: 600px) {
+    /* Dashboard Overview panels */
+    .card-header-btn {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+        text-align: center;
+    }
+
+    .card-header-btn h2 {
+        justify-content: center;
+    }
+
+    .card-header-btn .btn {
+        justify-content: center;
+    }
+
+    .header-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    .header-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+
+    /* Backend Server list item reflow */
+    .server-item {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 15px;
+        padding: 15px;
+    }
+
+    .server-info {
+        gap: 8px;
+    }
+
+    .server-name-row {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    .server-url {
+        word-break: break-all;
+    }
+
+    .server-actions {
+        width: 100%;
+        justify-content: space-between;
+        border-top: 1px solid var(--border-color);
+        padding-top: 12px;
+        margin-top: 4px;
+    }
+
+    /* Log Viewer adjustments */
+    .logs-controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+
+    .logs-filters {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .logs-filters select, 
+    .logs-filters input {
+        width: 100%;
+    }
+
+    .logs-controls button {
+        width: 100%;
+        justify-content: center;
+    }
+
+    .log-line {
+        flex-wrap: wrap;
+        gap: 6px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .log-time, .log-level-badge, .log-category {
+        font-size: 11px;
+    }
+
+    .log-msg {
+        width: 100%;
+        margin-top: 2px;
+    }
+
+    /* Table reflow for clients table */
+    #clients-table {
+        display: block;
+    }
+
+    #clients-table thead {
+        display: none; /* Hide headers */
+    }
+
+    #clients-table tbody, 
+    #clients-table tr, 
+    #clients-table td {
+        display: block;
+        width: 100%;
+    }
+
+    #clients-table tr {
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-bottom: 12px;
+        padding: 10px;
+        background: rgba(255, 255, 255, 0.01);
+    }
+
+    #clients-table td {
+        text-align: right;
+        padding: 8px 6px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+        position: relative;
+        padding-left: 45%;
+        word-break: break-all;
+        font-size: 12px;
+    }
+
+    #clients-table td:last-child {
+        border-bottom: none;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+    }
+
+    #clients-table td::before {
+        position: absolute;
+        left: 6px;
+        top: 8px;
+        width: 40%;
+        text-align: left;
+        font-weight: 600;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-size: 10px;
+    }
+
+    #clients-table td:nth-of-type(1)::before { content: "Client Name"; }
+    #clients-table td:nth-of-type(2)::before { content: "Client ID"; }
+    #clients-table td:nth-of-type(3)::before { content: "Type"; }
+    #clients-table td:nth-of-type(4)::before { content: "Actions"; }
+
+    /* Modals scaling */
+    .modal-card {
+        padding: 20px 15px;
+    }
+
+    .modal-footer {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .modal-footer .btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
