@@ -28,7 +28,19 @@ function renderServers(servers) {
         return;
     }
     
-    list.innerHTML = servers.map(server => {
+    // Sort disconnected/failed enabled servers to the top, then connected, then disabled
+    const sortedServers = [...servers].sort((a, b) => {
+        const getPriority = (s) => {
+            if (!s.enabled) return 3;
+            if (s.connectionStatus === 'Connected') return 2;
+            return 1; // Disconnected, Failed, or Retrying (Highest priority at top)
+        };
+        return getPriority(a) - getPriority(b);
+    });
+
+    list.innerHTML = sortedServers.map(server => {
+        const isDisconnected = server.enabled && server.connectionStatus !== 'Connected';
+        const itemClass = isDisconnected ? 'server-item server-disconnected-pulse' : 'server-item';
         const nameClass = server.enabled ? 'server-name' : 'server-name text-muted';
         const categoryBadge = (server.categories && server.categories.length > 0)
             ? server.categories.map(cat => `<span class="server-badge" style="background: rgba(59,130,246,0.1); color: var(--primary);">${escapeHtml(cat)}</span>`).join('')
@@ -65,7 +77,7 @@ function renderServers(servers) {
         }
 
         return `
-            <div class="server-item">
+            <div class="${itemClass}">
                 <div class="server-info">
                     <div class="server-name-row">
                         <span class="${nameClass}">${escapeHtml(server.displayName)}</span>

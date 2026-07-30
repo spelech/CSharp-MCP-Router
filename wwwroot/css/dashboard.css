@@ -45,6 +45,26 @@
     transition: all 0.2s ease;
 }
 
+@keyframes pulse-red-border {
+    0% {
+        border-color: rgba(239, 68, 68, 0.4);
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.2);
+    }
+    50% {
+        border-color: rgba(239, 68, 68, 0.95);
+        box-shadow: 0 0 16px rgba(239, 68, 68, 0.6);
+    }
+    100% {
+        border-color: rgba(239, 68, 68, 0.4);
+        box-shadow: 0 0 6px rgba(239, 68, 68, 0.2);
+    }
+}
+
+.server-item.server-disconnected-pulse {
+    background: rgba(239, 68, 68, 0.04);
+    animation: pulse-red-border 2s infinite ease-in-out;
+}
+
 .server-item:hover {
     background: rgba(255, 255, 255, 0.04);
     border-color: rgba(255, 255, 255, 0.15);
