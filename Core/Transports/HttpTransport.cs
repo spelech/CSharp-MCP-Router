@@ -31,16 +31,40 @@ namespace McpRouter.Core.Transports
 
         private void ApplyAuthAndCustomHeaders(HttpRequestMessage request)
         {
-            if (!string.IsNullOrEmpty(_server.ApiKey))
+            var token = !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
+            var authShape = (_server.AuthShape ?? "bearer").ToLowerInvariant();
+
+            if (!string.IsNullOrEmpty(token))
             {
-                if (_server.Id == "ha")
+                switch (authShape)
                 {
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
-                }
-                else
-                {
-                    request.Headers.TryAddWithoutValidation("X-API-Key", _server.ApiKey);
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _server.ApiKey);
+                    case "bearer":
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        break;
+                    case "basic":
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Basic", token);
+                        break;
+                    case "raw":
+                        request.Headers.TryAddWithoutValidation("Authorization", token);
+                        break;
+                    case "x-api-key":
+                        request.Headers.TryAddWithoutValidation("X-API-Key", token);
+                        break;
+                    case "custom-header":
+                        var headerName = !string.IsNullOrWhiteSpace(_server.CustomHeaderName) ? _server.CustomHeaderName : "X-Auth-Token";
+                        request.Headers.TryAddWithoutValidation(headerName, token);
+                        break;
+                    case "query":
+                        var paramName = !string.IsNullOrWhiteSpace(_server.CustomHeaderName) ? _server.CustomHeaderName : "token";
+                        var uriBuilder = new UriBuilder(request.RequestUri!);
+                        var query = System.Web.HttpUtility.ParseQueryString(uriBuilder.Query);
+                        query[paramName] = token;
+                        uriBuilder.Query = query.ToString();
+                        request.RequestUri = uriBuilder.Uri;
+                        break;
+                    default:
+                        request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                        break;
                 }
             }
 

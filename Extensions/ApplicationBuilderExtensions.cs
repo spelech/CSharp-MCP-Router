@@ -1089,6 +1089,10 @@ namespace McpRouter.Extensions
                         s.Hidden,
                         s.Type,
                         s.Categories,
+                        s.SecretProvider,
+                        s.SecretItemKey,
+                        s.AuthShape,
+                        s.CustomHeaderName,
                         s.HeadersJson,
                         HasApiKey = !string.IsNullOrEmpty(s.ApiKey),
                         ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
@@ -1148,6 +1152,22 @@ namespace McpRouter.Extensions
                 if (!string.IsNullOrEmpty(update.Type))
                 {
                     server.Type = update.Type;
+                }
+                if (update.SecretProvider != null)
+                {
+                    server.SecretProvider = update.SecretProvider;
+                }
+                if (update.SecretItemKey != null)
+                {
+                    server.SecretItemKey = update.SecretItemKey;
+                }
+                if (!string.IsNullOrEmpty(update.AuthShape))
+                {
+                    server.AuthShape = update.AuthShape;
+                }
+                if (update.CustomHeaderName != null)
+                {
+                    server.CustomHeaderName = update.CustomHeaderName;
                 }
                 if (update.Categories != null)
                 {

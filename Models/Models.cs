@@ -11,7 +11,10 @@ namespace McpRouter.Models
         public bool Enabled { get; set; }
         public bool Hidden { get; set; }
         public string Type { get; set; } = "sse"; // "sse" or "http"
-        public string SecretProvider { get; set; } = "Vault"; // "Vault", "WindowsRegistry", "Environment"
+        public string SecretProvider { get; set; } = "Vault"; // "Vault", "WindowsRegistry", "Environment", "None"
+        public string? SecretItemKey { get; set; }
+        public string AuthShape { get; set; } = "bearer"; // "bearer", "basic", "raw", "x-api-key", "custom-header", "query"
+        public string? CustomHeaderName { get; set; }
         public System.Collections.Generic.List<string> Categories { get; set; } = new();
         public string? ApiKey { get; set; }
         public string? HeadersJson { get; set; } // JSON dictionary of custom headers

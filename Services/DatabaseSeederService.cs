@@ -52,19 +52,31 @@ namespace McpRouter.Services
                     {
                         db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
                     }
-                    catch
+                    catch { }
+
+                    try
                     {
-                        // Ignore if column already exists
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretItemKey TEXT NULL");
                     }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN AuthShape TEXT DEFAULT 'bearer'");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN CustomHeaderName TEXT NULL");
+                    }
+                    catch { }
 
                     try
                     {
                         db.Database.ExecuteSqlRaw("ALTER TABLE Tools ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
                     }
-                    catch
-                    {
-                        // Ignore if column already exists
-                    }
+                    catch { }
 
                     // Create SecretProviders and AuthProviderConfigs tables for SQLite
                     try

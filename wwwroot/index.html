@@ -22,7 +22,7 @@
                 <i class="fa-solid fa-network-wired logo-icon"></i>
                 <div class="header-title">
                     <h1>MCP Router Gateway</h1>
-                    <span class="badge badge-primary" id="version-badge">v2.14.0</span>
+                    <span class="badge badge-primary" id="version-badge">v2.15.0</span>
                 </div>
             </div>
             <div class="header-status">
@@ -629,18 +629,43 @@
                     <input type="text" id="server-url" placeholder="e.g. http://notes-rag-mcp:3000/sse" required>
                 </div>
 
-                <div class="form-group">
-                    <label for="server-key">API Token / Secret (Optional)</label>
-                    <input type="password" id="server-key" placeholder="Bearer auth token">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="server-secret-provider">Secret Provider</label>
+                        <select id="server-secret-provider">
+                            <option value="None">None (Static API Token)</option>
+                            <option value="Vault">HashiCorp Vault (KV v2)</option>
+                            <option value="WindowsRegistry">Windows Registry (DPAPI)</option>
+                            <option value="Environment">Environment Variables</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="server-secret-key">Secret Key / Item Name</label>
+                        <input type="text" id="server-secret-key" placeholder="e.g. slack/bot-token or HOMEASSISTANT_TOKEN">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="server-auth-shape">Auth Token Format / Shape</label>
+                        <select id="server-auth-shape" onchange="window.onAuthShapeChange(this.value)">
+                            <option value="bearer" selected>Bearer Token (Authorization: Bearer &lt;token&gt;)</option>
+                            <option value="basic">Basic Auth (Authorization: Basic &lt;token&gt;)</option>
+                            <option value="raw">Raw Auth Header (Authorization: &lt;token&gt;)</option>
+                            <option value="x-api-key">X-API-Key Header (X-API-Key: &lt;token&gt;)</option>
+                            <option value="custom-header">Custom Header Name (e.g. Slack-Token: &lt;token&gt;)</option>
+                            <option value="query">URL Query Parameter (e.g. ?token=&lt;token&gt;)</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="group-custom-header-name" style="display: none;">
+                        <label for="server-custom-header-name">Custom Header / Query Name</label>
+                        <input type="text" id="server-custom-header-name" placeholder="e.g. Slack-Bot-Token or token">
+                    </div>
                 </div>
 
                 <div class="form-group">
-                    <label for="server-secret-provider">Secret Provider</label>
-                    <select id="server-secret-provider">
-                        <option value="Vault">HashiCorp Vault (KV v2)</option>
-                        <option value="WindowsRegistry">Windows Registry (DPAPI)</option>
-                        <option value="Environment">Environment Variables</option>
-                    </select>
+                    <label for="server-key">Static API Token / Secret (Fallback)</label>
+                    <input type="password" id="server-key" placeholder="Fallback API token if secret provider is not used">
                 </div>
 
                 <div class="form-row checkbox-row">

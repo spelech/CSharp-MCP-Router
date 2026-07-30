@@ -40,6 +40,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v2.15.0`** | 2026-07-29 | Implemented per-server secret provider key selection (`SecretItemKey`) and customizable authentication shapes (`AuthShape`: Bearer, Basic, Raw, X-API-Key, Custom Header, URL Query Parameter). |
 | **`v2.14.0`** | 2026-07-29 | Added real-time search filtering (by name, ID, URL, category), custom sorting (Status Priority, Name A-Z/Z-A, Type, Category), and dynamic grouping (`Category`, `Status`, `Type`) to the Backend MCP Servers dashboard card. |
 | **`v2.13.0`** | 2026-07-29 | Introduced `BackendHealthCheckService` to perform background health probing across enabled MCP backends on startup & every 15s, ensuring accurate status recovery without requiring an active SSE client stream. |
 | **`v2.12.0`** | 2026-07-29 | Reorganized Settings view into sub-page navigation tabs (`Vector & Search`, `Security & Approvals`, `Identity & Auth`, `Secret Providers`, `Prompts & Resources`). |

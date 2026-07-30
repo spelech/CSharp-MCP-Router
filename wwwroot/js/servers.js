@@ -235,15 +235,31 @@ export async function toggleServer(id, property, value) {
     }
 }
 
+export function onAuthShapeChange(shape) {
+    const customHeaderGroup = document.getElementById('group-custom-header-name');
+    if (customHeaderGroup) {
+        if (shape === 'custom-header' || shape === 'query') {
+            customHeaderGroup.style.display = 'block';
+        } else {
+            customHeaderGroup.style.display = 'none';
+        }
+    }
+}
+window.onAuthShapeChange = onAuthShapeChange;
+
 export function openModal() {
-    document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-server"></i> Add MCP Server';
+    document.getElementById('modal-title').innerHTML = '<i class="fa-solid fa-plus"></i> Add MCP Server';
     document.getElementById('server-id').value = '';
     document.getElementById('server-name').value = '';
     document.getElementById('server-type').value = 'sse';
     document.getElementById('server-category').value = 'infrastructure';
     document.getElementById('server-url').value = '';
     document.getElementById('server-key').value = '';
-    document.getElementById('server-secret-provider').value = 'Vault';
+    document.getElementById('server-secret-provider').value = 'None';
+    document.getElementById('server-secret-key').value = '';
+    document.getElementById('server-auth-shape').value = 'bearer';
+    document.getElementById('server-custom-header-name').value = '';
+    onAuthShapeChange('bearer');
     document.getElementById('server-enabled').checked = true;
     document.getElementById('server-hidden').checked = false;
     document.getElementById('server-modal').style.display = 'flex';
@@ -261,7 +277,11 @@ export function editServer(id) {
     document.getElementById('server-category').value = server.categories ? server.categories.join(', ') : 'default';
     document.getElementById('server-url').value = server.url;
     document.getElementById('server-key').value = '';
-    document.getElementById('server-secret-provider').value = server.secretProvider || 'Vault';
+    document.getElementById('server-secret-provider').value = server.secretProvider || 'None';
+    document.getElementById('server-secret-key').value = server.secretItemKey || '';
+    document.getElementById('server-auth-shape').value = server.authShape || 'bearer';
+    document.getElementById('server-custom-header-name').value = server.customHeaderName || '';
+    onAuthShapeChange(server.authShape || 'bearer');
     document.getElementById('server-enabled').checked = server.enabled;
     document.getElementById('server-hidden').checked = server.hidden;
     document.getElementById('server-modal').style.display = 'flex';
@@ -283,6 +303,9 @@ export async function saveServer(event) {
         categories: document.getElementById('server-category').value.split(',').map(s => s.trim()).filter(Boolean),
         url: document.getElementById('server-url').value,
         secretProvider: document.getElementById('server-secret-provider').value,
+        secretItemKey: document.getElementById('server-secret-key').value,
+        authShape: document.getElementById('server-auth-shape').value,
+        customHeaderName: document.getElementById('server-custom-header-name').value,
         enabled: document.getElementById('server-enabled').checked,
         hidden: document.getElementById('server-hidden').checked
     };
