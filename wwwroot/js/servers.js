@@ -2,6 +2,22 @@ import { apiRequest } from './api.js';
 import { escapeHtml } from './utils.js';
 
 export let allServers = [];
+let currentPage = 1;
+let pageSize = 6;
+
+export function changeServerPage(delta) {
+    currentPage += delta;
+    renderServers(allServers);
+}
+
+export function changeServerPageSize(newSize) {
+    pageSize = newSize === 'all' ? 'all' : parseInt(newSize, 10);
+    currentPage = 1;
+    renderServers(allServers);
+}
+
+window.changeServerPage = changeServerPage;
+window.changeServerPageSize = changeServerPageSize;
 
 export async function loadServers() {
     try {
@@ -25,6 +41,7 @@ function renderServers(servers) {
     const list = document.getElementById('servers-list');
     if (servers.length === 0) {
         list.innerHTML = '<div class="empty-state">No backend servers configured.</div>';
+        updatePaginationInfo(0, 0, 0);
         return;
     }
     
@@ -38,7 +55,20 @@ function renderServers(servers) {
         return getPriority(a) - getPriority(b);
     });
 
-    list.innerHTML = sortedServers.map(server => {
+    const totalItems = sortedServers.length;
+    const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
+    const totalPages = Math.max(1, Math.ceil(totalItems / (effectivePageSize || 1)));
+
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const startIndex = (currentPage - 1) * effectivePageSize;
+    const endIndex = Math.min(startIndex + effectivePageSize, totalItems);
+    const pageItems = sortedServers.slice(startIndex, endIndex);
+
+    updatePaginationInfo(startIndex + 1, endIndex, totalItems, currentPage, totalPages);
+
+    list.innerHTML = pageItems.map(server => {
         const isDisconnected = server.enabled && server.connectionStatus !== 'Connected';
         const itemClass = isDisconnected ? 'server-item server-disconnected-pulse' : 'server-item';
         const nameClass = server.enabled ? 'server-name' : 'server-name text-muted';
@@ -224,4 +254,18 @@ export async function reconnectServer(id) {
     } catch (error) {
         console.error('Error triggering reconnect:', error);
     }
+}
+
+function updatePaginationInfo(start, end, total, page, totalPages) {
+    const rangeEl = document.getElementById('pagination-range');
+    const totalEl = document.getElementById('pagination-total');
+    const pageNumEl = document.getElementById('pagination-page-num');
+    const prevBtn = document.getElementById('btn-prev-page');
+    const nextBtn = document.getElementById('btn-next-page');
+
+    if (rangeEl) rangeEl.textContent = total > 0 ? `${start}-${end}` : '0-0';
+    if (totalEl) totalEl.textContent = total;
+    if (pageNumEl) pageNumEl.textContent = `Page ${page || 1} of ${totalPages || 1}`;
+    if (prevBtn) prevBtn.disabled = (page <= 1);
+    if (nextBtn) nextBtn.disabled = (page >= totalPages);
 }

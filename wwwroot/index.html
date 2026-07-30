@@ -22,7 +22,7 @@
                 <i class="fa-solid fa-network-wired logo-icon"></i>
                 <div class="header-title">
                     <h1>MCP Router Gateway</h1>
-                    <span class="badge badge-primary" id="version-badge">v2.10.0</span>
+                    <span class="badge badge-primary" id="version-badge">v2.11.0</span>
                 </div>
             </div>
             <div class="header-status">
@@ -138,6 +138,21 @@
                             <!-- Dynamic Server Cards Go Here -->
                             <div class="loading-state">
                                 <i class="fa-solid fa-spinner fa-spin"></i> Loading backend servers...
+                            </div>
+                        </div>
+                        <div class="pagination-toolbar" id="servers-pagination" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; padding-top: 12px; border-top: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px;">
+                            <div class="pagination-info" style="color: var(--text-muted);">
+                                Showing <span id="pagination-range">0-0</span> of <span id="pagination-total">0</span> servers
+                            </div>
+                            <div class="pagination-controls" style="display: flex; gap: 8px; align-items: center;">
+                                <button class="btn btn-secondary btn-sm" id="btn-prev-page" onclick="window.changeServerPage(-1)"><i class="fa-solid fa-chevron-left"></i> Prev</button>
+                                <span id="pagination-page-num" style="font-weight: 600; color: var(--text-main);">Page 1 of 1</span>
+                                <button class="btn btn-secondary btn-sm" id="btn-next-page" onclick="window.changeServerPage(1)">Next <i class="fa-solid fa-chevron-right"></i></button>
+                                <select id="pagination-page-size" class="form-select form-select-sm" style="width: auto; padding: 4px 8px; background: rgba(0,0,0,0.2); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px;" onchange="window.changeServerPageSize(this.value)">
+                                    <option value="6" selected>6 / page</option>
+                                    <option value="12">12 / page</option>
+                                    <option value="all">All</option>
+                                </select>
                             </div>
                         </div>
                     </div>
