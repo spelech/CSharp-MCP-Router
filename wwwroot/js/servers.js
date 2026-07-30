@@ -123,6 +123,7 @@ export function openModal() {
     document.getElementById('server-hidden').checked = false;
     document.getElementById('server-modal').style.display = 'flex';
 }
+export const openAddModal = openModal;
 
 export function editServer(id) {
     const server = allServers.find(s => s.id === id);
@@ -140,6 +141,7 @@ export function editServer(id) {
     document.getElementById('server-hidden').checked = server.hidden;
     document.getElementById('server-modal').style.display = 'flex';
 }
+export const openEditModal = editServer;
 
 export function closeModal() {
     document.getElementById('server-modal').style.display = 'none';
