@@ -25,6 +25,13 @@ Run tests via `dotnet test McpRouter.slnx`.
 
 ## Rules
 
+- **MANDATORY VERSIONING RULE**: **EVERY COMMIT OR MERGE TO `main` MUST BUMP THE VERSION NUMBER.**
+  - Patch Bumps (e.g. `2.7.0` -> `2.7.1`): For bug fixes, performance optimizations, log refactoring, or minor UI tweaks.
+  - Minor Bumps (e.g. `2.7.0` -> `2.8.0`): For new features, API endpoints, schema changes, or architectural additions.
+  - **Files That MUST Be Updated Simultaneously**:
+    1. `mcp-router.csproj` (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`)
+    2. `wwwroot/index.html` (`<span class="badge badge-primary" id="version-badge">vX.Y.Z</span>`)
+    3. `README.md` (Add release entry to the Release Changelog table)
 - Do not use string manipulation (`string.Replace`) for JSON payloads. Use `JsonNode` (see `ClientSession.RewriteRequestJson`).
 - Do not commit mockups to `docs/assets/`. Use actual UI screenshots.
 - Ensure that you use atomic commits for logical changes.

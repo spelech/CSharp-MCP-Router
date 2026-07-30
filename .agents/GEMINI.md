@@ -70,8 +70,12 @@ Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) o
 
 ---
 
-## 🏷️ 5. Versioning
+## 🏷️ 5. Mandatory Versioning Rule
 
-* When releasing core fixes, always perform a matching version bump across the codebase:
-  * In the C# project file: [`mcp-router.csproj`](file:///containers/mcp/router/mcp-router.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
-  * In the UI dashboard header: [`index.html`](file:///containers/mcp/router/wwwroot/index.html) (`<span class="badge">vX.Y.Z</span>`).
+**EVERY COMMIT OR MERGE TO `main` MUST BUMP THE VERSION NUMBER WITHOUT EXCEPTION.**
+- **Patch Bumps (e.g. `2.7.0` -> `2.7.1`)**: For bug fixes, performance optimizations, log refactoring, or minor UI tweaks.
+- **Minor Bumps (e.g. `2.7.0` -> `2.8.0`)**: For new features, API endpoints, schema changes, or architectural additions.
+- **Files That MUST Be Updated Simultaneously**:
+  1. [`mcp-router.csproj`](file:///containers/mcp/router/mcp-router.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
+  2. [`wwwroot/index.html`](file:///containers/mcp/router/wwwroot/index.html) (`<span class="badge badge-primary" id="version-badge">vX.Y.Z</span>`).
+  3. [`README.md`](file:///containers/mcp/router/README.md) (Add release entry to the Release Changelog table).
