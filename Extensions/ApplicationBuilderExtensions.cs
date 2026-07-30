@@ -1099,7 +1099,7 @@ namespace McpRouter.Extensions
                 return Results.Ok(sanitized);
             });
 
-            app.MapPost("/api/servers/{id}/reconnect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            app.MapPost("/api/servers/{id}/reconnect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, [FromServices] Services.BackendHealthCheckService healthCheckSvc, ILogger<Program> logger) =>
             {
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
                 if (server == null)
@@ -1109,6 +1109,8 @@ namespace McpRouter.Extensions
 
                 logger.LogInformation("Triggering manual reconnect request for backend {ServerId} ({DisplayName})", id, server.DisplayName);
                 
+                await healthCheckSvc.ProbeServerAsync(server);
+
                 var activeSessions = sessionManager.GetActiveSessions();
                 foreach (var session in activeSessions)
                 {
@@ -1116,6 +1118,12 @@ namespace McpRouter.Extensions
                 }
 
                 return Results.Ok(new { success = true, message = $"Reconnection triggered for server {server.DisplayName}" });
+            });
+
+            app.MapPost("/api/servers/reconnect-all", async ([FromServices] Services.BackendHealthCheckService healthCheckSvc) =>
+            {
+                await healthCheckSvc.ProbeAllServersAsync();
+                return Results.Ok(new { success = true });
             });
             
             app.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>

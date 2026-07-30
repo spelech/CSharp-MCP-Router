@@ -19,8 +19,11 @@ export function changeServerPageSize(newSize) {
 window.changeServerPage = changeServerPage;
 window.changeServerPageSize = changeServerPageSize;
 
-export async function loadServers() {
+export async function loadServers(refresh = false) {
     try {
+        if (refresh) {
+            try { await apiRequest('/api/servers/reconnect-all', { method: 'POST' }); } catch {}
+        }
         allServers = await apiRequest('/api/servers');
         renderServers(allServers);
         updateStats(allServers);

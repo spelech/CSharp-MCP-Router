@@ -45,6 +45,10 @@ namespace McpRouter.Extensions
         // Register Docker Auto-Discovery Service
         builder.Services.AddHostedService<DockerAutoDiscoveryService>();
         
+        // Register Backend Health Check Service
+        builder.Services.AddSingleton<BackendHealthCheckService>();
+        builder.Services.AddHostedService(sp => sp.GetRequiredService<BackendHealthCheckService>());
+        
         // Register Dynamic Embedding Service (handles settings in encrypted DB)
         builder.Services.AddSingleton<DynamicEmbeddingService>();
         builder.Services.AddSingleton<IEmbeddingService>(sp => sp.GetRequiredService<DynamicEmbeddingService>());

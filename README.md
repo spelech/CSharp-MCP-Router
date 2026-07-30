@@ -40,6 +40,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v2.13.0`** | 2026-07-29 | Introduced `BackendHealthCheckService` to perform background health probing across enabled MCP backends on startup & every 15s, ensuring accurate status recovery without requiring an active SSE client stream. |
 | **`v2.12.0`** | 2026-07-29 | Reorganized Settings view into sub-page navigation tabs (`Vector & Search`, `Security & Approvals`, `Identity & Auth`, `Secret Providers`, `Prompts & Resources`). |
 | **`v2.11.0`** | 2026-07-29 | Added pagination controls (Prev/Next, page range, items-per-page selector: 6, 12, All) to backend server card grid. |
 | **`v2.10.0`** | 2026-07-29 | Enhanced server status cards UX: sorted disconnected/failed enabled servers to top of dashboard list with `@keyframes pulse-red-border` animation. |
