@@ -86,7 +86,7 @@ function renderServers(servers) {
     const list = document.getElementById('servers-list');
     if (servers.length === 0) {
         list.innerHTML = '<div class="empty-state">No backend servers configured.</div>';
-        updatePaginationInfo(0, 0, 0);
+        updatePaginationInfo(0, 0, 0, 1, 1);
         return;
     }
     
@@ -102,7 +102,7 @@ function renderServers(servers) {
 
     if (filtered.length === 0) {
         list.innerHTML = `<div class="empty-state">No servers matching search query "${escapeHtml(searchQuery)}".</div>`;
-        updatePaginationInfo(0, 0, 0);
+        updatePaginationInfo(0, 0, 0, 1, 1);
         return;
     }
 
@@ -125,27 +125,24 @@ function renderServers(servers) {
         return getPriority(a) - getPriority(b);
     });
 
-    // 3. Pagination
-    const totalItems = filtered.length;
-    const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
-    const totalPages = Math.max(1, Math.ceil(totalItems / (effectivePageSize || 1)));
-
-    if (currentPage > totalPages) currentPage = totalPages;
-    if (currentPage < 1) currentPage = 1;
-
-    const startIndex = (currentPage - 1) * effectivePageSize;
-    const endIndex = Math.min(startIndex + effectivePageSize, totalItems);
-    const pageItems = filtered.slice(startIndex, endIndex);
-
-    updatePaginationInfo(startIndex + 1, endIndex, totalItems, currentPage, totalPages);
-window.toggleServerGroup = toggleServerGroup;
-
-    // 4. Grouping & HTML rendering
+    // 3. Grouping & Pagination
     if (groupBy === 'none') {
+        const totalItems = filtered.length;
+        const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
+        const totalPages = Math.max(1, Math.ceil(totalItems / (effectivePageSize || 1)));
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * effectivePageSize;
+        const endIndex = Math.min(startIndex + effectivePageSize, totalItems);
+        const pageItems = filtered.slice(startIndex, endIndex);
+
+        updatePaginationInfo(startIndex + 1, endIndex, totalItems, currentPage, totalPages, 'servers');
         list.innerHTML = pageItems.map(server => renderSingleServerCard(server)).join('');
     } else {
         const groups = {};
-        pageItems.forEach(server => {
+        filtered.forEach(server => {
             let key = 'Uncategorized';
             if (groupBy === 'category') {
                 key = (server.categories && server.categories.length > 0) ? server.categories[0] : 'Uncategorized';
@@ -158,8 +155,22 @@ window.toggleServerGroup = toggleServerGroup;
             groups[key].push(server);
         });
 
+        const groupEntries = Object.entries(groups);
+        const totalGroups = groupEntries.length;
+        const effectivePageSize = pageSize === 'all' ? totalGroups : pageSize;
+        const totalPages = Math.max(1, Math.ceil(totalGroups / (effectivePageSize || 1)));
+
+        if (currentPage > totalPages) currentPage = totalPages;
+        if (currentPage < 1) currentPage = 1;
+
+        const startIndex = (currentPage - 1) * effectivePageSize;
+        const endIndex = Math.min(startIndex + effectivePageSize, totalGroups);
+        const pageGroupEntries = groupEntries.slice(startIndex, endIndex);
+
+        updatePaginationInfo(startIndex + 1, endIndex, totalGroups, currentPage, totalPages, 'groups', filtered.length);
+
         let html = '';
-        for (const [groupName, groupServers] of Object.entries(groups)) {
+        for (const [groupName, groupServers] of pageGroupEntries) {
             const groupId = encodeURIComponent(groupName.toLowerCase().replace(/\s+/g, '-'));
             const isCollapsed = collapsedGroups.has(groupId);
             const iconClass = isCollapsed ? 'fa-solid fa-chevron-right group-toggle-icon' : 'fa-solid fa-chevron-down group-toggle-icon';
@@ -391,7 +402,7 @@ export async function reconnectServer(id) {
     }
 }
 
-function updatePaginationInfo(start, end, total, page, totalPages) {
+function updatePaginationInfo(start, end, total, page, totalPages, unitLabel = 'servers', serverCount = null) {
     const rangeEl = document.getElementById('pagination-range');
     const totalEl = document.getElementById('pagination-total');
     const pageNumEl = document.getElementById('pagination-page-num');
@@ -399,7 +410,13 @@ function updatePaginationInfo(start, end, total, page, totalPages) {
     const nextBtn = document.getElementById('btn-next-page');
 
     if (rangeEl) rangeEl.textContent = total > 0 ? `${start}-${end}` : '0-0';
-    if (totalEl) totalEl.textContent = total;
+    if (totalEl) {
+        if (unitLabel === 'groups' && serverCount !== null) {
+            totalEl.textContent = `${total} groups (${serverCount} servers)`;
+        } else {
+            totalEl.textContent = `${total} ${unitLabel}`;
+        }
+    }
     if (pageNumEl) pageNumEl.textContent = `Page ${page || 1} of ${totalPages || 1}`;
     if (prevBtn) prevBtn.disabled = (page <= 1);
     if (nextBtn) nextBtn.disabled = (page >= totalPages);
