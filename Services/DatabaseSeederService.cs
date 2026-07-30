@@ -50,7 +50,7 @@ namespace McpRouter.Services
 
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None'");
                     }
                     catch { }
 
@@ -69,6 +69,20 @@ namespace McpRouter.Services
                     try
                     {
                         db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN CustomHeaderName TEXT NULL");
+                    }
+                    catch { }
+
+                    // Backfill existing servers in SQLite database
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw(
+                            "UPDATE Servers SET SecretProvider = 'None' " +
+                            "WHERE (SecretProvider IS NULL OR SecretProvider = '' OR SecretProvider = 'Vault') " +
+                            "AND (ApiKey IS NOT NULL AND ApiKey != '');");
+
+                        db.Database.ExecuteSqlRaw(
+                            "UPDATE Servers SET AuthShape = 'bearer' " +
+                            "WHERE AuthShape IS NULL OR AuthShape = '';");
                     }
                     catch { }
 
@@ -367,7 +381,14 @@ namespace McpRouter.Services
                                     existing.Categories = server.Categories;
                                     existing.Enabled = server.Enabled;
                                     existing.Hidden = server.Hidden;
-                                    existing.ApiKey = server.ApiKey;
+                                    if (!string.IsNullOrEmpty(server.ApiKey))
+                                    {
+                                        existing.ApiKey = server.ApiKey;
+                                    }
+                                    existing.SecretProvider = !string.IsNullOrEmpty(server.SecretProvider) ? server.SecretProvider : "None";
+                                    existing.SecretItemKey = server.SecretItemKey;
+                                    existing.AuthShape = !string.IsNullOrEmpty(server.AuthShape) ? server.AuthShape : "bearer";
+                                    existing.CustomHeaderName = server.CustomHeaderName;
                                     existing.HeadersJson = server.HeadersJson;
                                 }
                             }

@@ -1173,7 +1173,7 @@ namespace McpRouter.Extensions
                 {
                     server.Categories = update.Categories;
                 }
-                if (update.ApiKey != null)
+                if (!string.IsNullOrWhiteSpace(update.ApiKey))
                 {
                     server.ApiKey = update.ApiKey;
                 }

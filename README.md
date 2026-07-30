@@ -40,6 +40,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v2.18.0`** | 2026-07-30 | Fixed SQLite data backfill migration for existing servers to set `SecretProvider = 'None'` when static `ApiKey` is present, and protected existing API tokens from being cleared during PUT updates. |
 | **`v2.17.0`** | 2026-07-30 | Updated pagination slicing logic so that when grouping (`groupBy !== 'none'`) is active, items per page limits apply to groups rather than individual servers, with clear group/server range indicators. |
 | **`v2.16.0`** | 2026-07-30 | Made server group headers interactive and collapsible with animated chevron indicators, count badges, and persistent expand/collapse state. |
 | **`v2.15.0`** | 2026-07-29 | Implemented per-server secret provider key selection (`SecretItemKey`) and customizable authentication shapes (`AuthShape`: Bearer, Basic, Raw, X-API-Key, Custom Header, URL Query Parameter). |
