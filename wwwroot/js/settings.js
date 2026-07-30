@@ -1,11 +1,27 @@
 import { apiRequest, getSecretProviders, saveSecretProvider, getAuthProviders, saveAuthProvider } from './api.js';
 
 export async function initSettings() {
+    setupSubNavEvents();
     setupSettingsEvents();
     setupProviderEvents();
     await loadSettings();
     await loadProviders();
     await initCustomFilesManager();
+}
+
+function setupSubNavEvents() {
+    const subNavBtns = document.querySelectorAll('.settings-tab-btn');
+    subNavBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const targetId = btn.getAttribute('data-subview');
+            document.querySelectorAll('.settings-tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.settings-subview').forEach(v => v.classList.remove('active'));
+
+            btn.classList.add('active');
+            const targetView = document.getElementById(targetId);
+            if (targetView) targetView.classList.add('active');
+        });
+    });
 }
 
 function setupSettingsEvents() {

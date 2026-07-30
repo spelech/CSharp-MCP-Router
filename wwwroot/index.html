@@ -22,7 +22,7 @@
                 <i class="fa-solid fa-network-wired logo-icon"></i>
                 <div class="header-title">
                     <h1>MCP Router Gateway</h1>
-                    <span class="badge badge-primary" id="version-badge">v2.11.0</span>
+                    <span class="badge badge-primary" id="version-badge">v2.12.0</span>
                 </div>
             </div>
             <div class="header-status">
@@ -339,199 +339,220 @@
 
         <!-- View 3: Settings -->
         <div id="view-settings" class="view-panel">
-            <div class="glass-card settings-card" style="max-width: 600px; margin: 0 auto;">
-                <h2><i class="fa-solid fa-gear"></i> Semantic Search Settings</h2>
-                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
-                    Configure the embedding model used for matching query intents to tools. Changes are saved securely to the database.
-                </p>
-                <form id="settings-form">
+            <div class="tester-tabs settings-sub-nav" style="justify-content: flex-start; gap: 15px; margin-bottom: 25px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; max-width: 800px; margin-left: auto; margin-right: auto;">
+                <button type="button" class="tester-tab-btn active settings-tab-btn" data-subview="subview-search"><i class="fa-solid fa-brain"></i> Vector &amp; Search</button>
+                <button type="button" class="tester-tab-btn settings-tab-btn" data-subview="subview-security"><i class="fa-solid fa-shield-halved"></i> Security &amp; Approvals</button>
+                <button type="button" class="tester-tab-btn settings-tab-btn" data-subview="subview-identity"><i class="fa-solid fa-id-card"></i> Identity &amp; Auth</button>
+                <button type="button" class="tester-tab-btn settings-tab-btn" data-subview="subview-secrets"><i class="fa-solid fa-vault"></i> Secret Providers</button>
+                <button type="button" class="tester-tab-btn settings-tab-btn" data-subview="subview-files"><i class="fa-solid fa-folder-open"></i> Prompts &amp; Resources</button>
+            </div>
+
+            <!-- Subview 1: Vector & Search -->
+            <div id="subview-search" class="settings-subview active">
+                <div class="glass-card settings-card" style="max-width: 600px; margin: 0 auto;">
+                    <h2><i class="fa-solid fa-gear"></i> Semantic Search Settings</h2>
+                    <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                        Configure the embedding model used for matching query intents to tools. Changes are saved securely to the database.
+                    </p>
+                    <form id="settings-form">
+                        <div class="form-group">
+                            <label for="settings-provider">Embedding Provider</label>
+                            <select id="settings-provider" required>
+                                <option value="local">Local ONNX Model (In-Process, CPU-Friendly)</option>
+                                <option value="api">External Embedding API (LiteLLM, Open WebUI, OpenAI)</option>
+                            </select>
+                        </div>
+
+                        <div id="settings-local-group">
+                            <div class="form-group">
+                                <label for="settings-model-dir">Local Model Directory (inside volume)</label>
+                                <input type="text" id="settings-model-dir" placeholder="data/models">
+                                <small style="color: var(--text-muted);">
+                                    The <code>all-MiniLM-L6-v2</code> ONNX files will be downloaded automatically to this directory on first run.
+                                </small>
+                            </div>
+                        </div>
+
+                        <div id="settings-api-group" style="display: none;">
+                            <div class="form-group">
+                                <label for="settings-api-url">Embedding API URL</label>
+                                <input type="text" id="settings-api-url" placeholder="http://litellm:4000/v1/embeddings">
+                            </div>
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="settings-api-model">API Model Name</label>
+                                    <input type="text" id="settings-api-model" placeholder="all-MiniLM-L6-v2">
+                                </div>
+                                <div class="form-group">
+                                    <label for="settings-api-key">API Key (Optional)</label>
+                                    <input type="password" id="settings-api-key" placeholder="API password / auth token">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="settings-actions" style="margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px;">
+                            <button type="submit" class="btn btn-primary" id="btn-save-settings"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Subview 2: Security & Approvals -->
+            <div id="subview-security" class="settings-subview">
+                <div class="glass-card settings-card" style="max-width: 600px; margin: 0 auto;">
+                    <h2><i class="fa-solid fa-shield-halved"></i> Security &amp; Safety Controls</h2>
+                    <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                        Enforce human-in-the-loop validation for executing destructive or sensitive tools.
+                    </p>
                     <div class="form-group">
-                        <label for="settings-provider">Embedding Provider</label>
-                        <select id="settings-provider" required>
-                            <option value="local">Local ONNX Model (In-Process, CPU-Friendly)</option>
-                            <option value="api">External Embedding API (LiteLLM, Open WebUI, OpenAI)</option>
-                        </select>
-                    </div>
-
-                    <div id="settings-local-group">
-                        <div class="form-group">
-                            <label for="settings-model-dir">Local Model Directory (inside volume)</label>
-                            <input type="text" id="settings-model-dir" placeholder="data/models">
-                            <small style="color: var(--text-muted);">
-                                The <code>all-MiniLM-L6-v2</code> ONNX files will be downloaded automatically to this directory on first run.
-                            </small>
+                        <div class="checkbox-group" style="display: flex; align-items: center; gap: 10px;">
+                            <label class="switch">
+                                <input type="checkbox" id="settings-require-approval">
+                                <span class="slider"></span>
+                            </label>
+                            <span class="checkbox-label" style="font-weight: 500;">Require Manual Approval for Dangerous Tools</span>
                         </div>
+                        <small style="color: var(--text-muted); display: block; margin-top: 5px; margin-left: 50px;">
+                            When enabled, tool execution requests targeting databases, docker containers, files, or smart devices will prompt the user in the UI before running.
+                        </small>
                     </div>
-
-                    <div id="settings-api-group" style="display: none;">
-                        <div class="form-group">
-                            <label for="settings-api-url">Embedding API URL</label>
-                            <input type="text" id="settings-api-url" placeholder="http://litellm:4000/v1/embeddings">
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="settings-api-model">API Model Name</label>
-                                <input type="text" id="settings-api-model" placeholder="all-MiniLM-L6-v2">
-                            </div>
-                            <div class="form-group">
-                                <label for="settings-api-key">API Key (Optional)</label>
-                                <input type="password" id="settings-api-key" placeholder="API password / auth token">
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="settings-actions" style="margin-top: 25px; display: flex; justify-content: flex-end; gap: 10px;">
-                        <button type="submit" class="btn btn-primary" id="btn-save-settings"><i class="fa-solid fa-floppy-disk"></i> Save Settings</button>
-                    </div>
-                </form>
-            </div>
-            
-            <div class="glass-card settings-card" style="max-width: 600px; margin: 20px auto 0 auto;">
-                <h2><i class="fa-solid fa-shield-halved"></i> Security &amp; Safety Controls</h2>
-                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
-                    Enforce human-in-the-loop validation for executing destructive or sensitive tools.
-                </p>
-                <div class="form-group">
-                    <div class="checkbox-group" style="display: flex; align-items: center; gap: 10px;">
-                        <label class="switch">
-                            <input type="checkbox" id="settings-require-approval">
-                            <span class="slider"></span>
-                        </label>
-                        <span class="checkbox-label" style="font-weight: 500;">Require Manual Approval for Dangerous Tools</span>
-                    </div>
-                    <small style="color: var(--text-muted); display: block; margin-top: 5px; margin-left: 50px;">
-                        When enabled, tool execution requests targeting databases, docker containers, files, or smart devices will prompt the user in the UI before running.
-                    </small>
                 </div>
             </div>
 
-            <!-- Enterprise Identity & Auth Providers Card -->
-            <div class="glass-card settings-card" style="max-width: 800px; margin: 20px auto 0 auto;">
-                <h2><i class="fa-solid fa-id-card"></i> Identity & Auth Providers</h2>
-                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
-                    Enable authentication providers for user identity context and group policy authorization.
-                </p>
-                <form id="auth-providers-form">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                        <div style="padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <h4 style="margin:0;"><i class="fa-solid fa-brands fa-windows"></i> Active Directory</h4>
-                                <label class="switch">
-                                    <input type="checkbox" id="auth-ad-enabled">
-                                    <span class="slider"></span>
-                                </label>
+            <!-- Subview 3: Identity & Auth -->
+            <div id="subview-identity" class="settings-subview">
+                <div class="glass-card settings-card" style="max-width: 800px; margin: 0 auto;">
+                    <h2><i class="fa-solid fa-id-card"></i> Identity & Auth Providers</h2>
+                    <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                        Enable authentication providers for user identity context and group policy authorization.
+                    </p>
+                    <form id="auth-providers-form">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div style="padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4 style="margin:0;"><i class="fa-solid fa-brands fa-windows"></i> Active Directory</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" id="auth-ad-enabled">
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <p style="font-size: 12px; color: var(--text-muted);">Integrate Kerberos/NTLM Windows SIDs for enterprise group policies.</p>
                             </div>
-                            <p style="font-size: 12px; color: var(--text-muted);">Integrate Kerberos/NTLM Windows SIDs for enterprise group policies.</p>
-                        </div>
 
-                        <div style="padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                                <h4 style="margin:0;"><i class="fa-solid fa-key"></i> PocketID / TinyAuth OIDC</h4>
-                                <label class="switch">
-                                    <input type="checkbox" id="auth-oidc-enabled" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <p style="font-size: 12px; color: var(--text-muted);">Parse Remote-User and Remote-Groups HTTP headers from reverse proxies.</p>
-                            <div class="form-group" style="margin-top: 10px;">
-                                <label for="auth-user-header" style="font-size: 11px;">User Header Name</label>
-                                <input type="text" id="auth-user-header" value="Remote-User" style="font-size: 12px;">
-                            </div>
-                            <div class="form-group" style="margin-top: 5px;">
-                                <label for="auth-groups-header" style="font-size: 11px;">Groups Header Name</label>
-                                <input type="text" id="auth-groups-header" value="Remote-Groups" style="font-size: 12px;">
-                            </div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 15px; text-align: right;">
-                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Auth Config</button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Enterprise Secret Providers Card -->
-            <div class="glass-card settings-card" style="max-width: 800px; margin: 20px auto 0 auto;">
-                <h2><i class="fa-solid fa-vault"></i> Secret Providers</h2>
-                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
-                    Configure external vault and registry secret providers for resolving downstream MCP tokens.
-                </p>
-                <form id="secret-providers-form">
-                    <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
-                        <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <h4 style="margin:0; font-size: 13px;"><i class="fa-solid fa-lock"></i> Vault (KV v2)</h4>
-                                <label class="switch">
-                                    <input type="checkbox" id="secret-vault-enabled" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <span class="badge badge-secondary" style="font-size: 10px; margin-bottom: 10px; display: inline-block;">HashiCorp Vault</span>
-                            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
-                                <input type="text" id="secret-vault-address" placeholder="http://vault:8200" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
-                                <input type="password" id="secret-vault-token" placeholder="Vault Token (optional)" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
-                                <input type="text" id="secret-vault-path" placeholder="Mount Path (secret/data/)" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                            <div style="padding: 15px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                    <h4 style="margin:0;"><i class="fa-solid fa-key"></i> PocketID / TinyAuth OIDC</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" id="auth-oidc-enabled" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <p style="font-size: 12px; color: var(--text-muted);">Parse Remote-User and Remote-Groups HTTP headers from reverse proxies.</p>
+                                <div class="form-group" style="margin-top: 10px;">
+                                    <label for="auth-user-header" style="font-size: 11px;">User Header Name</label>
+                                    <input type="text" id="auth-user-header" value="Remote-User" style="font-size: 12px;">
+                                </div>
+                                <div class="form-group" style="margin-top: 5px;">
+                                    <label for="auth-groups-header" style="font-size: 11px;">Groups Header Name</label>
+                                    <input type="text" id="auth-groups-header" value="Remote-Groups" style="font-size: 12px;">
+                                </div>
                             </div>
                         </div>
-
-                        <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <h4 style="margin:0; font-size: 13px;"><i class="fa-solid fa-database"></i> Win Registry</h4>
-                                <label class="switch">
-                                    <input type="checkbox" id="secret-winreg-enabled" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <span class="badge badge-secondary" style="font-size: 10px; margin-bottom: 10px; display: inline-block;">DPAPI Encrypted</span>
-                            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
-                                <input type="text" id="secret-winreg-key" placeholder="HKCU\Software\McpRouter\Secrets" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
-                            </div>
+                        <div style="margin-top: 15px; text-align: right;">
+                            <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Auth Config</button>
                         </div>
-
-                        <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-                                <h4 style="margin:0; font-size: 13px;"><i class="fa-solid fa-terminal"></i> Environment</h4>
-                                <label class="switch">
-                                    <input type="checkbox" id="secret-env-enabled" checked>
-                                    <span class="slider"></span>
-                                </label>
-                            </div>
-                            <span class="badge badge-secondary" style="font-size: 10px; margin-bottom: 10px; display: inline-block;">Container Env</span>
-                            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
-                                <input type="text" id="secret-env-prefix" placeholder="Prefix (MCP_SECRET_)" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
-                            </div>
-                        </div>
-                    </div>
-                    <div style="margin-top: 15px; text-align: right;">
-                        <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Secret Config</button>
-                    </div>
-                </form>
-            </div>
-
-            <div class="glass-card settings-card" style="max-width: 800px; margin: 20px auto 0 auto;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h2><i class="fa-solid fa-folder-open"></i> Prompts &amp; Resources File Manager</h2>
-                    <button type="button" class="btn btn-secondary btn-sm" id="btn-create-custom-file"><i class="fa-solid fa-plus"></i> Create File</button>
+                    </form>
                 </div>
-                <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
-                    Manage your own local JSON prompts and markdown/text resources. They will be registered directly under the <code>router</code> namespace.
-                </p>
-                <div class="custom-files-table-container" style="overflow-x: auto;">
-                    <table class="custom-files-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted);">
-                                <th style="padding: 10px;">Type</th>
-                                <th style="padding: 10px;">Name</th>
-                                <th style="padding: 10px;">Size</th>
-                                <th style="padding: 10px;">Modified</th>
-                                <th style="padding: 10px; text-align: right;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="custom-files-tbody">
-                            <tr>
-                                <td colspan="5" class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted);">Loading custom files...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+            </div>
+
+            <!-- Subview 4: Secret Providers -->
+            <div id="subview-secrets" class="settings-subview">
+                <div class="glass-card settings-card" style="max-width: 800px; margin: 0 auto;">
+                    <h2><i class="fa-solid fa-vault"></i> Secret Providers</h2>
+                    <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                        Configure external vault and registry secret providers for resolving downstream MCP tokens.
+                    </p>
+                    <form id="secret-providers-form">
+                        <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px;">
+                            <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <h4 style="margin:0; font-size: 13px;"><i class="fa-solid fa-lock"></i> Vault (KV v2)</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" id="secret-vault-enabled" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <span class="badge badge-secondary" style="font-size: 10px; margin-bottom: 10px; display: inline-block;">HashiCorp Vault</span>
+                                <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                                    <input type="text" id="secret-vault-address" placeholder="http://vault:8200" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                                    <input type="password" id="secret-vault-token" placeholder="Vault Token (optional)" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                                    <input type="text" id="secret-vault-path" placeholder="Mount Path (secret/data/)" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                                </div>
+                            </div>
+
+                            <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <h4 style="margin:0; font-size: 13px;"><i class="fa-solid fa-database"></i> Win Registry</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" id="secret-winreg-enabled" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <span class="badge badge-secondary" style="font-size: 10px; margin-bottom: 10px; display: inline-block;">DPAPI Encrypted</span>
+                                <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                                    <input type="text" id="secret-winreg-key" placeholder="HKCU\Software\McpRouter\Secrets" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                                </div>
+                            </div>
+
+                            <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                    <h4 style="margin:0; font-size: 13px;"><i class="fa-solid fa-terminal"></i> Environment</h4>
+                                    <label class="switch">
+                                        <input type="checkbox" id="secret-env-enabled" checked>
+                                        <span class="slider"></span>
+                                    </label>
+                                </div>
+                                <span class="badge badge-secondary" style="font-size: 10px; margin-bottom: 10px; display: inline-block;">Container Env</span>
+                                <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                                    <input type="text" id="secret-env-prefix" placeholder="Prefix (MCP_SECRET_)" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                                </div>
+                            </div>
+                        </div>
+                        <div style="margin-top: 15px; text-align: right;">
+                            <button type="submit" class="btn btn-primary btn-sm"><i class="fa-solid fa-floppy-disk"></i> Save Secret Config</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Subview 5: Custom Files -->
+            <div id="subview-files" class="settings-subview">
+                <div class="glass-card settings-card" style="max-width: 800px; margin: 0 auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2><i class="fa-solid fa-folder-open"></i> Prompts &amp; Resources File Manager</h2>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-create-custom-file"><i class="fa-solid fa-plus"></i> Create File</button>
+                    </div>
+                    <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                        Manage your own local JSON prompts and markdown/text resources. They will be registered directly under the <code>router</code> namespace.
+                    </p>
+                    <div class="custom-files-table-container" style="overflow-x: auto;">
+                        <table class="custom-files-table" style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted);">
+                                    <th style="padding: 10px;">Type</th>
+                                    <th style="padding: 10px;">Name</th>
+                                    <th style="padding: 10px;">Size</th>
+                                    <th style="padding: 10px;">Modified</th>
+                                    <th style="padding: 10px; text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="custom-files-tbody">
+                                <tr>
+                                    <td colspan="5" class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted);">Loading custom files...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

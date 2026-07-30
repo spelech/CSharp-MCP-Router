@@ -65,6 +65,14 @@
     animation: pulse-red-border 2s infinite ease-in-out;
 }
 
+.settings-subview {
+    display: none;
+}
+
+.settings-subview.active {
+    display: block;
+}
+
 .server-item:hover {
     background: rgba(255, 255, 255, 0.04);
     border-color: rgba(255, 255, 255, 0.15);
