@@ -170,7 +170,7 @@ namespace McpRouter
 
         private async Task ConnectAndInitializeBackendAsync(McpServer server)
         {
-            int maxAttempts = 5;
+            int maxAttempts = 2;
             int attempt = 0;
             while (!_cts.Token.IsCancellationRequested && attempt < maxAttempts)
             {
@@ -183,7 +183,7 @@ namespace McpRouter
                     var conn = new BackendConnection(server, _httpClient, _logger);
                     if (server.Type != "http" && server.Type != "streamable")
                     {
-                        using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
+                        using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                         await conn.ConnectAsync().WaitAsync(ctsTimeout.Token);
                     }
                     
@@ -229,7 +229,7 @@ namespace McpRouter
                     });
 
                     // Send initialize request to this backend
-                    using (var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(15)))
+                    using (var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
                     {
                         var initReq = string.IsNullOrEmpty(_lastInitializeRequest)
                             ? "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.4.0\"}}}"
@@ -264,7 +264,7 @@ namespace McpRouter
 
                     try
                     {
-                        await Task.Delay(TimeSpan.FromSeconds(15), _cts.Token);
+                        await Task.Delay(TimeSpan.FromSeconds(3), _cts.Token);
                     }
                     catch (TaskCanceledException)
                     {
