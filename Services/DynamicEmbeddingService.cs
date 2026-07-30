@@ -133,6 +133,20 @@ namespace McpRouter.Services
             }
         }
 
+        public async Task PreWarmAsync()
+        {
+            try
+            {
+                _logger.LogInformation("Pre-warming vector embedding model in background...");
+                await GetEmbeddingAsync("Pre-warm initialization query for semantic search");
+                _logger.LogInformation("Vector embedding model pre-warmed successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to pre-warm vector embedding model.");
+            }
+        }
+
         public void ReloadSettings(RouterSettings settings)
         {
             SaveSettings(settings);

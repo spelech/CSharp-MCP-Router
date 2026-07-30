@@ -119,6 +119,16 @@ namespace McpRouter.Services
                         db.Settings.Add(new RouterSettings());
                         db.SaveChanges();
                     }
+
+                    try
+                    {
+                        var embeddingSvc = scope.ServiceProvider.GetRequiredService<DynamicEmbeddingService>();
+                        Task.Run(async () => await embeddingSvc.PreWarmAsync());
+                    }
+                    catch (Exception exPrewarm)
+                    {
+                        logger.LogWarning(exPrewarm, "Pre-warm background trigger warning");
+                    }
                 }
                 catch (Exception ex)
                 {

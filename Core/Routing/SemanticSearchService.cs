@@ -19,10 +19,8 @@ namespace McpRouter.Core.Routing
             }
 
             var queryVector = await embeddingService.GetEmbeddingAsync(query);
-            var scoredTools = new List<(object Tool, double Score)>();
 
-            foreach (var tool in tools)
-            {
+            var toolItems = tools.Select(tool => {
                 string name = "";
                 string description = "";
 
@@ -45,20 +43,29 @@ namespace McpRouter.Core.Routing
                                   type.GetProperty("Description")?.GetValue(tool)?.ToString() ?? "";
                 }
 
-                var textToEmbed = $"{name}: {description}";
-                var cacheKey = textToEmbed;
+                return new { Tool = tool, Name = name, Description = description, TextToEmbed = $"{name}: {description}" };
+            }).ToList();
 
-                if (!_embeddingsCache.TryGetValue(cacheKey, out var toolVector))
-                {
+            var uncachedTexts = toolItems.Select(t => t.TextToEmbed).Where(t => !_embeddingsCache.ContainsKey(t)).Distinct().ToList();
+            if (uncachedTexts.Count > 0)
+            {
+                await Task.WhenAll(uncachedTexts.Select(async text => {
                     try
                     {
-                        toolVector = await embeddingService.GetEmbeddingAsync(textToEmbed);
-                        _embeddingsCache[cacheKey] = toolVector;
+                        var vec = await embeddingService.GetEmbeddingAsync(text);
+                        _embeddingsCache[text] = vec;
                     }
-                    catch
-                    {
-                        continue;
-                    }
+                    catch {}
+                }));
+            }
+
+            var scoredTools = new List<(object Tool, double Score)>();
+
+            foreach (var item in toolItems)
+            {
+                if (!_embeddingsCache.TryGetValue(item.TextToEmbed, out var toolVector))
+                {
+                    continue;
                 }
 
                 double vectorScore = embeddingService.CosineSimilarity(queryVector, toolVector);
@@ -71,8 +78,8 @@ namespace McpRouter.Core.Routing
                     .Where(w => w.Length > 2)
                     .ToList();
 
-                var nameLower = name.ToLower();
-                var descLower = description.ToLower();
+                var nameLower = item.Name.ToLower();
+                var descLower = item.Description.ToLower();
 
                 // Substring phrase match boost
                 if (nameLower.Contains(queryLower))
@@ -107,7 +114,7 @@ namespace McpRouter.Core.Routing
                 }
 
                 double finalScore = vectorScore + keywordBoost;
-                scoredTools.Add((tool, finalScore));
+                scoredTools.Add((item.Tool, finalScore));
             }
 
 
