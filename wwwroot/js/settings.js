@@ -84,19 +84,36 @@ function setupProviderEvents() {
         secretForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             try {
+                const vaultConfig = {
+                    address: document.getElementById('secret-vault-address').value,
+                    token: document.getElementById('secret-vault-token').value,
+                    mountPath: document.getElementById('secret-vault-path').value
+                };
+
+                const winregConfig = {
+                    keyPath: document.getElementById('secret-winreg-key').value
+                };
+
+                const envConfig = {
+                    prefix: document.getElementById('secret-env-prefix').value
+                };
+
                 await saveSecretProvider({
                     providerName: 'Vault',
                     displayName: 'HashiCorp Vault (KV v2)',
+                    configJson: JSON.stringify(vaultConfig),
                     isEnabled: document.getElementById('secret-vault-enabled').checked
                 });
                 await saveSecretProvider({
                     providerName: 'WindowsRegistry',
                     displayName: 'Windows Registry (DPAPI)',
+                    configJson: JSON.stringify(winregConfig),
                     isEnabled: document.getElementById('secret-winreg-enabled').checked
                 });
                 await saveSecretProvider({
                     providerName: 'Environment',
                     displayName: 'Container Environment',
+                    configJson: JSON.stringify(envConfig),
                     isEnabled: document.getElementById('secret-env-enabled').checked
                 });
                 alert('Secret Provider configurations saved successfully!');
@@ -125,13 +142,39 @@ async function loadProviders() {
         const secretProviders = await getSecretProviders();
         if (Array.isArray(secretProviders)) {
             const vault = secretProviders.find(p => p.providerName === 'Vault');
-            if (vault) document.getElementById('secret-vault-enabled').checked = vault.isEnabled;
+            if (vault) {
+                document.getElementById('secret-vault-enabled').checked = vault.isEnabled;
+                if (vault.configJson) {
+                    try {
+                        const cfg = JSON.parse(vault.configJson);
+                        if (cfg.address) document.getElementById('secret-vault-address').value = cfg.address;
+                        if (cfg.token) document.getElementById('secret-vault-token').value = cfg.token;
+                        if (cfg.mountPath) document.getElementById('secret-vault-path').value = cfg.mountPath;
+                    } catch (_) {}
+                }
+            }
 
             const winreg = secretProviders.find(p => p.providerName === 'WindowsRegistry');
-            if (winreg) document.getElementById('secret-winreg-enabled').checked = winreg.isEnabled;
+            if (winreg) {
+                document.getElementById('secret-winreg-enabled').checked = winreg.isEnabled;
+                if (winreg.configJson) {
+                    try {
+                        const cfg = JSON.parse(winreg.configJson);
+                        if (cfg.keyPath) document.getElementById('secret-winreg-key').value = cfg.keyPath;
+                    } catch (_) {}
+                }
+            }
 
             const env = secretProviders.find(p => p.providerName === 'Environment');
-            if (env) document.getElementById('secret-env-enabled').checked = env.isEnabled;
+            if (env) {
+                document.getElementById('secret-env-enabled').checked = env.isEnabled;
+                if (env.configJson) {
+                    try {
+                        const cfg = JSON.parse(env.configJson);
+                        if (cfg.prefix) document.getElementById('secret-env-prefix').value = cfg.prefix;
+                    } catch (_) {}
+                }
+            }
         }
     } catch (e) {
         console.warn('Providers not yet initialized or endpoints unavailable:', e);

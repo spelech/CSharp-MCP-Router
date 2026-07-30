@@ -31,6 +31,7 @@ namespace McpRouter.Tests
                         IsEnabled INTEGER NOT NULL DEFAULT 1
                     );";
                 cmd.ExecuteNonQuery();
+                try { cmd.CommandText = "ALTER TABLE SecretProviders ADD COLUMN EncryptedConfigJson TEXT NULL;"; cmd.ExecuteNonQuery(); } catch {}
             }
 
             var controller = new ProvidersController(dbFactory);
@@ -67,9 +68,11 @@ namespace McpRouter.Tests
                         DisplayName TEXT NOT NULL,
                         UserHeader TEXT NULL,
                         GroupsHeader TEXT NULL,
+                        ConfigJson TEXT NULL,
                         IsEnabled INTEGER NOT NULL DEFAULT 1
                     );";
                 cmd.ExecuteNonQuery();
+                try { cmd.CommandText = "ALTER TABLE AuthProviderConfigs ADD COLUMN ConfigJson TEXT NULL;"; cmd.ExecuteNonQuery(); } catch {}
             }
 
             var controller = new ProvidersController(dbFactory);
@@ -82,6 +85,10 @@ namespace McpRouter.Tests
                 IsEnabled = true
             });
 
+            if (saveResult is ObjectResult objErr && objErr.StatusCode != 200)
+            {
+                Assert.Fail($"SaveAuthProvider failed: {System.Text.Json.JsonSerializer.Serialize(objErr.Value)}");
+            }
             Assert.IsType<OkObjectResult>(saveResult);
 
             var getResult = await controller.GetAuthProviders();

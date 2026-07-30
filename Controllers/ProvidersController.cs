@@ -21,6 +21,7 @@ namespace McpRouter.Controllers
         public string DisplayName { get; set; } = string.Empty;
         public string UserHeader { get; set; } = "Remote-User";
         public string GroupsHeader { get; set; } = "Remote-Groups";
+        public string? ConfigJson { get; set; }
         public bool IsEnabled { get; set; } = true;
     }
 
@@ -41,7 +42,7 @@ namespace McpRouter.Controllers
             try
             {
                 using var conn = _dbFactory.CreateConnection();
-                const string sql = "SELECT ProviderName, DisplayName, IsEnabled FROM SecretProviders;";
+                const string sql = "SELECT ProviderName, DisplayName, EncryptedConfigJson AS ConfigJson, IsEnabled FROM SecretProviders;";
                 var providers = await conn.QueryAsync<SecretProviderDto>(sql);
                 return Ok(providers);
             }
@@ -62,9 +63,9 @@ namespace McpRouter.Controllers
                 if (_dbFactory.ProviderName == "sqlite")
                 {
                     const string sql = @"
-                        INSERT INTO SecretProviders (ProviderName, DisplayName, IsEnabled)
-                        VALUES (@ProviderName, @DisplayName, @IsEnabled)
-                        ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, IsEnabled = @IsEnabled;";
+                        INSERT INTO SecretProviders (ProviderName, DisplayName, EncryptedConfigJson, IsEnabled)
+                        VALUES (@ProviderName, @DisplayName, @ConfigJson, @IsEnabled)
+                        ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, EncryptedConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
                     await conn.ExecuteAsync(sql, dto);
                 }
                 else
@@ -91,7 +92,7 @@ namespace McpRouter.Controllers
             try
             {
                 using var conn = _dbFactory.CreateConnection();
-                const string sql = "SELECT ProviderName, DisplayName, UserHeader, GroupsHeader, IsEnabled FROM AuthProviderConfigs;";
+                const string sql = "SELECT ProviderName, DisplayName, UserHeader, GroupsHeader, ConfigJson, IsEnabled FROM AuthProviderConfigs;";
                 var providers = await conn.QueryAsync<AuthProviderDto>(sql);
                 return Ok(providers);
             }
@@ -112,9 +113,9 @@ namespace McpRouter.Controllers
                 if (_dbFactory.ProviderName == "sqlite")
                 {
                     const string sql = @"
-                        INSERT INTO AuthProviderConfigs (ProviderName, DisplayName, UserHeader, GroupsHeader, IsEnabled)
-                        VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @IsEnabled)
-                        ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, UserHeader = @UserHeader, GroupsHeader = @GroupsHeader, IsEnabled = @IsEnabled;";
+                        INSERT INTO AuthProviderConfigs (ProviderName, DisplayName, UserHeader, GroupsHeader, ConfigJson, IsEnabled)
+                        VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @ConfigJson, @IsEnabled)
+                        ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, UserHeader = @UserHeader, GroupsHeader = @GroupsHeader, ConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
                     await conn.ExecuteAsync(sql, dto);
                 }
                 else

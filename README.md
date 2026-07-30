@@ -40,6 +40,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v2.8.0`** | 2026-07-29 | Added automatic SQLite migration for `SecretProviders` and `AuthProviderConfigs` tables, plus interactive configuration inputs for Vault, DPAPI WinReg, and Env Secret Providers. |
 | **`v2.7.5`** | 2026-07-29 | Exported `openAddModal` and `openEditModal` from `servers.js` to resolve ES module `SyntaxError` preventing `app.js` load. |
 | **`v2.7.4`** | 2026-07-29 | Excluded `/js/*`, `/css/*`, `/assets/*`, and `/api/*` from TinyAuth Caddy redirects to allow ES module imports and REST calls without CORS/auth blockage. |
 | **`v2.7.3`** | 2026-07-29 | Default `/api/*` dashboard middleware identity to `admin` when SSO headers are unpopulated, resolving 401 load errors on web dashboard. |

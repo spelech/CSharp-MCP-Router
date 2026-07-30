@@ -66,6 +66,53 @@ namespace McpRouter.Services
                         // Ignore if column already exists
                     }
 
+                    // Create SecretProviders and AuthProviderConfigs tables for SQLite
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw(
+                            "CREATE TABLE IF NOT EXISTS SecretProviders (" +
+                            "ProviderName TEXT PRIMARY KEY, " +
+                            "DisplayName TEXT, " +
+                            "ConfigJson TEXT, " +
+                            "IsEnabled INTEGER DEFAULT 1)");
+
+                        db.Database.ExecuteSqlRaw(
+                            "INSERT OR IGNORE INTO SecretProviders (ProviderName, DisplayName, IsEnabled) VALUES " +
+                            "('Vault', 'HashiCorp Vault (KV v2)', 1), " +
+                            "('WindowsRegistry', 'Windows Registry (DPAPI)', 1), " +
+                            "('Environment', 'Container Environment', 1);");
+
+                        db.Database.ExecuteSqlRaw(
+                            "CREATE TABLE IF NOT EXISTS AuthProviderConfigs (" +
+                            "ProviderName TEXT PRIMARY KEY, " +
+                            "DisplayName TEXT, " +
+                            "UserHeader TEXT, " +
+                            "GroupsHeader TEXT, " +
+                            "ConfigJson TEXT, " +
+                            "IsEnabled INTEGER DEFAULT 1)");
+
+                        try
+                        {
+                            db.Database.ExecuteSqlRaw("ALTER TABLE AuthProviderConfigs ADD COLUMN ConfigJson TEXT NULL");
+                        }
+                        catch {}
+
+                        try
+                        {
+                            db.Database.ExecuteSqlRaw("ALTER TABLE SecretProviders ADD COLUMN ConfigJson TEXT NULL");
+                        }
+                        catch {}
+
+                        db.Database.ExecuteSqlRaw(
+                            "INSERT OR IGNORE INTO AuthProviderConfigs (ProviderName, DisplayName, UserHeader, GroupsHeader, IsEnabled) VALUES " +
+                            "('ActiveDirectory', 'Active Directory', 'Remote-User', 'Remote-Groups', 1), " +
+                            "('PocketID_TinyAuth', 'PocketID / TinyAuth OIDC', 'Remote-User', 'Remote-Groups', 1);");
+                    }
+                    catch (Exception exSecret)
+                    {
+                        logger.LogWarning(exSecret, "Secret/Auth provider table init warning");
+                    }
+
                     var hasSettings = db.Settings.Any();
                     if (!hasSettings)
                     {

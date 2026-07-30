@@ -22,7 +22,7 @@
                 <i class="fa-solid fa-network-wired logo-icon"></i>
                 <div class="header-title">
                     <h1>MCP Router Gateway</h1>
-                    <span class="badge badge-primary" id="version-badge">v2.7.5</span>
+                    <span class="badge badge-primary" id="version-badge">v2.8.0</span>
                 </div>
             </div>
             <div class="header-status">
@@ -450,7 +450,12 @@
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <span class="badge badge-secondary" style="font-size: 10px;">HashiCorp Vault</span>
+                            <span class="badge badge-secondary" style="font-size: 10px; margin-bottom: 10px; display: inline-block;">HashiCorp Vault</span>
+                            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                                <input type="text" id="secret-vault-address" placeholder="http://vault:8200" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                                <input type="password" id="secret-vault-token" placeholder="Vault Token (optional)" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                                <input type="text" id="secret-vault-path" placeholder="Mount Path (secret/data/)" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                            </div>
                         </div>
 
                         <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
@@ -461,7 +466,10 @@
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <span class="badge badge-secondary" style="font-size: 10px;">DPAPI Encrypted</span>
+                            <span class="badge badge-secondary" style="font-size: 10px; margin-bottom: 10px; display: inline-block;">DPAPI Encrypted</span>
+                            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                                <input type="text" id="secret-winreg-key" placeholder="HKCU\Software\McpRouter\Secrets" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                            </div>
                         </div>
 
                         <div style="padding: 12px; background: rgba(255,255,255,0.03); border: 1px solid var(--border); border-radius: 8px;">
@@ -472,7 +480,10 @@
                                     <span class="slider"></span>
                                 </label>
                             </div>
-                            <span class="badge badge-secondary" style="font-size: 10px;">Container Env</span>
+                            <span class="badge badge-secondary" style="font-size: 10px; margin-bottom: 10px; display: inline-block;">Container Env</span>
+                            <div style="display: flex; flex-direction: column; gap: 6px; margin-top: 8px;">
+                                <input type="text" id="secret-env-prefix" placeholder="Prefix (MCP_SECRET_)" style="font-size: 11px; padding: 4px 8px; width: 100%; border: 1px solid var(--border); background: var(--bg-card); color: var(--text);">
+                            </div>
                         </div>
                     </div>
                     <div style="margin-top: 15px; text-align: right;">
