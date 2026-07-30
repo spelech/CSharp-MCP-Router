@@ -7,6 +7,24 @@ let pageSize = 6;
 let searchQuery = '';
 let sortBy = 'status-priority';
 let groupBy = 'none';
+let collapsedGroups = new Set();
+
+export function toggleServerGroup(groupId) {
+    if (collapsedGroups.has(groupId)) {
+        collapsedGroups.delete(groupId);
+    } else {
+        collapsedGroups.add(groupId);
+    }
+    const body = document.getElementById(`group-body-${groupId}`);
+    const icon = document.getElementById(`group-icon-${groupId}`);
+    if (body) {
+        body.style.display = collapsedGroups.has(groupId) ? 'none' : 'block';
+    }
+    if (icon) {
+        icon.className = collapsedGroups.has(groupId) ? 'fa-solid fa-chevron-right group-toggle-icon' : 'fa-solid fa-chevron-down group-toggle-icon';
+    }
+}
+window.toggleServerGroup = toggleServerGroup;
 
 export function onServerSearchInput(val) {
     searchQuery = (val || '').toLowerCase().trim();
@@ -120,6 +138,7 @@ function renderServers(servers) {
     const pageItems = filtered.slice(startIndex, endIndex);
 
     updatePaginationInfo(startIndex + 1, endIndex, totalItems, currentPage, totalPages);
+window.toggleServerGroup = toggleServerGroup;
 
     // 4. Grouping & HTML rendering
     if (groupBy === 'none') {
@@ -141,11 +160,21 @@ function renderServers(servers) {
 
         let html = '';
         for (const [groupName, groupServers] of Object.entries(groups)) {
+            const groupId = encodeURIComponent(groupName.toLowerCase().replace(/\s+/g, '-'));
+            const isCollapsed = collapsedGroups.has(groupId);
+            const iconClass = isCollapsed ? 'fa-solid fa-chevron-right group-toggle-icon' : 'fa-solid fa-chevron-down group-toggle-icon';
+            const bodyStyle = isCollapsed ? 'display: none;' : 'display: block;';
+
             html += `
-                <div class="server-group-header">
-                    <i class="fa-solid fa-folder"></i> ${escapeHtml(groupName)} (${groupServers.length})
+                <div class="server-group-header" onclick="window.toggleServerGroup('${groupId}')" style="cursor: pointer; user-select: none;">
+                    <i class="${iconClass}" id="group-icon-${groupId}"></i>
+                    <i class="fa-solid fa-folder"></i>
+                    <span>${escapeHtml(groupName)}</span>
+                    <span class="server-badge" style="margin-left: auto;">${groupServers.length}</span>
                 </div>
-                ${groupServers.map(server => renderSingleServerCard(server)).join('')}
+                <div class="server-group-body" id="group-body-${groupId}" style="${bodyStyle}">
+                    ${groupServers.map(server => renderSingleServerCard(server)).join('')}
+                </div>
             `;
         }
         list.innerHTML = html;
