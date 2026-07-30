@@ -22,7 +22,7 @@
                 <i class="fa-solid fa-network-wired logo-icon"></i>
                 <div class="header-title">
                     <h1>MCP Router Gateway</h1>
-                    <span class="badge badge-primary" id="version-badge">v2.13.0</span>
+                    <span class="badge badge-primary" id="version-badge">v2.14.0</span>
                 </div>
             </div>
             <div class="header-status">
@@ -131,6 +131,38 @@
                             <div class="header-actions">
                                 <button class="btn btn-secondary" onclick="loadServers(true)"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
                                 <button class="btn btn-primary" onclick="openAddModal()"><i class="fa-solid fa-plus"></i> Add Server</button>
+                            </div>
+                        </div>
+
+                        <!-- Search, Sort & Grouping Toolbar -->
+                        <div class="server-controls-toolbar" style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap; align-items: center; background: rgba(255,255,255,0.02); padding: 10px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04);">
+                            <!-- Search Input -->
+                            <div style="position: relative; flex: 1; min-width: 180px;">
+                                <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 12px;"></i>
+                                <input type="text" id="server-search-input" placeholder="Search servers, URLs, or categories..." style="padding-left: 30px; font-size: 12px; height: 32px; width: 100%; border: 1px solid var(--border-color); background: rgba(0,0,0,0.2); color: var(--text-main); border-radius: 6px;" oninput="window.onServerSearchInput(this.value)">
+                            </div>
+                            
+                            <!-- Sort Dropdown -->
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 11px; color: var(--text-muted); white-space: nowrap;"><i class="fa-solid fa-sort"></i> Sort:</span>
+                                <select id="server-sort-by" class="form-select form-select-sm" style="padding: 4px 8px; font-size: 12px; background: rgba(0,0,0,0.2); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px;" onchange="window.onServerSortChange(this.value)">
+                                    <option value="status-priority" selected>Status (Errors First)</option>
+                                    <option value="name-asc">Name (A-Z)</option>
+                                    <option value="name-desc">Name (Z-A)</option>
+                                    <option value="type">Type (SSE / HTTP)</option>
+                                    <option value="category">Category</option>
+                                </select>
+                            </div>
+
+                            <!-- Group By Dropdown -->
+                            <div style="display: flex; align-items: center; gap: 6px;">
+                                <span style="font-size: 11px; color: var(--text-muted); white-space: nowrap;"><i class="fa-solid fa-layer-group"></i> Group:</span>
+                                <select id="server-group-by" class="form-select form-select-sm" style="padding: 4px 8px; font-size: 12px; background: rgba(0,0,0,0.2); color: var(--text-main); border: 1px solid var(--border-color); border-radius: 6px;" onchange="window.onServerGroupChange(this.value)">
+                                    <option value="none" selected>None</option>
+                                    <option value="category">Category</option>
+                                    <option value="status">Status</option>
+                                    <option value="type">Type</option>
+                                </select>
                             </div>
                         </div>
                         

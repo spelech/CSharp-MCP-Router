@@ -4,6 +4,27 @@ import { escapeHtml } from './utils.js';
 export let allServers = [];
 let currentPage = 1;
 let pageSize = 6;
+let searchQuery = '';
+let sortBy = 'status-priority';
+let groupBy = 'none';
+
+export function onServerSearchInput(val) {
+    searchQuery = (val || '').toLowerCase().trim();
+    currentPage = 1;
+    renderServers(allServers);
+}
+
+export function onServerSortChange(val) {
+    sortBy = val;
+    currentPage = 1;
+    renderServers(allServers);
+}
+
+export function onServerGroupChange(val) {
+    groupBy = val;
+    currentPage = 1;
+    renderServers(allServers);
+}
 
 export function changeServerPage(delta) {
     currentPage += delta;
@@ -16,6 +37,9 @@ export function changeServerPageSize(newSize) {
     renderServers(allServers);
 }
 
+window.onServerSearchInput = onServerSearchInput;
+window.onServerSortChange = onServerSortChange;
+window.onServerGroupChange = onServerGroupChange;
 window.changeServerPage = changeServerPage;
 window.changeServerPageSize = changeServerPageSize;
 
@@ -48,17 +72,43 @@ function renderServers(servers) {
         return;
     }
     
-    // Sort disconnected/failed enabled servers to the top, then connected, then disabled
-    const sortedServers = [...servers].sort((a, b) => {
+    // 1. Search Filter
+    let filtered = servers.filter(s => {
+        if (!searchQuery) return true;
+        const nameMatch = (s.displayName || '').toLowerCase().includes(searchQuery);
+        const idMatch = (s.id || '').toLowerCase().includes(searchQuery);
+        const urlMatch = (s.url || '').toLowerCase().includes(searchQuery);
+        const catMatch = (s.categories || []).some(c => (c || '').toLowerCase().includes(searchQuery));
+        return nameMatch || idMatch || urlMatch || catMatch;
+    });
+
+    if (filtered.length === 0) {
+        list.innerHTML = `<div class="empty-state">No servers matching search query "${escapeHtml(searchQuery)}".</div>`;
+        updatePaginationInfo(0, 0, 0);
+        return;
+    }
+
+    // 2. Sort
+    filtered.sort((a, b) => {
+        if (sortBy === 'name-asc') return (a.displayName || '').localeCompare(b.displayName || '');
+        if (sortBy === 'name-desc') return (b.displayName || '').localeCompare(a.displayName || '');
+        if (sortBy === 'type') return (a.type || '').localeCompare(b.type || '');
+        if (sortBy === 'category') {
+            const catA = (a.categories && a.categories[0]) ? a.categories[0] : 'Uncategorized';
+            const catB = (b.categories && b.categories[0]) ? b.categories[0] : 'Uncategorized';
+            return catA.localeCompare(catB);
+        }
+        // Default: status-priority (Disconnected/Failed enabled servers first, connected next, disabled last)
         const getPriority = (s) => {
             if (!s.enabled) return 3;
             if (s.connectionStatus === 'Connected') return 2;
-            return 1; // Disconnected, Failed, or Retrying (Highest priority at top)
+            return 1;
         };
         return getPriority(a) - getPriority(b);
     });
 
-    const totalItems = sortedServers.length;
+    // 3. Pagination
+    const totalItems = filtered.length;
     const effectivePageSize = pageSize === 'all' ? totalItems : pageSize;
     const totalPages = Math.max(1, Math.ceil(totalItems / (effectivePageSize || 1)));
 
@@ -67,77 +117,107 @@ function renderServers(servers) {
 
     const startIndex = (currentPage - 1) * effectivePageSize;
     const endIndex = Math.min(startIndex + effectivePageSize, totalItems);
-    const pageItems = sortedServers.slice(startIndex, endIndex);
+    const pageItems = filtered.slice(startIndex, endIndex);
 
     updatePaginationInfo(startIndex + 1, endIndex, totalItems, currentPage, totalPages);
 
-    list.innerHTML = pageItems.map(server => {
-        const isDisconnected = server.enabled && server.connectionStatus !== 'Connected';
-        const itemClass = isDisconnected ? 'server-item server-disconnected-pulse' : 'server-item';
-        const nameClass = server.enabled ? 'server-name' : 'server-name text-muted';
-        const categoryBadge = (server.categories && server.categories.length > 0)
-            ? server.categories.map(cat => `<span class="server-badge" style="background: rgba(59,130,246,0.1); color: var(--primary);">${escapeHtml(cat)}</span>`).join('')
-            : '';
-            
-        let statusBadge = '';
-        let retryBtn = '';
-        
-        if (server.enabled) {
-            const status = server.connectionStatus || 'Disconnected';
-            if (status === 'Connected') {
-                statusBadge = `<span class="server-badge badge-success"><span class="indicator online"></span> Connected</span>`;
-            } else if (status === 'Connecting' || status === 'Retrying') {
-                const attemptText = server.connectionAttempts > 0 ? ` (${server.connectionAttempts}/5)` : '';
-                statusBadge = `<span class="server-badge badge-warning"><i class="fa-solid fa-spinner fa-spin"></i> ${status}${attemptText}</span>`;
-            } else if (status === 'Failed') {
-                const errMsg = server.connectionError ? escapeHtml(server.connectionError) : 'Connection failed';
-                statusBadge = `<span class="server-badge badge-danger" title="${errMsg}"><i class="fa-solid fa-triangle-exclamation"></i> Failed</span>`;
-                retryBtn = `
-                    <button class="btn-icon btn-retry" title="Retry Connection (Attempts: ${server.connectionAttempts})" onclick="window.reconnectServer('${server.id}')" style="color: var(--accent);">
-                        <i class="fa-solid fa-arrows-rotate"></i>
-                    </button>
-                `;
-            } else {
-                statusBadge = `<span class="server-badge badge-secondary">Disconnected</span>`;
-                retryBtn = `
-                    <button class="btn-icon btn-retry" title="Connect Server" onclick="window.reconnectServer('${server.id}')" style="color: var(--primary);">
-                        <i class="fa-solid fa-plug"></i>
-                    </button>
-                `;
+    // 4. Grouping & HTML rendering
+    if (groupBy === 'none') {
+        list.innerHTML = pageItems.map(server => renderSingleServerCard(server)).join('');
+    } else {
+        const groups = {};
+        pageItems.forEach(server => {
+            let key = 'Uncategorized';
+            if (groupBy === 'category') {
+                key = (server.categories && server.categories.length > 0) ? server.categories[0] : 'Uncategorized';
+            } else if (groupBy === 'status') {
+                key = server.enabled ? (server.connectionStatus || 'Disconnected') : 'Disabled';
+            } else if (groupBy === 'type') {
+                key = (server.type || 'SSE').toUpperCase();
             }
-        } else {
-            statusBadge = `<span class="server-badge badge-secondary">Disabled</span>`;
-        }
+            if (!groups[key]) groups[key] = [];
+            groups[key].push(server);
+        });
 
-        return `
-            <div class="${itemClass}">
-                <div class="server-info">
-                    <div class="server-name-row">
-                        <span class="${nameClass}">${escapeHtml(server.displayName)}</span>
-                        <span class="server-badge">${escapeHtml(server.type.toUpperCase())}</span>
-                        ${categoryBadge}
-                        ${server.hasApiKey ? '<span class="server-badge badge-key"><i class="fa-solid fa-lock"></i> Secured</span>' : ''}
-                        ${server.hidden ? '<span class="server-badge"><i class="fa-solid fa-eye-slash"></i> Hidden</span>' : ''}
-                        ${statusBadge}
-                    </div>
-                    <span class="server-url">${escapeHtml(server.url)}</span>
+        let html = '';
+        for (const [groupName, groupServers] of Object.entries(groups)) {
+            html += `
+                <div class="server-group-header">
+                    <i class="fa-solid fa-folder"></i> ${escapeHtml(groupName)} (${groupServers.length})
                 </div>
-                <div class="server-actions">
-                    ${retryBtn}
-                    <button class="btn-icon btn-edit" title="Edit Server" onclick="window.openEditModal('${server.id}')">
-                        <i class="fa-solid fa-pen-to-square"></i>
-                    </button>
-                    <button class="btn-icon btn-delete" title="Delete Server" onclick="window.deleteServer('${server.id}', '${escapeHtml(server.displayName)}')">
-                        <i class="fa-solid fa-trash-can"></i>
-                    </button>
-                    <label class="switch">
-                        <input type="checkbox" ${server.enabled ? 'checked' : ''} onchange="window.toggleServer('${server.id}', 'enabled', this.checked)">
-                        <span class="slider"></span>
-                    </label>
+                ${groupServers.map(server => renderSingleServerCard(server)).join('')}
+            `;
+        }
+        list.innerHTML = html;
+    }
+}
+
+function renderSingleServerCard(server) {
+    const isDisconnected = server.enabled && server.connectionStatus !== 'Connected';
+    const itemClass = isDisconnected ? 'server-item server-disconnected-pulse' : 'server-item';
+    const nameClass = server.enabled ? 'server-name' : 'server-name text-muted';
+    const categoryBadge = (server.categories && server.categories.length > 0)
+        ? server.categories.map(cat => `<span class="server-badge" style="background: rgba(59,130,246,0.1); color: var(--primary);">${escapeHtml(cat)}</span>`).join('')
+        : '';
+        
+    let statusBadge = '';
+    let retryBtn = '';
+    
+    if (server.enabled) {
+        const status = server.connectionStatus || 'Disconnected';
+        if (status === 'Connected') {
+            statusBadge = `<span class="server-badge badge-success"><span class="indicator online"></span> Connected</span>`;
+        } else if (status === 'Connecting' || status === 'Retrying') {
+            const attemptText = server.connectionAttempts > 0 ? ` (${server.connectionAttempts}/5)` : '';
+            statusBadge = `<span class="server-badge badge-warning"><i class="fa-solid fa-spinner fa-spin"></i> ${status}${attemptText}</span>`;
+        } else if (status === 'Failed') {
+            const errMsg = server.connectionError ? escapeHtml(server.connectionError) : 'Connection failed';
+            statusBadge = `<span class="server-badge badge-danger" title="${errMsg}"><i class="fa-solid fa-triangle-exclamation"></i> Failed</span>`;
+            retryBtn = `
+                <button class="btn-icon btn-retry" title="Retry Connection (Attempts: ${server.connectionAttempts})" onclick="window.reconnectServer('${server.id}')" style="color: var(--accent);">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                </button>
+            `;
+        } else {
+            statusBadge = `<span class="server-badge badge-secondary">Disconnected</span>`;
+            retryBtn = `
+                <button class="btn-icon btn-retry" title="Connect Server" onclick="window.reconnectServer('${server.id}')" style="color: var(--primary);">
+                    <i class="fa-solid fa-plug"></i>
+                </button>
+            `;
+        }
+    } else {
+        statusBadge = `<span class="server-badge badge-secondary">Disabled</span>`;
+    }
+
+    return `
+        <div class="${itemClass}">
+            <div class="server-info">
+                <div class="server-name-row">
+                    <span class="${nameClass}">${escapeHtml(server.displayName)}</span>
+                    <span class="server-badge">${escapeHtml((server.type || 'SSE').toUpperCase())}</span>
+                    ${categoryBadge}
+                    ${server.hasApiKey ? '<span class="server-badge badge-key"><i class="fa-solid fa-lock"></i> Secured</span>' : ''}
+                    ${server.hidden ? '<span class="server-badge"><i class="fa-solid fa-eye-slash"></i> Hidden</span>' : ''}
+                    ${statusBadge}
                 </div>
+                <span class="server-url">${escapeHtml(server.url)}</span>
             </div>
-        `;
-    }).join('');
+            <div class="server-actions">
+                ${retryBtn}
+                <button class="btn-icon btn-edit" title="Edit Server" onclick="window.openEditModal('${server.id}')">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                </button>
+                <button class="btn-icon btn-delete" title="Delete Server" onclick="window.deleteServer('${server.id}', '${escapeHtml(server.displayName)}')">
+                    <i class="fa-solid fa-trash-can"></i>
+                </button>
+                <label class="switch">
+                    <input type="checkbox" ${server.enabled ? 'checked' : ''} onchange="window.toggleServer('${server.id}', 'enabled', this.checked)">
+                    <span class="slider"></span>
+                </label>
+            </div>
+        </div>
+    `;
 }
 
 export async function toggleServer(id, property, value) {
