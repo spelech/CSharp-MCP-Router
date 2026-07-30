@@ -1225,6 +1225,35 @@ namespace McpRouter.Extensions
                 return Results.Ok(new { success = true });
             });
 
+            app.MapGet("/api/servers/{id}/inspect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            {
+                var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
+                if (server == null) return Results.NotFound(new { error = "Server not found" });
+
+                try
+                {
+                    var sessionId = "inspect-" + id + "-" + Guid.NewGuid().ToString("N")[..8];
+                    var session = await sessionManager.CreateSessionAsync(sessionId, null!, id, false);
+                    var tools = await session.ListToolsAsync("{}");
+                    var prompts = await session.ListPromptsAsync("{}");
+                    var resources = await session.ListResourcesAsync("{}");
+                    sessionManager.CloseSession(sessionId);
+
+                    return Results.Ok(new
+                    {
+                        server = new { id = server.Id, displayName = server.DisplayName, type = server.Type, url = server.Url, enabled = server.Enabled },
+                        tools,
+                        prompts,
+                        resources
+                    });
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error inspecting server {ServerId}", id);
+                    return Results.Problem($"Failed to inspect server capabilities: {ex.Message}");
+                }
+            });
+
             // --- TEST BENCH & LOGS ENDPOINTS ---
 
             // 1. Logs API

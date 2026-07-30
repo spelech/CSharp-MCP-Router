@@ -22,7 +22,7 @@
                 <i class="fa-solid fa-network-wired logo-icon"></i>
                 <div class="header-title">
                     <h1>MCP Router Gateway</h1>
-                    <span class="badge badge-primary" id="version-badge">v2.19.0</span>
+                    <span class="badge badge-primary" id="version-badge">v2.20.0</span>
                 </div>
             </div>
             <div class="header-status">
@@ -797,6 +797,71 @@
                     <button type="submit" class="btn btn-primary" id="btn-save-custom-file">Save File</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Server Capability Inspection Modal -->
+    <div class="modal-backdrop" id="server-inspect-modal" style="display: none;">
+        <div class="modal-content" style="max-width: 900px; width: 90%;">
+            <div class="modal-header">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <i class="fa-solid fa-cubes logo-icon" style="font-size: 20px; color: var(--accent);"></i>
+                    <div>
+                        <h3 id="inspect-modal-title" style="margin: 0; font-size: 18px;">Inspect Server Capabilities</h3>
+                        <span id="inspect-modal-subtitle" style="font-size: 12px; color: var(--text-muted);">View isolated tools, resources, and prompts</span>
+                    </div>
+                </div>
+                <button type="button" class="btn-icon" onclick="window.closeInspectModal()"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+
+            <!-- Inspect Subview Toolbar & Tabs -->
+            <div style="padding: 15px 20px 0 20px; border-bottom: 1px solid var(--border); display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+                <div class="tester-tabs" id="inspect-tabs-bar" style="margin: 0;">
+                    <button type="button" class="tester-tab-btn active" id="btn-inspect-tab-tools" onclick="window.switchInspectTab('tools')">
+                        <i class="fa-solid fa-wrench"></i> Tools <span class="server-badge" id="inspect-tools-count">0</span>
+                    </button>
+                    <button type="button" class="tester-tab-btn" id="btn-inspect-tab-resources" onclick="window.switchInspectTab('resources')">
+                        <i class="fa-solid fa-file-invoice"></i> Resources <span class="server-badge" id="inspect-resources-count">0</span>
+                    </button>
+                    <button type="button" class="tester-tab-btn" id="btn-inspect-tab-prompts" onclick="window.switchInspectTab('prompts')">
+                        <i class="fa-solid fa-comments"></i> Prompts <span class="server-badge" id="inspect-prompts-count">0</span>
+                    </button>
+                </div>
+
+                <div class="search-sort-bar" style="margin: 0;">
+                    <div class="search-input-wrapper">
+                        <i class="fa-solid fa-magnifying-glass search-icon"></i>
+                        <input type="text" id="inspect-search-input" placeholder="Search capabilities..." oninput="window.onInspectSearchInput(this.value)">
+                    </div>
+                </div>
+            </div>
+
+            <div style="padding: 20px; max-height: 500px; overflow-y: auto;">
+                <!-- Tools View -->
+                <div id="inspect-panel-tools" class="inspect-panel">
+                    <div id="inspect-tools-list" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div class="empty-state">Loading tools...</div>
+                    </div>
+                </div>
+
+                <!-- Resources View -->
+                <div id="inspect-panel-resources" class="inspect-panel" style="display: none;">
+                    <div id="inspect-resources-list" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div class="empty-state">Loading resources...</div>
+                    </div>
+                </div>
+
+                <!-- Prompts View -->
+                <div id="inspect-panel-prompts" class="inspect-panel" style="display: none;">
+                    <div id="inspect-prompts-list" style="display: flex; flex-direction: column; gap: 12px;">
+                        <div class="empty-state">Loading prompts...</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="window.closeInspectModal()">Close</button>
+            </div>
         </div>
     </div>
 

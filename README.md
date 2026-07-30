@@ -40,6 +40,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v2.20.0`** | 2026-07-30 | Added interactive Server Capabilities Inspection Modal on the dashboard with tabbed isolation (`Tools`, `Resources`, `Prompts`), live search filtering, and backend `GET /api/servers/{id}/inspect` REST endpoint. |
 | **`v2.19.0`** | 2026-07-30 | Expanded xUnit test suite (67 unit & integration tests) covering background health probing, transport authentication shapes, seeder migrations, dynamic vector embeddings, and container discovery. |
 | **`v2.18.0`** | 2026-07-30 | Fixed SQLite data backfill migration for existing servers to set `SecretProvider = 'None'` when static `ApiKey` is present, and protected existing API tokens from being cleared during PUT updates. |
 | **`v2.17.0`** | 2026-07-30 | Updated pagination slicing logic so that when grouping (`groupBy !== 'none'`) is active, items per page limits apply to groups rather than individual servers, with clear group/server range indicators. |

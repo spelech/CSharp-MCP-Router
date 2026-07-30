@@ -245,6 +245,9 @@ function renderSingleServerCard(server) {
             </div>
             <div class="server-actions">
                 ${retryBtn}
+                <button class="btn-icon btn-inspect" title="Inspect Capabilities (Tools, Resources, Prompts)" onclick="window.openServerInspectModal('${server.id}')" style="color: var(--accent);">
+                    <i class="fa-solid fa-cubes"></i>
+                </button>
                 <button class="btn-icon btn-edit" title="Edit Server" onclick="window.openEditModal('${server.id}')">
                     <i class="fa-solid fa-pen-to-square"></i>
                 </button>
@@ -258,6 +261,147 @@ function renderSingleServerCard(server) {
             </div>
         </div>
     `;
+}
+
+let currentInspectServer = null;
+let currentInspectData = { tools: [], resources: [], prompts: [] };
+let inspectActiveTab = 'tools';
+let inspectSearchQuery = '';
+
+export async function openServerInspectModal(serverId) {
+    currentInspectServer = allServers.find(s => s.id === serverId) || { id: serverId, displayName: serverId };
+    document.getElementById('inspect-modal-title').textContent = `Inspect Capabilities: ${currentInspectServer.displayName}`;
+    document.getElementById('inspect-modal-subtitle').textContent = `Server ID: ${currentInspectServer.id} • Type: ${(currentInspectServer.type || 'SSE').toUpperCase()}`;
+    document.getElementById('inspect-search-input').value = '';
+    inspectSearchQuery = '';
+    
+    switchInspectTab('tools');
+    document.getElementById('server-inspect-modal').style.display = 'flex';
+
+    document.getElementById('inspect-tools-list').innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> Fetching capabilities from server...</div>';
+    document.getElementById('inspect-resources-list').innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> Fetching capabilities...</div>';
+    document.getElementById('inspect-prompts-list').innerHTML = '<div class="empty-state"><i class="fa-solid fa-spinner fa-spin"></i> Fetching capabilities...</div>';
+
+    try {
+        const data = await apiRequest(`/api/servers/${serverId}/inspect`);
+        currentInspectData = data || { tools: [], resources: [], prompts: [] };
+        
+        document.getElementById('inspect-tools-count').textContent = (currentInspectData.tools || []).length;
+        document.getElementById('inspect-resources-count').textContent = (currentInspectData.resources || []).length;
+        document.getElementById('inspect-prompts-count').textContent = (currentInspectData.prompts || []).length;
+
+        renderInspectContent();
+    } catch (error) {
+        document.getElementById('inspect-tools-list').innerHTML = `<div class="empty-state text-danger"><i class="fa-solid fa-triangle-exclamation"></i> Error fetching capabilities: ${escapeHtml(error.message)}</div>`;
+    }
+}
+window.openServerInspectModal = openServerInspectModal;
+
+export function closeInspectModal() {
+    document.getElementById('server-inspect-modal').style.display = 'none';
+}
+window.closeInspectModal = closeInspectModal;
+
+export function switchInspectTab(tab) {
+    inspectActiveTab = tab;
+    ['tools', 'resources', 'prompts'].forEach(t => {
+        const btn = document.getElementById(`btn-inspect-tab-${t}`);
+        const panel = document.getElementById(`inspect-panel-${t}`);
+        if (btn) btn.classList.toggle('active', t === tab);
+        if (panel) panel.style.display = (t === tab) ? 'block' : 'none';
+    });
+    renderInspectContent();
+}
+window.switchInspectTab = switchInspectTab;
+
+export function onInspectSearchInput(val) {
+    inspectSearchQuery = (val || '').toLowerCase().trim();
+    renderInspectContent();
+}
+window.onInspectSearchInput = onInspectSearchInput;
+
+function renderInspectContent() {
+    const q = inspectSearchQuery;
+
+    if (inspectActiveTab === 'tools') {
+        const list = document.getElementById('inspect-tools-list');
+        const tools = (currentInspectData.tools || []).filter(t => {
+            if (!q) return true;
+            const name = (t.name || '').toLowerCase();
+            const desc = (t.description || '').toLowerCase();
+            return name.includes(q) || desc.includes(q);
+        });
+
+        if (tools.length === 0) {
+            list.innerHTML = `<div class="empty-state">${currentInspectData.tools?.length === 0 ? 'No tools exposed by this server.' : `No tools matching "${escapeHtml(q)}".`}</div>`;
+            return;
+        }
+
+        list.innerHTML = tools.map(t => `
+            <div class="glass-card" style="padding: 12px 16px; margin: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-weight: 700; font-family: monospace; color: var(--accent);"><i class="fa-solid fa-wrench"></i> ${escapeHtml(t.name)}</span>
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">${escapeHtml(t.description || 'No description available.')}</div>
+                ${t.inputSchema && t.inputSchema.properties ? `
+                    <div style="font-size: 11px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 4px; font-family: monospace;">
+                        <strong style="color: #93c5fd;">Parameters:</strong> ${Object.keys(t.inputSchema.properties).join(', ')}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+    } else if (inspectActiveTab === 'resources') {
+        const list = document.getElementById('inspect-resources-list');
+        const resources = (currentInspectData.resources || []).filter(r => {
+            if (!q) return true;
+            const uri = (r.uri || r.uriTemplate || '').toLowerCase();
+            const name = (r.name || '').toLowerCase();
+            const desc = (r.description || '').toLowerCase();
+            return uri.includes(q) || name.includes(q) || desc.includes(q);
+        });
+
+        if (resources.length === 0) {
+            list.innerHTML = `<div class="empty-state">${currentInspectData.resources?.length === 0 ? 'No resources exposed by this server.' : `No resources matching "${escapeHtml(q)}".`}</div>`;
+            return;
+        }
+
+        list.innerHTML = resources.map(r => `
+            <div class="glass-card" style="padding: 12px 16px; margin: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-weight: 700; font-family: monospace; color: var(--primary);"><i class="fa-solid fa-file-invoice"></i> ${escapeHtml(r.uri || r.uriTemplate || r.name)}</span>
+                    ${r.mimeType ? `<span class="server-badge">${escapeHtml(r.mimeType)}</span>` : ''}
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted);">${escapeHtml(r.description || 'No description available.')}</div>
+            </div>
+        `).join('');
+    } else if (inspectActiveTab === 'prompts') {
+        const list = document.getElementById('inspect-prompts-list');
+        const prompts = (currentInspectData.prompts || []).filter(p => {
+            if (!q) return true;
+            const name = (p.name || '').toLowerCase();
+            const desc = (p.description || '').toLowerCase();
+            return name.includes(q) || desc.includes(q);
+        });
+
+        if (prompts.length === 0) {
+            list.innerHTML = `<div class="empty-state">${currentInspectData.prompts?.length === 0 ? 'No prompts exposed by this server.' : `No prompts matching "${escapeHtml(q)}".`}</div>`;
+            return;
+        }
+
+        list.innerHTML = prompts.map(p => `
+            <div class="glass-card" style="padding: 12px 16px; margin: 0;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                    <span style="font-weight: 700; font-family: monospace; color: #a855f7;"><i class="fa-solid fa-comments"></i> ${escapeHtml(p.name)}</span>
+                </div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-bottom: 8px;">${escapeHtml(p.description || 'No description available.')}</div>
+                ${p.arguments && p.arguments.length > 0 ? `
+                    <div style="font-size: 11px; background: rgba(0,0,0,0.3); padding: 8px 12px; border-radius: 4px; font-family: monospace;">
+                        <strong style="color: #c084fc;">Arguments:</strong> ${p.arguments.map(a => a.name + (a.required ? '*' : '')).join(', ')}
+                    </div>
+                ` : ''}
+            </div>
+        `).join('');
+    }
 }
 
 export async function toggleServer(id, property, value) {
