@@ -7,8 +7,13 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using McpRouter.Models;
 using McpRouter.Services;
+using McpRouter.Core.Identity;
+using McpRouter.Core.Database;
+using Dapper;
 
 namespace McpRouter
 {
@@ -57,6 +62,108 @@ namespace McpRouter
         public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, Microsoft.Extensions.Logging.ILogger logger)
             : this(sessionId, clientResponse, servers, httpClient, embeddingService, null, logger)
         {
+        }
+
+        public async Task<UserIdentityContext> ResolveUserIdentityAsync()
+        {
+            if (_clientResponse?.HttpContext?.RequestServices == null)
+            {
+                return new UserIdentityContext("system", "System", new List<string>());
+            }
+            try
+            {
+                var compositeProvider = _clientResponse.HttpContext.RequestServices.GetService<CompositeIdentityProvider>();
+                if (compositeProvider != null)
+                {
+                    return await compositeProvider.ResolveIdentityAsync(_clientResponse.HttpContext);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to resolve user identity via CompositeIdentityProvider");
+            }
+            return new UserIdentityContext("anonymous", "None", new List<string>());
+        }
+
+        public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, string? category = null)
+        {
+            var identity = await ResolveUserIdentityAsync();
+
+            // 1. System/Admin bypass (e.g. Username is admin, or is in "Administrators" group, or username is "system")
+            if (identity.Username == "admin" || identity.Username == "system" || identity.GroupNames.Contains("Administrators") || identity.GroupNames.Contains("full_admin"))
+            {
+                return true;
+            }
+
+            if (_clientResponse?.HttpContext?.RequestServices == null)
+            {
+                // If there's no HttpContext, we default to true (e.g. CLI internal tasks)
+                return true;
+            }
+
+            try
+            {
+                var dbFactory = _clientResponse.HttpContext.RequestServices.GetService<IDbConnectionFactory>();
+                if (dbFactory == null)
+                {
+                    return true;
+                }
+
+                using var conn = dbFactory.CreateConnection();
+
+                var targetKeys = new List<string> { $"tool:{targetId}", $"prompt:{targetId}", $"resource:{targetId}" };
+                var serverId = targetId.Contains("__") ? targetId.Split("__", 2)[0] : targetId;
+                targetKeys.Add($"server:{serverId}");
+                if (!string.IsNullOrEmpty(category))
+                {
+                    targetKeys.Add($"category:{category}");
+                }
+
+                if (dbFactory.ProviderName == "sqlite")
+                {
+                    // Check if there are any policies for the targets first to default-allow
+                    const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds;";
+                    int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetIds = targetKeys });
+                    if (policyCount == 0)
+                    {
+                        return true;
+                    }
+
+                    // Check if there's an explicit deny for any of the user's groups
+                    const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
+                    int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetIds = targetKeys, GroupNames = identity.GroupNames });
+                    if (denyCount > 0)
+                    {
+                        return false;
+                    }
+
+                    // Check if there's an allow for any of the user's groups
+                    const string allowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds AND RequiredGroup IN @GroupNames AND IsAllowed = 1;";
+                    int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetIds = targetKeys, GroupNames = identity.GroupNames });
+                    return allowCount > 0;
+                }
+                else
+                {
+                    // Call stored procedure
+                    var groupNamesCsv = string.Join(",", identity.GroupNames);
+                    var parameters = new {
+                        GroupNames = groupNamesCsv,
+                        ItemName = targetId,
+                        RequestMethod = requestMethod
+                    };
+                    int isAllowed = await conn.ExecuteScalarAsync<int>(
+                        "sp_EvaluateUserAccess",
+                        parameters,
+                        commandType: System.Data.CommandType.StoredProcedure
+                    );
+                    return isAllowed == 1;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error checking user authorization for target '{TargetId}'", targetId);
+                return true; // Safe fallback for unconfigured environments
+            }
         }
 
         public async Task WriteMessageAsync(object message)
@@ -180,7 +287,8 @@ namespace McpRouter
                     _logger.LogInformation("Attempting to connect to backend {ServerId} (attempt {Attempt}/{MaxAttempts}) at {Url}...", server.Id, attempt, maxAttempts, server.Url);
                     _sessionManager?.UpdateBackendStatus(server.Id, "Connecting", attempt, "");
 
-                    var conn = new BackendConnection(server, _httpClient, _logger);
+                    var retriever = _clientResponse?.HttpContext?.RequestServices?.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
+                    var conn = new BackendConnection(server, _httpClient, _logger, retriever);
                     if (server.Type != "http" && server.Type != "streamable")
                     {
                         using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -297,6 +405,22 @@ namespace McpRouter
 
         public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db)
         {
+            // RBAC Check
+            var isAuth = await IsUserAuthorizedAsync("tools/call", toolName);
+            if (!isAuth)
+            {
+                var identity = await ResolveUserIdentityAsync();
+                return new {
+                    isError = true,
+                    content = new[] {
+                        new {
+                            type = "text",
+                            text = $"Security Error: User '{identity.Username}' does not have permission to execute tool '{toolName}'."
+                        }
+                    }
+                };
+            }
+
             string? requestId = null;
             using (var cts = new CancellationTokenSource())
             {
@@ -503,6 +627,12 @@ namespace McpRouter
 
         public async Task<object?> ReadResourceAsync(string resourceUri, string body)
         {
+            var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri);
+            if (!isAuth)
+            {
+                var identity = await ResolveUserIdentityAsync();
+                throw new UnauthorizedAccessException($"Security Error: User '{identity.Username}' does not have permission to read resource '{resourceUri}'.");
+            }
             return await _resourceRoutingManager.ReadResourceAsync(resourceUri, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson, _sessionManager);
         }
 
@@ -603,6 +733,12 @@ namespace McpRouter
 
         public async Task<object?> GetPromptAsync(string promptName, string body)
         {
+            var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName);
+            if (!isAuth)
+            {
+                var identity = await ResolveUserIdentityAsync();
+                throw new UnauthorizedAccessException($"Security Error: User '{identity.Username}' does not have permission to access prompt '{promptName}'.");
+            }
             return await _promptRoutingManager.GetPromptAsync(promptName, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson);
         }
     }

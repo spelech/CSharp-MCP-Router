@@ -9,6 +9,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using McpRouter.Core.Database;
+using Dapper;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
 using McpRouter.Services;
@@ -27,6 +29,24 @@ namespace McpRouter.Extensions
         public static void ConfigureMcpRouterPipeline(this WebApplication app)
         {
             app.UseCors();
+
+            // Extract token from query parameters for SSE / WebSocket bypass support
+            app.Use(async (context, next) =>
+            {
+                if (string.IsNullOrEmpty(context.Request.Headers.Authorization))
+                {
+                    if (context.Request.Query.TryGetValue("access_token", out var accessToken) && !string.IsNullOrEmpty(accessToken))
+                    {
+                        context.Request.Headers.Authorization = $"Bearer {accessToken}";
+                    }
+                    else if (context.Request.Query.TryGetValue("token", out var token) && !string.IsNullOrEmpty(token))
+                    {
+                        context.Request.Headers.Authorization = $"Bearer {token}";
+                    }
+                }
+                await next();
+            });
+
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseMiddleware<McpRouter.Middleware.McpDualSpecMiddleware>();
@@ -521,11 +541,63 @@ namespace McpRouter.Extensions
                         sessionManager.CloseSession(sessionId);
                     }
                 }
-            });
+            }).RequireAuthorization();
             
             // Minimal API route for handling GET (SSE initialization) and POST (JSON-RPC requests)
             app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, [FromServices] RouterDbContext db, ILogger<Program> logger, string targetServerId) =>
             {
+                // RBAC Check for targetServerId
+                var compositeProvider = httpContext.RequestServices.GetRequiredService<McpRouter.Core.Identity.CompositeIdentityProvider>();
+                var identity = await compositeProvider.ResolveIdentityAsync(httpContext);
+
+                if (identity.Username != "admin" && identity.Username != "system" && !identity.GroupNames.Contains("Administrators") && !identity.GroupNames.Contains("full_admin"))
+                {
+                    var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
+                    using var conn = dbFactory.CreateConnection();
+                    var targetServerKey = $"server:{targetServerId}";
+
+                    if (dbFactory.ProviderName == "sqlite")
+                    {
+                        const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId;";
+                        int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetId = targetServerKey });
+                        if (policyCount > 0)
+                        {
+                            const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
+                            int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
+
+                            const string allowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 1;";
+                            int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
+
+                            if (denyCount > 0 || allowCount == 0)
+                            {
+                                httpContext.Response.StatusCode = 403;
+                                await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
+                                return;
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var groupNamesCsv = string.Join(",", identity.GroupNames);
+                        var parameters = new {
+                            GroupNames = groupNamesCsv,
+                            ItemName = targetServerId,
+                            RequestMethod = "GET"
+                        };
+                        int isAllowed = await conn.ExecuteScalarAsync<int>(
+                            "sp_EvaluateUserAccess",
+                            parameters,
+                            commandType: System.Data.CommandType.StoredProcedure
+                        );
+                        if (isAllowed == 0)
+                        {
+                            httpContext.Response.StatusCode = 403;
+                            await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
+                            return;
+                        }
+                    }
+                }
+
                 var isSse = httpContext.Request.Headers.Accept.ToString().Contains("text/event-stream");
                 var isPost = HttpMethods.IsPost(httpContext.Request.Method);
                 bool metaMode = httpContext.Request.Query["meta"] == "true";
@@ -757,7 +829,7 @@ namespace McpRouter.Extensions
                 {
                     sessionManager.CloseSession(sessionId);
                 }
-            });
+            }).RequireAuthorization();
             
             // ----------------------------------------------------
             // MCP CLIENT MESSAGE ROUTER
@@ -1038,10 +1110,10 @@ namespace McpRouter.Extensions
             };
             
             app.MapPost("/message", async (HttpContext httpContext, [FromQuery] string sessionId, [FromServices] SessionManager sessionManager, ILogger<Program> logger) => 
-                await handleMessage(httpContext, sessionId, sessionManager, logger));
+                await handleMessage(httpContext, sessionId, sessionManager, logger)).RequireAuthorization();
             
             app.MapPost("/mcp/message", async (HttpContext httpContext, [FromQuery] string sessionId, [FromServices] SessionManager sessionManager, ILogger<Program> logger) => 
-                await handleMessage(httpContext, sessionId, sessionManager, logger));
+                await handleMessage(httpContext, sessionId, sessionManager, logger)).RequireAuthorization();
             
             // ----------------------------------------------------
             // DCR & OAUTH ENDPOINTS
@@ -1299,8 +1371,9 @@ namespace McpRouter.Extensions
                 return Results.NotFound(new { error = "Approval request not found." });
             });
 
-            app.MapGet("/api/test/tools", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            app.MapGet("/api/test/tools", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
+                var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var query = db.Servers.Where(s => s.Enabled);
                 var servers = await query.ToListAsync();
                 
@@ -1359,7 +1432,7 @@ namespace McpRouter.Extensions
                     {
                         try
                         {
-                            var conn = new BackendConnection(server, httpClient, logger);
+                            var conn = new BackendConnection(server, httpClient, logger, secretRetriever);
                             if (server.Type != "http" && server.Type != "streamable")
                             {
                                 await conn.ConnectAsync();
@@ -1401,8 +1474,9 @@ namespace McpRouter.Extensions
             });
 
             // 3. Test Call API
-            app.MapPost("/api/test/call", async ([FromBody] TestCallModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger) =>
+            app.MapPost("/api/test/call", async ([FromBody] TestCallModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
             {
+                var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == model.ServerId);
                 if (server == null && model.ServerId != "custom")
                 {
@@ -1432,7 +1506,7 @@ namespace McpRouter.Extensions
                 if (server == null) return Results.NotFound();
 
                 // Direct routing to backend
-                using var conn = new BackendConnection(server, httpClient, logger);
+                using var conn = new BackendConnection(server, httpClient, logger, secretRetriever);
                 if (server.Type != "http" && server.Type != "streamable")
                 {
                     await conn.ConnectAsync();
@@ -1460,8 +1534,9 @@ namespace McpRouter.Extensions
             });
 
             // 4. Test Semantic Search API
-            app.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            app.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
+                var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
                 var allTools = new System.Collections.Generic.List<object>();
                 var missingServers = new System.Collections.Generic.List<McpServer>();
@@ -1508,7 +1583,7 @@ namespace McpRouter.Extensions
                     {
                         try
                         {
-                            var conn = new BackendConnection(server, httpClient, logger);
+                            var conn = new BackendConnection(server, httpClient, logger, secretRetriever);
                             if (server.Type != "http" && server.Type != "streamable")
                             {
                                 await conn.ConnectAsync();
@@ -1549,8 +1624,9 @@ namespace McpRouter.Extensions
             });
 
             // 2b. Test Prompts List API
-            app.MapGet("/api/test/prompts", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            app.MapGet("/api/test/prompts", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
+                var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var query = db.Servers.Where(s => s.Enabled);
                 var servers = await query.ToListAsync();
                 
@@ -1586,7 +1662,7 @@ namespace McpRouter.Extensions
                     {
                         try
                         {
-                            var conn = new BackendConnection(server, httpClient, logger);
+                            var conn = new BackendConnection(server, httpClient, logger, secretRetriever);
                             if (server.Type != "http" && server.Type != "streamable")
                             {
                                 await conn.ConnectAsync();
@@ -1645,8 +1721,9 @@ namespace McpRouter.Extensions
             });
 
             // 2c. Test Resources List API
-            app.MapGet("/api/test/resources", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            app.MapGet("/api/test/resources", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
+                var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var query = db.Servers.Where(s => s.Enabled);
                 var servers = await query.ToListAsync();
                 
@@ -1730,7 +1807,7 @@ namespace McpRouter.Extensions
                     {
                         try
                         {
-                            var conn = new BackendConnection(server, httpClient, logger);
+                            var conn = new BackendConnection(server, httpClient, logger, secretRetriever);
                             if (server.Type != "http" && server.Type != "streamable")
                             {
                                 await conn.ConnectAsync();
@@ -1785,8 +1862,9 @@ namespace McpRouter.Extensions
             });
 
             // 3b. Test Prompt Get API
-            app.MapPost("/api/test/prompts/get", async ([FromBody] TestPromptGetModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger) =>
+            app.MapPost("/api/test/prompts/get", async ([FromBody] TestPromptGetModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
             {
+                var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
                 var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
 
@@ -1837,7 +1915,7 @@ namespace McpRouter.Extensions
                 }
 
                 var targetServer = servers.First(s => s.Id == serverId);
-                using var conn = new BackendConnection(targetServer, httpClient, logger);
+                using var conn = new BackendConnection(targetServer, httpClient, logger, secretRetriever);
                 if (targetServer.Type != "http" && targetServer.Type != "streamable")
                 {
                     await conn.ConnectAsync();
@@ -1853,8 +1931,9 @@ namespace McpRouter.Extensions
             });
 
             // 3c. Test Resource Read API
-            app.MapPost("/api/test/resources/read", async ([FromBody] TestResourceReadModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            app.MapPost("/api/test/resources/read", async ([FromBody] TestResourceReadModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
+                var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
                 var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
 
@@ -1890,7 +1969,7 @@ namespace McpRouter.Extensions
                 }
 
                 var targetServer = servers.First(s => s.Id == serverId);
-                using var conn = new BackendConnection(targetServer, httpClient, logger);
+                using var conn = new BackendConnection(targetServer, httpClient, logger, secretRetriever);
                 if (targetServer.Type != "http" && targetServer.Type != "streamable")
                 {
                     await conn.ConnectAsync();

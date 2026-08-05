@@ -20,18 +20,37 @@ namespace McpRouter.Core.Transports
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
         private readonly CancellationTokenSource _cts = new();
+        private readonly McpRouter.Core.Secrets.CompositeSecretRetriever? _secretRetriever;
         private string _sessionId = string.Empty;
 
-        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger)
+        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, McpRouter.Core.Secrets.CompositeSecretRetriever? secretRetriever = null)
         {
             _server = server;
             _httpClient = httpClient;
             _logger = logger;
+            _secretRetriever = secretRetriever;
+        }
+
+        private async Task<string?> ResolveTokenAsync()
+        {
+            var provider = _server.SecretProvider ?? "None";
+            if (provider != "None" && !string.IsNullOrEmpty(provider) && _secretRetriever != null)
+            {
+                var secretPath = _server.Url;
+                var keyName = _server.SecretItemKey ?? "ApiKey";
+                return await _secretRetriever.GetSecretAsync(secretPath, keyName);
+            }
+            return !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
         }
 
         private void ApplyAuthAndCustomHeaders(HttpRequestMessage request)
         {
-            var token = !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
+            ApplyAuthAndCustomHeadersAsync(request).GetAwaiter().GetResult();
+        }
+
+        private async Task ApplyAuthAndCustomHeadersAsync(HttpRequestMessage request)
+        {
+            var token = await ResolveTokenAsync();
             var authShape = (_server.AuthShape ?? "bearer").ToLowerInvariant();
 
             if (!string.IsNullOrEmpty(token))
@@ -113,7 +132,7 @@ namespace McpRouter.Core.Transports
             if (!string.IsNullOrEmpty(_sessionId))
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
 
-            ApplyAuthAndCustomHeaders(req);
+            await ApplyAuthAndCustomHeadersAsync(req);
 
             using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);
