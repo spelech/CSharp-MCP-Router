@@ -176,4 +176,52 @@ BEGIN
     );
 END //
 
+-- 7. Procedure: Save or Update AppKey Configuration
+DROP PROCEDURE IF EXISTS `sp_SaveAppKey` //
+CREATE PROCEDURE `sp_SaveAppKey`(
+    IN p_Id VARCHAR(100),
+    IN p_Name VARCHAR(200),
+    IN p_Username VARCHAR(256),
+    IN p_KeyPrefix VARCHAR(50),
+    IN p_EncryptedKey LONGTEXT,
+    IN p_ScopesJson LONGTEXT,
+    IN p_ExpiresAt DATETIME
+)
+BEGIN
+    INSERT INTO `AppKeys` (`Id`, `Name`, `Username`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`)
+    VALUES (p_Id, p_Name, p_Username, p_KeyPrefix, p_EncryptedKey, p_ScopesJson, p_ExpiresAt, NOW())
+    ON DUPLICATE KEY UPDATE
+        `Name` = p_Name,
+        `Username` = p_Username,
+        `KeyPrefix` = p_KeyPrefix,
+        `EncryptedKey` = p_EncryptedKey,
+        `ScopesJson` = p_ScopesJson,
+        `ExpiresAt` = p_ExpiresAt;
+END //
+
+-- 8. Procedure: Delete/Revoke AppKey
+DROP PROCEDURE IF EXISTS `sp_DeleteAppKey` //
+CREATE PROCEDURE `sp_DeleteAppKey`(
+    IN p_Id VARCHAR(100)
+)
+BEGIN
+    DELETE FROM `AppKeys` WHERE `Id` = p_Id;
+END //
+
+-- 9. Procedure: Get AppKeys
+DROP PROCEDURE IF EXISTS `sp_GetAppKeys` //
+CREATE PROCEDURE `sp_GetAppKeys`(
+    IN p_Username VARCHAR(256)
+)
+BEGIN
+    IF p_Username IS NULL OR p_Username = '' THEN
+        SELECT `Id`, `Name`, `Username`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`
+        FROM `AppKeys`;
+    ELSE
+        SELECT `Id`, `Name`, `Username`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`
+        FROM `AppKeys`
+        WHERE `Username` = p_Username;
+    END IF;
+END //
+
 DELIMITER ;

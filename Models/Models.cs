@@ -54,6 +54,7 @@ namespace McpRouter.Models
         public DbSet<RouterSettings> Settings => Set<RouterSettings>();
         public DbSet<McpAccessPolicy> AccessPolicies => Set<McpAccessPolicy>();
         public DbSet<GroupMapping> GroupMappings => Set<GroupMapping>();
+        public DbSet<AppKey> AppKeys => Set<AppKey>();
 
         public RouterDbContext(DbContextOptions<RouterDbContext> options, IConfiguration configuration)
             : base(options)
@@ -84,6 +85,7 @@ namespace McpRouter.Models
             modelBuilder.Entity<OAuthClient>().HasKey(c => c.ClientId);
             modelBuilder.Entity<McpAccessPolicy>().HasKey(p => p.Id);
             modelBuilder.Entity<GroupMapping>().HasKey(m => m.Id);
+            modelBuilder.Entity<AppKey>().HasKey(k => k.Id);
 
             // Register OpenIddict Entity Framework Core entities
             modelBuilder.UseOpenIddict();
