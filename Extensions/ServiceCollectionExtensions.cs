@@ -26,10 +26,11 @@ namespace McpRouter.Extensions
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.OidcIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.CompositeIdentityProvider>();
 
-        // Register Secret Retrievers (HashiCorp Vault & Windows Registry)
+        // Register Secret Retrievers (HashiCorp Vault, Windows Registry & Environment)
         builder.Services.AddMemoryCache();
         builder.Services.AddSingleton<McpRouter.Core.Secrets.ISecretRetriever, McpRouter.Core.Secrets.VaultSecretRetriever>();
         builder.Services.AddSingleton<McpRouter.Core.Secrets.ISecretRetriever, McpRouter.Core.Secrets.WindowsRegistrySecretRetriever>();
+        builder.Services.AddSingleton<McpRouter.Core.Secrets.ISecretRetriever, McpRouter.Core.Secrets.EnvironmentSecretRetriever>();
         builder.Services.AddSingleton<McpRouter.Core.Secrets.CompositeSecretRetriever>();
 
         // Register Observability & Audit Logger

@@ -24,6 +24,13 @@ namespace McpRouter.Services
             try
             {
                 logger.LogInformation("Initializing database...");
+
+                var encryptionKey = app.Configuration["DB_ENCRYPTION_KEY"];
+                if (string.IsNullOrEmpty(encryptionKey) || encryptionKey == "DefaultSecureKey123!")
+                {
+                    logger.LogCritical("SECURITY WARNING: The database is running with a default or weak DB_ENCRYPTION_KEY. Please set a strong DB_ENCRYPTION_KEY environment variable to secure your deployment!");
+                }
+
                 db.Database.EnsureCreated();
 
                 // Ensure the Settings table exists and has a default row
@@ -91,6 +98,21 @@ namespace McpRouter.Services
                         db.Database.ExecuteSqlRaw("ALTER TABLE Tools ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
                     }
                     catch { }
+
+                    // Create AccessPolicies table for SQLite
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw(
+                            "CREATE TABLE IF NOT EXISTS AccessPolicies (" +
+                            "Id TEXT PRIMARY KEY, " +
+                            "TargetId TEXT, " +
+                            "RequiredGroup TEXT, " +
+                            "IsAllowed INTEGER DEFAULT 1)");
+                    }
+                    catch (Exception exPolicies)
+                    {
+                        logger.LogWarning(exPolicies, "AccessPolicies table init warning");
+                    }
 
                     // Create SecretProviders and AuthProviderConfigs tables for SQLite
                     try

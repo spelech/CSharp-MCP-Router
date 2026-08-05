@@ -30,6 +30,14 @@ namespace McpRouter.Models
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 
+    public class McpAccessPolicy
+    {
+        public string Id { get; set; } = string.Empty;
+        public string TargetId { get; set; } = string.Empty; // e.g., "server:ha", "tool:docker__list_containers", "prompt:router__diagnose_failure", "resource:router://status"
+        public string RequiredGroup { get; set; } = string.Empty;
+        public bool IsAllowed { get; set; } = true;
+    }
+
     public class RouterDbContext : DbContext
     {
         private readonly string _encryptionKey;
@@ -65,6 +73,7 @@ namespace McpRouter.Models
         {
             modelBuilder.Entity<McpServer>().HasKey(s => s.Id);
             modelBuilder.Entity<OAuthClient>().HasKey(c => c.ClientId);
+            modelBuilder.Entity<McpAccessPolicy>().HasKey(p => p.Id);
 
             // Register OpenIddict Entity Framework Core entities
             modelBuilder.UseOpenIddict();
