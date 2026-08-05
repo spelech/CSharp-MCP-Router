@@ -119,6 +119,23 @@ namespace McpRouter
                     targetKeys.Add($"category:{category}");
                 }
 
+                var externalIds = identity.GroupNames.ToList();
+                if (!string.IsNullOrEmpty(identity.Sid)) externalIds.Add(identity.Sid);
+                if (!string.IsNullOrEmpty(identity.Username)) externalIds.Add(identity.Username);
+
+                var mappedGroups = new List<string>();
+                try
+                {
+                    const string mapSql = "SELECT InternalGroup FROM GroupMappings WHERE ExternalId IN @ExternalIds;";
+                    mappedGroups = (await conn.QueryAsync<string>(mapSql, new { ExternalIds = externalIds })).ToList();
+                }
+                catch (Exception exMap)
+                {
+                    _logger.LogWarning(exMap, "Failed to query GroupMappings, assuming empty");
+                }
+
+                var allUserGroups = identity.GroupNames.Concat(mappedGroups).Where(g => !string.IsNullOrEmpty(g)).Distinct().ToList();
+
                 if (dbFactory.ProviderName == "sqlite")
                 {
                     // Check if there are any policies for the targets first to default-allow
@@ -131,7 +148,7 @@ namespace McpRouter
 
                     // Check if there's an explicit deny for any of the user's groups
                     const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
-                    int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetIds = targetKeys, GroupNames = identity.GroupNames });
+                    int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetIds = targetKeys, GroupNames = allUserGroups });
                     if (denyCount > 0)
                     {
                         return false;
@@ -139,13 +156,13 @@ namespace McpRouter
 
                     // Check if there's an allow for any of the user's groups
                     const string allowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds AND RequiredGroup IN @GroupNames AND IsAllowed = 1;";
-                    int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetIds = targetKeys, GroupNames = identity.GroupNames });
+                    int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetIds = targetKeys, GroupNames = allUserGroups });
                     return allowCount > 0;
                 }
                 else
                 {
-                    // Call stored procedure
-                    var groupNamesCsv = string.Join(",", identity.GroupNames);
+                    // Call stored procedure with mapped groups!
+                    var groupNamesCsv = string.Join(",", allUserGroups);
                     var parameters = new {
                         GroupNames = groupNamesCsv,
                         ItemName = targetId,
