@@ -72,6 +72,14 @@ namespace McpRouter
             }
             try
             {
+                // AppKey authentication bypass for custom claims mapping
+                var httpContext = _clientResponse.HttpContext;
+                if (httpContext.User?.Identity?.IsAuthenticated == true && httpContext.User.Identity.AuthenticationType == "AppKey")
+                {
+                    var username = httpContext.User.Identity.Name ?? "anonymous";
+                    return new UserIdentityContext(username, "AppKey", new List<string>());
+                }
+
                 var compositeProvider = _clientResponse.HttpContext.RequestServices.GetService<CompositeIdentityProvider>();
                 if (compositeProvider != null)
                 {
@@ -87,6 +95,56 @@ namespace McpRouter
 
         public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, string? category = null)
         {
+            // If authenticated via AppKey, check key-level scopes first
+            if (_clientResponse?.HttpContext?.Items.TryGetValue("AppKeyUsed", out var appKeyUsedObj) == true && appKeyUsedObj is bool appKeyUsed && appKeyUsed)
+            {
+                if (_clientResponse.HttpContext.Items.TryGetValue("AppKeyScopes", out var scopesObj) == true && scopesObj is string scopesJson)
+                {
+                    bool scopeAllowed = false;
+                    try
+                    {
+                        var scopes = JsonSerializer.Deserialize<List<string>>(scopesJson);
+                        if (scopes != null)
+                        {
+                            var serverId = targetId.Contains("__") ? targetId.Split("__", 2)[0] : targetId;
+                            foreach (var s in scopes)
+                            {
+                                var cleanScope = s.Trim().ToLowerInvariant();
+                                if (cleanScope == "all" || cleanScope == "mcp_client" || cleanScope == "*")
+                                {
+                                    scopeAllowed = true;
+                                    break;
+                                }
+                                if (cleanScope == $"server:{serverId}".ToLowerInvariant())
+                                {
+                                    scopeAllowed = true;
+                                    break;
+                                }
+                                if (cleanScope == $"tool:{targetId}".ToLowerInvariant() ||
+                                    cleanScope == $"prompt:{targetId}".ToLowerInvariant() ||
+                                    cleanScope == $"resource:{targetId}".ToLowerInvariant() ||
+                                    cleanScope == $"server:{targetId}".ToLowerInvariant() ||
+                                    cleanScope == targetId.ToLowerInvariant())
+                                {
+                                    scopeAllowed = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception exScopes)
+                    {
+                        _logger.LogWarning(exScopes, "Failed to parse AppKey scopes JSON: {ScopesJson}", scopesJson);
+                    }
+
+                    if (!scopeAllowed)
+                    {
+                        _logger.LogWarning("AppKey rejected: requested target '{TargetId}' is outside the key's allowed scopes '{ScopesJson}'", targetId, scopesJson);
+                        return false;
+                    }
+                }
+            }
+
             var identity = await ResolveUserIdentityAsync();
 
             // 1. System/Admin bypass (e.g. Username is admin, or is in "Administrators" group, or username is "system")

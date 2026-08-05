@@ -44,15 +44,44 @@ namespace McpRouter.Services
                         "EmbeddingApiKey TEXT, " +
                         "EmbeddingApiModel TEXT, " +
                         "EmbeddingModelDir TEXT, " +
-                        "RequireManualApproval INTEGER DEFAULT 0)");
+                        "RequireManualApproval INTEGER DEFAULT 0, " +
+                        "GlobalMaxKeys INTEGER DEFAULT 100, " +
+                        "UserMaxKeys INTEGER DEFAULT 5)");
 
                     try
                     {
                         db.Database.ExecuteSqlRaw("ALTER TABLE Settings ADD COLUMN RequireManualApproval INTEGER DEFAULT 0");
                     }
-                    catch
+                    catch { }
+
+                    try
                     {
-                        // Ignore if column already exists
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Settings ADD COLUMN GlobalMaxKeys INTEGER DEFAULT 100");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Settings ADD COLUMN UserMaxKeys INTEGER DEFAULT 5");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw(
+                            "CREATE TABLE IF NOT EXISTS AppKeys (" +
+                            "Id TEXT PRIMARY KEY, " +
+                            "Name TEXT, " +
+                            "Username TEXT, " +
+                            "KeyPrefix TEXT, " +
+                            "EncryptedKey TEXT, " +
+                            "ScopesJson TEXT DEFAULT '[]', " +
+                            "ExpiresAt TEXT, " +
+                            "CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP)");
+                    }
+                    catch (Exception exAppKeys)
+                    {
+                        logger.LogWarning(exAppKeys, "AppKeys table init warning");
                     }
 
                     try
