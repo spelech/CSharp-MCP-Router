@@ -114,6 +114,20 @@ namespace McpRouter.Services
                         logger.LogWarning(exPolicies, "AccessPolicies table init warning");
                     }
 
+                    // Create GroupMappings table for SQLite
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw(
+                            "CREATE TABLE IF NOT EXISTS GroupMappings (" +
+                            "Id TEXT PRIMARY KEY, " +
+                            "ExternalId TEXT, " +
+                            "InternalGroup TEXT)");
+                    }
+                    catch (Exception exMappings)
+                    {
+                        logger.LogWarning(exMappings, "GroupMappings table init warning");
+                    }
+
                     // Create SecretProviders and AuthProviderConfigs tables for SQLite
                     try
                     {

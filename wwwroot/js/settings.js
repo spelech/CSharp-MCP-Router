@@ -7,6 +7,7 @@ export async function initSettings() {
     await loadSettings();
     await loadProviders();
     await initCustomFilesManager();
+    await initPermissionsManager();
 }
 
 function setupSubNavEvents() {
@@ -645,5 +646,269 @@ async function deleteCustomFile(type, name) {
         }
     } catch (err) {
         alert(`Failed to delete file: ${err.message}`);
+    }
+}
+
+// ==========================================
+// Access Control & Permissions Implementation
+// ==========================================
+async function initPermissionsManager() {
+    setupPermissionEvents();
+    await loadPermissions();
+}
+
+async function loadPermissions() {
+    await Promise.all([
+        loadPolicies(),
+        loadMappings()
+    ]);
+}
+
+async function loadPolicies() {
+    const tbody = document.getElementById('policies-tbody');
+    if (!tbody) return;
+
+    try {
+        const policies = await apiRequest('/api/permissions/policies');
+        if (!policies || policies.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted);">
+                        No policies configured. All targets are default-allowed.
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        tbody.innerHTML = policies.map(policy => {
+            const badgeLabel = policy.isAllowed ? 'ALLOW' : 'DENY';
+            const badgeStyle = policy.isAllowed
+                ? 'background: rgba(16, 185, 129, 0.1); color: #10b981; border: 1px solid rgba(16, 185, 129, 0.2); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;'
+                : 'background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 2px 6px; border-radius: 4px; font-size: 11px; font-weight: 600;';
+
+            return `
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px 10px; font-family: monospace; font-weight: 500;">${policy.targetId}</td>
+                    <td style="padding: 12px 10px;">${policy.requiredGroup}</td>
+                    <td style="padding: 12px 10px;"><span style="${badgeStyle}">${badgeLabel}</span></td>
+                    <td style="padding: 12px 10px; text-align: right;">
+                        <button class="btn btn-secondary btn-sm edit-policy-btn" data-id="${policy.id}" data-targetid="${policy.targetId}" data-group="${policy.requiredGroup}" data-allowed="${policy.isAllowed}" style="margin-right: 5px;">
+                            <i class="fa-solid fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-policy-btn" data-id="${policy.id}">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Attach action events
+        document.querySelectorAll('.edit-policy-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                openEditPolicy(btn.dataset.id, btn.dataset.targetid, btn.dataset.group, btn.dataset.allowed === 'true');
+            });
+        });
+
+        document.querySelectorAll('.delete-policy-btn').forEach(btn => {
+            btn.addEventListener('click', () => deletePolicy(btn.dataset.id));
+        });
+
+    } catch (err) {
+        console.error('Failed to load policies:', err);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="4" class="empty-state" style="padding: 20px; text-align: center; color: #ef4444;">
+                    Error loading policies: ${err.message}
+                </td>
+            </tr>`;
+    }
+}
+
+async function loadMappings() {
+    const tbody = document.getElementById('mappings-tbody');
+    if (!tbody) return;
+
+    try {
+        const mappings = await apiRequest('/api/permissions/mappings');
+        if (!mappings || mappings.length === 0) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="3" class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted);">
+                        No group/SID mappings configured.
+                    </td>
+                </tr>`;
+            return;
+        }
+
+        tbody.innerHTML = mappings.map(mapping => {
+            return `
+                <tr style="border-bottom: 1px solid var(--border);">
+                    <td style="padding: 12px 10px; font-family: monospace; font-weight: 500;">${mapping.externalId}</td>
+                    <td style="padding: 12px 10px;">${mapping.internalGroup}</td>
+                    <td style="padding: 12px 10px; text-align: right;">
+                        <button class="btn btn-secondary btn-sm edit-mapping-btn" data-id="${mapping.id}" data-external="${mapping.externalId}" data-internal="${mapping.internalGroup}" style="margin-right: 5px;">
+                            <i class="fa-solid fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-danger btn-sm delete-mapping-btn" data-id="${mapping.id}">
+                            <i class="fa-solid fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+
+        // Attach action events
+        document.querySelectorAll('.edit-mapping-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                openEditMapping(btn.dataset.id, btn.dataset.external, btn.dataset.internal);
+            });
+        });
+
+        document.querySelectorAll('.delete-mapping-btn').forEach(btn => {
+            btn.addEventListener('click', () => deleteMapping(btn.dataset.id));
+        });
+
+    } catch (err) {
+        console.error('Failed to load mappings:', err);
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="3" class="empty-state" style="padding: 20px; text-align: center; color: #ef4444;">
+                    Error loading mappings: ${err.message}
+                </td>
+            </tr>`;
+    }
+}
+
+function setupPermissionEvents() {
+    const createPolicyBtn = document.getElementById('btn-create-policy');
+    const closePolicyBtn = document.getElementById('btn-close-policy-modal');
+    const cancelPolicyBtn = document.getElementById('btn-cancel-policy-modal');
+    const policyModal = document.getElementById('policy-modal');
+    const policyForm = document.getElementById('policy-form');
+
+    const createMappingBtn = document.getElementById('btn-create-mapping');
+    const closeMappingBtn = document.getElementById('btn-close-mapping-modal');
+    const cancelMappingBtn = document.getElementById('btn-cancel-mapping-modal');
+    const mappingModal = document.getElementById('mapping-modal');
+    const mappingForm = document.getElementById('mapping-form');
+
+    if (createPolicyBtn && policyModal) {
+        createPolicyBtn.addEventListener('click', () => {
+            document.getElementById('policy-modal-title').innerHTML = '<i class="fa-solid fa-shield-halved"></i> Create Access Policy';
+            document.getElementById('policy-id').value = '';
+            document.getElementById('policy-target').value = '';
+            document.getElementById('policy-group').value = '';
+            document.getElementById('policy-allowed').value = 'true';
+            policyModal.style.display = 'flex';
+        });
+
+        const closePolicy = () => { policyModal.style.display = 'none'; };
+        closePolicyBtn?.addEventListener('click', closePolicy);
+        cancelPolicyBtn?.addEventListener('click', closePolicy);
+
+        policyForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('policy-id').value;
+            const targetId = document.getElementById('policy-target').value.trim();
+            const requiredGroup = document.getElementById('policy-group').value.trim();
+            const isAllowed = document.getElementById('policy-allowed').value === 'true';
+
+            try {
+                const res = await apiRequest('/api/permissions/policies', {
+                    method: 'POST',
+                    body: { id, targetId, requiredGroup, isAllowed }
+                });
+                if (res) {
+                    closePolicy();
+                    await loadPolicies();
+                }
+            } catch (err) {
+                alert('Failed to save policy: ' + err.message);
+            }
+        });
+    }
+
+    if (createMappingBtn && mappingModal) {
+        createMappingBtn.addEventListener('click', () => {
+            document.getElementById('mapping-modal-title').innerHTML = '<i class="fa-solid fa-user-group"></i> Create Group Mapping';
+            document.getElementById('mapping-id').value = '';
+            document.getElementById('mapping-external').value = '';
+            document.getElementById('mapping-internal').value = '';
+            mappingModal.style.display = 'flex';
+        });
+
+        const closeMapping = () => { mappingModal.style.display = 'none'; };
+        closeMappingBtn?.addEventListener('click', closeMapping);
+        cancelMappingBtn?.addEventListener('click', closeMapping);
+
+        mappingForm?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('mapping-id').value;
+            const externalId = document.getElementById('mapping-external').value.trim();
+            const internalGroup = document.getElementById('mapping-internal').value.trim();
+
+            try {
+                const res = await apiRequest('/api/permissions/mappings', {
+                    method: 'POST',
+                    body: { id, externalId, internalGroup }
+                });
+                if (res) {
+                    closeMapping();
+                    await loadMappings();
+                }
+            } catch (err) {
+                alert('Failed to save mapping: ' + err.message);
+            }
+        });
+    }
+}
+
+function openEditPolicy(id, targetId, group, isAllowed) {
+    const modal = document.getElementById('policy-modal');
+    if (!modal) return;
+
+    document.getElementById('policy-modal-title').innerHTML = '<i class="fa-solid fa-shield-halved"></i> Edit Access Policy';
+    document.getElementById('policy-id').value = id;
+    document.getElementById('policy-target').value = targetId;
+    document.getElementById('policy-group').value = group;
+    document.getElementById('policy-allowed').value = isAllowed ? 'true' : 'false';
+
+    modal.style.display = 'flex';
+}
+
+async function deletePolicy(id) {
+    if (!confirm('Are you sure you want to delete this access policy?')) return;
+    try {
+        const res = await apiRequest(`/api/permissions/policies/${id}`, { method: 'DELETE' });
+        if (res && res.success) {
+            await loadPolicies();
+        }
+    } catch (err) {
+        alert('Failed to delete policy: ' + err.message);
+    }
+}
+
+function openEditMapping(id, external, internal) {
+    const modal = document.getElementById('mapping-modal');
+    if (!modal) return;
+
+    document.getElementById('mapping-modal-title').innerHTML = '<i class="fa-solid fa-user-group"></i> Edit Group Mapping';
+    document.getElementById('mapping-id').value = id;
+    document.getElementById('mapping-external').value = external;
+    document.getElementById('mapping-internal').value = internal;
+
+    modal.style.display = 'flex';
+}
+
+async function deleteMapping(id) {
+    if (!confirm('Are you sure you want to delete this group mapping?')) return;
+    try {
+        const res = await apiRequest(`/api/permissions/mappings/${id}`, { method: 'DELETE' });
+        if (res && res.success) {
+            await loadMappings();
+        }
+    } catch (err) {
+        alert('Failed to delete mapping: ' + err.message);
     }
 }

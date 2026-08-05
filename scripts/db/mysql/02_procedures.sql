@@ -14,16 +14,60 @@ CREATE PROCEDURE `sp_EvaluateUserAccess`(
     IN p_RequestMethod VARCHAR(50)
 )
 BEGIN
-    SELECT CASE WHEN COUNT(*) > 0 THEN 1 ELSE 0 END AS IsAllowed
-    FROM `ToolAccessPolicies` tap
-    INNER JOIN `Tools` t ON tap.`ToolId` = t.`ToolId`
-    INNER JOIN `AdGroups` g ON tap.`GroupId` = g.`GroupId`
-    INNER JOIN `McpServers` s ON t.`ServerId` = s.`ServerId`
-    WHERE FIND_IN_SET(g.`GroupName`, p_GroupNames) > 0
-      AND t.`ToolName` = p_ItemName
-      AND tap.`IsAllowed` = 1
-      AND t.`IsEnabled` = 1
-      AND s.`IsActive` = 1;
+    DECLARE v_ServerId VARCHAR(100);
+    DECLARE v_PolicyCount INT;
+    DECLARE v_DenyCount INT;
+    DECLARE v_AllowCount INT;
+
+    SET v_ServerId = p_ItemName;
+    IF INSTR(p_ItemName, '__') > 0 THEN
+        SET v_ServerId = SUBSTRING_INDEX(p_ItemName, '__', 1);
+    END IF;
+
+    -- Create temporary table for target keys
+    CREATE TEMPORARY TABLE IF NOT EXISTS `_temp_target_keys` (
+        `TargetId` VARCHAR(250) NOT NULL
+    );
+    TRUNCATE TABLE `_temp_target_keys`;
+
+    INSERT INTO `_temp_target_keys` VALUES
+        (CONCAT('tool:', p_ItemName)),
+        (CONCAT('prompt:', p_ItemName)),
+        (CONCAT('resource:', p_ItemName)),
+        (CONCAT('server:', v_ServerId));
+
+    -- Count total policies
+    SELECT COUNT(*) INTO v_PolicyCount
+    FROM `AccessPolicies`
+    WHERE `TargetId` IN (SELECT `TargetId` FROM `_temp_target_keys`);
+
+    IF v_PolicyCount = 0 THEN
+        SELECT 1 AS IsAllowed;
+    ELSE
+        -- Check deny policies
+        SELECT COUNT(*) INTO v_DenyCount
+        FROM `AccessPolicies` ap
+        WHERE ap.`TargetId` IN (SELECT `TargetId` FROM `_temp_target_keys`)
+          AND FIND_IN_SET(ap.`RequiredGroup`, p_GroupNames) > 0
+          AND ap.`IsAllowed` = 0;
+
+        IF v_DenyCount > 0 THEN
+            SELECT 0 AS IsAllowed;
+        ELSE
+            -- Check allow policies
+            SELECT COUNT(*) INTO v_AllowCount
+            FROM `AccessPolicies` ap
+            WHERE ap.`TargetId` IN (SELECT `TargetId` FROM `_temp_target_keys`)
+              AND FIND_IN_SET(ap.`RequiredGroup`, p_GroupNames) > 0
+              AND ap.`IsAllowed` = 1;
+
+            IF v_AllowCount > 0 THEN
+                SELECT 1 AS IsAllowed;
+            ELSE
+                SELECT 0 AS IsAllowed;
+            END IF;
+        END IF;
+    END IF;
 END //
 
 -- 2. Procedure: Get allowed tools/items for given group names

@@ -79,6 +79,23 @@ CREATE TABLE IF NOT EXISTS `ToolAccessPolicies` (
     CONSTRAINT `UQ_Tool_Group` UNIQUE (`ToolId`, `GroupId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- AccessPolicies Generic Table
+CREATE TABLE IF NOT EXISTS `AccessPolicies` (
+    `Id`            VARCHAR(100) PRIMARY KEY,
+    `TargetId`      VARCHAR(250) NOT NULL,
+    `RequiredGroup` VARCHAR(256) NOT NULL,
+    `IsAllowed`     TINYINT(1) NOT NULL DEFAULT 1,
+    `CreatedAt`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Group Mappings Table
+CREATE TABLE IF NOT EXISTS `GroupMappings` (
+    `Id`             VARCHAR(100) PRIMARY KEY,
+    `ExternalId`     VARCHAR(256) NOT NULL,
+    `InternalGroup`  VARCHAR(256) NOT NULL,
+    `CreatedAt`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 -- 6. Audit Logging Table
 CREATE TABLE IF NOT EXISTS `AuditLogs` (
     `AuditId`           BIGINT AUTO_INCREMENT PRIMARY KEY,

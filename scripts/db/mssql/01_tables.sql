@@ -106,6 +106,31 @@ BEGIN
 END;
 GO
 
+-- AccessPolicies Generic Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AccessPolicies')
+BEGIN
+    CREATE TABLE [dbo].[AccessPolicies] (
+        [Id]            VARCHAR(100) PRIMARY KEY,
+        [TargetId]      VARCHAR(250) NOT NULL,
+        [RequiredGroup] NVARCHAR(256) NOT NULL,
+        [IsAllowed]     BIT NOT NULL DEFAULT 1,
+        [CreatedAt]     DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END;
+GO
+
+-- Group Mappings Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'GroupMappings')
+BEGIN
+    CREATE TABLE [dbo].[GroupMappings] (
+        [Id]             VARCHAR(100) PRIMARY KEY,
+        [ExternalId]     VARCHAR(256) NOT NULL,
+        [InternalGroup]  NVARCHAR(256) NOT NULL,
+        [CreatedAt]      DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END;
+GO
+
 -- 6. Audit Logging Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AuditLogs')
 BEGIN
