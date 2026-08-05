@@ -1,10 +1,30 @@
 # MCP Router Architecture
 
-This document outlines the internal architecture, security mechanisms, and design patterns used within the C# MCP Router. The codebase follows SOLID principles to ensure maintainability, testability, and clear separation of concerns.
+This document outlines the internal architecture, security mechanisms, design requirements, and key flow diagrams of the C# MCP Router. The codebase is designed around standard enterprise design patterns to guarantee high throughput, strict security, and clear separation of concerns.
 
 ---
 
-## Architecture Overview
+## 📐 Architectural Design Requirements
+
+### 1. Performance & Latency Requirements
+- **Sub-millisecond Routing Decision**: The gateway must route messages based on headers (`Mcp-Method` and `Mcp-Name` compliant with the MCP 2026-07-28 Spec) without having to read or buffer the request body. This keeps CPU usage low and routes requests almost instantly.
+- **Concurrent Request Handling**: Highly thread-safe design. The router must manage simultaneous SSE client channels, background health probes, and on-demand semantic search requests using thread-safe state wrappers (`ConcurrentDictionary` and thread-safe locks).
+- **Background Startup Warming**: Embedding models, backend connection channels, and configuration caches must be preloaded asynchronously during server initialization. This prevents first-request latency spikes (cold starts).
+
+### 2. Security & Identity Requirements
+- **Dual Authenticated Identities**: Must support enterprise-grade Windows/Kerberos environments via Active Directory SIDs as well as modern containerized reverse-proxy identities via OIDC headers.
+- **Strict Role-Based Access Control (RBAC)**: All target servers and backend tools must check caller groups using virtual mapping databases via optimized Stored Procedures.
+- **Compliant Error Handling & WWW-Authenticate Headers**: In accordance with the MCP 2026-07-28 Authorization specification, the gateway must emit strict `WWW-Authenticate` challenge headers during `401 Unauthorized` and `403 Forbidden` states.
+- **Data Redaction (PII)**: Any bearer tokens, credentials, API keys, or database passwords parsed in standard JSON-RPC communication must be filtered and redacted before being logged or stored.
+
+### 3. Reliability & Resilience Requirements
+- **Pluggable & Extensible Design**: Downstream transports, identity providers, and secret managers must be structured under clean strategy patterns (`ITransport`, `IIdentityProvider`, `ISecretRetriever`) to enable easy customization without touching core routing logic.
+- **Robust Stateless Buffering**: When communicating with stateless streamable HTTP backends, the router must read events line-by-line using a streaming buffer. It must support fast-breaking response parsing to prevent connections from hanging indefinitely.
+- **Safe Resource Cleanup**: Active SSE client sessions must handle connection terminations cleanly (preventing thread leakage) and capture disposal/cancellation exceptions gracefully.
+
+---
+
+## 🏛️ System Component Overview
 
 ```mermaid
 graph TD
@@ -29,47 +49,84 @@ graph TD
 
 ---
 
-## Core Subsystems & Components
+## 📡 Message & Connection Flows
 
-The router's core logic resides within the `/Core` namespace, organized into specialized, enterprise-grade sub-systems.
+### 1. SSE Client Connection Lifecycle
+When an MCP client initiates a connection to the gateway:
 
-### 1. Spec Parsing & Dual-Spec Middleware (`McpRouter.Middleware`)
-- **`McpDualSpecMiddleware`**: Intercepts HTTP requests and inspects **MCP 2026-07-28 Specification** headers (`Mcp-Method`, `Mcp-Name`, `MCP-Protocol-Version`). Allows sub-millisecond authorization and method resolution without stream-reading request bodies.
-- **Legacy Fallback**: If 2026 headers are missing, reads and parses JSON-RPC request bodies, cleanly passing through protocol handshakes (`initialize`, `notifications/initialized`).
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as MCP Client
+    participant Router as MCP Router
+    participant SessionMgr as SessionManager
+    participant BackendConn as BackendConnection
+    participant Downstream as MCP Backend
 
-### 2. Pluggable Identity Providers (`McpRouter.Core.Identity`)
-- **`IIdentityProvider`**: Standard abstraction for resolving caller identity and group memberships into a `UserIdentityContext`.
-- **`ActiveDirectoryIdentityProvider`**: Inspects `WindowsIdentity` Kerberos/NTLM tokens and security identifiers (SIDs).
-- **`OidcIdentityProvider`**: Resolves identities and group memberships from PocketID and TinyAuth reverse-proxy HTTP headers (`Remote-User`, `Remote-Groups`, `sso_groups`).
-- **`CompositeIdentityProvider`**: Aggregates enabled identity providers and evaluates them in sequence.
-
-### 3. Pluggable Secret Retrievers (`McpRouter.Core.Secrets`)
-- **`ISecretRetriever`**: Standard abstraction for fetching downstream MCP server tokens and API keys.
-- **`VaultSecretRetriever`**: Fetches secrets from **HashiCorp Vault** (KV v2) using `VaultSharp` with in-memory caching.
-- **`WindowsRegistrySecretRetriever`**: Retrieves DPAPI-encrypted (`ProtectedData`) keys from `HKLM`/`HKCU` Windows registry hives.
-- **`EnvironmentSecretRetriever`**: Reads secrets from container environment variables.
-- **`CompositeSecretRetriever`**: Routes requests to the target provider based on the server's explicit `SecretProvider` database column (`Vault`, `WindowsRegistry`, or `Environment`).
-
-### 4. Database Layer & Stored Procedure Engine (`McpRouter.Core.Database` & `scripts/db/`)
-- **`IDbConnectionFactory` & `DbConnectionFactory`**: Multi-database provider producing `IDbConnection` instances for **MS SQL Server** (`Microsoft.Data.SqlClient`), **MySQL** (`MySqlConnector`), or **SQLite** (`Microsoft.Data.Sqlite`) using Dapper.
-- **Stored Procedure Suites (`scripts/db/mssql/` & `scripts/db/mysql/`)**:
-  - `sp_EvaluateUserAccess`: Evaluates tool authorization against AD Group SIDs or OIDC Group names.
-  - `sp_GetServerSecrets`: Resolves secret paths and explicit secret providers for downstream servers.
-  - `sp_SaveSecretProvider` & `sp_SaveAuthProvider`: Persists dynamic provider configuration.
-  - `sp_InsertAuditLog`: Stores invocation audit records.
-
-### 5. Observability & PII Audit Logging (`McpRouter.Core.Logging`)
-- **`PiiSanitizer`**: Uses compiled Regex patterns to redact Bearer tokens, API keys, passwords, and sensitive parameter values from logged payloads.
-- **`AuditLogger`**: Asynchronously records request ID, user principal name, user SID, target server, execution time, status code, and sanitized payloads via `sp_InsertAuditLog`.
-
-### 6. Transport & Session Layer (`McpRouter.Core.Transports`)
-- **`ITransport`**: Interface for downstream communication.
-- **`SseTransport`**: Stateful Server-Sent Events transport.
-- **`HttpTransport`**: Stateless Streamable HTTP transport with non-blocking stream buffers and empty-response handling.
+    Client->>Router: GET /sse (Default Meta-Mode)
+    Router->>Router: Execute McpDualSpecMiddleware Auth Checks
+    Router->>SessionMgr: Create & Register ClientSession
+    SessionMgr-->>Router: Session Token Generated
+    Router->>BackendConn: Warm & Connect Backend SSE streams (Concurrent)
+    BackendConn->>Downstream: Handshake & Initialize
+    Downstream-->>BackendConn: Return Capability Details
+    BackendConn-->>Router: Cache warmed backend tools, prompts, resources
+    Router-->>Client: Return 200 OK (text/event-stream)
+    Note over Client,Router: Client gets bootstrap tools (search_tools, execute_tool)
+```
 
 ---
 
-## Configuration & Management API (`Controllers/ProvidersController.cs`)
-The Web Dashboard UI communicates with REST endpoints to configure auth and secret providers dynamically:
-- `GET /api/providers/auth` & `POST /api/providers/auth`
-- `GET /api/providers/secrets` & `POST /api/providers/secrets`
+### 2. Request Routing and Execution Flow (Meta-Mode)
+When an agent client attempts to search for and execute a capability:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client as LLM / Agent
+    participant Router as MCP Router
+    participant SemanticSvc as SemanticSearchService
+    participant DB as SQLCipher Database
+    participant BackendConn as BackendConnection
+    participant Downstream as MCP Backend
+
+    Client->>Router: POST /message?sessionId=1 (search_tools)
+    Router->>SemanticSvc: Evaluate "restart container" query
+    SemanticSvc->>SemanticSvc: Fetch ONNX / OpenAI Embeddings
+    SemanticSvc->>SemanticSvc: Evaluate Hybrid Keyword + Semantic Weights
+    SemanticSvc-->>Router: Return tool "docker__restart_container"
+    Router-->>Client: Return namespaced search result JSON
+
+    Client->>Router: POST /message?sessionId=1 (execute_tool: docker__restart_container)
+    Router->>Router: Verify caller security & permissions (sp_EvaluateUserAccess)
+    Router->>DB: Check secret provider rules (sp_GetServerSecrets)
+    DB-->>Router: Returns Env, Vault, or Registry secrets config
+    Router->>BackendConn: Relay request (unnamespaced tool: "restart_container")
+    BackendConn->>Downstream: Send JSON-RPC Command
+    Downstream-->>BackendConn: Command Output
+    BackendConn-->>Router: Relay Output
+    Router-->>Client: Return tool execution results
+```
+
+---
+
+## 🛠️ Core Codebase Organization
+
+The codebase is organized in directories mirroring its sub-system boundaries:
+
+- **`/Core/`**:
+  - `ClientSession.cs`: Controls client connections, tracks execution threads, and rewrites JSON payloads.
+  - `BackendConnection.cs`: Represents connection tunnels to upstream servers.
+  - `SessionManager.cs`: Monitors all active connections and handles cleanup.
+  - `CustomTools.cs`: Directs semantic tool searching and routing workflows.
+- **`/Middleware/`**:
+  - `McpAuthorizationSpecMiddleware.cs`: Appends standard-compliant authorization challenges (`WWW-Authenticate`).
+  - `McpDualSpecMiddleware.cs`: Core request interception for specification headers.
+- **`/Services/`**:
+  - `SemanticSearchService.cs`: Merges vector embeddings and hybrid keyword matches.
+  - `BackendHealthCheckService.cs`: Periodically checks the health of downstream targets.
+- **`/Controllers/`**:
+  - `ProvidersController.cs`: Controls administrative configuration for security providers.
+  - `McpController.cs`: Exposes SSE tunnels and routing routes.
+- **`/data/`**:
+  - Persistent volume holding configurations, local ONNX files, and SQLite databases.
