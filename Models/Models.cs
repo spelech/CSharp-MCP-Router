@@ -38,6 +38,13 @@ namespace McpRouter.Models
         public bool IsAllowed { get; set; } = true;
     }
 
+    public class GroupMapping
+    {
+        public string Id { get; set; } = string.Empty; // Guid or key
+        public string ExternalId { get; set; } = string.Empty; // e.g., S-1-5-... or pocketid_admins
+        public string InternalGroup { get; set; } = string.Empty; // e.g., database_users
+    }
+
     public class RouterDbContext : DbContext
     {
         private readonly string _encryptionKey;
@@ -45,6 +52,8 @@ namespace McpRouter.Models
         public DbSet<McpServer> Servers => Set<McpServer>();
         public DbSet<OAuthClient> Clients => Set<OAuthClient>();
         public DbSet<RouterSettings> Settings => Set<RouterSettings>();
+        public DbSet<McpAccessPolicy> AccessPolicies => Set<McpAccessPolicy>();
+        public DbSet<GroupMapping> GroupMappings => Set<GroupMapping>();
 
         public RouterDbContext(DbContextOptions<RouterDbContext> options, IConfiguration configuration)
             : base(options)
@@ -74,6 +83,7 @@ namespace McpRouter.Models
             modelBuilder.Entity<McpServer>().HasKey(s => s.Id);
             modelBuilder.Entity<OAuthClient>().HasKey(c => c.ClientId);
             modelBuilder.Entity<McpAccessPolicy>().HasKey(p => p.Id);
+            modelBuilder.Entity<GroupMapping>().HasKey(m => m.Id);
 
             // Register OpenIddict Entity Framework Core entities
             modelBuilder.UseOpenIddict();

@@ -22,7 +22,7 @@
                 <i class="fa-solid fa-network-wired logo-icon"></i>
                 <div class="header-title">
                     <h1>MCP Router Gateway</h1>
-                    <span class="badge badge-primary" id="version-badge">v2.21.0</span>
+                    <span class="badge badge-primary" id="version-badge">v2.22.0</span>
                 </div>
             </div>
             <div class="header-status">
@@ -377,6 +377,7 @@
                 <button type="button" class="tester-tab-btn settings-tab-btn" data-subview="subview-identity"><i class="fa-solid fa-id-card"></i> Identity &amp; Auth</button>
                 <button type="button" class="tester-tab-btn settings-tab-btn" data-subview="subview-secrets"><i class="fa-solid fa-vault"></i> Secret Providers</button>
                 <button type="button" class="tester-tab-btn settings-tab-btn" data-subview="subview-files"><i class="fa-solid fa-folder-open"></i> Prompts &amp; Resources</button>
+                <button type="button" class="tester-tab-btn settings-tab-btn" data-subview="subview-permissions"><i class="fa-solid fa-user-lock"></i> Access Control</button>
             </div>
 
             <!-- Subview 1: Vector & Search -->
@@ -581,6 +582,63 @@
                             <tbody id="custom-files-tbody">
                                 <tr>
                                     <td colspan="5" class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted);">Loading custom files...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Subview 6: Access Control & Permissions -->
+            <div id="subview-permissions" class="settings-subview">
+                <div class="glass-card settings-card" style="max-width: 900px; margin: 0 auto; margin-bottom: 25px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2><i class="fa-solid fa-shield-halved"></i> Access Control Policies</h2>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-create-policy"><i class="fa-solid fa-plus"></i> Create Policy</button>
+                    </div>
+                    <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                        Define target-specific allow/deny rules for users based on their active directory or OIDC groups.
+                        TargetId format: <code>server:&lt;id&gt;</code>, <code>tool:&lt;name&gt;</code>, <code>prompt:&lt;name&gt;</code>, <code>resource:&lt;uri&gt;</code>.
+                    </p>
+                    <div class="table-container" style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted);">
+                                    <th style="padding: 10px;">Target ID</th>
+                                    <th style="padding: 10px;">Required Group</th>
+                                    <th style="padding: 10px;">Access</th>
+                                    <th style="padding: 10px; text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="policies-tbody">
+                                <tr>
+                                    <td colspan="4" class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted);">Loading policies...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="glass-card settings-card" style="max-width: 900px; margin: 0 auto;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h2><i class="fa-solid fa-user-group"></i> Group &amp; SID Mappings</h2>
+                        <button type="button" class="btn btn-secondary btn-sm" id="btn-create-mapping"><i class="fa-solid fa-plus"></i> Create Mapping</button>
+                    </div>
+                    <p class="description" style="color: var(--text-muted); font-size: 13px; margin-bottom: 20px;">
+                        Map external Active Directory SIDs or OIDC PocketID groups to internal virtual groups for easier access control.
+                    </p>
+                    <div class="table-container" style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--border); color: var(--text-muted);">
+                                    <th style="padding: 10px;">External Group / SID</th>
+                                    <th style="padding: 10px;">Internal Group Name</th>
+                                    <th style="padding: 10px; text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mappings-tbody">
+                                <tr>
+                                    <td colspan="3" class="empty-state" style="padding: 20px; text-align: center; color: var(--text-muted);">Loading mappings...</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -862,6 +920,73 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" onclick="window.closeInspectModal()">Close</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Policy Modal -->
+    <div class="modal-backdrop" id="policy-modal" style="display: none;">
+        <div class="glass-card modal-card" style="max-width: 500px; width: 90%;">
+            <div class="modal-header">
+                <h2 id="policy-modal-title"><i class="fa-solid fa-shield-halved"></i> Access Policy</h2>
+                <button type="button" class="btn-close" id="btn-close-policy-modal">&times;</button>
+            </div>
+            <form id="policy-form">
+                <input type="hidden" id="policy-id">
+
+                <div class="form-group">
+                    <label for="policy-target">Target ID</label>
+                    <input type="text" id="policy-target" placeholder="e.g. server:ha or tool:docker__list_containers" required>
+                    <small style="color: var(--text-muted); font-size: 11px;">
+                        Use <code>server:ha</code>, <code>tool:plex__play</code>, <code>prompt:router__diagnose</code>, <code>resource:router://status</code>
+                    </small>
+                </div>
+
+                <div class="form-group">
+                    <label for="policy-group">Required Group / Internal Group</label>
+                    <input type="text" id="policy-group" placeholder="e.g. database_users or Administrators" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="policy-allowed">Policy Mode</label>
+                    <select id="policy-allowed" required>
+                        <option value="true">ALLOW Access</option>
+                        <option value="false">DENY Access</option>
+                    </select>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-policy-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Policy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mapping Modal -->
+    <div class="modal-backdrop" id="mapping-modal" style="display: none;">
+        <div class="glass-card modal-card" style="max-width: 500px; width: 90%;">
+            <div class="modal-header">
+                <h2 id="mapping-modal-title"><i class="fa-solid fa-user-group"></i> Group Mapping</h2>
+                <button type="button" class="btn-close" id="btn-close-mapping-modal">&times;</button>
+            </div>
+            <form id="mapping-form">
+                <input type="hidden" id="mapping-id">
+
+                <div class="form-group">
+                    <label for="mapping-external">External AD SID or OIDC Group</label>
+                    <input type="text" id="mapping-external" placeholder="e.g. S-1-5-21-... or pocketid_admins" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="mapping-internal">Internal Group Name</label>
+                    <input type="text" id="mapping-internal" placeholder="e.g. database_users" required>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" id="btn-cancel-mapping-modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Mapping</button>
+                </div>
+            </form>
         </div>
     </div>
 

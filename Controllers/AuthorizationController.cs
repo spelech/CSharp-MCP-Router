@@ -20,6 +20,7 @@ namespace McpRouter.Controllers
         }
 
         [HttpPost("~/connect/token")]
+        [HttpPost("~/oauth/token")]
         [Produces("application/json")]
         public async Task<IActionResult> Exchange()
         {
