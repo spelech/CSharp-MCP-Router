@@ -70,7 +70,7 @@ Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) o
 
 ---
 
-## 🏷️ 5. Mandatory Versioning Rule
+## 🏷️ 5. Mandatory Versioning & Documentation Rule
 
 **EVERY COMMIT OR MERGE TO `main` MUST BUMP THE VERSION NUMBER WITHOUT EXCEPTION.**
 - **Patch Bumps (e.g. `2.7.0` -> `2.7.1`)**: For bug fixes, performance optimizations, log refactoring, or minor UI tweaks.
@@ -79,3 +79,7 @@ Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) o
   1. [`mcp-router.csproj`](file:///containers/mcp/router/mcp-router.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
   2. [`wwwroot/index.html`](file:///containers/mcp/router/wwwroot/index.html) (`<span class="badge badge-primary" id="version-badge">vX.Y.Z</span>`).
   3. [`README.md`](file:///containers/mcp/router/README.md) (Add release entry to the Release Changelog table).
+
+**MANDATORY ATOMIC COMMIT AND DOCS UPDATING PROCESS**:
+* Whenever an AI agent implements a bugfix or feature, they **MUST** update the documentation (e.g., `README.md`, `ARCHITECTURE.md`, or the `docs/` folder) to reflect those changes.
+* Agents **MUST** use clean, logical atomic commits. Code changes and documentation updates should be committed in grouped, logical chunks.
