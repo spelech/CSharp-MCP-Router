@@ -206,3 +206,65 @@ BEGIN
     );
 END;
 GO
+
+-- 7. Procedure: Save or Update AppKey Configuration
+CREATE OR ALTER PROCEDURE [dbo].[sp_SaveAppKey]
+    @Id VARCHAR(100),
+    @Name NVARCHAR(200),
+    @Username NVARCHAR(256),
+    @KeyPrefix VARCHAR(50),
+    @EncryptedKey NVARCHAR(MAX),
+    @ScopesJson NVARCHAR(MAX),
+    @ExpiresAt DATETIME2 = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM [dbo].[AppKeys] WHERE [Id] = @Id)
+    BEGIN
+        UPDATE [dbo].[AppKeys]
+        SET [Name] = @Name,
+            [Username] = @Username,
+            [KeyPrefix] = @KeyPrefix,
+            [EncryptedKey] = @EncryptedKey,
+            [ScopesJson] = @ScopesJson,
+            [ExpiresAt] = @ExpiresAt
+        WHERE [Id] = @Id;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO [dbo].[AppKeys] ([Id], [Name], [Username], [KeyPrefix], [EncryptedKey], [ScopesJson], [ExpiresAt], [CreatedAt])
+        VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, SYSUTCDATETIME());
+    END
+END;
+GO
+
+-- 8. Procedure: Delete/Revoke AppKey
+CREATE OR ALTER PROCEDURE [dbo].[sp_DeleteAppKey]
+    @Id VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM [dbo].[AppKeys] WHERE [Id] = @Id;
+END;
+GO
+
+-- 9. Procedure: Get AppKeys
+CREATE OR ALTER PROCEDURE [dbo].[sp_GetAppKeys]
+    @Username NVARCHAR(256) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF @Username IS NULL
+    BEGIN
+        SELECT [Id], [Name], [Username], [KeyPrefix], [EncryptedKey], [ScopesJson], [ExpiresAt], [CreatedAt]
+        FROM [dbo].[AppKeys];
+    END
+    ELSE
+    BEGIN
+        SELECT [Id], [Name], [Username], [KeyPrefix], [EncryptedKey], [ScopesJson], [ExpiresAt], [CreatedAt]
+        FROM [dbo].[AppKeys]
+        WHERE [Username] = @Username;
+    END
+END;
+GO

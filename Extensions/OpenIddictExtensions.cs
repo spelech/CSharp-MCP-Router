@@ -2,7 +2,9 @@ using Microsoft.Extensions.DependencyInjection;
 using McpRouter.Models;
 using System;
 using OpenIddict.Validation.AspNetCore;
-using System;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
+using McpRouter.Middleware;
 
 namespace McpRouter.Extensions
 {
@@ -14,6 +16,15 @@ namespace McpRouter.Extensions
             {
                 options.DefaultAuthenticateScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme;
+            })
+            .AddScheme<AuthenticationSchemeOptions, AppKeyAuthenticationHandler>("AppKey", null);
+
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder()
+                    .RequireAuthenticatedUser()
+                    .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey")
+                    .Build();
             });
 
             services.AddOpenIddict()
