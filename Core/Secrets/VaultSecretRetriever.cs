@@ -17,15 +17,23 @@ namespace McpRouter.Core.Secrets
         public VaultSecretRetriever(IConfiguration config, IMemoryCache cache)
         {
             _cache = cache;
-            var address = config["Vault:Address"];
-            var roleId = config["Vault:RoleId"];
-            var secretId = config["Vault:SecretId"];
-
-            if (!string.IsNullOrEmpty(address) && !string.IsNullOrEmpty(roleId) && !string.IsNullOrEmpty(secretId))
+            try
             {
-                var authMethod = new AppRoleAuthMethodInfo(roleId, secretId);
-                var settings = new VaultClientSettings(address, authMethod);
-                _vaultClient = new VaultClient(settings);
+                var address = config["Vault:Address"];
+                var roleId = config["Vault:RoleId"];
+                var secretId = config["Vault:SecretId"];
+
+                if (!string.IsNullOrEmpty(address) && !string.IsNullOrEmpty(roleId) && !string.IsNullOrEmpty(secretId))
+                {
+                    var authMethod = new AppRoleAuthMethodInfo(roleId, secretId);
+                    var settings = new VaultClientSettings(address, authMethod);
+                    _vaultClient = new VaultClient(settings);
+                }
+            }
+            catch
+            {
+                // Suppress and protect configuration metadata details
+                _vaultClient = null;
             }
         }
 
@@ -51,6 +59,7 @@ namespace McpRouter.Core.Secrets
             }
             catch
             {
+                // Ensure no details/paths or connection details leak publicly
                 return null;
             }
         }

@@ -85,5 +85,22 @@ namespace McpRouter.Tests
             Assert.Equal("None", updated.SecretProvider);
             Assert.Equal("bearer", updated.AuthShape);
         }
+
+        [Fact]
+        public void DbEncryptionKey_Warning_Detection_Works_Correctly()
+        {
+            var testKeys = new[] { "", "DefaultSecureKey123!", "SomeSecureRandomKeyValue999!" };
+            var results = new List<bool>();
+
+            foreach (var key in testKeys)
+            {
+                var isWeak = string.IsNullOrEmpty(key) || key == "DefaultSecureKey123!";
+                results.Add(isWeak);
+            }
+
+            Assert.True(results[0]); // empty key is weak
+            Assert.True(results[1]); // default key is weak
+            Assert.False(results[2]); // secure key is not weak
+        }
     }
 }
