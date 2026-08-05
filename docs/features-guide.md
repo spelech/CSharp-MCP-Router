@@ -1,0 +1,150 @@
+# MCP Router Features Guide
+
+This guide provides in-depth instructions for using the various features of the MCP Router.
+
+---
+
+## 🖥️ 1. Dynamic Server Management
+
+The MCP Router supports three methods to add, update, and manage backend Model Context Protocol (MCP) servers:
+
+### Method A: Web UI Dashboard (Recommended)
+You can manage servers dynamically on the fly without restarting the gateway:
+1. Open the router dashboard in your browser.
+2. Click the **+ Add Server** button in the top right.
+3. Fill out the **Add MCP Server** modal:
+   - **Display Name**: User-friendly label (e.g., `Home Assistant`).
+   - **URL**: The backend SSE message endpoint or HTTP server (e.g., `http://ha-mcp:8086/mcp`).
+   - **Transport Type**: Select `sse` (stateful) or `http` (stateless).
+   - **Category**: Classify your server (e.g., `homecontrol`, `infrastructure`, `development`).
+   - **API Token/Key**: Credentials needed to invoke downstream tools (saved securely).
+   - **Secret Provider**: Choose how to retrieve server secrets dynamically (`None`, `Vault`, `WindowsRegistry`, or `Environment`). See the [Pluggable Secret Retrievers](#3-pluggable-secret-retrievers) section for setup details.
+4. Click **Save Server**. The router automatically registers the server and warms up the background connections.
+
+![Add MCP Server Modal](../docs/assets/add_server_modal.jpg)
+
+### Method B: Static JSON Seeding (`custom_servers.json`)
+For GitOps, declarative configurations, or automated environments:
+1. Create a `custom_servers.json` file inside the mapped `/app/data/` volume directory.
+2. Structure the JSON as follows:
+   ```json
+   [
+     {
+       "id": "my-mcp-server",
+       "displayName": "My Custom Server",
+       "url": "http://10.0.0.15:3000/sse",
+       "type": "sse",
+       "category": "infrastructure",
+       "enabled": true,
+       "hidden": false,
+       "apiKey": "optional-bearer-or-api-key",
+       "headersJson": "{\"Custom-Header-Name\": \"Header-Value\"}"
+     }
+   ]
+   ```
+3. The gateway scans, inserts, or updates matching server entries in the local database during startup initialization.
+
+### Method C: Environment Seed Migration
+The gateway auto-seeds common homelab services on its first run if they are specified in the environment (e.g., `HOMEASSISTANT_TOKEN`, `PLEX_TOKEN`, `SEERR_API_KEY`). See `Program.cs` for details.
+
+---
+
+## 📡 2. Routing Modes
+
+You can connect your client (Cursor, VS Code, Claude Desktop, Antigravity CLI) via different SSE connection endpoints:
+
+| Route Path | Mode | Description |
+| :--- | :--- | :--- |
+| `/sse` or `/sse?meta=true` | **Meta-Mode (Default)** | Hides underlying tools from the initial bootstrap, offering only `search_tools` and `execute_tool`. Prevents context window bloat. |
+| `/sse?meta=false` | **Full-List Mode** | Directly exposes all underlying tools (300+) from every connected backend server. |
+| `/{targetServerId}` | **Target-Specific Proxying** | Bridges connections directly and exclusively to the target server (e.g., `/docker` or `/ha`). |
+
+### Client Setup Examples
+
+#### Claude Desktop Configuration (`config.json`)
+```json
+{
+  "mcpServers": {
+    "mcp-router-meta": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8026/sse"]
+    }
+  }
+}
+```
+
+#### Antigravity CLI Configuration (`.gemini/settings.json`)
+```json
+{
+  "mcpServers": {
+    "mcp-router": {
+      "url": "http://localhost:8026/sse",
+      "type": "sse",
+      "trust": true,
+      "serverUrl": "http://localhost:8026/sse"
+    }
+  }
+}
+```
+
+---
+
+## 🔍 3. Semantic Search
+
+When running in **Meta-Mode**, the router shields the client's context window. The client agent must query tools semantically first.
+
+### Search Flow:
+1. **Tool Inquiry**: Client queries `search_tools(query: "restart actual budget container")`.
+2. **Hybrid Scoring Engine**:
+   - Compares the semantic embeddings of underlying tools using either a **Local ONNX model** (`all-MiniLM-L6-v2`) or **LiteLLM/OpenAI-compatible APIs**.
+   - Leverages **Keyword Boosting** (exact matching phrases get +2.0 weight boost, individual words +1.0/+0.5 boost).
+3. **Execution Routing**: Once namespaced tool names (e.g., `docker__restart_container`) are returned, the client invokes them using `execute_tool`.
+
+### Embeddings Configuration:
+Through the Settings panel, you can choose:
+* **Local ONNX (In-Process)**: CPU-friendly, offline, runs using `Microsoft.ML.OnnxRuntime`. Downloads ONNX weights on first run to the `/app/data/` volume.
+* **OpenAI API / LiteLLM Provider**: Connects to remote endpoint models. Credentials are encrypted inside the database via SQLite SQLCipher.
+
+---
+
+## 🔐 4. Authentication & Group Mapping
+
+The MCP Router supports advanced identity mapping to control tool and backend server execution access.
+
+### Dual Identity Providers
+- **Active Directory (Kerberos/NTLM)**: Resolves caller identities using standard Active Directory SIDs (`WindowsIdentity`).
+- **OIDC Header Proxy (PocketID / TinyAuth)**: Extracts SSO-managed HTTP headers (e.g., `Remote-User`, `Remote-Groups`).
+
+### Group & SID Mapping Policy
+External groups are mapped to virtual internal groups via the database `GroupMappings` table (accessible through the Web Dashboard UI under Settings -> Identity & Auth):
+1. **Create Mapping**: Link an external Active Directory SID (e.g., `S-1-5-21-...`) or OIDC group (e.g., `house_member`) to an internal security group (`admin`, `operator`, `readonly`).
+2. **Evaluate Access**: When a tool is invoked, the router executes the `sp_EvaluateUserAccess` stored procedure to verify that the active user's groups permit invoking that specific namespace / target server.
+
+---
+
+## 🔑 5. Pluggable Secret Retrievers
+
+To avoid storing sensitive downstream API keys and passwords in plaintext database columns, the router dynamically fetches secrets at routing time via pluggable retrievers.
+
+The `CompositeSecretRetriever` dynamically resolves secrets from:
+1. **HashiCorp Vault (KV v2)**: Fetches secrets using path-based configurations (e.g., `/secret/data/mcp/plex`).
+2. **Windows Registry (DPAPI)**: Retrieves DPAPI-secured strings stored in the machine registry hives (`HKLM` or `HKCU`).
+3. **Environment Variables**: Resolves secrets bound as container environment variables on-demand.
+
+### Configuration
+1. Register the secret location in your secret store (e.g., standard Environment Variable `DOCKER_API_KEY=my-super-secret`).
+2. In the Add/Edit Server modal, select `Environment` for the **Secret Provider** column and specify `DOCKER_API_KEY` in the **SecretItemKey** field.
+3. The gateway fetches, decrypts, and caches (using `IMemoryCache` with short rolling TTL to support rotation) the token at execution time without leaking it in database backups.
+
+---
+
+## 🧪 6. Developer Test Bench & Diagnostics
+
+The Web Dashboard features a robust developer environment to debug, simulate, and verify your gateway setup:
+
+1. **Interactive Form Builder**: Generates responsive, customized forms matching the exact JSON schema specifications of any registered backend tool.
+2. **Logs Console**: A thread-safe, styling-rich real-time console mirroring incoming JSON-RPC traffic, request IDs, and security classifications.
+3. **Search Simulator**: Real-time evaluation panel where developers can test queries against the semantic search engine and inspect exact scores.
+4. **Manual Approval Modal**: If "Manual Approval for Dangerous Tools" is toggled, dangerous executions pause, triggering an approval card on the Web UI awaiting administrator click.
+
+![Test Bench View](../docs/assets/test_bench_view.jpg)
