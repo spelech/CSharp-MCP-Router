@@ -24,7 +24,7 @@ namespace McpRouter.Extensions
                 })
                 .AddServer(options =>
                 {
-                    options.SetTokenEndpointUris("/connect/token");
+                    options.SetTokenEndpointUris("/connect/token", "/oauth/token");
                     options.AllowClientCredentialsFlow();
                     options.AddDevelopmentEncryptionCertificate()
                            .AddDevelopmentSigningCertificate();

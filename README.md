@@ -40,6 +40,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v2.22.0`** | 2026-08-05 | Implemented external Active Directory SIDs and OIDC group mappings to internal virtual groups. Added a Web Dashboard subview for managing policies and mappings dynamically. Aligned with MCP 2026-07-28 Authorization spec (strict WWW-Authenticate challenges on HTTP 401/403) and enabled standards-based /oauth/token endpoint fallback support. |
 | **`v2.21.0`** | 2026-08-04 | Addressed critical security findings: implemented OIDC proxy IP validation, pipeline endpoint authorization, fine-grained RBAC/ABAC matrix using Dapper/Stored Procedures, Environment secret provider support, and safe exception handlers to prevent metadata leakage. |
 | **`v2.20.0`** | 2026-07-30 | Added interactive Server Capabilities Inspection Modal on the dashboard with tabbed isolation (`Tools`, `Resources`, `Prompts`), live search filtering, and backend `GET /api/servers/{id}/inspect` REST endpoint. |
 | **`v2.19.0`** | 2026-07-30 | Expanded xUnit test suite (67 unit & integration tests) covering background health probing, transport authentication shapes, seeder migrations, dynamic vector embeddings, and container discovery. |

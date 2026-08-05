@@ -13,19 +13,57 @@ CREATE OR ALTER PROCEDURE [dbo].[sp_EvaluateUserAccess]
 AS
 BEGIN
     SET NOCOUNT ON;
-    
-    -- Admin bypass check or explicit group policy match
+
+    -- Compute target keys (tool:ItemName, server:ItemName, etc.)
+    -- ItemName might contain "__" for tools or prompts
+    DECLARE @ServerId VARCHAR(100);
+    SET @ServerId = @ItemName;
+    IF CHARINDEX('__', @ItemName) > 0
+    BEGIN
+        SET @ServerId = SUBSTRING(@ItemName, 1, CHARINDEX('__', @ItemName) - 1);
+    END;
+
+    -- Create temp table or table variable of target keys
+    DECLARE @TargetKeys TABLE (TargetId VARCHAR(250));
+    INSERT INTO @TargetKeys VALUES
+        ('tool:' + @ItemName),
+        ('prompt:' + @ItemName),
+        ('resource:' + @ItemName),
+        ('server:' + @ServerId);
+
+    -- Parse CSV group names
+    DECLARE @Groups TABLE (GroupName NVARCHAR(256));
+    INSERT INTO @Groups
+    SELECT value FROM STRING_SPLIT(@GroupNames, ',');
+
+    -- Check if there are any policies configured for these targets
+    IF NOT EXISTS (
+        SELECT 1 FROM [dbo].[AccessPolicies]
+        WHERE [TargetId] IN (SELECT TargetId FROM @TargetKeys)
+    )
+    BEGIN
+        SELECT 1 AS IsAllowed;
+        RETURN;
+    END;
+
+    -- Check for explicit deny
     IF EXISTS (
-        SELECT 1
-        FROM [dbo].[ToolAccessPolicies] tap
-        INNER JOIN [dbo].[Tools] t ON tap.[ToolId] = t.[ToolId]
-        INNER JOIN [dbo].[AdGroups] g ON tap.[GroupId] = g.[GroupId]
-        INNER JOIN [dbo].[McpServers] s ON t.[ServerId] = s.[ServerId]
-        WHERE g.[GroupName] IN (SELECT value FROM STRING_SPLIT(@GroupNames, ','))
-          AND t.[ToolName] = @ItemName
-          AND tap.[IsAllowed] = 1
-          AND t.[IsEnabled] = 1
-          AND s.[IsActive] = 1
+        SELECT 1 FROM [dbo].[AccessPolicies]
+        WHERE [TargetId] IN (SELECT TargetId FROM @TargetKeys)
+          AND [RequiredGroup] IN (SELECT GroupName FROM @Groups)
+          AND [IsAllowed] = 0
+    )
+    BEGIN
+        SELECT 0 AS IsAllowed;
+        RETURN;
+    END;
+
+    -- Check for explicit allow
+    IF EXISTS (
+        SELECT 1 FROM [dbo].[AccessPolicies]
+        WHERE [TargetId] IN (SELECT TargetId FROM @TargetKeys)
+          AND [RequiredGroup] IN (SELECT GroupName FROM @Groups)
+          AND [IsAllowed] = 1
     )
     BEGIN
         SELECT 1 AS IsAllowed;

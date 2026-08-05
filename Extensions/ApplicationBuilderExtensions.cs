@@ -47,6 +47,7 @@ namespace McpRouter.Extensions
                 await next();
             });
 
+            app.UseMiddleware<McpRouter.Middleware.McpAuthorizationSpecMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseMiddleware<McpRouter.Middleware.McpDualSpecMiddleware>();
@@ -225,6 +226,17 @@ namespace McpRouter.Extensions
                             }
                             logger.LogInformation("[JSON-RPC Client -> Gateway] {Payload}", requestBody);
                         }
+                    }
+                    catch (UnauthorizedAccessException exAuth)
+                    {
+                        logger.LogWarning(exAuth, "Unauthorized access during stateless request handling");
+                        httpContext.Response.StatusCode = 403;
+                        httpContext.Response.Headers.ContentType = "application/json";
+                        await httpContext.Response.WriteAsJsonAsync(new {
+                            jsonrpc = "2.0",
+                            error = new { code = -32001, message = exAuth.Message }
+                        });
+                        return;
                     }
                     catch (Exception ex)
                     {
@@ -435,6 +447,17 @@ namespace McpRouter.Extensions
                             httpContext.Response.StatusCode = 202;
                             return;
                         }
+                    }
+                    catch (UnauthorizedAccessException exAuth)
+                    {
+                        logger.LogWarning(exAuth, "Unauthorized access during stateless request handling");
+                        httpContext.Response.StatusCode = 403;
+                        httpContext.Response.Headers.ContentType = "application/json";
+                        await httpContext.Response.WriteAsJsonAsync(new {
+                            jsonrpc = "2.0",
+                            error = new { code = -32001, message = exAuth.Message }
+                        });
+                        return;
                     }
                     catch (Exception ex)
                     {
@@ -725,6 +748,17 @@ namespace McpRouter.Extensions
                             httpContext.Response.StatusCode = 202; // Accepted
                             return;
                         }
+                    }
+                    catch (UnauthorizedAccessException exAuth)
+                    {
+                        logger.LogWarning(exAuth, "Unauthorized access during active session request routing");
+                        httpContext.Response.StatusCode = 403;
+                        httpContext.Response.Headers.ContentType = "application/json";
+                        await httpContext.Response.WriteAsJsonAsync(new {
+                            jsonrpc = "2.0",
+                            error = new { code = -32001, message = exAuth.Message }
+                        });
+                        return;
                     }
                     catch (Exception ex)
                     {
@@ -1101,6 +1135,15 @@ namespace McpRouter.Extensions
                         }
                         return Results.Accepted();
                     }
+                }
+                catch (UnauthorizedAccessException exAuth)
+                {
+                    logger.LogWarning(exAuth, "Unauthorized access during client message routing");
+                    httpContext.Response.StatusCode = 403;
+                    return Results.Json(new {
+                        jsonrpc = "2.0",
+                        error = new { code = -32001, message = exAuth.Message }
+                    }, statusCode: 403);
                 }
                 catch (Exception ex)
                 {
