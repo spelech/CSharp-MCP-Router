@@ -1,6 +1,6 @@
 # MCP Router Agents Guide
 
-This file provides context for AI coding agents modifying the `CSharp-MCP-Router` repository.
+This file provides context and rules for AI coding agents modifying the `CSharp-MCP-Router` repository.
 
 ## Architecture
 
@@ -32,6 +32,9 @@ Run tests via `dotnet test McpRouter.slnx`.
     1. `mcp-router.csproj` (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`)
     2. `wwwroot/index.html` (`<span class="badge badge-primary" id="version-badge">vX.Y.Z</span>`)
     3. `README.md` (Add release entry to the Release Changelog table)
+- **MANDATORY DOCUMENTATION & ATOMIC COMMIT RULE**: **EVERY FEATURE OR CHANGE MUST INCLUDE UP-TO-DATE DOCUMENTATION.**
+  - When working on a feature branch, AI agents **MUST** ensure relevant guides (`README.md`, `ARCHITECTURE.md`, `docs/features-guide.md`, etc.) are updated to reflect the design or functionality changes.
+  - Agents **MUST** use logical, atomic commits for changes. Commit code and documentation separately or in cleanly grouped atomic commits.
 - Do not use string manipulation (`string.Replace`) for JSON payloads. Use `JsonNode` (see `ClientSession.RewriteRequestJson`).
 - Do not commit mockups to `docs/assets/`. Use actual UI screenshots.
 - Ensure that you use atomic commits for logical changes.
