@@ -31,6 +31,22 @@ BEGIN
 END;
 GO
 
+-- 7. App Keys Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AppKeys')
+BEGIN
+    CREATE TABLE [dbo].[AppKeys] (
+        [Id]           VARCHAR(100) PRIMARY KEY,
+        [Name]         NVARCHAR(200) NOT NULL,
+        [Username]     NVARCHAR(256) NOT NULL,
+        [KeyPrefix]    VARCHAR(50) NOT NULL,
+        [EncryptedKey] NVARCHAR(MAX) NOT NULL,
+        [ScopesJson]   NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+        [ExpiresAt]    DATETIME2 NULL,
+        [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END;
+GO
+
 -- 2. Secret Providers Configuration Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SecretProviders')
 BEGIN

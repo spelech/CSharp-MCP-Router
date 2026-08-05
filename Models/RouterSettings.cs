@@ -12,5 +12,7 @@ namespace McpRouter.Models
         public string EmbeddingApiModel { get; set; } = "all-MiniLM-L6-v2";
         public string EmbeddingModelDir { get; set; } = "data/models";
         public bool RequireManualApproval { get; set; } = false;
+        public int GlobalMaxKeys { get; set; } = 100;
+        public int UserMaxKeys { get; set; } = 5;
     }
 }
