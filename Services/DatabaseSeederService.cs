@@ -429,13 +429,14 @@ namespace McpRouter.Services
                         var customServers = JsonSerializer.Deserialize<List<McpServer>>(jsonContent, options);
                         if (customServers != null)
                         {
+                            var existingServersDict = db.Servers.ToDictionary(s => s.Id);
                             foreach (var server in customServers)
                             {
-                                var existing = db.Servers.FirstOrDefault(s => s.Id == server.Id);
-                                if (existing == null)
+                                if (!existingServersDict.TryGetValue(server.Id, out var existing))
                                 {
                                     logger.LogInformation($"Registering custom server '{server.DisplayName}' ({server.Id}) from config...");
                                     db.Servers.Add(server);
+                                    existingServersDict[server.Id] = server;
                                 }
                                 else
                                 {
