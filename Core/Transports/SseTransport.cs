@@ -293,7 +293,7 @@ namespace McpRouter.Core.Transports
                 }
             } catch { }
 
-            var tcs = _stateManager.CreateRequest(requestId);
+            var requestTask = _stateManager.CreateRequest(requestId).Task;
 
             try
             {
@@ -316,7 +316,7 @@ namespace McpRouter.Core.Transports
                 using var res = await _httpClient.SendAsync(req, _cts.Token);
                 res.EnsureSuccessStatusCode();
 
-                var response = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
+                var response = await requestTask.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
                 var responseJson = JsonSerializer.Serialize(response, _jsonOptions);
                 _logger.LogInformation("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, responseJson);
                 return response;
@@ -346,7 +346,7 @@ namespace McpRouter.Core.Transports
             }
 
             string requestId = bodyObj.id;
-            var tcs = _stateManager.CreateRequest(requestId);
+            var requestTask = _stateManager.CreateRequest(requestId).Task;
 
             try
             {
@@ -368,7 +368,7 @@ namespace McpRouter.Core.Transports
                 using var res = await _httpClient.SendAsync(postReq, _cts.Token);
                 res.EnsureSuccessStatusCode();
 
-                return await tcs.Task.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
+                return await requestTask.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
             }
             finally
             {
