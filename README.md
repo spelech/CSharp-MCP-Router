@@ -31,7 +31,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
   * **Search Simulator**: Real-time evaluation panel for intent ranking.
   * **Provider Management Controls**: Interactive UI cards in Settings to toggle and configure Auth and Secret providers.
 * **Target-Specific Proxying:** Exposes separate endpoints (`/{targetServerId}`) to route directly to specific backends (e.g., `/plex`, `/docker`).
-* **OAuth 2.0 Security:** Integrates a lightweight OAuth 2.0 authorization server for secure API access.
+* **OAuth 2.0 Security & CORS Config:** Integrates a lightweight OAuth 2.0 authorization server for secure API access. Leverages strict, configurable CORS protection with `CORS_ALLOWED_ORIGINS` to prevent cross-origin request hijacking / forgery vulnerabilities.
 * **Built-in Web Dashboard:** A responsive, dark-mode, glassmorphic UI to monitor connected clients, stats, and backend health status.
 
 ---
@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.0.1`** | 2026-08-07 | **Security Release: Fixed Overly Permissive CORS Vulnerability.** Replaced the wildcard `AllowAnyOrigin()` CORS policy with a secure default policy allowing only standard localhost origins, and implemented custom CORS domain registration via the `CORS_ALLOWED_ORIGINS` (or `AllowedOrigins`) environment variables and configuration settings. |
 | **`v3.0.0`** | 2026-08-06 | **Major Release: Complete Frontend Architectural Rewrite.** Re-architected and completely modularized the frontend into a beautiful, lightweight Vite React 19 + TypeScript SPA. Designed and implemented custom Zustand state micro-stores (user, servers, clients, settings, logs) with optimal state selectors to minimize re-renders and avoid prop-drilling. Established robust Vitest unit test suites achieving 100% pass rates. Integrated multi-stage node compilation into the Docker build, and typecheck/test phases into the GitHub Actions CI pipeline. |
 | **`v2.23.1`** | 2026-08-06 | Restructured repository documentation: broke down large monolithic sections of the README, established a comprehensive Features Guide (`docs/features-guide.md`), detailed design/performance requirements in `ARCHITECTURE.md`, and formalized AI coding agent guidelines for documentation maintenance and atomic commits. |
 | **`v2.23.0`** | 2026-08-05 | Implemented alternate App Key (API Key) generation and verification to support headless programs, CLI clients, OpenWebUI, and Librechat without OIDC challenge redirects. Keys are stored symmetrically encrypted in the database using AES with prefix-based indexing and full scope/policy double check on every tool/server invocation. |
