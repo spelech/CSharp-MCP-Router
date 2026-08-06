@@ -1,0 +1,39 @@
+export async function apiRequest<T = any>(url: string, options: any = {}): Promise<T> {
+  const defaultHeaders: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+
+  const fetchOptions: RequestInit = {
+    ...options,
+    headers: {
+      ...defaultHeaders,
+      ...((options.headers as Record<string, string>) || {})
+    }
+  };
+
+  if (options.body !== undefined) {
+    if (typeof options.body === 'object' && !(options.body instanceof Blob) && !(options.body instanceof FormData)) {
+      fetchOptions.body = JSON.stringify(options.body);
+    } else {
+      fetchOptions.body = options.body;
+    }
+  }
+
+  const response = await fetch(url, fetchOptions);
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(text || `Request failed with status ${response.status}`);
+  }
+
+  if (response.status === 204) return null as any;
+  return response.json();
+}
+
+export function escapeHtml(str: string | null | undefined): string {
+  if (!str) return '';
+  return str.replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;");
+}
