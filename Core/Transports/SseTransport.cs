@@ -24,9 +24,16 @@ namespace McpRouter.Core.Transports
         private readonly McpRouter.Core.Secrets.CompositeSecretRetriever? _secretRetriever;
         
         private string? _messageUrl;
+        private readonly TaskCompletionSource<string> _messageUrlTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private string _sessionId = Guid.NewGuid().ToString("N");
         private Task? _readerTask;
         private Task? _pingTask;
+
+        private void SetMessageUrl(string url)
+        {
+            _messageUrl = url;
+            _messageUrlTcs.TrySetResult(url);
+        }
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -163,7 +170,7 @@ namespace McpRouter.Core.Transports
                             _sessionId = sessionValues.FirstOrDefault() ?? string.Empty;
                             _ = Task.Delay(1500, _cts.Token).ContinueWith(t => {
                                 if (!t.IsCanceled && _messageUrl == null) {
-                                    _messageUrl = _server.Url;
+                                    SetMessageUrl(_server.Url);
                                 }
                             });
                         }
@@ -171,7 +178,7 @@ namespace McpRouter.Core.Transports
                         {
                             _ = Task.Delay(1500, _cts.Token).ContinueWith(t => {
                                 if (!t.IsCanceled && _messageUrl == null) {
-                                    _messageUrl = _server.Url;
+                                    SetMessageUrl(_server.Url);
                                 }
                             });
                         }
@@ -194,15 +201,17 @@ namespace McpRouter.Core.Transports
                                 var data = line.Substring(5).Trim();
                                 if (currentEvent == "endpoint")
                                 {
+                                    string resolvedUrl;
                                     if (Uri.IsWellFormedUriString(data, UriKind.Absolute))
                                     {
-                                        _messageUrl = data;
+                                        resolvedUrl = data;
                                     }
                                     else
                                     {
                                         var baseUri = new Uri(_server.Url);
-                                        _messageUrl = new Uri(baseUri, data).ToString();
+                                        resolvedUrl = new Uri(baseUri, data).ToString();
                                     }
+                                    SetMessageUrl(resolvedUrl);
                                 }
                                 else if (currentEvent == "message")
                                 {
@@ -262,11 +271,18 @@ namespace McpRouter.Core.Transports
 
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
         {
-            int attempts = 0;
-            while (_messageUrl == null && attempts < 50)
+            if (_messageUrl == null)
             {
-                await Task.Delay(100);
-                attempts++;
+                try
+                {
+                    await _messageUrlTcs.Task.WaitAsync(TimeSpan.FromSeconds(5), _cts.Token);
+                }
+                catch (TimeoutException)
+                {
+                }
+                catch (OperationCanceledException)
+                {
+                }
             }
 
             if (_messageUrl == null)
@@ -333,11 +349,18 @@ namespace McpRouter.Core.Transports
             var bodyObj = new { jsonrpc = "2.0", method = method, @params = parameters, id = overrideId ?? Guid.NewGuid().ToString("N") };
             var bodyJson = JsonSerializer.Serialize(bodyObj);
 
-            int attempts = 0;
-            while (_messageUrl == null && attempts < 50)
+            if (_messageUrl == null)
             {
-                await Task.Delay(100);
-                attempts++;
+                try
+                {
+                    await _messageUrlTcs.Task.WaitAsync(TimeSpan.FromSeconds(5), _cts.Token);
+                }
+                catch (TimeoutException)
+                {
+                }
+                catch (OperationCanceledException)
+                {
+                }
             }
 
             if (_messageUrl == null)
