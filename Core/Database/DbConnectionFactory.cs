@@ -28,7 +28,7 @@ namespace McpRouter.Core.Database
             if (_provider == "sqlite" && string.IsNullOrEmpty(_connectionString))
             {
                 var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");
-                var encryptionKey = config["DB_ENCRYPTION_KEY"] ?? "DefaultSecureKey123!";
+                var encryptionKey = McpRouter.Core.Secrets.EncryptionKeyProvider.GetDbEncryptionKey(config);
                 _connectionString = $"Data Source={dbPath};Password={encryptionKey}";
             }
         }

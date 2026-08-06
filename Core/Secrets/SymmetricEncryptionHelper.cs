@@ -14,10 +14,7 @@ namespace McpRouter.Core.Secrets
         {
             if (_cachedKey != null) return _cachedKey;
 
-            // Use ROUTER_SECRET first, then DB_ENCRYPTION_KEY, then fallback
-            var secretString = config["ROUTER_SECRET"]
-                ?? config["DB_ENCRYPTION_KEY"]
-                ?? "DefaultSecureKey123!";
+            var secretString = EncryptionKeyProvider.GetRouterSecret(config);
 
             // Hash with SHA-256 to ensure a solid 256-bit key
             using (var sha256 = SHA256.Create())
