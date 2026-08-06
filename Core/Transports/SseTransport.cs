@@ -24,9 +24,39 @@ namespace McpRouter.Core.Transports
         private readonly McpRouter.Core.Secrets.CompositeSecretRetriever? _secretRetriever;
         
         private string? _messageUrl;
+        private readonly TaskCompletionSource<string> _messageUrlTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private string _sessionId = Guid.NewGuid().ToString("N");
         private Task? _readerTask;
         private Task? _pingTask;
+
+        private void SetMessageUrl(string url)
+        {
+            _messageUrl = url;
+            _messageUrlTcs.TrySetResult(url);
+        }
+
+        private async Task<string?> WaitForMessageUrlAsync()
+        {
+            if (_messageUrl != null)
+            {
+                return _messageUrl;
+            }
+
+            try
+            {
+                var delayTask = Task.Delay(TimeSpan.FromSeconds(5), _cts.Token);
+                var completedTask = await Task.WhenAny(_messageUrlTcs.Task, delayTask);
+                if (completedTask == _messageUrlTcs.Task)
+                {
+                    return await _messageUrlTcs.Task;
+                }
+            }
+            catch (Exception)
+            {
+                // Fallback to current value of _messageUrl if anything cancels or fails
+            }
+            return _messageUrl;
+        }
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -163,7 +193,7 @@ namespace McpRouter.Core.Transports
                             _sessionId = sessionValues.FirstOrDefault() ?? string.Empty;
                             _ = Task.Delay(1500, _cts.Token).ContinueWith(t => {
                                 if (!t.IsCanceled && _messageUrl == null) {
-                                    _messageUrl = _server.Url;
+                                    SetMessageUrl(_server.Url);
                                 }
                             });
                         }
@@ -171,7 +201,7 @@ namespace McpRouter.Core.Transports
                         {
                             _ = Task.Delay(1500, _cts.Token).ContinueWith(t => {
                                 if (!t.IsCanceled && _messageUrl == null) {
-                                    _messageUrl = _server.Url;
+                                    SetMessageUrl(_server.Url);
                                 }
                             });
                         }
@@ -196,12 +226,12 @@ namespace McpRouter.Core.Transports
                                 {
                                     if (Uri.IsWellFormedUriString(data, UriKind.Absolute))
                                     {
-                                        _messageUrl = data;
+                                        SetMessageUrl(data);
                                     }
                                     else
                                     {
                                         var baseUri = new Uri(_server.Url);
-                                        _messageUrl = new Uri(baseUri, data).ToString();
+                                        SetMessageUrl(new Uri(baseUri, data).ToString());
                                     }
                                 }
                                 else if (currentEvent == "message")
@@ -262,14 +292,9 @@ namespace McpRouter.Core.Transports
 
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
         {
-            int attempts = 0;
-            while (_messageUrl == null && attempts < 50)
-            {
-                await Task.Delay(100);
-                attempts++;
-            }
+            var messageUrl = await WaitForMessageUrlAsync();
 
-            if (_messageUrl == null)
+            if (messageUrl == null)
             {
                 return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
             }
@@ -300,7 +325,7 @@ namespace McpRouter.Core.Transports
                 var content = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 
-                using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
+                using var req = new HttpRequestMessage(HttpMethod.Post, messageUrl) { Content = content };
                 req.Headers.Host = "localhost";
                 req.Headers.Accept.Clear();
                 req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -333,14 +358,9 @@ namespace McpRouter.Core.Transports
             var bodyObj = new { jsonrpc = "2.0", method = method, @params = parameters, id = overrideId ?? Guid.NewGuid().ToString("N") };
             var bodyJson = JsonSerializer.Serialize(bodyObj);
 
-            int attempts = 0;
-            while (_messageUrl == null && attempts < 50)
-            {
-                await Task.Delay(100);
-                attempts++;
-            }
+            var messageUrl = await WaitForMessageUrlAsync();
 
-            if (_messageUrl == null)
+            if (messageUrl == null)
             {
                 throw new InvalidOperationException($"Backend {_server.Id} has not sent its endpoint event yet.");
             }
@@ -353,7 +373,7 @@ namespace McpRouter.Core.Transports
                 var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 
-                using var postReq = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
+                using var postReq = new HttpRequestMessage(HttpMethod.Post, messageUrl) { Content = content };
                 postReq.Headers.Host = "localhost";
                 postReq.Headers.Accept.Clear();
                 postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -408,6 +428,7 @@ namespace McpRouter.Core.Transports
         public void Dispose()
         {
             _cts.Cancel();
+            _messageUrlTcs.TrySetCanceled();
             _cts.Dispose();
         }
     }
