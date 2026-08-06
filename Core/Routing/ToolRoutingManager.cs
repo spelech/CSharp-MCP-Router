@@ -242,7 +242,7 @@ namespace McpRouter.Core.Routing
                     tools.AddRange(_cachedTools);
                 }
 
-                var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService);
+                var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService, logger);
                 return new {
                     content = new[] {
                         new {

@@ -1662,7 +1662,7 @@ namespace McpRouter.Extensions
                     }
                 }
 
-                var scoredResults = await Core.Routing.SemanticSearchService.SearchToolsSemanticAsync(model.Query, allTools, embeddingService);
+                var scoredResults = await Core.Routing.SemanticSearchService.SearchToolsSemanticAsync(model.Query, allTools, embeddingService, logger);
                 return Results.Ok(scoredResults);
             });
 

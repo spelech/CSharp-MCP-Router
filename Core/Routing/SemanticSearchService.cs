@@ -11,7 +11,11 @@ namespace McpRouter.Core.Routing
     {
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, float[]> _embeddingsCache = new();
 
-        public static async Task<List<object>> SearchToolsSemanticAsync(string query, List<object> tools, IEmbeddingService embeddingService)
+        public static async Task<List<object>> SearchToolsSemanticAsync(
+            string query,
+            List<object> tools,
+            IEmbeddingService embeddingService,
+            Microsoft.Extensions.Logging.ILogger? logger = null)
         {
             if (string.IsNullOrWhiteSpace(query))
             {
@@ -55,7 +59,12 @@ namespace McpRouter.Core.Routing
                         var vec = await embeddingService.GetEmbeddingAsync(text);
                         _embeddingsCache[text] = vec;
                     }
-                    catch {}
+                    catch (Exception ex)
+                    {
+                        // Exception during embedding generation is ignored because semantic search falls back
+                        // gracefully to hybrid keyword-based matching if embeddings cannot be generated.
+                        logger?.LogWarning(ex, "Failed to generate embedding for text during tool search: {Text}", text);
+                    }
                 }));
             }
 
