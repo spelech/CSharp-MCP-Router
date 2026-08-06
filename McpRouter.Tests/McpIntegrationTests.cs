@@ -999,6 +999,13 @@ namespace McpRouter.Tests
                 readResult.Should().NotBeNull();
                 var readJson = JsonSerializer.Serialize(readResult);
                 readJson.Should().Contain("# Test resource content");
+
+                // Test SearchResourcesAsync
+                var searchResultsEmpty = await resourceRouting.SearchResourcesAsync("", resourcesList);
+                searchResultsEmpty.Count.Should().BeLessThanOrEqualTo(15);
+
+                var searchResultsQuery = await resourceRouting.SearchResourcesAsync("Local File", resourcesList);
+                searchResultsQuery.Should().Contain(r => ((Dictionary<string, object>)r)["name"].ToString()!.Contains("Local File"));
             }
             finally
             {
