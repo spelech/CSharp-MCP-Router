@@ -18,8 +18,6 @@ namespace McpRouter.Core.Routing
                 return tools.Take(15).ToList();
             }
 
-            var queryVector = await embeddingService.GetEmbeddingAsync(query);
-
             var toolItems = tools.Select(tool => {
                 string name = "";
                 string description = "";
@@ -58,6 +56,8 @@ namespace McpRouter.Core.Routing
                     catch {}
                 }));
             }
+
+            var queryVector = await embeddingService.GetEmbeddingAsync(query);
 
             var scoredTools = new List<(object Tool, double Score)>();
 
