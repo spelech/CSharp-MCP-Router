@@ -4,8 +4,10 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
+using McpRouter.Core.Secrets;
 using McpRouter.Core.Transports;
 using McpRouter.Models;
+using Moq;
 using Xunit;
 
 namespace McpRouter.Tests
@@ -126,5 +128,52 @@ namespace McpRouter.Tests
             Assert.Equal("antigravity", string.Join("", request.Headers.GetValues("X-Agent")));
         }
 
+        [Fact]
+        public async Task SseTransport_ResolveTokenAsync_Uses_Custom_Path_Field_And_Mount()
+        {
+            var server = new McpServer
+            {
+                Id = "vault-srv",
+                Url = "http://localhost:5000/sse",
+                SecretProvider = "Vault",
+                SecretMount = "kv-custom",
+                SecretPath = "apps/my-app",
+                SecretField = "token-key"
+            };
+
+            var mockRetriever = new Mock<ISecretRetriever>();
+            mockRetriever.Setup(r => r.GetSecretAsync("kv-custom:apps/my-app", "token-key"))
+                         .ReturnsAsync("resolved-vault-secret-999");
+
+            var transport = new SseTransport(server, new HttpClient(), NullLogger<SseTransport>.Instance, null!, mockRetriever.Object);
+
+            var token = await transport.ResolveTokenAsync();
+
+            Assert.Equal("resolved-vault-secret-999", token);
+            mockRetriever.Verify(r => r.GetSecretAsync("kv-custom:apps/my-app", "token-key"), Times.Once);
+        }
+
+        [Fact]
+        public async Task HttpTransport_ResolveTokenAsync_Defaults_To_Url_And_ApiKey_When_Not_Configured()
+        {
+            var server = new McpServer
+            {
+                Id = "vault-default-http",
+                Url = "http://localhost:5000/mcp",
+                SecretProvider = "Vault",
+                SecretItemKey = "MyKey"
+            };
+
+            var mockRetriever = new Mock<ISecretRetriever>();
+            mockRetriever.Setup(r => r.GetSecretAsync("http://localhost:5000/mcp", "MyKey"))
+                         .ReturnsAsync("resolved-default-secret-123");
+
+            var transport = new HttpTransport(server, new HttpClient(), NullLogger<HttpTransport>.Instance, mockRetriever.Object);
+
+            var token = await transport.ResolveTokenAsync();
+
+            Assert.Equal("resolved-default-secret-123", token);
+            mockRetriever.Verify(r => r.GetSecretAsync("http://localhost:5000/mcp", "MyKey"), Times.Once);
+        }
     }
 }

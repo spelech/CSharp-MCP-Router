@@ -14,6 +14,9 @@ CREATE TABLE IF NOT EXISTS `McpServers` (
     `BaseUrl`           VARCHAR(500) NOT NULL,
     `TransportType`     VARCHAR(20) NOT NULL DEFAULT 'SSE',
     `SecretProvider`    VARCHAR(50) NOT NULL DEFAULT 'Vault',
+    `SecretMount`       VARCHAR(100) NULL,
+    `SecretPath`        VARCHAR(250) NULL,
+    `SecretField`       VARCHAR(100) NULL,
     `HealthStatus`      VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
     `HealthCheckUrl`    VARCHAR(500) NULL,
     `IsActive`          TINYINT(1) NOT NULL DEFAULT 1,
@@ -79,23 +82,6 @@ CREATE TABLE IF NOT EXISTS `ToolAccessPolicies` (
     CONSTRAINT `UQ_Tool_Group` UNIQUE (`ToolId`, `GroupId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- AccessPolicies Generic Table
-CREATE TABLE IF NOT EXISTS `AccessPolicies` (
-    `Id`            VARCHAR(100) PRIMARY KEY,
-    `TargetId`      VARCHAR(250) NOT NULL,
-    `RequiredGroup` VARCHAR(256) NOT NULL,
-    `IsAllowed`     TINYINT(1) NOT NULL DEFAULT 1,
-    `CreatedAt`     DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- Group Mappings Table
-CREATE TABLE IF NOT EXISTS `GroupMappings` (
-    `Id`             VARCHAR(100) PRIMARY KEY,
-    `ExternalId`     VARCHAR(256) NOT NULL,
-    `InternalGroup`  VARCHAR(256) NOT NULL,
-    `CreatedAt`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
 -- 6. Audit Logging Table
 CREATE TABLE IF NOT EXISTS `AuditLogs` (
     `AuditId`           BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -111,28 +97,4 @@ CREATE TABLE IF NOT EXISTS `AuditLogs` (
     `ResponsePayload`   LONGTEXT NULL,
     `ErrorMessage`      LONGTEXT NULL,
     `Timestamp`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 7. App Keys Table
-CREATE TABLE IF NOT EXISTS `AppKeys` (
-    `Id`           VARCHAR(100) PRIMARY KEY,
-    `Name`         VARCHAR(200) NOT NULL,
-    `Username`     VARCHAR(256) NOT NULL,
-    `KeyPrefix`    VARCHAR(50) NOT NULL,
-    `EncryptedKey` LONGTEXT NOT NULL,
-    `ScopesJson`   LONGTEXT NOT NULL,
-    `ExpiresAt`    DATETIME NULL,
-    `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 8. Admin Audit Logging Table
-CREATE TABLE IF NOT EXISTS `AdminAuditLogs` (
-    `Id`           VARCHAR(50) NOT NULL PRIMARY KEY,
-    `Username`     VARCHAR(256) NOT NULL,
-    `Action`       VARCHAR(100) NOT NULL,
-    `Target`       VARCHAR(256) NOT NULL,
-    `Details`      LONGTEXT NULL,
-    `Success`      TINYINT(1) NOT NULL,
-    `ErrorMessage` LONGTEXT NULL,
-    `Timestamp`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

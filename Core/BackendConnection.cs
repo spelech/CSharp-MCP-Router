@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using McpRouter.Core.Secrets;
 using McpRouter.Models;
 using McpRouter.Core.Transports;
 
@@ -23,7 +24,7 @@ namespace McpRouter
         public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests => _stateManager.PendingRequests;
         public TimeSpan RequestTimeout { get => _transport.RequestTimeout; set => _transport.RequestTimeout = value; }
 
-        public BackendConnection(McpServer server, HttpClient httpClient, ILogger logger, McpRouter.Core.Secrets.CompositeSecretRetriever? secretRetriever = null)
+        public BackendConnection(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null)
         {
             _server = server;
             _stateManager = new JsonRpcStateManager();

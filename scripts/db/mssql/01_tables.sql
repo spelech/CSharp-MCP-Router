@@ -22,27 +22,14 @@ BEGIN
         [BaseUrl]           VARCHAR(500) NOT NULL,
         [TransportType]     VARCHAR(20) NOT NULL DEFAULT 'SSE',
         [SecretProvider]    VARCHAR(50) NOT NULL DEFAULT 'Vault',
+        [SecretMount]       VARCHAR(100) NULL,
+        [SecretPath]        VARCHAR(250) NULL,
+        [SecretField]       VARCHAR(100) NULL,
         [HealthStatus]      VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
         [HealthCheckUrl]    VARCHAR(500) NULL,
         [IsActive]          BIT NOT NULL DEFAULT 1,
         [CreatedAt]         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
         [UpdatedAt]         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
-    );
-END;
-GO
-
--- 7. App Keys Table
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AppKeys')
-BEGIN
-    CREATE TABLE [dbo].[AppKeys] (
-        [Id]           VARCHAR(100) PRIMARY KEY,
-        [Name]         NVARCHAR(200) NOT NULL,
-        [Username]     NVARCHAR(256) NOT NULL,
-        [KeyPrefix]    VARCHAR(50) NOT NULL,
-        [EncryptedKey] NVARCHAR(MAX) NOT NULL,
-        [ScopesJson]   NVARCHAR(MAX) NOT NULL DEFAULT '[]',
-        [ExpiresAt]    DATETIME2 NULL,
-        [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
 END;
 GO
@@ -122,31 +109,6 @@ BEGIN
 END;
 GO
 
--- AccessPolicies Generic Table
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AccessPolicies')
-BEGIN
-    CREATE TABLE [dbo].[AccessPolicies] (
-        [Id]            VARCHAR(100) PRIMARY KEY,
-        [TargetId]      VARCHAR(250) NOT NULL,
-        [RequiredGroup] NVARCHAR(256) NOT NULL,
-        [IsAllowed]     BIT NOT NULL DEFAULT 1,
-        [CreatedAt]     DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
-    );
-END;
-GO
-
--- Group Mappings Table
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'GroupMappings')
-BEGIN
-    CREATE TABLE [dbo].[GroupMappings] (
-        [Id]             VARCHAR(100) PRIMARY KEY,
-        [ExternalId]     VARCHAR(256) NOT NULL,
-        [InternalGroup]  NVARCHAR(256) NOT NULL,
-        [CreatedAt]      DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
-    );
-END;
-GO
-
 -- 6. Audit Logging Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AuditLogs')
 BEGIN
@@ -164,22 +126,6 @@ BEGIN
         [ResponsePayload]   NVARCHAR(MAX) NULL,
         [ErrorMessage]      NVARCHAR(MAX) NULL,
         [Timestamp]         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
-    );
-END;
-GO
-
--- 7. Admin Audit Logging Table
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AdminAuditLogs')
-BEGIN
-    CREATE TABLE [dbo].[AdminAuditLogs] (
-        [Id]           VARCHAR(50) NOT NULL PRIMARY KEY,
-        [Username]     NVARCHAR(256) NOT NULL,
-        [Action]       VARCHAR(100) NOT NULL,
-        [Target]       VARCHAR(256) NOT NULL,
-        [Details]      NVARCHAR(MAX) NULL,
-        [Success]      BIT NOT NULL,
-        [ErrorMessage] NVARCHAR(MAX) NULL,
-        [Timestamp]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
 END;
 GO
