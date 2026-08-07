@@ -155,8 +155,8 @@ namespace McpRouter
 
             if (_clientResponse?.HttpContext?.RequestServices == null)
             {
-                // If there's no HttpContext, we default to true (e.g. CLI internal tasks)
-                return true;
+                // If there's no HttpContext, we default to false (fail closed)
+                return false;
             }
 
             try
@@ -164,7 +164,7 @@ namespace McpRouter
                 var dbFactory = _clientResponse.HttpContext.RequestServices.GetService<IDbConnectionFactory>();
                 if (dbFactory == null)
                 {
-                    return true;
+                    return false;
                 }
 
                 using var conn = dbFactory.CreateConnection();
@@ -204,12 +204,12 @@ namespace McpRouter
 
                 if (dbFactory.ProviderName == "sqlite")
                 {
-                    // Check if there are any policies for the targets first to default-allow
+                    // Check if there are any policies for the targets first to default-allow (inverted to fail closed)
                     const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds;";
                     int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetIds = targetKeys });
                     if (policyCount == 0)
                     {
-                        return true;
+                        return false;
                     }
 
                     // Check if there's an explicit deny for any of the user's groups
@@ -245,7 +245,7 @@ namespace McpRouter
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error checking user authorization for target '{TargetId}'", targetId);
-                return true; // Safe fallback for unconfigured environments
+                return false; // Fail closed fallback
             }
         }
 

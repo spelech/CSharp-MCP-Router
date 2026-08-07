@@ -39,7 +39,7 @@ namespace McpRouter.Extensions
         builder.Services.AddSingleton<McpRouter.Core.Logging.IAuditLogger, McpRouter.Core.Logging.AuditLogger>();
 
         // Register OpenIddict & Controllers
-        builder.Services.AddMcpOpenIddict();
+        builder.Services.AddMcpOpenIddict(builder.Environment);
         builder.Services.AddControllers();
 
         builder.Services.AddHttpClient();
@@ -88,10 +88,17 @@ namespace McpRouter.Extensions
                 }
                 else
                 {
-                    policy.WithOrigins("http://localhost:3000", "http://localhost:5000", "https://localhost:5001")
-                          .AllowAnyMethod()
-                          .AllowAnyHeader()
-                          .AllowCredentials();
+                    if (builder.Environment.EnvironmentName == "Development" || builder.Environment.EnvironmentName == "Dev")
+                    {
+                        policy.WithOrigins("http://localhost:3000", "http://localhost:5000", "https://localhost:5001")
+                              .AllowAnyMethod()
+                              .AllowAnyHeader()
+                              .AllowCredentials();
+                    }
+                    else
+                    {
+                        policy.WithOrigins("https://invalid-origin.local");
+                    }
                 }
             });
         });

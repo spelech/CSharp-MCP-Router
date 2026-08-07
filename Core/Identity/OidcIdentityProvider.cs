@@ -23,7 +23,7 @@ namespace McpRouter.Core.Identity
         public OidcIdentityProvider(IConfiguration config)
         {
             _config = config;
-            _requireTrustedProxy = config.GetValue<bool>("Oidc:RequireTrustedProxy", false);
+            _requireTrustedProxy = config.GetValue<bool>("Oidc:RequireTrustedProxy", true);
             var proxiesStr = config["Oidc:TrustedProxies"] ?? "";
             _trustedProxies = proxiesStr.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
         }

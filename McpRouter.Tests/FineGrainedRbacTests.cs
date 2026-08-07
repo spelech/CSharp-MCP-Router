@@ -83,12 +83,12 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        public async Task RBAC_DefaultsToAllowed_WhenNoPoliciesConfigured()
+        public async Task RBAC_DefaultsToDenied_WhenNoPoliciesConfigured()
         {
             var session = CreateSession("bob", new List<string> { "Users" });
 
             var authorized = await session.IsUserAuthorizedAsync("tools/call", "ha__turn_on");
-            Assert.True(authorized);
+            Assert.False(authorized);
         }
 
         [Fact]

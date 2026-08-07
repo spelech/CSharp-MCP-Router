@@ -225,8 +225,10 @@ namespace McpRouter.Controllers
                 // KeyPrefix is first 16 characters (e.g. "mcp-global-abcde")
                 var prefix = plaintextKey.Substring(0, 16);
 
-                // Encrypt the key
-                var encryptedKey = SymmetricEncryptionHelper.Encrypt(plaintextKey, _config);
+                // Store a secure one-way hash of the key
+                using var sha256 = System.Security.Cryptography.SHA256.Create();
+                var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(plaintextKey));
+                var encryptedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
 
                 var appKey = new AppKey
                 {

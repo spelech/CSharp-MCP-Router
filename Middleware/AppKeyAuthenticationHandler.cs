@@ -1,5 +1,6 @@
 using System;
 using System.Security.Claims;
+using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
@@ -68,9 +69,39 @@ namespace McpRouter.Middleware
                     return AuthenticateResult.Fail("Invalid App Key prefix.");
                 }
 
-                // Decrypt the key to verify correctness
-                var decrypted = SymmetricEncryptionHelper.Decrypt(appKey.EncryptedKey, _config);
-                if (decrypted != token)
+                // Verify the key using constant-time comparison
+                bool isValid = false;
+                if (appKey.EncryptedKey.Length == 64 && !appKey.EncryptedKey.Contains("/") && !appKey.EncryptedKey.Contains("+") && !appKey.EncryptedKey.Contains("="))
+                {
+                    // SHA-256 Hash
+                    using var sha = SHA256.Create();
+                    var computedBytes = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(token));
+                    var computedHash = Convert.ToHexString(computedBytes).ToLowerInvariant();
+                    
+                    isValid = CryptographicOperations.FixedTimeEquals(
+                        System.Text.Encoding.UTF8.GetBytes(appKey.EncryptedKey),
+                        System.Text.Encoding.UTF8.GetBytes(computedHash)
+                    );
+                }
+                else
+                {
+                    // Legacy AES Decryption (fallback)
+                    try
+                    {
+                        var decrypted = SymmetricEncryptionHelper.Decrypt(appKey.EncryptedKey, _config);
+                        
+                        isValid = CryptographicOperations.FixedTimeEquals(
+                            System.Text.Encoding.UTF8.GetBytes(decrypted),
+                            System.Text.Encoding.UTF8.GetBytes(token)
+                        );
+                    }
+                    catch
+                    {
+                        isValid = false;
+                    }
+                }
+
+                if (!isValid)
                 {
                     return AuthenticateResult.Fail("Invalid App Key.");
                 }

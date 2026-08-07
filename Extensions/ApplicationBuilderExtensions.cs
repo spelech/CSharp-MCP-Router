@@ -561,20 +561,24 @@ namespace McpRouter.Extensions
                     {
                         const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId;";
                         int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetId = targetServerKey });
-                        if (policyCount > 0)
+                        if (policyCount == 0)
                         {
-                            const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
-                            int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
+                            httpContext.Response.StatusCode = 403;
+                            await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
+                            return;
+                        }
 
-                            const string allowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 1;";
-                            int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
+                        const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
+                        int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
 
-                            if (denyCount > 0 || allowCount == 0)
-                            {
-                                httpContext.Response.StatusCode = 403;
-                                await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
-                                return;
-                            }
+                        const string allowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 1;";
+                        int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
+
+                        if (denyCount > 0 || allowCount == 0)
+                        {
+                            httpContext.Response.StatusCode = 403;
+                            await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
+                            return;
                         }
                     }
                     else
