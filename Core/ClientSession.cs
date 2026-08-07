@@ -960,8 +960,19 @@ namespace McpRouter
             string? responsePayload,
             string? errorMessage)
         {
+            var config = _clientResponse?.HttpContext?.RequestServices?.GetService<IConfiguration>();
+            var failClosedRaw = config?["Audit:FailClosed"];
+            bool failClosed = !bool.TryParse(failClosedRaw, out var parsedFailClosed) || parsedFailClosed;
+
             var auditLogger = _clientResponse?.HttpContext?.RequestServices?.GetService<McpRouter.Core.Logging.IAuditLogger>();
-            if (auditLogger == null) return;
+            if (auditLogger == null)
+            {
+                if (failClosed)
+                {
+                    throw new System.Security.SecurityException("Audit logger service unavailable and fail-closed policy is active.");
+                }
+                return;
+            }
 
             try
             {
@@ -989,7 +1000,10 @@ namespace McpRouter
                             requestId = idProp.GetString() ?? idProp.GetRawText();
                         }
                     }
-                    catch {}
+                    catch (JsonException exJson)
+                    {
+                        _logger.LogDebug(exJson, "Could not parse payload JSON to extract requestId in audit log.");
+                    }
                 }
                 requestId ??= Guid.NewGuid().ToString("N");
 
@@ -1010,8 +1024,6 @@ namespace McpRouter
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to write invocation audit log");
-                var config = _clientResponse?.HttpContext?.RequestServices?.GetService<IConfiguration>();
-                var failClosed = config?.GetValue<bool>("Audit:FailClosed", true) ?? true;
                 if (failClosed)
                 {
                     throw new System.Security.SecurityException("Audit logging failed and fail-closed policy is active.", ex);

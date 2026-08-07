@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.7.1`** | 2026-08-07 | fix(security): handle unresolved IAuditLogger and safely parse json request ids |
 | **`v3.7.0`** | 2026-08-07 | feat(security): implement fail-closed try-finally logging |
 | **`v3.6.2`** | 2026-08-07 | fix(security): resolve production startup crash, fail-closed stored procedures, and backend invocation auditing |
 | **`v3.6.1`** | 2026-08-07 | test(security): add fail-closed, SHA-256 app keys hashing, and sequential execution verification tests |

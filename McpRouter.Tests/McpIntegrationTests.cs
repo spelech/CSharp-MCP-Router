@@ -15,6 +15,8 @@ using Xunit;
 using FluentAssertions;
 using McpRouter.Models;
 using McpRouter.Services;
+using McpRouter.Core.Logging;
+using Microsoft.Extensions.DependencyInjection;
 using McpRouter;
 using Microsoft.AspNetCore.Mvc;
 
@@ -70,8 +72,19 @@ namespace McpRouter.Tests
             var httpClient = new HttpClient(httpHandler);
             
             var context = new DefaultHttpContext();
+            var claims = new[] { new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin") };
+            context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(claims, "AppKey"));
             var response = context.Response;
             
+            var services = new ServiceCollection();
+            var mockAuditLogger = new Mock<IAuditLogger>();
+            services.AddSingleton<IAuditLogger>(mockAuditLogger.Object);
+            var realConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
+                { "Audit:FailClosed", "false" }
+            }).Build();
+            services.AddSingleton<IConfiguration>(realConfig);
+            context.RequestServices = services.BuildServiceProvider();
+
             var loggerMock = new Mock<ILogger>();
             var embeddingMock = new Mock<IEmbeddingService>();
             
@@ -105,6 +118,8 @@ namespace McpRouter.Tests
                     if (n1 == 0 || n2 == 0) return 0.0;
                     return dot / (Math.Sqrt(n1) * Math.Sqrt(n2));
                 });
+
+
             
             return new ClientSession("test-session", response, servers, httpClient, embeddingMock.Object, loggerMock.Object);
         }
@@ -850,7 +865,18 @@ namespace McpRouter.Tests
             var httpClient = new HttpClient(httpHandler);
             var sessionManager = new SessionManager(serviceProvider, new TestHttpClientFactory(httpClient), smLogger);
 
-            var session = new ClientSession("test-session", null!, servers, httpClient, new Mock<IEmbeddingService>().Object, sessionManager, logger);
+            var context = new DefaultHttpContext();
+            var claims = new[] { new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin") };
+            context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(claims, "AppKey"));
+            var services = new ServiceCollection();
+            services.AddSingleton<IAuditLogger>(new Mock<IAuditLogger>().Object);
+            var realConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
+                { "Audit:FailClosed", "false" }
+            }).Build();
+            services.AddSingleton<IConfiguration>(realConfig);
+            context.RequestServices = services.BuildServiceProvider();
+
+            var session = new ClientSession("test-session", context.Response, servers, httpClient, new Mock<IEmbeddingService>().Object, sessionManager, logger);
             session.IsMetaMode = false;
 
             httpHandler.Handler = async (req) =>

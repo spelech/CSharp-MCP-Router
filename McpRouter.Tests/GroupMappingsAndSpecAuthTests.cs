@@ -69,6 +69,11 @@ namespace McpRouter.Tests
             var composite = new CompositeIdentityProvider(new[] { mockProvider.Object });
             services.AddSingleton(composite);
 
+            var realConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
+                { "Audit:FailClosed", "false" }
+            }).Build();
+            services.AddSingleton<IConfiguration>(realConfig);
+
             context.RequestServices = services.BuildServiceProvider();
 
             var httpClient = new HttpClient();
