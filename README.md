@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.8.2`** | 2026-08-07 | fix(security): strip proxy headers for untrusted remote IPs |
 | **`v3.8.1`** | 2026-08-07 | fix(identity): sanitize LDAP search inputs and configure LDAPS secure channel |
 | **`v3.8.0`** | 2026-08-07 | feat(identity): implement cross-platform AD LDAP resolution |
 | **`v3.7.1`** | 2026-08-07 | fix(security): handle unresolved IAuditLogger and safely parse json request ids |
