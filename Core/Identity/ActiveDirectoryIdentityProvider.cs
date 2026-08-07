@@ -1,3 +1,5 @@
+#pragma warning disable CA1416
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Principal;
@@ -27,3 +29,4 @@ namespace McpRouter.Core.Identity
         }
     }
 }
+#pragma warning restore CA1416

@@ -1,4 +1,12 @@
-# Stage 1: Build the C# application
+# Stage 1: Build the React frontend SPA
+FROM node:20-alpine AS frontend-build
+WORKDIR /frontend
+COPY frontend/package*.json ./
+RUN npm ci
+COPY frontend/ ./
+RUN npm run build
+
+# Stage 2: Build the C# application
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /source
 
@@ -8,9 +16,11 @@ RUN dotnet restore mcp-router.csproj
 
 # Copy source and publish
 COPY . ./
+# Copy built frontend assets to wwwroot
+COPY --from=frontend-build /wwwroot ./wwwroot
 RUN dotnet publish mcp-router.csproj -c Release -o /app
 
-# Stage 2: Final runtime image
+# Stage 3: Final runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
 WORKDIR /app
 
