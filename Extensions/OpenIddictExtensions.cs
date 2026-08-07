@@ -30,7 +30,13 @@ namespace McpRouter.Extensions
                 options.AddPolicy("AdminPolicy", policy =>
                 {
                     policy.RequireAuthenticatedUser()
-                          .RequireRole("Administrator")
+                          .RequireAssertion(ctx =>
+                          {
+                              var httpContext = ctx.Resource as Microsoft.AspNetCore.Http.HttpContext;
+                              var config = httpContext?.RequestServices?.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
+                              var adminSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
+                              return ctx.User.HasClaim("Sid", adminSid);
+                          })
                           .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey", "OidcHeader");
                 });
             });

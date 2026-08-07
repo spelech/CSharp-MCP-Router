@@ -8,8 +8,21 @@ namespace McpRouter.Core.Identity
         string Username,
         string AuthenticationType,
         List<string> GroupNames,
-        string Sid = ""
-    );
+        string Sid = "",
+        List<string>? Sids = null
+    )
+    {
+        public List<string> AllSids
+        {
+            get
+            {
+                var list = new List<string>();
+                if (!string.IsNullOrEmpty(Sid)) list.Add(Sid);
+                if (Sids != null) list.AddRange(Sids);
+                return list.Distinct().ToList();
+            }
+        }
+    }
 
     public interface IIdentityProvider
     {

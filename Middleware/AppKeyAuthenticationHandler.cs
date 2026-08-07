@@ -69,37 +69,20 @@ namespace McpRouter.Middleware
                     return AuthenticateResult.Fail("Invalid App Key prefix.");
                 }
 
-                // Verify the key using constant-time comparison
-                bool isValid = false;
-                if (appKey.EncryptedKey.Length == 64 && !appKey.EncryptedKey.Contains("/") && !appKey.EncryptedKey.Contains("+") && !appKey.EncryptedKey.Contains("="))
+                // Verify the key using constant-time comparison on SHA-256 hash
+                if (appKey.EncryptedKey.Length != 64 || appKey.EncryptedKey.Contains("/") || appKey.EncryptedKey.Contains("+") || appKey.EncryptedKey.Contains("="))
                 {
-                    // SHA-256 Hash
-                    using var sha = SHA256.Create();
-                    var computedBytes = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(token));
-                    var computedHash = Convert.ToHexString(computedBytes).ToLowerInvariant();
-                    
-                    isValid = CryptographicOperations.FixedTimeEquals(
-                        System.Text.Encoding.UTF8.GetBytes(appKey.EncryptedKey),
-                        System.Text.Encoding.UTF8.GetBytes(computedHash)
-                    );
+                    return AuthenticateResult.Fail("Invalid App Key hash format.");
                 }
-                else
-                {
-                    // Legacy AES Decryption (fallback)
-                    try
-                    {
-                        var decrypted = SymmetricEncryptionHelper.Decrypt(appKey.EncryptedKey, _config);
-                        
-                        isValid = CryptographicOperations.FixedTimeEquals(
-                            System.Text.Encoding.UTF8.GetBytes(decrypted),
-                            System.Text.Encoding.UTF8.GetBytes(token)
-                        );
-                    }
-                    catch
-                    {
-                        isValid = false;
-                    }
-                }
+
+                using var sha = SHA256.Create();
+                var computedBytes = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(token));
+                var computedHash = Convert.ToHexString(computedBytes).ToLowerInvariant();
+
+                bool isValid = CryptographicOperations.FixedTimeEquals(
+                    System.Text.Encoding.UTF8.GetBytes(appKey.EncryptedKey.ToLowerInvariant()),
+                    System.Text.Encoding.UTF8.GetBytes(computedHash)
+                );
 
                 if (!isValid)
                 {

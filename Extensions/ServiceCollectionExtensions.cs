@@ -1,10 +1,15 @@
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using McpRouter.Models;
 using McpRouter.Services;
+using McpRouter.Core.Security;
 
 namespace McpRouter.Extensions
 {
@@ -24,6 +29,7 @@ namespace McpRouter.Extensions
         builder.Services.AddDbContext<RouterDbContext>();
 
         // Register Identity Providers (Active Directory & PocketID/TinyAuth OIDC)
+        builder.Services.AddSingleton<McpRouter.Core.Identity.ILdapService, McpRouter.Core.Identity.LdapActiveDirectoryService>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.ActiveDirectoryIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.OidcIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.CompositeIdentityProvider>();
@@ -42,14 +48,18 @@ namespace McpRouter.Extensions
         builder.Services.AddMcpOpenIddict(builder.Environment);
         builder.Services.AddControllers();
 
-        builder.Services.AddHttpClient();
-        builder.Services.Configure<Microsoft.Extensions.Http.HttpClientFactoryOptions>(options =>
+        builder.Services.AddHttpClient("McpClient");
+        builder.Services.ConfigureAll<Microsoft.Extensions.Http.HttpClientFactoryOptions>(options =>
         {
             options.HttpMessageHandlerBuilderActions.Add(b =>
             {
-                b.PrimaryHandler = new HttpClientHandler
+                var configuration = b.Services.GetRequiredService<IConfiguration>();
+                var allowedIpRanges = configuration.GetSection("Security:AllowedIpRanges").Get<string[]>() ?? Array.Empty<string>();
+
+                b.PrimaryHandler = new SocketsHttpHandler
                 {
-                    AllowAutoRedirect = false
+                    AllowAutoRedirect = false,
+                    ConnectCallback = (context, cancellationToken) => SecurityValidationHelper.ValidatingConnectCallback(context, allowedIpRanges, cancellationToken)
                 };
             });
         });

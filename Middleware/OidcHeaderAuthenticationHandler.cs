@@ -1,8 +1,13 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using McpRouter.Core.Identity;
@@ -11,69 +16,59 @@ namespace McpRouter.Middleware
 {
     public class OidcHeaderAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
-        private readonly CompositeIdentityProvider _identityProvider;
+        private readonly IIdentityProvider _identityProvider;
+        private readonly IConfiguration? _configuration;
 
         public OidcHeaderAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
-            CompositeIdentityProvider identityProvider)
+            IIdentityProvider identityProvider,
+            IConfiguration? configuration = null)
             : base(options, logger, encoder)
         {
             _identityProvider = identityProvider;
+            _configuration = configuration;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
         {
-            try
+            var config = _configuration ?? Context.RequestServices?.GetService<IConfiguration>();
+            var identityContext = await _identityProvider.ResolveIdentityAsync(Context);
+            if (identityContext == null || identityContext.Username == "guest" || identityContext.Username == "anonymous")
             {
-                var identity = await _identityProvider.ResolveIdentityAsync(Context);
-                if (identity == null || identity.Username == "anonymous" || identity.Username == "guest")
-                {
-                    return AuthenticateResult.NoResult();
-                }
-
-                var claims = new System.Collections.Generic.List<Claim>
-                {
-                    new Claim(ClaimTypes.Name, identity.Username),
-                    new Claim("identity_provider", identity.AuthenticationType)
-                };
-
-                if (identity.GroupNames != null)
-                {
-                    foreach (var group in identity.GroupNames)
-                    {
-                        claims.Add(new Claim(ClaimTypes.Role, group));
-                    }
-                }
-
-                // Check if user should be mapped to the Administrator role
-                bool isAdmin = identity.Username.Equals("admin", StringComparison.OrdinalIgnoreCase) ||
-                               identity.Username.Equals("system", StringComparison.OrdinalIgnoreCase) ||
-                               (identity.GroupNames != null && (
-                                   identity.GroupNames.Contains("Administrators") ||
-                                   identity.GroupNames.Contains("full_admin")
-                               ));
-
-                if (isAdmin)
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, "Administrator"));
-                }
-
-                var claimsIdentity = new ClaimsIdentity(claims, Scheme.Name);
-                var principal = new ClaimsPrincipal(claimsIdentity);
-                var ticket = new AuthenticationTicket(principal, Scheme.Name);
-
-                // Set Items["AuthenticatedUser"] for legacy REST compatibility
-                Context.Items["AuthenticatedUser"] = identity.Username;
-
-                return AuthenticateResult.Success(ticket);
+                return AuthenticateResult.NoResult();
             }
-            catch (Exception ex)
+
+            var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
+            var username = identityContext.Username;
+
+            var claims = new List<Claim>
             {
-                Logger.LogError(ex, "Error resolving identity from OIDC/AD headers.");
-                return AuthenticateResult.Fail("Error resolving identity.");
+                new Claim(ClaimTypes.Name, username),
+                new Claim(ClaimTypes.NameIdentifier, username)
+            };
+
+            if (identityContext.AllSids.Contains(adminGroupSid))
+            {
+                claims.Add(new Claim("Sid", adminGroupSid));
             }
+
+            foreach (var group in identityContext.GroupNames)
+            {
+                claims.Add(new Claim(ClaimTypes.Role, group));
+            }
+
+            foreach (var sid in identityContext.AllSids)
+            {
+                claims.Add(new Claim(ClaimTypes.GroupSid, sid));
+            }
+
+            var identity = new ClaimsIdentity(claims, Scheme.Name);
+            var principal = new ClaimsPrincipal(identity);
+            var ticket = new AuthenticationTicket(principal, Scheme.Name);
+
+            return AuthenticateResult.Success(ticket);
         }
     }
 }

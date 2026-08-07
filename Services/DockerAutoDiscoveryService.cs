@@ -159,11 +159,29 @@ namespace McpRouter.Services
                     categories.Add("default");
                 }
 
+                var serverUrl = $"http://{containerName}:{port}{path}";
+                using var configScope = _serviceProvider.CreateScope();
+                var config = configScope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
+                var allowedIpRanges = config.GetSection("Security:AllowedIpRanges").Get<string[]>() ?? Array.Empty<string>();
+
+                if (Uri.TryCreate(serverUrl, UriKind.Absolute, out var parsedUri))
+                {
+                    var host = parsedUri.Host;
+                    if (System.Net.IPAddress.TryParse(host, out var directIp))
+                    {
+                        if (McpRouter.Core.Security.SecurityValidationHelper.IsBlockedIp(directIp, allowedIpRanges))
+                        {
+                            _logger.LogWarning("Docker Auto-Discovery: Skipped container '{Container}' because URL '{Url}' resolves to blocked IP '{Ip}' (SSRF protection).", containerName, serverUrl, directIp);
+                            continue;
+                        }
+                    }
+                }
+
                 discoveredServers.Add(new McpServer
                 {
                     Id = id,
                     DisplayName = displayName,
-                    Url = $"http://{containerName}:{port}{path}",
+                    Url = serverUrl,
                     Type = type,
                     Enabled = true,
                     Hidden = false,
