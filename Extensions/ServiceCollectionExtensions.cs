@@ -1,10 +1,15 @@
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Net.Sockets;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using McpRouter.Models;
 using McpRouter.Services;
+using McpRouter.Core.Security;
 
 namespace McpRouter.Extensions
 {
@@ -48,9 +53,70 @@ namespace McpRouter.Extensions
         {
             options.HttpMessageHandlerBuilderActions.Add(b =>
             {
-                b.PrimaryHandler = new HttpClientHandler
+                var configuration = b.Services.GetRequiredService<IConfiguration>();
+                var allowedIpRanges = configuration.GetSection("Security:AllowedIpRanges").Get<string[]>() ?? Array.Empty<string>();
+
+                b.PrimaryHandler = new SocketsHttpHandler
                 {
-                    AllowAutoRedirect = false
+                    AllowAutoRedirect = false,
+                    ConnectCallback = async (context, cancellationToken) =>
+                    {
+                        var host = context.DnsEndPoint.Host;
+                        var port = context.DnsEndPoint.Port;
+
+                        IPAddress[] ipAddresses;
+                        if (IPAddress.TryParse(host, out var directIp))
+                        {
+                            ipAddresses = new[] { directIp };
+                        }
+                        else
+                        {
+                            ipAddresses = await Dns.GetHostAddressesAsync(host, cancellationToken);
+                        }
+
+                        if (ipAddresses.Length == 0)
+                        {
+                            throw new HttpRequestException($"Unable to resolve host '{host}'.");
+                        }
+
+                        foreach (var ip in ipAddresses)
+                        {
+                            if (SecurityValidationHelper.IsBlockedIp(ip, allowedIpRanges))
+                            {
+                                throw new HttpRequestException($"Access to IP address '{ip}' for host '{host}' is blocked for security (SSRF protection).");
+                            }
+                        }
+
+                        Socket? socket = null;
+                        Exception? lastException = null;
+
+                        foreach (var ip in ipAddresses)
+                        {
+                            var s = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp)
+                            {
+                                NoDelay = true
+                            };
+
+                            try
+                            {
+                                await s.ConnectAsync(new IPEndPoint(ip, port), cancellationToken);
+                                socket = s;
+                                break;
+                            }
+                            catch (Exception ex)
+                            {
+                                s.Dispose();
+                                lastException = ex;
+                            }
+                        }
+
+                        if (socket == null)
+                        {
+                            throw new HttpRequestException($"Failed to connect to host '{host}' ({ipAddresses[0]}) on port {port}.", lastException);
+                        }
+
+                        return new NetworkStream(socket, ownsSocket: true);
+                    }
                 };
             });
         });
