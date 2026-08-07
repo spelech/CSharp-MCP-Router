@@ -488,63 +488,101 @@ namespace McpRouter
 
         public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db)
         {
-            // Namespace validation
-            var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
-            if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateToolOrPromptName(toolName, activeServerIds))
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            int statusCode = 200;
+            string? errorMessage = null;
+            string? responsePayload = null;
+
+            try
             {
-                return new {
-                    isError = true,
-                    content = new[] {
-                        new {
-                            type = "text",
-                            text = $"Security Error: Invalid or spoofed namespaced identifier: '{toolName}'."
+                // Namespace validation
+                var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateToolOrPromptName(toolName, activeServerIds))
+                {
+                    statusCode = 403;
+                    errorMessage = $"Security Error: Invalid or spoofed namespaced identifier: '{toolName}'.";
+                    var errResult = new {
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = errorMessage
+                            }
+                        }
+                    };
+                    responsePayload = JsonSerializer.Serialize(errResult);
+                    return errResult;
+                }
+
+                // RBAC Check
+                var isAuth = await IsUserAuthorizedAsync("tools/call", toolName);
+                if (!isAuth)
+                {
+                    var identity = await ResolveUserIdentityAsync();
+                    statusCode = 403;
+                    errorMessage = $"Security Error: User '{identity.Username}' does not have permission to execute tool '{toolName}'.";
+                    var errResult = new {
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = errorMessage
+                            }
+                        }
+                    };
+                    responsePayload = JsonSerializer.Serialize(errResult);
+                    return errResult;
+                }
+
+                string? requestId = null;
+                using (var cts = new CancellationTokenSource())
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(body);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("id", out var idProp))
+                        {
+                            requestId = idProp.GetString() ?? idProp.GetRawText();
+                            _activeRequestCancellationTokens[requestId] = cts;
                         }
                     }
-                };
-            }
+                    catch { }
 
-            // RBAC Check
-            var isAuth = await IsUserAuthorizedAsync("tools/call", toolName);
-            if (!isAuth)
-            {
-                var identity = await ResolveUserIdentityAsync();
-                return new {
-                    isError = true,
-                    content = new[] {
-                        new {
-                            type = "text",
-                            text = $"Security Error: User '{identity.Username}' does not have permission to execute tool '{toolName}'."
+                    try
+                    {
+                        var res = await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager);
+                        responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
+                        return res;
+                    }
+                    catch (Exception exCall)
+                    {
+                        statusCode = 500;
+                        errorMessage = exCall.Message;
+                        throw;
+                    }
+                    finally
+                    {
+                        if (requestId != null)
+                        {
+                            _activeRequestCancellationTokens.TryRemove(requestId, out _);
                         }
                     }
-                };
+                }
             }
-
-            string? requestId = null;
-            using (var cts = new CancellationTokenSource())
+            catch (Exception exOuter)
             {
-                try
+                if (statusCode == 200)
                 {
-                    using var doc = JsonDocument.Parse(body);
-                    var root = doc.RootElement;
-                    if (root.TryGetProperty("id", out var idProp))
-                    {
-                        requestId = idProp.GetString() ?? idProp.GetRawText();
-                        _activeRequestCancellationTokens[requestId] = cts;
-                    }
+                    statusCode = 500;
+                    errorMessage = exOuter.Message;
                 }
-                catch { }
-
-                try
-                {
-                    return await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager);
-                }
-                finally
-                {
-                    if (requestId != null)
-                    {
-                        _activeRequestCancellationTokens.TryRemove(requestId, out _);
-                    }
-                }
+                throw;
+            }
+            finally
+            {
+                stopwatch.Stop();
+                await AuditInvocationAsync("tools/call", toolName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage);
             }
         }
 
@@ -725,20 +763,49 @@ namespace McpRouter
 
         public async Task<object?> ReadResourceAsync(string resourceUri, string body)
         {
-            // Namespace validation
-            var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
-            if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateResourceUri(resourceUri, activeServerIds))
-            {
-                throw new UnauthorizedAccessException($"Security Error: Invalid or spoofed resource URI namespace: '{resourceUri}'.");
-            }
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            int statusCode = 200;
+            string? errorMessage = null;
+            string? responsePayload = null;
 
-            var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri);
-            if (!isAuth)
+            try
             {
-                var identity = await ResolveUserIdentityAsync();
-                throw new UnauthorizedAccessException($"Security Error: User '{identity.Username}' does not have permission to read resource '{resourceUri}'.");
+                // Namespace validation
+                var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateResourceUri(resourceUri, activeServerIds))
+                {
+                    statusCode = 403;
+                    errorMessage = $"Security Error: Invalid or spoofed resource URI namespace: '{resourceUri}'.";
+                    throw new UnauthorizedAccessException(errorMessage);
+                }
+
+                var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri);
+                if (!isAuth)
+                {
+                    var identity = await ResolveUserIdentityAsync();
+                    statusCode = 403;
+                    errorMessage = $"Security Error: User '{identity.Username}' does not have permission to read resource '{resourceUri}'.";
+                    throw new UnauthorizedAccessException(errorMessage);
+                }
+
+                var res = await _resourceRoutingManager.ReadResourceAsync(resourceUri, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson, _sessionManager);
+                responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
+                return res;
             }
-            return await _resourceRoutingManager.ReadResourceAsync(resourceUri, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson, _sessionManager);
+            catch (Exception ex)
+            {
+                if (statusCode == 200)
+                {
+                    statusCode = 500;
+                    errorMessage = ex.Message;
+                }
+                throw;
+            }
+            finally
+            {
+                stopwatch.Stop();
+                await AuditInvocationAsync("resources/read", resourceUri, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage);
+            }
         }
 
         public async Task<List<object>> ListResourceTemplatesAsync(string body)
@@ -838,20 +905,111 @@ namespace McpRouter
 
         public async Task<object?> GetPromptAsync(string promptName, string body)
         {
-            // Namespace validation
-            var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
-            if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateToolOrPromptName(promptName, activeServerIds))
-            {
-                throw new UnauthorizedAccessException($"Security Error: Invalid or spoofed prompt namespace: '{promptName}'.");
-            }
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            int statusCode = 200;
+            string? errorMessage = null;
+            string? responsePayload = null;
 
-            var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName);
-            if (!isAuth)
+            try
+            {
+                // Namespace validation
+                var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateToolOrPromptName(promptName, activeServerIds))
+                {
+                    statusCode = 403;
+                    errorMessage = $"Security Error: Invalid or spoofed prompt namespace: '{promptName}'.";
+                    throw new UnauthorizedAccessException(errorMessage);
+                }
+
+                var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName);
+                if (!isAuth)
+                {
+                    var identity = await ResolveUserIdentityAsync();
+                    statusCode = 403;
+                    errorMessage = $"Security Error: User '{identity.Username}' does not have permission to access prompt '{promptName}'.";
+                    throw new UnauthorizedAccessException(errorMessage);
+                }
+
+                var res = await _promptRoutingManager.GetPromptAsync(promptName, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson);
+                responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
+                return res;
+            }
+            catch (Exception ex)
+            {
+                if (statusCode == 200)
+                {
+                    statusCode = 500;
+                    errorMessage = ex.Message;
+                }
+                throw;
+            }
+            finally
+            {
+                stopwatch.Stop();
+                await AuditInvocationAsync("prompts/get", promptName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage);
+            }
+        }
+
+        private async Task AuditInvocationAsync(
+            string requestMethod,
+            string itemName,
+            string? payload,
+            int statusCode,
+            long executionTimeMs,
+            string? responsePayload,
+            string? errorMessage)
+        {
+            var auditLogger = _clientResponse?.HttpContext?.RequestServices?.GetService<McpRouter.Core.Logging.IAuditLogger>();
+            if (auditLogger == null) return;
+
+            try
             {
                 var identity = await ResolveUserIdentityAsync();
-                throw new UnauthorizedAccessException($"Security Error: User '{identity.Username}' does not have permission to access prompt '{promptName}'.");
+                
+                string serverId;
+                if (itemName.StartsWith("mcp://"))
+                {
+                    serverId = Uri.TryCreate(itemName, UriKind.Absolute, out var parsedUri) ? parsedUri.Host : itemName;
+                }
+                else
+                {
+                    serverId = itemName.Contains("__") ? itemName.Split("__", 2)[0] : itemName;
+                }
+
+                // Try to extract requestId from request payload
+                string? requestId = null;
+                if (!string.IsNullOrEmpty(payload))
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(payload);
+                        if (doc.RootElement.TryGetProperty("id", out var idProp))
+                        {
+                            requestId = idProp.GetString() ?? idProp.GetRawText();
+                        }
+                    }
+                    catch {}
+                }
+                requestId ??= Guid.NewGuid().ToString("N");
+
+                await auditLogger.LogInvocationAsync(
+                    requestId,
+                    identity.Username,
+                    identity.Sid ?? "",
+                    serverId,
+                    itemName,
+                    requestMethod,
+                    (int)executionTimeMs,
+                    statusCode,
+                    payload,
+                    responsePayload,
+                    errorMessage
+                );
             }
-            return await _promptRoutingManager.GetPromptAsync(promptName, body, _backendConnections, EnsureBackendsInitializedAsync, RewriteRequestJson);
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to write invocation audit log");
+            }
         }
     }
 }
