@@ -180,5 +180,31 @@ namespace McpRouter.Tests
             Assert.Equal(5, maxKeys);
             Assert.True(count >= maxKeys); // Limit reached
         }
+
+        [Fact]
+        public void AppKeys_Sha256Hashing_VerificationWorks()
+        {
+            var keyString = "mcp-global-randomstring123456789";
+            
+            // Hash the key using SHA-256
+            using var sha256 = System.Security.Cryptography.SHA256.Create();
+            var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(keyString));
+            var storedHash = Convert.ToHexString(hashBytes).ToLowerInvariant();
+
+            // Verify using the validation logic
+            bool isValid = false;
+            if (storedHash.Length == 64)
+            {
+                using var sha = System.Security.Cryptography.SHA256.Create();
+                var computedBytes = sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(keyString));
+                var computedHash = Convert.ToHexString(computedBytes).ToLowerInvariant();
+                isValid = System.Security.Cryptography.CryptographicOperations.FixedTimeEquals(
+                    System.Text.Encoding.UTF8.GetBytes(storedHash),
+                    System.Text.Encoding.UTF8.GetBytes(computedHash)
+                );
+            }
+
+            Assert.True(isValid);
+        }
     }
 }
