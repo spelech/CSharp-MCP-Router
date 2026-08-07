@@ -274,7 +274,8 @@ namespace McpRouter.Services
                                 var decrypted = SymmetricEncryptionHelper.DecryptLegacy(key.EncryptedKey, configuration);
                                 if (string.IsNullOrEmpty(decrypted))
                                 {
-                                    decrypted = key.EncryptedKey;
+                                    logger.LogError($"AppKey Hashing Migration: Failed to decrypt legacy AppKey '{key.Name}' (Id: {key.Id}). Skipping migration for this key to prevent corruption.");
+                                    continue;
                                 }
 
                                 using var sha256 = SHA256.Create();
