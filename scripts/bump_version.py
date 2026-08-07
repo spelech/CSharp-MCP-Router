@@ -135,7 +135,9 @@ def main():
         print(f"Warning: {user_store_path} not found.")
 
     # 5. Stage files using git add
-    os.system(f"git add {csproj_path} {html_path} {readme_path} {user_store_path if os.path.exists(user_store_path) else ''}")
+    paths_to_stage = [csproj_path, html_path, readme_path, user_store_path]
+    existing_paths = [p for p in paths_to_stage if os.path.exists(p)]
+    os.system(f"git add {' '.join(existing_paths)}")
     print("Staged updated versioning files.")
 
 if __name__ == "__main__":
