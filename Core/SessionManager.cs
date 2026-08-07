@@ -103,6 +103,19 @@ namespace McpRouter
 
             var session = new ClientSession(sessionId, clientResponse, servers, client, embeddingService, this, sessionLogger);
             session.IsMetaMode = metaMode;
+
+            if (_sessions.TryRemove(sessionId, out var oldSession))
+            {
+                try
+                {
+                    oldSession.Close();
+                }
+                catch (Exception exClose)
+                {
+                    _logger.LogWarning(exClose, "Error closing overwritten session for ID {SessionId}", sessionId);
+                }
+            }
+
             _sessions[sessionId] = session;
             return session;
         }

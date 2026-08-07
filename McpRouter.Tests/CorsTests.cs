@@ -29,6 +29,7 @@ namespace McpRouter.Tests
         {
             // Arrange
             var builder = WebApplication.CreateBuilder();
+            builder.Environment.EnvironmentName = "Development";
 
             var inMemoryConfig = GetBaseConfig();
             builder.Configuration.AddInMemoryCollection(inMemoryConfig);
@@ -50,6 +51,28 @@ namespace McpRouter.Tests
             defaultPolicy.AllowAnyHeader.Should().BeTrue();
             defaultPolicy.AllowAnyMethod.Should().BeTrue();
             defaultPolicy.SupportsCredentials.Should().BeTrue();
+        }
+
+        [Fact]
+        public void Cors_DefaultFallback_Denies_In_Production()
+        {
+            // Arrange
+            var builder = WebApplication.CreateBuilder();
+            builder.Environment.EnvironmentName = "Production";
+
+            var inMemoryConfig = GetBaseConfig();
+            builder.Configuration.AddInMemoryCollection(inMemoryConfig);
+
+            // Act
+            builder.AddMcpRouterServices();
+            var app = builder.Build();
+
+            // Assert
+            var corsOptions = app.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
+            var defaultPolicy = corsOptions.GetPolicy(corsOptions.DefaultPolicyName);
+
+            defaultPolicy.Should().NotBeNull();
+            defaultPolicy!.Origins.Should().NotContain("http://localhost:3000");
         }
 
         [Fact]

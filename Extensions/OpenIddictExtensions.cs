@@ -10,7 +10,7 @@ namespace McpRouter.Extensions
 {
     public static class OpenIddictExtensions
     {
-        public static IServiceCollection AddMcpOpenIddict(this IServiceCollection services)
+        public static IServiceCollection AddMcpOpenIddict(this IServiceCollection services, Microsoft.Extensions.Hosting.IHostEnvironment env)
         {
             services.AddAuthentication(options =>
             {
@@ -45,8 +45,13 @@ namespace McpRouter.Extensions
                 {
                     options.SetTokenEndpointUris("/connect/token", "/oauth/token");
                     options.AllowClientCredentialsFlow();
-                    options.AddDevelopmentEncryptionCertificate()
-                           .AddDevelopmentSigningCertificate();
+                    
+                    if (env.IsDevelopment() || env.EnvironmentName == "Dev")
+                    {
+                        options.AddDevelopmentEncryptionCertificate()
+                               .AddDevelopmentSigningCertificate();
+                    }
+
                     options.UseAspNetCore()
                            .EnableTokenEndpointPassthrough();
                 })
