@@ -270,5 +270,36 @@ namespace McpRouter.Tests
                 await session.CallToolAsync("testserver__testtool", "{}", null!);
             });
         }
+
+        [Fact]
+        public async Task CallTool_FailsClosed_WhenAuditLoggerUnresolved()
+        {
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
+                { "Audit:FailClosed", "true" }
+            }).Build();
+
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IConfiguration))).Returns(config);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IAuditLogger))).Returns((IAuditLogger?)null);
+
+            var httpContextMock = new Mock<HttpContext>();
+            httpContextMock.Setup(h => h.RequestServices).Returns(serviceProviderMock.Object);
+            httpContextMock.Setup(h => h.Items).Returns(new Dictionary<object, object?>());
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "admin") }, "AppKey");
+            httpContextMock.Setup(h => h.User).Returns(new ClaimsPrincipal(identity));
+
+            var responseMock = new Mock<HttpResponse>();
+            responseMock.Setup(r => r.HttpContext).Returns(httpContextMock.Object);
+
+            var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger>();
+            var servers = new List<McpServer> { new McpServer { Id = "testserver", Enabled = true } };
+
+            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), null, null, loggerMock.Object);
+
+            await Assert.ThrowsAsync<System.Security.SecurityException>(async () =>
+            {
+                await session.CallToolAsync("testserver__testtool", "{}", null!);
+            });
+        }
     }
 }
