@@ -115,8 +115,27 @@ def main():
     else:
         print(f"Warning: {readme_path} not found.")
 
-    # 4. Stage files using git add
-    os.system(f"git add {csproj_path} {html_path} {readme_path}")
+    # 4. Update useUserStore.ts
+    user_store_path = os.path.join(repo_root, "frontend", "src", "stores", "useUserStore.ts")
+    if os.path.exists(user_store_path):
+        with open(user_store_path, "r", encoding="utf-8") as f:
+            store_content = f.read()
+        
+        # Replace: version: 'X.Y.Z', // fallback default
+        updated_store = re.sub(
+            r"(version:\s*['\"]).*?('\s*,\s*//\s*fallback\s*default)",
+            fr"\g<1>{new_version}\g<2>",
+            store_content
+        )
+        
+        with open(user_store_path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(updated_store)
+        print(f"Updated {user_store_path}")
+    else:
+        print(f"Warning: {user_store_path} not found.")
+
+    # 5. Stage files using git add
+    os.system(f"git add {csproj_path} {html_path} {readme_path} {user_store_path if os.path.exists(user_store_path) else ''}")
     print("Staged updated versioning files.")
 
 if __name__ == "__main__":

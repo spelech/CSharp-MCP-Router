@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.1.2`** | 2026-08-07 | chore(scripts): update bump_version.py to sync fallback version in useUserStore.ts |
 | **`v3.1.1`** | 2026-08-07 | docs: add design spec for security hardening |
 | **`v3.1.0`** | 2026-08-07 | feat(scripts): add commit and version autobump helper scripts |
 | **`v3.0.8`** | 2026-08-07 | **Performance Release: Optimized Database Seeder.** Resolved a critical N+1 query issue in the custom server database initialization by pre-fetching database records into an in-memory dictionary. This cuts down database round-trips from $O(M)$ down to $O(1)$ during configuration ingestion. |
