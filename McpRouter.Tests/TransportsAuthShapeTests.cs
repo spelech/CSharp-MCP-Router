@@ -33,6 +33,7 @@ namespace McpRouter.Tests
             {
                 Id = "srv1",
                 Url = "http://localhost:5000/sse",
+                SecretProvider = "None",
                 ApiKey = token,
                 AuthShape = authShape
             };
@@ -55,6 +56,7 @@ namespace McpRouter.Tests
             {
                 Id = "slack",
                 Url = "http://localhost:5000/sse",
+                SecretProvider = "None",
                 ApiKey = "xoxb-test-token",
                 AuthShape = "custom-header",
                 CustomHeaderName = "Slack-Bot-Token"
@@ -75,6 +77,7 @@ namespace McpRouter.Tests
             {
                 Id = "query-srv",
                 Url = "http://localhost:5000/sse?existing=1",
+                SecretProvider = "None",
                 ApiKey = "query-token-123",
                 AuthShape = "query",
                 CustomHeaderName = "api_key"
@@ -96,6 +99,7 @@ namespace McpRouter.Tests
             {
                 Id = "custom-http",
                 Url = "http://localhost:5000/mcp",
+                SecretProvider = "None",
                 ApiKey = "http-secret-key",
                 AuthShape = "custom-header",
                 CustomHeaderName = "X-Service-Auth"
@@ -116,6 +120,7 @@ namespace McpRouter.Tests
             {
                 Id = "headers-json",
                 Url = "http://localhost:5000/sse",
+                SecretProvider = "None",
                 HeadersJson = "{\"X-Custom-Env\": \"production\", \"X-Agent\": \"antigravity\"}"
             };
             var transport = new SseTransport(server, new HttpClient(), NullLogger<SseTransport>.Instance, null!);

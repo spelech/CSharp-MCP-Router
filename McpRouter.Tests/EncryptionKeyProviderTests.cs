@@ -7,61 +7,45 @@ using Xunit;
 
 namespace McpRouter.Tests
 {
+    [Collection("DbKeyTests")]
     public class EncryptionKeyProviderTests
     {
         [Fact]
         public void GetDbEncryptionKey_UsesConfig_WhenProvided()
         {
+            DbKeyHelper.ResetCache();
+            EncryptionKeyProvider.ResetCache();
+
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DB_ENCRYPTION_KEY", "ConfiguredDbKey123!" }
             }).Build();
-
-            // Clear cache first
-            typeof(EncryptionKeyProvider).GetField("_cachedDbKey", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?.SetValue(null, null);
 
             var key = EncryptionKeyProvider.GetDbEncryptionKey(config);
             Assert.Equal("ConfiguredDbKey123!", key);
         }
 
         [Fact]
-        public void GetDbEncryptionKey_GeneratesAndPersists_WhenNotConfigured()
+        public void GetDbEncryptionKey_ThrowsInvalidOperation_WhenNotConfigured()
         {
+            DbKeyHelper.ResetCache();
+            EncryptionKeyProvider.ResetCache();
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
 
-            // Clear cache first
-            typeof(EncryptionKeyProvider).GetField("_cachedDbKey", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?.SetValue(null, null);
-
-            var dataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
-            var keyPath = Path.Combine(dataDir, "db_encryption.key");
-
-            if (File.Exists(keyPath))
-            {
-                File.Delete(keyPath);
-            }
-
-            var key = EncryptionKeyProvider.GetDbEncryptionKey(config);
-            Assert.NotEmpty(key);
-            Assert.True(File.Exists(keyPath));
-
-            var persistedKey = File.ReadAllText(keyPath).Trim();
-            Assert.Equal(key, persistedKey);
-
-            // Re-fetch should return cached/persisted key
-            var key2 = EncryptionKeyProvider.GetDbEncryptionKey(config);
-            Assert.Equal(key, key2);
+            var ex = Assert.Throws<InvalidOperationException>(() => EncryptionKeyProvider.GetDbEncryptionKey(config));
+            Assert.Contains("Master encryption key is missing", ex.Message);
         }
 
         [Fact]
         public void GetRouterSecret_UsesConfig_WhenProvided()
         {
+            DbKeyHelper.ResetCache();
+            EncryptionKeyProvider.ResetCache();
+
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "ROUTER_SECRET", "ConfiguredRouterSecret123!" }
             }).Build();
-
-            // Clear cache first
-            typeof(EncryptionKeyProvider).GetField("_cachedRouterSecret", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?.SetValue(null, null);
 
             var secret = EncryptionKeyProvider.GetRouterSecret(config);
             Assert.Equal("ConfiguredRouterSecret123!", secret);
@@ -70,13 +54,13 @@ namespace McpRouter.Tests
         [Fact]
         public void GetRouterSecret_FallsBackToDbEncryptionKey_WhenDbEncryptionKeyProvided()
         {
+            DbKeyHelper.ResetCache();
+            EncryptionKeyProvider.ResetCache();
+
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DB_ENCRYPTION_KEY", "FallbackDbKey123!" }
             }).Build();
-
-            // Clear cache first
-            typeof(EncryptionKeyProvider).GetField("_cachedRouterSecret", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)?.SetValue(null, null);
 
             var secret = EncryptionKeyProvider.GetRouterSecret(config);
             Assert.Equal("FallbackDbKey123!", secret);

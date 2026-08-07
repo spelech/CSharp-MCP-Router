@@ -34,26 +34,43 @@ namespace McpRouter.Core.Transports
 
         public async Task<string?> ResolveTokenAsync(ISecretRetriever? secretRetriever = null)
         {
-            var retriever = secretRetriever ?? _secretRetriever;
-            if (retriever != null && (_server.SecretProvider ?? "Vault") != "None")
+            var provider = _server.SecretProvider ?? "None";
+            if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
-                string path = !string.IsNullOrWhiteSpace(_server.SecretPath) ? _server.SecretPath : _server.Url;
-                if (!string.IsNullOrWhiteSpace(_server.SecretMount))
-                {
-                    path = $"{_server.SecretMount}:{path}";
-                }
-                string field = !string.IsNullOrWhiteSpace(_server.SecretField)
-                    ? _server.SecretField
-                    : (!string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "ApiKey");
-
-                var secret = await retriever.GetSecretAsync(path, field);
-                if (!string.IsNullOrEmpty(secret))
-                {
-                    return secret;
-                }
+                return !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
             }
 
-            return !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
+            var retriever = secretRetriever ?? _secretRetriever;
+            if (retriever == null)
+            {
+                throw new InvalidOperationException($"SecretProvider is configured to '{provider}' for server '{_server.Id}', but no secret retriever is registered.");
+            }
+
+            string path = !string.IsNullOrWhiteSpace(_server.SecretPath) ? _server.SecretPath : _server.Url;
+            if (!string.IsNullOrWhiteSpace(_server.SecretMount))
+            {
+                path = $"{_server.SecretMount}:{path}";
+            }
+            string field = !string.IsNullOrWhiteSpace(_server.SecretField)
+                ? _server.SecretField
+                : (!string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "ApiKey");
+
+            string? secret = null;
+            if (retriever is CompositeSecretRetriever composite)
+            {
+                secret = await composite.GetSecretForProviderAsync(provider, path, field);
+            }
+            else
+            {
+                secret = await retriever.GetSecretAsync(path, field);
+            }
+
+            if (string.IsNullOrEmpty(secret))
+            {
+                throw new System.Security.SecurityException($"Failed to resolve secret from provider '{provider}' for server '{_server.Id}' (path: '{path}', field: '{field}'). Plaintext ApiKey fallback is disabled.");
+            }
+
+            return secret;
         }
 
         private async Task ApplyAuthAndCustomHeadersAsync(HttpRequestMessage request)

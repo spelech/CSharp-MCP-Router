@@ -15,6 +15,7 @@ namespace McpRouter.Core.Secrets
         private static byte[] GetEncryptionKey(IConfiguration config)
         {
             var secretString = config["ROUTER_SECRET"]
+                ?? config["ROUTER_MASTER_KEY"]
                 ?? DbKeyHelper.ResolveDbEncryptionKey(config);
 
             if (_cachedKey.HasValue && _cachedKey.Value.secretString == secretString)
@@ -30,7 +31,8 @@ namespace McpRouter.Core.Secrets
                 }
 
                 var secretBytes = Encoding.UTF8.GetBytes(secretString);
-                var derivedKey = Rfc2898DeriveBytes.Pbkdf2(secretBytes, Salt, 600_000, HashAlgorithmName.SHA256, 32);
+                var deploymentSalt = SHA256.HashData(Encoding.UTF8.GetBytes(secretString + "_McpRouter_Salt_v2"));
+                var derivedKey = Rfc2898DeriveBytes.Pbkdf2(secretBytes, deploymentSalt, 600_000, HashAlgorithmName.SHA256, 32);
                 _cachedKey = (secretString, derivedKey);
 
                 return derivedKey;
@@ -64,74 +66,26 @@ namespace McpRouter.Core.Secrets
         {
             if (string.IsNullOrEmpty(ciphertext)) return ciphertext;
 
-            try
+            var fullCipher = Convert.FromBase64String(ciphertext);
+            if (fullCipher.Length < 28) // 12 nonce + 16 tag minimum
             {
-                var fullCipher = Convert.FromBase64String(ciphertext);
-                if (fullCipher.Length >= 28) // 12 nonce + 16 tag minimum
-                {
-                    var keyBytes = GetEncryptionKey(config);
-                    var nonce = new byte[12];
-                    var tag = new byte[16];
-                    var cipherBytes = new byte[fullCipher.Length - 28];
-
-                    Array.Copy(fullCipher, 0, nonce, 0, 12);
-                    Array.Copy(fullCipher, 12, tag, 0, 16);
-                    Array.Copy(fullCipher, 28, cipherBytes, 0, cipherBytes.Length);
-
-                    var plaintextBytes = new byte[cipherBytes.Length];
-                    using var aesGcm = new AesGcm(keyBytes, 16);
-                    aesGcm.Decrypt(nonce, cipherBytes, tag, plaintextBytes);
-
-                    return Encoding.UTF8.GetString(plaintextBytes);
-                }
-            }
-            catch
-            {
-                // Fall back to DecryptLegacy if AES-GCM fails (e.g., legacy AES-CBC formatted values)
+                throw new CryptographicException("Ciphertext payload is invalid or truncated.");
             }
 
-            return DecryptLegacy(ciphertext, config);
-        }
+            var keyBytes = GetEncryptionKey(config);
+            var nonce = new byte[12];
+            var tag = new byte[16];
+            var cipherBytes = new byte[fullCipher.Length - 28];
 
-        public static string DecryptLegacy(string ciphertext, IConfiguration config)
-        {
-            if (string.IsNullOrEmpty(ciphertext)) return ciphertext;
+            Array.Copy(fullCipher, 0, nonce, 0, 12);
+            Array.Copy(fullCipher, 12, tag, 0, 16);
+            Array.Copy(fullCipher, 28, cipherBytes, 0, cipherBytes.Length);
 
-            try
-            {
-                var fullCipher = Convert.FromBase64String(ciphertext);
-                if (fullCipher.Length < 16) return string.Empty;
+            var plaintextBytes = new byte[cipherBytes.Length];
+            using var aesGcm = new AesGcm(keyBytes, 16);
+            aesGcm.Decrypt(nonce, cipherBytes, tag, plaintextBytes);
 
-                var secretString = config["ROUTER_SECRET"]
-                    ?? DbKeyHelper.ResolveDbEncryptionKey(config);
-
-                byte[] keyBytes;
-                using (var sha256 = SHA256.Create())
-                {
-                    keyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(secretString));
-                }
-
-                using (var aes = Aes.Create())
-                {
-                    aes.Key = keyBytes;
-
-                    var iv = new byte[16];
-                    Array.Copy(fullCipher, 0, iv, 0, iv.Length);
-                    aes.IV = iv;
-
-                    using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
-                    using (var ms = new MemoryStream(fullCipher, iv.Length, fullCipher.Length - iv.Length))
-                    using (var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read))
-                    using (var reader = new StreamReader(cs, Encoding.UTF8))
-                    {
-                        return reader.ReadToEnd();
-                    }
-                }
-            }
-            catch
-            {
-                return string.Empty;
-            }
+            return Encoding.UTF8.GetString(plaintextBytes);
         }
     }
 }

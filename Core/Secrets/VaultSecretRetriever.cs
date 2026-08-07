@@ -52,22 +52,28 @@ namespace McpRouter.Core.Secrets
                 }
 
                 var address = _config["Vault:Address"];
-                var roleId = _config["Vault:RoleId"];
-                var secretId = _config["Vault:SecretId"];
-
-                if (!string.IsNullOrEmpty(address) &&
-                    address.StartsWith("https://", StringComparison.OrdinalIgnoreCase) &&
-                    !string.IsNullOrEmpty(roleId) &&
-                    !string.IsNullOrEmpty(secretId))
-                {
-                    var authMethod = new AppRoleAuthMethodInfo(roleId, secretId);
-                    var settings = new VaultClientSettings(address, authMethod);
-                    _vaultClient = new VaultClient(settings);
-                }
-                else
+                if (string.IsNullOrEmpty(address))
                 {
                     _vaultClient = null;
+                    return null;
                 }
+
+                if (!address.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new ArgumentException("Vault Address must use the HTTPS scheme.");
+                }
+
+                var roleId = _config["Vault:RoleId"];
+                var secretId = _config["Vault:SecretId"];
+                if (string.IsNullOrEmpty(roleId) || string.IsNullOrEmpty(secretId))
+                {
+                    _vaultClient = null;
+                    return null;
+                }
+
+                var authMethod = new AppRoleAuthMethodInfo(roleId, secretId);
+                var settings = new VaultClientSettings(address, authMethod);
+                _vaultClient = new VaultClient(settings);
 
                 return _vaultClient;
             }
@@ -134,9 +140,9 @@ namespace McpRouter.Core.Secrets
                 }
                 return value;
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                throw new System.Security.SecurityException($"Vault secret read failed for path '{secretPath}', key '{keyName}'.", ex);
             }
         }
     }

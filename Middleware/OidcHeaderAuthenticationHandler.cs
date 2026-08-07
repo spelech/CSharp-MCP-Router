@@ -43,16 +43,16 @@ namespace McpRouter.Middleware
             var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
             var username = identityContext.Username;
 
-            if (identityContext.AllSids.Contains(adminGroupSid))
-            {
-                username = "Administrator";
-            }
-
             var claims = new List<Claim>
             {
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.NameIdentifier, username)
             };
+
+            if (identityContext.AllSids.Contains(adminGroupSid))
+            {
+                claims.Add(new Claim("Sid", adminGroupSid));
+            }
 
             foreach (var group in identityContext.GroupNames)
             {

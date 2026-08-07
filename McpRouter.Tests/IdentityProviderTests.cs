@@ -20,7 +20,9 @@ namespace McpRouter.Tests
             context.Request.Headers["Remote-User"] = "steve";
             context.Request.Headers["Remote-Groups"] = "full_admin, house_member";
 
-            var provider = new OidcIdentityProvider();
+            var configDict = new Dictionary<string, string?> { ["Oidc:TrustedProxies"] = "127.0.0.1" };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+            var provider = new OidcIdentityProvider(config);
             var identity = await provider.ResolveIdentityAsync(context);
 
             Assert.Equal("steve", identity.Username);
@@ -38,8 +40,10 @@ namespace McpRouter.Tests
             context.Request.Headers["Remote-User"] = "alex";
             context.Request.Headers["sso_groups"] = "dev_team";
 
-            var adProvider = new ActiveDirectoryIdentityProvider();
-            var oidcProvider = new OidcIdentityProvider();
+            var configDict = new Dictionary<string, string?> { ["Oidc:TrustedProxies"] = "127.0.0.1" };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+            var adProvider = new ActiveDirectoryIdentityProvider(config);
+            var oidcProvider = new OidcIdentityProvider(config);
             var composite = new CompositeIdentityProvider(new IIdentityProvider[] { adProvider, oidcProvider });
 
             var identity = await composite.ResolveIdentityAsync(context);
@@ -92,7 +96,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        public async Task OidcIdentityProvider_MapsAdminSid_ForAdminGroups()
+        public async Task OidcIdentityProvider_DoesNotMapAdminSid_ForAdminGroups()
         {
             var context = new DefaultHttpContext();
             context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
@@ -102,7 +106,7 @@ namespace McpRouter.Tests
             var provider = new OidcIdentityProvider();
             var identity = await provider.ResolveIdentityAsync(context);
 
-            Assert.Contains("S-1-5-32-544", identity.AllSids);
+            Assert.Empty(identity.AllSids);
         }
 
         /// <summary>
@@ -179,5 +183,121 @@ namespace McpRouter.Tests
             Assert.Contains("Security Error", bobJson);
             Assert.Contains("bob", bobJson);
         }
+
+        [Fact]
+        public async Task LdapService_ThrowsInvalidOperation_WhenUseSslFalse()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Ldap:Server"] = "127.0.0.1",
+                ["Ldap:Port"] = "389",
+                ["Ldap:UseSsl"] = "false"
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+            var logger = new Mock<Microsoft.Extensions.Logging.ILogger<LdapActiveDirectoryService>>().Object;
+            var service = new LdapActiveDirectoryService(config, logger);
+
+            await Assert.ThrowsAsync<System.InvalidOperationException>(async () =>
+            {
+                await service.ResolveUserSidsAsync("testuser");
+            });
+        }
+
+        [Fact]
+        public async Task LdapService_ThrowsSecurityException_OnBindFailure()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Ldap:Server"] = "127.0.0.1",
+                ["Ldap:Port"] = "636",
+                ["Ldap:UseSsl"] = "true"
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+            var logger = new Mock<Microsoft.Extensions.Logging.ILogger<LdapActiveDirectoryService>>().Object;
+            var service = new LdapActiveDirectoryService(config, logger);
+
+            await Assert.ThrowsAsync<System.Security.SecurityException>(async () =>
+            {
+                await service.ResolveUserSidsAsync("testuser");
+            });
+        }
+
+        [Fact]
+        public void SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Admin:GroupSid"] = "S-1-5-32-544"
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var adminIdentity = new UserIdentityContext("admin_user", "Test", new List<string> { "Administrators" }, Sid: "", Sids: new List<string> { "S-1-5-32-544" });
+            var nonAdminIdentity = new UserIdentityContext("admin", "Test", new List<string> { "Administrators", "full_admin" }, Sid: "", Sids: new List<string>());
+
+            Assert.True(McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(adminIdentity, config));
+            Assert.False(McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(nonAdminIdentity, config));
+        }
+
+        [Fact]
+        public async Task OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames()
+        {
+            var context = new DefaultHttpContext();
+            context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
+            context.Request.Headers["Remote-User"] = "admin";
+            context.Request.Headers["Remote-Groups"] = "full_admin, Administrators";
+
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Oidc:TrustedProxies"] = "127.0.0.1"
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+            var provider = new OidcIdentityProvider(config);
+
+            var identity = await provider.ResolveIdentityAsync(context);
+
+            Assert.Equal("admin", identity.Username);
+            Assert.Empty(identity.AllSids);
+            Assert.False(McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(identity, config));
+        }
+
+        [Fact]
+        public void TrustedProxyHelper_DeniesLoopback_WhenNotExplicitlyAllowlisted()
+        {
+            var context = new DefaultHttpContext();
+            context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
+            context.Request.Headers["Remote-User"] = "malicious";
+
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Oidc:RequireTrustedProxy"] = "true",
+                ["Oidc:TrustedProxies"] = "10.0.0.10" // Loopback (127.0.0.1) NOT included!
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            bool isTrusted = TrustedProxyHelper.IsTrustedProxy(context, config);
+            Assert.False(isTrusted);
+        }
+
+        [Fact]
+        public void TrustedProxyHelper_DeniesXForwardedFor_WhenChainHasUntrustedHop()
+        {
+            var context = new DefaultHttpContext();
+            // Direct connection is trusted proxy (10.0.0.10)
+            context.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.10");
+            // XFF chain has untrusted hop 192.168.1.50 between client and trusted proxy
+            context.Request.Headers["X-Forwarded-For"] = "203.0.113.195, 192.168.1.50, 10.0.0.10";
+
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Oidc:RequireTrustedProxy"] = "true",
+                ["Oidc:TrustedProxies"] = "10.0.0.10" // 192.168.1.50 is NOT trusted
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            bool isTrusted = TrustedProxyHelper.IsTrustedProxy(context, config);
+            Assert.False(isTrusted);
+        }
     }
 }
+
+

@@ -551,7 +551,7 @@ namespace McpRouter.Extensions
                 var compositeProvider = httpContext.RequestServices.GetRequiredService<McpRouter.Core.Identity.CompositeIdentityProvider>();
                 var identity = await compositeProvider.ResolveIdentityAsync(httpContext);
 
-                if (identity.Username != "admin" && identity.Username != "system" && !identity.GroupNames.Contains("Administrators") && !identity.GroupNames.Contains("full_admin"))
+                if (!McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(identity, httpContext.RequestServices.GetService<IConfiguration>()))
                 {
                     var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
                     using var conn = dbFactory.CreateConnection();
@@ -1146,25 +1146,21 @@ namespace McpRouter.Extensions
             
             var api = app.MapGroup("").RequireAuthorization("AdminPolicy");
 
-            app.MapGet("/api/me", (HttpContext context) =>
+            api.MapGet("/api/me", async (HttpContext context, [FromServices] McpRouter.Core.Identity.CompositeIdentityProvider identityProvider) =>
             {
-                var user = context.Request.Headers["Remote-User"].ToString();
-                var name = context.Request.Headers["Remote-Name"].ToString();
-                var email = context.Request.Headers["Remote-Email"].ToString();
-                var groups = context.Request.Headers["Remote-Groups"].ToString();
-            
-                if (string.IsNullOrEmpty(user))
+                var identity = await identityProvider.ResolveIdentityAsync(context);
+                if (identity == null || identity.Username == "guest" || identity.Username == "anonymous")
                 {
                     return Results.Ok(new { authenticated = false });
                 }
-            
+
                 return Results.Ok(new
                 {
                     authenticated = true,
-                    username = user,
-                    name = string.IsNullOrEmpty(name) ? user : name,
-                    email = email,
-                    groups = groups.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries)
+                    username = identity.Username,
+                    name = identity.Username,
+                    email = "",
+                    groups = identity.GroupNames
                 });
             });
             
@@ -1231,7 +1227,7 @@ namespace McpRouter.Extensions
             
             api.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
-                var username = httpContext.User.Identity?.Name ?? "system";
+                var username = httpContext.User.Identity?.Name ?? "anonymous";
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
                 if (server == null)
                 {
@@ -1248,6 +1244,11 @@ namespace McpRouter.Extensions
                 }
                 if (!string.IsNullOrEmpty(update.Url))
                 {
+                    if (!IsValidServerUrl(update.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
+                    {
+                        _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, System.Text.Json.JsonSerializer.Serialize(update), false, err);
+                        return Results.BadRequest(new { error = err });
+                    }
                     server.Url = update.Url;
                 }
                 if (!string.IsNullOrEmpty(update.Type))
@@ -1298,7 +1299,13 @@ namespace McpRouter.Extensions
             
             api.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
-                var username = httpContext.User.Identity?.Name ?? "system";
+                var username = httpContext.User.Identity?.Name ?? "anonymous";
+                if (!IsValidServerUrl(server.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
+                {
+                    _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id ?? "unknown", System.Text.Json.JsonSerializer.Serialize(server), false, err);
+                    return Results.BadRequest(new { error = err });
+                }
+
                 if (string.IsNullOrEmpty(server.Id))
                 {
                     server.Id = Guid.NewGuid().ToString("N").Substring(0, 8);
@@ -1316,7 +1323,7 @@ namespace McpRouter.Extensions
             
             api.MapDelete("/api/servers/{id}", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
-                var username = httpContext.User.Identity?.Name ?? "system";
+                var username = httpContext.User.Identity?.Name ?? "anonymous";
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
                 if (server == null)
                 {
@@ -1380,7 +1387,7 @@ namespace McpRouter.Extensions
                 Results.Ok(embeddingService.GetSettings()));
                 
             api.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) => {
-                var username = httpContext.User.Identity?.Name ?? "system";
+                var username = httpContext.User.Identity?.Name ?? "anonymous";
                 try
                 {
                     embeddingService.SaveSettings(settings);
@@ -2167,6 +2174,60 @@ namespace McpRouter.Extensions
             app.Run();
             
         }
+        private static bool IsValidServerUrl(string? url, IConfiguration config, out string? errorMessage)
+        {
+            errorMessage = null;
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                errorMessage = "Server URL cannot be empty.";
+                return false;
+            }
+
+            if (!Uri.TryCreate(url, UriKind.Absolute, out var uri) || (uri.Scheme != "http" && uri.Scheme != "https"))
+            {
+                errorMessage = "Server URL must be a valid HTTP or HTTPS URI.";
+                return false;
+            }
+
+            var host = uri.Host;
+            var allowedIpRanges = config.GetSection("Security:AllowedIpRanges").Get<string[]>() ?? Array.Empty<string>();
+
+            try
+            {
+                System.Net.IPAddress[] ipAddresses;
+                if (System.Net.IPAddress.TryParse(host, out var directIp))
+                {
+                    ipAddresses = new[] { directIp };
+                }
+                else
+                {
+                    ipAddresses = System.Net.Dns.GetHostAddresses(host);
+                }
+
+                foreach (var ip in ipAddresses)
+                {
+                    if (McpRouter.Core.Security.SecurityValidationHelper.IsBlockedIp(ip, allowedIpRanges))
+                    {
+                        errorMessage = $"Access to IP address '{ip}' for host '{host}' is blocked for security (SSRF protection).";
+                        return false;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Failed to resolve host '{host}': {ex.Message}";
+                return false;
+            }
+
+            return true;
+        }
+    }
+
+    public class TestToolCallModel
+    {
+        public string ServerId { get; set; } = string.Empty;
+        public string ToolName { get; set; } = string.Empty;
+        public JsonElement Arguments { get; set; }
     }
 
     public class TestCallModel

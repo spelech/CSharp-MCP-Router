@@ -194,5 +194,68 @@ namespace McpRouter.Tests
             Assert.Equal("cached-value", val);
             Assert.Equal(0, clientCreationCount); // No client created because cache hit!
         }
+
+        [Fact]
+        public async Task Vault_ThrowsArgumentException_WhenAddressNotHttps()
+        {
+            var memoryCache = new MemoryCache(new MemoryCacheOptions());
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Vault:Address", "http://unsecure-vault:8200" },
+                { "Vault:RoleId", "role" },
+                { "Vault:SecretId", "secret" }
+            }).Build();
+
+            var retriever = new VaultSecretRetriever(config, memoryCache);
+
+            await Assert.ThrowsAsync<ArgumentException>(async () =>
+            {
+                await retriever.GetSecretAsync("my-path", "key1");
+            });
+        }
+
+        [Fact]
+        public async Task HttpTransport_RefusesConnection_WhenSecretProviderVaultFails_AndNeverReadsApiKey()
+        {
+            var server = new McpRouter.Models.McpServer
+            {
+                Id = "test-server",
+                SecretProvider = "Vault",
+                ApiKey = "PLAINTEXT_SECRET_KEY_DO_NOT_READ",
+                Url = "http://localhost:9999"
+            };
+
+            var mockRetriever = new Mock<ISecretRetriever>();
+            mockRetriever.Setup(r => r.ProviderName).Returns("Vault");
+            mockRetriever.Setup(r => r.GetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
+                         .ThrowsAsync(new System.Security.SecurityException("Vault connection failed"));
+
+            var httpClient = new System.Net.Http.HttpClient();
+            var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger>();
+            var transport = new McpRouter.Core.Transports.HttpTransport(server, httpClient, loggerMock.Object, mockRetriever.Object);
+
+            var ex = await Assert.ThrowsAsync<System.Security.SecurityException>(async () =>
+            {
+                await transport.ResolveTokenAsync();
+            });
+
+            Assert.Contains("Vault connection failed", ex.Message);
+
+            // Also test null secret return (retriever returns null instead of throwing)
+            var mockNullRetriever = new Mock<ISecretRetriever>();
+            mockNullRetriever.Setup(r => r.ProviderName).Returns("Vault");
+            mockNullRetriever.Setup(r => r.GetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
+                             .ReturnsAsync((string?)null);
+
+            var transportNull = new McpRouter.Core.Transports.HttpTransport(server, httpClient, loggerMock.Object, mockNullRetriever.Object);
+
+            var exNull = await Assert.ThrowsAsync<System.Security.SecurityException>(async () =>
+            {
+                await transportNull.ResolveTokenAsync();
+            });
+
+            Assert.Contains("Plaintext ApiKey fallback is disabled", exNull.Message);
+        }
     }
 }
+

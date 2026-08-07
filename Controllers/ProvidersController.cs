@@ -60,7 +60,7 @@ namespace McpRouter.Controllers
         {
             if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
 
-            var username = User?.Identity?.Name ?? "system";
+            var username = User?.Identity?.Name ?? "anonymous";
             try
             {
                 McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);
@@ -121,7 +121,7 @@ namespace McpRouter.Controllers
         {
             if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
 
-            var username = User?.Identity?.Name ?? "system";
+            var username = User?.Identity?.Name ?? "anonymous";
             try
             {
                 McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);

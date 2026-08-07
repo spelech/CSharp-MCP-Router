@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.9.7`** | 2026-08-07 | fix(security): resolve Remediation Round 2 P0 vulnerabilities (P0-1 through P0-7) |
 | **`v3.9.6`** | 2026-08-07 | fix(security): request-scoped SSE authorization — evaluate identity per-message, not from cached handshake context |
 | **`v3.9.5`** | 2026-08-07 | fix(security): make IsBlockedIp strictly fail-closed on null input |
 | **`v3.9.4`** | 2026-08-07 | fix(security): socket-level ConnectCallback SSRF validation |

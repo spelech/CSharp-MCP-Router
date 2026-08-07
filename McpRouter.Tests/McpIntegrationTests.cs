@@ -16,6 +16,7 @@ using FluentAssertions;
 using McpRouter.Models;
 using McpRouter.Services;
 using McpRouter.Core.Logging;
+using McpRouter.Core.Identity;
 using Microsoft.Extensions.DependencyInjection;
 using McpRouter;
 using Microsoft.AspNetCore.Mvc;
@@ -46,7 +47,7 @@ namespace McpRouter.Tests
 
         public McpIntegrationTests()
         {
-            _connection = new Microsoft.Data.Sqlite.SqliteConnection("Filename=:memory:");
+            _connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source=McpTestDb_{Guid.NewGuid()};Mode=Memory;Cache=Shared");
             _connection.Open();
 
             var options = new DbContextOptionsBuilder<RouterDbContext>()
@@ -66,13 +67,129 @@ namespace McpRouter.Tests
             _connection.Dispose();
         }
 
+        [Fact]
+        public async Task McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps()
+        {
+            var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build());
+            services.AddHttpClient("McpClient");
+            services.ConfigureAll<Microsoft.Extensions.Http.HttpClientFactoryOptions>(options =>
+            {
+                options.HttpMessageHandlerBuilderActions.Add(b =>
+                {
+                    b.PrimaryHandler = new SocketsHttpHandler
+                    {
+                        AllowAutoRedirect = false,
+                        ConnectCallback = McpRouter.Core.Security.SecurityValidationHelper.ValidatingConnectCallback
+                    };
+                });
+            });
+
+            var sp = services.BuildServiceProvider();
+            var factory = sp.GetRequiredService<IHttpClientFactory>();
+            var client = factory.CreateClient("McpClient");
+
+            var ex = await Assert.ThrowsAsync<HttpRequestException>(async () =>
+            {
+                await client.GetAsync("http://169.254.169.254/latest/meta-data");
+            });
+
+            Assert.Contains("SSRF protection", ex.Message);
+        }
+
+        [Fact]
+        public async Task AuditLogger_AuditFailClosed_RefusesInvocation_OnAuditWriteError()
+        {
+            var mockAuditLogger = new Mock<IAuditLogger>();
+            mockAuditLogger.Setup(a => a.LogInvocationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(),
+                It.IsAny<string?>(), It.IsAny<string?>()
+            )).ThrowsAsync(new Exception("Database connection for audit log failed"));
+
+            var services = new ServiceCollection();
+            services.AddSingleton<IAuditLogger>(mockAuditLogger.Object);
+            services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Audit:FailClosed", "true" }
+            }).Build());
+
+            var mockProvider = new Mock<IIdentityProvider>();
+            mockProvider.Setup(p => p.ResolveIdentityAsync(It.IsAny<HttpContext>()))
+                        .ReturnsAsync(new UserIdentityContext("alice", "MockProvider", new List<string> { "S-1-5-32-545" }));
+
+            var composite = new CompositeIdentityProvider(new[] { mockProvider.Object });
+            services.AddSingleton(composite);
+
+            var sp = services.BuildServiceProvider();
+
+            var httpContext = new DefaultHttpContext { RequestServices = sp };
+            var session = CreateSession(new List<McpServer>(), out _);
+
+            var ex = await Assert.ThrowsAsync<System.Security.SecurityException>(async () =>
+            {
+                await session.CallToolAsync("test__tool", "{}", _db, httpContext);
+            });
+
+            Assert.Contains("Audit logging failed and fail-closed security policy is active", ex.Message);
+        }
+
+        [Fact]
+        public async Task AuditLogger_RecordsPerRequestActor_NotHandshakeActor()
+        {
+            string? loggedUsername = null;
+            var mockAuditLogger = new Mock<IAuditLogger>();
+            mockAuditLogger.Setup(a => a.LogInvocationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<int>(), It.IsAny<int>(), It.IsAny<string?>(),
+                It.IsAny<string?>(), It.IsAny<string?>()
+            )).Callback<string, string, string, string, string, string, int, int, string?, string?, string?>(
+                (reqId, user, sid, server, item, method, time, status, payload, resp, err) =>
+                {
+                    loggedUsername = user;
+                }
+            ).Returns(Task.CompletedTask);
+
+            var services = new ServiceCollection();
+            services.AddSingleton<IAuditLogger>(mockAuditLogger.Object);
+            services.AddSingleton<IConfiguration>(new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build());
+
+            var bobContext = new DefaultHttpContext();
+            var mockProvider = new Mock<IIdentityProvider>();
+            mockProvider.Setup(p => p.ResolveIdentityAsync(bobContext))
+                        .ReturnsAsync(new UserIdentityContext("bob", "MockProvider", new List<string> { "S-1-5-32-545" }));
+
+            var composite = new CompositeIdentityProvider(new[] { mockProvider.Object });
+            services.AddSingleton(composite);
+            var sp = services.BuildServiceProvider();
+            bobContext.RequestServices = sp;
+
+            // Session created under Alice (handshake context)
+            var aliceSession = CreateSession(new List<McpServer>(), out _);
+            // Simulate Bob invoking tool call over Alice's SSE session
+            try
+            {
+                await aliceSession.CallToolAsync("test__tool", "{}", _db, bobContext);
+            }
+            catch { }
+
+            // Audit log MUST record Bob (the per-request actor), NOT Alice
+            Assert.Equal("bob", loggedUsername);
+        }
+
         private ClientSession CreateSession(List<McpServer> servers, out MockHttpMessageHandler httpHandler)
         {
             httpHandler = new MockHttpMessageHandler();
             var httpClient = new HttpClient(httpHandler);
             
             var context = new DefaultHttpContext();
-            var claims = new[] { new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin") };
+            var claims = new[] { 
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin"),
+                new System.Security.Claims.Claim("GroupSid", "S-1-5-32-544"),
+                new System.Security.Claims.Claim("Sid", "S-1-5-32-544")
+            };
             context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(claims, "AppKey"));
             var response = context.Response;
             
@@ -121,6 +238,14 @@ namespace McpRouter.Tests
 
 
             
+            foreach (var s in servers)
+            {
+                if (s.SecretProvider == "Vault" && string.IsNullOrEmpty(s.SecretPath) && string.IsNullOrEmpty(s.SecretMount))
+                {
+                    s.SecretProvider = "None";
+                }
+            }
+
             return new ClientSession("test-session", response, servers, httpClient, embeddingMock.Object, loggerMock.Object);
         }
 
@@ -203,7 +328,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task TestInitializationDiagnostics()
         {
-            var server = new McpServer { Id = "backend1", DisplayName = "Backend 1", Url = "http://backend1/mcp", Type = "http", Enabled = true };
+            var server = new McpServer { Id = "backend1", DisplayName = "Backend 1", Url = "http://backend1/mcp", Type = "http", SecretProvider = "None", Enabled = true };
             var mockHandler = new MockHttpMessageHandler();
             var httpClient = new HttpClient(mockHandler);
             var loggerMock = new Mock<ILogger>();
@@ -854,7 +979,7 @@ namespace McpRouter.Tests
             // Arrange
             var servers = new List<McpServer>
             {
-                new McpServer { Id = "ha", DisplayName = "Home Assistant", Url = "http://ha/mcp", Type = "http", Enabled = true }
+                new McpServer { Id = "ha", DisplayName = "Home Assistant", Url = "http://ha/mcp", Type = "http", SecretProvider = "None", Enabled = true }
             };
 
             var serviceProvider = new Mock<IServiceProvider>().Object;
@@ -865,15 +990,23 @@ namespace McpRouter.Tests
             var httpClient = new HttpClient(httpHandler);
             var sessionManager = new SessionManager(serviceProvider, new TestHttpClientFactory(httpClient), smLogger);
 
+            _db.AccessPolicies.Add(new McpAccessPolicy { Id = "p1", TargetId = "tool:ha__turn_on", RequiredGroup = "S-1-5-32-545", IsAllowed = true });
+            _db.AccessPolicies.Add(new McpAccessPolicy { Id = "p2", TargetId = "server:ha", RequiredGroup = "S-1-5-32-545", IsAllowed = true });
+            _db.SaveChanges();
+
             var context = new DefaultHttpContext();
             var claims = new[] { new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin") };
             context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(claims, "AppKey"));
             var services = new ServiceCollection();
             services.AddSingleton<IAuditLogger>(new Mock<IAuditLogger>().Object);
             var realConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
-                { "Audit:FailClosed", "false" }
+                { "Audit:FailClosed", "false" },
+                { "DB_PROVIDER", "sqlite" },
+                { "ConnectionStrings:DefaultConnection", _connection.ConnectionString },
+                { "DB_ENCRYPTION_KEY", "TestKey" }
             }).Build();
             services.AddSingleton<IConfiguration>(realConfig);
+            services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory>(new McpRouter.Core.Database.DbConnectionFactory(realConfig));
             context.RequestServices = services.BuildServiceProvider();
 
             var session = new ClientSession("test-session", context.Response, servers, httpClient, new Mock<IEmbeddingService>().Object, sessionManager, logger);
@@ -939,8 +1072,16 @@ namespace McpRouter.Tests
             // Act 1: Call sensitive tool "ha-mcp__turn_on" -> blocks waiting for approval!
             await session.ListToolsAsync("{\"jsonrpc\":\"2.0\",\"id\":1}");
 
+            var nonAdminContext = new DefaultHttpContext { RequestServices = context.RequestServices };
+            var nonAdminClaims = new[] { 
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "alice"),
+                new System.Security.Claims.Claim("GroupSid", "S-1-5-32-545"),
+                new System.Security.Claims.Claim("Sid", "S-1-5-32-545")
+            };
+            nonAdminContext.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(nonAdminClaims, "AppKey"));
+
             var callBody = "{\"jsonrpc\":\"2.0\",\"id\":\"appr-call-1\",\"method\":\"tools/call\",\"params\":{\"name\":\"ha__turn_on\",\"arguments\":{}}}";
-            var approvalTask = session.CallToolAsync("ha__turn_on", callBody, _db);
+            var approvalTask = session.CallToolAsync("ha__turn_on", callBody, _db, nonAdminContext);
 
             // Await a short moment for it to block and register approval
             await Task.Delay(200);
