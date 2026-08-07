@@ -14,6 +14,9 @@ namespace McpRouter.Models
         public string Type { get; set; } = "sse"; // "sse" or "http"
         public string SecretProvider { get; set; } = "Vault"; // "Vault", "WindowsRegistry", "Environment", "None"
         public string? SecretItemKey { get; set; }
+        public string? SecretMount { get; set; }
+        public string? SecretPath { get; set; }
+        public string? SecretField { get; set; }
         public string AuthShape { get; set; } = "bearer"; // "bearer", "basic", "raw", "x-api-key", "custom-header", "query"
         public string? CustomHeaderName { get; set; }
         public System.Collections.Generic.List<string> Categories { get; set; } = new();
