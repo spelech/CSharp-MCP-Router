@@ -11,6 +11,124 @@ namespace McpRouter.Core.Security
     {
         private static readonly Regex ServerIdRegex = new("^[a-zA-Z0-9_-]+$", RegexOptions.Compiled);
 
+        /// <summary>
+        /// Determines if an IP address is in a blocked range (loopback, link-local, private, CGNAT, multicast, ULA v6),
+        /// unless it matches an explicitly allowed CIDR/IP range in allowedIpRanges.
+        /// </summary>
+        public static bool IsBlockedIp(IPAddress ip, string[]? allowedIpRanges)
+        {
+            if (ip == null) return false;
+
+            // Unmap IPv4-mapped IPv6 address to IPv4 for accurate evaluation
+            if (ip.IsIPv4MappedToIPv6)
+            {
+                ip = ip.MapToIPv4();
+            }
+
+            // 1. Check explicitly allowed IP ranges first
+            if (allowedIpRanges != null && allowedIpRanges.Length > 0)
+            {
+                foreach (var allowedRange in allowedIpRanges)
+                {
+                    if (IsInSubnet(ip, allowedRange))
+                    {
+                        return false; // Allowed explicitly
+                    }
+                }
+            }
+
+            // 2. Check if IP falls into any blocked ranges
+            if (ip.AddressFamily == AddressFamily.InterNetwork)
+            {
+                if (IPAddress.IsLoopback(ip) || IsInSubnet(ip, "127.0.0.0/8")) return true; // Loopback
+                if (IsInSubnet(ip, "10.0.0.0/8")) return true;       // Private Class A
+                if (IsInSubnet(ip, "172.16.0.0/12")) return true;   // Private Class B (172.16.0.0 - 172.31.255.255)
+                if (IsInSubnet(ip, "192.168.0.0/16")) return true;  // Private Class C
+                if (IsInSubnet(ip, "169.254.0.0/16")) return true;  // Link-local (APIPA)
+                if (IsInSubnet(ip, "100.64.0.0/10")) return true;   // CGNAT (Carrier-Grade NAT)
+                if (IsInSubnet(ip, "224.0.0.0/4")) return true;     // Multicast
+                if (IsInSubnet(ip, "0.0.0.0/8")) return true;       // Current network / Broadcast
+            }
+            else if (ip.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                if (IPAddress.IsLoopback(ip) || IsInSubnet(ip, "::1/128")) return true; // IPv6 Loopback
+                if (ip.IsIPv6LinkLocal || IsInSubnet(ip, "fe80::/10")) return true;    // IPv6 Link-local
+                if (ip.IsIPv6Multicast || IsInSubnet(ip, "ff00::/8")) return true;    // IPv6 Multicast
+                if (IsInSubnet(ip, "fc00::/7")) return true;                         // IPv6 Unique Local Address (ULA fc00::/7)
+                if (IsInSubnet(ip, "::/128")) return true;                            // IPv6 Unspecified address
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Checks if an IP address matches a CIDR range (e.g., "10.0.0.0/8", "127.0.0.1") or exact IP string or "loopback".
+        /// </summary>
+        public static bool IsInSubnet(IPAddress ip, string cidrOrIp)
+        {
+            if (ip == null || string.IsNullOrWhiteSpace(cidrOrIp)) return false;
+
+            if (ip.IsIPv4MappedToIPv6)
+            {
+                ip = ip.MapToIPv4();
+            }
+
+            string cleanCidr = cidrOrIp.Trim();
+
+            // Special handling for keyword "loopback" if passed as allowed range
+            if (cleanCidr.Equals("loopback", StringComparison.OrdinalIgnoreCase))
+            {
+                return IPAddress.IsLoopback(ip);
+            }
+
+            string[] parts = cleanCidr.Split('/');
+            if (!IPAddress.TryParse(parts[0], out var targetIp))
+            {
+                return false;
+            }
+
+            if (targetIp.IsIPv4MappedToIPv6)
+            {
+                targetIp = targetIp.MapToIPv4();
+            }
+
+            if (ip.AddressFamily != targetIp.AddressFamily)
+            {
+                return false;
+            }
+
+            byte[] ipBytes = ip.GetAddressBytes();
+            byte[] targetBytes = targetIp.GetAddressBytes();
+            int maxPrefix = ipBytes.Length * 8;
+
+            int prefixLength = maxPrefix;
+            if (parts.Length > 1)
+            {
+                if (!int.TryParse(parts[1], out prefixLength) || prefixLength < 0 || prefixLength > maxPrefix)
+                {
+                    return false;
+                }
+            }
+
+            int fullBytes = prefixLength / 8;
+            int remainingBits = prefixLength % 8;
+
+            for (int i = 0; i < fullBytes; i++)
+            {
+                if (ipBytes[i] != targetBytes[i])
+                    return false;
+            }
+
+            if (remainingBits > 0)
+            {
+                byte mask = (byte)(0xFF << (8 - remainingBits));
+                if ((ipBytes[fullBytes] & mask) != (targetBytes[fullBytes] & mask))
+                    return false;
+            }
+
+            return true;
+        }
+
         public static bool IsPrivateOrLoopback(string url)
         {
             if (string.IsNullOrWhiteSpace(url)) return false;

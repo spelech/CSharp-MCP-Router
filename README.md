@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.9.4`** | 2026-08-07 | fix(security): socket-level ConnectCallback SSRF validation |
 | **`v3.9.3`** | 2026-08-07 | fix(crypto): prevent credential corruption on migration failure and add thread-safe key locking |
 | **`v3.9.2`** | 2026-08-07 | fix(crypto): implement AES-GCM, PBKDF2 derivation, and key hashing migration |
 | **`v3.9.1`** | 2026-08-07 | fix(secrets): fix database schema and Vault HTTPS enforcement |
