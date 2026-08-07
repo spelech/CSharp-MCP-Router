@@ -20,6 +20,13 @@ namespace McpRouter.Core.Secrets
             try
             {
                 var address = config["Vault:Address"];
+                if (!string.IsNullOrEmpty(address))
+                {
+                    if (!address.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                    {
+                        throw new ArgumentException("Vault Address must use the HTTPS scheme.");
+                    }
+                }
                 var roleId = config["Vault:RoleId"];
                 var secretId = config["Vault:SecretId"];
 

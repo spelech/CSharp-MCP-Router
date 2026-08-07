@@ -26,5 +26,15 @@ namespace McpRouter.Tests
             Assert.Contains("\"apiKey\":\"[REDACTED]\"", clean);
             Assert.Contains("\"password\":\"[REDACTED]\"", clean);
         }
+
+        [Fact]
+        public void SanitizePayload_Redacts_ConnectionString_Passwords()
+        {
+            string raw = "Data Source=mcp_router.db;Password=MySecretPassword123;Version=3;";
+            string clean = PiiSanitizer.SanitizePayload(raw);
+
+            Assert.DoesNotContain("MySecretPassword123", clean);
+            Assert.Contains("Password=[REDACTED]", clean);
+        }
     }
 }

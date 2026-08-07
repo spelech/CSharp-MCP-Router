@@ -6,6 +6,7 @@ namespace McpRouter.Core.Logging
     {
         private static readonly Regex TokenRegex = new(@"Bearer\s+[A-Za-z0-9\-\._~\+\/]+=*", RegexOptions.Compiled | RegexOptions.IgnoreCase);
         private static readonly Regex KeyRegex = new(@"""(api[-_]?key|password|secret|token|authorization)""\s*:\s*""[^""]+""", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ConnStringPasswordRegex = new(@"Password\s*=\s*[^;]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static string SanitizePayload(string rawPayload)
         {
@@ -13,6 +14,7 @@ namespace McpRouter.Core.Logging
 
             var sanitized = TokenRegex.Replace(rawPayload, "Bearer [REDACTED]");
             sanitized = KeyRegex.Replace(sanitized, "\"$1\":\"[REDACTED]\"");
+            sanitized = ConnStringPasswordRegex.Replace(sanitized, "Password=[REDACTED]");
 
             return sanitized;
         }

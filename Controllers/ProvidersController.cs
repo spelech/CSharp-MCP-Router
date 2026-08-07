@@ -61,6 +61,8 @@ namespace McpRouter.Controllers
 
             try
             {
+                McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);
+
                 using var conn = _dbFactory.CreateConnection();
                 if (_dbFactory.ProviderName == "sqlite")
                 {
@@ -81,6 +83,10 @@ namespace McpRouter.Controllers
                 }
 
                 return Ok(new { success = true });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
@@ -111,6 +117,8 @@ namespace McpRouter.Controllers
 
             try
             {
+                McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);
+
                 using var conn = _dbFactory.CreateConnection();
                 if (_dbFactory.ProviderName == "sqlite")
                 {
@@ -132,6 +140,10 @@ namespace McpRouter.Controllers
                 }
 
                 return Ok(new { success = true });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
