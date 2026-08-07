@@ -49,7 +49,7 @@ namespace McpRouter.Tests
                     ProviderName = "WindowsRegistry",
                     DisplayName = "Windows Registry (DPAPI)",
                     IsEnabled = true
-                });
+                }, new FakeAuditLogger());
 
                 Assert.IsType<OkObjectResult>(saveResult);
 
@@ -107,7 +107,7 @@ namespace McpRouter.Tests
                     UserHeader = "Remote-User",
                     GroupsHeader = "Remote-Groups",
                     IsEnabled = true
-                });
+                }, new FakeAuditLogger());
 
                 if (saveResult is ObjectResult objErr && objErr.StatusCode != 200)
                 {
@@ -127,6 +127,15 @@ namespace McpRouter.Tests
                     try { File.Delete(tempDbFile); } catch {}
                 }
             }
+        }
+
+        private class FakeAuditLogger : McpRouter.Core.Logging.IAuditLogger
+        {
+            public Task LogInvocationAsync(string requestId, string userPrincipalName, string userSid, string serverCodeName, string itemName, string requestMethod, int executionTimeMs, int statusCode, string? requestPayload = null, string? responsePayload = null, string? errorMessage = null)
+                => Task.CompletedTask;
+
+            public Task LogAdminActionAsync(string username, string action, string target, string details, bool success, string? errorMessage = null)
+                => Task.CompletedTask;
         }
     }
 }

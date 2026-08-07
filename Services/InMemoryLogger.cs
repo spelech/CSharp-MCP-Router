@@ -22,12 +22,16 @@ namespace McpRouter.Services
 
         public static void Add(LogLevel level, string category, string message, Exception? exception)
         {
+            var sanitizedMessage = McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(message);
+            var exceptionStr = exception?.ToString();
+            var sanitizedException = string.IsNullOrEmpty(exceptionStr) ? null : McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(exceptionStr);
+
             _queue.Enqueue(new LogEntry
             {
                 Level = level,
                 Category = category,
-                Message = message,
-                Exception = exception?.ToString()
+                Message = sanitizedMessage,
+                Exception = sanitizedException
             });
 
             while (_queue.Count > MaxLogs)

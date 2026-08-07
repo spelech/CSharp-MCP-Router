@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Dapper;
 using McpRouter.Core.Database;
+using McpRouter.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 
@@ -55,10 +56,11 @@ namespace McpRouter.Controllers
         }
 
         [HttpPost("secrets")]
-        public async Task<IActionResult> SaveSecretProvider([FromBody] SecretProviderDto dto)
+        public async Task<IActionResult> SaveSecretProvider([FromBody] SecretProviderDto dto, [FromServices] IAuditLogger auditLogger)
         {
             if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
 
+            var username = User?.Identity?.Name ?? "system";
             try
             {
                 McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);
@@ -82,14 +84,18 @@ namespace McpRouter.Controllers
                     }, commandType: System.Data.CommandType.StoredProcedure);
                 }
 
+                _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, dto.ConfigJson ?? "", true);
+
                 return Ok(new { success = true });
             }
             catch (ArgumentException ex)
             {
+                _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, dto.ConfigJson ?? "", false, ex.Message);
                 return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
+                _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, dto.ConfigJson ?? "", false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
             }
         }
@@ -111,10 +117,11 @@ namespace McpRouter.Controllers
         }
 
         [HttpPost("auth")]
-        public async Task<IActionResult> SaveAuthProvider([FromBody] AuthProviderDto dto)
+        public async Task<IActionResult> SaveAuthProvider([FromBody] AuthProviderDto dto, [FromServices] IAuditLogger auditLogger)
         {
             if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
 
+            var username = User?.Identity?.Name ?? "system";
             try
             {
                 McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);
@@ -139,14 +146,18 @@ namespace McpRouter.Controllers
                     }, commandType: System.Data.CommandType.StoredProcedure);
                 }
 
+                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, dto.ConfigJson ?? "", true);
+
                 return Ok(new { success = true });
             }
             catch (ArgumentException ex)
             {
+                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, dto.ConfigJson ?? "", false, ex.Message);
                 return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
+                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, dto.ConfigJson ?? "", false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
             }
         }

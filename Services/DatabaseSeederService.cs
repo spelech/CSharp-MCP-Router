@@ -147,6 +147,40 @@ namespace McpRouter.Services
                         logger.LogWarning(exPolicies, "AccessPolicies table init warning");
                     }
 
+                    // Create AuditLogs and AdminAuditLogs tables for SQLite
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw(
+                            "CREATE TABLE IF NOT EXISTS AuditLogs (" +
+                            "RequestId TEXT PRIMARY KEY, " +
+                            "UserPrincipalName TEXT, " +
+                            "UserSid TEXT, " +
+                            "ServerCodeName TEXT, " +
+                            "ItemName TEXT, " +
+                            "RequestMethod TEXT, " +
+                            "ExecutionTimeMs INTEGER, " +
+                            "StatusCode INTEGER, " +
+                            "RequestPayload TEXT, " +
+                            "ResponsePayload TEXT, " +
+                            "ErrorMessage TEXT, " +
+                            "Timestamp TEXT DEFAULT CURRENT_TIMESTAMP)");
+
+                        db.Database.ExecuteSqlRaw(
+                            "CREATE TABLE IF NOT EXISTS AdminAuditLogs (" +
+                            "Id TEXT PRIMARY KEY, " +
+                            "Username TEXT, " +
+                            "Action TEXT, " +
+                            "Target TEXT, " +
+                            "Details TEXT, " +
+                            "Success INTEGER, " +
+                            "ErrorMessage TEXT, " +
+                            "Timestamp TEXT DEFAULT CURRENT_TIMESTAMP)");
+                    }
+                    catch (Exception exAudit)
+                    {
+                        logger.LogWarning(exAudit, "Audit tables init warning");
+                    }
+
                     // Create GroupMappings table for SQLite
                     try
                     {

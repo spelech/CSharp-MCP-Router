@@ -167,3 +167,19 @@ BEGIN
     );
 END;
 GO
+
+-- 7. Admin Audit Logging Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AdminAuditLogs')
+BEGIN
+    CREATE TABLE [dbo].[AdminAuditLogs] (
+        [Id]           VARCHAR(50) NOT NULL PRIMARY KEY,
+        [Username]     NVARCHAR(256) NOT NULL,
+        [Action]       VARCHAR(100) NOT NULL,
+        [Target]       VARCHAR(256) NOT NULL,
+        [Details]      NVARCHAR(MAX) NULL,
+        [Success]      BIT NOT NULL,
+        [ErrorMessage] NVARCHAR(MAX) NULL,
+        [Timestamp]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END;
+GO

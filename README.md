@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.5.0`** | 2026-08-07 | feat(security): implement LogBuffer PII sanitization and structured admin audit logging |
 | **`v3.4.0`** | 2026-08-07 | feat(security): implement column-level encryption, HTTPS URL validation, connection string password masking, and add DB encryption verification tests |
 | **`v3.3.0`** | 2026-08-07 | feat(security): implement strict namespace validation, SSRF private IP blocks, and disable automatic redirects |
 | **`v3.2.0`** | 2026-08-07 | feat(security): implement OidcHeader auth handler and secure control-plane endpoints |
