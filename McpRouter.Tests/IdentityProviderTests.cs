@@ -1,7 +1,9 @@
+using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using McpRouter.Core.Identity;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace McpRouter.Tests
@@ -12,6 +14,7 @@ namespace McpRouter.Tests
         public async Task OidcIdentityProvider_Parses_Remote_User_And_Groups_Headers()
         {
             var context = new DefaultHttpContext();
+            context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
             context.Request.Headers["Remote-User"] = "steve";
             context.Request.Headers["Remote-Groups"] = "full_admin, house_member";
 
@@ -29,6 +32,7 @@ namespace McpRouter.Tests
         public async Task CompositeIdentityProvider_Falls_Back_To_Oidc_When_AD_Not_Authenticated()
         {
             var context = new DefaultHttpContext();
+            context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
             context.Request.Headers["Remote-User"] = "alex";
             context.Request.Headers["sso_groups"] = "dev_team";
 
@@ -71,7 +75,13 @@ namespace McpRouter.Tests
             context.Request.Headers["Remote-User"] = "steve";
             context.Request.Headers["Remote-Groups"] = "house_member";
 
-            var provider = new OidcIdentityProvider();
+            var configDict = new Dictionary<string, string?>
+            {
+                { "Oidc:RequireTrustedProxy", "true" },
+                { "Oidc:TrustedProxies", "10.0.0.10" }
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+            var provider = new OidcIdentityProvider(config);
             var identity = await provider.ResolveIdentityAsync(context);
 
             Assert.True(context.Request.Headers.ContainsKey("Remote-User"));
@@ -83,6 +93,7 @@ namespace McpRouter.Tests
         public async Task OidcIdentityProvider_MapsAdminSid_ForAdminGroups()
         {
             var context = new DefaultHttpContext();
+            context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
             context.Request.Headers["Remote-User"] = "steve";
             context.Request.Headers["Remote-Groups"] = "full_admin";
 
