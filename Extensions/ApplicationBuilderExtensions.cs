@@ -91,30 +91,7 @@ namespace McpRouter.Extensions
                 }
             }); // Serves dashboard files from wwwroot with no-cache headers
             
-            // Enforce SSO auth on dashboard APIs (with admin fallback for dashboard REST calls)
-            app.Use(async (context, next) =>
-            {
-                var path = context.Request.Path.Value ?? string.Empty;
-                if (path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) && 
-                    !path.StartsWith("/api/register", StringComparison.OrdinalIgnoreCase) && 
-                    !path.StartsWith("/api/me", StringComparison.OrdinalIgnoreCase))
-                {
-                    var user = context.Request.Headers["Remote-User"].ToString();
-                    if (string.IsNullOrEmpty(user))
-                    {
-                        user = context.Request.Headers["X-Forwarded-User"].ToString();
-                    }
 
-                    // Default identity fallback to "admin" if no SSO proxy header is passed (since edge proxy handles auth)
-                    if (string.IsNullOrEmpty(user))
-                    {
-                        user = "admin";
-                    }
-
-                    context.Items["AuthenticatedUser"] = user;
-                }
-                await next();
-            });
             
             app.SeedDatabase();
             
@@ -1162,6 +1139,8 @@ namespace McpRouter.Extensions
             // DCR & OAUTH ENDPOINTS
             // ----------------------------------------------------
             
+            var api = app.MapGroup("").RequireAuthorization("AdminPolicy");
+
             app.MapGet("/api/me", (HttpContext context) =>
             {
                 var user = context.Request.Headers["Remote-User"].ToString();
@@ -1189,7 +1168,7 @@ namespace McpRouter.Extensions
             // ----------------------------------------------------
             // DASHBOARD MANAGEMENT ENDPOINTS
             // ----------------------------------------------------
-            app.MapGet("/api/servers", async ([FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
+            api.MapGet("/api/servers", async ([FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
             {
                 var servers = await db.Servers.ToListAsync();
                 var statuses = sessionManager.BackendStatuses;
@@ -1218,7 +1197,7 @@ namespace McpRouter.Extensions
                 return Results.Ok(sanitized);
             });
 
-            app.MapPost("/api/servers/{id}/reconnect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, [FromServices] Services.BackendHealthCheckService healthCheckSvc, ILogger<Program> logger) =>
+            api.MapPost("/api/servers/{id}/reconnect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, [FromServices] Services.BackendHealthCheckService healthCheckSvc, ILogger<Program> logger) =>
             {
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
                 if (server == null)
@@ -1239,13 +1218,13 @@ namespace McpRouter.Extensions
                 return Results.Ok(new { success = true, message = $"Reconnection triggered for server {server.DisplayName}" });
             });
 
-            app.MapPost("/api/servers/reconnect-all", async ([FromServices] Services.BackendHealthCheckService healthCheckSvc) =>
+            api.MapPost("/api/servers/reconnect-all", async ([FromServices] Services.BackendHealthCheckService healthCheckSvc) =>
             {
                 await healthCheckSvc.ProbeAllServersAsync();
                 return Results.Ok(new { success = true });
             });
             
-            app.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
+            api.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
             {
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
                 if (server == null)
@@ -1308,7 +1287,7 @@ namespace McpRouter.Extensions
                 return Results.Ok(server);
             });
             
-            app.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
+            api.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
             {
                 if (string.IsNullOrEmpty(server.Id))
                 {
@@ -1322,7 +1301,7 @@ namespace McpRouter.Extensions
                 return Results.Ok(server);
             });
             
-            app.MapDelete("/api/servers/{id}", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
+            api.MapDelete("/api/servers/{id}", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
             {
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
                 if (server == null)
@@ -1340,7 +1319,7 @@ namespace McpRouter.Extensions
                 return Results.Ok(new { success = true });
             });
 
-            app.MapGet("/api/servers/{id}/inspect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            api.MapGet("/api/servers/{id}/inspect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
             {
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
                 if (server == null) return Results.NotFound(new { error = "Server not found" });
@@ -1372,22 +1351,22 @@ namespace McpRouter.Extensions
             // --- TEST BENCH & LOGS ENDPOINTS ---
 
             // 1. Logs API
-            app.MapGet("/api/logs", () => Results.Ok(LogBuffer.GetLogs()));
-            app.MapDelete("/api/logs", () => {
+            api.MapGet("/api/logs", () => Results.Ok(LogBuffer.GetLogs()));
+            api.MapDelete("/api/logs", () => {
                 LogBuffer.Clear();
                 return Results.Ok(new { success = true });
             });
 
             // 1.5. Settings API
-            app.MapGet("/api/settings", (DynamicEmbeddingService embeddingService) => 
+            api.MapGet("/api/settings", (DynamicEmbeddingService embeddingService) => 
                 Results.Ok(embeddingService.GetSettings()));
                 
-            app.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService) => {
+            api.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService) => {
                 embeddingService.SaveSettings(settings);
                 return Results.Ok(new { success = true, settings = embeddingService.GetSettings() });
             });
 
-            app.MapGet("/api/approvals", ([FromServices] SessionManager sessionManager) =>
+            api.MapGet("/api/approvals", ([FromServices] SessionManager sessionManager) =>
             {
                 var approvals = sessionManager.PendingApprovals.Values.Select(a => new
                 {
@@ -1399,7 +1378,7 @@ namespace McpRouter.Extensions
                 return Results.Ok(approvals);
             });
 
-            app.MapPost("/api/approvals/{id}/action", ([FromRoute] string id, [FromBody] System.Text.Json.JsonElement body, [FromServices] SessionManager sessionManager) =>
+            api.MapPost("/api/approvals/{id}/action", ([FromRoute] string id, [FromBody] System.Text.Json.JsonElement body, [FromServices] SessionManager sessionManager) =>
             {
                 if (sessionManager.PendingApprovals.TryRemove(id, out var approval))
                 {
@@ -1414,7 +1393,7 @@ namespace McpRouter.Extensions
                 return Results.NotFound(new { error = "Approval request not found." });
             });
 
-            app.MapGet("/api/test/tools", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapGet("/api/test/tools", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var query = db.Servers.Where(s => s.Enabled);
@@ -1517,7 +1496,7 @@ namespace McpRouter.Extensions
             });
 
             // 3. Test Call API
-            app.MapPost("/api/test/call", async ([FromBody] TestCallModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/call", async ([FromBody] TestCallModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == model.ServerId);
@@ -1577,7 +1556,7 @@ namespace McpRouter.Extensions
             });
 
             // 4. Test Semantic Search API
-            app.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
@@ -1667,7 +1646,7 @@ namespace McpRouter.Extensions
             });
 
             // 2b. Test Prompts List API
-            app.MapGet("/api/test/prompts", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapGet("/api/test/prompts", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var query = db.Servers.Where(s => s.Enabled);
@@ -1764,7 +1743,7 @@ namespace McpRouter.Extensions
             });
 
             // 2c. Test Resources List API
-            app.MapGet("/api/test/resources", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapGet("/api/test/resources", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var query = db.Servers.Where(s => s.Enabled);
@@ -1905,7 +1884,7 @@ namespace McpRouter.Extensions
             });
 
             // 3b. Test Prompt Get API
-            app.MapPost("/api/test/prompts/get", async ([FromBody] TestPromptGetModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/prompts/get", async ([FromBody] TestPromptGetModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
@@ -1974,7 +1953,7 @@ namespace McpRouter.Extensions
             });
 
             // 3c. Test Resource Read API
-            app.MapPost("/api/test/resources/read", async ([FromBody] TestResourceReadModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/resources/read", async ([FromBody] TestResourceReadModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
@@ -2047,7 +2026,7 @@ namespace McpRouter.Extensions
                 return path;
             }
 
-            app.MapGet("/api/custom-files", () =>
+            api.MapGet("/api/custom-files", () =>
             {
                 var result = new List<object>();
                 try
@@ -2075,7 +2054,7 @@ namespace McpRouter.Extensions
                 return Results.Ok(result);
             });
 
-            app.MapGet("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name) =>
+            api.MapGet("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name) =>
             {
                 if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
                 var cleanName = SanitizeFileName(name);
@@ -2096,7 +2075,7 @@ namespace McpRouter.Extensions
                 }
             });
 
-            app.MapPost("/api/custom-files/{type}/{name}", async ([FromRoute] string type, [FromRoute] string name, [FromBody] System.Text.Json.JsonElement body) =>
+            api.MapPost("/api/custom-files/{type}/{name}", async ([FromRoute] string type, [FromRoute] string name, [FromBody] System.Text.Json.JsonElement body) =>
             {
                 if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
                 var cleanName = SanitizeFileName(name);
@@ -2136,7 +2115,7 @@ namespace McpRouter.Extensions
                 }
             });
 
-            app.MapDelete("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name) =>
+            api.MapDelete("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name) =>
             {
                 if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
                 var cleanName = SanitizeFileName(name);

@@ -11,11 +11,13 @@ using McpRouter.Core.Secrets;
 using McpRouter.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
+using Microsoft.AspNetCore.Authorization;
 
 namespace McpRouter.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "AdminPolicy")]
     public class AppKeysController : ControllerBase
     {
         private readonly IDbConnectionFactory _dbFactory;
@@ -29,19 +31,25 @@ namespace McpRouter.Controllers
 
         private string GetAuthenticatedUser()
         {
-            var user = HttpContext.Items["AuthenticatedUser"] as string;
+            var user = User.Identity?.Name;
+            if (string.IsNullOrEmpty(user))
+            {
+                user = HttpContext.Items["AuthenticatedUser"] as string;
+            }
             if (string.IsNullOrEmpty(user))
             {
                 user = HttpContext.Request.Headers["Remote-User"].FirstOrDefault()
                     ?? HttpContext.Request.Headers["X-Forwarded-User"].FirstOrDefault()
-                    ?? "admin"; // Default fallback
+                    ?? string.Empty;
             }
             return user;
         }
 
         private bool IsAdmin(string username)
         {
-            return username.Equals("admin", StringComparison.OrdinalIgnoreCase) || username.Equals("system", StringComparison.OrdinalIgnoreCase);
+            return User.IsInRole("Administrator") || 
+                   username.Equals("admin", StringComparison.OrdinalIgnoreCase) || 
+                   username.Equals("system", StringComparison.OrdinalIgnoreCase);
         }
 
         [HttpGet]

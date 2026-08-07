@@ -12,7 +12,7 @@ namespace McpRouter.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    // [Authorize] // Assuming we'd want this protected by TinyAuth in a real deployment
+    [Authorize(Policy = "AdminPolicy")]
     public class ClientsController : ControllerBase
     {
         private readonly IOpenIddictApplicationManager _applicationManager;
