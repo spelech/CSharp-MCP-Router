@@ -2,14 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using McpRouter.Core.Secrets;
 using McpRouter.Models;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace McpRouter.Services
 {
@@ -17,7 +20,12 @@ namespace McpRouter.Services
     {
         public static void SeedDatabase(this WebApplication app)
         {
-            using var scope = app.Services.CreateScope();
+            SeedDatabase(app.Services, app.Configuration);
+        }
+
+        public static void SeedDatabase(IServiceProvider services, IConfiguration configuration)
+        {
+            using var scope = services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             
@@ -25,7 +33,7 @@ namespace McpRouter.Services
             {
                 logger.LogInformation("Initializing database...");
 
-                var encryptionKey = app.Configuration["DB_ENCRYPTION_KEY"];
+                var encryptionKey = configuration["DB_ENCRYPTION_KEY"];
                 if (string.IsNullOrEmpty(encryptionKey))
                 {
                     logger.LogInformation("No DB_ENCRYPTION_KEY provided in configuration. A unique, cryptographically secure key has been generated and persisted in the data directory.");
@@ -247,6 +255,44 @@ namespace McpRouter.Services
                     {
                         db.Settings.Add(new RouterSettings());
                         db.SaveChanges();
+                    }
+
+                    // AppKey Hashing Migration: migrate legacy AES-CBC encrypted AppKeys to SHA-256 hashes
+                    try
+                    {
+                        var appKeys = db.AppKeys.ToList();
+                        bool keysUpdated = false;
+                        foreach (var key in appKeys)
+                        {
+                            if (string.IsNullOrEmpty(key.EncryptedKey)) continue;
+
+                            bool isHashed = key.EncryptedKey.Length == 64
+                                && key.EncryptedKey.All(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
+
+                            if (!isHashed)
+                            {
+                                var decrypted = SymmetricEncryptionHelper.DecryptLegacy(key.EncryptedKey, configuration);
+                                if (string.IsNullOrEmpty(decrypted))
+                                {
+                                    decrypted = key.EncryptedKey;
+                                }
+
+                                using var sha256 = SHA256.Create();
+                                var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(decrypted));
+                                key.EncryptedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
+                                keysUpdated = true;
+                            }
+                        }
+
+                        if (keysUpdated)
+                        {
+                            logger.LogInformation("Migrated legacy AppKeys to SHA-256 hashes.");
+                            db.SaveChanges();
+                        }
+                    }
+                    catch (Exception exAppKeyMigration)
+                    {
+                        logger.LogError(exAppKeyMigration, "Failed to migrate legacy AppKeys to SHA-256 hashes.");
                     }
 
                     try
