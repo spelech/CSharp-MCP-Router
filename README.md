@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.1.1`** | 2026-08-07 | docs: add design spec for security hardening |
 | **`v3.1.0`** | 2026-08-07 | feat(scripts): add commit and version autobump helper scripts |
 | **`v3.0.8`** | 2026-08-07 | **Performance Release: Optimized Database Seeder.** Resolved a critical N+1 query issue in the custom server database initialization by pre-fetching database records into an in-memory dictionary. This cuts down database round-trips from $O(M)$ down to $O(1)$ during configuration ingestion. |
 | **`v3.0.7`** | 2026-08-07 | **Security Bug Fix: Resolve Hardcoded Fallback DB Encryption Key.** Replaced cleartext fallback secret patterns in `RouterDbContext`, `DbConnectionFactory`, and `SymmetricEncryptionHelper` with a robust dynamic fallback. Missing encryption key settings will now generate and persist a high-entropy cryptographically secure random key file inside the `/app/data/` persistent volume, avoiding any hardcoded credential risk. |
