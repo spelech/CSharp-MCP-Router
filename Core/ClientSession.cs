@@ -65,30 +65,30 @@ namespace McpRouter
         {
         }
 
-        public async Task<UserIdentityContext> ResolveUserIdentityAsync()
+        public async Task<UserIdentityContext> ResolveUserIdentityAsync(HttpContext? httpContext = null)
         {
-            var config = _clientResponse?.HttpContext?.RequestServices?.GetService<IConfiguration>();
+            var contextToUse = httpContext ?? _clientResponse?.HttpContext;
+            var config = contextToUse?.RequestServices?.GetService<IConfiguration>();
             var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
 
-            if (_clientResponse?.HttpContext?.RequestServices == null)
+            if (contextToUse?.RequestServices == null)
             {
                 return new UserIdentityContext("system", "System", new List<string>(), adminGroupSid);
             }
             try
             {
                 // AppKey authentication bypass for custom claims mapping
-                var httpContext = _clientResponse.HttpContext;
-                if (httpContext.User?.Identity?.IsAuthenticated == true && httpContext.User.Identity.AuthenticationType == "AppKey")
+                if (contextToUse.User?.Identity?.IsAuthenticated == true && contextToUse.User.Identity.AuthenticationType == "AppKey")
                 {
-                    var username = httpContext.User.Identity.Name ?? "anonymous";
+                    var username = contextToUse.User.Identity.Name ?? "anonymous";
                     var appKeySids = (username == "admin" || username == "system") ? new List<string> { adminGroupSid } : null;
                     return new UserIdentityContext(username, "AppKey", new List<string>(), "", appKeySids);
                 }
 
-                var compositeProvider = _clientResponse.HttpContext.RequestServices.GetService<CompositeIdentityProvider>();
+                var compositeProvider = contextToUse.RequestServices.GetService<CompositeIdentityProvider>();
                 if (compositeProvider != null)
                 {
-                    return await compositeProvider.ResolveIdentityAsync(_clientResponse.HttpContext);
+                    return await compositeProvider.ResolveIdentityAsync(contextToUse);
                 }
             }
             catch (Exception ex)
@@ -98,12 +98,13 @@ namespace McpRouter
             return new UserIdentityContext("anonymous", "None", new List<string>());
         }
 
-        public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, string? category = null)
+        public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, string? category = null, HttpContext? httpContext = null)
         {
+            var contextToUse = httpContext ?? _clientResponse?.HttpContext;
             // If authenticated via AppKey, check key-level scopes first
-            if (_clientResponse?.HttpContext?.Items.TryGetValue("AppKeyUsed", out var appKeyUsedObj) == true && appKeyUsedObj is bool appKeyUsed && appKeyUsed)
+            if (contextToUse?.Items.TryGetValue("AppKeyUsed", out var appKeyUsedObj) == true && appKeyUsedObj is bool appKeyUsed && appKeyUsed)
             {
-                if (_clientResponse.HttpContext.Items.TryGetValue("AppKeyScopes", out var scopesObj) == true && scopesObj is string scopesJson)
+                if (contextToUse.Items.TryGetValue("AppKeyScopes", out var scopesObj) == true && scopesObj is string scopesJson)
                 {
                     bool scopeAllowed = false;
                     try
@@ -150,17 +151,17 @@ namespace McpRouter
                 }
             }
 
-            var identity = await ResolveUserIdentityAsync();
+            var identity = await ResolveUserIdentityAsync(contextToUse);
 
             // 1. Admin SID bypass check
-            var config = _clientResponse?.HttpContext?.RequestServices?.GetService<IConfiguration>();
+            var config = contextToUse?.RequestServices?.GetService<IConfiguration>();
             var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
             if (identity.AllSids.Contains(adminGroupSid))
             {
                 return true;
             }
 
-            if (_clientResponse?.HttpContext?.RequestServices == null)
+            if (contextToUse?.RequestServices == null)
             {
                 // If there's no HttpContext, we default to false (fail closed)
                 return false;
@@ -168,7 +169,7 @@ namespace McpRouter
 
             try
             {
-                var dbFactory = _clientResponse.HttpContext.RequestServices.GetService<IDbConnectionFactory>();
+                var dbFactory = contextToUse.RequestServices.GetService<IDbConnectionFactory>();
                 if (dbFactory == null)
                 {
                     return false;
@@ -492,7 +493,7 @@ namespace McpRouter
             return tools;
         }
 
-        public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db)
+        public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db, HttpContext? httpContext = null)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             int statusCode = 200;
@@ -520,11 +521,11 @@ namespace McpRouter
                     return errResult;
                 }
 
-                // RBAC Check
-                var isAuth = await IsUserAuthorizedAsync("tools/call", toolName);
+                // RBAC Check — use the live per-request HttpContext when provided
+                var isAuth = await IsUserAuthorizedAsync("tools/call", toolName, null, httpContext);
                 if (!isAuth)
                 {
-                    var identity = await ResolveUserIdentityAsync();
+                    var identity = await ResolveUserIdentityAsync(httpContext);
                     statusCode = 403;
                     errorMessage = $"Security Error: User '{identity.Username}' does not have permission to execute tool '{toolName}'.";
                     var errResult = new {
@@ -767,7 +768,7 @@ namespace McpRouter
             return resources;
         }
 
-        public async Task<object?> ReadResourceAsync(string resourceUri, string body)
+        public async Task<object?> ReadResourceAsync(string resourceUri, string body, HttpContext? httpContext = null)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             int statusCode = 200;
@@ -785,10 +786,11 @@ namespace McpRouter
                     throw new UnauthorizedAccessException(errorMessage);
                 }
 
-                var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri);
+                // RBAC Check — use the live per-request HttpContext when provided
+                var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri, null, httpContext);
                 if (!isAuth)
                 {
-                    var identity = await ResolveUserIdentityAsync();
+                    var identity = await ResolveUserIdentityAsync(httpContext);
                     statusCode = 403;
                     errorMessage = $"Security Error: User '{identity.Username}' does not have permission to read resource '{resourceUri}'.";
                     throw new UnauthorizedAccessException(errorMessage);
@@ -909,7 +911,7 @@ namespace McpRouter
             return prompts;
         }
 
-        public async Task<object?> GetPromptAsync(string promptName, string body)
+        public async Task<object?> GetPromptAsync(string promptName, string body, HttpContext? httpContext = null)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             int statusCode = 200;
@@ -927,10 +929,11 @@ namespace McpRouter
                     throw new UnauthorizedAccessException(errorMessage);
                 }
 
-                var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName);
+                // RBAC Check — use the live per-request HttpContext when provided
+                var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName, null, httpContext);
                 if (!isAuth)
                 {
-                    var identity = await ResolveUserIdentityAsync();
+                    var identity = await ResolveUserIdentityAsync(httpContext);
                     statusCode = 403;
                     errorMessage = $"Security Error: User '{identity.Username}' does not have permission to access prompt '{promptName}'.";
                     throw new UnauthorizedAccessException(errorMessage);

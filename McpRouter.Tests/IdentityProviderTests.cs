@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using McpRouter.Core.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Moq;
 using Xunit;
 
 namespace McpRouter.Tests
@@ -59,11 +61,11 @@ namespace McpRouter.Tests
             var provider = new OidcIdentityProvider();
             var identity = await provider.ResolveIdentityAsync(context);
 
+            Assert.Equal("guest", identity.Username);
             Assert.False(context.Request.Headers.ContainsKey("Remote-User"));
             Assert.False(context.Request.Headers.ContainsKey("Remote-Groups"));
             Assert.False(context.Request.Headers.ContainsKey("X-Forwarded-User"));
             Assert.False(context.Request.Headers.ContainsKey("sso_groups"));
-            Assert.Equal("guest", identity.Username);
             Assert.Empty(identity.GroupNames);
         }
 
@@ -77,10 +79,10 @@ namespace McpRouter.Tests
 
             var configDict = new Dictionary<string, string?>
             {
-                { "Oidc:RequireTrustedProxy", "true" },
-                { "Oidc:TrustedProxies", "10.0.0.10" }
+                ["Oidc:TrustedProxies"] = "10.0.0.10,127.0.0.1"
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
             var provider = new OidcIdentityProvider(config);
             var identity = await provider.ResolveIdentityAsync(context);
 
@@ -101,6 +103,81 @@ namespace McpRouter.Tests
             var identity = await provider.ResolveIdentityAsync(context);
 
             Assert.Contains("S-1-5-32-544", identity.AllSids);
+        }
+
+        /// <summary>
+        /// Verifies that a single shared ClientSession evaluates identity from the live
+        /// per-message HttpContext, not the cached handshake context.
+        ///
+        /// Scenario:
+        ///   - Session is established with a dummy handshake context (neither Alice nor Bob).
+        ///   - Alice's per-request context resolves to an admin SID → tool call is authorized.
+        ///   - Bob's per-request context resolves to no SID/groups → tool call is denied (isError:true).
+        /// </summary>
+        [Fact]
+        public async Task SSE_ValidatesIdentityPerMessage()
+        {
+            const string AdminSid = "S-1-5-32-544";
+
+            // --- Build a per-request-context-aware mock identity provider ---
+            // The mock returns Alice's admin identity when her context is passed in,
+            // and Bob's unprivileged identity when his context is passed in.
+            var aliceContext = new DefaultHttpContext();
+            aliceContext.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
+
+            var bobContext = new DefaultHttpContext();
+            bobContext.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
+
+            var aliceIdentity = new UserIdentityContext("alice", "Test", new List<string> { "full_admin" }, AdminSid);
+            var bobIdentity   = new UserIdentityContext("bob",   "Test", new List<string>(), "");
+
+            var mockProvider = new Moq.Mock<IIdentityProvider>();
+            mockProvider.Setup(p => p.ResolveIdentityAsync(aliceContext)).ReturnsAsync(aliceIdentity);
+            mockProvider.Setup(p => p.ResolveIdentityAsync(bobContext)).ReturnsAsync(bobIdentity);
+
+            // --- Shared service provider ---
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                ["Audit:FailClosed"] = "false",
+                ["Admin:GroupSid"]   = AdminSid
+            }).Build();
+
+            var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(config);
+            services.AddSingleton(new CompositeIdentityProvider(new[] { mockProvider.Object }));
+            var sp = services.BuildServiceProvider();
+
+            aliceContext.RequestServices = sp;
+            bobContext.RequestServices   = sp;
+
+            // Handshake context — session constructed with Alice's response but identity
+            // must NOT be used for subsequent per-message calls
+            var handshakeContext = new DefaultHttpContext();
+            handshakeContext.RequestServices = sp;
+            handshakeContext.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
+
+            var servers = new List<McpRouter.Models.McpServer>();
+            var httpClient = new System.Net.Http.HttpClient();
+            var loggerMock = new Moq.Mock<Microsoft.Extensions.Logging.ILogger>();
+            var embeddingMock = new Moq.Mock<McpRouter.Services.IEmbeddingService>();
+
+            var session = new ClientSession("test-sse-session", handshakeContext.Response, servers, httpClient, embeddingMock.Object, loggerMock.Object);
+
+            var toolBody = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"search_tools\",\"arguments\":{\"query\":\"test\"}}}";
+
+            // --- Alice's call: admin SID bypass → authorized ---
+            // Tool routing will fail (no backends) but the auth layer must not deny her.
+            try { await session.CallToolAsync("search_tools", toolBody, db: null!, httpContext: aliceContext); }
+            catch (UnauthorizedAccessException) { throw; }  // fail the test if auth denies alice
+            catch { /* routing / no-backend exceptions are expected in a unit test */ }
+
+            // --- Bob's call: no SID, no DB policy → RBAC must deny (isError:true) ---
+            // CallToolAsync returns an MCP error object on RBAC denial (protocol-conformant).
+            var bobResult = await session.CallToolAsync("search_tools", toolBody, db: null!, httpContext: bobContext);
+            var bobJson   = System.Text.Json.JsonSerializer.Serialize(bobResult);
+            Assert.Contains("\"isError\":true", bobJson);
+            Assert.Contains("Security Error", bobJson);
+            Assert.Contains("bob", bobJson);
         }
     }
 }

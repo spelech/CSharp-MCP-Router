@@ -292,7 +292,7 @@ namespace McpRouter.Extensions
                             if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
                             {
                                 var toolName = nameProp.GetString() ?? string.Empty;
-                                var res = await activeSession.CallToolAsync(toolName, requestBody, db);
+                                var res = await activeSession.CallToolAsync(toolName, requestBody, db, httpContext);
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
@@ -339,7 +339,7 @@ namespace McpRouter.Extensions
                             if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("uri", out var uriProp))
                             {
                                 var uri = uriProp.GetString() ?? string.Empty;
-                                var res = await activeSession.ReadResourceAsync(uri, requestBody);
+                                var res = await activeSession.ReadResourceAsync(uri, requestBody, httpContext);
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
@@ -373,7 +373,7 @@ namespace McpRouter.Extensions
                             if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
                             {
                                 var name = nameProp.GetString() ?? string.Empty;
-                                var res = await activeSession.GetPromptAsync(name, requestBody);
+                                var res = await activeSession.GetPromptAsync(name, requestBody, httpContext);
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
@@ -694,7 +694,7 @@ namespace McpRouter.Extensions
                             if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
                             {
                                 var toolName = nameProp.GetString() ?? string.Empty;
-                                var res = await activeSession.CallToolAsync(toolName, requestBody, db);
+                                var res = await activeSession.CallToolAsync(toolName, requestBody, db, httpContext);
                                 
                                 var response = new
                                 {
@@ -971,7 +971,7 @@ namespace McpRouter.Extensions
                         {
                             var toolName = nameProp.GetString() ?? string.Empty;
                             var db = httpContext.RequestServices.GetRequiredService<RouterDbContext>();
-                            var res = await session.CallToolAsync(toolName, body, db);
+                            var res = await session.CallToolAsync(toolName, body, db, httpContext);
                             
                             var response = new
                             {
@@ -1001,7 +1001,7 @@ namespace McpRouter.Extensions
                         if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("uri", out var uriProp))
                         {
                             var uri = uriProp.GetString() ?? string.Empty;
-                            var res = await session.ReadResourceAsync(uri, body);
+                            var res = await session.ReadResourceAsync(uri, body, httpContext);
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -1072,7 +1072,7 @@ namespace McpRouter.Extensions
                         if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
                         {
                             var name = nameProp.GetString() ?? string.Empty;
-                            var res = await session.GetPromptAsync(name, body);
+                            var res = await session.GetPromptAsync(name, body, httpContext);
                             var response = new
                             {
                                 jsonrpc = "2.0",
