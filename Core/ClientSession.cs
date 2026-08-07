@@ -67,9 +67,12 @@ namespace McpRouter
 
         public async Task<UserIdentityContext> ResolveUserIdentityAsync()
         {
+            var config = _clientResponse?.HttpContext?.RequestServices?.GetService<IConfiguration>();
+            var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
+
             if (_clientResponse?.HttpContext?.RequestServices == null)
             {
-                return new UserIdentityContext("system", "System", new List<string>());
+                return new UserIdentityContext("system", "System", new List<string>(), adminGroupSid);
             }
             try
             {
@@ -78,7 +81,8 @@ namespace McpRouter
                 if (httpContext.User?.Identity?.IsAuthenticated == true && httpContext.User.Identity.AuthenticationType == "AppKey")
                 {
                     var username = httpContext.User.Identity.Name ?? "anonymous";
-                    return new UserIdentityContext(username, "AppKey", new List<string>());
+                    var appKeySids = (username == "admin" || username == "system") ? new List<string> { adminGroupSid } : null;
+                    return new UserIdentityContext(username, "AppKey", new List<string>(), "", appKeySids);
                 }
 
                 var compositeProvider = _clientResponse.HttpContext.RequestServices.GetService<CompositeIdentityProvider>();
@@ -148,8 +152,10 @@ namespace McpRouter
 
             var identity = await ResolveUserIdentityAsync();
 
-            // 1. System/Admin bypass (e.g. Username is admin, or is in "Administrators" group, or username is "system")
-            if (identity.Username == "admin" || identity.Username == "system" || identity.GroupNames.Contains("Administrators") || identity.GroupNames.Contains("full_admin"))
+            // 1. Admin SID bypass check
+            var config = _clientResponse?.HttpContext?.RequestServices?.GetService<IConfiguration>();
+            var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
+            if (identity.AllSids.Contains(adminGroupSid))
             {
                 return true;
             }
@@ -186,9 +192,8 @@ namespace McpRouter
                     targetKeys.Add($"category:{category}");
                 }
 
-                var externalIds = identity.GroupNames.ToList();
-                if (!string.IsNullOrEmpty(identity.Sid)) externalIds.Add(identity.Sid);
-                if (!string.IsNullOrEmpty(identity.Username)) externalIds.Add(identity.Username);
+                var externalIds = identity.GroupNames.Concat(identity.AllSids).Distinct().ToList();
+                if (!string.IsNullOrEmpty(identity.Username) && !externalIds.Contains(identity.Username)) externalIds.Add(identity.Username);
 
                 var mappedGroups = new List<string>();
                 try
