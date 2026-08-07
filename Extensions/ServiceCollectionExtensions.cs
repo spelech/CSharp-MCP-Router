@@ -1,3 +1,5 @@
+using System;
+using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
@@ -59,9 +61,28 @@ namespace McpRouter.Extensions
         {
             options.AddDefaultPolicy(policy =>
             {
-                policy.AllowAnyOrigin()
-                      .AllowAnyMethod()
-                      .AllowAnyHeader();
+                var allowedOriginsValue = builder.Configuration["CORS_ALLOWED_ORIGINS"]
+                    ?? builder.Configuration["AllowedOrigins"];
+
+                if (!string.IsNullOrWhiteSpace(allowedOriginsValue))
+                {
+                    var origins = allowedOriginsValue
+                        .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
+                        .Select(o => o.Trim())
+                        .ToArray();
+
+                    policy.WithOrigins(origins)
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                }
+                else
+                {
+                    policy.WithOrigins("http://localhost:3000", "http://localhost:5000", "https://localhost:5001")
+                          .AllowAnyMethod()
+                          .AllowAnyHeader()
+                          .AllowCredentials();
+                }
             });
         });
 
