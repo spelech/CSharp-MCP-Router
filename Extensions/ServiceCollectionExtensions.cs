@@ -24,6 +24,7 @@ namespace McpRouter.Extensions
         builder.Services.AddDbContext<RouterDbContext>();
 
         // Register Identity Providers (Active Directory & PocketID/TinyAuth OIDC)
+        builder.Services.AddSingleton<McpRouter.Core.Identity.ILdapService, McpRouter.Core.Identity.LdapActiveDirectoryService>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.ActiveDirectoryIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.OidcIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.CompositeIdentityProvider>();

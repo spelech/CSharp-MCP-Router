@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.8.0`** | 2026-08-07 | feat(identity): implement cross-platform AD LDAP resolution |
 | **`v3.7.1`** | 2026-08-07 | fix(security): handle unresolved IAuditLogger and safely parse json request ids |
 | **`v3.7.0`** | 2026-08-07 | feat(security): implement fail-closed try-finally logging |
 | **`v3.6.2`** | 2026-08-07 | fix(security): resolve production startup crash, fail-closed stored procedures, and backend invocation auditing |

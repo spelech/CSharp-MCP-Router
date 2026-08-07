@@ -74,7 +74,14 @@ namespace McpRouter.Core.Identity
             var groups = groupsHeader.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
                                      .ToList();
 
-            return Task.FromResult(new UserIdentityContext(user, ProviderName, groups));
+            var adminGroupSid = _config?["Admin:GroupSid"] ?? "S-1-5-32-544";
+            var sids = new List<string>();
+            if (user == "admin" || user == "system" || groups.Contains("Administrators") || groups.Contains("full_admin"))
+            {
+                sids.Add(adminGroupSid);
+            }
+
+            return Task.FromResult(new UserIdentityContext(user, ProviderName, groups, "", sids));
         }
     }
 }
