@@ -7,10 +7,15 @@ bin/
 obj/
 publish/
 
-# Database files
-data/mcp_router.db
-data/mcp_router.db-shm
-data/mcp_router.db-wal
+# Database files and keys
+data/mcp_router.db*
+data/router.db*
+data/*.key
+
+# Build, test, and runtime outputs
+mcp_server.log
+**/TestResults/
+wwwroot/
 
 # OS specific files
 .DS_Store

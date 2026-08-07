@@ -1,0 +1,10 @@
+.git
+**/bin
+**/obj
+*.log
+data/*.db*
+data/*.key
+McpRouter.Tests
+TestResults
+node_modules
+wwwroot
