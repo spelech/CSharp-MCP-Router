@@ -5,6 +5,8 @@ using Moq;
 using Xunit;
 using McpRouter.Core.Secrets;
 
+[assembly: CollectionBehavior(DisableTestParallelization = true)]
+
 namespace McpRouter.Tests
 {
     public class DbKeyHelperTests : IDisposable

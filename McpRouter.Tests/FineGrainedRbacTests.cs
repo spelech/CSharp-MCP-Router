@@ -13,8 +13,8 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Moq;
+using Microsoft.Extensions.Logging;
 using Xunit;
 
 namespace McpRouter.Tests
@@ -162,6 +162,32 @@ namespace McpRouter.Tests
             {
                 await session.ReadResourceAsync("router://status", "{}");
             });
+        }
+
+        [Fact]
+        public async Task RBAC_DefaultsToDenied_WhenDbExceptionThrown()
+        {
+            var context = new DefaultHttpContext();
+            var claims = new List<System.Security.Claims.Claim> { new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "bob") };
+            var identity = new System.Security.Claims.ClaimsIdentity(claims, "Test");
+            context.User = new System.Security.Claims.ClaimsPrincipal(identity);
+
+            // Do not register IDbConnectionFactory to simulate db resolution/connection failure
+            var services = new ServiceCollection();
+            context.RequestServices = services.BuildServiceProvider();
+
+            var session = new ClientSession(
+                "test-sess",
+                context.Response,
+                new List<McpServer>(),
+                new HttpClient(),
+                new Mock<IEmbeddingService>().Object,
+                null,
+                new Mock<Microsoft.Extensions.Logging.ILogger<ClientSession>>().Object
+            );
+            
+            var authorized = await session.IsUserAuthorizedAsync("tools/call", "ha__turn_on");
+            Assert.False(authorized);
         }
     }
 }
