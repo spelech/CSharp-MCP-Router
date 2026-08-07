@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 
@@ -19,8 +18,7 @@ namespace McpRouter.Core.Identity
             {
                 var list = new List<string>();
                 if (!string.IsNullOrEmpty(Sid)) list.Add(Sid);
-                if (Sids != null && Sids.Count > 0) list.AddRange(Sids);
-                if (GroupNames != null) list.AddRange(GroupNames.Where(g => g.StartsWith("S-1-")));
+                if (Sids != null) list.AddRange(Sids);
                 return list.Distinct().ToList();
             }
         }
@@ -32,4 +30,3 @@ namespace McpRouter.Core.Identity
         Task<UserIdentityContext> ResolveIdentityAsync(HttpContext httpContext);
     }
 }
-
