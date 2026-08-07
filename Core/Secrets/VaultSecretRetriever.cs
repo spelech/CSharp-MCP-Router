@@ -55,7 +55,10 @@ namespace McpRouter.Core.Secrets
                 var roleId = _config["Vault:RoleId"];
                 var secretId = _config["Vault:SecretId"];
 
-                if (!string.IsNullOrEmpty(address) && !string.IsNullOrEmpty(roleId) && !string.IsNullOrEmpty(secretId))
+                if (!string.IsNullOrEmpty(address) &&
+                    address.StartsWith("https://", StringComparison.OrdinalIgnoreCase) &&
+                    !string.IsNullOrEmpty(roleId) &&
+                    !string.IsNullOrEmpty(secretId))
                 {
                     var authMethod = new AppRoleAuthMethodInfo(roleId, secretId);
                     var settings = new VaultClientSettings(address, authMethod);
@@ -76,30 +79,6 @@ namespace McpRouter.Core.Secrets
 
         public async Task<string?> GetSecretAsync(string secretPath, string keyName)
         {
-            var client = await EnsureVaultClientAsync();
-            if (client == null) return null;
-
-            // Perform JIT renewal check on token TTL
-            long ttlSeconds = 1200; // Fallback to 20 minutes on failure/null
-            try
-            {
-                var tokenInfoSecret = await client.V1.Auth.Token.LookupSelfAsync();
-                if (tokenInfoSecret?.Data != null)
-                {
-                    ttlSeconds = tokenInfoSecret.Data.TimeToLive;
-                }
-            }
-            catch
-            {
-                ttlSeconds = 1200; // Fallback to 20 mins on failure/null
-            }
-
-            if (ttlSeconds < 300) // Under 5 minutes remaining
-            {
-                client = await EnsureVaultClientAsync(forceRecreate: true);
-                if (client == null) return null;
-            }
-
             string mountPoint = "secret";
             string path = secretPath;
 
@@ -110,10 +89,39 @@ namespace McpRouter.Core.Secrets
                 path = parts[1];
             }
 
+            // 1. Check cache FIRST before client creation or network operations
             string cacheKey = $"vault:{mountPoint}:{path}:{keyName}";
             if (_cache.TryGetValue(cacheKey, out string? cached) && cached != null)
             {
                 return cached;
+            }
+
+            var client = await EnsureVaultClientAsync();
+            if (client == null) return null;
+
+            // 2. Perform JIT renewal check on token TTL
+            long ttlSeconds = 1200;
+            try
+            {
+                var tokenInfoSecret = await client.V1.Auth.Token.LookupSelfAsync();
+                if (tokenInfoSecret?.Data != null)
+                {
+                    ttlSeconds = tokenInfoSecret.Data.TimeToLive;
+                }
+                else
+                {
+                    ttlSeconds = 0; // Null token data -> force re-login / client recreation
+                }
+            }
+            catch
+            {
+                ttlSeconds = 0; // Exception -> force re-login / client recreation
+            }
+
+            if (ttlSeconds < 300) // Under 5 minutes remaining (or force re-login on exception/0)
+            {
+                client = await EnsureVaultClientAsync(forceRecreate: true);
+                if (client == null) return null;
             }
 
             try
