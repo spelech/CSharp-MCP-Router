@@ -1,9 +1,5 @@
-#pragma warning disable CA1416
-
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -13,32 +9,25 @@ namespace McpRouter.Core.Identity
 {
     public class ActiveDirectoryIdentityProvider : IIdentityProvider
     {
-        private readonly IConfiguration? _config;
-        private readonly ILdapService? _ldapService;
-        private readonly List<string> _trustedProxies = new();
-        private readonly bool _requireTrustedProxy = false;
+        private readonly IConfiguration? _configuration;
+
+        public ActiveDirectoryIdentityProvider(IConfiguration? configuration = null)
+        {
+            _configuration = configuration;
+        }
 
         public string ProviderName => "ActiveDirectory";
 
-        public ActiveDirectoryIdentityProvider()
+        public Task<UserIdentityContext> ResolveIdentityAsync(HttpContext httpContext)
         {
-        }
+            var config = _configuration ?? (httpContext.RequestServices?.GetService(typeof(IConfiguration)) as IConfiguration);
 
-        public ActiveDirectoryIdentityProvider(IConfiguration? config = null, ILdapService? ldapService = null)
-        {
-            _config = config;
-            _ldapService = ldapService;
-            if (_config != null)
+            if (!TrustedProxyHelper.IsTrustedProxy(httpContext, config))
             {
-                _requireTrustedProxy = _config.GetValue<bool>("Oidc:RequireTrustedProxy", true);
-                var proxiesStr = _config["Oidc:TrustedProxies"] ?? "";
-                _trustedProxies = proxiesStr.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+                TrustedProxyHelper.StripUntrustedHeaders(httpContext);
+                return Task.FromResult(new UserIdentityContext("anonymous", ProviderName, new List<string>()));
             }
-        }
 
-        public async Task<UserIdentityContext> ResolveIdentityAsync(HttpContext httpContext)
-        {
-            // 1. Windows Authentication (IIS / Negotiate)
             if (httpContext.User.Identity is WindowsIdentity winIdentity && winIdentity.IsAuthenticated)
             {
                 var username = winIdentity.Name;
@@ -47,54 +36,16 @@ namespace McpRouter.Core.Identity
                     .Select(g => g.Value)
                     .ToList() ?? new List<string>();
 
-                List<string>? ldapSids = null;
-                if (_ldapService != null)
+                var sids = new List<string>(groups);
+                if (!string.IsNullOrEmpty(sid))
                 {
-                    ldapSids = await _ldapService.ResolveUserSidsAsync(username);
+                    sids.Add(sid);
                 }
 
-                return new UserIdentityContext(username, ProviderName, groups, sid, ldapSids);
+                return Task.FromResult(new UserIdentityContext(username, ProviderName, groups, Sid: sid, Sids: sids));
             }
 
-            // 2. Header-based SSO with trusted proxy validation
-            var remoteIp = httpContext.Connection.RemoteIpAddress;
-            bool isTrusted = false;
-
-            if (remoteIp != null)
-            {
-                var remoteIpStr = remoteIp.ToString();
-                if (IPAddress.IsLoopback(remoteIp) || _trustedProxies.Contains(remoteIpStr))
-                {
-                    isTrusted = true;
-                }
-            }
-            else
-            {
-                if (!_requireTrustedProxy && _trustedProxies.Count == 0)
-                {
-                    isTrusted = true;
-                }
-            }
-
-            if (!isTrusted && (_requireTrustedProxy || _trustedProxies.Count > 0))
-            {
-                return new UserIdentityContext("anonymous", ProviderName, new List<string>());
-            }
-
-            var headerUser = httpContext.Request.Headers["Remote-User"].FirstOrDefault()
-                          ?? httpContext.Request.Headers["X-Forwarded-User"].FirstOrDefault();
-
-            if (!string.IsNullOrEmpty(headerUser) && headerUser != "guest" && headerUser != "anonymous" && _ldapService != null)
-            {
-                var resolvedSids = await _ldapService.ResolveUserSidsAsync(headerUser);
-                if (resolvedSids != null && resolvedSids.Count > 0)
-                {
-                    return new UserIdentityContext(headerUser, ProviderName, new List<string>(), "", resolvedSids);
-                }
-            }
-
-            return new UserIdentityContext("anonymous", ProviderName, new List<string>());
+            return Task.FromResult(new UserIdentityContext("anonymous", ProviderName, new List<string>()));
         }
     }
 }
-#pragma warning restore CA1416
