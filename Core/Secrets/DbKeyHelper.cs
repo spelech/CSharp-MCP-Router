@@ -25,57 +25,14 @@ namespace McpRouter.Core.Secrets
                     return _cachedKey;
                 }
 
-                // 1. Check DB_ENCRYPTION_KEY environment variable/configuration
-                var key = configuration["DB_ENCRYPTION_KEY"];
-                if (!string.IsNullOrEmpty(key))
+                // 1. Check environment variables/configuration: ROUTER_MASTER_KEY or DB_ENCRYPTION_KEY
+                var key = configuration["ROUTER_MASTER_KEY"] ?? configuration["DB_ENCRYPTION_KEY"];
+                if (string.IsNullOrWhiteSpace(key))
                 {
-                    _cachedKey = key;
-                    return _cachedKey;
+                    throw new InvalidOperationException("FATAL: Master encryption key is missing. Set 'ROUTER_MASTER_KEY' or 'DB_ENCRYPTION_KEY' environment variable. Self-generated key fallback is disabled for security.");
                 }
 
-                // 2. Resolve or generate a persistent local key file
-                var dataDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data");
-                if (!Directory.Exists(dataDir))
-                {
-                    Directory.CreateDirectory(dataDir);
-                }
-
-                var keyFilePath = Path.Combine(dataDir, "db_key.txt");
-                if (File.Exists(keyFilePath))
-                {
-                    try
-                    {
-                        var fileKey = File.ReadAllText(keyFilePath).Trim();
-                        if (!string.IsNullOrEmpty(fileKey))
-                        {
-                            _cachedKey = fileKey;
-                            return _cachedKey;
-                        }
-                    }
-                    catch
-                    {
-                        // Fallback to generating a new key if read fails
-                    }
-                }
-
-                // 3. Generate a cryptographically secure 256-bit (32-byte) key
-                var keyBytes = new byte[32];
-                using (var rng = RandomNumberGenerator.Create())
-                {
-                    rng.GetBytes(keyBytes);
-                }
-                var newKey = Convert.ToBase64String(keyBytes);
-
-                try
-                {
-                    File.WriteAllText(keyFilePath, newKey);
-                }
-                catch
-                {
-                    // If write fails, return the transient generated key
-                }
-
-                _cachedKey = newKey;
+                _cachedKey = key.Trim();
                 return _cachedKey;
             }
         }

@@ -68,33 +68,35 @@ namespace McpRouter
         public async Task<UserIdentityContext> ResolveUserIdentityAsync(HttpContext? httpContext = null)
         {
             var contextToUse = httpContext ?? _clientResponse?.HttpContext;
-            var config = contextToUse?.RequestServices?.GetService<IConfiguration>();
-            var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
 
-            if (contextToUse?.RequestServices == null)
+            if (contextToUse?.User?.Identity?.IsAuthenticated == true)
             {
-                return new UserIdentityContext("system", "System", new List<string>(), adminGroupSid);
-            }
-            try
-            {
-                // AppKey authentication bypass for custom claims mapping
-                if (contextToUse.User?.Identity?.IsAuthenticated == true && contextToUse.User.Identity.AuthenticationType == "AppKey")
-                {
-                    var username = contextToUse.User.Identity.Name ?? "anonymous";
-                    var appKeySids = (username == "admin" || username == "system") ? new List<string> { adminGroupSid } : null;
-                    return new UserIdentityContext(username, "AppKey", new List<string>(), "", appKeySids);
-                }
+                var username = contextToUse.User.Identity.Name ?? "anonymous";
+                var sids = contextToUse.User.Claims
+                    .Where(c => c.Type == "Sid" || c.Type == "GroupSid" || c.Type == System.Security.Claims.ClaimTypes.GroupSid || c.Type == System.Security.Claims.ClaimTypes.PrimaryGroupSid)
+                    .Select(c => c.Value)
+                    .Distinct()
+                    .ToList();
 
-                var compositeProvider = contextToUse.RequestServices.GetService<CompositeIdentityProvider>();
-                if (compositeProvider != null)
+                return new UserIdentityContext(username, contextToUse.User.Identity.AuthenticationType ?? "Claims", GroupNames: new List<string>(), Sid: "", Sids: sids);
+            }
+
+            if (contextToUse?.RequestServices != null)
+            {
+                try
                 {
-                    return await compositeProvider.ResolveIdentityAsync(contextToUse);
+                    var compositeProvider = contextToUse.RequestServices.GetService<CompositeIdentityProvider>();
+                    if (compositeProvider != null)
+                    {
+                        return await compositeProvider.ResolveIdentityAsync(contextToUse);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to resolve user identity via CompositeIdentityProvider");
                 }
             }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to resolve user identity via CompositeIdentityProvider");
-            }
+
             return new UserIdentityContext("anonymous", "None", new List<string>());
         }
 
@@ -155,8 +157,7 @@ namespace McpRouter
 
             // 1. Admin SID bypass check
             var config = contextToUse?.RequestServices?.GetService<IConfiguration>();
-            var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
-            if (identity.AllSids.Contains(adminGroupSid))
+            if (McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(identity, config))
             {
                 return true;
             }
@@ -207,7 +208,7 @@ namespace McpRouter
                     _logger.LogWarning(exMap, "Failed to query GroupMappings, assuming empty");
                 }
 
-                var allUserGroups = identity.GroupNames.Concat(mappedGroups).Where(g => !string.IsNullOrEmpty(g)).Distinct().ToList();
+                var allUserGroups = identity.GroupNames.Concat(identity.AllSids).Concat(mappedGroups).Where(g => !string.IsNullOrEmpty(g)).Distinct().ToList();
 
                 if (dbFactory.ProviderName == "sqlite")
                 {
@@ -589,7 +590,7 @@ namespace McpRouter
             finally
             {
                 stopwatch.Stop();
-                await AuditInvocationAsync("tools/call", toolName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage);
+                await AuditInvocationAsync("tools/call", toolName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage, httpContext);
             }
         }
 
@@ -812,7 +813,7 @@ namespace McpRouter
             finally
             {
                 stopwatch.Stop();
-                await AuditInvocationAsync("resources/read", resourceUri, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage);
+                await AuditInvocationAsync("resources/read", resourceUri, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage, httpContext);
             }
         }
 
@@ -955,7 +956,7 @@ namespace McpRouter
             finally
             {
                 stopwatch.Stop();
-                await AuditInvocationAsync("prompts/get", promptName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage);
+                await AuditInvocationAsync("prompts/get", promptName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage, httpContext);
             }
         }
 
@@ -966,13 +967,15 @@ namespace McpRouter
             int statusCode,
             long executionTimeMs,
             string? responsePayload,
-            string? errorMessage)
+            string? errorMessage,
+            HttpContext? httpContext = null)
         {
-            var config = _clientResponse?.HttpContext?.RequestServices?.GetService<IConfiguration>();
+            var services = httpContext?.RequestServices ?? _clientResponse?.HttpContext?.RequestServices;
+            var config = services?.GetService<IConfiguration>();
             var failClosedRaw = config?["Audit:FailClosed"];
             bool failClosed = !bool.TryParse(failClosedRaw, out var parsedFailClosed) || parsedFailClosed;
 
-            var auditLogger = _clientResponse?.HttpContext?.RequestServices?.GetService<McpRouter.Core.Logging.IAuditLogger>();
+            var auditLogger = services?.GetService<McpRouter.Core.Logging.IAuditLogger>();
             if (auditLogger == null)
             {
                 if (failClosed)
@@ -984,7 +987,7 @@ namespace McpRouter
 
             try
             {
-                var identity = await ResolveUserIdentityAsync();
+                var identity = await ResolveUserIdentityAsync(httpContext);
                 
                 string serverId;
                 if (itemName.StartsWith("mcp://"))
@@ -1034,7 +1037,7 @@ namespace McpRouter
                 _logger.LogWarning(ex, "Failed to write invocation audit log");
                 if (failClosed)
                 {
-                    throw new System.Security.SecurityException("Audit logging failed and fail-closed policy is active.", ex);
+                    throw new System.Security.SecurityException("Audit logging failed and fail-closed security policy is active.", ex);
                 }
             }
         }

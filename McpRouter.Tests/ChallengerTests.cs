@@ -228,6 +228,7 @@ namespace McpRouter.Tests
                 DisplayName = "Backend 1", 
                 Url = "http://backend1/mcp", 
                 Type = "sse", // SSE type uses background reader and TaskCompletionSource
+                SecretProvider = "None",
                 Enabled = true 
             };
 
@@ -285,6 +286,7 @@ namespace McpRouter.Tests
                 DisplayName = "Backend 1", 
                 Url = "http://backend1/mcp", 
                 Type = "sse",
+                SecretProvider = "None",
                 Enabled = true 
             };
 
@@ -364,6 +366,7 @@ namespace McpRouter.Tests
                 DisplayName = "SSE Backend", 
                 Url = "http://backend_sse/mcp", 
                 Type = "sse", // Using Type = sse to trigger StartReader
+                SecretProvider = "None",
                 Enabled = true 
             };
 
@@ -436,6 +439,7 @@ namespace McpRouter.Tests
                 DisplayName = "Stress Backend", 
                 Url = "http://backend_stress/mcp", 
                 Type = "sse",
+                SecretProvider = "None",
                 Enabled = true 
             };
 

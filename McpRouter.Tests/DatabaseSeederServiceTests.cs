@@ -35,7 +35,7 @@ namespace McpRouter.Tests
 
             var inMemoryConfig = new Dictionary<string, string?>
             {
-                { "Encryption:Key", "TestSecretKey1234567890123456789012" }
+                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
             var db = new RouterDbContext(options, config);

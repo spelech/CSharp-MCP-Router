@@ -41,10 +41,15 @@ namespace McpRouter.Core.Identity
                 return Task.FromResult(sids);
             }
 
-            int port = int.TryParse(portStr, out var p) ? p : 389;
+            int port = int.TryParse(portStr, out var p) ? p : 636;
             bool useSsl = _config.GetValue<bool>("Ldap:UseSsl", false) 
                        || _config.GetValue<bool>("AD:UseSsl", false) 
                        || port == 636;
+
+            if (!useSsl)
+            {
+                throw new InvalidOperationException("LDAP over plaintext (port 389) is disabled for security. Configure Ldap:UseSsl=true or use LDAPS port 636.");
+            }
 
             try
             {
@@ -57,10 +62,7 @@ namespace McpRouter.Core.Identity
 
                 using var connection = new LdapConnection(identifier, credential, AuthType.Basic);
                 connection.SessionOptions.ProtocolVersion = 3;
-                if (useSsl)
-                {
-                    connection.SessionOptions.SecureSocketLayer = true;
-                }
+                connection.SessionOptions.SecureSocketLayer = true;
                 connection.Bind();
 
                 var sanitizedUsername = EscapeLdapFilter(username);
@@ -114,7 +116,8 @@ namespace McpRouter.Core.Identity
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "Failed to resolve SIDs via LDAP for user {Username}", username);
+                _logger.LogError(ex, "Failed to resolve SIDs via LDAP for user {Username}", username);
+                throw new System.Security.SecurityException($"LDAP SID resolution failed for user '{username}'. Fail-closed policy active.", ex);
             }
 
             return Task.FromResult(sids);

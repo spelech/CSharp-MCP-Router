@@ -298,5 +298,82 @@ namespace McpRouter.Core.Security
                 // If invalid JSON, ignore and let downstream parse/handle it
             }
         }
+
+        /// <summary>
+        /// Single SID-based admin decision point.
+        /// Admin status is granted ONLY when the resolved, verified user/group SIDs include Admin:GroupSid (default S-1-5-32-544).
+        /// Display names, group names, or string comparisons are strictly forbidden.
+        /// </summary>
+        public static bool IsAdmin(McpRouter.Core.Identity.UserIdentityContext? identity, Microsoft.Extensions.Configuration.IConfiguration? config)
+        {
+            if (identity == null) return false;
+            var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
+            return identity.AllSids.Contains(adminGroupSid, StringComparer.OrdinalIgnoreCase);
+        }
+
+        public static ValueTask<System.IO.Stream> ValidatingConnectCallback(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
+        {
+            return ValidatingConnectCallback(context, null, cancellationToken);
+        }
+
+        public static async ValueTask<System.IO.Stream> ValidatingConnectCallback(SocketsHttpConnectionContext context, string[]? allowedIpRanges, CancellationToken cancellationToken)
+        {
+            var host = context.DnsEndPoint.Host;
+            var port = context.DnsEndPoint.Port;
+
+            IPAddress[] ipAddresses;
+            if (IPAddress.TryParse(host, out var directIp))
+            {
+                ipAddresses = new[] { directIp };
+            }
+            else
+            {
+                ipAddresses = await Dns.GetHostAddressesAsync(host, cancellationToken);
+            }
+
+            if (ipAddresses.Length == 0)
+            {
+                throw new HttpRequestException($"Unable to resolve host '{host}'.");
+            }
+
+            foreach (var ip in ipAddresses)
+            {
+                if (IsBlockedIp(ip, allowedIpRanges))
+                {
+                    throw new HttpRequestException($"Access to IP address '{ip}' for host '{host}' is blocked for security (SSRF protection).");
+                }
+            }
+
+            Socket? socket = null;
+            Exception? lastException = null;
+
+            foreach (var ip in ipAddresses)
+            {
+                var s = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp)
+                {
+                    NoDelay = true
+                };
+
+                try
+                {
+                    await s.ConnectAsync(new IPEndPoint(ip, port), cancellationToken);
+                    socket = s;
+                    break;
+                }
+                catch (Exception ex)
+                {
+                    s.Dispose();
+                    lastException = ex;
+                }
+            }
+
+            if (socket == null)
+            {
+                throw new HttpRequestException($"Failed to connect to host '{host}' ({ipAddresses[0]}) on port {port}.", lastException);
+            }
+
+            return new NetworkStream(socket, ownsSocket: true);
+        }
     }
 }
+

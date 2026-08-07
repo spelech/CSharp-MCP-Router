@@ -98,13 +98,31 @@ namespace McpRouter.Services
 
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None'");
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
                     }
                     catch { }
 
                     try
                     {
                         db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretItemKey TEXT NULL");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretMount TEXT NULL");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretPath TEXT NULL");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretField TEXT NULL");
                     }
                     catch { }
 
@@ -125,7 +143,7 @@ namespace McpRouter.Services
                     {
                         db.Database.ExecuteSqlRaw(
                             "UPDATE Servers SET SecretProvider = 'None' " +
-                            "WHERE (SecretProvider IS NULL OR SecretProvider = '' OR SecretProvider = 'Vault') " +
+                            "WHERE (SecretProvider IS NULL OR SecretProvider = '') " +
                             "AND (ApiKey IS NOT NULL AND ApiKey != '');");
 
                         db.Database.ExecuteSqlRaw(
@@ -271,7 +289,7 @@ namespace McpRouter.Services
 
                             if (!isHashed)
                             {
-                                var decrypted = SymmetricEncryptionHelper.DecryptLegacy(key.EncryptedKey, configuration);
+                                var decrypted = DecryptLegacyAppKey(key.EncryptedKey, configuration);
                                 if (string.IsNullOrEmpty(decrypted))
                                 {
                                     logger.LogError($"AppKey Hashing Migration: Failed to decrypt legacy AppKey '{key.Name}' (Id: {key.Id}). Skipping migration for this key to prevent corruption.");
@@ -291,9 +309,9 @@ namespace McpRouter.Services
                             db.SaveChanges();
                         }
                     }
-                    catch (Exception exAppKeyMigration)
+                    catch (Exception exKeyMig)
                     {
-                        logger.LogError(exAppKeyMigration, "Failed to migrate legacy AppKeys to SHA-256 hashes.");
+                        logger.LogWarning(exKeyMig, "AppKey hashing migration warning");
                     }
 
                     try
@@ -555,6 +573,48 @@ namespace McpRouter.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to initialize database.");
+            }
+        }
+
+        private static string DecryptLegacyAppKey(string ciphertext, IConfiguration configuration)
+        {
+            if (string.IsNullOrEmpty(ciphertext)) return string.Empty;
+
+            try
+            {
+                var fullCipher = Convert.FromBase64String(ciphertext);
+                if (fullCipher.Length < 16) return string.Empty;
+
+                var secretString = configuration["ROUTER_SECRET"]
+                    ?? configuration["ROUTER_MASTER_KEY"]
+                    ?? McpRouter.Core.Secrets.DbKeyHelper.ResolveDbEncryptionKey(configuration);
+
+                byte[] keyBytes;
+                using (var sha256 = SHA256.Create())
+                {
+                    keyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(secretString));
+                }
+
+                using (var aes = System.Security.Cryptography.Aes.Create())
+                {
+                    aes.Key = keyBytes;
+
+                    var iv = new byte[16];
+                    Array.Copy(fullCipher, 0, iv, 0, iv.Length);
+                    aes.IV = iv;
+
+                    using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
+                    using (var ms = new MemoryStream(fullCipher, iv.Length, fullCipher.Length - iv.Length))
+                    using (var cs = new System.Security.Cryptography.CryptoStream(ms, decryptor, System.Security.Cryptography.CryptoStreamMode.Read))
+                    using (var reader = new StreamReader(cs, Encoding.UTF8))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+            }
+            catch
+            {
+                return string.Empty;
             }
         }
     }

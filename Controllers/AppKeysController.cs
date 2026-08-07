@@ -29,33 +29,23 @@ namespace McpRouter.Controllers
             _config = config;
         }
 
-        private string GetAuthenticatedUser()
+        private async Task<McpRouter.Core.Identity.UserIdentityContext> GetIdentityAsync()
         {
-            var user = User.Identity?.Name;
-            if (string.IsNullOrEmpty(user))
-            {
-                user = HttpContext.Items["AuthenticatedUser"] as string;
-            }
-            if (string.IsNullOrEmpty(user))
-            {
-                user = HttpContext.Request.Headers["Remote-User"].FirstOrDefault()
-                    ?? HttpContext.Request.Headers["X-Forwarded-User"].FirstOrDefault()
-                    ?? string.Empty;
-            }
-            return user;
+            var compositeProvider = HttpContext.RequestServices.GetRequiredService<McpRouter.Core.Identity.CompositeIdentityProvider>();
+            return await compositeProvider.ResolveIdentityAsync(HttpContext);
         }
 
-        private bool IsAdmin(string username)
+        private bool IsAdmin(McpRouter.Core.Identity.UserIdentityContext identity)
         {
-            return User.IsInRole("Administrator") || 
-                   username.Equals("admin", StringComparison.OrdinalIgnoreCase) || 
-                   username.Equals("system", StringComparison.OrdinalIgnoreCase);
+            return McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(identity, _config);
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAppKeys([FromQuery] string? usernameFilter = null)
         {
-            var currentUser = GetAuthenticatedUser();
+            var identity = await GetIdentityAsync();
+            var currentUser = identity.Username;
+            var isAdmin = IsAdmin(identity);
             using var conn = _dbFactory.CreateConnection();
 
             try
@@ -64,7 +54,7 @@ namespace McpRouter.Controllers
 
                 if (_dbFactory.ProviderName == "sqlite")
                 {
-                    if (IsAdmin(currentUser))
+                    if (isAdmin)
                     {
                         if (!string.IsNullOrEmpty(usernameFilter))
                         {
@@ -86,7 +76,7 @@ namespace McpRouter.Controllers
                 else
                 {
                     // Use Stored Procedure for MS SQL & MySQL
-                    var parameters = new { Username = IsAdmin(currentUser) ? usernameFilter : currentUser };
+                    var parameters = new { Username = isAdmin ? usernameFilter : currentUser };
                     keys = await conn.QueryAsync<AppKey>(
                         "sp_GetAppKeys",
                         parameters,
@@ -117,7 +107,9 @@ namespace McpRouter.Controllers
         [HttpGet("limits")]
         public async Task<IActionResult> GetAppKeysLimits()
         {
-            var currentUser = GetAuthenticatedUser();
+            var identity = await GetIdentityAsync();
+            var currentUser = identity.Username;
+            var isAdmin = IsAdmin(identity);
             using var conn = _dbFactory.CreateConnection();
 
             try
@@ -143,7 +135,7 @@ namespace McpRouter.Controllers
                     userMax,
                     totalActiveKeys,
                     userActiveKeys,
-                    isLimitReached = !IsAdmin(currentUser) && (totalActiveKeys >= globalMax || userActiveKeys >= userMax)
+                    isLimitReached = !isAdmin && (totalActiveKeys >= globalMax || userActiveKeys >= userMax)
                 });
             }
             catch (Exception ex)
@@ -155,10 +147,12 @@ namespace McpRouter.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateAppKey([FromBody] CreateAppKeyRequest model)
         {
-            var currentUser = GetAuthenticatedUser();
+            var identity = await GetIdentityAsync();
+            var currentUser = identity.Username;
+            var isAdmin = IsAdmin(identity);
 
             // Allow admins to generate key for another user, default to current user
-            var targetUser = IsAdmin(currentUser) && !string.IsNullOrEmpty(model.Username) ? model.Username : currentUser;
+            var targetUser = isAdmin && !string.IsNullOrEmpty(model.Username) ? model.Username : currentUser;
 
             if (string.IsNullOrWhiteSpace(model.Name))
             {
@@ -182,7 +176,7 @@ namespace McpRouter.Controllers
                 }
 
                 // Check limits (admins bypass limits)
-                if (!IsAdmin(currentUser))
+                if (!isAdmin)
                 {
                     int totalActiveKeys = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppKeys;");
                     if (totalActiveKeys >= globalMax)
@@ -289,7 +283,9 @@ namespace McpRouter.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> RevokeAppKey(string id)
         {
-            var currentUser = GetAuthenticatedUser();
+            var identity = await GetIdentityAsync();
+            var currentUser = identity.Username;
+            var isAdmin = IsAdmin(identity);
             using var conn = _dbFactory.CreateConnection();
 
             try
@@ -304,7 +300,7 @@ namespace McpRouter.Controllers
                     return NotFound(new { error = "AppKey not found." });
                 }
 
-                if (!IsAdmin(currentUser) && !appKey.Username.Equals(currentUser, StringComparison.OrdinalIgnoreCase))
+                if (!isAdmin && !appKey.Username.Equals(currentUser, StringComparison.OrdinalIgnoreCase))
                 {
                     return Forbid();
                 }

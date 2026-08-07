@@ -48,8 +48,8 @@ namespace McpRouter.Extensions
         builder.Services.AddMcpOpenIddict(builder.Environment);
         builder.Services.AddControllers();
 
-        builder.Services.AddHttpClient();
-        builder.Services.Configure<Microsoft.Extensions.Http.HttpClientFactoryOptions>(options =>
+        builder.Services.AddHttpClient("McpClient");
+        builder.Services.ConfigureAll<Microsoft.Extensions.Http.HttpClientFactoryOptions>(options =>
         {
             options.HttpMessageHandlerBuilderActions.Add(b =>
             {
@@ -59,64 +59,7 @@ namespace McpRouter.Extensions
                 b.PrimaryHandler = new SocketsHttpHandler
                 {
                     AllowAutoRedirect = false,
-                    ConnectCallback = async (context, cancellationToken) =>
-                    {
-                        var host = context.DnsEndPoint.Host;
-                        var port = context.DnsEndPoint.Port;
-
-                        IPAddress[] ipAddresses;
-                        if (IPAddress.TryParse(host, out var directIp))
-                        {
-                            ipAddresses = new[] { directIp };
-                        }
-                        else
-                        {
-                            ipAddresses = await Dns.GetHostAddressesAsync(host, cancellationToken);
-                        }
-
-                        if (ipAddresses.Length == 0)
-                        {
-                            throw new HttpRequestException($"Unable to resolve host '{host}'.");
-                        }
-
-                        foreach (var ip in ipAddresses)
-                        {
-                            if (SecurityValidationHelper.IsBlockedIp(ip, allowedIpRanges))
-                            {
-                                throw new HttpRequestException($"Access to IP address '{ip}' for host '{host}' is blocked for security (SSRF protection).");
-                            }
-                        }
-
-                        Socket? socket = null;
-                        Exception? lastException = null;
-
-                        foreach (var ip in ipAddresses)
-                        {
-                            var s = new Socket(ip.AddressFamily, SocketType.Stream, ProtocolType.Tcp)
-                            {
-                                NoDelay = true
-                            };
-
-                            try
-                            {
-                                await s.ConnectAsync(new IPEndPoint(ip, port), cancellationToken);
-                                socket = s;
-                                break;
-                            }
-                            catch (Exception ex)
-                            {
-                                s.Dispose();
-                                lastException = ex;
-                            }
-                        }
-
-                        if (socket == null)
-                        {
-                            throw new HttpRequestException($"Failed to connect to host '{host}' ({ipAddresses[0]}) on port {port}.", lastException);
-                        }
-
-                        return new NetworkStream(socket, ownsSocket: true);
-                    }
+                    ConnectCallback = (context, cancellationToken) => SecurityValidationHelper.ValidatingConnectCallback(context, allowedIpRanges, cancellationToken)
                 };
             });
         });

@@ -19,7 +19,6 @@ namespace McpRouter.Tests
         {
             return new Dictionary<string, string?>
             {
-                { "Encryption:Key", "TestSecretKey1234567890123456789012" },
                 { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
             };
         }

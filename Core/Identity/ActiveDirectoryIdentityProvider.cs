@@ -10,22 +10,25 @@ namespace McpRouter.Core.Identity
     public class ActiveDirectoryIdentityProvider : IIdentityProvider
     {
         private readonly IConfiguration? _configuration;
+        private readonly ILdapService? _ldapService;
 
-        public ActiveDirectoryIdentityProvider(IConfiguration? configuration = null)
+        public ActiveDirectoryIdentityProvider(IConfiguration? configuration = null, ILdapService? ldapService = null)
         {
             _configuration = configuration;
+            _ldapService = ldapService;
         }
 
         public string ProviderName => "ActiveDirectory";
 
-        public Task<UserIdentityContext> ResolveIdentityAsync(HttpContext httpContext)
+        public async Task<UserIdentityContext> ResolveIdentityAsync(HttpContext httpContext)
         {
             var config = _configuration ?? (httpContext.RequestServices?.GetService(typeof(IConfiguration)) as IConfiguration);
+            var ldapService = _ldapService ?? (httpContext.RequestServices?.GetService(typeof(ILdapService)) as ILdapService);
 
             if (!TrustedProxyHelper.IsTrustedProxy(httpContext, config))
             {
                 TrustedProxyHelper.StripUntrustedHeaders(httpContext);
-                return Task.FromResult(new UserIdentityContext("anonymous", ProviderName, new List<string>()));
+                return new UserIdentityContext("anonymous", ProviderName, new List<string>());
             }
 
             if (httpContext.User.Identity is WindowsIdentity winIdentity && winIdentity.IsAuthenticated)
@@ -42,10 +45,19 @@ namespace McpRouter.Core.Identity
                     sids.Add(sid);
                 }
 
-                return Task.FromResult(new UserIdentityContext(username, ProviderName, groups, Sid: sid, Sids: sids));
+                if (ldapService != null)
+                {
+                    var ldapSids = await ldapService.ResolveUserSidsAsync(username);
+                    if (ldapSids != null)
+                    {
+                        sids.AddRange(ldapSids);
+                    }
+                }
+
+                return new UserIdentityContext(username, ProviderName, groups, Sid: sid, Sids: sids.Distinct().ToList());
             }
 
-            return Task.FromResult(new UserIdentityContext("anonymous", ProviderName, new List<string>()));
+            return new UserIdentityContext("anonymous", ProviderName, new List<string>());
         }
     }
 }
