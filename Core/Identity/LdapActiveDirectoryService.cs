@@ -42,6 +42,9 @@ namespace McpRouter.Core.Identity
             }
 
             int port = int.TryParse(portStr, out var p) ? p : 389;
+            bool useSsl = _config.GetValue<bool>("Ldap:UseSsl", false) 
+                       || _config.GetValue<bool>("AD:UseSsl", false) 
+                       || port == 636;
 
             try
             {
@@ -54,9 +57,14 @@ namespace McpRouter.Core.Identity
 
                 using var connection = new LdapConnection(identifier, credential, AuthType.Basic);
                 connection.SessionOptions.ProtocolVersion = 3;
+                if (useSsl)
+                {
+                    connection.SessionOptions.SecureSocketLayer = true;
+                }
                 connection.Bind();
 
-                string searchFilter = $"(&(objectClass=user)(sAMAccountName={username}))";
+                var sanitizedUsername = EscapeLdapFilter(username);
+                string searchFilter = $"(&(objectClass=user)(sAMAccountName={sanitizedUsername}))";
                 if (string.IsNullOrEmpty(baseDn) && !string.IsNullOrEmpty(domain))
                 {
                     var parts = domain.Split('.', StringSplitOptions.RemoveEmptyEntries);
@@ -110,6 +118,25 @@ namespace McpRouter.Core.Identity
             }
 
             return Task.FromResult(sids);
+        }
+
+        public static string EscapeLdapFilter(string filter)
+        {
+            if (string.IsNullOrEmpty(filter)) return string.Empty;
+            var sb = new StringBuilder(filter.Length);
+            foreach (char c in filter)
+            {
+                switch (c)
+                {
+                    case '\\': sb.Append("\\5c"); break;
+                    case '*':  sb.Append("\\2a"); break;
+                    case '(':  sb.Append("\\28"); break;
+                    case ')':  sb.Append("\\29"); break;
+                    case '\0': sb.Append("\\00"); break;
+                    default:   sb.Append(c); break;
+                }
+            }
+            return sb.ToString();
         }
 
         public static string ConvertSidBytesToString(byte[] bytes)
