@@ -17,7 +17,7 @@ namespace McpRouter.Core.Security
         /// </summary>
         public static bool IsBlockedIp(IPAddress ip, string[]? allowedIpRanges)
         {
-            if (ip == null) return false;
+            if (ip == null) return true;
 
             // Unmap IPv4-mapped IPv6 address to IPv4 for accurate evaluation
             if (ip.IsIPv4MappedToIPv6)
