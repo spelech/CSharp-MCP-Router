@@ -125,5 +125,31 @@ namespace McpRouter.Tests
             Assert.True(request.Headers.Contains("X-Agent"));
             Assert.Equal("antigravity", string.Join("", request.Headers.GetValues("X-Agent")));
         }
+
+        [Fact]
+        public async Task SseTransport_WaitForMessageUrl_Succeeds_When_SetMessageUrl_Is_Called()
+        {
+            var server = new McpServer
+            {
+                Id = "srv1",
+                Url = "http://localhost:5000/sse"
+            };
+            var transport = new SseTransport(server, new HttpClient(), NullLogger<SseTransport>.Instance, null!);
+
+            var setMessageUrlMethod = transport.GetType().GetMethod("SetMessageUrl", BindingFlags.NonPublic | BindingFlags.Instance);
+            var waitForMessageUrlMethod = transport.GetType().GetMethod("WaitForMessageUrlAsync", BindingFlags.NonPublic | BindingFlags.Instance);
+
+            Assert.NotNull(setMessageUrlMethod);
+            Assert.NotNull(waitForMessageUrlMethod);
+
+            var waitTask = (Task<string>)waitForMessageUrlMethod.Invoke(transport, null)!;
+
+            Assert.False(waitTask.IsCompleted);
+
+            setMessageUrlMethod.Invoke(transport, new object[] { "http://localhost:5000/resolved-endpoint" });
+
+            var result = await waitTask;
+            Assert.Equal("http://localhost:5000/resolved-endpoint", result);
+        }
     }
 }

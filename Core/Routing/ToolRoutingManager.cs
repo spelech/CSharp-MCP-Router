@@ -242,7 +242,7 @@ namespace McpRouter.Core.Routing
                     tools.AddRange(_cachedTools);
                 }
 
-                var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService);
+                var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService, logger);
                 return new {
                     content = new[] {
                         new {
@@ -525,7 +525,10 @@ namespace McpRouter.Core.Routing
                     argumentsText = JsonSerializer.Serialize(argsProp, new JsonSerializerOptions { WriteIndented = true });
                 }
             }
-            catch { }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to parse tool call arguments from body during RequestManualApprovalAsync for tool '{ToolName}'", toolName);
+            }
 
             var approval = new PendingApproval
             {
