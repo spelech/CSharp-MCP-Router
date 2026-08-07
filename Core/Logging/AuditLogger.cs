@@ -20,6 +20,14 @@ namespace McpRouter.Core.Logging
             string? requestPayload = null,
             string? responsePayload = null,
             string? errorMessage = null);
+
+        Task LogAdminActionAsync(
+            string username,
+            string action,
+            string target,
+            string details,
+            bool success,
+            string? errorMessage = null);
     }
 
     public class AuditLogger : IAuditLogger
@@ -80,6 +88,46 @@ namespace McpRouter.Core.Logging
             catch
             {
                 // Silently swallow log storage exceptions to prevent blocking request pipeline
+            }
+        }
+
+        public async Task LogAdminActionAsync(
+            string username,
+            string action,
+            string target,
+            string details,
+            bool success,
+            string? errorMessage = null)
+        {
+            try
+            {
+                using var conn = _dbFactory.CreateConnection();
+                var cleanDetails = PiiSanitizer.SanitizePayload(details);
+
+                var parameters = new DynamicParameters();
+                parameters.Add("Id", Guid.NewGuid().ToString("N"));
+                parameters.Add("Username", username);
+                parameters.Add("Action", action);
+                parameters.Add("Target", target);
+                parameters.Add("Details", cleanDetails);
+                parameters.Add("Success", success ? 1 : 0);
+                parameters.Add("ErrorMessage", errorMessage);
+
+                if (_dbFactory.ProviderName == "sqlite")
+                {
+                    const string sql = @"
+                        INSERT INTO AdminAuditLogs (Id, Username, Action, Target, Details, Success, ErrorMessage, Timestamp)
+                        VALUES (@Id, @Username, @Action, @Target, @Details, @Success, @ErrorMessage, CURRENT_TIMESTAMP);";
+                    await conn.ExecuteAsync(sql, parameters);
+                }
+                else
+                {
+                    await conn.ExecuteAsync("sp_InsertAdminAuditLog", parameters, commandType: CommandType.StoredProcedure);
+                }
+            }
+            catch
+            {
+                // Silently swallow log storage exceptions to prevent blocking admin operations
             }
         }
     }

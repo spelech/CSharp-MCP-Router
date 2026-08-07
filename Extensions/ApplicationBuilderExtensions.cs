@@ -14,6 +14,7 @@ using Dapper;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
 using McpRouter.Services;
+using McpRouter.Core.Logging;
 
 namespace McpRouter.Extensions
 {
@@ -1224,11 +1225,13 @@ namespace McpRouter.Extensions
                 return Results.Ok(new { success = true });
             });
             
-            api.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
+            api.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
+                var username = httpContext.User.Identity?.Name ?? "system";
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
                 if (server == null)
                 {
+                    _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, System.Text.Json.JsonSerializer.Serialize(update), false, "Server not found");
                     return Results.NotFound();
                 }
             
@@ -1284,11 +1287,14 @@ namespace McpRouter.Extensions
                 // Reset active sessions so they reconnect to updated backends
                 sessionManager.ResetAll();
             
+                _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, System.Text.Json.JsonSerializer.Serialize(update), true);
+
                 return Results.Ok(server);
             });
             
-            api.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
+            api.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
+                var username = httpContext.User.Identity?.Name ?? "system";
                 if (string.IsNullOrEmpty(server.Id))
                 {
                     server.Id = Guid.NewGuid().ToString("N").Substring(0, 8);
@@ -1298,14 +1304,19 @@ namespace McpRouter.Extensions
                 await db.SaveChangesAsync();
                 
                 sessionManager.ResetAll();
+
+                _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id, System.Text.Json.JsonSerializer.Serialize(server), true);
+
                 return Results.Ok(server);
             });
             
-            api.MapDelete("/api/servers/{id}", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
+            api.MapDelete("/api/servers/{id}", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
+                var username = httpContext.User.Identity?.Name ?? "system";
                 var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
                 if (server == null)
                 {
+                    _ = auditLogger.LogAdminActionAsync(username, "DeleteServer", id, "", false, "Server not found");
                     return Results.NotFound();
                 }
                 
@@ -1316,6 +1327,9 @@ namespace McpRouter.Extensions
                 sessionManager.RemoveServerCache(id);
                 
                 sessionManager.ResetAll();
+
+                _ = auditLogger.LogAdminActionAsync(username, "DeleteServer", id, "", true);
+
                 return Results.Ok(new { success = true });
             });
 
@@ -1361,14 +1375,17 @@ namespace McpRouter.Extensions
             api.MapGet("/api/settings", (DynamicEmbeddingService embeddingService) => 
                 Results.Ok(embeddingService.GetSettings()));
                 
-            api.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService) => {
+            api.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) => {
+                var username = httpContext.User.Identity?.Name ?? "system";
                 try
                 {
                     embeddingService.SaveSettings(settings);
+                    _ = auditLogger.LogAdminActionAsync(username, "UpdateSettings", "embedding-settings", System.Text.Json.JsonSerializer.Serialize(settings), true);
                     return Results.Ok(new { success = true, settings = embeddingService.GetSettings() });
                 }
                 catch (ArgumentException ex)
                 {
+                    _ = auditLogger.LogAdminActionAsync(username, "UpdateSettings", "embedding-settings", System.Text.Json.JsonSerializer.Serialize(settings), false, ex.Message);
                     return Results.BadRequest(new { error = ex.Message });
                 }
             });

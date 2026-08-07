@@ -124,3 +124,15 @@ CREATE TABLE IF NOT EXISTS `AppKeys` (
     `ExpiresAt`    DATETIME NULL,
     `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 8. Admin Audit Logging Table
+CREATE TABLE IF NOT EXISTS `AdminAuditLogs` (
+    `Id`           VARCHAR(50) NOT NULL PRIMARY KEY,
+    `Username`     VARCHAR(256) NOT NULL,
+    `Action`       VARCHAR(100) NOT NULL,
+    `Target`       VARCHAR(256) NOT NULL,
+    `Details`      LONGTEXT NULL,
+    `Success`      TINYINT(1) NOT NULL,
+    `ErrorMessage` LONGTEXT NULL,
+    `Timestamp`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -268,3 +268,24 @@ BEGIN
     END
 END;
 GO
+
+-- 10. Procedure: Insert Admin Audit Log Entry
+CREATE OR ALTER PROCEDURE [dbo].[sp_InsertAdminAuditLog]
+    @Id VARCHAR(50),
+    @Username NVARCHAR(256),
+    @Action VARCHAR(100),
+    @Target VARCHAR(256),
+    @Details NVARCHAR(MAX) = NULL,
+    @Success BIT,
+    @ErrorMessage NVARCHAR(MAX) = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+    INSERT INTO [dbo].[AdminAuditLogs] (
+        [Id], [Username], [Action], [Target], [Details], [Success], [ErrorMessage], [Timestamp]
+    )
+    VALUES (
+        @Id, @Username, @Action, @Target, @Details, @Success, @ErrorMessage, SYSUTCDATETIME()
+    );
+END;
+GO

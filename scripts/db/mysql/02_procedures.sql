@@ -224,4 +224,24 @@ BEGIN
     END IF;
 END //
 
+-- 10. Procedure: Insert Admin Audit Log Entry
+DROP PROCEDURE IF EXISTS `sp_InsertAdminAuditLog` //
+CREATE PROCEDURE `sp_InsertAdminAuditLog`(
+    IN p_Id VARCHAR(50),
+    IN p_Username VARCHAR(256),
+    IN p_Action VARCHAR(100),
+    IN p_Target VARCHAR(256),
+    IN p_Details LONGTEXT,
+    IN p_Success TINYINT(1),
+    IN p_ErrorMessage LONGTEXT
+)
+BEGIN
+    INSERT INTO `AdminAuditLogs` (
+        `Id`, `Username`, `Action`, `Target`, `Details`, `Success`, `ErrorMessage`, `Timestamp`
+    )
+    VALUES (
+        p_Id, p_Username, p_Action, p_Target, p_Details, p_Success, p_ErrorMessage, NOW()
+    );
+END //
+
 DELIMITER ;
