@@ -146,6 +146,14 @@ namespace McpRouter.Tests
             var result = LdapActiveDirectoryService.ConvertSidBytesToString(sidBytes);
             Assert.Equal("S-1-5-32-544", result);
         }
+
+        [Fact]
+        public void LdapActiveDirectoryService_EscapeLdapFilter_EscapesSpecialCharacters()
+        {
+            var injectionInput = "admin*)(|(objectclass=*\0";
+            var escaped = LdapActiveDirectoryService.EscapeLdapFilter(injectionInput);
+            Assert.Equal(@"admin\2a\29\28|\28objectclass=\2a\00", escaped);
+        }
     }
 }
 
