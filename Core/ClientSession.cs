@@ -170,7 +170,15 @@ namespace McpRouter
                 using var conn = dbFactory.CreateConnection();
 
                 var targetKeys = new List<string> { $"tool:{targetId}", $"prompt:{targetId}", $"resource:{targetId}" };
-                var serverId = targetId.Contains("__") ? targetId.Split("__", 2)[0] : targetId;
+                string serverId;
+                if (targetId.StartsWith("mcp://"))
+                {
+                    serverId = Uri.TryCreate(targetId, UriKind.Absolute, out var parsedUri) ? parsedUri.Host : targetId;
+                }
+                else
+                {
+                    serverId = targetId.Contains("__") ? targetId.Split("__", 2)[0] : targetId;
+                }
                 targetKeys.Add($"server:{serverId}");
                 if (!string.IsNullOrEmpty(category))
                 {
@@ -480,6 +488,21 @@ namespace McpRouter
 
         public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db)
         {
+            // Namespace validation
+            var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+            if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateToolOrPromptName(toolName, activeServerIds))
+            {
+                return new {
+                    isError = true,
+                    content = new[] {
+                        new {
+                            type = "text",
+                            text = $"Security Error: Invalid or spoofed namespaced identifier: '{toolName}'."
+                        }
+                    }
+                };
+            }
+
             // RBAC Check
             var isAuth = await IsUserAuthorizedAsync("tools/call", toolName);
             if (!isAuth)
@@ -702,6 +725,13 @@ namespace McpRouter
 
         public async Task<object?> ReadResourceAsync(string resourceUri, string body)
         {
+            // Namespace validation
+            var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+            if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateResourceUri(resourceUri, activeServerIds))
+            {
+                throw new UnauthorizedAccessException($"Security Error: Invalid or spoofed resource URI namespace: '{resourceUri}'.");
+            }
+
             var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri);
             if (!isAuth)
             {
@@ -808,6 +838,13 @@ namespace McpRouter
 
         public async Task<object?> GetPromptAsync(string promptName, string body)
         {
+            // Namespace validation
+            var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+            if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateToolOrPromptName(promptName, activeServerIds))
+            {
+                throw new UnauthorizedAccessException($"Security Error: Invalid or spoofed prompt namespace: '{promptName}'.");
+            }
+
             var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName);
             if (!isAuth)
             {

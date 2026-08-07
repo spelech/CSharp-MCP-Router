@@ -43,6 +43,16 @@ namespace McpRouter.Extensions
         builder.Services.AddControllers();
 
         builder.Services.AddHttpClient();
+        builder.Services.Configure<Microsoft.Extensions.Http.HttpClientFactoryOptions>(options =>
+        {
+            options.HttpMessageHandlerBuilderActions.Add(b =>
+            {
+                b.PrimaryHandler = new HttpClientHandler
+                {
+                    AllowAutoRedirect = false
+                };
+            });
+        });
         builder.Services.AddSingleton<SessionManager>();
         
         // Register Docker Auto-Discovery Service

@@ -42,6 +42,18 @@ namespace McpRouter.Services
 
         public void SaveSettings(RouterSettings newSettings)
         {
+            if (newSettings.EmbeddingProvider != null && newSettings.EmbeddingProvider.Equals("api", StringComparison.OrdinalIgnoreCase))
+            {
+                if (McpRouter.Core.Security.SecurityValidationHelper.IsPrivateOrLoopback(newSettings.EmbeddingApiUrl))
+                {
+                    var allowPrivate = Environment.GetEnvironmentVariable("ALLOW_PRIVATE_IPS") == "true";
+                    if (!allowPrivate)
+                    {
+                        throw new ArgumentException("Embedding URL points to a blocked private or loopback IP range.");
+                    }
+                }
+            }
+
             lock (_lock)
             {
                 _settings = newSettings;
