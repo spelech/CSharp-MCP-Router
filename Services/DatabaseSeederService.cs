@@ -26,9 +26,13 @@ namespace McpRouter.Services
                 logger.LogInformation("Initializing database...");
 
                 var encryptionKey = app.Configuration["DB_ENCRYPTION_KEY"];
-                if (string.IsNullOrEmpty(encryptionKey) || encryptionKey == "DefaultSecureKey123!")
+                if (string.IsNullOrEmpty(encryptionKey))
                 {
-                    logger.LogCritical("SECURITY WARNING: The database is running with a default or weak DB_ENCRYPTION_KEY. Please set a strong DB_ENCRYPTION_KEY environment variable to secure your deployment!");
+                    logger.LogInformation("No DB_ENCRYPTION_KEY provided in configuration. A unique, cryptographically secure key has been generated and persisted in the data directory.");
+                }
+                else if (encryptionKey.Length < 16)
+                {
+                    logger.LogCritical("SECURITY WARNING: The configured DB_ENCRYPTION_KEY is too short (< 16 characters). Please set a strong, high-entropy DB_ENCRYPTION_KEY environment variable to secure your deployment!");
                 }
 
                 db.Database.EnsureCreated();
@@ -429,13 +433,14 @@ namespace McpRouter.Services
                         var customServers = JsonSerializer.Deserialize<List<McpServer>>(jsonContent, options);
                         if (customServers != null)
                         {
+                            var existingServersDict = db.Servers.ToDictionary(s => s.Id);
                             foreach (var server in customServers)
                             {
-                                var existing = db.Servers.FirstOrDefault(s => s.Id == server.Id);
-                                if (existing == null)
+                                if (!existingServersDict.TryGetValue(server.Id, out var existing))
                                 {
                                     logger.LogInformation($"Registering custom server '{server.DisplayName}' ({server.Id}) from config...");
                                     db.Servers.Add(server);
+                                    existingServersDict[server.Id] = server;
                                 }
                                 else
                                 {

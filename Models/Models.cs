@@ -1,5 +1,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Secrets;
 
 namespace McpRouter.Models
 {
@@ -59,7 +60,7 @@ namespace McpRouter.Models
         public RouterDbContext(DbContextOptions<RouterDbContext> options, IConfiguration configuration)
             : base(options)
         {
-            _encryptionKey = configuration["DB_ENCRYPTION_KEY"] ?? "DefaultSecureKey123!";
+            _encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
