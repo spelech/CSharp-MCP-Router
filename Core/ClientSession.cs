@@ -13,6 +13,7 @@ using McpRouter.Models;
 using McpRouter.Services;
 using McpRouter.Core.Identity;
 using McpRouter.Core.Database;
+using Microsoft.Extensions.Configuration;
 using Dapper;
 
 namespace McpRouter
@@ -1009,6 +1010,12 @@ namespace McpRouter
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to write invocation audit log");
+                var config = _clientResponse?.HttpContext?.RequestServices?.GetService<IConfiguration>();
+                var failClosed = config?.GetValue<bool>("Audit:FailClosed", true) ?? true;
+                if (failClosed)
+                {
+                    throw new System.Security.SecurityException("Audit logging failed and fail-closed policy is active.", ex);
+                }
             }
         }
     }

@@ -7,10 +7,13 @@ using Dapper;
 using McpRouter.Core.Database;
 using McpRouter.Core.Secrets;
 using McpRouter.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
+using McpRouter.Core.Logging;
+using System.Net.Http;
 
 namespace McpRouter.Tests
 {
@@ -227,6 +230,44 @@ namespace McpRouter.Tests
                 await logger.LogAdminActionAsync(
                     "user-1", "action-1", "target-1", "details-1", true
                 );
+            });
+        }
+
+        [Fact]
+        public async Task CallTool_FailsClosed_WhenAuditLogFails()
+        {
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
+                { "Audit:FailClosed", "true" }
+            }).Build();
+
+            var auditLoggerMock = new Mock<IAuditLogger>();
+            auditLoggerMock.Setup(a => a.LogInvocationAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int>(), It.IsAny<int>(),
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>()))
+                .ThrowsAsync(new InvalidOperationException("Audit DB failure"));
+
+            var serviceProviderMock = new Mock<IServiceProvider>();
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IConfiguration))).Returns(config);
+            serviceProviderMock.Setup(sp => sp.GetService(typeof(IAuditLogger))).Returns(auditLoggerMock.Object);
+
+            var httpContextMock = new Mock<HttpContext>();
+            httpContextMock.Setup(h => h.RequestServices).Returns(serviceProviderMock.Object);
+            httpContextMock.Setup(h => h.Items).Returns(new Dictionary<object, object?>());
+            var identity = new ClaimsIdentity(new[] { new Claim(ClaimTypes.Name, "admin") }, "AppKey");
+            httpContextMock.Setup(h => h.User).Returns(new ClaimsPrincipal(identity));
+
+            var responseMock = new Mock<HttpResponse>();
+            responseMock.Setup(r => r.HttpContext).Returns(httpContextMock.Object);
+
+            var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger>();
+            var servers = new List<McpServer> { new McpServer { Id = "testserver", Enabled = true } };
+
+            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), null, null, loggerMock.Object);
+
+            await Assert.ThrowsAsync<System.Security.SecurityException>(async () =>
+            {
+                await session.CallToolAsync("testserver__testtool", "{}", null!);
             });
         }
     }
