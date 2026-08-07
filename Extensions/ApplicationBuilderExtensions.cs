@@ -1362,8 +1362,15 @@ namespace McpRouter.Extensions
                 Results.Ok(embeddingService.GetSettings()));
                 
             api.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService) => {
-                embeddingService.SaveSettings(settings);
-                return Results.Ok(new { success = true, settings = embeddingService.GetSettings() });
+                try
+                {
+                    embeddingService.SaveSettings(settings);
+                    return Results.Ok(new { success = true, settings = embeddingService.GetSettings() });
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
             });
 
             api.MapGet("/api/approvals", ([FromServices] SessionManager sessionManager) =>

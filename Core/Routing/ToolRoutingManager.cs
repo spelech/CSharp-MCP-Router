@@ -286,6 +286,20 @@ namespace McpRouter.Core.Routing
                     };
                 }
 
+                var activeServerIds = servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateToolOrPromptName(targetName, activeServerIds))
+                {
+                    return new {
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = $"Security Error: Invalid or spoofed namespaced identifier in execute_tool: '{targetName}'."
+                            }
+                        }
+                    };
+                }
+
                 var targetPayload = new
                 {
                     jsonrpc = "2.0",

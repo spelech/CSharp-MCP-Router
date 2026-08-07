@@ -17,6 +17,11 @@ namespace McpRouter.Tests
 {
     public class DynamicEmbeddingServiceTests
     {
+        public DynamicEmbeddingServiceTests()
+        {
+            Environment.SetEnvironmentVariable("ALLOW_PRIVATE_IPS", "true");
+        }
+
         private class MockHttpMessageHandler : HttpMessageHandler
         {
             private readonly Func<HttpRequestMessage, HttpResponseMessage> _handler;

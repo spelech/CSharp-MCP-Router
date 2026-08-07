@@ -24,6 +24,15 @@ namespace McpRouter.Services
 
         public async Task<float[]> GetEmbeddingAsync(string text)
         {
+            if (McpRouter.Core.Security.SecurityValidationHelper.IsPrivateOrLoopback(_settings.EmbeddingApiUrl))
+            {
+                var allowPrivate = Environment.GetEnvironmentVariable("ALLOW_PRIVATE_IPS") == "true";
+                if (!allowPrivate)
+                {
+                    throw new InvalidOperationException("Access to private or loopback IP ranges is blocked for security reasons.");
+                }
+            }
+
             var request = new HttpRequestMessage(HttpMethod.Post, _settings.EmbeddingApiUrl);
             if (!string.IsNullOrEmpty(_settings.EmbeddingApiKey))
             {
