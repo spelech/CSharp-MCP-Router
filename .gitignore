@@ -11,6 +11,7 @@ publish/
 data/mcp_router.db*
 data/router.db*
 data/*.key
+data/*.txt
 
 # Build, test, and runtime outputs
 mcp_server.log

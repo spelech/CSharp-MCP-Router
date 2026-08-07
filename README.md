@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.4.0`** | 2026-08-07 | feat(security): implement column-level encryption, HTTPS URL validation, connection string password masking, and add DB encryption verification tests |
 | **`v3.3.0`** | 2026-08-07 | feat(security): implement strict namespace validation, SSRF private IP blocks, and disable automatic redirects |
 | **`v3.2.0`** | 2026-08-07 | feat(security): implement OidcHeader auth handler and secure control-plane endpoints |
 | **`v3.1.3`** | 2026-08-07 | fix(hygiene): resolve NuGet vulnerabilities, clean up AD warnings, and enable dynamic frontend Docker building |

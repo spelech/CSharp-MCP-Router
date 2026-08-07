@@ -147,5 +147,38 @@ namespace McpRouter.Core.Security
 
             return false;
         }
+
+        public static void ValidateJsonUrlsRequireHttps(string? json)
+        {
+            if (string.IsNullOrWhiteSpace(json)) return;
+
+            try
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(json);
+                var root = doc.RootElement;
+                if (root.ValueKind == System.Text.Json.JsonValueKind.Object)
+                {
+                    foreach (var prop in root.EnumerateObject())
+                    {
+                        var name = prop.Name.ToLowerInvariant();
+                        if (name.Contains("url") || name.Contains("uri") || name.Contains("authority") || name.Contains("issuer") || name.Contains("endpoint"))
+                        {
+                            var val = prop.Value.GetString();
+                            if (!string.IsNullOrEmpty(val) && (val.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || val.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
+                            {
+                                if (!val.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                                {
+                                    throw new ArgumentException($"URL field '{prop.Name}' must use the HTTPS scheme.");
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            catch (System.Text.Json.JsonException)
+            {
+                // If invalid JSON, ignore and let downstream parse/handle it
+            }
+        }
     }
 }

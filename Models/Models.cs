@@ -49,6 +49,7 @@ namespace McpRouter.Models
     public class RouterDbContext : DbContext
     {
         private readonly string _encryptionKey;
+        private readonly IConfiguration _configuration;
 
         public DbSet<McpServer> Servers => Set<McpServer>();
         public DbSet<OAuthClient> Clients => Set<OAuthClient>();
@@ -61,6 +62,7 @@ namespace McpRouter.Models
             : base(options)
         {
             _encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
+            _configuration = configuration;
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -82,11 +84,39 @@ namespace McpRouter.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+            base.OnModelCreating(modelBuilder);
+
             modelBuilder.Entity<McpServer>().HasKey(s => s.Id);
             modelBuilder.Entity<OAuthClient>().HasKey(c => c.ClientId);
             modelBuilder.Entity<McpAccessPolicy>().HasKey(p => p.Id);
             modelBuilder.Entity<GroupMapping>().HasKey(m => m.Id);
             modelBuilder.Entity<AppKey>().HasKey(k => k.Id);
+
+            var nullableApiConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<string?, string?>(
+                v => v == null ? null : SymmetricEncryptionHelper.Encrypt(v, _configuration),
+                v => v == null ? null : SymmetricEncryptionHelper.Decrypt(v, _configuration)
+            );
+
+            var apiConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<string, string>(
+                v => SymmetricEncryptionHelper.Encrypt(v, _configuration),
+                v => SymmetricEncryptionHelper.Decrypt(v, _configuration)
+            );
+
+            modelBuilder.Entity<McpServer>()
+                .Property(s => s.ApiKey)
+                .HasConversion(nullableApiConverter);
+
+            modelBuilder.Entity<McpServer>()
+                .Property(s => s.HeadersJson)
+                .HasConversion(nullableApiConverter);
+
+            modelBuilder.Entity<McpServer>()
+                .Property(s => s.SecretItemKey)
+                .HasConversion(nullableApiConverter);
+
+            modelBuilder.Entity<RouterSettings>()
+                .Property(s => s.EmbeddingApiKey)
+                .HasConversion(apiConverter);
 
             // Register OpenIddict Entity Framework Core entities
             modelBuilder.UseOpenIddict();
