@@ -14,11 +14,12 @@ namespace McpRouter.Tests
 {
     public class TransportsAuthShapeTests
     {
-        private void InvokeApplyAuthAndCustomHeaders(object transport, HttpRequestMessage request)
+        private async Task InvokeApplyAuthAndCustomHeadersAsync(object transport, HttpRequestMessage request)
         {
-            var method = transport.GetType().GetMethod("ApplyAuthAndCustomHeaders", BindingFlags.NonPublic | BindingFlags.Instance);
+            var method = transport.GetType().GetMethod("ApplyAuthAndCustomHeadersAsync", BindingFlags.NonPublic | BindingFlags.Instance);
             Assert.NotNull(method);
-            method.Invoke(transport, new object[] { request });
+            var task = (Task)method.Invoke(transport, new object[] { request })!;
+            await task;
         }
 
         [Theory]
@@ -26,7 +27,7 @@ namespace McpRouter.Tests
         [InlineData("basic", "secret123", "Authorization", "Basic secret123")]
         [InlineData("raw", "secret123", "Authorization", "secret123")]
         [InlineData("x-api-key", "secret123", "X-API-Key", "secret123")]
-        public void SseTransport_ApplyAuthAndCustomHeaders_Formats_Standard_Headers(string authShape, string token, string expectedHeaderKey, string expectedHeaderValue)
+        public async Task SseTransport_ApplyAuthAndCustomHeaders_Formats_Standard_Headers(string authShape, string token, string expectedHeaderKey, string expectedHeaderValue)
         {
             var server = new McpServer
             {
@@ -40,7 +41,7 @@ namespace McpRouter.Tests
             var transport = new SseTransport(server, httpClient, logger, null!);
 
             var request = new HttpRequestMessage(HttpMethod.Get, server.Url);
-            InvokeApplyAuthAndCustomHeaders(transport, request);
+            await InvokeApplyAuthAndCustomHeadersAsync(transport, request);
 
             Assert.True(request.Headers.Contains(expectedHeaderKey));
             var val = string.Join(" ", request.Headers.GetValues(expectedHeaderKey));
@@ -48,7 +49,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        public void SseTransport_ApplyAuthAndCustomHeaders_Formats_CustomHeader()
+        public async Task SseTransport_ApplyAuthAndCustomHeaders_Formats_CustomHeader()
         {
             var server = new McpServer
             {
@@ -61,14 +62,14 @@ namespace McpRouter.Tests
             var transport = new SseTransport(server, new HttpClient(), NullLogger<SseTransport>.Instance, null!);
 
             var request = new HttpRequestMessage(HttpMethod.Get, server.Url);
-            InvokeApplyAuthAndCustomHeaders(transport, request);
+            await InvokeApplyAuthAndCustomHeadersAsync(transport, request);
 
             Assert.True(request.Headers.Contains("Slack-Bot-Token"));
             Assert.Equal("xoxb-test-token", string.Join("", request.Headers.GetValues("Slack-Bot-Token")));
         }
 
         [Fact]
-        public void SseTransport_ApplyAuthAndCustomHeaders_Appends_QueryParameter()
+        public async Task SseTransport_ApplyAuthAndCustomHeaders_Appends_QueryParameter()
         {
             var server = new McpServer
             {
@@ -81,7 +82,7 @@ namespace McpRouter.Tests
             var transport = new SseTransport(server, new HttpClient(), NullLogger<SseTransport>.Instance, null!);
 
             var request = new HttpRequestMessage(HttpMethod.Get, server.Url);
-            InvokeApplyAuthAndCustomHeaders(transport, request);
+            await InvokeApplyAuthAndCustomHeadersAsync(transport, request);
 
             Assert.NotNull(request.RequestUri);
             Assert.Contains("api_key=query-token-123", request.RequestUri.Query);
@@ -89,7 +90,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        public void HttpTransport_ApplyAuthAndCustomHeaders_Formats_CustomHeader()
+        public async Task HttpTransport_ApplyAuthAndCustomHeaders_Formats_CustomHeader()
         {
             var server = new McpServer
             {
@@ -102,14 +103,14 @@ namespace McpRouter.Tests
             var transport = new HttpTransport(server, new HttpClient(), NullLogger<HttpTransport>.Instance);
 
             var request = new HttpRequestMessage(HttpMethod.Post, server.Url);
-            InvokeApplyAuthAndCustomHeaders(transport, request);
+            await InvokeApplyAuthAndCustomHeadersAsync(transport, request);
 
             Assert.True(request.Headers.Contains("X-Service-Auth"));
             Assert.Equal("http-secret-key", string.Join("", request.Headers.GetValues("X-Service-Auth")));
         }
 
         [Fact]
-        public void SseTransport_ApplyAuthAndCustomHeaders_Parses_HeadersJson()
+        public async Task SseTransport_ApplyAuthAndCustomHeaders_Parses_HeadersJson()
         {
             var server = new McpServer
             {
@@ -120,7 +121,7 @@ namespace McpRouter.Tests
             var transport = new SseTransport(server, new HttpClient(), NullLogger<SseTransport>.Instance, null!);
 
             var request = new HttpRequestMessage(HttpMethod.Get, server.Url);
-            InvokeApplyAuthAndCustomHeaders(transport, request);
+            await InvokeApplyAuthAndCustomHeadersAsync(transport, request);
 
             Assert.True(request.Headers.Contains("X-Custom-Env"));
             Assert.Equal("production", string.Join("", request.Headers.GetValues("X-Custom-Env")));

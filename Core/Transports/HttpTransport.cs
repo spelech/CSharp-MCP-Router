@@ -56,9 +56,9 @@ namespace McpRouter.Core.Transports
             return !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
         }
 
-        private void ApplyAuthAndCustomHeaders(HttpRequestMessage request)
+        private async Task ApplyAuthAndCustomHeadersAsync(HttpRequestMessage request)
         {
-            var token = ResolveTokenAsync().GetAwaiter().GetResult();
+            var token = await ResolveTokenAsync();
             var authShape = (_server.AuthShape ?? "bearer").ToLowerInvariant();
 
             if (!string.IsNullOrEmpty(token))
@@ -140,7 +140,7 @@ namespace McpRouter.Core.Transports
             if (!string.IsNullOrEmpty(_sessionId))
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
 
-            ApplyAuthAndCustomHeaders(req);
+            await ApplyAuthAndCustomHeadersAsync(req);
 
             using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);

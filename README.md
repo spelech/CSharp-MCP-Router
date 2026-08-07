@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.9.1`** | 2026-08-07 | fix(secrets): fix database schema and Vault HTTPS enforcement |
 | **`v3.9.0`** | 2026-08-07 | feat(secrets): implement per-server Vault integration and JIT renewal |
 | **`v3.8.4`** | 2026-08-07 | fix(security): resolve IPv6 mapping and default trust in proxy validation |
 | **`v3.8.3`** | 2026-08-07 | fix(security): implement actual trusted proxy header stripping and mapping |
