@@ -15,22 +15,19 @@ namespace McpRouter.Core.Identity
             if (remoteIp == null)
             {
                 var requireTrusted = config?.GetValue<bool>("Oidc:RequireTrustedProxy", true) ?? true;
-                var proxiesStr = config?["Oidc:TrustedProxies"] ?? "";
-                if (!requireTrusted || string.IsNullOrEmpty(proxiesStr) || config == null)
-                {
-                    return true;
-                }
-                return false;
+                return !requireTrusted;
             }
 
-            if (IPAddress.IsLoopback(remoteIp))
+            var effectiveIp = remoteIp.IsIPv4MappedToIPv6 ? remoteIp.MapToIPv4() : remoteIp;
+
+            if (IPAddress.IsLoopback(effectiveIp))
             {
                 return true;
             }
 
-            var proxiesStrVal = config?["Oidc:TrustedProxies"] ?? "127.0.0.1,::1,10.0.0.10";
+            var proxiesStrVal = config?["Oidc:TrustedProxies"] ?? "";
             var trustedProxies = proxiesStrVal.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-            if (trustedProxies.Contains(remoteIp.ToString()))
+            if (effectiveIp != null && trustedProxies.Contains(effectiveIp.ToString()))
             {
                 return true;
             }
