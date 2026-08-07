@@ -120,6 +120,12 @@ External groups are mapped to virtual internal groups via the database `GroupMap
 1. **Create Mapping**: Link an external Active Directory SID (e.g., `S-1-5-21-...`) or OIDC group (e.g., `house_member`) to an internal security group (`admin`, `operator`, `readonly`).
 2. **Evaluate Access**: When a tool is invoked, the router executes the `sp_EvaluateUserAccess` stored procedure to verify that the active user's groups permit invoking that specific namespace / target server.
 
+### CORS & Cross-Origin Security Configuration
+By default, the gateway restricts cross-origin request access to standard safe localhost development origins (`http://localhost:3000`, `http://localhost:5000`, `https://localhost:5001`) to protect your local environment from cross-site request forgery and malicious third-party websites.
+
+For production or custom domain deployments, you can configure the allowed origins using the `CORS_ALLOWED_ORIGINS` (or `AllowedOrigins`) environment variable or configuration setting:
+- **`CORS_ALLOWED_ORIGINS`**: A comma, semicolon, or whitespace-separated list of allowed origin URLs (e.g., `https://my-mcp-dashboard.internal, https://cursor-plugin.internal`).
+
 ---
 
 ## 🔑 5. Pluggable Secret Retrievers

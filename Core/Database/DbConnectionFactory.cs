@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
+using McpRouter.Core.Secrets;
 
 namespace McpRouter.Core.Database
 {
@@ -28,7 +29,7 @@ namespace McpRouter.Core.Database
             if (_provider == "sqlite" && string.IsNullOrEmpty(_connectionString))
             {
                 var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");
-                var encryptionKey = config["DB_ENCRYPTION_KEY"] ?? "DefaultSecureKey123!";
+                var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(config);
                 _connectionString = $"Data Source={dbPath};Password={encryptionKey}";
             }
         }

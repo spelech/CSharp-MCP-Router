@@ -35,29 +35,6 @@ namespace McpRouter.Core.Transports
             _messageUrlTcs.TrySetResult(url);
         }
 
-        private async Task<string?> WaitForMessageUrlAsync()
-        {
-            if (_messageUrl != null)
-            {
-                return _messageUrl;
-            }
-
-            try
-            {
-                var delayTask = Task.Delay(TimeSpan.FromSeconds(5), _cts.Token);
-                var completedTask = await Task.WhenAny(_messageUrlTcs.Task, delayTask);
-                if (completedTask == _messageUrlTcs.Task)
-                {
-                    return await _messageUrlTcs.Task;
-                }
-            }
-            catch (Exception)
-            {
-                // Fallback to current value of _messageUrl if anything cancels or fails
-            }
-            return _messageUrl;
-        }
-
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             Converters = { new JsonRpcMessageConverter() }
@@ -224,15 +201,17 @@ namespace McpRouter.Core.Transports
                                 var data = line.Substring(5).Trim();
                                 if (currentEvent == "endpoint")
                                 {
+                                    string resolvedUrl;
                                     if (Uri.IsWellFormedUriString(data, UriKind.Absolute))
                                     {
-                                        SetMessageUrl(data);
+                                        resolvedUrl = data;
                                     }
                                     else
                                     {
                                         var baseUri = new Uri(_server.Url);
-                                        SetMessageUrl(new Uri(baseUri, data).ToString());
+                                        resolvedUrl = new Uri(baseUri, data).ToString();
                                     }
+                                    SetMessageUrl(resolvedUrl);
                                 }
                                 else if (currentEvent == "message")
                                 {
@@ -292,9 +271,21 @@ namespace McpRouter.Core.Transports
 
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
         {
-            var messageUrl = await WaitForMessageUrlAsync();
+            if (_messageUrl == null)
+            {
+                try
+                {
+                    await _messageUrlTcs.Task.WaitAsync(TimeSpan.FromSeconds(5), _cts.Token);
+                }
+                catch (TimeoutException)
+                {
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }
 
-            if (messageUrl == null)
+            if (_messageUrl == null)
             {
                 return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
             }
@@ -318,14 +309,14 @@ namespace McpRouter.Core.Transports
                 }
             } catch { }
 
-            var tcs = _stateManager.CreateRequest(requestId);
+            var requestTask = _stateManager.CreateRequest(requestId).Task;
 
             try
             {
                 var content = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 
-                using var req = new HttpRequestMessage(HttpMethod.Post, messageUrl) { Content = content };
+                using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
                 req.Headers.Host = "localhost";
                 req.Headers.Accept.Clear();
                 req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -341,7 +332,7 @@ namespace McpRouter.Core.Transports
                 using var res = await _httpClient.SendAsync(req, _cts.Token);
                 res.EnsureSuccessStatusCode();
 
-                var response = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
+                var response = await requestTask.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
                 var responseJson = JsonSerializer.Serialize(response, _jsonOptions);
                 _logger.LogInformation("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, responseJson);
                 return response;
@@ -358,22 +349,34 @@ namespace McpRouter.Core.Transports
             var bodyObj = new { jsonrpc = "2.0", method = method, @params = parameters, id = overrideId ?? Guid.NewGuid().ToString("N") };
             var bodyJson = JsonSerializer.Serialize(bodyObj);
 
-            var messageUrl = await WaitForMessageUrlAsync();
+            if (_messageUrl == null)
+            {
+                try
+                {
+                    await _messageUrlTcs.Task.WaitAsync(TimeSpan.FromSeconds(5), _cts.Token);
+                }
+                catch (TimeoutException)
+                {
+                }
+                catch (OperationCanceledException)
+                {
+                }
+            }
 
-            if (messageUrl == null)
+            if (_messageUrl == null)
             {
                 throw new InvalidOperationException($"Backend {_server.Id} has not sent its endpoint event yet.");
             }
 
             string requestId = bodyObj.id;
-            var tcs = _stateManager.CreateRequest(requestId);
+            var requestTask = _stateManager.CreateRequest(requestId).Task;
 
             try
             {
                 var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
                 
-                using var postReq = new HttpRequestMessage(HttpMethod.Post, messageUrl) { Content = content };
+                using var postReq = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
                 postReq.Headers.Host = "localhost";
                 postReq.Headers.Accept.Clear();
                 postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -388,7 +391,7 @@ namespace McpRouter.Core.Transports
                 using var res = await _httpClient.SendAsync(postReq, _cts.Token);
                 res.EnsureSuccessStatusCode();
 
-                return await tcs.Task.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
+                return await requestTask.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
             }
             finally
             {
