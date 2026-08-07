@@ -8,6 +8,7 @@ namespace McpRouter.Core.Secrets
 {
     public static class SymmetricEncryptionHelper
     {
+        private static readonly object KeyLock = new object();
         private static readonly byte[] Salt = Encoding.UTF8.GetBytes("McpRouter_SymmetricEncryption_Salt_2026");
         private static (string secretString, byte[] key)? _cachedKey;
 
@@ -21,11 +22,19 @@ namespace McpRouter.Core.Secrets
                 return _cachedKey.Value.key;
             }
 
-            var secretBytes = Encoding.UTF8.GetBytes(secretString);
-            var derivedKey = Rfc2898DeriveBytes.Pbkdf2(secretBytes, Salt, 600_000, HashAlgorithmName.SHA256, 32);
-            _cachedKey = (secretString, derivedKey);
+            lock (KeyLock)
+            {
+                if (_cachedKey.HasValue && _cachedKey.Value.secretString == secretString)
+                {
+                    return _cachedKey.Value.key;
+                }
 
-            return derivedKey;
+                var secretBytes = Encoding.UTF8.GetBytes(secretString);
+                var derivedKey = Rfc2898DeriveBytes.Pbkdf2(secretBytes, Salt, 600_000, HashAlgorithmName.SHA256, 32);
+                _cachedKey = (secretString, derivedKey);
+
+                return derivedKey;
+            }
         }
 
         public static string Encrypt(string plaintext, IConfiguration config)
