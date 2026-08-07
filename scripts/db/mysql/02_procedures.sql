@@ -42,7 +42,7 @@ BEGIN
     WHERE `TargetId` IN (SELECT `TargetId` FROM `_temp_target_keys`);
 
     IF v_PolicyCount = 0 THEN
-        SELECT 1 AS IsAllowed;
+        SELECT 0 AS IsAllowed;
     ELSE
         -- Check deny policies
         SELECT COUNT(*) INTO v_DenyCount

@@ -206,5 +206,28 @@ namespace McpRouter.Tests
 
             Assert.True(isValid);
         }
+
+        [Fact]
+        public async Task AuditLogger_ThrowsException_OnDatabaseError()
+        {
+            var brokenFactoryMock = new Mock<IDbConnectionFactory>();
+            brokenFactoryMock.Setup(f => f.CreateConnection()).Throws(new InvalidOperationException("Failed to open connection"));
+            
+            var logger = new McpRouter.Core.Logging.AuditLogger(brokenFactoryMock.Object);
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await logger.LogInvocationAsync(
+                    "req-1", "user-1", "sid-1", "server-1", "item-1", "method-1", 100, 200
+                );
+            });
+
+            await Assert.ThrowsAsync<InvalidOperationException>(async () =>
+            {
+                await logger.LogAdminActionAsync(
+                    "user-1", "action-1", "target-1", "details-1", true
+                );
+            });
+        }
     }
 }

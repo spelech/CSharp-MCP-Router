@@ -42,7 +42,7 @@ BEGIN
         WHERE [TargetId] IN (SELECT TargetId FROM @TargetKeys)
     )
     BEGIN
-        SELECT 1 AS IsAllowed;
+        SELECT 0 AS IsAllowed;
         RETURN;
     END;
 

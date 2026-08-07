@@ -46,10 +46,15 @@ namespace McpRouter.Extensions
                     options.SetTokenEndpointUris("/connect/token", "/oauth/token");
                     options.AllowClientCredentialsFlow();
                     
-                    if (env.IsDevelopment() || env.EnvironmentName == "Dev")
+                    if (env.IsDevelopment() || env.EnvironmentName == "Dev" || env.EnvironmentName == "Development")
                     {
                         options.AddDevelopmentEncryptionCertificate()
                                .AddDevelopmentSigningCertificate();
+                    }
+                    else
+                    {
+                        options.AddEphemeralEncryptionKey()
+                               .AddEphemeralSigningKey();
                     }
 
                     options.UseAspNetCore()

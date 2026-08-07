@@ -85,9 +85,9 @@ namespace McpRouter.Core.Logging
                     await conn.ExecuteAsync("sp_InsertAuditLog", parameters, commandType: CommandType.StoredProcedure);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Silently swallow log storage exceptions to prevent blocking request pipeline
+                throw new InvalidOperationException("Audit log storage failed", ex);
             }
         }
 
@@ -125,9 +125,9 @@ namespace McpRouter.Core.Logging
                     await conn.ExecuteAsync("sp_InsertAdminAuditLog", parameters, commandType: CommandType.StoredProcedure);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                // Silently swallow log storage exceptions to prevent blocking admin operations
+                throw new InvalidOperationException("Audit log storage failed", ex);
             }
         }
     }
