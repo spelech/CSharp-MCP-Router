@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.2.0`** | 2026-08-07 | feat(security): implement OidcHeader auth handler and secure control-plane endpoints |
 | **`v3.1.3`** | 2026-08-07 | fix(hygiene): resolve NuGet vulnerabilities, clean up AD warnings, and enable dynamic frontend Docker building |
 | **`v3.1.2`** | 2026-08-07 | chore(scripts): update bump_version.py to sync fallback version in useUserStore.ts |
 | **`v3.1.1`** | 2026-08-07 | docs: add design spec for security hardening |

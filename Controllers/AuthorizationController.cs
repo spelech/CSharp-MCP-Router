@@ -4,6 +4,7 @@ using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 using System.Text.Json;
@@ -55,6 +56,7 @@ namespace McpRouter.Controllers
             throw new NotImplementedException("The specified grant type is not implemented.");
         }
 
+        [Authorize(Policy = "AdminPolicy")]
         [HttpPost("~/api/register")]
         [Produces("application/json")]
         public async Task<IActionResult> RegisterClient([FromBody] JsonElement metadata)

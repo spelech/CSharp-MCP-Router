@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Dapper;
 using McpRouter.Core.Database;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace McpRouter.Controllers
 {
@@ -27,6 +28,7 @@ namespace McpRouter.Controllers
 
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "AdminPolicy")]
     public class ProvidersController : ControllerBase
     {
         private readonly IDbConnectionFactory _dbFactory;

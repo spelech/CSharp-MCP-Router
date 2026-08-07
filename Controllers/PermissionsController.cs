@@ -5,11 +5,13 @@ using Dapper;
 using McpRouter.Core.Database;
 using McpRouter.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 
 namespace McpRouter.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "AdminPolicy")]
     public class PermissionsController : ControllerBase
     {
         private readonly IDbConnectionFactory _dbFactory;
