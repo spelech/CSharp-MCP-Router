@@ -17,6 +17,11 @@ using McpRouter.Models;
 using McpRouter.Services;
 using McpRouter;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.DependencyInjection;
+using System.Net;
+using McpRouter.Extensions;
+using McpRouter.Core.Security;
 
 namespace McpRouter.Tests
 {
@@ -223,6 +228,7 @@ namespace McpRouter.Tests
                 DisplayName = "Backend 1", 
                 Url = "http://backend1/mcp", 
                 Type = "sse", // SSE type uses background reader and TaskCompletionSource
+                SecretProvider = "None",
                 Enabled = true 
             };
 
@@ -280,6 +286,7 @@ namespace McpRouter.Tests
                 DisplayName = "Backend 1", 
                 Url = "http://backend1/mcp", 
                 Type = "sse",
+                SecretProvider = "None",
                 Enabled = true 
             };
 
@@ -359,6 +366,7 @@ namespace McpRouter.Tests
                 DisplayName = "SSE Backend", 
                 Url = "http://backend_sse/mcp", 
                 Type = "sse", // Using Type = sse to trigger StartReader
+                SecretProvider = "None",
                 Enabled = true 
             };
 
@@ -431,6 +439,7 @@ namespace McpRouter.Tests
                 DisplayName = "Stress Backend", 
                 Url = "http://backend_stress/mcp", 
                 Type = "sse",
+                SecretProvider = "None",
                 Enabled = true 
             };
 
@@ -631,6 +640,86 @@ namespace McpRouter.Tests
                 var msg = action();
                 msg.Should().NotBeNull();
             }
+        }
+
+        [Fact]
+        public async Task Connect_BlocksPrivateOrLoopbackIPs_AtSocketLevel()
+        {
+            // 1. Without allowed IP ranges, connecting to 127.0.0.1 must throw HttpRequestException with SSRF protection message.
+            var builder1 = WebApplication.CreateBuilder();
+            builder1.AddMcpRouterServices();
+            var app1 = builder1.Build();
+            var clientFactory1 = app1.Services.GetRequiredService<IHttpClientFactory>();
+            var client1 = clientFactory1.CreateClient();
+
+            var ex1 = await Assert.ThrowsAsync<HttpRequestException>(() => client1.GetAsync("http://127.0.0.1:59999"));
+            ex1.Message.Should().Contain("SSRF protection");
+
+            // 2. With Security:AllowedIpRanges configured with 127.0.0.1, connection to 127.0.0.1 is allowed to proceed (does not throw SSRF exception).
+            var builder2 = WebApplication.CreateBuilder();
+            builder2.Configuration["Security:AllowedIpRanges:0"] = "127.0.0.1";
+            builder2.AddMcpRouterServices();
+            var app2 = builder2.Build();
+            var clientFactory2 = app2.Services.GetRequiredService<IHttpClientFactory>();
+            var client2 = clientFactory2.CreateClient();
+
+            var ex2 = await Assert.ThrowsAsync<HttpRequestException>(() => client2.GetAsync("http://127.0.0.1:59999"));
+            ex2.Message.Should().NotContain("SSRF protection");
+        }
+
+        [Fact]
+        public void SecurityValidationHelper_IsBlockedIp_ValidatesAllBlockedAndAllowedRanges()
+        {
+            // IPv4 Loopback
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("127.0.0.1"), null).Should().BeTrue();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("127.0.0.1"), new[] { "127.0.0.1" }).Should().BeFalse();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("127.0.0.1"), new[] { "127.0.0.0/8" }).Should().BeFalse();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("127.0.0.1"), new[] { "loopback" }).Should().BeFalse();
+
+            // IPv4 Private A (10.0.0.0/8)
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("10.0.0.1"), null).Should().BeTrue();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("10.0.0.1"), new[] { "10.0.0.0/8" }).Should().BeFalse();
+
+            // IPv4 Private B (172.16.0.0/12)
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("172.16.5.10"), null).Should().BeTrue();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("172.31.255.254"), null).Should().BeTrue();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("172.32.0.1"), null).Should().BeFalse(); // Outside 172.16/12
+
+            // IPv4 Private C (192.168.0.0/16)
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("192.168.1.50"), null).Should().BeTrue();
+
+            // IPv4 Link-Local (169.254.0.0/16)
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("169.254.169.254"), null).Should().BeTrue();
+
+            // IPv4 CGNAT (100.64.0.0/10)
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("100.64.1.1"), null).Should().BeTrue();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("100.127.255.254"), null).Should().BeTrue();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("100.128.0.1"), null).Should().BeFalse(); // Outside CGNAT
+
+            // IPv4 Multicast (224.0.0.0/4)
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("224.0.0.1"), null).Should().BeTrue();
+
+            // IPv6 Loopback
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("::1"), null).Should().BeTrue();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("::1"), new[] { "::1" }).Should().BeFalse();
+
+            // IPv6 Link-Local
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("fe80::1"), null).Should().BeTrue();
+
+            // IPv6 ULA (fc00::/7)
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("fd00::1"), null).Should().BeTrue();
+
+            // IPv6 Multicast
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("ff02::1"), null).Should().BeTrue();
+
+            // IPv4-mapped IPv6 Loopback / Private
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("::ffff:127.0.0.1"), null).Should().BeTrue();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("::ffff:10.0.0.1"), null).Should().BeTrue();
+
+            // Public IP Addresses (should be allowed)
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("8.8.8.8"), null).Should().BeFalse();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("1.1.1.1"), null).Should().BeFalse();
+            SecurityValidationHelper.IsBlockedIp(IPAddress.Parse("2607:f8b0:4005:805::200e"), null).Should().BeFalse();
         }
     }
 }

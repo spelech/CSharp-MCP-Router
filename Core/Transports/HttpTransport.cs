@@ -8,6 +8,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using McpRouter.Core.Secrets;
 using McpRouter.Models;
 using Microsoft.Extensions.Logging;
 
@@ -19,11 +20,11 @@ namespace McpRouter.Core.Transports
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
         private readonly ILogger _logger;
+        private readonly ISecretRetriever? _secretRetriever;
         private readonly CancellationTokenSource _cts = new();
-        private readonly McpRouter.Core.Secrets.CompositeSecretRetriever? _secretRetriever;
         private string _sessionId = string.Empty;
 
-        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, McpRouter.Core.Secrets.CompositeSecretRetriever? secretRetriever = null)
+        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null)
         {
             _server = server;
             _httpClient = httpClient;
@@ -31,21 +32,45 @@ namespace McpRouter.Core.Transports
             _secretRetriever = secretRetriever;
         }
 
-        private async Task<string?> ResolveTokenAsync()
+        public async Task<string?> ResolveTokenAsync(ISecretRetriever? secretRetriever = null)
         {
             var provider = _server.SecretProvider ?? "None";
-            if (provider != "None" && !string.IsNullOrEmpty(provider) && _secretRetriever != null)
+            if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
-                var secretPath = _server.Url;
-                var keyName = _server.SecretItemKey ?? "ApiKey";
-                return await _secretRetriever.GetSecretAsync(secretPath, keyName);
+                return !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
             }
-            return !string.IsNullOrEmpty(_server.ApiKey) ? _server.ApiKey : null;
-        }
 
-        private void ApplyAuthAndCustomHeaders(HttpRequestMessage request)
-        {
-            ApplyAuthAndCustomHeadersAsync(request).GetAwaiter().GetResult();
+            var retriever = secretRetriever ?? _secretRetriever;
+            if (retriever == null)
+            {
+                throw new InvalidOperationException($"SecretProvider is configured to '{provider}' for server '{_server.Id}', but no secret retriever is registered.");
+            }
+
+            string path = !string.IsNullOrWhiteSpace(_server.SecretPath) ? _server.SecretPath : _server.Url;
+            if (!string.IsNullOrWhiteSpace(_server.SecretMount))
+            {
+                path = $"{_server.SecretMount}:{path}";
+            }
+            string field = !string.IsNullOrWhiteSpace(_server.SecretField)
+                ? _server.SecretField
+                : (!string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "ApiKey");
+
+            string? secret = null;
+            if (retriever is CompositeSecretRetriever composite)
+            {
+                secret = await composite.GetSecretForProviderAsync(provider, path, field);
+            }
+            else
+            {
+                secret = await retriever.GetSecretAsync(path, field);
+            }
+
+            if (string.IsNullOrEmpty(secret))
+            {
+                throw new System.Security.SecurityException($"Failed to resolve secret from provider '{provider}' for server '{_server.Id}' (path: '{path}', field: '{field}'). Plaintext ApiKey fallback is disabled.");
+            }
+
+            return secret;
         }
 
         private async Task ApplyAuthAndCustomHeadersAsync(HttpRequestMessage request)

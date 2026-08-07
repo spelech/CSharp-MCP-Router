@@ -62,6 +62,21 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v3.9.7`** | 2026-08-07 | fix(security): resolve Remediation Round 2 P0 vulnerabilities (P0-1 through P0-7) |
+| **`v3.9.6`** | 2026-08-07 | fix(security): request-scoped SSE authorization — evaluate identity per-message, not from cached handshake context |
+| **`v3.9.5`** | 2026-08-07 | fix(security): make IsBlockedIp strictly fail-closed on null input |
+| **`v3.9.4`** | 2026-08-07 | fix(security): socket-level ConnectCallback SSRF validation |
+| **`v3.9.3`** | 2026-08-07 | fix(crypto): prevent credential corruption on migration failure and add thread-safe key locking |
+| **`v3.9.2`** | 2026-08-07 | fix(crypto): implement AES-GCM, PBKDF2 derivation, and key hashing migration |
+| **`v3.9.1`** | 2026-08-07 | fix(secrets): fix database schema and Vault HTTPS enforcement |
+| **`v3.9.0`** | 2026-08-07 | feat(secrets): implement per-server Vault integration and JIT renewal |
+| **`v3.8.4`** | 2026-08-07 | fix(security): resolve IPv6 mapping and default trust in proxy validation |
+| **`v3.8.3`** | 2026-08-07 | fix(security): implement actual trusted proxy header stripping and mapping |
+| **`v3.8.2`** | 2026-08-07 | fix(security): strip proxy headers for untrusted remote IPs |
+| **`v3.8.1`** | 2026-08-07 | fix(identity): sanitize LDAP search inputs and configure LDAPS secure channel |
+| **`v3.8.0`** | 2026-08-07 | feat(identity): implement cross-platform AD LDAP resolution |
+| **`v3.7.1`** | 2026-08-07 | fix(security): handle unresolved IAuditLogger and safely parse json request ids |
+| **`v3.7.0`** | 2026-08-07 | feat(security): implement fail-closed try-finally logging |
 | **`v3.6.2`** | 2026-08-07 | fix(security): resolve production startup crash, fail-closed stored procedures, and backend invocation auditing |
 | **`v3.6.1`** | 2026-08-07 | test(security): add fail-closed, SHA-256 app keys hashing, and sequential execution verification tests |
 | **`v3.6.0`** | 2026-08-07 | feat(security): implement fail-closed authorization, OIDC proxy default enforcement, session overwrites leak prevention, SHA-256 app keys hashing, and CORS/cert production gating |

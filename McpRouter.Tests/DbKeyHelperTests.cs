@@ -55,31 +55,17 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        public void ResolveDbEncryptionKey_GeneratesAndPersistsKey_WhenAbsent()
+        public void ResolveDbEncryptionKey_ThrowsInvalidOperation_WhenMasterKeyAbsent()
         {
             // Arrange
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(c => c["DB_ENCRYPTION_KEY"]).Returns((string?)null);
+            configMock.Setup(c => c["ROUTER_MASTER_KEY"]).Returns((string?)null);
 
-            // Act - First call: should generate and save to file
-            var key1 = DbKeyHelper.ResolveDbEncryptionKey(configMock.Object);
-
-            // Assert
-            Assert.False(string.IsNullOrEmpty(key1));
-            Assert.True(File.Exists(_keyFilePath), "Should write generated key to data/db_key.txt");
-
-            // Read the file to ensure the key matches
-            var fileContent = File.ReadAllText(_keyFilePath).Trim();
-            Assert.Equal(key1, fileContent);
-
-            // Act - Second call: should retrieve from cache or file, and must be identical
-            var key2 = DbKeyHelper.ResolveDbEncryptionKey(configMock.Object);
-            Assert.Equal(key1, key2);
-
-            // Act - Third call (reset cache to force reading from file): should retrieve from file and be identical
-            DbKeyHelper.ResetCache();
-            var key3 = DbKeyHelper.ResolveDbEncryptionKey(configMock.Object);
-            Assert.Equal(key1, key3);
+            // Act & Assert
+            var ex = Assert.Throws<InvalidOperationException>(() => DbKeyHelper.ResolveDbEncryptionKey(configMock.Object));
+            Assert.Contains("Master encryption key is missing", ex.Message);
+            Assert.False(File.Exists(_keyFilePath), "Should not create a key file when master key is absent.");
         }
     }
 }

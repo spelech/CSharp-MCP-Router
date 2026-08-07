@@ -2,14 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using McpRouter.Core.Secrets;
 using McpRouter.Models;
-
-using Microsoft.EntityFrameworkCore;
 
 namespace McpRouter.Services
 {
@@ -17,7 +20,12 @@ namespace McpRouter.Services
     {
         public static void SeedDatabase(this WebApplication app)
         {
-            using var scope = app.Services.CreateScope();
+            SeedDatabase(app.Services, app.Configuration);
+        }
+
+        public static void SeedDatabase(IServiceProvider services, IConfiguration configuration)
+        {
+            using var scope = services.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             
@@ -25,7 +33,7 @@ namespace McpRouter.Services
             {
                 logger.LogInformation("Initializing database...");
 
-                var encryptionKey = app.Configuration["DB_ENCRYPTION_KEY"];
+                var encryptionKey = configuration["DB_ENCRYPTION_KEY"];
                 if (string.IsNullOrEmpty(encryptionKey))
                 {
                     logger.LogInformation("No DB_ENCRYPTION_KEY provided in configuration. A unique, cryptographically secure key has been generated and persisted in the data directory.");
@@ -90,13 +98,31 @@ namespace McpRouter.Services
 
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None'");
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
                     }
                     catch { }
 
                     try
                     {
                         db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretItemKey TEXT NULL");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretMount TEXT NULL");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretPath TEXT NULL");
+                    }
+                    catch { }
+
+                    try
+                    {
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretField TEXT NULL");
                     }
                     catch { }
 
@@ -117,7 +143,7 @@ namespace McpRouter.Services
                     {
                         db.Database.ExecuteSqlRaw(
                             "UPDATE Servers SET SecretProvider = 'None' " +
-                            "WHERE (SecretProvider IS NULL OR SecretProvider = '' OR SecretProvider = 'Vault') " +
+                            "WHERE (SecretProvider IS NULL OR SecretProvider = '') " +
                             "AND (ApiKey IS NOT NULL AND ApiKey != '');");
 
                         db.Database.ExecuteSqlRaw(
@@ -247,6 +273,45 @@ namespace McpRouter.Services
                     {
                         db.Settings.Add(new RouterSettings());
                         db.SaveChanges();
+                    }
+
+                    // AppKey Hashing Migration: migrate legacy AES-CBC encrypted AppKeys to SHA-256 hashes
+                    try
+                    {
+                        var appKeys = db.AppKeys.ToList();
+                        bool keysUpdated = false;
+                        foreach (var key in appKeys)
+                        {
+                            if (string.IsNullOrEmpty(key.EncryptedKey)) continue;
+
+                            bool isHashed = key.EncryptedKey.Length == 64
+                                && key.EncryptedKey.All(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
+
+                            if (!isHashed)
+                            {
+                                var decrypted = DecryptLegacyAppKey(key.EncryptedKey, configuration);
+                                if (string.IsNullOrEmpty(decrypted))
+                                {
+                                    logger.LogError($"AppKey Hashing Migration: Failed to decrypt legacy AppKey '{key.Name}' (Id: {key.Id}). Skipping migration for this key to prevent corruption.");
+                                    continue;
+                                }
+
+                                using var sha256 = SHA256.Create();
+                                var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(decrypted));
+                                key.EncryptedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
+                                keysUpdated = true;
+                            }
+                        }
+
+                        if (keysUpdated)
+                        {
+                            logger.LogInformation("Migrated legacy AppKeys to SHA-256 hashes.");
+                            db.SaveChanges();
+                        }
+                    }
+                    catch (Exception exKeyMig)
+                    {
+                        logger.LogWarning(exKeyMig, "AppKey hashing migration warning");
                     }
 
                     try
@@ -508,6 +573,48 @@ namespace McpRouter.Services
             catch (Exception ex)
             {
                 logger.LogError(ex, "Failed to initialize database.");
+            }
+        }
+
+        private static string DecryptLegacyAppKey(string ciphertext, IConfiguration configuration)
+        {
+            if (string.IsNullOrEmpty(ciphertext)) return string.Empty;
+
+            try
+            {
+                var fullCipher = Convert.FromBase64String(ciphertext);
+                if (fullCipher.Length < 16) return string.Empty;
+
+                var secretString = configuration["ROUTER_SECRET"]
+                    ?? configuration["ROUTER_MASTER_KEY"]
+                    ?? McpRouter.Core.Secrets.DbKeyHelper.ResolveDbEncryptionKey(configuration);
+
+                byte[] keyBytes;
+                using (var sha256 = SHA256.Create())
+                {
+                    keyBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(secretString));
+                }
+
+                using (var aes = System.Security.Cryptography.Aes.Create())
+                {
+                    aes.Key = keyBytes;
+
+                    var iv = new byte[16];
+                    Array.Copy(fullCipher, 0, iv, 0, iv.Length);
+                    aes.IV = iv;
+
+                    using (var decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
+                    using (var ms = new MemoryStream(fullCipher, iv.Length, fullCipher.Length - iv.Length))
+                    using (var cs = new System.Security.Cryptography.CryptoStream(ms, decryptor, System.Security.Cryptography.CryptoStreamMode.Read))
+                    using (var reader = new StreamReader(cs, Encoding.UTF8))
+                    {
+                        return reader.ReadToEnd();
+                    }
+                }
+            }
+            catch
+            {
+                return string.Empty;
             }
         }
     }

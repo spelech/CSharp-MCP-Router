@@ -13,6 +13,7 @@ using McpRouter.Models;
 using McpRouter.Services;
 using McpRouter.Core.Identity;
 using McpRouter.Core.Database;
+using Microsoft.Extensions.Configuration;
 using Dapper;
 
 namespace McpRouter
@@ -64,41 +65,48 @@ namespace McpRouter
         {
         }
 
-        public async Task<UserIdentityContext> ResolveUserIdentityAsync()
+        public async Task<UserIdentityContext> ResolveUserIdentityAsync(HttpContext? httpContext = null)
         {
-            if (_clientResponse?.HttpContext?.RequestServices == null)
-            {
-                return new UserIdentityContext("system", "System", new List<string>());
-            }
-            try
-            {
-                // AppKey authentication bypass for custom claims mapping
-                var httpContext = _clientResponse.HttpContext;
-                if (httpContext.User?.Identity?.IsAuthenticated == true && httpContext.User.Identity.AuthenticationType == "AppKey")
-                {
-                    var username = httpContext.User.Identity.Name ?? "anonymous";
-                    return new UserIdentityContext(username, "AppKey", new List<string>());
-                }
+            var contextToUse = httpContext ?? _clientResponse?.HttpContext;
 
-                var compositeProvider = _clientResponse.HttpContext.RequestServices.GetService<CompositeIdentityProvider>();
-                if (compositeProvider != null)
+            if (contextToUse?.User?.Identity?.IsAuthenticated == true)
+            {
+                var username = contextToUse.User.Identity.Name ?? "anonymous";
+                var sids = contextToUse.User.Claims
+                    .Where(c => c.Type == "Sid" || c.Type == "GroupSid" || c.Type == System.Security.Claims.ClaimTypes.GroupSid || c.Type == System.Security.Claims.ClaimTypes.PrimaryGroupSid)
+                    .Select(c => c.Value)
+                    .Distinct()
+                    .ToList();
+
+                return new UserIdentityContext(username, contextToUse.User.Identity.AuthenticationType ?? "Claims", GroupNames: new List<string>(), Sid: "", Sids: sids);
+            }
+
+            if (contextToUse?.RequestServices != null)
+            {
+                try
                 {
-                    return await compositeProvider.ResolveIdentityAsync(_clientResponse.HttpContext);
+                    var compositeProvider = contextToUse.RequestServices.GetService<CompositeIdentityProvider>();
+                    if (compositeProvider != null)
+                    {
+                        return await compositeProvider.ResolveIdentityAsync(contextToUse);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to resolve user identity via CompositeIdentityProvider");
                 }
             }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to resolve user identity via CompositeIdentityProvider");
-            }
+
             return new UserIdentityContext("anonymous", "None", new List<string>());
         }
 
-        public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, string? category = null)
+        public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, string? category = null, HttpContext? httpContext = null)
         {
+            var contextToUse = httpContext ?? _clientResponse?.HttpContext;
             // If authenticated via AppKey, check key-level scopes first
-            if (_clientResponse?.HttpContext?.Items.TryGetValue("AppKeyUsed", out var appKeyUsedObj) == true && appKeyUsedObj is bool appKeyUsed && appKeyUsed)
+            if (contextToUse?.Items.TryGetValue("AppKeyUsed", out var appKeyUsedObj) == true && appKeyUsedObj is bool appKeyUsed && appKeyUsed)
             {
-                if (_clientResponse.HttpContext.Items.TryGetValue("AppKeyScopes", out var scopesObj) == true && scopesObj is string scopesJson)
+                if (contextToUse.Items.TryGetValue("AppKeyScopes", out var scopesObj) == true && scopesObj is string scopesJson)
                 {
                     bool scopeAllowed = false;
                     try
@@ -145,15 +153,16 @@ namespace McpRouter
                 }
             }
 
-            var identity = await ResolveUserIdentityAsync();
+            var identity = await ResolveUserIdentityAsync(contextToUse);
 
-            // 1. System/Admin bypass (e.g. Username is admin, or is in "Administrators" group, or username is "system")
-            if (identity.Username == "admin" || identity.Username == "system" || identity.GroupNames.Contains("Administrators") || identity.GroupNames.Contains("full_admin"))
+            // 1. Admin SID bypass check
+            var config = contextToUse?.RequestServices?.GetService<IConfiguration>();
+            if (McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(identity, config))
             {
                 return true;
             }
 
-            if (_clientResponse?.HttpContext?.RequestServices == null)
+            if (contextToUse?.RequestServices == null)
             {
                 // If there's no HttpContext, we default to false (fail closed)
                 return false;
@@ -161,7 +170,7 @@ namespace McpRouter
 
             try
             {
-                var dbFactory = _clientResponse.HttpContext.RequestServices.GetService<IDbConnectionFactory>();
+                var dbFactory = contextToUse.RequestServices.GetService<IDbConnectionFactory>();
                 if (dbFactory == null)
                 {
                     return false;
@@ -185,9 +194,8 @@ namespace McpRouter
                     targetKeys.Add($"category:{category}");
                 }
 
-                var externalIds = identity.GroupNames.ToList();
-                if (!string.IsNullOrEmpty(identity.Sid)) externalIds.Add(identity.Sid);
-                if (!string.IsNullOrEmpty(identity.Username)) externalIds.Add(identity.Username);
+                var externalIds = identity.GroupNames.Concat(identity.AllSids).Distinct().ToList();
+                if (!string.IsNullOrEmpty(identity.Username) && !externalIds.Contains(identity.Username)) externalIds.Add(identity.Username);
 
                 var mappedGroups = new List<string>();
                 try
@@ -200,7 +208,7 @@ namespace McpRouter
                     _logger.LogWarning(exMap, "Failed to query GroupMappings, assuming empty");
                 }
 
-                var allUserGroups = identity.GroupNames.Concat(mappedGroups).Where(g => !string.IsNullOrEmpty(g)).Distinct().ToList();
+                var allUserGroups = identity.GroupNames.Concat(identity.AllSids).Concat(mappedGroups).Where(g => !string.IsNullOrEmpty(g)).Distinct().ToList();
 
                 if (dbFactory.ProviderName == "sqlite")
                 {
@@ -486,7 +494,7 @@ namespace McpRouter
             return tools;
         }
 
-        public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db)
+        public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db, HttpContext? httpContext = null)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             int statusCode = 200;
@@ -514,11 +522,11 @@ namespace McpRouter
                     return errResult;
                 }
 
-                // RBAC Check
-                var isAuth = await IsUserAuthorizedAsync("tools/call", toolName);
+                // RBAC Check — use the live per-request HttpContext when provided
+                var isAuth = await IsUserAuthorizedAsync("tools/call", toolName, null, httpContext);
                 if (!isAuth)
                 {
-                    var identity = await ResolveUserIdentityAsync();
+                    var identity = await ResolveUserIdentityAsync(httpContext);
                     statusCode = 403;
                     errorMessage = $"Security Error: User '{identity.Username}' does not have permission to execute tool '{toolName}'.";
                     var errResult = new {
@@ -582,7 +590,7 @@ namespace McpRouter
             finally
             {
                 stopwatch.Stop();
-                await AuditInvocationAsync("tools/call", toolName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage);
+                await AuditInvocationAsync("tools/call", toolName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage, httpContext);
             }
         }
 
@@ -761,7 +769,7 @@ namespace McpRouter
             return resources;
         }
 
-        public async Task<object?> ReadResourceAsync(string resourceUri, string body)
+        public async Task<object?> ReadResourceAsync(string resourceUri, string body, HttpContext? httpContext = null)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             int statusCode = 200;
@@ -779,10 +787,11 @@ namespace McpRouter
                     throw new UnauthorizedAccessException(errorMessage);
                 }
 
-                var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri);
+                // RBAC Check — use the live per-request HttpContext when provided
+                var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri, null, httpContext);
                 if (!isAuth)
                 {
-                    var identity = await ResolveUserIdentityAsync();
+                    var identity = await ResolveUserIdentityAsync(httpContext);
                     statusCode = 403;
                     errorMessage = $"Security Error: User '{identity.Username}' does not have permission to read resource '{resourceUri}'.";
                     throw new UnauthorizedAccessException(errorMessage);
@@ -804,7 +813,7 @@ namespace McpRouter
             finally
             {
                 stopwatch.Stop();
-                await AuditInvocationAsync("resources/read", resourceUri, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage);
+                await AuditInvocationAsync("resources/read", resourceUri, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage, httpContext);
             }
         }
 
@@ -903,7 +912,7 @@ namespace McpRouter
             return prompts;
         }
 
-        public async Task<object?> GetPromptAsync(string promptName, string body)
+        public async Task<object?> GetPromptAsync(string promptName, string body, HttpContext? httpContext = null)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             int statusCode = 200;
@@ -921,10 +930,11 @@ namespace McpRouter
                     throw new UnauthorizedAccessException(errorMessage);
                 }
 
-                var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName);
+                // RBAC Check — use the live per-request HttpContext when provided
+                var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName, null, httpContext);
                 if (!isAuth)
                 {
-                    var identity = await ResolveUserIdentityAsync();
+                    var identity = await ResolveUserIdentityAsync(httpContext);
                     statusCode = 403;
                     errorMessage = $"Security Error: User '{identity.Username}' does not have permission to access prompt '{promptName}'.";
                     throw new UnauthorizedAccessException(errorMessage);
@@ -946,7 +956,7 @@ namespace McpRouter
             finally
             {
                 stopwatch.Stop();
-                await AuditInvocationAsync("prompts/get", promptName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage);
+                await AuditInvocationAsync("prompts/get", promptName, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage, httpContext);
             }
         }
 
@@ -957,14 +967,27 @@ namespace McpRouter
             int statusCode,
             long executionTimeMs,
             string? responsePayload,
-            string? errorMessage)
+            string? errorMessage,
+            HttpContext? httpContext = null)
         {
-            var auditLogger = _clientResponse?.HttpContext?.RequestServices?.GetService<McpRouter.Core.Logging.IAuditLogger>();
-            if (auditLogger == null) return;
+            var services = httpContext?.RequestServices ?? _clientResponse?.HttpContext?.RequestServices;
+            var config = services?.GetService<IConfiguration>();
+            var failClosedRaw = config?["Audit:FailClosed"];
+            bool failClosed = !bool.TryParse(failClosedRaw, out var parsedFailClosed) || parsedFailClosed;
+
+            var auditLogger = services?.GetService<McpRouter.Core.Logging.IAuditLogger>();
+            if (auditLogger == null)
+            {
+                if (failClosed)
+                {
+                    throw new System.Security.SecurityException("Audit logger service unavailable and fail-closed policy is active.");
+                }
+                return;
+            }
 
             try
             {
-                var identity = await ResolveUserIdentityAsync();
+                var identity = await ResolveUserIdentityAsync(httpContext);
                 
                 string serverId;
                 if (itemName.StartsWith("mcp://"))
@@ -988,7 +1011,10 @@ namespace McpRouter
                             requestId = idProp.GetString() ?? idProp.GetRawText();
                         }
                     }
-                    catch {}
+                    catch (JsonException exJson)
+                    {
+                        _logger.LogDebug(exJson, "Could not parse payload JSON to extract requestId in audit log.");
+                    }
                 }
                 requestId ??= Guid.NewGuid().ToString("N");
 
@@ -1009,6 +1035,10 @@ namespace McpRouter
             catch (Exception ex)
             {
                 _logger.LogWarning(ex, "Failed to write invocation audit log");
+                if (failClosed)
+                {
+                    throw new System.Security.SecurityException("Audit logging failed and fail-closed security policy is active.", ex);
+                }
             }
         }
     }
