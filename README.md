@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.0.7`** | 2026-08-07 | refactor(routing): break apart ToolRoutingManager and expand unit tests for Docker, LDAP, AD, and ONNX |
 | **`v4.0.6`** | 2026-08-07 | test(coverage): expand test suites for moderate core modules to reach >= 80% coverage |
 | **`v4.0.5`** | 2026-08-07 | test(coverage): expand core service unit test suites and bump version to v4.0.4 |
 | **`v4.0.4`** | 2026-08-07 | test(coverage): expand core service unit test suites (+1,500 covered lines, 217 passing tests) |

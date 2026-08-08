@@ -77,16 +77,32 @@ namespace McpRouter.Services
             var response = await httpClient.GetStringAsync("http://localhost/containers/json", stoppingToken);
             
             using var doc = JsonDocument.Parse(response);
-            var containers = doc.RootElement.EnumerateArray();
+            using var configScope = _serviceProvider.CreateScope();
+            var config = configScope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
+            var allowedIpRanges = config.GetSection("Security:AllowedIpRanges").Get<string[]>() ?? Array.Empty<string>();
 
+            var discoveredServers = ParseDiscoveredServers(doc.RootElement, _logger, allowedIpRanges);
+
+            using var scope = _serviceProvider.CreateScope();
+            var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
+            var sessionManager = scope.ServiceProvider.GetRequiredService<SessionManager>();
+
+            UpsertDiscoveredServers(discoveredServers, db, sessionManager, _logger);
+        }
+
+        public static List<McpServer> ParseDiscoveredServers(JsonElement rootElement, Microsoft.Extensions.Logging.ILogger logger, string[] allowedIpRanges)
+        {
             var discoveredServers = new List<McpServer>();
 
-            foreach (var container in containers)
+            if (rootElement.ValueKind != JsonValueKind.Array)
+                return discoveredServers;
+
+            foreach (var container in rootElement.EnumerateArray())
             {
                 if (!container.TryGetProperty("Labels", out var labelsProp) || labelsProp.ValueKind != JsonValueKind.Object)
                     continue;
 
-                // Check if mcp.enabled is true (or check for mcp.id as a fallback indicator)
+                // Check if mcp.enabled is true
                 bool mcpEnabled = false;
                 if (labelsProp.TryGetProperty("mcp.enabled", out var enabledProp) && 
                     enabledProp.GetString()?.Equals("true", StringComparison.OrdinalIgnoreCase) == true)
@@ -160,14 +176,11 @@ namespace McpRouter.Services
                 }
 
                 var serverUrl = $"http://{containerName}:{port}{path}";
-                using var configScope = _serviceProvider.CreateScope();
-                var config = configScope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
-                var allowedIpRanges = config.GetSection("Security:AllowedIpRanges").Get<string[]>() ?? Array.Empty<string>();
 
                 if (!Uri.TryCreate(serverUrl, UriKind.Absolute, out var parsedUri)
                     || (parsedUri.Scheme != "http" && parsedUri.Scheme != "https"))
                 {
-                    _logger.LogWarning("Docker Auto-Discovery: Skipped '{Container}' — invalid URL '{Url}'.", containerName, serverUrl);
+                    logger.LogWarning("Docker Auto-Discovery: Skipped '{Container}' — invalid URL '{Url}'.", containerName, serverUrl);
                     continue;
                 }
                 System.Net.IPAddress[] resolvedIps;
@@ -179,13 +192,13 @@ namespace McpRouter.Services
                 }
                 catch (Exception exResolve)
                 {
-                    _logger.LogWarning(exResolve, "Docker Auto-Discovery: Skipped '{Container}' — cannot resolve host '{Host}'.", containerName, parsedUri.Host);
+                    logger.LogWarning(exResolve, "Docker Auto-Discovery: Skipped '{Container}' — cannot resolve host '{Host}'.", containerName, parsedUri.Host);
                     continue;
                 }
                 if (resolvedIps.Length == 0 ||
                     resolvedIps.Any(ip => McpRouter.Core.Security.SecurityValidationHelper.IsBlockedIp(ip, allowedIpRanges)))
                 {
-                    _logger.LogWarning("Docker Auto-Discovery: Skipped '{Container}' — '{Url}' resolves to a blocked/unresolvable IP (SSRF).", containerName, serverUrl);
+                    logger.LogWarning("Docker Auto-Discovery: Skipped '{Container}' — '{Url}' resolves to a blocked/unresolvable IP (SSRF).", containerName, serverUrl);
                     continue;
                 }
 
@@ -202,10 +215,11 @@ namespace McpRouter.Services
                 });
             }
 
-            using var scope = _serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
-            var sessionManager = scope.ServiceProvider.GetRequiredService<SessionManager>();
+            return discoveredServers;
+        }
 
+        public static void UpsertDiscoveredServers(List<McpServer> discoveredServers, RouterDbContext db, SessionManager sessionManager, Microsoft.Extensions.Logging.ILogger logger)
+        {
             bool changed = false;
 
             // 1. Upsert discovered servers
@@ -214,7 +228,7 @@ namespace McpRouter.Services
                 var existing = db.Servers.FirstOrDefault(s => s.Id == discovered.Id);
                 if (existing == null)
                 {
-                    _logger.LogInformation("Auto-discovered new MCP server: '{DisplayName}' ({Id}) at {Url}", discovered.DisplayName, discovered.Id, discovered.Url);
+                    logger.LogInformation("Auto-discovered new MCP server: '{DisplayName}' ({Id}) at {Url}", discovered.DisplayName, discovered.Id, discovered.Url);
                     db.Servers.Add(discovered);
                     changed = true;
                 }
@@ -238,7 +252,7 @@ namespace McpRouter.Services
 
                     if (updated)
                     {
-                        _logger.LogInformation("Updating auto-discovered MCP server: '{DisplayName}' ({Id})", discovered.DisplayName, discovered.Id);
+                        logger.LogInformation("Updating auto-discovered MCP server: '{DisplayName}' ({Id})", discovered.DisplayName, discovered.Id);
                         existing.AutoDiscovered = true;
                         changed = true;
                     }
@@ -253,7 +267,7 @@ namespace McpRouter.Services
             {
                 if (!activeIds.Contains(dbServer.Id) && dbServer.Enabled)
                 {
-                    _logger.LogInformation("Auto-discovered MCP server container stopped/removed. Disabling: '{DisplayName}' ({Id})", dbServer.DisplayName, dbServer.Id);
+                    logger.LogInformation("Auto-discovered MCP server container stopped/removed. Disabling: '{DisplayName}' ({Id})", dbServer.DisplayName, dbServer.Id);
                     dbServer.Enabled = false;
                     changed = true;
                 }
