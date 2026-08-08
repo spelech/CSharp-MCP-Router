@@ -66,6 +66,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.2.10`** | 2026-08-08 | fix(health): refactor BackendHealthCheckService to use IDbConnectionFactory with EF Core fallback |
 | **`v4.2.9`** | 2026-08-08 | fix(api): final cleanup of debug logging in OidcHeaderAuthenticationHandler |
 | **`v4.2.8`** | 2026-08-08 | fix(api): handle Dapper dynamic long/bool conversions for Enabled/Hidden fields |
 | **`v4.2.7`** | 2026-08-08 | fix(api): safely deserialize Categories JSON in GET /api/servers endpoint |

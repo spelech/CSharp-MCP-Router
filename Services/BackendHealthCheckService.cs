@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using McpRouter.Core;
 using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.Services
 {
@@ -61,8 +62,40 @@ namespace McpRouter.Services
             try
             {
                 using var scope = _serviceProvider.CreateScope();
-                var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
-                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                List<McpServer> servers = new();
+                try
+                {
+                    var dbFactory = scope.ServiceProvider.GetService<IDbConnectionFactory>();
+                    if (dbFactory != null)
+                    {
+                        using var conn = dbFactory.CreateConnection();
+                        var rawServers = (await conn.QueryAsync(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson FROM Servers")).ToList();
+
+                        servers = rawServers.Select(s => new McpServer
+                        {
+                            Id = Convert.ToString(s.Id) ?? string.Empty,
+                            DisplayName = Convert.ToString(s.DisplayName) ?? string.Empty,
+                            Url = Convert.ToString(s.Url) ?? string.Empty,
+                            Enabled = s.Enabled is long l ? l != 0L : Convert.ToBoolean(s.Enabled),
+                            Hidden = s.Hidden is long lh ? lh != 0L : Convert.ToBoolean(s.Hidden),
+                            Type = Convert.ToString(s.Type) ?? "sse",
+                            ApiKey = Convert.ToString(s.ApiKey)
+                        }).Where(s => s.Enabled).ToList();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Dapper query failed, falling back to RouterDbContext");
+                }
+
+                if (servers.Count == 0)
+                {
+                    var db = scope.ServiceProvider.GetService<RouterDbContext>();
+                    if (db != null)
+                    {
+                        servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                    }
+                }
 
                 var tasks = servers.Select(s => ProbeServerAsync(s));
                 await Task.WhenAll(tasks);
