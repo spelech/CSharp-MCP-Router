@@ -97,6 +97,8 @@ namespace McpRouter.Core.Identity
             var bytes = ip.GetAddressBytes();
             if (bytes.Length == 4)
             {
+                // 10.0.0.0/8 (Homelab host & container network ranges)
+                if (bytes[0] == 10) return true;
                 // 172.16.0.0/12 (Standard Docker bridge & overlay networks)
                 if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) return true;
                 // 127.0.0.0/8

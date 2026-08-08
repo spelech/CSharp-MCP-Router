@@ -35,6 +35,7 @@ namespace McpRouter.Middleware
         {
             var config = _configuration ?? Context.RequestServices?.GetService<IConfiguration>();
             var identityContext = await _identityProvider.ResolveIdentityAsync(Context);
+            Logger.LogInformation("[DEBUG_AUTH] OidcHeaderHandler: user={User}, groups={Groups}, ip={IP}", identityContext?.Username, string.Join(",", identityContext?.GroupNames ?? new List<string>()), Context.Connection.RemoteIpAddress);
             if (identityContext == null || identityContext.Username == "guest" || identityContext.Username == "anonymous")
             {
                 return AuthenticateResult.NoResult();
