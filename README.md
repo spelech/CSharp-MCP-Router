@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.0.15`** | 2026-08-08 | docs(plans): include refactoring plans and extracted tool helpers |
 | **`v4.0.14`** | 2026-08-08 | refactor(session): extract ClientSession.ProxyForwarder partial class |
 | **`v4.0.13`** | 2026-08-08 | refactor(session): extract ClientSession.BackendInitializer partial class |
 | **`v4.0.12`** | 2026-08-08 | refactor(session): extract ClientSession.Authorization partial class |
