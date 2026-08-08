@@ -45,7 +45,7 @@ namespace McpRouter.Extensions
         builder.Services.AddSingleton<McpRouter.Core.Logging.IAuditLogger, McpRouter.Core.Logging.AuditLogger>();
 
         // Register OpenIddict & Controllers
-        builder.Services.AddMcpOpenIddict(builder.Environment);
+        builder.Services.AddMcpOpenIddict(builder.Environment, builder.Configuration);
         builder.Services.AddControllers();
 
         builder.Services.AddHttpClient("McpClient");

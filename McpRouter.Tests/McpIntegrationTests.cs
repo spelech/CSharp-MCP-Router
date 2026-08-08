@@ -139,6 +139,7 @@ namespace McpRouter.Tests
         public async Task AuditLogger_RecordsPerRequestActor_NotHandshakeActor()
         {
             string? loggedUsername = null;
+            string? loggedSid = null;
             var mockAuditLogger = new Mock<IAuditLogger>();
             mockAuditLogger.Setup(a => a.LogInvocationAsync(
                 It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(),
@@ -149,6 +150,7 @@ namespace McpRouter.Tests
                 (reqId, user, sid, server, item, method, time, status, payload, resp, err) =>
                 {
                     loggedUsername = user;
+                    loggedSid = sid;
                 }
             ).Returns(Task.CompletedTask);
 
@@ -159,7 +161,7 @@ namespace McpRouter.Tests
             var bobContext = new DefaultHttpContext();
             var mockProvider = new Mock<IIdentityProvider>();
             mockProvider.Setup(p => p.ResolveIdentityAsync(bobContext))
-                        .ReturnsAsync(new UserIdentityContext("bob", "MockProvider", new List<string> { "S-1-5-32-545" }));
+                        .ReturnsAsync(new UserIdentityContext("bob", "MockProvider", new List<string> { "group1" }, Sids: new List<string> { "S-1-5-32-545" }));
 
             var composite = new CompositeIdentityProvider(new[] { mockProvider.Object });
             services.AddSingleton(composite);
@@ -175,8 +177,9 @@ namespace McpRouter.Tests
             }
             catch { }
 
-            // Audit log MUST record Bob (the per-request actor), NOT Alice
+            // Audit log MUST record Bob (the per-request actor) and Bob's SID, NOT Alice
             Assert.Equal("bob", loggedUsername);
+            Assert.Equal("S-1-5-32-545", loggedSid);
         }
 
         private ClientSession CreateSession(List<McpServer> servers, out MockHttpMessageHandler httpHandler)
@@ -1241,6 +1244,19 @@ namespace McpRouter.Tests
             sessionManager.SetServerToolsCache("server-b", tools);
             sessionManager.ClearGlobalCache();
             sessionManager.GetServerToolsCache("server-b").Should().BeNull();
+        }
+
+        [Fact]
+        public void Mcp_SessionId_IsOpaque_NotBearerToken()
+        {
+            var token = "secret-bearer-token-1234567890";
+            string sessionId1 = Guid.NewGuid().ToString("N");
+            string sessionId2 = Guid.NewGuid().ToString("N");
+
+            Assert.NotEqual(token, sessionId1);
+            Assert.NotEqual(sessionId1, sessionId2);
+            Assert.Matches("^[0-9a-f]{32}$", sessionId1);
+            Assert.Matches("^[0-9a-f]{32}$", sessionId2);
         }
 
         private class TestHttpClientFactory : IHttpClientFactory

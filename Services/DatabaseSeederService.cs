@@ -98,7 +98,7 @@ namespace McpRouter.Services
 
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None'");
                     }
                     catch { }
 
@@ -138,14 +138,19 @@ namespace McpRouter.Services
                     }
                     catch { }
 
-                    // Backfill existing servers in SQLite database
+                    // (SecretProvider backfill removed — all dialects default 'None' via DDL; Vault/Registry/Env are opt-in per server.)
                     try
                     {
-                        db.Database.ExecuteSqlRaw(
-                            "UPDATE Servers SET SecretProvider = 'None' " +
-                            "WHERE (SecretProvider IS NULL OR SecretProvider = '') " +
-                            "AND (ApiKey IS NOT NULL AND ApiKey != '');");
+                        var misconfigured = db.Servers
+                            .Where(s => s.SecretProvider != "None" && string.IsNullOrEmpty(s.SecretPath) && string.IsNullOrEmpty(s.SecretMount))
+                            .Select(s => s.Id).ToList();
+                        if (misconfigured.Count > 0)
+                            logger.LogWarning("Servers [{Ids}] set SecretProvider != 'None' but have no SecretPath/SecretMount; they FAIL CLOSED until a provider path is configured.", string.Join(", ", misconfigured));
+                    }
+                    catch { }
 
+                    try
+                    {
                         db.Database.ExecuteSqlRaw(
                             "UPDATE Servers SET AuthShape = 'bearer' " +
                             "WHERE AuthShape IS NULL OR AuthShape = '';");
@@ -154,7 +159,7 @@ namespace McpRouter.Services
 
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Tools ADD COLUMN SecretProvider TEXT DEFAULT 'Vault'");
+                        db.Database.ExecuteSqlRaw("ALTER TABLE Tools ADD COLUMN SecretProvider TEXT DEFAULT 'None'");
                     }
                     catch { }
 
@@ -275,38 +280,46 @@ namespace McpRouter.Services
                         db.SaveChanges();
                     }
 
-                    // AppKey Hashing Migration: migrate legacy AES-CBC encrypted AppKeys to SHA-256 hashes
+                    // AppKey Hashing Migration: migrate legacy AES-CBC encrypted AppKeys to SHA-256 hashes (gated by RUN_KEY_MIGRATION flag)
                     try
                     {
-                        var appKeys = db.AppKeys.ToList();
-                        bool keysUpdated = false;
-                        foreach (var key in appKeys)
+                        var runKeyMigration = configuration["KeyMigration:Enabled"] ?? configuration["RUN_KEY_MIGRATION"] ?? Environment.GetEnvironmentVariable("RUN_KEY_MIGRATION");
+                        if (string.Equals(runKeyMigration, "true", StringComparison.OrdinalIgnoreCase))
                         {
-                            if (string.IsNullOrEmpty(key.EncryptedKey)) continue;
-
-                            bool isHashed = key.EncryptedKey.Length == 64
-                                && key.EncryptedKey.All(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
-
-                            if (!isHashed)
+                            var appKeys = db.AppKeys.ToList();
+                            bool keysUpdated = false;
+                            foreach (var key in appKeys)
                             {
-                                var decrypted = DecryptLegacyAppKey(key.EncryptedKey, configuration);
-                                if (string.IsNullOrEmpty(decrypted))
-                                {
-                                    logger.LogError($"AppKey Hashing Migration: Failed to decrypt legacy AppKey '{key.Name}' (Id: {key.Id}). Skipping migration for this key to prevent corruption.");
-                                    continue;
-                                }
+                                if (string.IsNullOrEmpty(key.EncryptedKey)) continue;
 
-                                using var sha256 = SHA256.Create();
-                                var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(decrypted));
-                                key.EncryptedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
-                                keysUpdated = true;
+                                bool isHashed = key.EncryptedKey.Length == 64
+                                    && key.EncryptedKey.All(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
+
+                                if (!isHashed)
+                                {
+                                    var decrypted = DecryptLegacyAppKey(key.EncryptedKey, configuration);
+                                    if (string.IsNullOrEmpty(decrypted))
+                                    {
+                                        logger.LogError($"AppKey Hashing Migration: Failed to decrypt legacy AppKey '{key.Name}' (Id: {key.Id}). Skipping migration for this key to prevent corruption.");
+                                        continue;
+                                    }
+
+                                    using var sha256 = SHA256.Create();
+                                    var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(decrypted));
+                                    key.EncryptedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
+                                    keysUpdated = true;
+                                }
+                            }
+
+                            if (keysUpdated)
+                            {
+                                logger.LogInformation("Migrated legacy AppKeys to SHA-256 hashes.");
+                                db.SaveChanges();
                             }
                         }
-
-                        if (keysUpdated)
+                        else
                         {
-                            logger.LogInformation("Migrated legacy AppKeys to SHA-256 hashes.");
-                            db.SaveChanges();
+                            logger.LogInformation("AppKey legacy-key migration skipped. Set RUN_KEY_MIGRATION=true for a one-time migration.");
                         }
                     }
                     catch (Exception exKeyMig)

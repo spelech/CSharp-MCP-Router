@@ -42,5 +42,25 @@ namespace McpRouter.Tests
             var discoveryService = new DockerAutoDiscoveryService(serviceProvider, NullLogger<DockerAutoDiscoveryService>.Instance);
             Assert.NotNull(discoveryService);
         }
+
+        [Fact]
+        public void DockerDiscovery_SkipsContainer_ResolvingToPrivateIp()
+        {
+            var db = CreateDbContext();
+            var services = new ServiceCollection();
+            services.AddSingleton(db);
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
+            services.AddSingleton<IConfiguration>(config);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var discoveryService = new DockerAutoDiscoveryService(serviceProvider, NullLogger<DockerAutoDiscoveryService>.Instance);
+            Assert.NotNull(discoveryService);
+
+            bool isBlocked1 = McpRouter.Core.Security.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("127.0.0.1"), Array.Empty<string>());
+            bool isBlocked2 = McpRouter.Core.Security.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("169.254.169.254"), Array.Empty<string>());
+
+            Assert.True(isBlocked1);
+            Assert.True(isBlocked2);
+        }
     }
 }

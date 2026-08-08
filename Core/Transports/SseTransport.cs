@@ -250,7 +250,7 @@ namespace McpRouter.Core.Transports
                                         {
                                             if (responseObj is not JsonRpcResponse)
                                             {
-                                                _logger.LogInformation("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, data);
+                                                _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(data));
                                             }
                                             await onMessageReceived(responseObj);
                                         }
@@ -352,14 +352,14 @@ namespace McpRouter.Core.Transports
 
                 await ApplyAuthAndCustomHeadersAsync(req);
 
-                _logger.LogInformation("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, modifiedBody);
+                _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(modifiedBody));
 
                 using var res = await _httpClient.SendAsync(req, _cts.Token);
                 res.EnsureSuccessStatusCode();
 
                 var response = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
                 var responseJson = JsonSerializer.Serialize(response, _jsonOptions);
-                _logger.LogInformation("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, responseJson);
+                _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(responseJson));
                 return response;
             }
             finally

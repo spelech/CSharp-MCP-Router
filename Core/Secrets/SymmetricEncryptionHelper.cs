@@ -9,7 +9,6 @@ namespace McpRouter.Core.Secrets
     public static class SymmetricEncryptionHelper
     {
         private static readonly object KeyLock = new object();
-        private static readonly byte[] Salt = Encoding.UTF8.GetBytes("McpRouter_SymmetricEncryption_Salt_2026");
         private static (string secretString, byte[] key)? _cachedKey;
 
         private static byte[] GetEncryptionKey(IConfiguration config)

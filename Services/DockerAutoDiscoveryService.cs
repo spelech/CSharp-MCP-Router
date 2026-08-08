@@ -164,17 +164,29 @@ namespace McpRouter.Services
                 var config = configScope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
                 var allowedIpRanges = config.GetSection("Security:AllowedIpRanges").Get<string[]>() ?? Array.Empty<string>();
 
-                if (Uri.TryCreate(serverUrl, UriKind.Absolute, out var parsedUri))
+                if (!Uri.TryCreate(serverUrl, UriKind.Absolute, out var parsedUri)
+                    || (parsedUri.Scheme != "http" && parsedUri.Scheme != "https"))
                 {
-                    var host = parsedUri.Host;
-                    if (System.Net.IPAddress.TryParse(host, out var directIp))
-                    {
-                        if (McpRouter.Core.Security.SecurityValidationHelper.IsBlockedIp(directIp, allowedIpRanges))
-                        {
-                            _logger.LogWarning("Docker Auto-Discovery: Skipped container '{Container}' because URL '{Url}' resolves to blocked IP '{Ip}' (SSRF protection).", containerName, serverUrl, directIp);
-                            continue;
-                        }
-                    }
+                    _logger.LogWarning("Docker Auto-Discovery: Skipped '{Container}' — invalid URL '{Url}'.", containerName, serverUrl);
+                    continue;
+                }
+                System.Net.IPAddress[] resolvedIps;
+                try
+                {
+                    resolvedIps = System.Net.IPAddress.TryParse(parsedUri.Host, out var directIp)
+                        ? new[] { directIp }
+                        : System.Net.Dns.GetHostAddresses(parsedUri.Host);
+                }
+                catch (Exception exResolve)
+                {
+                    _logger.LogWarning(exResolve, "Docker Auto-Discovery: Skipped '{Container}' — cannot resolve host '{Host}'.", containerName, parsedUri.Host);
+                    continue;
+                }
+                if (resolvedIps.Length == 0 ||
+                    resolvedIps.Any(ip => McpRouter.Core.Security.SecurityValidationHelper.IsBlockedIp(ip, allowedIpRanges)))
+                {
+                    _logger.LogWarning("Docker Auto-Discovery: Skipped '{Container}' — '{Url}' resolves to a blocked/unresolvable IP (SSRF).", containerName, serverUrl);
+                    continue;
                 }
 
                 discoveredServers.Add(new McpServer

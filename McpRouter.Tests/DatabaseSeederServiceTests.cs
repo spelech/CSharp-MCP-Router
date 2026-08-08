@@ -64,36 +64,21 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        public async Task Seeder_Backfills_Existing_Servers_With_Static_ApiKey()
+        public async Task Seeder_DefaultsUnconfiguredSecretProvider_ToNone_AndPreservesExplicitVault()
         {
             var db = CreateDbContext();
-            var server = new McpServer
-            {
-                Id = "existing-server-1",
-                DisplayName = "Existing Server",
-                Url = "http://localhost:8888/sse",
-                ApiKey = "static-token-999",
-                SecretProvider = "Vault",
-                AuthShape = ""
-            };
-            db.Servers.Add(server);
+            db.Servers.Add(new McpServer { Id = "s1", DisplayName = "Unconfigured Server", Url = "http://localhost/sse", SecretProvider = "None" });
+            db.Servers.Add(new McpServer { Id = "s2", DisplayName = "Explicit Vault Server", Url = "http://localhost/sse", SecretProvider = "Vault" });
             await db.SaveChangesAsync();
 
-            // Perform backfill query
-            if ((server.SecretProvider == "Vault" || string.IsNullOrEmpty(server.SecretProvider)) && !string.IsNullOrEmpty(server.ApiKey))
-            {
-                server.SecretProvider = "None";
-            }
-            if (string.IsNullOrEmpty(server.AuthShape))
-            {
-                server.AuthShape = "bearer";
-            }
-            await db.SaveChangesAsync();
+            var s1 = await db.Servers.FirstOrDefaultAsync(s => s.Id == "s1");
+            var s2 = await db.Servers.FirstOrDefaultAsync(s => s.Id == "s2");
 
-            var updated = await db.Servers.FirstOrDefaultAsync(s => s.Id == "existing-server-1");
-            Assert.NotNull(updated);
-            Assert.Equal("None", updated.SecretProvider);
-            Assert.Equal("bearer", updated.AuthShape);
+            Assert.NotNull(s1);
+            Assert.Equal("None", s1.SecretProvider);
+
+            Assert.NotNull(s2);
+            Assert.Equal("Vault", s2.SecretProvider);
         }
 
         [Fact]
@@ -153,7 +138,8 @@ namespace McpRouter.Tests
             var inMemoryConfig = new Dictionary<string, string?>
             {
                 { "ROUTER_SECRET", routerSecret },
-                { "DB_ENCRYPTION_KEY", routerSecret }
+                { "DB_ENCRYPTION_KEY", routerSecret },
+                { "RUN_KEY_MIGRATION", "true" }
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
 
@@ -235,6 +221,67 @@ namespace McpRouter.Tests
             var authResult = await handler.AuthenticateAsync();
             Assert.True(authResult.Succeeded, authResult.Failure?.Message);
             Assert.Equal("legacyuser", authResult.Principal?.Identity?.Name);
+        }
+
+        [Fact]
+        public async Task KeyMigration_NotRun_WhenFlagAbsent()
+        {
+            using var connection = new SqliteConnection("Filename=:memory:");
+            connection.Open();
+
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = @"
+                    CREATE TABLE IF NOT EXISTS AppKeys (
+                        Id TEXT PRIMARY KEY,
+                        Name TEXT,
+                        Username TEXT,
+                        KeyPrefix TEXT,
+                        EncryptedKey TEXT,
+                        ScopesJson TEXT DEFAULT '[]',
+                        ExpiresAt TEXT,
+                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                    );
+                    CREATE TABLE IF NOT EXISTS Settings (
+                        Id TEXT PRIMARY KEY,
+                        EmbeddingProvider TEXT,
+                        RequireManualApproval INTEGER DEFAULT 0,
+                        GlobalMaxKeys INTEGER DEFAULT 100,
+                        UserMaxKeys INTEGER DEFAULT 5
+                    );";
+                cmd.ExecuteNonQuery();
+            }
+
+            var legacyEncryptedKey = "legacy-cbc-encrypted-string-not-64-hex";
+            using (var cmd = connection.CreateCommand())
+            {
+                cmd.CommandText = "INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson) VALUES ('k1', 'Key1', 'user1', 'prefix1', @Key, '[]');";
+                cmd.Parameters.AddWithValue("@Key", legacyEncryptedKey);
+                cmd.ExecuteNonQuery();
+            }
+
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
+            }).Build();
+            var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(config);
+            services.AddDbContext<RouterDbContext>(opt => opt.UseSqlite(connection));
+
+            var mockDbFactory = new Mock<IDbConnectionFactory>();
+            mockDbFactory.Setup(f => f.CreateConnection()).Returns(connection);
+            mockDbFactory.Setup(f => f.ProviderName).Returns("sqlite");
+            services.AddSingleton(mockDbFactory.Object);
+            services.AddLogging();
+
+            var serviceProvider = services.BuildServiceProvider();
+
+            DatabaseSeederService.SeedDatabase(serviceProvider, config);
+
+            using var db = serviceProvider.GetRequiredService<RouterDbContext>();
+            var unmigratedKey = await db.AppKeys.FirstOrDefaultAsync(k => k.Id == "k1");
+            Assert.NotNull(unmigratedKey);
+            Assert.Equal(legacyEncryptedKey, unmigratedKey.EncryptedKey);
         }
     }
 }

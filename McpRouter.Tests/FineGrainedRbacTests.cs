@@ -197,5 +197,42 @@ namespace McpRouter.Tests
             var authorized = await session.IsUserAuthorizedAsync("tools/call", "ha__turn_on");
             Assert.False(authorized);
         }
+
+        [Fact]
+        public async Task ToolsList_FiltersByAuthorization()
+        {
+            var context = new DefaultHttpContext();
+            var claims = new List<System.Security.Claims.Claim>
+            {
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "bob"),
+                new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Role, "house_member")
+            };
+            var identity = new System.Security.Claims.ClaimsIdentity(claims, "Test");
+            context.User = new System.Security.Claims.ClaimsPrincipal(identity);
+
+            var services = new ServiceCollection();
+            services.AddSingleton(_dbFactory);
+            context.RequestServices = services.BuildServiceProvider();
+
+            await _connection.ExecuteAsync(@"
+                INSERT INTO AccessPolicies (Id, TargetId, RequiredGroup, IsAllowed)
+                VALUES ('1', 'tool:serverA__tool1', 'house_member', 1);");
+
+            var session = new ClientSession(
+                "test-sess",
+                context.Response,
+                new List<McpServer>(),
+                new HttpClient(),
+                new Mock<IEmbeddingService>().Object,
+                null,
+                new Mock<Microsoft.Extensions.Logging.ILogger<ClientSession>>().Object
+            );
+
+            bool tool1Auth = await session.IsUserAuthorizedAsync("tools/list", "serverA__tool1", null, context);
+            bool tool2Auth = await session.IsUserAuthorizedAsync("tools/list", "serverB__tool2", null, context);
+
+            Assert.True(tool1Auth);
+            Assert.False(tool2Auth);
+        }
     }
 }

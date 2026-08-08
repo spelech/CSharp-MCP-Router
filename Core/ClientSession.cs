@@ -77,8 +77,13 @@ namespace McpRouter
                     .Select(c => c.Value)
                     .Distinct()
                     .ToList();
+                var groupNames = contextToUse.User.Claims
+                    .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "Group" || c.Type == "group" || c.Type == "roles" || c.Type == "groups")
+                    .Select(c => c.Value)
+                    .Distinct()
+                    .ToList();
 
-                return new UserIdentityContext(username, contextToUse.User.Identity.AuthenticationType ?? "Claims", GroupNames: new List<string>(), Sid: "", Sids: sids);
+                return new UserIdentityContext(username, contextToUse.User.Identity.AuthenticationType ?? "Claims", GroupNames: groupNames, Sid: "", Sids: sids);
             }
 
             if (contextToUse?.RequestServices != null)
@@ -267,7 +272,7 @@ namespace McpRouter
                     return;
                 }
                 var json = JsonSerializer.Serialize(message, _jsonOptions);
-                _logger.LogInformation("[JSON-RPC Gateway -> Client] {Payload}", json);
+                _logger.LogDebug("[JSON-RPC Gateway -> Client] {Payload}", McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(json));
                 _sessionManager?.AddPerformanceMetrics(0, json.Length / 4, 0);
                 await _clientResponse.WriteAsync($"event: message\ndata: {json}\n\n");
                 await _clientResponse.Body.FlushAsync();
@@ -488,10 +493,10 @@ namespace McpRouter
 
         public SessionManager? GetSessionManager() => _sessionManager;
 
-        public async Task<List<object>> ListToolsAsync(string body)
+        public async Task<List<object>> ListToolsAsync(string body, HttpContext? httpContext = null)
         {
             var tools = await _toolRoutingManager.ListToolsAsync(body, IsMetaMode, _backendConnections, _logger, EnsureBackendsInitializedAsync, _servers, _sessionManager);
-            return tools;
+            return await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext);
         }
 
         public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db, HttpContext? httpContext = null)
@@ -763,10 +768,10 @@ namespace McpRouter
             }
         }
 
-        public async Task<List<object>> ListResourcesAsync(string body)
+        public async Task<List<object>> ListResourcesAsync(string body, HttpContext? httpContext = null)
         {
             var resources = await _resourceRoutingManager.ListResourcesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager);
-            return resources;
+            return await FilterAuthorizedAsync(resources, "resources/list", "uri", httpContext);
         }
 
         public async Task<object?> ReadResourceAsync(string resourceUri, string body, HttpContext? httpContext = null)
@@ -906,10 +911,28 @@ namespace McpRouter
             return new { completion = new { values = Array.Empty<string>(), hasMore = false } };
         }
 
-        public async Task<List<object>> ListPromptsAsync(string body)
+        public async Task<List<object>> ListPromptsAsync(string body, HttpContext? httpContext = null)
         {
             var prompts = await _promptRoutingManager.ListPromptsAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager);
-            return prompts;
+            return await FilterAuthorizedAsync(prompts, "prompts/list", "name", httpContext);
+        }
+
+        private async Task<List<object>> FilterAuthorizedAsync(List<object> items, string method, string idProp, HttpContext? httpContext)
+        {
+            var allowed = new List<object>(items.Count);
+            foreach (var item in items)
+            {
+                string? id = null;
+                try
+                {
+                    using var doc = JsonDocument.Parse(JsonSerializer.Serialize(item));
+                    if (doc.RootElement.TryGetProperty(idProp, out var p)) id = p.GetString();
+                }
+                catch { /* fall through to fail-closed exclude */ }
+                if (string.IsNullOrEmpty(id)) continue;                       // can't identify → exclude
+                if (await IsUserAuthorizedAsync(method, id, null, httpContext)) allowed.Add(item);
+            }
+            return allowed;
         }
 
         public async Task<object?> GetPromptAsync(string promptName, string body, HttpContext? httpContext = null)
@@ -1021,7 +1044,7 @@ namespace McpRouter
                 await auditLogger.LogInvocationAsync(
                     requestId,
                     identity.Username,
-                    identity.Sid ?? "",
+                    identity.AllSids.Count > 0 ? string.Join(";", identity.AllSids) : "",
                     serverId,
                     itemName,
                     requestMethod,

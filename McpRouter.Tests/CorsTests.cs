@@ -59,19 +59,35 @@ namespace McpRouter.Tests
             var builder = WebApplication.CreateBuilder();
             builder.Environment.EnvironmentName = "Production";
 
-            var inMemoryConfig = GetBaseConfig();
-            builder.Configuration.AddInMemoryCollection(inMemoryConfig);
+            var tempCertPath = Path.Combine(Path.GetTempPath(), $"cors_test_{Guid.NewGuid():N}.pfx");
+            using (var rsa = System.Security.Cryptography.RSA.Create(2048))
+            {
+                var certReq = new System.Security.Cryptography.X509Certificates.CertificateRequest("CN=TestCert", rsa, System.Security.Cryptography.HashAlgorithmName.SHA256, System.Security.Cryptography.RSASignaturePadding.Pkcs1);
+                var cert = certReq.CreateSelfSigned(DateTimeOffset.UtcNow, DateTimeOffset.UtcNow.AddDays(1));
+                File.WriteAllBytes(tempCertPath, cert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Pfx));
+            }
 
-            // Act
-            builder.AddMcpRouterServices();
-            var app = builder.Build();
+            try
+            {
+                var inMemoryConfig = GetBaseConfig();
+                inMemoryConfig["OpenIddict:CertificatePath"] = tempCertPath;
+                builder.Configuration.AddInMemoryCollection(inMemoryConfig);
 
-            // Assert
-            var corsOptions = app.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
-            var defaultPolicy = corsOptions.GetPolicy(corsOptions.DefaultPolicyName);
+                // Act
+                builder.AddMcpRouterServices();
+                var app = builder.Build();
 
-            defaultPolicy.Should().NotBeNull();
-            defaultPolicy!.Origins.Should().NotContain("http://localhost:3000");
+                // Assert
+                var corsOptions = app.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
+                var defaultPolicy = corsOptions.GetPolicy(corsOptions.DefaultPolicyName);
+
+                defaultPolicy.Should().NotBeNull();
+                defaultPolicy!.Origins.Should().NotContain("http://localhost:3000");
+            }
+            finally
+            {
+                if (File.Exists(tempCertPath)) File.Delete(tempCertPath);
+            }
         }
 
         [Fact]
@@ -79,6 +95,7 @@ namespace McpRouter.Tests
         {
             // Arrange
             var builder = WebApplication.CreateBuilder();
+            builder.Environment.EnvironmentName = "Development";
 
             var inMemoryConfig = GetBaseConfig();
             inMemoryConfig["CORS_ALLOWED_ORIGINS"] = "https://my-domain.com, https://another.org";
@@ -106,6 +123,7 @@ namespace McpRouter.Tests
         {
             // Arrange
             var builder = WebApplication.CreateBuilder();
+            builder.Environment.EnvironmentName = "Development";
 
             var inMemoryConfig = GetBaseConfig();
             inMemoryConfig["AllowedOrigins"] = "https://allowed-fallback.com";
