@@ -26,33 +26,42 @@ namespace McpRouter.Extensions
 // ----------------------------------------------------
             // DASHBOARD MANAGEMENT ENDPOINTS
             // ----------------------------------------------------
-            api.MapGet("/api/servers", async ([FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager) =>
+            api.MapGet("/api/servers", async ([FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
             {
-                var servers = await db.Servers.ToListAsync();
-                var statuses = sessionManager.BackendStatuses;
-                
-                var sanitized = servers.Select(s => {
-                    statuses.TryGetValue(s.Id, out var status);
-                    return new {
-                        s.Id,
-                        s.DisplayName,
-                        s.Url,
-                        s.Enabled,
-                        s.Hidden,
-                        s.Type,
-                        s.Categories,
-                        s.SecretProvider,
-                        s.SecretItemKey,
-                        s.AuthShape,
-                        s.CustomHeaderName,
-                        s.HeadersJson,
-                        HasApiKey = !string.IsNullOrEmpty(s.ApiKey),
-                        ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
-                        ConnectionAttempts = status?.Attempts ?? 0,
-                        ConnectionError = status?.Error ?? string.Empty
-                    };
-                });
-                return Results.Ok(sanitized);
+                try
+                {
+                    using var conn = dbFactory.CreateConnection();
+                    var servers = (await conn.QueryAsync<McpServer>("SELECT * FROM Servers")).ToList();
+                    var statuses = sessionManager.BackendStatuses;
+                    
+                    var sanitized = servers.Select(s => {
+                        statuses.TryGetValue(s.Id, out var status);
+                        return new {
+                            s.Id,
+                            s.DisplayName,
+                            s.Url,
+                            s.Enabled,
+                            s.Hidden,
+                            s.Type,
+                            s.Categories,
+                            s.SecretProvider,
+                            s.SecretItemKey,
+                            s.AuthShape,
+                            s.CustomHeaderName,
+                            s.HeadersJson,
+                            HasApiKey = !string.IsNullOrEmpty(s.ApiKey),
+                            ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
+                            ConnectionAttempts = status?.Attempts ?? 0,
+                            ConnectionError = status?.Error ?? string.Empty
+                        };
+                    });
+                    return Results.Ok(sanitized);
+                }
+                catch (Exception ex)
+                {
+                    logger.LogError(ex, "Error executing GET /api/servers");
+                    return Results.Problem(ex.Message);
+                }
             });
 
             api.MapPost("/api/servers/{id}/reconnect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, [FromServices] Services.BackendHealthCheckService healthCheckSvc, ILogger<Program> logger) =>
