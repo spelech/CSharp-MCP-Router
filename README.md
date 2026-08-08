@@ -66,6 +66,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.2.3`** | 2026-08-08 | fix(auth): update certificate fallback logic for production container deployment |
 | **`v4.2.2`** | 2026-08-08 | fix(build): update package-lock.json for @playwright/test compatibility in Dockerfile |
 | **`v4.2.1`** | 2026-08-08 | chore(release): merge Playwright E2E testing framework and User Guide documentation suite |
 | **`v4.2.0`** | 2026-08-08 | feat(e2e): refactor Playwright E2E suite using Page Object Models and data-testid attributes |
