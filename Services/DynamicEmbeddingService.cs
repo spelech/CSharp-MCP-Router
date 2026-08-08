@@ -7,7 +7,9 @@ using System.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.Services
 {
@@ -60,26 +62,25 @@ namespace McpRouter.Services
                 try
                 {
                     using var scope = _serviceProvider.CreateScope();
-                    var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
-                    
-                    var dbSettings = db.Settings.FirstOrDefault(s => s.Id == "default");
-                    if (dbSettings == null)
+                    var dbFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
+                    using var conn = dbFactory.CreateConnection();
+
+                    var exists = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM Settings WHERE Id = 'default'");
+                    if (exists == 0)
                     {
-                        db.Settings.Add(_settings);
+                        conn.Execute(@"INSERT INTO Settings (Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, RequireManualApproval, GlobalMaxKeys, UserMaxKeys)
+                            VALUES ('default', @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @RequireManualApproval, @GlobalMaxKeys, @UserMaxKeys)", _settings);
                     }
                     else
                     {
-                        dbSettings.EmbeddingProvider = _settings.EmbeddingProvider;
-                        dbSettings.EmbeddingApiUrl = _settings.EmbeddingApiUrl;
-                        dbSettings.EmbeddingApiKey = _settings.EmbeddingApiKey;
-                        dbSettings.EmbeddingApiModel = _settings.EmbeddingApiModel;
-                        dbSettings.EmbeddingModelDir = _settings.EmbeddingModelDir;
+                        conn.Execute(@"UPDATE Settings SET EmbeddingProvider = @EmbeddingProvider, EmbeddingApiUrl = @EmbeddingApiUrl, EmbeddingApiKey = @EmbeddingApiKey,
+                            EmbeddingApiModel = @EmbeddingApiModel, EmbeddingModelDir = @EmbeddingModelDir, RequireManualApproval = @RequireManualApproval,
+                            GlobalMaxKeys = @GlobalMaxKeys, UserMaxKeys = @UserMaxKeys WHERE Id = 'default'", _settings);
                     }
-                    db.SaveChanges();
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogError(ex, "Failed to save settings to the encrypted database");
+                    _logger.LogError(ex, "Failed to save settings to the database");
                 }
                 ReloadActiveService();
             }
@@ -92,9 +93,10 @@ namespace McpRouter.Services
                 try
                 {
                     using var scope = _serviceProvider.CreateScope();
-                    var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
-                    
-                    var dbSettings = db.Settings.FirstOrDefault(s => s.Id == "default");
+                    var dbFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
+                    using var conn = dbFactory.CreateConnection();
+
+                    var dbSettings = conn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default'");
                     if (dbSettings != null)
                     {
                         _settings = dbSettings;
@@ -115,53 +117,70 @@ namespace McpRouter.Services
 
         private void ReloadActiveService()
         {
-            if (_settings.EmbeddingProvider.ToLower() == "api")
+            if (_settings.EmbeddingProvider?.ToLower() == "api")
             {
                 _logger.LogInformation("Activating external API embedding provider pointing to {Url}", _settings.EmbeddingApiUrl);
                 _activeService = new ApiEmbeddingService(_httpClient, _settings);
             }
             else
             {
-                _logger.LogInformation("Activating local ONNX in-process embedding provider");
+                _logger.LogInformation("Activating local ONNX embedding provider (all-MiniLM-L6-v2)");
                 _activeService = new OnnxEmbeddingService(_httpClient, _settings, _loggerFactory.CreateLogger<OnnxEmbeddingService>());
-            }
-        }
-
-        public Task<float[]> GetEmbeddingAsync(string text)
-        {
-            lock (_lock)
-            {
-                if (_activeService == null) LoadSettings();
-                return _activeService!.GetEmbeddingAsync(text);
-            }
-        }
-
-        public double CosineSimilarity(float[] vector1, float[] vector2)
-        {
-            lock (_lock)
-            {
-                if (_activeService == null) LoadSettings();
-                return _activeService!.CosineSimilarity(vector1, vector2);
-            }
-        }
-
-        public async Task PreWarmAsync()
-        {
-            try
-            {
-                _logger.LogInformation("Pre-warming vector embedding model in background...");
-                await GetEmbeddingAsync("Pre-warm initialization query for semantic search");
-                _logger.LogInformation("Vector embedding model pre-warmed successfully.");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to pre-warm vector embedding model.");
             }
         }
 
         public void ReloadSettings(RouterSettings settings)
         {
-            SaveSettings(settings);
+            lock (_lock)
+            {
+                _settings = settings;
+                ReloadActiveService();
+            }
+        }
+
+        public async Task<float[]> GetEmbeddingAsync(string text)
+        {
+            if (_activeService == null)
+            {
+                ReloadActiveService();
+            }
+            return await _activeService!.GetEmbeddingAsync(text);
+        }
+
+        public async Task<float[]> GenerateEmbeddingAsync(string text) => await GetEmbeddingAsync(text);
+
+        public double CosineSimilarity(float[] vector1, float[] vector2)
+        {
+            if (_activeService != null)
+            {
+                return _activeService.CosineSimilarity(vector1, vector2);
+            }
+
+            if (vector1 == null || vector2 == null || vector1.Length != vector2.Length || vector1.Length == 0)
+                return 0.0;
+
+            double dotProduct = 0.0;
+            double norm1 = 0.0;
+            double norm2 = 0.0;
+
+            for (int i = 0; i < vector1.Length; i++)
+            {
+                dotProduct += vector1[i] * vector2[i];
+                norm1 += vector1[i] * vector1[i];
+                norm2 += vector2[i] * vector2[i];
+            }
+
+            if (norm1 == 0.0 || norm2 == 0.0) return 0.0;
+            return dotProduct / (Math.Sqrt(norm1) * Math.Sqrt(norm2));
+        }
+
+        public async Task PreWarmAsync()
+        {
+            if (_activeService == null)
+            {
+                ReloadActiveService();
+            }
+            await _activeService!.GetEmbeddingAsync("health check prewarm");
         }
     }
 }

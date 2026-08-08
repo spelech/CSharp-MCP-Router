@@ -164,7 +164,7 @@ namespace McpRouter
                 try
                 {
                     const string mapSql = "SELECT InternalGroup FROM GroupMappings WHERE ExternalId IN @ExternalIds;";
-                    mappedGroups = (await conn.QueryAsync<string>(mapSql, new { ExternalIds = externalIds })).ToList();
+                    mappedGroups = (await conn.QueryAsync<string>(mapSql, new { ExternalIds = externalIds.ToArray() })).ToList();
                 }
                 catch (Exception exMap)
                 {
@@ -177,7 +177,7 @@ namespace McpRouter
                 {
                     // Check if there are any policies for the targets first to default-allow (inverted to fail closed)
                     const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds;";
-                    int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetIds = targetKeys });
+                    int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetIds = targetKeys.ToArray() });
                     if (policyCount == 0)
                     {
                         return false;
@@ -185,7 +185,7 @@ namespace McpRouter
 
                     // Check if there's an explicit deny for any of the user's groups
                     const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
-                    int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetIds = targetKeys, GroupNames = allUserGroups });
+                    int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetIds = targetKeys.ToArray(), GroupNames = allUserGroups.ToArray() });
                     if (denyCount > 0)
                     {
                         return false;
@@ -193,7 +193,7 @@ namespace McpRouter
 
                     // Check if there's an allow for any of the user's groups
                     const string allowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds AND RequiredGroup IN @GroupNames AND IsAllowed = 1;";
-                    int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetIds = targetKeys, GroupNames = allUserGroups });
+                    int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetIds = targetKeys.ToArray(), GroupNames = allUserGroups.ToArray() });
                     return allowCount > 0;
                 }
                 else

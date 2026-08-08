@@ -17,6 +17,8 @@ using McpRouter.Models;
 using McpRouter.Services;
 using McpRouter.Core.Logging;
 using McpRouter.Core.Identity;
+using McpRouter.Core.Database;
+using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using McpRouter;
 using Microsoft.AspNetCore.Mvc;
@@ -43,27 +45,37 @@ namespace McpRouter.Tests
     public class McpIntegrationTests : IDisposable
     {
         private readonly Microsoft.Data.Sqlite.SqliteConnection _connection;
-        private readonly RouterDbContext _db;
+        private readonly IDbConnectionFactory _dbFactory;
 
         public McpIntegrationTests()
         {
-            _connection = new Microsoft.Data.Sqlite.SqliteConnection($"Data Source=McpTestDb_{Guid.NewGuid()};Mode=Memory;Cache=Shared");
+            var dbName = $"Data Source=McpTestDb_{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
+            _connection = new Microsoft.Data.Sqlite.SqliteConnection(dbName);
             _connection.Open();
 
-            var options = new DbContextOptionsBuilder<RouterDbContext>()
-                .UseSqlite(_connection)
-                .Options;
+            _connection.Execute(@"
+                CREATE TABLE IF NOT EXISTS Servers (
+                    Id TEXT PRIMARY KEY, DisplayName TEXT, Url TEXT, Enabled INTEGER DEFAULT 1, Hidden INTEGER DEFAULT 0, Type TEXT DEFAULT 'sse', SecretProvider TEXT DEFAULT 'None', SecretItemKey TEXT, AuthShape TEXT DEFAULT 'bearer', CustomHeaderName TEXT, Categories TEXT DEFAULT '[]', ApiKey TEXT, HeadersJson TEXT, AutoDiscovered INTEGER DEFAULT 0
+                );
+                CREATE TABLE IF NOT EXISTS Settings (
+                    Id TEXT PRIMARY KEY, EmbeddingProvider TEXT, EmbeddingApiUrl TEXT, EmbeddingApiKey TEXT, EmbeddingApiModel TEXT, EmbeddingModelDir TEXT, RequireManualApproval INTEGER DEFAULT 0, GlobalMaxKeys INTEGER DEFAULT 100, UserMaxKeys INTEGER DEFAULT 5
+                );
+                CREATE TABLE IF NOT EXISTS AppKeys (
+                    Id TEXT PRIMARY KEY, Name TEXT, Username TEXT, KeyPrefix TEXT, EncryptedKey TEXT, ScopesJson TEXT DEFAULT '[]', ExpiresAt TEXT, CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE IF NOT EXISTS AccessPolicies (
+                    Id TEXT PRIMARY KEY, TargetId TEXT, RequiredGroup TEXT, IsAllowed INTEGER DEFAULT 1
+                );
+            ");
 
-            var mockConfig = new Mock<IConfiguration>();
-            mockConfig.Setup(c => c["DB_ENCRYPTION_KEY"]).Returns("TestKey");
-
-            _db = new RouterDbContext(options, mockConfig.Object);
-            _db.Database.EnsureCreated();
+            var mockDbFactory = new Mock<IDbConnectionFactory>();
+            mockDbFactory.Setup(f => f.CreateConnection()).Returns(() => new Microsoft.Data.Sqlite.SqliteConnection(dbName));
+            mockDbFactory.Setup(f => f.ProviderName).Returns("sqlite");
+            _dbFactory = mockDbFactory.Object;
         }
 
         public void Dispose()
         {
-            _db.Dispose();
             _connection.Dispose();
         }
 
@@ -129,7 +141,7 @@ namespace McpRouter.Tests
 
             var ex = await Assert.ThrowsAsync<System.Security.SecurityException>(async () =>
             {
-                await session.CallToolAsync("test__tool", "{}", _db, httpContext);
+                await session.CallToolAsync("test__tool", "{}", _dbFactory, httpContext);
             });
 
             Assert.Contains("Audit logging failed and fail-closed security policy is active", ex.Message);
@@ -173,7 +185,7 @@ namespace McpRouter.Tests
             // Simulate Bob invoking tool call over Alice's SSE session
             try
             {
-                await aliceSession.CallToolAsync("test__tool", "{}", _db, bobContext);
+                await aliceSession.CallToolAsync("test__tool", "{}", _dbFactory, bobContext);
             }
             catch { }
 
@@ -725,7 +737,7 @@ namespace McpRouter.Tests
 
             // Act - Semantically search for "Excel"
             var searchBody = "{\"jsonrpc\":\"2.0\",\"id\":\"search-id\",\"method\":\"tools/call\",\"params\":{\"name\":\"search_tools\",\"arguments\":{\"query\":\"Excel\"}}}";
-            var result = await session.CallToolAsync("search_tools", searchBody, _db);
+            var result = await session.CallToolAsync("search_tools", searchBody, _dbFactory);
 
             // Assert
             result.Should().NotBeNull();
@@ -741,7 +753,7 @@ namespace McpRouter.Tests
 
             // Act - Semantically search for "Docker container log"
             var searchBody2 = "{\"jsonrpc\":\"2.0\",\"id\":\"search-id-2\",\"method\":\"tools/call\",\"params\":{\"name\":\"search_tools\",\"arguments\":{\"query\":\"container log\"}}}";
-            var result2 = await session.CallToolAsync("search_tools", searchBody2, _db);
+            var result2 = await session.CallToolAsync("search_tools", searchBody2, _dbFactory);
 
             var json2 = JsonSerializer.Serialize(result2);
             using var doc2 = JsonDocument.Parse(json2);
@@ -944,8 +956,9 @@ namespace McpRouter.Tests
             await session.ListToolsAsync("{\"jsonrpc\":\"2.0\",\"id\":1}");
 
             // Act 1: Actionable Error Transformation
+            // Act 1: Actionable Error Transformation
             var callBody = "{\"jsonrpc\":\"2.0\",\"id\":\"test-call-1\",\"method\":\"tools/call\",\"params\":{\"name\":\"testserver1__fail_tool\",\"arguments\":{}}}";
-            var result = await session.CallToolAsync("testserver1__fail_tool", callBody, _db);
+            var result = await session.CallToolAsync("testserver1__fail_tool", callBody, _dbFactory);
             result.Should().NotBeNull();
             var resultJson = JsonSerializer.Serialize(result);
             resultJson.Should().Contain("isError");
@@ -954,7 +967,7 @@ namespace McpRouter.Tests
 
             // Act 2: Cancellation
             var cancelBody = "{\"jsonrpc\":\"2.0\",\"id\":\"test-call-cancel\",\"method\":\"tools/call\",\"params\":{\"name\":\"testserver1__fail_tool\",\"arguments\":{}}}";
-            var cancelTask = session.CallToolAsync("testserver1__fail_tool", cancelBody, _db);
+            var cancelTask = session.CallToolAsync("testserver1__fail_tool", cancelBody, _dbFactory);
             await Task.Delay(100);
             // Simulate client cancellation
             session.CancelRequest("test-call-cancel");
@@ -993,9 +1006,17 @@ namespace McpRouter.Tests
             var httpClient = new HttpClient(httpHandler);
             var sessionManager = new SessionManager(serviceProvider, new TestHttpClientFactory(httpClient), smLogger);
 
-            _db.AccessPolicies.Add(new McpAccessPolicy { Id = "p1", TargetId = "tool:ha__turn_on", RequiredGroup = "S-1-5-32-545", IsAllowed = true });
-            _db.AccessPolicies.Add(new McpAccessPolicy { Id = "p2", TargetId = "server:ha", RequiredGroup = "S-1-5-32-545", IsAllowed = true });
-            _db.SaveChanges();
+            using var dapperConn = _dbFactory.CreateConnection();
+            dapperConn.Execute(@"
+                CREATE TABLE IF NOT EXISTS AccessPolicies (
+                    Id TEXT PRIMARY KEY, TargetId TEXT, RequiredGroup TEXT, IsAllowed INTEGER DEFAULT 1
+                );
+                CREATE TABLE IF NOT EXISTS Settings (
+                    Id TEXT PRIMARY KEY, RequireManualApproval INTEGER DEFAULT 0
+                );
+            ");
+            dapperConn.Execute("INSERT INTO AccessPolicies (Id, TargetId, RequiredGroup, IsAllowed) VALUES ('p1', 'tool:ha__turn_on', 'S-1-5-32-545', 1)");
+            dapperConn.Execute("INSERT INTO AccessPolicies (Id, TargetId, RequiredGroup, IsAllowed) VALUES ('p2', 'server:ha', 'S-1-5-32-545', 1)");
 
             var context = new DefaultHttpContext();
             var claims = new[] { new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin") };
@@ -1009,7 +1030,7 @@ namespace McpRouter.Tests
                 { "DB_ENCRYPTION_KEY", "TestKey" }
             }).Build();
             services.AddSingleton<IConfiguration>(realConfig);
-            services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory>(new McpRouter.Core.Database.DbConnectionFactory(realConfig));
+            services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory>(_dbFactory);
             context.RequestServices = services.BuildServiceProvider();
 
             var session = new ClientSession("test-session", context.Response, servers, httpClient, new Mock<IEmbeddingService>().Object, sessionManager, logger);
@@ -1055,20 +1076,9 @@ namespace McpRouter.Tests
             };
 
             // Set manual approval to true in settings
-            var settings = _db.Settings.FirstOrDefault();
-            if (settings == null)
-            {
-                settings = new RouterSettings { Id = "test-default", RequireManualApproval = true };
-                _db.Settings.Add(settings);
-            }
-            else
-            {
-                settings.RequireManualApproval = true;
-                _db.Settings.Update(settings);
-            }
-            await _db.SaveChangesAsync();
+            dapperConn.Execute("UPDATE Settings SET RequireManualApproval = 1; INSERT OR IGNORE INTO Settings (Id, RequireManualApproval) VALUES ('global', 1);");
 
-            var loadedSettings = _db.Settings.FirstOrDefault();
+            var loadedSettings = dapperConn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings");
             loadedSettings.Should().NotBeNull();
             loadedSettings!.RequireManualApproval.Should().BeTrue();
 
@@ -1084,7 +1094,7 @@ namespace McpRouter.Tests
             nonAdminContext.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(nonAdminClaims, "AppKey"));
 
             var callBody = "{\"jsonrpc\":\"2.0\",\"id\":\"appr-call-1\",\"method\":\"tools/call\",\"params\":{\"name\":\"ha__turn_on\",\"arguments\":{}}}";
-            var approvalTask = session.CallToolAsync("ha__turn_on", callBody, _db, nonAdminContext);
+            var approvalTask = session.CallToolAsync("ha__turn_on", callBody, _dbFactory, nonAdminContext);
 
             // Await a short moment for it to block and register approval
             await Task.Delay(200);
@@ -1111,8 +1121,7 @@ namespace McpRouter.Tests
             resultJson.Should().Contain("success");
 
             // Reset settings
-            _db.Settings.Remove(settings);
-            await _db.SaveChangesAsync();
+            dapperConn.Execute("DELETE FROM Settings WHERE Id = 'default'");
         }
 
         [Fact]

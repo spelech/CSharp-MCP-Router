@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
-using OpenIddict.Abstractions;
-using OpenIddict.EntityFrameworkCore.Models;
-using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Database;
+using Dapper;
 
 namespace McpRouter.Controllers
 {
@@ -15,35 +15,34 @@ namespace McpRouter.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class ClientsController : ControllerBase
     {
-        private readonly IOpenIddictApplicationManager _applicationManager;
+        private readonly IDbConnectionFactory _dbFactory;
 
-        public ClientsController(IOpenIddictApplicationManager applicationManager)
+        public ClientsController(IDbConnectionFactory dbFactory)
         {
-            _applicationManager = applicationManager;
+            _dbFactory = dbFactory;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetClients()
         {
-            var clients = new List<object>();
-            await foreach (var app in _applicationManager.ListAsync(null, null, HttpContext.RequestAborted))
-            {
-                var clientId = await _applicationManager.GetClientIdAsync(app);
-                var displayName = await _applicationManager.GetDisplayNameAsync(app);
-                var perms = await _applicationManager.GetPermissionsAsync(app);
-                
-                // Roles/Servers are stored as permissions prefixed with "scp:" (scopes) or "role:"
-                var scopes = perms.Where(p => p.StartsWith(OpenIddictConstants.Permissions.Prefixes.Scope)).Select(p => p.Substring(4));
-                var isDynamic = perms.Contains("scp:dynamic_client");
-                
-                clients.Add(new {
-                    Id = await _applicationManager.GetIdAsync(app),
-                    ClientId = clientId,
-                    DisplayName = displayName ?? "Unknown",
+            using var conn = _dbFactory.CreateConnection();
+            var keys = await conn.QueryAsync<dynamic>("SELECT Id, Name, Username, KeyPrefix, ScopesJson FROM AppKeys");
+
+            var clients = keys.Select(k => {
+                var scopesJson = Convert.ToString(k.ScopesJson) ?? "[]";
+                List<string> scopes;
+                try { scopes = JsonSerializer.Deserialize<List<string>>(scopesJson) ?? new List<string>(); }
+                catch { scopes = new List<string>(); }
+
+                return new {
+                    Id = Convert.ToString(k.Id),
+                    ClientId = Convert.ToString(k.Username) ?? Convert.ToString(k.KeyPrefix),
+                    DisplayName = Convert.ToString(k.Name) ?? "App Key",
                     Scopes = scopes,
-                    IsDynamic = isDynamic
-                });
-            }
+                    IsDynamic = false
+                };
+            }).ToList();
+
             return Ok(clients);
         }
 
@@ -53,43 +52,39 @@ namespace McpRouter.Controllers
             if (string.IsNullOrWhiteSpace(model.DisplayName))
                 return BadRequest("DisplayName is required.");
 
-            var descriptor = new OpenIddictApplicationDescriptor
-            {
-                ClientId = Guid.NewGuid().ToString("N"),
-                ClientSecret = Guid.NewGuid().ToString("N"), // Auto-generate secret
-                DisplayName = model.DisplayName,
-                Permissions = 
-                {
-                    OpenIddictConstants.Permissions.Endpoints.Token,
-                    OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
-                    OpenIddictConstants.Permissions.Prefixes.Scope + "mcp_client"
-                }
-            };
+            var clientId = Guid.NewGuid().ToString("N");
+            var clientSecret = "mcp_" + Guid.NewGuid().ToString("N");
+            var keyId = Guid.NewGuid().ToString("N").Substring(0, 8);
+            var prefix = clientSecret.Substring(0, Math.Min(16, clientSecret.Length));
+            var scopesJson = JsonSerializer.Serialize(model.Scopes ?? new List<string>());
 
-            if (model.Scopes != null)
-            {
-                foreach(var scope in model.Scopes)
-                {
-                    descriptor.Permissions.Add(OpenIddictConstants.Permissions.Prefixes.Scope + scope);
-                }
-            }
+            using var conn = _dbFactory.CreateConnection();
+            await conn.ExecuteAsync(@"
+                INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson)
+                VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson)",
+                new {
+                    Id = keyId,
+                    Name = model.DisplayName,
+                    Username = clientId,
+                    KeyPrefix = prefix,
+                    EncryptedKey = clientSecret,
+                    ScopesJson = scopesJson
+                });
 
-            var app = await _applicationManager.CreateAsync(descriptor);
-            
             return Ok(new {
-                ClientId = descriptor.ClientId,
-                ClientSecret = descriptor.ClientSecret, // Return once so the user can copy it
-                DisplayName = descriptor.DisplayName
+                ClientId = clientId,
+                ClientSecret = clientSecret,
+                DisplayName = model.DisplayName
             });
         }
         
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(string id)
         {
-            var app = await _applicationManager.FindByIdAsync(id);
-            if (app == null) return NotFound();
+            using var conn = _dbFactory.CreateConnection();
+            var deleted = await conn.ExecuteAsync("DELETE FROM AppKeys WHERE Id = @id", new { id });
+            if (deleted == 0) return NotFound();
             
-            await _applicationManager.DeleteAsync(app);
             return NoContent();
         }
 

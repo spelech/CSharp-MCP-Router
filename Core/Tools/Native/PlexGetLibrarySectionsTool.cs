@@ -4,12 +4,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.CustomTools
 {
-public class PlexGetLibrarySectionsTool : ICustomTool
+    public class PlexGetLibrarySectionsTool : ICustomTool
     {
         public string Name => "plex_get_library_sections";
         public string Description => "List all configured library sections on Plex (Movies, TV Shows, Music, etc.) with their IDs.";
@@ -20,9 +21,10 @@ public class PlexGetLibrarySectionsTool : ICustomTool
             properties = new { }
         };
 
-        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, RouterDbContext db)
+        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, IDbConnectionFactory dbFactory)
         {
-            var plex = await db.Servers.FirstOrDefaultAsync(s => s.Id == "plex");
+            using var conn = dbFactory.CreateConnection();
+            var plex = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = 'plex'");
             if (plex == null || !plex.Enabled)
             {
                 return new { error = "Plex service is not configured or disabled." };

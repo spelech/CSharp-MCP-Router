@@ -4,12 +4,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.CustomTools
 {
-public class SeerrRequestMediaTool : ICustomTool
+    public class SeerrRequestMediaTool : ICustomTool
     {
         public string Name => "seerr_request_media";
         public string Description => "Submit a new media request for a movie or TV show on Overseerr/Seerr.";
@@ -26,12 +27,13 @@ public class SeerrRequestMediaTool : ICustomTool
             required = new[] { "mediaType", "mediaId" }
         };
 
-        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, RouterDbContext db)
+        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, IDbConnectionFactory dbFactory)
         {
             var mediaType = parameters.GetProperty("mediaType").GetString();
             var mediaId = parameters.GetProperty("mediaId").GetInt32();
             
-            var seerr = await db.Servers.FirstOrDefaultAsync(s => s.Id == "seerr");
+            using var conn = dbFactory.CreateConnection();
+            var seerr = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = 'seerr'");
             if (seerr == null || !seerr.Enabled)
             {
                 return new { error = "Seerr service is not configured or disabled." };
@@ -44,7 +46,6 @@ public class SeerrRequestMediaTool : ICustomTool
             }
             apiBase = apiBase.TrimEnd('/');
 
-            // Overseerr request structure
             var requestBody = new Dictionary<string, object>
             {
                 { "mediaType", mediaType ?? "movie" },

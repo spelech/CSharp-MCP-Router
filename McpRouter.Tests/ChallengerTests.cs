@@ -648,6 +648,10 @@ namespace McpRouter.Tests
             // 1. Without allowed IP ranges, connecting to 127.0.0.1 must throw HttpRequestException with SSRF protection message.
             var builder1 = WebApplication.CreateBuilder();
             builder1.Environment.EnvironmentName = "Development";
+            builder1.Configuration["Security:AllowedIpRanges:0"] = "";
+            builder1.Configuration["Security:AllowedIpRanges:1"] = "";
+            builder1.Configuration["Security:AllowedIpRanges:2"] = "";
+            builder1.Configuration["Security:AllowedIpRanges:3"] = "";
             builder1.AddMcpRouterServices();
             var app1 = builder1.Build();
             var clientFactory1 = app1.Services.GetRequiredService<IHttpClientFactory>();

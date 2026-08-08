@@ -4,14 +4,16 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using McpRouter.Core.Database;
 using McpRouter.Models;
 using McpRouter.Services;
+using Moq;
 using Xunit;
+using Dapper;
 
 namespace McpRouter.Tests
 {
@@ -37,19 +39,20 @@ namespace McpRouter.Tests
             }
         }
 
-        private (RouterDbContext db, RouterSettings settings) CreateDbContext(string provider = "OpenAI", string apiUrl = "http://localhost:5000/v1/embeddings", string apiKey = "test-key", string model = "text-embedding-3-small")
+        private (SqliteConnection conn, IDbConnectionFactory factory, RouterSettings settings) CreateDbFactory(string provider = "OpenAI", string apiUrl = "http://localhost:5000/v1/embeddings", string apiKey = "test-key", string model = "text-embedding-3-small")
         {
-            var options = new DbContextOptionsBuilder<RouterDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            var connection = new SqliteConnection("Filename=:memory:");
+            connection.Open();
 
-            var inMemoryConfig = new Dictionary<string, string?>
-            {
-                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
-            };
-            var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
-            var db = new RouterDbContext(options, config);
-            db.Database.EnsureCreated();
+            connection.Execute(@"
+                CREATE TABLE IF NOT EXISTS Settings (
+                    Id TEXT PRIMARY KEY,
+                    EmbeddingProvider TEXT,
+                    EmbeddingApiUrl TEXT,
+                    EmbeddingApiKey TEXT,
+                    EmbeddingApiModel TEXT
+                );
+            ");
 
             var settings = new RouterSettings
             {
@@ -59,16 +62,18 @@ namespace McpRouter.Tests
                 EmbeddingApiKey = apiKey,
                 EmbeddingApiModel = model
             };
-            db.Settings.Add(settings);
-            db.SaveChanges();
+            connection.Execute("INSERT INTO Settings (Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel) VALUES (@Id, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel)", settings);
 
-            return (db, settings);
+            var mockDbFactory = new Mock<IDbConnectionFactory>();
+            mockDbFactory.Setup(f => f.CreateConnection()).Returns(connection);
+            mockDbFactory.Setup(f => f.ProviderName).Returns("sqlite");
+            return (connection, mockDbFactory.Object, settings);
         }
 
         [Fact]
         public async Task ApiEmbeddingService_GetEmbeddingAsync_Returns_Vector_From_OpenAI_Response()
         {
-            var (db, settings) = CreateDbContext();
+            var (conn, dbFactory, settings) = CreateDbFactory();
             var handler = new MockHttpMessageHandler(req =>
             {
                 Assert.Equal("Bearer test-key", req.Headers.Authorization?.ToString());
@@ -89,7 +94,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error()
         {
-            var (db, settings) = CreateDbContext();
+            var (conn, dbFactory, settings) = CreateDbFactory();
             var handler = new MockHttpMessageHandler(req => new HttpResponseMessage(HttpStatusCode.InternalServerError));
 
             var service = new ApiEmbeddingService(new HttpClient(handler), settings);

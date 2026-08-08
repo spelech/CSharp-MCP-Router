@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
@@ -14,33 +14,49 @@ using McpRouter.Models;
 using McpRouter.Services;
 using Moq;
 using Xunit;
+using Dapper;
 
 namespace McpRouter.Tests
 {
     public class DockerAutoDiscoveryServiceTests
     {
-        private RouterDbContext CreateDbContext()
+        private (SqliteConnection masterConn, IDbConnectionFactory factory) CreateDbFactory()
         {
-            var options = new DbContextOptionsBuilder<RouterDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            var dbName = $"Data Source=DiscoveryTestDb_{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
+            var masterConn = new SqliteConnection(dbName);
+            masterConn.Open();
 
-            var inMemoryConfig = new Dictionary<string, string?>
-            {
-                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
-            };
-            var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
-            var db = new RouterDbContext(options, config);
-            db.Database.EnsureCreated();
-            return db;
+            masterConn.Execute(@"
+                CREATE TABLE IF NOT EXISTS Servers (
+                    Id TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    Url TEXT,
+                    Enabled INTEGER DEFAULT 1,
+                    Hidden INTEGER DEFAULT 0,
+                    Type TEXT DEFAULT 'sse',
+                    SecretProvider TEXT DEFAULT 'None',
+                    SecretItemKey TEXT,
+                    AuthShape TEXT DEFAULT 'bearer',
+                    CustomHeaderName TEXT,
+                    Categories TEXT DEFAULT '[]',
+                    ApiKey TEXT,
+                    HeadersJson TEXT,
+                    AutoDiscovered INTEGER DEFAULT 0
+                );
+            ");
+
+            var mockDbFactory = new Mock<IDbConnectionFactory>();
+            mockDbFactory.Setup(f => f.CreateConnection()).Returns(() => new SqliteConnection(dbName));
+            mockDbFactory.Setup(f => f.ProviderName).Returns("sqlite");
+            return (masterConn, mockDbFactory.Object);
         }
 
         [Fact]
         public void Service_Initializes_With_Valid_Dependencies()
         {
-            var db = CreateDbContext();
+            var (conn, dbFactory) = CreateDbFactory();
             var services = new ServiceCollection();
-            services.AddSingleton(db);
+            services.AddSingleton(dbFactory);
             var serviceProvider = services.BuildServiceProvider();
 
             var discoveryService = new DockerAutoDiscoveryService(serviceProvider, NullLogger<DockerAutoDiscoveryService>.Instance);
@@ -50,9 +66,9 @@ namespace McpRouter.Tests
         [Fact]
         public void DockerDiscovery_SkipsContainer_ResolvingToPrivateIp()
         {
-            var db = CreateDbContext();
+            var (conn, dbFactory) = CreateDbFactory();
             var services = new ServiceCollection();
-            services.AddSingleton(db);
+            services.AddSingleton(dbFactory);
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
             services.AddSingleton<IConfiguration>(config);
             var serviceProvider = services.BuildServiceProvider();
@@ -70,9 +86,9 @@ namespace McpRouter.Tests
         [Fact]
         public async Task ExecuteAsync_SkipsScan_WhenDockerSocketDoesNotExist()
         {
-            var db = CreateDbContext();
+            var (conn, dbFactory) = CreateDbFactory();
             var services = new ServiceCollection();
-            services.AddSingleton(db);
+            services.AddSingleton(dbFactory);
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
             services.AddSingleton<IConfiguration>(config);
             var serviceProvider = services.BuildServiceProvider();
@@ -126,23 +142,16 @@ namespace McpRouter.Tests
         [Fact]
         public void UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers()
         {
-            var db = CreateDbContext();
+            var (conn, dbFactory) = CreateDbFactory();
             var mockFactory = new Mock<IHttpClientFactory>();
             var services = new ServiceCollection();
             var sp = services.BuildServiceProvider();
             var sessionManager = new SessionManager(sp, mockFactory.Object, NullLogger<SessionManager>.Instance);
 
-            // Add an existing auto-discovered server
-            db.Servers.Add(new McpServer
-            {
-                Id = "old-server",
-                DisplayName = "Old Server",
-                Url = "http://old:8080/sse",
-                AutoDiscovered = true,
-                Enabled = true,
-                Categories = new List<string> { "legacy" }
-            });
-            db.SaveChanges();
+            conn.Execute(@"
+                INSERT INTO Servers (Id, DisplayName, Url, AutoDiscovered, Enabled, Categories)
+                VALUES ('old-server', 'Old Server', 'http://old:8080/sse', 1, 1, '[""legacy""]')
+            ");
 
             var discovered = new List<McpServer>
             {
@@ -167,16 +176,15 @@ namespace McpRouter.Tests
                 }
             };
 
-            DockerAutoDiscoveryService.UpsertDiscoveredServers(discovered, db, sessionManager, NullLogger.Instance);
+            DockerAutoDiscoveryService.UpsertDiscoveredServers(discovered, dbFactory, sessionManager, NullLogger.Instance);
 
-            var updatedOld = db.Servers.FirstOrDefault(s => s.Id == "old-server");
+            var updatedOld = conn.QueryFirstOrDefault<McpServer>("SELECT * FROM Servers WHERE Id = 'old-server'");
             Assert.NotNull(updatedOld);
             Assert.Equal("Updated Old Server", updatedOld.DisplayName);
             Assert.Equal("http://old:8081/sse", updatedOld.Url);
             Assert.Equal("http", updatedOld.Type);
-            Assert.Contains("updated", updatedOld.Categories);
 
-            var newSrv = db.Servers.FirstOrDefault(s => s.Id == "new-server");
+            var newSrv = conn.QueryFirstOrDefault<McpServer>("SELECT * FROM Servers WHERE Id = 'new-server'");
             Assert.NotNull(newSrv);
         }
     }

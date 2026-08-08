@@ -4,12 +4,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.CustomTools
 {
-public class SeerrSearchMediaTool : ICustomTool
+    public class SeerrSearchMediaTool : ICustomTool
     {
         public string Name => "seerr_search_media";
         public string Description => "Search for movies or TV shows on Overseerr/Seerr to get their ID, status, and details.";
@@ -24,22 +25,20 @@ public class SeerrSearchMediaTool : ICustomTool
             required = new[] { "query" }
         };
 
-        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, RouterDbContext db)
+        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, IDbConnectionFactory dbFactory)
         {
             var query = parameters.GetProperty("query").GetString();
-            var seerr = await db.Servers.FirstOrDefaultAsync(s => s.Id == "seerr");
+            using var conn = dbFactory.CreateConnection();
+            var seerr = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = 'seerr'");
             if (seerr == null || !seerr.Enabled)
             {
                 return new { error = "Seerr service is not configured or disabled in MCP Router." };
             }
 
-            // Translate internally to Seerr URL
-            // URL might end in /sse or /mcp, we want the API root
-            // e.g., http://seerr:5055/api/v1
             var apiBase = seerr.Url.Replace("/sse", "").Replace("/mcp", "");
             if (!apiBase.Contains(":5055"))
             {
-                apiBase = "http://seerr:5055"; // Default container target
+                apiBase = "http://seerr:5055";
             }
             apiBase = apiBase.TrimEnd('/');
 

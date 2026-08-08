@@ -4,9 +4,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
@@ -149,13 +147,13 @@ namespace McpRouter.Extensions
                         }
                         else if (method == "tools/call")
                         {
-                            var db = httpContext.RequestServices.GetRequiredService<RouterDbContext>();
+                            var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
                             using var doc = JsonDocument.Parse(requestBody);
                             var root = doc.RootElement;
                             if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
                             {
                                 var toolName = nameProp.GetString() ?? string.Empty;
-                                var res = await activeSession.CallToolAsync(toolName, requestBody, db, httpContext);
+                                var res = await activeSession.CallToolAsync(toolName, requestBody, dbFactory, httpContext);
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
@@ -408,7 +406,7 @@ namespace McpRouter.Extensions
             }).RequireAuthorization();
             
             // Minimal API route for handling GET (SSE initialization) and POST (JSON-RPC requests)
-            app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, [FromServices] RouterDbContext db, ILogger<Program> logger, string targetServerId) =>
+            app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, ILogger<Program> logger, string targetServerId) =>
             {
                 // RBAC Check for targetServerId
                 var compositeProvider = httpContext.RequestServices.GetRequiredService<McpRouter.Core.Identity.CompositeIdentityProvider>();
@@ -538,7 +536,10 @@ namespace McpRouter.Extensions
                         var serverName = "McpRouterGateway";
                         if (!string.IsNullOrWhiteSpace(targetServerId))
                         {
-                            var allServers = await db.Servers.ToListAsync();
+                            var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
+                            using var dbConn = dbFactory.CreateConnection();
+                            var rawServers = await dbConn.QueryAsync<McpServer>("SELECT * FROM Servers");
+                            var allServers = rawServers.ToList();
                             var targetServer = allServers.FirstOrDefault(s => s.Id == targetServerId);
                             if (targetServer != null)
                             {
@@ -550,7 +551,6 @@ namespace McpRouter.Extensions
                                 serverName = char.ToUpper(targetServerId[0]) + targetServerId.Substring(1) + " Services";
                             }
                         }
-            
                         var response = method == "server/discover" ? (object)new
                         {
                             jsonrpc = "2.0",
@@ -733,8 +733,8 @@ namespace McpRouter.Extensions
                         if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
                         {
                             var toolName = nameProp.GetString() ?? string.Empty;
-                            var db = httpContext.RequestServices.GetRequiredService<RouterDbContext>();
-                            var res = await session.CallToolAsync(toolName, body, db, httpContext);
+                            var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
+                            var res = await session.CallToolAsync(toolName, body, dbFactory, httpContext);
                             
                             var response = new
                             {

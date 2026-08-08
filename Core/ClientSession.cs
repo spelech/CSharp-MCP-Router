@@ -7,7 +7,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using McpRouter.Models;
 using McpRouter.Services;
@@ -77,7 +76,7 @@ namespace McpRouter
             return await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext);
         }
 
-        public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Models.RouterDbContext db, HttpContext? httpContext = null)
+        public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Core.Database.IDbConnectionFactory dbFactory, HttpContext? httpContext = null)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             int statusCode = 200;
@@ -142,7 +141,7 @@ namespace McpRouter
 
                     try
                     {
-                        var res = await _toolRoutingManager.CallToolAsync(toolName, body, db, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager);
+                        var res = await _toolRoutingManager.CallToolAsync(toolName, body, dbFactory, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager);
                         responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
                         return res;
                     }

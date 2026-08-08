@@ -1,9 +1,21 @@
-using System;
-using Microsoft.EntityFrameworkCore;
-using McpRouter.Core.Secrets;
+using System.Runtime.CompilerServices;
+using Dapper;
 
 namespace McpRouter.Models
 {
+    internal static class DapperTypeHandlerInitializer
+    {
+        [ModuleInitializer]
+        public static void Initialize()
+        {
+            try
+            {
+                SqlMapper.AddTypeHandler(new McpRouter.Services.JsonListTypeHandler());
+            }
+            catch { }
+        }
+    }
+
     public class McpServer
     {
         public string Id { get; set; } = string.Empty;
@@ -49,80 +61,4 @@ namespace McpRouter.Models
         public string InternalGroup { get; set; } = string.Empty; // e.g., database_users
     }
 
-    public class RouterDbContext : DbContext
-    {
-        private readonly string _encryptionKey;
-        private readonly IConfiguration _configuration;
-
-        public DbSet<McpServer> Servers => Set<McpServer>();
-        public DbSet<OAuthClient> Clients => Set<OAuthClient>();
-        public DbSet<RouterSettings> Settings => Set<RouterSettings>();
-        public DbSet<McpAccessPolicy> AccessPolicies => Set<McpAccessPolicy>();
-        public DbSet<GroupMapping> GroupMappings => Set<GroupMapping>();
-        public DbSet<AppKey> AppKeys => Set<AppKey>();
-
-        public RouterDbContext(DbContextOptions<RouterDbContext> options, IConfiguration configuration)
-            : base(options)
-        {
-            _encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
-            _configuration = configuration;
-        }
-
-        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-        {
-            if (!optionsBuilder.IsConfigured)
-            {
-                // In Docker, the database path is in the /app/data volume
-                var dbPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");
-                var dir = Path.GetDirectoryName(dbPath);
-                if (dir != null && !Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
-
-                // Password=... is how Microsoft.Data.Sqlite with SQLCipher applies the key
-                optionsBuilder.UseSqlite($"Data Source={dbPath};Password={_encryptionKey}");
-            }
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            base.OnModelCreating(modelBuilder);
-
-            modelBuilder.Entity<McpServer>().HasKey(s => s.Id);
-            modelBuilder.Entity<OAuthClient>().HasKey(c => c.ClientId);
-            modelBuilder.Entity<McpAccessPolicy>().HasKey(p => p.Id);
-            modelBuilder.Entity<GroupMapping>().HasKey(m => m.Id);
-            modelBuilder.Entity<AppKey>().HasKey(k => k.Id);
-
-            var nullableApiConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<string?, string?>(
-                v => v == null ? null : SymmetricEncryptionHelper.Encrypt(v, _configuration),
-                v => v == null ? null : SymmetricEncryptionHelper.Decrypt(v, _configuration)
-            );
-
-            var apiConverter = new Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<string, string>(
-                v => SymmetricEncryptionHelper.Encrypt(v, _configuration),
-                v => SymmetricEncryptionHelper.Decrypt(v, _configuration)
-            );
-
-            modelBuilder.Entity<McpServer>()
-                .Property(s => s.ApiKey)
-                .HasConversion(nullableApiConverter);
-
-            modelBuilder.Entity<McpServer>()
-                .Property(s => s.HeadersJson)
-                .HasConversion(nullableApiConverter);
-
-            modelBuilder.Entity<McpServer>()
-                .Property(s => s.SecretItemKey)
-                .HasConversion(nullableApiConverter);
-
-            modelBuilder.Entity<RouterSettings>()
-                .Property(s => s.EmbeddingApiKey)
-                .HasConversion(apiConverter);
-
-            // Register OpenIddict Entity Framework Core entities
-            modelBuilder.UseOpenIddict();
-        }
-    }
 }

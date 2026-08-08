@@ -24,13 +24,13 @@ namespace McpRouter.Extensions
         builder.Logging.AddDebug();
         builder.Logging.AddProvider(new InMemoryLoggerProvider());
 
-        // Register Multi-Database Provider Factory & DbContext
+        // Register Multi-Database Provider Factory (Pure Dapper)
         builder.Services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory, McpRouter.Core.Database.DbConnectionFactory>();
-        builder.Services.AddDbContext<RouterDbContext>();
 
-        // Register Identity Providers (Active Directory & PocketID/TinyAuth OIDC)
+        // Register Pluggable Identity Providers (Active Directory & Configurable Header Auth)
         builder.Services.AddSingleton<McpRouter.Core.Identity.ILdapService, McpRouter.Core.Identity.LdapActiveDirectoryService>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.ActiveDirectoryIdentityProvider>();
+        builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.HeaderIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.OidcIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.CompositeIdentityProvider>();
 

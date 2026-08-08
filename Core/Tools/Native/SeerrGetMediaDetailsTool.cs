@@ -4,12 +4,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.CustomTools
 {
-public class SeerrGetMediaDetailsTool : ICustomTool
+    public class SeerrGetMediaDetailsTool : ICustomTool
     {
         public string Name => "seerr_get_media_details";
         public string Description => "Get full information about a specific movie or TV show from Overseerr, including its request/media status.";
@@ -25,12 +26,13 @@ public class SeerrGetMediaDetailsTool : ICustomTool
             required = new[] { "mediaType", "tmdbId" }
         };
 
-        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, RouterDbContext db)
+        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, IDbConnectionFactory dbFactory)
         {
             var mediaType = parameters.GetProperty("mediaType").GetString();
             var tmdbId = parameters.GetProperty("tmdbId").GetInt32();
 
-            var seerr = await db.Servers.FirstOrDefaultAsync(s => s.Id == "seerr");
+            using var conn = dbFactory.CreateConnection();
+            var seerr = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = 'seerr'");
             if (seerr == null || !seerr.Enabled)
             {
                 return new { error = "Seerr service is not configured or disabled." };
@@ -43,7 +45,6 @@ public class SeerrGetMediaDetailsTool : ICustomTool
             }
             apiBase = apiBase.TrimEnd('/');
 
-            // Route to movie or tv endpoint
             var endpoint = mediaType == "tv" ? $"/api/v1/tv/{tmdbId}" : $"/api/v1/movie/{tmdbId}";
 
             using var req = new HttpRequestMessage(HttpMethod.Get, $"{apiBase}{endpoint}");

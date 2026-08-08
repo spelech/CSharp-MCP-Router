@@ -4,12 +4,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.CustomTools
 {
-public class PlexSearchLibraryTool : ICustomTool
+    public class PlexSearchLibraryTool : ICustomTool
     {
         public string Name => "plex_search_library";
         public string Description => "Perform a global search across all libraries in Plex Media Server.";
@@ -24,10 +25,11 @@ public class PlexSearchLibraryTool : ICustomTool
             required = new[] { "query" }
         };
 
-        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, RouterDbContext db)
+        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, IDbConnectionFactory dbFactory)
         {
             var query = parameters.GetProperty("query").GetString();
-            var plex = await db.Servers.FirstOrDefaultAsync(s => s.Id == "plex");
+            using var conn = dbFactory.CreateConnection();
+            var plex = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = 'plex'");
             if (plex == null || !plex.Enabled)
             {
                 return new { error = "Plex service is not configured or disabled in MCP Router." };

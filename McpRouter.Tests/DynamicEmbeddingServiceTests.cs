@@ -4,14 +4,16 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using McpRouter.Core.Database;
 using McpRouter.Models;
 using McpRouter.Services;
+using Moq;
 using Xunit;
+using Dapper;
 
 namespace McpRouter.Tests
 {
@@ -37,31 +39,41 @@ namespace McpRouter.Tests
             }
         }
 
-        private (IServiceProvider provider, RouterDbContext db) CreateServiceProvider()
+        private (IServiceProvider provider, SqliteConnection masterConn) CreateServiceProvider()
         {
-            var options = new DbContextOptionsBuilder<RouterDbContext>()
-                .UseInMemoryDatabase(Guid.NewGuid().ToString())
-                .Options;
+            var dbName = $"Data Source=EmbeddingTestDb_{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
+            var masterConn = new SqliteConnection(dbName);
+            masterConn.Open();
 
-            var inMemoryConfig = new Dictionary<string, string?>
-            {
-                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
-            };
-            var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
-            var db = new RouterDbContext(options, config);
-            db.Database.EnsureCreated();
+            masterConn.Execute(@"
+                CREATE TABLE IF NOT EXISTS Settings (
+                    Id TEXT PRIMARY KEY,
+                    EmbeddingProvider TEXT,
+                    EmbeddingApiUrl TEXT,
+                    EmbeddingApiKey TEXT,
+                    EmbeddingApiModel TEXT,
+                    EmbeddingModelDir TEXT,
+                    RequireManualApproval INTEGER DEFAULT 0,
+                    GlobalMaxKeys INTEGER DEFAULT 100,
+                    UserMaxKeys INTEGER DEFAULT 5
+                );
+            ");
+
+            var mockDbFactory = new Mock<IDbConnectionFactory>();
+            mockDbFactory.Setup(f => f.CreateConnection()).Returns(() => new SqliteConnection(dbName));
+            mockDbFactory.Setup(f => f.ProviderName).Returns("sqlite");
 
             var services = new ServiceCollection();
-            services.AddSingleton(db);
+            services.AddSingleton(mockDbFactory.Object);
             var provider = services.BuildServiceProvider();
 
-            return (provider, db);
+            return (provider, masterConn);
         }
 
         [Fact]
         public void DynamicEmbeddingService_Gets_And_Saves_Settings()
         {
-            var (provider, db) = CreateServiceProvider();
+            var (provider, conn) = CreateServiceProvider();
             var service = new DynamicEmbeddingService(new HttpClient(), NullLoggerFactory.Instance, provider);
 
             var settings = service.GetSettings();
@@ -73,7 +85,7 @@ namespace McpRouter.Tests
 
             service.SaveSettings(settings);
 
-            var saved = db.Settings.FirstOrDefault(s => s.Id == "default");
+            var saved = conn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default'");
             Assert.NotNull(saved);
             Assert.Equal("API", saved.EmbeddingProvider);
             Assert.Equal("http://localhost:5000/v1/embeddings", saved.EmbeddingApiUrl);
@@ -82,7 +94,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task DynamicEmbeddingService_GetEmbeddingAsync_Uses_ApiProvider_When_Configured()
         {
-            var (provider, db) = CreateServiceProvider();
+            var (provider, conn) = CreateServiceProvider();
             var handler = new MockHttpMessageHandler(req =>
             {
                 var json = "{\"data\":[{\"embedding\":[1.0, 0.0, 0.0]}]}";
@@ -105,7 +117,7 @@ namespace McpRouter.Tests
         [Fact]
         public void CosineSimilarity_Calculates_Correct_Vector_Distance()
         {
-            var (provider, db) = CreateServiceProvider();
+            var (provider, conn) = CreateServiceProvider();
             var service = new DynamicEmbeddingService(new HttpClient(), NullLoggerFactory.Instance, provider);
 
             var v1 = new float[] { 1.0F, 0.0F, 0.0F };
@@ -122,7 +134,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task PreWarmAsync_Executes_Without_Throwing()
         {
-            var (provider, db) = CreateServiceProvider();
+            var (provider, conn) = CreateServiceProvider();
             var handler = new MockHttpMessageHandler(req =>
             {
                 var json = "{\"data\":[{\"embedding\":[0.1, 0.2]}]}";

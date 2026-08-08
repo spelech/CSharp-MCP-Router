@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
@@ -15,6 +14,7 @@ using McpRouter.Models;
 using McpRouter.Core.Logging;
 using Dapper;
 using System.Linq;
+using System.Collections.Generic;
 
 namespace McpRouter.Extensions
 {
@@ -23,9 +23,7 @@ namespace McpRouter.Extensions
         public static void MapServerEndpoints(this WebApplication app)
         {
             var api = app.MapGroup("").RequireAuthorization("AdminPolicy");
-// ----------------------------------------------------
-            // DASHBOARD MANAGEMENT ENDPOINTS
-            // ----------------------------------------------------
+
             api.MapGet("/api/servers", async ([FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
             {
                 try
@@ -83,9 +81,10 @@ namespace McpRouter.Extensions
                 }
             });
 
-            api.MapPost("/api/servers/{id}/reconnect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, [FromServices] Services.BackendHealthCheckService healthCheckSvc, ILogger<Program> logger) =>
+            api.MapPost("/api/servers/{id}/reconnect", async (string id, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, [FromServices] Services.BackendHealthCheckService healthCheckSvc, ILogger<Program> logger) =>
             {
-                var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
+                using var conn = dbFactory.CreateConnection();
+                var server = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @id", new { id });
                 if (server == null)
                 {
                     return Results.NotFound();
@@ -110,84 +109,63 @@ namespace McpRouter.Extensions
                 return Results.Ok(new { success = true });
             });
             
-            api.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
+            api.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
-                var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
+                using var conn = dbFactory.CreateConnection();
+                var server = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @id", new { id });
                 if (server == null)
                 {
-                    _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, System.Text.Json.JsonSerializer.Serialize(update), false, "Server not found");
+                    _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, "Server not found");
                     return Results.NotFound();
                 }
             
                 server.Enabled = update.Enabled;
                 server.Hidden = update.Hidden;
                 
-                if (!string.IsNullOrEmpty(update.DisplayName))
-                {
-                    server.DisplayName = update.DisplayName;
-                }
+                if (!string.IsNullOrEmpty(update.DisplayName)) server.DisplayName = update.DisplayName;
                 if (!string.IsNullOrEmpty(update.Url))
                 {
                     if (!IsValidServerUrl(update.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
                     {
-                        _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, System.Text.Json.JsonSerializer.Serialize(update), false, err);
+                        _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, err);
                         return Results.BadRequest(new { error = err });
                     }
                     server.Url = update.Url;
                 }
-                if (!string.IsNullOrEmpty(update.Type))
-                {
-                    server.Type = update.Type;
-                }
-                if (update.SecretProvider != null)
-                {
-                    server.SecretProvider = update.SecretProvider;
-                }
-                if (update.SecretItemKey != null)
-                {
-                    server.SecretItemKey = update.SecretItemKey;
-                }
-                if (!string.IsNullOrEmpty(update.AuthShape))
-                {
-                    server.AuthShape = update.AuthShape;
-                }
-                if (update.CustomHeaderName != null)
-                {
-                    server.CustomHeaderName = update.CustomHeaderName;
-                }
-                if (update.Categories != null)
-                {
-                    server.Categories = update.Categories;
-                }
-                if (!string.IsNullOrWhiteSpace(update.ApiKey))
-                {
-                    server.ApiKey = update.ApiKey;
-                }
-                if (update.HeadersJson != null)
-                {
-                    server.HeadersJson = update.HeadersJson;
-                }
+                if (!string.IsNullOrEmpty(update.Type)) server.Type = update.Type;
+                if (update.SecretProvider != null) server.SecretProvider = update.SecretProvider;
+                if (update.SecretItemKey != null) server.SecretItemKey = update.SecretItemKey;
+                if (!string.IsNullOrEmpty(update.AuthShape)) server.AuthShape = update.AuthShape;
+                if (update.CustomHeaderName != null) server.CustomHeaderName = update.CustomHeaderName;
+                if (update.Categories != null) server.Categories = update.Categories;
+                if (!string.IsNullOrWhiteSpace(update.ApiKey)) server.ApiKey = update.ApiKey;
+                if (update.HeadersJson != null) server.HeadersJson = update.HeadersJson;
                 
-                await db.SaveChangesAsync();
+                var catJson = JsonSerializer.Serialize(server.Categories ?? new());
+                await conn.ExecuteAsync(@"UPDATE Servers SET DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
+                    SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, AuthShape = @AuthShape, CustomHeaderName = @CustomHeaderName,
+                    Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson WHERE Id = @Id",
+                    new {
+                        server.DisplayName, server.Url, Enabled = server.Enabled ? 1 : 0, Hidden = server.Hidden ? 1 : 0, server.Type,
+                        server.SecretProvider, server.SecretItemKey, server.AuthShape, server.CustomHeaderName,
+                        Categories = catJson, server.ApiKey, server.HeadersJson, server.Id
+                    });
                 
-                // Clear cache only for this server
                 sessionManager.RemoveServerCache(id);
-                
-                // Reset active sessions so they reconnect to updated backends
                 sessionManager.ResetAll();
             
-                _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, System.Text.Json.JsonSerializer.Serialize(update), true);
+                _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), true);
 
                 return Results.Ok(server);
             });
             
-            api.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
+            api.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
                 if (!IsValidServerUrl(server.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
                 {
-                    _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id ?? "unknown", System.Text.Json.JsonSerializer.Serialize(server), false, err);
+                    _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id ?? "unknown", JsonSerializer.Serialize(server), false, err);
                     return Results.BadRequest(new { error = err });
                 }
 
@@ -196,32 +174,37 @@ namespace McpRouter.Extensions
                     server.Id = Guid.NewGuid().ToString("N").Substring(0, 8);
                 }
                 
-                db.Servers.Add(server);
-                await db.SaveChangesAsync();
+                using var conn = dbFactory.CreateConnection();
+                var catJson = JsonSerializer.Serialize(server.Categories ?? new());
+                await conn.ExecuteAsync(@"INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson)
+                    VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson)",
+                    new {
+                        server.Id, server.DisplayName, server.Url, Enabled = server.Enabled ? 1 : 0, Hidden = server.Hidden ? 1 : 0, Type = server.Type ?? "sse",
+                        SecretProvider = server.SecretProvider ?? "None", server.SecretItemKey, AuthShape = server.AuthShape ?? "bearer", server.CustomHeaderName,
+                        Categories = catJson, server.ApiKey, server.HeadersJson
+                    });
                 
                 sessionManager.ResetAll();
 
-                _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id, System.Text.Json.JsonSerializer.Serialize(server), true);
+                _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id, JsonSerializer.Serialize(server), true);
 
                 return Results.Ok(server);
             });
             
-            api.MapDelete("/api/servers/{id}", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
+            api.MapDelete("/api/servers/{id}", async (string id, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
-                var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
+                using var conn = dbFactory.CreateConnection();
+                var server = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @id", new { id });
                 if (server == null)
                 {
                     _ = auditLogger.LogAdminActionAsync(username, "DeleteServer", id, "", false, "Server not found");
                     return Results.NotFound();
                 }
                 
-                db.Servers.Remove(server);
-                await db.SaveChangesAsync();
+                await conn.ExecuteAsync("DELETE FROM Servers WHERE Id = @id", new { id });
                 
-                // Clear cache only for this server
                 sessionManager.RemoveServerCache(id);
-                
                 sessionManager.ResetAll();
 
                 _ = auditLogger.LogAdminActionAsync(username, "DeleteServer", id, "", true);
@@ -229,9 +212,10 @@ namespace McpRouter.Extensions
                 return Results.Ok(new { success = true });
             });
 
-            api.MapGet("/api/servers/{id}/inspect", async (string id, [FromServices] RouterDbContext db, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            api.MapGet("/api/servers/{id}/inspect", async (string id, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
             {
-                var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == id);
+                using var conn = dbFactory.CreateConnection();
+                var server = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @id", new { id });
                 if (server == null) return Results.NotFound(new { error = "Server not found" });
 
                 try
@@ -257,10 +241,7 @@ namespace McpRouter.Extensions
                     return Results.Problem($"Failed to inspect server capabilities: {ex.Message}");
                 }
             });
-
-            
         }
-
 
         public static bool IsValidServerUrl(string? url, IConfiguration config, out string? errorMessage)
         {

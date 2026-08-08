@@ -4,12 +4,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.CustomTools
 {
-public class PlexGetMetadataTool : ICustomTool
+    public class PlexGetMetadataTool : ICustomTool
     {
         public string Name => "plex_get_metadata";
         public string Description => "Get full detailed metadata details for a specific item (ratingKey) on Plex.";
@@ -24,10 +25,11 @@ public class PlexGetMetadataTool : ICustomTool
             required = new[] { "ratingKey" }
         };
 
-        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, RouterDbContext db)
+        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, IDbConnectionFactory dbFactory)
         {
             var ratingKey = parameters.GetProperty("ratingKey").GetString();
-            var plex = await db.Servers.FirstOrDefaultAsync(s => s.Id == "plex");
+            using var conn = dbFactory.CreateConnection();
+            var plex = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = 'plex'");
             if (plex == null || !plex.Enabled)
             {
                 return new { error = "Plex service is not configured or disabled." };
