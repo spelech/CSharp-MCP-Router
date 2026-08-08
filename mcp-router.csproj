@@ -4,9 +4,9 @@
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Version>4.0.21</Version>
-    <AssemblyVersion>4.0.21.0</AssemblyVersion>
-    <FileVersion>4.0.21.0</FileVersion>
+    <Version>4.0.22</Version>
+    <AssemblyVersion>4.0.22.0</AssemblyVersion>
+    <FileVersion>4.0.22.0</FileVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
 
