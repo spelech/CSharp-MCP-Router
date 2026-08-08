@@ -33,6 +33,7 @@ export const ServerControlsToolbar: React.FC = () => {
         ></i>
         <input
           type="text"
+          data-testid="server-search-input"
           placeholder="Search servers, URLs, or categories..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -54,6 +55,7 @@ export const ServerControlsToolbar: React.FC = () => {
           <i className="fa-solid fa-sort"></i> Sort:
         </span>
         <select
+          data-testid="sort-by-select"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
           className="form-select form-select-sm"
@@ -79,6 +81,7 @@ export const ServerControlsToolbar: React.FC = () => {
           <i className="fa-solid fa-layer-group"></i> Group:
         </span>
         <select
+          data-testid="group-by-select"
           value={groupBy}
           onChange={(e) => setGroupBy(e.target.value)}
           className="form-select form-select-sm"
