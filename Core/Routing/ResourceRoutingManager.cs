@@ -13,41 +13,11 @@ namespace McpRouter.Core.Routing
     public class ResourceRoutingManager
     {
         private readonly Dictionary<string, string> _resourceRoutingTable = new();
+        private readonly ResourceCatalogManager _catalogManager = new();
 
         public async Task<List<object>> SearchResourcesAsync(string query, List<object> resources)
         {
-            if (string.IsNullOrWhiteSpace(query))
-            {
-                return resources.Take(15).ToList();
-            }
-
-            var queryLower = query.ToLower();
-            var results = new List<object>();
-
-            foreach (var res in resources)
-            {
-                string name = "";
-                string description = "";
-
-                if (res is Dictionary<string, object> dict)
-                {
-                    if (dict.TryGetValue("name", out var n)) name = n?.ToString() ?? "";
-                    if (dict.TryGetValue("description", out var d)) description = d?.ToString() ?? "";
-                }
-                else if (res is System.Text.Json.JsonElement je)
-                {
-                    if (je.TryGetProperty("name", out var n)) name = n.GetString() ?? "";
-                    if (je.TryGetProperty("description", out var d)) description = d.GetString() ?? "";
-                }
-
-                if (name.Contains(queryLower, StringComparison.OrdinalIgnoreCase) ||
-                    description.Contains(queryLower, StringComparison.OrdinalIgnoreCase))
-                {
-                    results.Add(res);
-                }
-            }
-
-            return results.Take(15).ToList();
+            return await _catalogManager.SearchResourcesAsync(query, resources);
         }
 
         public async Task<List<object>> ListResourcesAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, SessionManager? sessionManager = null)
@@ -378,11 +348,9 @@ namespace McpRouter.Core.Routing
 
         private object ResolveLocalLogResource(string uri)
         {
-            var match = System.Text.RegularExpressions.Regex.Match(uri, @"^logs://([^/]+)/today$");
             string logText = "No logs found for this backend server.";
-            if (match.Success)
+            if (_catalogManager.TryMatchLogsTemplate(uri, out var serverId))
             {
-                var serverId = match.Groups[1].Value;
                 var filteredLogs = LogBuffer.GetLogs()
                     .Where(l => l.Message.Contains($"backend {serverId}", StringComparison.OrdinalIgnoreCase) || 
                                 l.Message.Contains($"backend server: {serverId}", StringComparison.OrdinalIgnoreCase) || 
