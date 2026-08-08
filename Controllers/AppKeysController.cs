@@ -122,8 +122,9 @@ namespace McpRouter.Controllers
                 var settings = await conn.QueryFirstOrDefaultAsync<dynamic>(settingsSql);
                 if (settings != null)
                 {
-                    globalMax = settings.GlobalMaxKeys ?? 100;
-                    userMax = settings.UserMaxKeys ?? 5;
+                    var dict = (IDictionary<string, object>)settings;
+                    if (dict.TryGetValue("GlobalMaxKeys", out var g) && g != null) globalMax = Convert.ToInt32(g);
+                    if (dict.TryGetValue("UserMaxKeys", out var u) && u != null) userMax = Convert.ToInt32(u);
                 }
 
                 int totalActiveKeys = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppKeys;");
@@ -171,8 +172,9 @@ namespace McpRouter.Controllers
                 var settings = await conn.QueryFirstOrDefaultAsync<dynamic>(settingsSql);
                 if (settings != null)
                 {
-                    globalMax = settings.GlobalMaxKeys ?? 100;
-                    userMax = settings.UserMaxKeys ?? 5;
+                    var dict = (IDictionary<string, object>)settings;
+                    if (dict.TryGetValue("GlobalMaxKeys", out var g) && g != null) globalMax = Convert.ToInt32(g);
+                    if (dict.TryGetValue("UserMaxKeys", out var u) && u != null) userMax = Convert.ToInt32(u);
                 }
 
                 // Check limits (admins bypass limits)
@@ -232,7 +234,8 @@ namespace McpRouter.Controllers
                     KeyPrefix = prefix,
                     EncryptedKey = encryptedKey,
                     ScopesJson = JsonSerializer.Serialize(scopes),
-                    ExpiresAt = model.ExpiresInDays.HasValue ? DateTime.UtcNow.AddDays(model.ExpiresInDays.Value) : null
+                    ExpiresAt = model.ExpiresInDays.HasValue ? DateTime.UtcNow.AddDays(model.ExpiresInDays.Value) : null,
+                    CreatedAt = DateTime.UtcNow
                 };
 
                 if (_dbFactory.ProviderName == "sqlite")
