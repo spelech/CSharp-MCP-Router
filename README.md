@@ -7,7 +7,7 @@
 ![Code Coverage](https://img.shields.io/badge/coverage-93%25-brightgreen?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
-![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
 
 An enterprise-ready, high-performance C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the **Model Context Protocol (MCP)**. 
 
@@ -77,11 +77,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.2.18`** | 2026-08-08 | docs(license): add official Apache License 2.0 file and update README badge |
 | **`v4.2.17`** | 2026-08-08 | docs(readme): add shield badges to top of README |
 | **`v4.2.16`** | 2026-08-08 | docs(rules): update agent rules for CHANGELOG.md extraction |
 | **`v4.2.15`** | 2026-08-08 | fix(inspect): pass httpContext to inspect capability listing calls and await backend initialization |
 | **`v4.2.14`** | 2026-08-08 | fix(inspect): standardize ROUTER_SECRET encryption derivation and add resilient multi-primitive capabilities inspect |
-| **`v4.2.13`** | 2026-08-08 | refactor(db): complete 100% EF Core removal and Dapper refactoring with isolated header identity provider |
 
 ---
 
