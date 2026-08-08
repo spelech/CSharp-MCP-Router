@@ -1,6 +1,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using McpRouter.Models;
 using System;
+using System.Security.Claims;
 using OpenIddict.Validation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -38,7 +39,11 @@ namespace McpRouter.Extensions
                               var httpContext = ctx.Resource as Microsoft.AspNetCore.Http.HttpContext;
                               var cfg = httpContext?.RequestServices?.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
                               var adminSid = cfg?["Admin:GroupSid"] ?? "S-1-5-32-544";
-                              return ctx.User.HasClaim("Sid", adminSid);
+                              return ctx.User.HasClaim("Sid", adminSid) ||
+                                     ctx.User.IsInRole("full_admin") ||
+                                     ctx.User.IsInRole("Administrator") ||
+                                     ctx.User.HasClaim(ClaimTypes.Role, "full_admin") ||
+                                     ctx.User.HasClaim(ClaimTypes.Role, "Administrator");
                           })
                           .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey", "OidcHeader");
                 });
