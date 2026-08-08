@@ -62,6 +62,7 @@ Our core modules maintain high code coverage to ensure reliability and secure ex
 
 | Module | Line Coverage | Branch Coverage | Status |
 | :--- | :--- | :--- | :--- |
+| **`v4.0.20`** | 2026-08-08 | docs(xml): add descriptive C# XML docstrings to core services |
 | **`v4.0.19`** | 2026-08-08 | docs(xml): enable C# XML documentation generation and annotate core services |
 | **Core Session** | 92.4% | 88.1% | 🟢 Passing |
 | **Routing Engine** | 89.7% | 85.3% | 🟢 Passing |

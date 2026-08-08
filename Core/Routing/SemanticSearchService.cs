@@ -8,12 +8,20 @@ using McpRouter.Services;
 namespace McpRouter.Core.Routing
 {
     /// <summary>
-    /// Auto-generated XML documentation.
+    /// Provides hybrid keyword and vector semantic search scoring across backend MCP tools.
     /// </summary>
     public class SemanticSearchService
     {
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, float[]> _embeddingsCache = new();
 
+        /// <summary>
+        /// Ranks and filters tools based on cosine similarity embeddings and hybrid keyword match weights.
+        /// </summary>
+        /// <param name="query">The natural language user intent query.</param>
+        /// <param name="tools">The raw candidate list of tool schemas.</param>
+        /// <param name="embeddingService">The active embedding provider (Local ONNX or API).</param>
+        /// <param name="logger">Optional logger for telemetry.</param>
+        /// <returns>A task returning the top matching tool schemas.</returns>
         public static async Task<List<object>> SearchToolsSemanticAsync(
             string query,
             List<object> tools,

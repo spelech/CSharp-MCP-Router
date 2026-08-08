@@ -11,10 +11,14 @@ using McpRouter.Models;
 namespace McpRouter
 {
     /// <summary>
-    /// Auto-generated XML documentation.
+    /// Partial class implementation handling downstream MCP backend connection management, auto-initialization, and retry loops.
     /// </summary>
     public partial class ClientSession
     {
+        /// <summary>
+        /// Ensures all enabled downstream backend servers are initialized before proceeding with method execution.
+        /// </summary>
+        /// <returns>A task representing asynchronous initialization completion.</returns>
         public async Task EnsureBackendsInitializedAsync()
         {
             if (_initializeTask == null)

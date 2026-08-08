@@ -14,10 +14,15 @@ using McpRouter.Core.Database;
 namespace McpRouter
 {
     /// <summary>
-    /// Auto-generated XML documentation.
+    /// Partial class implementation providing RBAC policy authorization, user identity resolution, and invocation audit logging.
     /// </summary>
     public partial class ClientSession
     {
+        /// <summary>
+        /// Resolves the caller's <see cref="UserIdentityContext"/> from claim principal data or configured identity providers.
+        /// </summary>
+        /// <param name="httpContext">Optional HTTP context override; defaults to the current session's response context.</param>
+        /// <returns>A task returning the resolved <see cref="UserIdentityContext"/>.</returns>
         public async Task<UserIdentityContext> ResolveUserIdentityAsync(HttpContext? httpContext = null)
         {
             var contextToUse = httpContext ?? _clientResponse?.HttpContext;
