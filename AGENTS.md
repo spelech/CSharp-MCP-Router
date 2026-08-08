@@ -30,8 +30,9 @@ Run tests via `dotnet test McpRouter.slnx`.
   - Minor Bumps (e.g. `2.7.0` -> `2.8.0`): For new features, API endpoints, schema changes, or architectural additions.
   - **Files That MUST Be Updated Simultaneously**:
     1. `mcp-router.csproj` (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`)
-    2. `wwwroot/index.html` (`<span class="badge badge-primary" id="version-badge">vX.Y.Z</span>`)
-    3. `README.md` (Add release entry to the Release Changelog table)
+    2. `frontend/src/stores/useUserStore.ts` (React fallback version)
+    3. `CHANGELOG.md` (Add release entry to the Release Changelog table)
+    4. `README.md` (Update top-5 release preview table)
 - **MANDATORY DOCUMENTATION & ATOMIC COMMIT RULE**: **EVERY FEATURE OR CHANGE MUST INCLUDE UP-TO-DATE DOCUMENTATION.**
   - When working on a feature branch, AI agents **MUST** ensure relevant guides (`README.md`, `ARCHITECTURE.md`, `docs/features-guide.md`, etc.) are updated to reflect the design or functionality changes.
   - Agents **MUST** use logical, atomic commits for changes. Commit code and documentation separately or in cleanly grouped atomic commits.

@@ -77,8 +77,9 @@ Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) o
 - **Minor Bumps (e.g. `2.7.0` -> `2.8.0`)**: For new features, API endpoints, schema changes, or architectural additions.
 - **Files That MUST Be Updated Simultaneously**:
   1. [`mcp-router.csproj`](file:///containers/mcp/router/mcp-router.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
-  2. [`wwwroot/index.html`](file:///containers/mcp/router/wwwroot/index.html) (`<span class="badge badge-primary" id="version-badge">vX.Y.Z</span>`).
-  3. [`README.md`](file:///containers/mcp/router/README.md) (Add release entry to the Release Changelog table).
+  2. [`frontend/src/stores/useUserStore.ts`](file:///containers/mcp/router/frontend/src/stores/useUserStore.ts) (React fallback version).
+  3. [`CHANGELOG.md`](file:///containers/mcp/router/CHANGELOG.md) (Add release entry to full changelog table).
+  4. [`README.md`](file:///containers/mcp/router/README.md) (Update top-5 release preview table).
 
 **MANDATORY ATOMIC COMMIT AND DOCS UPDATING PROCESS**:
 * Whenever an AI agent implements a bugfix or feature, they **MUST** update the documentation (e.g., `README.md`, `ARCHITECTURE.md`, or the `docs/` folder) to reflect those changes.
