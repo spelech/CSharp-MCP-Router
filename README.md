@@ -77,11 +77,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.4.0`** | 2026-08-08 | feat(auth): add X-App-Key header extraction and default admin AppKey seeder |
 | **`v4.3.0`** | 2026-08-08 | feat(ui): implement interactive multi-target client setup guide generator |
 | **`v4.2.19`** | 2026-08-08 | docs(license): track and commit official Apache License 2.0 file |
 | **`v4.2.18`** | 2026-08-08 | docs(license): add official Apache License 2.0 file and update README badge |
 | **`v4.2.17`** | 2026-08-08 | docs(readme): add shield badges to top of README |
-| **`v4.2.16`** | 2026-08-08 | docs(rules): update agent rules for CHANGELOG.md extraction |
 
 ---
 
