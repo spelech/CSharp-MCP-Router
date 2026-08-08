@@ -42,6 +42,12 @@ For deep technical details on the router's internal design, dependency injection
 
 ---
 
+## 📖 Official User Guide & Manual
+
+For step-by-step UI guides, server registration, secret provider configuration (Env, HashiCorp Vault, Registry), RBAC group policies, client setup snippets, and interactive test bench operations, see the [**Official User Guide Suite**](docs/user-guide/README.md).
+
+---
+
 ## 📡 Features & Usage Guide
 
 For deep technical walkthroughs, setup configuration examples, connection guidelines, secret retrievers, and usage instructions for the Web UI/Test Bench, see [docs/features-guide.md](docs/features-guide.md).
@@ -60,6 +66,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.1.0`** | 2026-08-08 | feat(testing): add Playwright E2E test suite and comprehensive User Guide documentation suite |
 | **`v4.0.25`** | 2026-08-08 | fix(auth): use development encryption and signing certificates when custom certificate path is unconfigured |
 | **`v4.0.24`** | 2026-08-08 | fix(seeder): add explicit DDL notice logging for database migration verification |
 | **`v4.0.23`** | 2026-08-08 | fix(seeder): add detailed DDL logging and robust column alterations |
