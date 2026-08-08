@@ -57,6 +57,59 @@ namespace McpRouter.Services.DatabaseSeeders
             {
                 logger.LogWarning(exKeyMig, "AppKey hashing migration warning");
             }
+
+            // Seed Default Admin AppKey for CLI / system clients if none exists
+            try
+            {
+                using var conn = dbFactory.CreateConnection();
+                const string checkPrefix = "mcp-global-steve";
+                var existingKey = conn.QueryFirstOrDefault<string>("SELECT Id FROM AppKeys WHERE KeyPrefix = @KeyPrefix;", new { KeyPrefix = checkPrefix });
+                if (string.IsNullOrEmpty(existingKey))
+                {
+                    const string defaultPlaintextKey = "mcp-global-steve-default-cli-key-99";
+                    using var sha256 = SHA256.Create();
+                    var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(defaultPlaintextKey));
+                    var hashedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
+
+                    var defaultKey = new AppKey
+                    {
+                        Id = Guid.NewGuid().ToString("N"),
+                        Name = "CLI Default Admin Key",
+                        Username = "steve",
+                        KeyPrefix = checkPrefix,
+                        EncryptedKey = hashedKey,
+                        ScopesJson = "[\"all\"]",
+                        ExpiresAt = null,
+                        CreatedAt = DateTime.UtcNow
+                    };
+
+                    if (dbFactory.ProviderName == "sqlite")
+                    {
+                        const string insertSql = @"
+                            INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
+                            VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
+                        conn.Execute(insertSql, defaultKey);
+                    }
+                    else
+                    {
+                        conn.Execute("sp_SaveAppKey", new {
+                            defaultKey.Id,
+                            defaultKey.Name,
+                            defaultKey.Username,
+                            defaultKey.KeyPrefix,
+                            defaultKey.EncryptedKey,
+                            defaultKey.ScopesJson,
+                            defaultKey.ExpiresAt,
+                            defaultKey.CreatedAt
+                        });
+                    }
+                    logger.LogInformation("Seeded default CLI Admin AppKey for 'steve'.");
+                }
+            }
+            catch (Exception exSeedKey)
+            {
+                logger.LogWarning(exSeedKey, "Default AppKey seeder warning");
+            }
         }
 
         private static string DecryptLegacyAppKey(string ciphertext, IConfiguration configuration)

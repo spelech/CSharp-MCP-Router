@@ -40,6 +40,35 @@ namespace McpRouter.Middleware
                 token = authHeader.Substring("Bearer ".Length).Trim();
             }
 
+            if (string.IsNullOrEmpty(token))
+            {
+                var xAppKey = Request.Headers["X-App-Key"].ToString();
+                if (!string.IsNullOrEmpty(xAppKey))
+                {
+                    token = xAppKey.Trim();
+                }
+                else
+                {
+                    var xApiKey = Request.Headers["X-Api-Key"].ToString();
+                    if (!string.IsNullOrEmpty(xApiKey))
+                    {
+                        token = xApiKey.Trim();
+                    }
+                    else if (Request.Query.TryGetValue("app_key", out var qAppKey) && !string.IsNullOrEmpty(qAppKey))
+                    {
+                        token = qAppKey.ToString().Trim();
+                    }
+                    else if (Request.Query.TryGetValue("api_key", out var qApiKey) && !string.IsNullOrEmpty(qApiKey))
+                    {
+                        token = qApiKey.ToString().Trim();
+                    }
+                    else if (Request.Query.TryGetValue("key", out var qKey) && !string.IsNullOrEmpty(qKey))
+                    {
+                        token = qKey.ToString().Trim();
+                    }
+                }
+            }
+
             if (string.IsNullOrEmpty(token) || !token.StartsWith("mcp-"))
             {
                 return AuthenticateResult.NoResult();
