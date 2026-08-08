@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -11,6 +12,7 @@ using Microsoft.Extensions.Logging.Abstractions;
 using McpRouter.Core.Database;
 using McpRouter.Models;
 using McpRouter.Services;
+using Moq;
 using Xunit;
 
 namespace McpRouter.Tests
@@ -86,6 +88,96 @@ namespace McpRouter.Tests
             {
                 await (Task)executeMethod.Invoke(discoveryService, new object[] { cts.Token })!;
             });
+        }
+
+        [Fact]
+        public void ParseDiscoveredServers_ParsesValidDockerContainerLabels()
+        {
+            var json = @"[
+                {
+                    ""Names"": [""/10.0.0.10""],
+                    ""Labels"": {
+                        ""mcp.enabled"": ""true"",
+                        ""mcp.id"": ""docker"",
+                        ""mcp.port"": ""8080"",
+                        ""mcp.displayName"": ""Docker MCP"",
+                        ""mcp.type"": ""sse"",
+                        ""mcp.path"": ""/sse"",
+                        ""mcp.categories"": ""infrastructure,tools""
+                    }
+                },
+                {
+                    ""Names"": [""/disabled-server""],
+                    ""Labels"": {
+                        ""mcp.enabled"": ""false""
+                    }
+                }
+            ]";
+
+            using var doc = JsonDocument.Parse(json);
+            var discovered = DockerAutoDiscoveryService.ParseDiscoveredServers(doc.RootElement, NullLogger.Instance, new[] { "10.0.0.0/8" });
+
+            Assert.Single(discovered);
+            Assert.Equal("docker", discovered[0].Id);
+            Assert.Equal("Docker MCP", discovered[0].DisplayName);
+            Assert.Contains("infrastructure", discovered[0].Categories);
+        }
+
+        [Fact]
+        public void UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers()
+        {
+            var db = CreateDbContext();
+            var mockFactory = new Mock<IHttpClientFactory>();
+            var services = new ServiceCollection();
+            var sp = services.BuildServiceProvider();
+            var sessionManager = new SessionManager(sp, mockFactory.Object, NullLogger<SessionManager>.Instance);
+
+            // Add an existing auto-discovered server
+            db.Servers.Add(new McpServer
+            {
+                Id = "old-server",
+                DisplayName = "Old Server",
+                Url = "http://old:8080/sse",
+                AutoDiscovered = true,
+                Enabled = true,
+                Categories = new List<string> { "legacy" }
+            });
+            db.SaveChanges();
+
+            var discovered = new List<McpServer>
+            {
+                new McpServer
+                {
+                    Id = "old-server",
+                    DisplayName = "Updated Old Server",
+                    Url = "http://old:8081/sse",
+                    Type = "http",
+                    AutoDiscovered = true,
+                    Enabled = true,
+                    Categories = new List<string> { "infrastructure", "updated" }
+                },
+                new McpServer
+                {
+                    Id = "new-server",
+                    DisplayName = "New Server",
+                    Url = "http://new:8080/sse",
+                    AutoDiscovered = true,
+                    Enabled = true,
+                    Categories = new List<string> { "default" }
+                }
+            };
+
+            DockerAutoDiscoveryService.UpsertDiscoveredServers(discovered, db, sessionManager, NullLogger.Instance);
+
+            var updatedOld = db.Servers.FirstOrDefault(s => s.Id == "old-server");
+            Assert.NotNull(updatedOld);
+            Assert.Equal("Updated Old Server", updatedOld.DisplayName);
+            Assert.Equal("http://old:8081/sse", updatedOld.Url);
+            Assert.Equal("http", updatedOld.Type);
+            Assert.Contains("updated", updatedOld.Categories);
+
+            var newSrv = db.Servers.FirstOrDefault(s => s.Id == "new-server");
+            Assert.NotNull(newSrv);
         }
     }
 }
