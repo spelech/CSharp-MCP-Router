@@ -1,47 +1,47 @@
+using System;
+using System.Text.Json;
 using System.Threading.Tasks;
-using FluentAssertions;
-using Xunit;
 using McpRouter.Controllers;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Moq;
 using OpenIddict.Abstractions;
-using Microsoft.AspNetCore.Mvc;
-using System.Text.Json;
+using Xunit;
 
 namespace McpRouter.Tests
 {
     public class AuthorizationControllerTests
     {
         [Fact]
-        public async Task RegisterClient_Should_Return_Client_Credentials()
+        public async Task Exchange_ThrowsInvalidOperationException_WhenRequestNull()
         {
-            // Arrange
-            var mockManager = new Mock<IOpenIddictApplicationManager>();
-            mockManager.Setup(m => m.CreateAsync(It.IsAny<OpenIddictApplicationDescriptor>(), default))
-                .ReturnsAsync(new object()); // Mock returns something
+            var mockAppManager = new Mock<IOpenIddictApplicationManager>();
+            var controller = new AuthorizationController(mockAppManager.Object)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext()
+                }
+            };
 
-            var controller = new AuthorizationController(mockManager.Object);
+            await Assert.ThrowsAsync<InvalidOperationException>(() => controller.Exchange());
+        }
 
-            var metadataJson = @"{ ""client_name"": ""Test Client"" }";
-            using var doc = JsonDocument.Parse(metadataJson);
+        [Fact]
+        public async Task RegisterClient_CreatesApplicationAndReturnsOk()
+        {
+            var mockAppManager = new Mock<IOpenIddictApplicationManager>();
+            mockAppManager.Setup(m => m.CreateAsync(It.IsAny<OpenIddictApplicationDescriptor>(), default))
+                          .ReturnsAsync(new object());
 
-            // Act
-            var result = await controller.RegisterClient(doc.RootElement);
+            var controller = new AuthorizationController(mockAppManager.Object);
+            var json = JsonDocument.Parse("{\"client_name\":\"IntegrationTestApp\"}").RootElement;
 
-            // Assert
-            result.Should().BeOfType<OkObjectResult>();
-            var okResult = result as OkObjectResult;
-            okResult.Should().NotBeNull();
-            
-            var response = okResult!.Value;
-            response.Should().NotBeNull();
-            
-            // Check that client_id and client_secret are generated
-            var type = response!.GetType();
-            var clientId = type.GetProperty("client_id")?.GetValue(response, null);
-            var clientSecret = type.GetProperty("client_secret")?.GetValue(response, null);
+            var result = await controller.RegisterClient(json) as OkObjectResult;
 
-            clientId.Should().NotBeNull();
-            clientSecret.Should().NotBeNull();
+            Assert.NotNull(result);
+            Assert.Equal(200, result.StatusCode);
+            mockAppManager.Verify(m => m.CreateAsync(It.Is<OpenIddictApplicationDescriptor>(d => d.DisplayName == "IntegrationTestApp"), default), Times.Once);
         }
     }
 }

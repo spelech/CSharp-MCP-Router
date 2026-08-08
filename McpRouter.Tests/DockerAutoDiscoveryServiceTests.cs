@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -61,6 +63,29 @@ namespace McpRouter.Tests
 
             Assert.True(isBlocked1);
             Assert.True(isBlocked2);
+        }
+
+        [Fact]
+        public async Task ExecuteAsync_SkipsScan_WhenDockerSocketDoesNotExist()
+        {
+            var db = CreateDbContext();
+            var services = new ServiceCollection();
+            services.AddSingleton(db);
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
+            services.AddSingleton<IConfiguration>(config);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var discoveryService = new DockerAutoDiscoveryService(serviceProvider, NullLogger<DockerAutoDiscoveryService>.Instance);
+            using var cts = new CancellationTokenSource();
+            cts.CancelAfter(50);
+
+            var executeMethod = typeof(DockerAutoDiscoveryService).GetMethod("ExecuteAsync", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.NotNull(executeMethod);
+
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(async () =>
+            {
+                await (Task)executeMethod.Invoke(discoveryService, new object[] { cts.Token })!;
+            });
         }
     }
 }

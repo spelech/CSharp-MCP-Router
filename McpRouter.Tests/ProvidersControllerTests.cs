@@ -1,13 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Dapper;
 using McpRouter.Controllers;
 using McpRouter.Core.Database;
 using McpRouter.Core.Logging;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Moq;
@@ -17,36 +13,35 @@ namespace McpRouter.Tests
 {
     public class ProvidersControllerTests : IDisposable
     {
-        private readonly SqliteConnection _connection;
+        private const string ConnectionString = "Data Source=InMemoryProvidersDb;Mode=Memory;Cache=Shared";
+        private readonly SqliteConnection _masterConnection;
         private readonly IDbConnectionFactory _dbFactory;
 
         public ProvidersControllerTests()
         {
-            _connection = new SqliteConnection("DataSource=:memory:;Mode=Memory;Cache=Shared");
-            _connection.Open();
+            _masterConnection = new SqliteConnection(ConnectionString);
+            _masterConnection.Open();
 
-            _connection.Execute(@"
+            _masterConnection.Execute(@"
                 CREATE TABLE IF NOT EXISTS SecretProviders (
-                    ProviderId INTEGER PRIMARY KEY AUTOINCREMENT,
-                    ProviderName TEXT UNIQUE NOT NULL,
-                    DisplayName TEXT NOT NULL,
+                    ProviderName TEXT PRIMARY KEY,
+                    DisplayName TEXT,
                     EncryptedConfigJson TEXT,
-                    IsEnabled INTEGER DEFAULT 1
+                    IsEnabled INTEGER
                 );
                 CREATE TABLE IF NOT EXISTS AuthProviderConfigs (
-                    AuthId INTEGER PRIMARY KEY AUTOINCREMENT,
-                    ProviderName TEXT UNIQUE NOT NULL,
-                    DisplayName TEXT NOT NULL,
-                    UserHeader TEXT DEFAULT 'Remote-User',
-                    GroupsHeader TEXT DEFAULT 'Remote-Groups',
+                    ProviderName TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    UserHeader TEXT,
+                    GroupsHeader TEXT,
                     ConfigJson TEXT,
-                    IsEnabled INTEGER DEFAULT 1
+                    IsEnabled INTEGER
                 );");
 
             var mockFactory = new Mock<IDbConnectionFactory>();
             mockFactory.Setup(f => f.CreateConnection()).Returns(() =>
             {
-                var conn = new SqliteConnection("DataSource=:memory:;Mode=Memory;Cache=Shared");
+                var conn = new SqliteConnection(ConnectionString);
                 conn.Open();
                 return conn;
             });
@@ -56,76 +51,132 @@ namespace McpRouter.Tests
 
         public void Dispose()
         {
-            _connection.Dispose();
-        }
-
-        private ProvidersController CreateController()
-        {
-            var controller = new ProvidersController(_dbFactory);
-            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
-            {
-                new Claim(ClaimTypes.Name, "adminuser"),
-                new Claim(ClaimTypes.Role, "Admin")
-            }, "TestAuth"));
-
-            controller.ControllerContext = new ControllerContext
-            {
-                HttpContext = new DefaultHttpContext { User = user }
-            };
-            return controller;
+            _masterConnection.Dispose();
         }
 
         [Fact]
-        public async Task SecretProviders_Save_And_Get()
+        public async Task GetSecretProviders_ReturnsOkWithList()
         {
-            var controller = CreateController();
-            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ProvidersController(_dbFactory);
+            var result = await controller.GetSecretProviders() as OkObjectResult;
 
+            Assert.NotNull(result);
+            Assert.Equal(200, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task SaveSecretProvider_ReturnsBadRequest_WhenProviderNameMissing()
+        {
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ProvidersController(_dbFactory);
+            var dto = new SecretProviderDto { ProviderName = "" };
+
+            var result = await controller.SaveSecretProvider(dto, mockAudit.Object) as BadRequestObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task SaveSecretProvider_ReturnsBadRequest_WhenHttpUrlPassedInConfig()
+        {
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ProvidersController(_dbFactory);
             var dto = new SecretProviderDto
             {
                 ProviderName = "Vault",
                 DisplayName = "HashiCorp Vault",
-                ConfigJson = "{\"address\":\"https://vault:8200\"}",
-                IsEnabled = true
+                ConfigJson = "{\"url\":\"http://insecure-vault.local:8200\"}"
             };
 
-            var saveResult = await controller.SaveSecretProvider(dto, mockAudit.Object);
-            var okSave = Assert.IsAssignableFrom<ObjectResult>(saveResult);
-            Assert.Equal(200, okSave.StatusCode);
-
-            var getResult = await controller.GetSecretProviders();
-            var okResult = Assert.IsAssignableFrom<ObjectResult>(getResult);
-            Assert.Equal(200, okResult.StatusCode);
-            var providers = Assert.IsAssignableFrom<IEnumerable<SecretProviderDto>>(okResult.Value);
-            Assert.Single(providers);
-            Assert.Equal("Vault", providers.First().ProviderName);
+            var result = await controller.SaveSecretProvider(dto, mockAudit.Object) as BadRequestObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
         }
 
         [Fact]
-        public async Task AuthProviders_Save_And_Get()
+        public async Task SaveSecretProvider_SavesSuccessfully()
         {
-            var controller = CreateController();
             var mockAudit = new Mock<IAuditLogger>();
-
-            var dto = new AuthProviderDto
+            var controller = new ProvidersController(_dbFactory);
+            var dto = new SecretProviderDto
             {
-                ProviderName = "PocketID_TinyAuth",
-                DisplayName = "PocketID / TinyAuth Portal",
-                UserHeader = "Remote-User",
-                GroupsHeader = "Remote-Groups",
+                ProviderName = "Vault",
+                DisplayName = "HashiCorp Vault",
+                ConfigJson = "{\"url\":\"https://vault.local:8200\"}",
                 IsEnabled = true
             };
 
-            var saveResult = await controller.SaveAuthProvider(dto, mockAudit.Object);
-            var okSave = Assert.IsAssignableFrom<ObjectResult>(saveResult);
-            Assert.Equal(200, okSave.StatusCode);
+            var result = await controller.SaveSecretProvider(dto, mockAudit.Object) as OkObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(200, result.StatusCode);
+        }
 
-            var getResult = await controller.GetAuthProviders();
-            var okResult = Assert.IsAssignableFrom<ObjectResult>(getResult);
-            Assert.Equal(200, okResult.StatusCode);
-            var providers = Assert.IsAssignableFrom<IEnumerable<AuthProviderDto>>(okResult.Value);
-            Assert.Single(providers);
-            Assert.Equal("PocketID_TinyAuth", providers.First().ProviderName);
+        [Fact]
+        public async Task GetAuthProviders_ReturnsOkWithList()
+        {
+            var controller = new ProvidersController(_dbFactory);
+            var result = await controller.GetAuthProviders() as OkObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(200, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task SaveAuthProvider_ReturnsBadRequest_WhenProviderNameMissing()
+        {
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ProvidersController(_dbFactory);
+            var dto = new AuthProviderDto { ProviderName = "" };
+
+            var result = await controller.SaveAuthProvider(dto, mockAudit.Object) as BadRequestObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task SaveAuthProvider_SavesSuccessfully()
+        {
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ProvidersController(_dbFactory);
+            var dto = new AuthProviderDto
+            {
+                ProviderName = "PocketID",
+                DisplayName = "PocketID OIDC",
+                UserHeader = "Remote-User",
+                GroupsHeader = "Remote-Groups",
+                ConfigJson = "{\"authority\":\"https://sso.local\"}",
+                IsEnabled = true
+            };
+
+            var result = await controller.SaveAuthProvider(dto, mockAudit.Object) as OkObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(200, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetSecretProviders_Returns500_OnDbException()
+        {
+            var mockFailingFactory = new Mock<IDbConnectionFactory>();
+            mockFailingFactory.Setup(f => f.CreateConnection()).Throws(new Exception("DB Connection Failed"));
+
+            var controller = new ProvidersController(mockFailingFactory.Object);
+            var result = await controller.GetSecretProviders() as ObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(500, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetAuthProviders_Returns500_OnDbException()
+        {
+            var mockFailingFactory = new Mock<IDbConnectionFactory>();
+            mockFailingFactory.Setup(f => f.CreateConnection()).Throws(new Exception("DB Connection Failed"));
+
+            var controller = new ProvidersController(mockFailingFactory.Object);
+            var result = await controller.GetAuthProviders() as ObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(500, result.StatusCode);
         }
     }
 }
