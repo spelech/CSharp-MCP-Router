@@ -262,38 +262,6 @@ namespace McpRouter
             }
         }
 
-        public async Task WriteMessageAsync(object message)
-        {
-            await _writeLock.WaitAsync();
-            try
-            {
-                if (_clientResponse.HttpContext.RequestAborted.IsCancellationRequested)
-                {
-                    return;
-                }
-                var json = JsonSerializer.Serialize(message, _jsonOptions);
-                _logger.LogDebug("[JSON-RPC Gateway -> Client] {Payload}", McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(json));
-                _sessionManager?.AddPerformanceMetrics(0, json.Length / 4, 0);
-                await _clientResponse.WriteAsync($"event: message\ndata: {json}\n\n");
-                await _clientResponse.Body.FlushAsync();
-            }
-            catch (ObjectDisposedException)
-            {
-                // Client connection closed cleanly
-            }
-            catch (OperationCanceledException)
-            {
-                // Request cancelled
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning("Notice writing to client SSE stream: {Message}", ex.Message);
-            }
-            finally
-            {
-                _writeLock.Release();
-            }
-        }
 
 
         public async Task EnsureBackendsInitializedAsync()
@@ -706,15 +674,6 @@ namespace McpRouter
             return results;
         }
 
-        public async Task BroadcastNotificationAsync(string method, string body)
-        {
-            var tasks = new List<Task>();
-            foreach (var conn in _backendConnections.Values)
-            {
-                tasks.Add(conn.SendNotificationAsync(method, body));
-            }
-            await Task.WhenAll(tasks);
-        }
 
         public void Close()
         {
@@ -725,48 +684,6 @@ namespace McpRouter
             _backendConnections.Clear();
         }
 
-        private string RewriteRequestJson(string body, string paramKey, string newValue)
-        {
-            try
-            {
-                var docOptions = new JsonDocumentOptions
-                {
-                    AllowTrailingCommas = true,
-                    CommentHandling = JsonCommentHandling.Skip
-                };
-                var node = System.Text.Json.Nodes.JsonNode.Parse(body, null, docOptions);
-                if (node == null) return body;
-
-                if (node is System.Text.Json.Nodes.JsonObject obj)
-                {
-                    RewriteObject(obj, paramKey, newValue);
-                }
-                else if (node is System.Text.Json.Nodes.JsonArray array)
-                {
-                    foreach (var item in array)
-                    {
-                        if (item is System.Text.Json.Nodes.JsonObject itemObj)
-                        {
-                            RewriteObject(itemObj, paramKey, newValue);
-                        }
-                    }
-                }
-                return node.ToJsonString();
-            }
-            catch (Exception ex)
-            {
-                _logger?.LogError(ex, "Failed to parse and rewrite JSON body for key '{ParamKey}' to '{NewValue}'", paramKey, newValue);
-                return body;
-            }
-        }
-
-        private static void RewriteObject(System.Text.Json.Nodes.JsonObject obj, string paramKey, string newValue)
-        {
-            if (obj.TryGetPropertyValue("params", out var paramsNode) && paramsNode is System.Text.Json.Nodes.JsonObject paramsObj)
-            {
-                paramsObj[paramKey] = newValue;
-            }
-        }
 
         public async Task<List<object>> ListResourcesAsync(string body, HttpContext? httpContext = null)
         {
