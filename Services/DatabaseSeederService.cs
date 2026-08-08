@@ -97,29 +97,27 @@ namespace McpRouter.Services
                         logger.LogWarning(exAppKeys, "AppKeys table init warning");
                     }
 
-                    string[] serverColumns = new[]
+                    var colDefs = new (string Name, string Ddl)[]
                     {
-                        "ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None'",
-                        "ALTER TABLE Servers ADD COLUMN SecretItemKey TEXT NULL",
-                        "ALTER TABLE Servers ADD COLUMN SecretMount TEXT NULL",
-                        "ALTER TABLE Servers ADD COLUMN SecretPath TEXT NULL",
-                        "ALTER TABLE Servers ADD COLUMN SecretField TEXT NULL",
-                        "ALTER TABLE Servers ADD COLUMN AuthShape TEXT DEFAULT 'bearer'",
-                        "ALTER TABLE Servers ADD COLUMN CustomHeaderName TEXT NULL"
+                        ("SecretProvider", "ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None'"),
+                        ("SecretItemKey", "ALTER TABLE Servers ADD COLUMN SecretItemKey TEXT NULL"),
+                        ("SecretMount", "ALTER TABLE Servers ADD COLUMN SecretMount TEXT NULL"),
+                        ("SecretPath", "ALTER TABLE Servers ADD COLUMN SecretPath TEXT NULL"),
+                        ("SecretField", "ALTER TABLE Servers ADD COLUMN SecretField TEXT NULL"),
+                        ("AuthShape", "ALTER TABLE Servers ADD COLUMN AuthShape TEXT DEFAULT 'bearer'"),
+                        ("CustomHeaderName", "ALTER TABLE Servers ADD COLUMN CustomHeaderName TEXT NULL")
                     };
 
-                    foreach (var ddl in serverColumns)
+                    foreach (var (colName, ddl) in colDefs)
                     {
                         try
                         {
                             db.Database.ExecuteSqlRaw(ddl);
+                            logger.LogInformation("Successfully added column {Column} to Servers table.", colName);
                         }
                         catch (Exception exAlter)
                         {
-                            if (!exAlter.Message.Contains("duplicate column", StringComparison.OrdinalIgnoreCase))
-                            {
-                                logger.LogWarning(exAlter, "Failed DDL: {Sql}", ddl);
-                            }
+                            logger.LogInformation("Column {Column} DDL notice: {Message}", colName, exAlter.Message);
                         }
                     }
 
