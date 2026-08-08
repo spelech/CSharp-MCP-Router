@@ -19,9 +19,16 @@ To connect external clients securely without passing raw SSO headers:
 
 ---
 
-## 🛠️ Integration Snippets & Guides
+## 🛠️ Dynamic Integration Snippets & Setup Generator
 
-Click **`Client Setup`** on the Dashboard toolbar to view ready-to-copy client configurations:
+The **MCP Client Setup Guide** card on the dashboard features an interactive multi-target configuration generator:
+
+- **Target Route / Server Selector**: Choose between **Unified Meta-Mode Gateway** (`/sse?meta=true`), an **Individual Backend Server** (`/docker`, `/ha`, `/actual`, `/plex`, `/excel`, etc.), or a **Server Category** (`/media`, `/smarthome`, `/infrastructure`).
+- **Client Application**: Select **Claude Desktop**, **Cursor IDE**, **VS Code / Cline / Roo Code**, or **TypeScript SDK**.
+- **Host Origin Override**: Customize the host domain or IP (defaulting to current browser origin).
+- **App Key Toggle**: Check **Include `X-App-Key`** to automatically inject secret authorization headers into generated configurations.
+
+---
 
 ### 1. Cursor IDE Integration (`.cursor/mcp.json`)
 Add the following to your project's `.cursor/mcp.json` or global Cursor configuration:
