@@ -60,6 +60,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.0.23`** | 2026-08-08 | fix(seeder): add detailed DDL logging and robust column alterations |
 | **`v4.0.22`** | 2026-08-08 | docs(plans): add documentation and coverage implementation plan |
 | **`v4.0.21`** | 2026-08-08 | docs(architecture): add Mermaid class diagrams for session, interfaces, and routing engine |
 | **`v4.0.20`** | 2026-08-08 | docs(xml): add descriptive C# XML docstrings to core services |

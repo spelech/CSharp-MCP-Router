@@ -97,47 +97,31 @@ namespace McpRouter.Services
                         logger.LogWarning(exAppKeys, "AppKeys table init warning");
                     }
 
-                    try
+                    string[] serverColumns = new[]
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None'");
-                    }
-                    catch { }
+                        "ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None'",
+                        "ALTER TABLE Servers ADD COLUMN SecretItemKey TEXT NULL",
+                        "ALTER TABLE Servers ADD COLUMN SecretMount TEXT NULL",
+                        "ALTER TABLE Servers ADD COLUMN SecretPath TEXT NULL",
+                        "ALTER TABLE Servers ADD COLUMN SecretField TEXT NULL",
+                        "ALTER TABLE Servers ADD COLUMN AuthShape TEXT DEFAULT 'bearer'",
+                        "ALTER TABLE Servers ADD COLUMN CustomHeaderName TEXT NULL"
+                    };
 
-                    try
+                    foreach (var ddl in serverColumns)
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretItemKey TEXT NULL");
+                        try
+                        {
+                            db.Database.ExecuteSqlRaw(ddl);
+                        }
+                        catch (Exception exAlter)
+                        {
+                            if (!exAlter.Message.Contains("duplicate column", StringComparison.OrdinalIgnoreCase))
+                            {
+                                logger.LogWarning(exAlter, "Failed DDL: {Sql}", ddl);
+                            }
+                        }
                     }
-                    catch { }
-
-                    try
-                    {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretMount TEXT NULL");
-                    }
-                    catch { }
-
-                    try
-                    {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretPath TEXT NULL");
-                    }
-                    catch { }
-
-                    try
-                    {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN SecretField TEXT NULL");
-                    }
-                    catch { }
-
-                    try
-                    {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN AuthShape TEXT DEFAULT 'bearer'");
-                    }
-                    catch { }
-
-                    try
-                    {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Servers ADD COLUMN CustomHeaderName TEXT NULL");
-                    }
-                    catch { }
 
                     // (SecretProvider backfill removed — all dialects default 'None' via DDL; Vault/Registry/Env are opt-in per server.)
                     try
