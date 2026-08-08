@@ -54,30 +54,12 @@ namespace McpRouter.Extensions
             app.UseMiddleware<McpRouter.Middleware.McpDualSpecMiddleware>();
             app.MapControllers();
             
-            // Request logging middleware
+            // Request logging middleware (metadata only — never headers/body/query, which carry credentials)
             app.Use(async (context, next) =>
             {
                 var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-                var headersString = string.Join(" | ", context.Request.Headers.Select(h => $"{h.Key}: {h.Value}"));
-                
-                string bodyString = string.Empty;
-                if (context.Request.ContentLength > 0)
-                {
-                    context.Request.EnableBuffering();
-                    using (var reader = new StreamReader(context.Request.Body, leaveOpen: true))
-                    {
-                        bodyString = await reader.ReadToEndAsync();
-                        context.Request.Body.Position = 0;
-                    }
-                }
-            
-                logger.LogInformation("Incoming request: {Method} {Path}{QueryString} from {Ip}. Body: {Body}. Headers: {Headers}", 
-                    context.Request.Method, 
-                    context.Request.Path, 
-                    context.Request.QueryString,
-                    context.Connection.RemoteIpAddress,
-                    bodyString,
-                    headersString);
+                logger.LogInformation("Incoming request: {Method} {Path} from {Ip}",
+                    context.Request.Method, context.Request.Path, context.Connection.RemoteIpAddress);
                 await next();
             });
             
@@ -202,7 +184,7 @@ namespace McpRouter.Extensions
                             {
                                 id = idProp.Clone();
                             }
-                            logger.LogInformation("[JSON-RPC Client -> Gateway] {Payload}", requestBody);
+                            logger.LogDebug("[JSON-RPC Client -> Gateway] {Payload}", McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(requestBody));
                         }
                     }
                     catch (UnauthorizedAccessException exAuth)
@@ -273,7 +255,7 @@ namespace McpRouter.Extensions
 
                         if (method == "tools/list")
                         {
-                            var tools = await activeSession.ListToolsAsync(requestBody);
+                            var tools = await activeSession.ListToolsAsync(requestBody, httpContext);
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -308,7 +290,7 @@ namespace McpRouter.Extensions
                         }
                         else if (method == "resources/list")
                         {
-                            var resources = await activeSession.ListResourcesAsync(requestBody);
+                            var resources = await activeSession.ListResourcesAsync(requestBody, httpContext);
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -355,7 +337,7 @@ namespace McpRouter.Extensions
                         }
                         else if (method == "prompts/list")
                         {
-                            var prompts = await activeSession.ListPromptsAsync(requestBody);
+                            var prompts = await activeSession.ListPromptsAsync(requestBody, httpContext);
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -607,18 +589,9 @@ namespace McpRouter.Extensions
                 var isPost = HttpMethods.IsPost(httpContext.Request.Method);
                 bool metaMode = httpContext.Request.Query["meta"] == "true";
             
-                // Ensure session ID is tracked (using Bearer token or fallback to new Guid)
-                bool hasBearerToken = false;
-                string sessionId;
-                if (httpContext.Request.Headers.Authorization.ToString().StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
-                {
-                    sessionId = httpContext.Request.Headers.Authorization.ToString().Substring("Bearer ".Length).Trim();
-                    hasBearerToken = true;
-                }
-                else
-                {
-                    sessionId = Guid.NewGuid().ToString("N");
-                }
+                // Session id is an opaque server-issued capability, NEVER the caller's token.
+                // Clients receive it in the SSE `endpoint` URL and echo it back on /mcp/message.
+                string sessionId = Guid.NewGuid().ToString("N");
             
                 // Read body if POST
                 string requestBody = string.Empty;
@@ -658,98 +631,7 @@ namespace McpRouter.Extensions
                     }
                 }
             
-                // If POST and NOT initialize/discover, and we have a bearer token, route to existing session
-                if (httpContext.Request.Method == "POST" && method != "initialize" && method != "server/discover" && hasBearerToken)
-                {
-                    var activeSession = sessionManager.GetSession(sessionId);
-                    if (activeSession == null)
-                    {
-                        logger.LogWarning("Active session not found for session ID: {SessionId}", sessionId);
-                        httpContext.Response.StatusCode = 404;
-                        await httpContext.Response.WriteAsJsonAsync(new { error = "Session not found." });
-                        return;
-                    }
-            
-                    logger.LogInformation("Routing POST request method {Method} to active session: {SessionId}", method, sessionId);
-                    
-                    try
-                    {
-                        if (method == "tools/list")
-                        {
-                            var tools = await activeSession.ListToolsAsync(requestBody);
-                            var response = new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                result = new { tools }
-                            };
-                            httpContext.Response.Headers.ContentType = "application/json";
-                            await httpContext.Response.WriteAsJsonAsync(response);
-                            return;
-                        }
-                        else if (method == "tools/call")
-                        {
-                            using var doc = JsonDocument.Parse(requestBody);
-                            var root = doc.RootElement;
-                            if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("name", out var nameProp))
-                            {
-                                var toolName = nameProp.GetString() ?? string.Empty;
-                                var res = await activeSession.CallToolAsync(toolName, requestBody, db, httpContext);
-                                
-                                var response = new
-                                {
-                                    jsonrpc = "2.0",
-                                    id = id != null ? (object)id : null,
-                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
-                                };
-                                httpContext.Response.Headers.ContentType = "application/json";
-                                await httpContext.Response.WriteAsJsonAsync(response);
-                                return;
-                            }
-                            httpContext.Response.StatusCode = 400;
-                            await httpContext.Response.WriteAsJsonAsync(new { error = "Invalid tools/call: missing name parameter" });
-                            return;
-                        }
-                        else
-                        {
-                            // General broadcast for notifications or other standard requests
-                            var results = await activeSession.BroadcastRequestAsync(requestBody);
-                            if (results.Count > 0 && id != null)
-                            {
-                                var response = new
-                                {
-                                    jsonrpc = "2.0",
-                                    id = (object)id,
-                                    result = results.First().Value
-                                };
-                                httpContext.Response.Headers.ContentType = "application/json";
-                                await httpContext.Response.WriteAsJsonAsync(response);
-                                return;
-                            }
-                            
-                            httpContext.Response.StatusCode = 202; // Accepted
-                            return;
-                        }
-                    }
-                    catch (UnauthorizedAccessException exAuth)
-                    {
-                        logger.LogWarning(exAuth, "Unauthorized access during active session request routing");
-                        httpContext.Response.StatusCode = 403;
-                        httpContext.Response.Headers.ContentType = "application/json";
-                        await httpContext.Response.WriteAsJsonAsync(new {
-                            jsonrpc = "2.0",
-                            error = new { code = -32001, message = exAuth.Message }
-                        });
-                        return;
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogError(ex, "Error processing routed message for session {SessionId}", sessionId);
-                        httpContext.Response.StatusCode = 500;
-                        await httpContext.Response.WriteAsJsonAsync(new { error = ex.Message });
-                        return;
-                    }
-                }
+
             
                 // Otherwise, establish a new SSE stream (for GET requests, or POST with method "initialize")
                 httpContext.Response.Headers.ContentType = "text/event-stream";
@@ -771,7 +653,7 @@ namespace McpRouter.Extensions
                 {
                     try
                     {
-                        logger.LogInformation("Processing initial JSON-RPC message in POST /mcp body: {Body}", requestBody);
+                        logger.LogDebug("Processing initial JSON-RPC message in POST /mcp body: {Body}", McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(requestBody));
                         var serverName = "McpRouterGateway";
                         if (!string.IsNullOrWhiteSpace(targetServerId))
                         {
@@ -872,7 +754,7 @@ namespace McpRouter.Extensions
                 using var reader = new StreamReader(httpContext.Request.Body);
                 var body = await reader.ReadToEndAsync();
                 
-                logger.LogInformation("[JSON-RPC Client -> Gateway] {Payload}", body);
+                logger.LogDebug("[JSON-RPC Client -> Gateway] {Payload}", McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(body));
             
                 try
                 {
@@ -955,7 +837,7 @@ namespace McpRouter.Extensions
                     }
                     else if (method == "tools/list")
                     {
-                        var tools = await session.ListToolsAsync(body);
+                        var tools = await session.ListToolsAsync(body, httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -986,7 +868,7 @@ namespace McpRouter.Extensions
                     }
                     else if (method == "resources/list")
                     {
-                        var resources = await session.ListResourcesAsync(body);
+                        var resources = await session.ListResourcesAsync(body, httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -1057,7 +939,7 @@ namespace McpRouter.Extensions
                     }
                     else if (method == "prompts/list")
                     {
-                        var prompts = await session.ListPromptsAsync(body);
+                        var prompts = await session.ListPromptsAsync(body, httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -1377,9 +1259,42 @@ namespace McpRouter.Extensions
 
             // 1. Logs API
             api.MapGet("/api/logs", () => Results.Ok(LogBuffer.GetLogs()));
-            api.MapDelete("/api/logs", () => {
+            api.MapDelete("/api/logs", async (HttpContext ctx) => {
                 LogBuffer.Clear();
+                var audit = ctx.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
+                if (audit != null) await audit.LogAdminActionAsync(ctx.User?.Identity?.Name ?? "unknown", "logs.clear", "InMemoryLogBuffer", "", true);
                 return Results.Ok(new { success = true });
+            });
+
+            // 1.2 Audit Query API
+            api.MapGet("/api/audit", async (HttpContext ctx, [FromServices] IDbConnectionFactory dbf,
+                string? user, string? server, DateTime? since, int take = 200, int skip = 0) =>
+            {
+                take = Math.Clamp(take, 1, 1000);
+                using var conn = dbf.CreateConnection();
+                string sql;
+                if (dbf.ProviderName == "sqlserver")
+                {
+                    sql = @"SELECT Timestamp, Username, UserSid, ServerId, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage
+                            FROM AuditLogs
+                            WHERE (@user   IS NULL OR Username = @user)
+                              AND (@server IS NULL OR ServerId = @server)
+                              AND (@since  IS NULL OR Timestamp >= @since)
+                            ORDER BY Timestamp DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY;";
+                }
+                else
+                {
+                    sql = @"SELECT Timestamp, Username, UserSid, ServerId, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage
+                            FROM AuditLogs
+                            WHERE (@user   IS NULL OR Username = @user)
+                              AND (@server IS NULL OR ServerId = @server)
+                              AND (@since  IS NULL OR Timestamp >= @since)
+                            ORDER BY Timestamp DESC LIMIT @take OFFSET @skip;";
+                }
+                var rows = await conn.QueryAsync(sql, new { user, server, since, take, skip });
+                var audit = ctx.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
+                if (audit != null) await audit.LogAdminActionAsync(ctx.User?.Identity?.Name ?? "unknown", "audit.query", "AuditLogs", "", true);
+                return Results.Ok(rows);
             });
 
             // 1.5. Settings API

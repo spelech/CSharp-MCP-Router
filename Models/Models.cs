@@ -12,7 +12,7 @@ namespace McpRouter.Models
         public bool Enabled { get; set; }
         public bool Hidden { get; set; }
         public string Type { get; set; } = "sse"; // "sse" or "http"
-        public string SecretProvider { get; set; } = "Vault"; // "Vault", "WindowsRegistry", "Environment", "None"
+        public string SecretProvider { get; set; } = "None"; // "Vault", "WindowsRegistry", "Environment", "None"
         public string? SecretItemKey { get; set; }
         public string? SecretMount { get; set; }
         public string? SecretPath { get; set; }

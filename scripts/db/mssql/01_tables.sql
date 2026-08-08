@@ -21,7 +21,7 @@ BEGIN
         [Description]       NVARCHAR(MAX) NULL,
         [BaseUrl]           VARCHAR(500) NOT NULL,
         [TransportType]     VARCHAR(20) NOT NULL DEFAULT 'SSE',
-        [SecretProvider]    VARCHAR(50) NOT NULL DEFAULT 'Vault',
+        [SecretProvider]    VARCHAR(50) NOT NULL DEFAULT 'None',
         [SecretMount]       VARCHAR(100) NULL,
         [SecretPath]        VARCHAR(250) NULL,
         [SecretField]       VARCHAR(100) NULL,
@@ -103,7 +103,7 @@ BEGIN
         [Description]       NVARCHAR(MAX) NULL,
         [InputSchemaJson]   NVARCHAR(MAX) NULL,
         [VaultSecretPath]   VARCHAR(250) NULL,
-        [SecretProvider]    VARCHAR(50) NOT NULL DEFAULT 'Vault',
+        [SecretProvider]    VARCHAR(50) NOT NULL DEFAULT 'None',
         [IsEnabled]         BIT NOT NULL DEFAULT 1,
         [CreatedAt]         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
         CONSTRAINT [UQ_Server_ToolName] UNIQUE ([ServerId], [ToolName])

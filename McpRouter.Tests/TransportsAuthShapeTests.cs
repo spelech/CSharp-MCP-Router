@@ -181,5 +181,28 @@ namespace McpRouter.Tests
             Assert.Equal("resolved-default-secret-123", token);
             mockRetriever.Verify(r => r.GetSecretAsync("http://localhost:5000/mcp", "MyKey"), Times.Once);
         }
+
+        [Fact]
+        public async Task SseTransport_ResolveTokenAsync_FailsClosed_WhenVaultResolvesNull()
+        {
+            var server = new McpServer
+            {
+                Id = "srv-null-vault",
+                Url = "http://localhost:5000/sse",
+                SecretProvider = "Vault",
+                ApiKey = "fallback-key-should-never-be-used",
+                SecretMount = "kv",
+                SecretPath = "missing",
+                SecretField = "token"
+            };
+
+            var mockRetriever = new Mock<ISecretRetriever>();
+            mockRetriever.Setup(r => r.GetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
+                         .ReturnsAsync((string?)null);
+
+            var transport = new SseTransport(server, new HttpClient(), NullLogger<SseTransport>.Instance, null!, mockRetriever.Object);
+
+            await Assert.ThrowsAsync<System.Security.SecurityException>(() => transport.ResolveTokenAsync());
+        }
     }
 }

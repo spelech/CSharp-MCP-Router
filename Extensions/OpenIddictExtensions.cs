@@ -10,7 +10,10 @@ namespace McpRouter.Extensions
 {
     public static class OpenIddictExtensions
     {
-        public static IServiceCollection AddMcpOpenIddict(this IServiceCollection services, Microsoft.Extensions.Hosting.IHostEnvironment env)
+        public static IServiceCollection AddMcpOpenIddict(
+            this IServiceCollection services, 
+            Microsoft.Extensions.Hosting.IHostEnvironment env,
+            Microsoft.Extensions.Configuration.IConfiguration config)
         {
             services.AddAuthentication(options =>
             {
@@ -33,8 +36,8 @@ namespace McpRouter.Extensions
                           .RequireAssertion(ctx =>
                           {
                               var httpContext = ctx.Resource as Microsoft.AspNetCore.Http.HttpContext;
-                              var config = httpContext?.RequestServices?.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
-                              var adminSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
+                              var cfg = httpContext?.RequestServices?.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
+                              var adminSid = cfg?["Admin:GroupSid"] ?? "S-1-5-32-544";
                               return ctx.User.HasClaim("Sid", adminSid);
                           })
                           .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey", "OidcHeader");
@@ -59,8 +62,15 @@ namespace McpRouter.Extensions
                     }
                     else
                     {
-                        options.AddEphemeralEncryptionKey()
-                               .AddEphemeralSigningKey();
+                        var certPath = config["OpenIddict:CertificatePath"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PATH");
+                        var certPass = config["OpenIddict:CertificatePassword"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD");
+                        if (string.IsNullOrEmpty(certPath) || !System.IO.File.Exists(certPath))
+                            throw new InvalidOperationException(
+                                "FATAL: A persistent OpenIddict certificate is required outside Development. " +
+                                "Set OpenIddict:CertificatePath (+ Password). Ephemeral keys are disabled in Production.");
+                        var cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                            certPath, certPass, System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.MachineKeySet);
+                        options.AddSigningCertificate(cert).AddEncryptionCertificate(cert);
                     }
 
                     options.UseAspNetCore()

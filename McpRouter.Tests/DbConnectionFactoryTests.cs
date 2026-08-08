@@ -16,7 +16,8 @@ namespace McpRouter.Tests
         {
             var inMemoryConfig = new Dictionary<string, string?>
             {
-                { "DB_PROVIDER", "sqlite" }
+                { "DB_PROVIDER", "sqlite" },
+                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
 

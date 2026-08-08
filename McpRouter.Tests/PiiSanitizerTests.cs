@@ -49,5 +49,24 @@ namespace McpRouter.Tests
             Assert.DoesNotContain("super_secret_key_123", logs[0].Message);
             Assert.Contains("[REDACTED]", logs[0].Message);
         }
+
+        [Fact]
+        public void PiiSanitizer_Redacts_Basic_ApiKey_Cookie_QueryToken_UrlUserInfo()
+        {
+            string rawToken = "Basic dXNlcjpwYXNz";
+            string rawHeader = "Authorization: Basic dXNlcjpwYXNz\r\nCookie: session=12345";
+            string rawQuery = "https://example.com/api?access_token=secret_token_abc";
+            string rawUserInfo = "https://user:pass123@example.com/mcp";
+
+            string cleanToken = PiiSanitizer.SanitizePayload(rawToken);
+            string cleanHeader = PiiSanitizer.SanitizePayload(rawHeader);
+            string cleanQuery = PiiSanitizer.SanitizePayload(rawQuery);
+            string cleanUserInfo = PiiSanitizer.SanitizePayload(rawUserInfo);
+
+            Assert.DoesNotContain("dXNlcjpwYXNz", cleanToken);
+            Assert.DoesNotContain("12345", cleanHeader);
+            Assert.DoesNotContain("secret_token_abc", cleanQuery);
+            Assert.DoesNotContain("pass123", cleanUserInfo);
+        }
     }
 }

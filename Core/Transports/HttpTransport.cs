@@ -145,7 +145,7 @@ namespace McpRouter.Core.Transports
 
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
         {
-            _logger.LogInformation("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, bodyJson);
+            _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(bodyJson));
             var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _server.Url) { Content = content };
@@ -191,8 +191,8 @@ namespace McpRouter.Core.Transports
                 }
             }
 
-            _logger.LogInformation("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, responseBody);
-            _logger.LogInformation("[HttpTransport DEBUG] Server {ServerId} responded with status {StatusCode}. Body: '{Body}'", _server.Id, resp.StatusCode, responseBody);
+            _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(responseBody));
+            _logger.LogDebug("[HttpTransport DEBUG] Server {ServerId} responded with status {StatusCode}. Body: '{Body}'", _server.Id, resp.StatusCode, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(responseBody));
 
             if (string.IsNullOrWhiteSpace(responseBody))
             {
