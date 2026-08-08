@@ -130,3 +130,91 @@ The codebase is organized in directories mirroring its sub-system boundaries:
   - `McpController.cs`: Exposes SSE tunnels and routing routes.
 - **`/data/`**:
   - Persistent volume holding configurations, local ONNX files, and SQLite databases.
+
+---
+
+## 🧩 Class Architecture & Separation of Concerns
+
+### 1. Client Session & Modular Partial Class Architecture
+```mermaid
+classDiagram
+    class ClientSession {
+        <<partial>>
+    }
+    class Authorization {
+        <<partial ClientSession>>
+    }
+    class BackendInitializer {
+        <<partial ClientSession>>
+    }
+    class ProxyForwarder {
+        <<partial ClientSession>>
+    }
+    class NotificationBroadcaster {
+        <<partial ClientSession>>
+    }
+    class JsonRpcRewriter {
+        <<partial ClientSession>>
+    }
+    ClientSession <|-- Authorization
+    ClientSession <|-- BackendInitializer
+    ClientSession <|-- ProxyForwarder
+    ClientSession <|-- NotificationBroadcaster
+    ClientSession <|-- JsonRpcRewriter
+    
+    class SessionManager
+    class BackendConnection
+    SessionManager --> ClientSession : Manages
+    ClientSession --> BackendConnection : Owns multiple
+```
+
+### 2. Pluggable Strategy Interfaces & Security Providers
+```mermaid
+classDiagram
+    class IIdentityProvider {
+        <<interface>>
+    }
+    class ActiveDirectoryProvider
+    class OidcProvider
+    IIdentityProvider <|-- ActiveDirectoryProvider
+    IIdentityProvider <|-- OidcProvider
+
+    class ISecretRetriever {
+        <<interface>>
+    }
+    class VaultSecretRetriever
+    class DpapiSecretRetriever
+    ISecretRetriever <|-- VaultSecretRetriever
+    ISecretRetriever <|-- DpapiSecretRetriever
+
+    class ITransport {
+        <<interface>>
+    }
+    class SseTransport
+    class StdioTransport
+    ITransport <|-- SseTransport
+    ITransport <|-- StdioTransport
+
+    class IAuditLogger {
+        <<interface>>
+    }
+    class SqlAuditLogger
+    IAuditLogger <|-- SqlAuditLogger
+```
+
+### 3. Routing Engine Architecture & Helper Separation
+```mermaid
+classDiagram
+    class RoutingEngine
+    class ToolRoutingManager
+    class ResourceRoutingManager
+    class ResourceCatalogManager
+    class ToolApprovalManager
+    class ToolErrorFormatter
+
+    RoutingEngine --> ToolRoutingManager
+    RoutingEngine --> ResourceRoutingManager
+    RoutingEngine --> ResourceCatalogManager
+    ToolRoutingManager --> ToolApprovalManager
+    ToolRoutingManager --> ToolErrorFormatter
+```
