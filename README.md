@@ -66,6 +66,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.2.14`** | 2026-08-08 | fix(inspect): standardize ROUTER_SECRET encryption derivation and add resilient multi-primitive capabilities inspect |
 | **`v4.2.13`** | 2026-08-08 | refactor(db): complete 100% EF Core removal and Dapper refactoring with isolated header identity provider |
 | **`v4.2.12`** | 2026-08-08 | fix(discovery): resolve IDbConnectionFactory in DockerAutoDiscoveryService.ScanContainersAsync |
 | **`v4.2.11`** | 2026-08-08 | fix(discovery): use IDbConnectionFactory and Dapper for DockerAutoDiscoveryService upserts |
