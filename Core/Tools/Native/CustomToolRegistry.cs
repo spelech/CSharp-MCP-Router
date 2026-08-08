@@ -19,7 +19,7 @@ public static class CustomToolRegistry
             // Register(new PlexGetMetadataTool());
         }
 
-        private static void Register(ICustomTool tool)
+        public static void Register(ICustomTool tool)
         {
             _tools[tool.Name] = tool;
         }

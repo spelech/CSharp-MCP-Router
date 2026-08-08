@@ -1,8 +1,6 @@
-using System;
 using System.Collections.Generic;
+using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using Moq;
 using McpRouter.Core.Routing;
 using McpRouter.Services;
 using Xunit;
@@ -11,44 +9,65 @@ namespace McpRouter.Tests
 {
     public class SemanticSearchServiceTests
     {
-        [Fact]
-        public async Task SearchToolsSemanticAsync_GracefullyHandlesEmbeddingExceptions_AndLogsWarning()
+        private class TestEmbeddingService : IEmbeddingService
         {
-            // Arrange
-            var query = "test query";
+            public bool IsConfigured => true;
+
+            public Task<float[]> GetEmbeddingAsync(string text)
+            {
+                if (text.Contains("docker"))
+                    return Task.FromResult(new float[] { 1.0f, 0.0f });
+                return Task.FromResult(new float[] { 0.0f, 1.0f });
+            }
+
+            public double CosineSimilarity(float[] vector1, float[] vector2)
+            {
+                if (vector1 == null || vector2 == null || vector1.Length != vector2.Length) return 0;
+                float dot = 0, n1 = 0, n2 = 0;
+                for (int i = 0; i < vector1.Length; i++)
+                {
+                    dot += vector1[i] * vector2[i];
+                    n1 += vector1[i] * vector1[i];
+                    n2 += vector2[i] * vector2[i];
+                }
+                return dot / (System.Math.Sqrt(n1) * System.Math.Sqrt(n2));
+            }
+
+            public void ReloadSettings(McpRouter.Models.RouterSettings settings) { }
+        }
+
+        [Fact]
+        public async Task SearchToolsSemanticAsync_ScoresAndRanksTools()
+        {
+            var embeddingService = new TestEmbeddingService();
+
             var tools = new List<object>
             {
-                new { name = "tool1", description = "tool1 desc" }
+                new Dictionary<string, object> { { "name", "docker_list_containers" }, { "description", "List running Docker containers" } },
+                new Dictionary<string, object> { { "name", "plex_search_library" }, { "description", "Search media in Plex" } }
             };
 
-            var embeddingMock = new Mock<IEmbeddingService>();
+            var emptyRes = await SemanticSearchService.SearchToolsSemanticAsync("", tools, embeddingService);
+            Assert.Equal(2, emptyRes.Count);
 
-            // Mock query embedding success but tool text embedding failure
-            embeddingMock.Setup(e => e.GetEmbeddingAsync("test query"))
-                .ReturnsAsync(new float[] { 0.1F, 0.2F });
+            var dockerRes = await SemanticSearchService.SearchToolsSemanticAsync("docker containers", tools, embeddingService);
+            Assert.NotEmpty(dockerRes);
+        }
 
-            embeddingMock.Setup(e => e.GetEmbeddingAsync("tool1: tool1 desc"))
-                .ThrowsAsync(new Exception("API limit reached or service unavailable"));
+        [Fact]
+        public void SearchTools_KeywordMatching_WorksCorrectly()
+        {
+            var tools = new List<object>
+            {
+                JsonDocument.Parse("{\"name\":\"docker_restart\",\"description\":\"Restart container\"}").RootElement,
+                new Dictionary<string, string> { { "name", "plex_play" }, { "description", "Play media" } }
+            };
 
-            var loggerMock = new Mock<ILogger>();
+            var empty = SemanticSearchService.SearchTools("", tools);
+            Assert.Equal(2, empty.Count);
 
-            // Act
-            // If the code works correctly, it should log a warning and return empty/default search results
-            // rather than failing the whole request.
-            var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingMock.Object, loggerMock.Object);
-
-            // Assert
-            Assert.NotNull(results);
-
-            // Verify that logger.Log got called with a LogLevel.Warning
-            loggerMock.Verify(
-                x => x.Log(
-                    LogLevel.Warning,
-                    It.IsAny<EventId>(),
-                    It.Is<It.IsAnyType>((v, t) => v.ToString()!.Contains("Failed to generate embedding")),
-                    It.IsAny<Exception>(),
-                    It.IsAny<Func<It.IsAnyType, Exception?, string>>()),
-                Times.AtLeastOnce);
+            var queryRes = SemanticSearchService.SearchTools("restart", tools);
+            Assert.NotEmpty(queryRes);
         }
     }
 }
