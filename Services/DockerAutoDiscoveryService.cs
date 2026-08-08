@@ -11,6 +11,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
+using McpRouter.Core.Database;
+using Dapper;
 
 namespace McpRouter.Services
 {
@@ -216,6 +218,80 @@ namespace McpRouter.Services
             }
 
             return discoveredServers;
+        }
+
+        public static void UpsertDiscoveredServers(List<McpServer> discoveredServers, IDbConnectionFactory dbFactory, SessionManager sessionManager, Microsoft.Extensions.Logging.ILogger logger)
+        {
+            using var conn = dbFactory.CreateConnection();
+            var rawExisting = conn.Query(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AutoDiscovered FROM Servers").ToList();
+
+            var existingMap = rawExisting.ToDictionary(
+                s => Convert.ToString(s.Id) ?? string.Empty,
+                s => new McpServer
+                {
+                    Id = Convert.ToString(s.Id) ?? string.Empty,
+                    DisplayName = Convert.ToString(s.DisplayName) ?? string.Empty,
+                    Url = Convert.ToString(s.Url) ?? string.Empty,
+                    Enabled = s.Enabled is long l ? l != 0L : Convert.ToBoolean(s.Enabled),
+                    Hidden = s.Hidden is long lh ? lh != 0L : Convert.ToBoolean(s.Hidden),
+                    Type = Convert.ToString(s.Type) ?? "sse",
+                    Categories = !string.IsNullOrEmpty((string?)s.Categories) ? (JsonSerializer.Deserialize<List<string>>((string)s.Categories) ?? new()) : new(),
+                    AutoDiscovered = s.AutoDiscovered is long ad ? ad != 0L : Convert.ToBoolean(s.AutoDiscovered)
+                }
+            );
+
+            bool changed = false;
+
+            foreach (var discovered in discoveredServers)
+            {
+                var catJson = JsonSerializer.Serialize(discovered.Categories);
+                if (!existingMap.TryGetValue(discovered.Id, out var existing))
+                {
+                    logger.LogInformation("Auto-discovered new MCP server: '{DisplayName}' ({Id}) at {Url}", discovered.DisplayName, discovered.Id, discovered.Url);
+                    conn.Execute(@"INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, AuthShape, AutoDiscovered) VALUES (@Id, @DisplayName, @Url, 1, 0, @Type, @Categories, 'None', 'bearer', 1)",
+                        new { discovered.Id, discovered.DisplayName, discovered.Url, discovered.Type, Categories = catJson });
+                    changed = true;
+                }
+                else
+                {
+                    bool updated = false;
+                    if (existing.Url != discovered.Url) { existing.Url = discovered.Url; updated = true; }
+                    if (existing.Type != discovered.Type) { existing.Type = discovered.Type; updated = true; }
+                    if (existing.DisplayName != discovered.DisplayName) { existing.DisplayName = discovered.DisplayName; updated = true; }
+                    if (!existing.Enabled) { existing.Enabled = true; updated = true; }
+
+                    var catMatch = existing.Categories.Count == discovered.Categories.Count && existing.Categories.All(c => discovered.Categories.Contains(c));
+                    if (!catMatch)
+                    {
+                        existing.Categories = discovered.Categories;
+                        updated = true;
+                    }
+
+                    if (updated)
+                    {
+                        logger.LogInformation("Updating auto-discovered MCP server: '{DisplayName}' ({Id})", discovered.DisplayName, discovered.Id);
+                        conn.Execute(@"UPDATE Servers SET DisplayName = @DisplayName, Url = @Url, Type = @Type, Enabled = 1, Categories = @Categories, AutoDiscovered = 1 WHERE Id = @Id",
+                            new { discovered.Id, discovered.DisplayName, discovered.Url, discovered.Type, Categories = catJson });
+                        changed = true;
+                    }
+                }
+            }
+
+            var activeIds = discoveredServers.Select(s => s.Id).ToHashSet();
+            foreach (var existing in existingMap.Values)
+            {
+                if (existing.AutoDiscovered && !activeIds.Contains(existing.Id) && existing.Enabled)
+                {
+                    logger.LogInformation("Auto-discovered MCP server container stopped/removed. Disabling: '{DisplayName}' ({Id})", existing.DisplayName, existing.Id);
+                    conn.Execute(@"UPDATE Servers SET Enabled = 0 WHERE Id = @Id", new { existing.Id });
+                    changed = true;
+                }
+            }
+
+            if (changed)
+            {
+                sessionManager.ResetAll();
+            }
         }
 
         public static void UpsertDiscoveredServers(List<McpServer> discoveredServers, RouterDbContext db, SessionManager sessionManager, Microsoft.Extensions.Logging.ILogger logger)
