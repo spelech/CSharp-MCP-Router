@@ -1,5 +1,14 @@
 # MCP Router Gateway & Semantic Proxy
 
+![Version](https://img.shields.io/badge/version-v4.2.16-orange?style=for-the-badge)
+![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-275%20passing-2ea44f?style=for-the-badge)
+![Code Coverage](https://img.shields.io/badge/coverage-93%25-brightgreen?style=for-the-badge)
+![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![License](https://img.shields.io/badge/license-MIT-green?style=for-the-badge)
+
 An enterprise-ready, high-performance C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the **Model Context Protocol (MCP)**. 
 
 The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex, Home Assistant, Actual Budget, Excel, etc.) and presents them to client LLMs, IDEs, and agents as a single unified connection.
@@ -68,11 +77,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.2.17`** | 2026-08-08 | docs(readme): add shield badges to top of README |
 | **`v4.2.16`** | 2026-08-08 | docs(rules): update agent rules for CHANGELOG.md extraction |
 | **`v4.2.15`** | 2026-08-08 | fix(inspect): pass httpContext to inspect capability listing calls and await backend initialization |
 | **`v4.2.14`** | 2026-08-08 | fix(inspect): standardize ROUTER_SECRET encryption derivation and add resilient multi-primitive capabilities inspect |
 | **`v4.2.13`** | 2026-08-08 | refactor(db): complete 100% EF Core removal and Dapper refactoring with isolated header identity provider |
-| **`v4.2.12`** | 2026-08-08 | fix(discovery): resolve IDbConnectionFactory in DockerAutoDiscoveryService.ScanContainersAsync |
 
 ---
 

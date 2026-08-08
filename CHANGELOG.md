@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.2.17`** | 2026-08-08 | docs(readme): add shield badges to top of README |
 | **`v4.2.16`** | 2026-08-08 | docs(rules): update agent rules for CHANGELOG.md extraction |
 | **`v4.2.15`** | 2026-08-08 | fix(inspect): pass httpContext to inspect capability listing calls and await backend initialization |
 | **`v4.2.14`** | 2026-08-08 | fix(inspect): standardize ROUTER_SECRET encryption derivation and add resilient multi-primitive capabilities inspect |
