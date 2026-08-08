@@ -55,27 +55,19 @@ namespace McpRouter.Extensions
                     options.SetTokenEndpointUris("/connect/token", "/oauth/token");
                     options.AllowClientCredentialsFlow();
                     
-                    var disableCertRequirement = string.Equals(config["OpenIddict:DisableCertRequirement"], "true", StringComparison.OrdinalIgnoreCase) ||
-                                                 string.Equals(Environment.GetEnvironmentVariable("OPENIDDICT_DISABLE_CERT_REQUIREMENT"), "true", StringComparison.OrdinalIgnoreCase);
+                    var certPath = config["OpenIddict:CertificatePath"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PATH");
+                    var certPass = config["OpenIddict:CertificatePassword"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD");
 
-                    if (env.IsDevelopment() || env.EnvironmentName == "Dev" || env.EnvironmentName == "Development" || disableCertRequirement)
+                    if (!string.IsNullOrEmpty(certPath) && System.IO.File.Exists(certPath))
                     {
-                        options.AddDevelopmentEncryptionCertificate()
-                               .AddDevelopmentSigningCertificate();
-                    }
-                    else
-                    {
-                        var certPath = config["OpenIddict:CertificatePath"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PATH");
-                        var certPass = config["OpenIddict:CertificatePassword"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD");
-                        if (string.IsNullOrEmpty(certPath) || !System.IO.File.Exists(certPath))
-                        {
-                            throw new InvalidOperationException(
-                                "FATAL: A persistent OpenIddict certificate is required outside Development. " +
-                                "Set OpenIddict:CertificatePath (+ Password). Ephemeral keys are disabled in Production.");
-                        }
                         var cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
                             certPath, certPass, System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.MachineKeySet);
                         options.AddSigningCertificate(cert).AddEncryptionCertificate(cert);
+                    }
+                    else
+                    {
+                        options.AddDevelopmentEncryptionCertificate()
+                               .AddDevelopmentSigningCertificate();
                     }
 
                     options.UseAspNetCore()
