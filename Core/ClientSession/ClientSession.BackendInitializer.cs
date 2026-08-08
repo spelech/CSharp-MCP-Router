@@ -91,7 +91,7 @@ namespace McpRouter
                 }
             });
 
-            await Task.CompletedTask;
+            await Task.WhenAll(tasks);
         }
 
         private async Task ConnectAndInitializeBackendAsync(McpServer server)

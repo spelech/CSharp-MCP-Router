@@ -212,7 +212,7 @@ namespace McpRouter.Extensions
                 return Results.Ok(new { success = true });
             });
 
-            api.MapGet("/api/servers/{id}/inspect", async (string id, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
+            api.MapGet("/api/servers/{id}/inspect", async (string id, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 using var conn = dbFactory.CreateConnection();
                 var server = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @id", new { id });
@@ -229,7 +229,7 @@ namespace McpRouter.Extensions
 
                     try
                     {
-                        tools = await session.ListToolsAsync("{}");
+                        tools = await session.ListToolsAsync("{}", httpContext);
                     }
                     catch (Exception exTools)
                     {
@@ -238,7 +238,7 @@ namespace McpRouter.Extensions
 
                     try
                     {
-                        prompts = await session.ListPromptsAsync("{}");
+                        prompts = await session.ListPromptsAsync("{}", httpContext);
                     }
                     catch (Exception exPrompts)
                     {
@@ -247,7 +247,7 @@ namespace McpRouter.Extensions
 
                     try
                     {
-                        resources = await session.ListResourcesAsync("{}");
+                        resources = await session.ListResourcesAsync("{}", httpContext);
                     }
                     catch (Exception exRes)
                     {
