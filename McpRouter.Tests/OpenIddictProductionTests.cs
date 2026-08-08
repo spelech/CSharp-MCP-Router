@@ -19,7 +19,6 @@ namespace McpRouter.Tests
         public void OpenIddict_Boots_WithDevelopmentCertificates_WhenNoCertConfigured()
         {
             var services = new ServiceCollection();
-            services.AddDbContext<McpRouter.Models.RouterDbContext>();
             var mockEnv = new Mock<IHostEnvironment>();
             mockEnv.Setup(e => e.EnvironmentName).Returns("Production");
 
@@ -47,7 +46,6 @@ namespace McpRouter.Tests
                 }
 
                 var services = new ServiceCollection();
-                services.AddDbContext<McpRouter.Models.RouterDbContext>();
                 var mockEnv = new Mock<IHostEnvironment>();
                 mockEnv.Setup(e => e.EnvironmentName).Returns("Production");
 

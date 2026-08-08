@@ -26,7 +26,8 @@ namespace McpRouter.Tests
 
         public GroupMappingsAndSpecAuthTests()
         {
-            _connection = new SqliteConnection("Filename=:memory:");
+            var dbName = $"Data Source=GroupMappingDb_{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
+            _connection = new SqliteConnection(dbName);
             _connection.Open();
 
             // Create AccessPolicies and GroupMappings tables
@@ -44,7 +45,7 @@ namespace McpRouter.Tests
                 );");
 
             var mockFactory = new Mock<IDbConnectionFactory>();
-            mockFactory.Setup(f => f.CreateConnection()).Returns(_connection);
+            mockFactory.Setup(f => f.CreateConnection()).Returns(() => new SqliteConnection(dbName));
             mockFactory.Setup(f => f.ProviderName).Returns("sqlite");
             _dbFactory = mockFactory.Object;
         }

@@ -16,6 +16,15 @@ namespace McpRouter.Core.Database
 
     public class DbConnectionFactory : IDbConnectionFactory
     {
+        static DbConnectionFactory()
+        {
+            try
+            {
+                Dapper.SqlMapper.AddTypeHandler(new McpRouter.Services.JsonListTypeHandler());
+            }
+            catch { }
+        }
+
         private readonly string _provider;
         private readonly string _connectionString;
 

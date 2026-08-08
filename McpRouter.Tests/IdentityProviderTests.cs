@@ -26,7 +26,7 @@ namespace McpRouter.Tests
             var identity = await provider.ResolveIdentityAsync(context);
 
             Assert.Equal("steve", identity.Username);
-            Assert.Equal("PocketID_TinyAuth", identity.AuthenticationType);
+            Assert.Equal("HeaderAuth", identity.AuthenticationType);
             Assert.Equal(2, identity.GroupNames.Count);
             Assert.Contains("full_admin", identity.GroupNames);
             Assert.Contains("house_member", identity.GroupNames);
@@ -171,13 +171,13 @@ namespace McpRouter.Tests
 
             // --- Alice's call: admin SID bypass → authorized ---
             // Tool routing will fail (no backends) but the auth layer must not deny her.
-            try { await session.CallToolAsync("search_tools", toolBody, db: null!, httpContext: aliceContext); }
+            try { await session.CallToolAsync("search_tools", toolBody, dbFactory: null!, httpContext: aliceContext); }
             catch (UnauthorizedAccessException) { throw; }  // fail the test if auth denies alice
             catch { /* routing / no-backend exceptions are expected in a unit test */ }
 
             // --- Bob's call: no SID, no DB policy → RBAC must deny (isError:true) ---
             // CallToolAsync returns an MCP error object on RBAC denial (protocol-conformant).
-            var bobResult = await session.CallToolAsync("search_tools", toolBody, db: null!, httpContext: bobContext);
+            var bobResult = await session.CallToolAsync("search_tools", toolBody, dbFactory: null!, httpContext: bobContext);
             var bobJson   = System.Text.Json.JsonSerializer.Serialize(bobResult);
             Assert.Contains("\"isError\":true", bobJson);
             Assert.Contains("Security Error", bobJson);

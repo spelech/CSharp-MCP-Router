@@ -9,6 +9,7 @@ using System.Net.Http;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
 using McpRouter.Services;
+using Dapper;
 
 namespace McpRouter.Core.Routing
 {
@@ -192,7 +193,7 @@ namespace McpRouter.Core.Routing
         public async Task<object> CallToolAsync(
             string toolName,
             string body,
-            McpRouter.Models.RouterDbContext db,
+            McpRouter.Core.Database.IDbConnectionFactory dbFactory,
             ConcurrentDictionary<string, BackendConnection> backendConnections,
             IEnumerable<McpServer> servers,
             ILogger logger,
@@ -205,7 +206,7 @@ namespace McpRouter.Core.Routing
         {
             try
             {
-                var task = CallToolInternalAsync(toolName, body, db, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
+                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
                 return await task.WaitAsync(cancellationToken);
             }
             catch (OperationCanceledException)
@@ -227,7 +228,7 @@ namespace McpRouter.Core.Routing
         private async Task<object> CallToolInternalAsync(
             string toolName,
             string body,
-            McpRouter.Models.RouterDbContext db,
+            McpRouter.Core.Database.IDbConnectionFactory dbFactory,
             ConcurrentDictionary<string, BackendConnection> backendConnections,
             IEnumerable<McpServer> servers,
             ILogger logger,
@@ -333,7 +334,7 @@ namespace McpRouter.Core.Routing
 
                 try
                 {
-                    var result = await ExecuteTargetToolAsync(targetName, targetBody, db, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
+                    var result = await ExecuteTargetToolAsync(targetName, targetBody, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
                     return result;
                 }
                 catch (Exception ex)
@@ -351,13 +352,13 @@ namespace McpRouter.Core.Routing
                 }
             }
 
-            return await ExecuteTargetToolAsync(toolName, body, db, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
+            return await ExecuteTargetToolAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
         }
 
         private async Task<object> ExecuteTargetToolAsync(
             string toolName,
             string body,
-            McpRouter.Models.RouterDbContext db,
+            McpRouter.Core.Database.IDbConnectionFactory dbFactory,
             ConcurrentDictionary<string, BackendConnection> backendConnections,
             IEnumerable<McpServer> servers,
             ILogger logger,
@@ -378,7 +379,7 @@ namespace McpRouter.Core.Routing
 
                 try
                 {
-                    var result = await customTool.ExecuteAsync(parameters, httpClient, db);
+                    var result = await customTool.ExecuteAsync(parameters, httpClient, dbFactory);
                     return new
                     {
                         content = new[] {
@@ -422,7 +423,8 @@ namespace McpRouter.Core.Routing
             {
                 logger.LogInformation("Routing tool call '{ToolName}' to server '{ServerId}'", toolName, serverId);
 
-                var settings = db.Settings.FirstOrDefault();
+                using var dbConn = dbFactory.CreateConnection();
+                var settings = dbConn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings");
                 if (settings != null && settings.RequireManualApproval && ToolApprovalManager.IsSensitiveTool(toolName))
                 {
                     var approved = await ToolApprovalManager.RequestManualApprovalAsync(toolName, body, sessionManager, serverId, logger);

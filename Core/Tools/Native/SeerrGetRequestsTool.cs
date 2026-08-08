@@ -4,12 +4,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.CustomTools
 {
-public class SeerrGetRequestsTool : ICustomTool
+    public class SeerrGetRequestsTool : ICustomTool
     {
         public string Name => "seerr_get_requests";
         public string Description => "Retrieve a list of media requests from Overseerr/Seerr.";
@@ -25,13 +26,14 @@ public class SeerrGetRequestsTool : ICustomTool
             }
         };
 
-        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, RouterDbContext db)
+        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, IDbConnectionFactory dbFactory)
         {
             int take = parameters.TryGetProperty("take", out var t) ? t.GetInt32() : 20;
             int skip = parameters.TryGetProperty("skip", out var s) ? s.GetInt32() : 0;
             string filter = parameters.TryGetProperty("filter", out var f) ? f.GetString() ?? "all" : "all";
 
-            var seerr = await db.Servers.FirstOrDefaultAsync(s => s.Id == "seerr");
+            using var conn = dbFactory.CreateConnection();
+            var seerr = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = 'seerr'");
             if (seerr == null || !seerr.Enabled)
             {
                 return new { error = "Seerr service is not configured or disabled." };

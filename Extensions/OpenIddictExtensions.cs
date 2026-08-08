@@ -50,11 +50,6 @@ namespace McpRouter.Extensions
             });
 
             services.AddOpenIddict()
-                .AddCore(options =>
-                {
-                    options.UseEntityFrameworkCore()
-                           .UseDbContext<RouterDbContext>();
-                })
                 .AddServer(options =>
                 {
                     options.SetTokenEndpointUris("/connect/token", "/oauth/token");

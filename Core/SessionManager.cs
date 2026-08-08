@@ -3,8 +3,7 @@ using System.Collections.Concurrent;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.EntityFrameworkCore;
+using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
@@ -84,10 +83,10 @@ namespace McpRouter
         public async Task<ClientSession> CreateSessionAsync(string sessionId, HttpResponse clientResponse, string? targetServerId = null, bool metaMode = false)
         {
             using var scope = _serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
-            
-            var query = db.Servers.Where(s => s.Enabled);
-            var servers = await query.ToListAsync();
+            var dbFactory = scope.ServiceProvider.GetRequiredService<McpRouter.Core.Database.IDbConnectionFactory>();
+            using var conn = dbFactory.CreateConnection();
+            var rawServers = await conn.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+            var servers = rawServers.ToList();
             
             if (!string.IsNullOrWhiteSpace(targetServerId))
             {

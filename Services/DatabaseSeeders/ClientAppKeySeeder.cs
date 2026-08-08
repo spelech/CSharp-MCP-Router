@@ -7,11 +7,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
 
+using McpRouter.Core.Database;
+using Dapper;
+
 namespace McpRouter.Services.DatabaseSeeders
 {
     public static class ClientAppKeySeeder
     {
-        public static void SeedDefaultClientsAndKeys(RouterDbContext db, ILogger logger, IConfiguration configuration)
+        public static void SeedDefaultClientsAndKeys(IDbConnectionFactory dbFactory, ILogger logger, IConfiguration configuration)
         {
             // AppKey Hashing Migration: migrate legacy AES-CBC encrypted AppKeys to SHA-256 hashes (gated by RUN_KEY_MIGRATION flag)
             try
@@ -19,8 +22,8 @@ namespace McpRouter.Services.DatabaseSeeders
                 var runKeyMigration = configuration["KeyMigration:Enabled"] ?? configuration["RUN_KEY_MIGRATION"] ?? Environment.GetEnvironmentVariable("RUN_KEY_MIGRATION");
                 if (string.Equals(runKeyMigration, "true", StringComparison.OrdinalIgnoreCase))
                 {
-                    var appKeys = db.AppKeys.ToList();
-                    bool keysUpdated = false;
+                    using var conn = dbFactory.CreateConnection();
+                    var appKeys = conn.Query<AppKey>("SELECT Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys").ToList();
                     foreach (var key in appKeys)
                     {
                         if (string.IsNullOrEmpty(key.EncryptedKey)) continue;
@@ -39,16 +42,11 @@ namespace McpRouter.Services.DatabaseSeeders
 
                             using var sha256 = SHA256.Create();
                             var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(decrypted));
-                            key.EncryptedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
-                            keysUpdated = true;
+                            var hashedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
+                            conn.Execute("UPDATE AppKeys SET EncryptedKey = @EncryptedKey WHERE Id = @Id", new { EncryptedKey = hashedKey, key.Id });
                         }
                     }
-
-                    if (keysUpdated)
-                    {
-                        logger.LogInformation("Migrated legacy AppKeys to SHA-256 hashes.");
-                        db.SaveChanges();
-                    }
+                    logger.LogInformation("Migrated legacy AppKeys to SHA-256 hashes.");
                 }
                 else
                 {

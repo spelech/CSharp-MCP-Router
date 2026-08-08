@@ -4,12 +4,13 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+using McpRouter.Core.Database;
 using McpRouter.Models;
+using Dapper;
 
 namespace McpRouter.CustomTools
 {
-public class PlexGetRecentlyAddedTool : ICustomTool
+    public class PlexGetRecentlyAddedTool : ICustomTool
     {
         public string Name => "plex_get_recently_added";
         public string Description => "List recently added media items in a specific library section.";
@@ -24,10 +25,11 @@ public class PlexGetRecentlyAddedTool : ICustomTool
             required = new[] { "sectionId" }
         };
 
-        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, RouterDbContext db)
+        public async Task<object> ExecuteAsync(JsonElement parameters, HttpClient httpClient, IDbConnectionFactory dbFactory)
         {
             var sectionId = parameters.GetProperty("sectionId").GetInt32();
-            var plex = await db.Servers.FirstOrDefaultAsync(s => s.Id == "plex");
+            using var conn = dbFactory.CreateConnection();
+            var plex = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = 'plex'");
             if (plex == null || !plex.Enabled)
             {
                 return new { error = "Plex service is not configured or disabled." };

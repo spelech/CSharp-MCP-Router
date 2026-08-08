@@ -2,8 +2,6 @@ using System;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -85,16 +83,7 @@ namespace McpRouter.Services
                 }
                 catch (Exception ex)
                 {
-                    _logger.LogDebug(ex, "Dapper query failed, falling back to RouterDbContext");
-                }
-
-                if (servers.Count == 0)
-                {
-                    var db = scope.ServiceProvider.GetService<RouterDbContext>();
-                    if (db != null)
-                    {
-                        servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
-                    }
+                    _logger.LogError(ex, "Failed to query servers for health check probe");
                 }
 
                 var tasks = servers.Select(s => ProbeServerAsync(s));

@@ -3,9 +3,7 @@ using System.IO;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
@@ -141,11 +139,12 @@ namespace McpRouter.Extensions
                 return Results.NotFound(new { error = "Approval request not found." });
             });
 
-            api.MapGet("/api/test/tools", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapGet("/api/test/tools", async (string? serverId, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
-                var query = db.Servers.Where(s => s.Enabled);
-                var servers = await query.ToListAsync();
+                using var connDb = dbFactory.CreateConnection();
+                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var servers = rawServers.ToList();
                 
                 if (!string.IsNullOrWhiteSpace(serverId))
                 {
@@ -244,10 +243,11 @@ namespace McpRouter.Extensions
             });
 
             // 3. Test Call API
-            api.MapPost("/api/test/call", async ([FromBody] TestCallModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/call", async ([FromBody] TestCallModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
-                var server = await db.Servers.FirstOrDefaultAsync(s => s.Id == model.ServerId);
+                using var dbConn = dbFactory.CreateConnection();
+                var server = await dbConn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @Id", new { Id = model.ServerId });
                 if (server == null && model.ServerId != "custom")
                 {
                     return Results.NotFound($"Server {model.ServerId} not found");
@@ -260,7 +260,7 @@ namespace McpRouter.Extensions
                     try
                     {
                         var args = model.Arguments.ValueKind == JsonValueKind.Undefined ? JsonDocument.Parse("{}").RootElement : model.Arguments;
-                        var res = await customTool.ExecuteAsync(args, httpClient, db);
+                        var res = await customTool.ExecuteAsync(args, httpClient, dbFactory);
                         return Results.Ok(new {
                             content = new[] {
                                 new { type = "text", text = JsonSerializer.Serialize(res, new JsonSerializerOptions { WriteIndented = true }) }
@@ -304,10 +304,12 @@ namespace McpRouter.Extensions
             });
 
             // 4. Test Semantic Search API
-            api.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
-                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                using var connDb = dbFactory.CreateConnection();
+                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var servers = rawServers.ToList();
                 var allTools = new System.Collections.Generic.List<object>();
                 var missingServers = new System.Collections.Generic.List<McpServer>();
 
@@ -394,11 +396,12 @@ namespace McpRouter.Extensions
             });
 
             // 2b. Test Prompts List API
-            api.MapGet("/api/test/prompts", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapGet("/api/test/prompts", async (string? serverId, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
-                var query = db.Servers.Where(s => s.Enabled);
-                var servers = await query.ToListAsync();
+                using var connDb = dbFactory.CreateConnection();
+                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var servers = rawServers.ToList();
                 
                 if (!string.IsNullOrWhiteSpace(serverId))
                 {
@@ -491,11 +494,12 @@ namespace McpRouter.Extensions
             });
 
             // 2c. Test Resources List API
-            api.MapGet("/api/test/resources", async (string? serverId, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapGet("/api/test/resources", async (string? serverId, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
-                var query = db.Servers.Where(s => s.Enabled);
-                var servers = await query.ToListAsync();
+                using var connDb = dbFactory.CreateConnection();
+                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var servers = rawServers.ToList();
                 
                 if (!string.IsNullOrWhiteSpace(serverId))
                 {
@@ -632,10 +636,12 @@ namespace McpRouter.Extensions
             });
 
             // 3b. Test Prompt Get API
-            api.MapPost("/api/test/prompts/get", async ([FromBody] TestPromptGetModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/prompts/get", async ([FromBody] TestPromptGetModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
-                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                using var connDb = dbFactory.CreateConnection();
+                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var servers = rawServers.ToList();
                 var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
 
                 var serverId = model.ServerId;
@@ -701,10 +707,12 @@ namespace McpRouter.Extensions
             });
 
             // 3c. Test Resource Read API
-            api.MapPost("/api/test/resources/read", async ([FromBody] TestResourceReadModel model, [FromServices] RouterDbContext db, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/resources/read", async ([FromBody] TestResourceReadModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
-                var servers = await db.Servers.Where(s => s.Enabled).ToListAsync();
+                using var connDb = dbFactory.CreateConnection();
+                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var servers = rawServers.ToList();
                 var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
 
                 var uri = model.Uri;

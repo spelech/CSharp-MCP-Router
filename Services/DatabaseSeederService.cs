@@ -7,16 +7,35 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using McpRouter.Core.Database;
 using McpRouter.Core.Secrets;
 using McpRouter.Models;
 using McpRouter.Services.DatabaseSeeders;
+using Dapper;
 
 namespace McpRouter.Services
 {
+    public class JsonListTypeHandler : SqlMapper.TypeHandler<List<string>>
+    {
+        public override void SetValue(System.Data.IDbDataParameter parameter, List<string>? value)
+        {
+            parameter.Value = System.Text.Json.JsonSerializer.Serialize(value ?? new List<string>());
+        }
+
+        public override List<string> Parse(object value)
+        {
+            if (value is string str && !string.IsNullOrWhiteSpace(str))
+            {
+                try { return System.Text.Json.JsonSerializer.Deserialize<List<string>>(str) ?? new List<string>(); }
+                catch { }
+            }
+            return new List<string>();
+        }
+    }
+
     public static class DatabaseSeederService
     {
         public static void SeedDatabase(this WebApplication app)
@@ -27,29 +46,53 @@ namespace McpRouter.Services
         public static void SeedDatabase(IServiceProvider services, IConfiguration configuration)
         {
             using var scope = services.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
+            var dbFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             
             try
             {
-                logger.LogInformation("Initializing database...");
+                logger.LogInformation("Initializing database via Dapper...");
+                SqlMapper.AddTypeHandler(new JsonListTypeHandler());
 
                 var encryptionKey = configuration["DB_ENCRYPTION_KEY"];
                 if (string.IsNullOrEmpty(encryptionKey))
                 {
-                    logger.LogInformation("No DB_ENCRYPTION_KEY provided in configuration. A unique, cryptographically secure key has been generated and persisted in the data directory.");
+                    logger.LogInformation("No DB_ENCRYPTION_KEY provided in configuration. A unique key has been resolved.");
                 }
                 else if (encryptionKey.Length < 16)
                 {
-                    logger.LogCritical("SECURITY WARNING: The configured DB_ENCRYPTION_KEY is too short (< 16 characters). Please set a strong, high-entropy DB_ENCRYPTION_KEY environment variable to secure your deployment!");
+                    logger.LogCritical("SECURITY WARNING: The configured DB_ENCRYPTION_KEY is too short (< 16 characters).");
                 }
 
-                db.Database.EnsureCreated();
+                using var conn = dbFactory.CreateConnection();
+
+                // Create Servers table
+                conn.Execute(@"
+                    CREATE TABLE IF NOT EXISTS Servers (
+                        Id TEXT PRIMARY KEY,
+                        DisplayName TEXT,
+                        Url TEXT,
+                        Enabled INTEGER DEFAULT 1,
+                        Hidden INTEGER DEFAULT 0,
+                        Type TEXT DEFAULT 'sse',
+                        SecretProvider TEXT DEFAULT 'None',
+                        SecretItemKey TEXT,
+                        SecretMount TEXT,
+                        SecretPath TEXT,
+                        SecretField TEXT,
+                        AuthShape TEXT DEFAULT 'bearer',
+                        CustomHeaderName TEXT,
+                        Categories TEXT DEFAULT '[]',
+                        ApiKey TEXT,
+                        HeadersJson TEXT,
+                        AutoDiscovered INTEGER DEFAULT 0
+                    );
+                ");
 
                 // Ensure the Settings table exists and has a default row
                 try
                 {
-                    db.Database.ExecuteSqlRaw(
+                    conn.Execute(
                         "CREATE TABLE IF NOT EXISTS Settings (" +
                         "Id TEXT PRIMARY KEY, " +
                         "EmbeddingProvider TEXT, " +
@@ -63,25 +106,25 @@ namespace McpRouter.Services
 
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Settings ADD COLUMN RequireManualApproval INTEGER DEFAULT 0");
+                        conn.Execute("ALTER TABLE Settings ADD COLUMN RequireManualApproval INTEGER DEFAULT 0");
                     }
                     catch { }
 
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Settings ADD COLUMN GlobalMaxKeys INTEGER DEFAULT 100");
+                        conn.Execute("ALTER TABLE Settings ADD COLUMN GlobalMaxKeys INTEGER DEFAULT 100");
                     }
                     catch { }
 
                     try
                     {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Settings ADD COLUMN UserMaxKeys INTEGER DEFAULT 5");
+                        conn.Execute("ALTER TABLE Settings ADD COLUMN UserMaxKeys INTEGER DEFAULT 5");
                     }
                     catch { }
 
                     try
                     {
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "CREATE TABLE IF NOT EXISTS AppKeys (" +
                             "Id TEXT PRIMARY KEY, " +
                             "Name TEXT, " +
@@ -112,7 +155,7 @@ namespace McpRouter.Services
                     {
                         try
                         {
-                            db.Database.ExecuteSqlRaw(ddl);
+                            conn.Execute(ddl);
                             logger.LogInformation("Successfully added column {Column} to Servers table.", colName);
                         }
                         catch (Exception exAlter)
@@ -121,35 +164,18 @@ namespace McpRouter.Services
                         }
                     }
 
-                    // (SecretProvider backfill removed — all dialects default 'None' via DDL; Vault/Registry/Env are opt-in per server.)
                     try
                     {
-                        var misconfigured = db.Servers
-                            .Where(s => s.SecretProvider != "None" && string.IsNullOrEmpty(s.SecretPath) && string.IsNullOrEmpty(s.SecretMount))
-                            .Select(s => s.Id).ToList();
-                        if (misconfigured.Count > 0)
-                            logger.LogWarning("Servers [{Ids}] set SecretProvider != 'None' but have no SecretPath/SecretMount; they FAIL CLOSED until a provider path is configured.", string.Join(", ", misconfigured));
-                    }
-                    catch { }
-
-                    try
-                    {
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "UPDATE Servers SET AuthShape = 'bearer' " +
                             "WHERE AuthShape IS NULL OR AuthShape = '';");
-                    }
-                    catch { }
-
-                    try
-                    {
-                        db.Database.ExecuteSqlRaw("ALTER TABLE Tools ADD COLUMN SecretProvider TEXT DEFAULT 'None'");
                     }
                     catch { }
 
                     // Create AccessPolicies table for SQLite
                     try
                     {
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "CREATE TABLE IF NOT EXISTS AccessPolicies (" +
                             "Id TEXT PRIMARY KEY, " +
                             "TargetId TEXT, " +
@@ -164,7 +190,7 @@ namespace McpRouter.Services
                     // Create AuditLogs and AdminAuditLogs tables for SQLite
                     try
                     {
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "CREATE TABLE IF NOT EXISTS AuditLogs (" +
                             "RequestId TEXT PRIMARY KEY, " +
                             "UserPrincipalName TEXT, " +
@@ -179,7 +205,7 @@ namespace McpRouter.Services
                             "ErrorMessage TEXT, " +
                             "Timestamp TEXT DEFAULT CURRENT_TIMESTAMP)");
 
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "CREATE TABLE IF NOT EXISTS AdminAuditLogs (" +
                             "Id TEXT PRIMARY KEY, " +
                             "Username TEXT, " +
@@ -198,7 +224,7 @@ namespace McpRouter.Services
                     // Create GroupMappings table for SQLite
                     try
                     {
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "CREATE TABLE IF NOT EXISTS GroupMappings (" +
                             "Id TEXT PRIMARY KEY, " +
                             "ExternalId TEXT, " +
@@ -212,20 +238,20 @@ namespace McpRouter.Services
                     // Create SecretProviders and AuthProviderConfigs tables for SQLite
                     try
                     {
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "CREATE TABLE IF NOT EXISTS SecretProviders (" +
                             "ProviderName TEXT PRIMARY KEY, " +
                             "DisplayName TEXT, " +
                             "ConfigJson TEXT, " +
                             "IsEnabled INTEGER DEFAULT 1)");
 
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "INSERT OR IGNORE INTO SecretProviders (ProviderName, DisplayName, IsEnabled) VALUES " +
                             "('Vault', 'HashiCorp Vault (KV v2)', 1), " +
                             "('WindowsRegistry', 'Windows Registry (DPAPI)', 1), " +
                             "('Environment', 'Container Environment', 1);");
 
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "CREATE TABLE IF NOT EXISTS AuthProviderConfigs (" +
                             "ProviderName TEXT PRIMARY KEY, " +
                             "DisplayName TEXT, " +
@@ -236,34 +262,33 @@ namespace McpRouter.Services
 
                         try
                         {
-                            db.Database.ExecuteSqlRaw("ALTER TABLE AuthProviderConfigs ADD COLUMN ConfigJson TEXT NULL");
+                            conn.Execute("ALTER TABLE AuthProviderConfigs ADD COLUMN ConfigJson TEXT NULL");
                         }
                         catch {}
 
                         try
                         {
-                            db.Database.ExecuteSqlRaw("ALTER TABLE SecretProviders ADD COLUMN ConfigJson TEXT NULL");
+                            conn.Execute("ALTER TABLE SecretProviders ADD COLUMN ConfigJson TEXT NULL");
                         }
                         catch {}
 
-                        db.Database.ExecuteSqlRaw(
+                        conn.Execute(
                             "INSERT OR IGNORE INTO AuthProviderConfigs (ProviderName, DisplayName, UserHeader, GroupsHeader, IsEnabled) VALUES " +
                             "('ActiveDirectory', 'Active Directory', 'Remote-User', 'Remote-Groups', 1), " +
-                            "('PocketID_TinyAuth', 'PocketID / TinyAuth OIDC', 'Remote-User', 'Remote-Groups', 1);");
+                            "('HeaderAuth', 'Configurable Reverse Proxy Header Auth', 'Remote-User', 'Remote-Groups', 1);");
                     }
                     catch (Exception exSecret)
                     {
                         logger.LogWarning(exSecret, "Secret/Auth provider table init warning");
                     }
 
-                    var hasSettings = db.Settings.Any();
-                    if (!hasSettings)
+                    var countSettings = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM Settings");
+                    if (countSettings == 0)
                     {
-                        db.Settings.Add(new RouterSettings());
-                        db.SaveChanges();
+                        conn.Execute("INSERT INTO Settings (Id, RequireManualApproval, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 0, 100, 5)");
                     }
 
-                    ClientAppKeySeeder.SeedDefaultClientsAndKeys(db, logger, configuration);
+                    ClientAppKeySeeder.SeedDefaultClientsAndKeys(dbFactory, logger, configuration);
 
                     try
                     {
@@ -280,7 +305,7 @@ namespace McpRouter.Services
                     logger.LogError(ex, "Failed to create or seed Settings table");
                 }
                 
-                CatalogDatabaseSeeder.SeedCatalogServers(db, logger);
+                CatalogDatabaseSeeder.SeedCatalogServers(dbFactory, logger);
             }
             catch (Exception ex)
             {
