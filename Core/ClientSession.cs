@@ -1031,7 +1031,11 @@ namespace McpRouter
                         using var doc = JsonDocument.Parse(payload);
                         if (doc.RootElement.TryGetProperty("id", out var idProp))
                         {
-                            requestId = idProp.GetString() ?? idProp.GetRawText();
+                            var extractedId = idProp.ValueKind == JsonValueKind.String ? idProp.GetString() : idProp.GetRawText();
+                            if (!string.IsNullOrEmpty(extractedId))
+                            {
+                                requestId = $"{extractedId}_{Guid.NewGuid().ToString("N")[..6]}";
+                            }
                         }
                     }
                     catch (JsonException exJson)
