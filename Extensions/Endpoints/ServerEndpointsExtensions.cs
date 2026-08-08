@@ -35,15 +35,26 @@ namespace McpRouter.Extensions
                     var statuses = sessionManager.BackendStatuses;
                     
                     var sanitized = rawServers.Select(s => {
-                        var idStr = (string)s.Id;
-                        var isEnabled = s.Enabled == 1L || s.Enabled == true;
-                        var isHidden = s.Hidden == 1L || s.Hidden == true;
+                        var idStr = Convert.ToString(s.Id) ?? string.Empty;
+                        bool isEnabled = false;
+                        if (s.Enabled is long longEnabled) isEnabled = longEnabled != 0L;
+                        else if (s.Enabled is bool boolEnabled) isEnabled = boolEnabled;
+                        else if (s.Enabled != null) isEnabled = Convert.ToBoolean(s.Enabled);
+
+                        bool isHidden = false;
+                        if (s.Hidden is long longHidden) isHidden = longHidden != 0L;
+                        else if (s.Hidden is bool boolHidden) isHidden = boolHidden;
+                        else if (s.Hidden != null) isHidden = Convert.ToBoolean(s.Hidden);
                         var catStr = (string?)s.Categories ?? "[]";
                         List<string> categories;
                         try { categories = JsonSerializer.Deserialize<List<string>>(catStr) ?? new(); }
                         catch { categories = new(); }
 
-                        statuses.TryGetValue(idStr, out var status);
+                        BackendStatus? status = null;
+                        if (!string.IsNullOrEmpty(idStr))
+                        {
+                            statuses.TryGetValue(idStr, out status);
+                        }
                         return new {
                             Id = idStr,
                             DisplayName = (string)s.DisplayName,
