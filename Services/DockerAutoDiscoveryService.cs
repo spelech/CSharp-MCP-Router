@@ -86,10 +86,10 @@ namespace McpRouter.Services
             var discoveredServers = ParseDiscoveredServers(doc.RootElement, _logger, allowedIpRanges);
 
             using var scope = _serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<RouterDbContext>();
+            var dbFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
             var sessionManager = scope.ServiceProvider.GetRequiredService<SessionManager>();
 
-            UpsertDiscoveredServers(discoveredServers, db, sessionManager, _logger);
+            UpsertDiscoveredServers(discoveredServers, dbFactory, sessionManager, _logger);
         }
 
         public static List<McpServer> ParseDiscoveredServers(JsonElement rootElement, Microsoft.Extensions.Logging.ILogger logger, string[] allowedIpRanges)
