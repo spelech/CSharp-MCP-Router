@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.0.12`** | 2026-08-08 | refactor(session): extract ClientSession.Authorization partial class |
 | **`v4.0.11`** | 2026-08-07 | refactor(resources): extract ResourceCatalogManager and modularize ResourceRoutingManager |
 | **`v4.0.10`** | 2026-08-07 | refactor(seeder): extract CatalogDatabaseSeeder and ClientAppKeySeeder helpers |
 | **`v4.0.9`** | 2026-08-07 | refactor(endpoints): extract modular endpoint extension classes from ApplicationBuilderExtensions |
