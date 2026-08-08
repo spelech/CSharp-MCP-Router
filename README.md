@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.0.9`** | 2026-08-07 | refactor(endpoints): extract modular endpoint extension classes from ApplicationBuilderExtensions |
 | **`v4.0.8`** | 2026-08-07 | refactor(session): extract ClientSession rewriter and notification broadcaster partials |
 | **`v4.0.7`** | 2026-08-07 | refactor(routing): break apart ToolRoutingManager and expand unit tests for Docker, LDAP, AD, and ONNX |
 | **`v4.0.6`** | 2026-08-07 | test(coverage): expand test suites for moderate core modules to reach >= 80% coverage |
