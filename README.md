@@ -62,6 +62,8 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.0.5`** | 2026-08-07 | test(coverage): expand core service unit test suites and bump version to v4.0.4 |
+| **`v4.0.4`** | 2026-08-07 | test(coverage): expand core service unit test suites (+1,500 covered lines, 217 passing tests) |
 | **`v4.0.3`** | 2026-08-07 | test(coverage): expand integration test suite and protocol handlers (v4.0.2) |
 | **`v4.0.2`** | 2026-08-07 | test(coverage): expand integration test suite & protocol handlers (+1,224 lines covered, 202 tests) |
 | **`v4.0.1`** | 2026-08-07 | test(coverage): expand controller, secret retriever, and audit logger unit tests |
