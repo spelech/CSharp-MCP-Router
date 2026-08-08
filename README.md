@@ -66,6 +66,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.2.7`** | 2026-08-08 | fix(api): safely deserialize Categories JSON in GET /api/servers endpoint |
 | **`v4.2.6`** | 2026-08-08 | fix(api): refactor GET /api/servers to use Dapper IDbConnectionFactory |
 | **`v4.2.5`** | 2026-08-08 | fix(auth): update TrustedProxyHelper to auto-trust Docker container subnets and preserve XFF chain validation |
 | **`v4.2.4`** | 2026-08-08 | fix(auth): update AdminPolicy and OidcHeaderAuthenticationHandler to authorize TinyAuth full_admin group |
