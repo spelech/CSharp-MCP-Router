@@ -31,26 +31,34 @@ namespace McpRouter.Extensions
                 try
                 {
                     using var conn = dbFactory.CreateConnection();
-                    var servers = (await conn.QueryAsync<McpServer>("SELECT * FROM Servers")).ToList();
+                    var rawServers = (await conn.QueryAsync(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson FROM Servers")).ToList();
                     var statuses = sessionManager.BackendStatuses;
                     
-                    var sanitized = servers.Select(s => {
-                        statuses.TryGetValue(s.Id, out var status);
+                    var sanitized = rawServers.Select(s => {
+                        var idStr = (string)s.Id;
+                        var isEnabled = s.Enabled == 1L || s.Enabled == true;
+                        var isHidden = s.Hidden == 1L || s.Hidden == true;
+                        var catStr = (string?)s.Categories ?? "[]";
+                        List<string> categories;
+                        try { categories = JsonSerializer.Deserialize<List<string>>(catStr) ?? new(); }
+                        catch { categories = new(); }
+
+                        statuses.TryGetValue(idStr, out var status);
                         return new {
-                            s.Id,
-                            s.DisplayName,
-                            s.Url,
-                            s.Enabled,
-                            s.Hidden,
-                            s.Type,
-                            s.Categories,
-                            s.SecretProvider,
-                            s.SecretItemKey,
-                            s.AuthShape,
-                            s.CustomHeaderName,
-                            s.HeadersJson,
-                            HasApiKey = !string.IsNullOrEmpty(s.ApiKey),
-                            ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
+                            Id = idStr,
+                            DisplayName = (string)s.DisplayName,
+                            Url = (string)s.Url,
+                            Enabled = isEnabled,
+                            Hidden = isHidden,
+                            Type = (string)(s.Type ?? "sse"),
+                            Categories = categories,
+                            SecretProvider = (string)(s.SecretProvider ?? "None"),
+                            SecretItemKey = (string?)s.SecretItemKey,
+                            AuthShape = (string)(s.AuthShape ?? "bearer"),
+                            CustomHeaderName = (string?)s.CustomHeaderName,
+                            HeadersJson = (string?)s.HeadersJson,
+                            HasApiKey = !string.IsNullOrEmpty((string?)s.ApiKey),
+                            ConnectionStatus = isEnabled ? (status?.Status ?? "Disconnected") : "Disabled",
                             ConnectionAttempts = status?.Attempts ?? 0,
                             ConnectionError = status?.Error ?? string.Empty
                         };
