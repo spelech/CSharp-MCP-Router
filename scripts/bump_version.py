@@ -86,36 +86,70 @@ def main():
     else:
         print(f"Warning: {html_path} not found.")
 
-    # 3. Update README.md Release Changelog
-    if os.path.exists(readme_path):
-        with open(readme_path, "r", encoding="utf-8") as f:
-            readme_content = f.read()
+    changelog_path = os.path.join(repo_root, "CHANGELOG.md")
 
-        today_str = datetime.now().strftime("%Y-%m-%d")
-        # Strip conventional prefix if present for a cleaner changelog, or keep full message
-        clean_msg = commit_message
-        new_row = f"| **`v{new_version}`** | {today_str} | {clean_msg} |"
+    # 3. Update CHANGELOG.md
+    today_str = datetime.now().strftime("%Y-%m-%d")
+    clean_msg = commit_message
+    new_row = f"| **`v{new_version}`** | {today_str} | {clean_msg} |"
 
-        # Locate the table header separator row: | :--- | :--- | :--- |
-        # We want to insert the new row immediately after this separator.
-        lines = readme_content.splitlines()
+    if os.path.exists(changelog_path):
+        with open(changelog_path, "r", encoding="utf-8") as f:
+            changelog_content = f.read()
+
+        lines = changelog_content.splitlines()
         inserted = False
         for i, line in enumerate(lines):
             if re.match(r"\|\s*:?---:?\s*\|\s*:?---:?\s*\|\s*:?---:?\s*\|", line):
                 lines.insert(i + 1, new_row)
                 inserted = True
                 break
-        
+
         if inserted:
+            with open(changelog_path, "w", encoding="utf-8", newline="\n") as f:
+                f.write("\n".join(lines) + "\n")
+            print(f"Updated {changelog_path}")
+        else:
+            print("Warning: Could not find changelog table header separator in CHANGELOG.md.")
+    else:
+        print(f"Warning: {changelog_path} not found.")
+
+    # 4. Update README.md top-5 release preview table
+    if os.path.exists(readme_path):
+        with open(readme_path, "r", encoding="utf-8") as f:
+            readme_content = f.read()
+
+        lines = readme_content.splitlines()
+        sep_index = -1
+        for i, line in enumerate(lines):
+            if re.match(r"\|\s*:?---:?\s*\|\s*:?---:?\s*\|\s*:?---:?\s*\|", line):
+                sep_index = i
+                break
+
+        if sep_index != -1:
+            lines.insert(sep_index + 1, new_row)
+
+            # Count rows after separator and slice to keep only top 5 release rows
+            table_rows = []
+            end_index = sep_index + 1
+            while end_index < len(lines) and lines[end_index].strip().startswith("|"):
+                table_rows.append(lines[end_index])
+                end_index += 1
+
+            if len(table_rows) > 5:
+                # Keep top 5 table rows
+                trimmed_rows = table_rows[:5]
+                lines = lines[:sep_index + 1] + trimmed_rows + lines[end_index:]
+
             with open(readme_path, "w", encoding="utf-8", newline="\n") as f:
                 f.write("\n".join(lines) + "\n")
-            print(f"Updated {readme_path}")
+            print(f"Updated {readme_path} (top-5 preview)")
         else:
             print("Warning: Could not find changelog table header separator in README.md.")
     else:
         print(f"Warning: {readme_path} not found.")
 
-    # 4. Update useUserStore.ts
+    # 5. Update useUserStore.ts
     user_store_path = os.path.join(repo_root, "frontend", "src", "stores", "useUserStore.ts")
     if os.path.exists(user_store_path):
         with open(user_store_path, "r", encoding="utf-8") as f:
@@ -134,8 +168,8 @@ def main():
     else:
         print(f"Warning: {user_store_path} not found.")
 
-    # 5. Stage files using git add
-    paths_to_stage = [csproj_path, html_path, readme_path, user_store_path]
+    # 6. Stage files using git add
+    paths_to_stage = [csproj_path, html_path, readme_path, changelog_path, user_store_path]
     existing_paths = [p for p in paths_to_stage if os.path.exists(p)]
     os.system(f"git add {' '.join(existing_paths)}")
     print("Staged updated versioning files.")
