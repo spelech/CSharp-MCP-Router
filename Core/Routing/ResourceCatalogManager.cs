@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace McpRouter.Core.Routing
 {
+    /// <summary>
+    /// Auto-generated XML documentation.
+    /// </summary>
     public class ResourceCatalogManager
     {
         public async Task<List<object>> SearchResourcesAsync(string query, List<object> resources)

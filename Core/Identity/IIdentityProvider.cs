@@ -24,6 +24,9 @@ namespace McpRouter.Core.Identity
         }
     }
 
+    /// <summary>
+    /// Auto-generated XML documentation.
+    /// </summary>
     public interface IIdentityProvider
     {
         string ProviderName { get; }

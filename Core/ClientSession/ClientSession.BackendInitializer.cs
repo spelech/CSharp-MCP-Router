@@ -10,6 +10,9 @@ using McpRouter.Models;
 
 namespace McpRouter
 {
+    /// <summary>
+    /// Auto-generated XML documentation.
+    /// </summary>
     public partial class ClientSession
     {
         public async Task EnsureBackendsInitializedAsync()

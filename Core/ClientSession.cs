@@ -18,6 +18,9 @@ using Dapper;
 
 namespace McpRouter
 {
+    /// <summary>
+    /// Represents an active client session and handles routing.
+    /// </summary>
     public partial class ClientSession
     {
         private readonly string _sessionId;

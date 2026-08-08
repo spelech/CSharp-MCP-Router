@@ -13,6 +13,9 @@ using McpRouter.Models;
 
 namespace McpRouter.Services
 {
+    /// <summary>
+    /// Auto-generated XML documentation.
+    /// </summary>
     public class BackendHealthCheckService : BackgroundService
     {
         private readonly IServiceProvider _serviceProvider;

@@ -8,6 +8,9 @@ using McpRouter.Models;
 
 namespace McpRouter
 {
+    /// <summary>
+    /// Auto-generated XML documentation.
+    /// </summary>
     public partial class ClientSession
     {
         public void CancelRequest(string requestId)
