@@ -56,29 +56,29 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 2. **Namespaced Execution**: After `search_tools` returns matching namespaced tools (e.g. `docker__restart_container`), the agent must invoke it via `execute_tool(name, arguments)`.
 3. **Semantic Knowledge Retrieval (`notes-rag`)**: AI agents **MUST** query the `notes-rag` service first (using the `search_notes` tool) for system architecture or setup questions before attempting to grep the filesystem. This leverages the local SilverBullet/Obsidian notes database.
 
+## 📜 Release Changelog
+
+| Version | Release Date | Summary of Key Changes |
+| :--- | :--- | :--- |
+| **`v4.0.20`** | 2026-08-08 | docs(xml): add descriptive C# XML docstrings to core services |
+| **`v4.0.19`** | 2026-08-08 | docs(xml): enable C# XML documentation generation and annotate core services |
+| **`v4.0.18`** | 2026-08-08 | docs(xml): enable C# XML documentation generation and annotate core services |
+| **`v4.0.17`** | 2026-08-08 | docs(coverage): add comprehensive code coverage report and README section |
+| **`v4.0.16`** | 2026-08-08 | docs(spec): add documentation, coverage report, and class diagrams design spec |
+| **`v4.0.15`** | 2026-08-08 | docs(plans): include refactoring plans and extracted tool helpers |
+
+---
+
 ## 🧪 Code Coverage & Quality Gate
 
 Our core modules maintain high code coverage to ensure reliability and secure execution. For the full breakdown and module-specific metrics, please see the [Detailed Coverage Report](docs/coverage-report.md).
 
 | Module | Line Coverage | Branch Coverage | Status |
 | :--- | :--- | :--- | :--- |
-| **`v4.0.20`** | 2026-08-08 | docs(xml): add descriptive C# XML docstrings to core services |
-| **`v4.0.19`** | 2026-08-08 | docs(xml): enable C# XML documentation generation and annotate core services |
 | **Core Session** | 92.4% | 88.1% | 🟢 Passing |
 | **Routing Engine** | 89.7% | 85.3% | 🟢 Passing |
 | **Controllers** | 94.2% | 91.0% | 🟢 Passing |
 | **Security & Providers** | 98.5% | 95.8% | 🟢 Passing |
-
----
-
-## 📜 Release Changelog
-
-| Version | Release Date | Summary of Key Changes |
-| :--- | :--- | :--- |
-| **`v4.0.18`** | 2026-08-08 | docs(xml): enable C# XML documentation generation and annotate core services |
-| **`v4.0.17`** | 2026-08-08 | docs(coverage): add comprehensive code coverage report and README section |
-| **`v4.0.16`** | 2026-08-08 | docs(spec): add documentation, coverage report, and class diagrams design spec |
-| **`v4.0.15`** | 2026-08-08 | docs(plans): include refactoring plans and extracted tool helpers |
 | **`v4.0.14`** | 2026-08-08 | refactor(session): extract ClientSession.ProxyForwarder partial class |
 | **`v4.0.13`** | 2026-08-08 | refactor(session): extract ClientSession.BackendInitializer partial class |
 | **`v4.0.12`** | 2026-08-08 | refactor(session): extract ClientSession.Authorization partial class |
