@@ -66,19 +66,6 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 | **`v4.0.17`** | 2026-08-08 | docs(coverage): add comprehensive code coverage report and README section |
 | **`v4.0.16`** | 2026-08-08 | docs(spec): add documentation, coverage report, and class diagrams design spec |
 | **`v4.0.15`** | 2026-08-08 | docs(plans): include refactoring plans and extracted tool helpers |
-
----
-
-## 🧪 Code Coverage & Quality Gate
-
-Our core modules maintain high code coverage to ensure reliability and secure execution. For the full breakdown and module-specific metrics, please see the [Detailed Coverage Report](docs/coverage-report.md).
-
-| Module | Line Coverage | Branch Coverage | Status |
-| :--- | :--- | :--- | :--- |
-| **Core Session** | 92.4% | 88.1% | 🟢 Passing |
-| **Routing Engine** | 89.7% | 85.3% | 🟢 Passing |
-| **Controllers** | 94.2% | 91.0% | 🟢 Passing |
-| **Security & Providers** | 98.5% | 95.8% | 🟢 Passing |
 | **`v4.0.14`** | 2026-08-08 | refactor(session): extract ClientSession.ProxyForwarder partial class |
 | **`v4.0.13`** | 2026-08-08 | refactor(session): extract ClientSession.BackendInitializer partial class |
 | **`v4.0.12`** | 2026-08-08 | refactor(session): extract ClientSession.Authorization partial class |
@@ -159,3 +146,16 @@ Our core modules maintain high code coverage to ensure reliability and secure ex
 | **`v2.2.0`** | 2026-07-28 | Added pluggable `IIdentityProvider` abstraction supporting `ActiveDirectoryIdentityProvider` (Kerberos/NTLM SIDs) and `OidcIdentityProvider` (PocketID / TinyAuth headers). |
 | **`v2.1.0`** | 2026-07-28 | Created multi-database `DbConnectionFactory` supporting MS SQL Server (`Microsoft.Data.SqlClient`), MySQL (`MySqlConnector`), and SQLite (`Microsoft.Data.Sqlite`) with Dapper and stored procedure scripts (`scripts/db/mssql/`, `scripts/db/mysql/`). |
 | **`v2.0.0`** | 2026-07-28 | Major release adopting **MCP 2026-07-28 Specification** (`Mcp-Method`, `Mcp-Name` HTTP headers) via `McpDualSpecMiddleware` with dual-spec JSON body fallback. |
+
+---
+
+## 🧪 Code Coverage & Quality Gate
+
+Our core modules maintain high code coverage to ensure reliability and secure execution. For the full breakdown and module-specific metrics, please see the [Detailed Coverage Report](docs/coverage-report.md).
+
+| Module | Line Coverage | Branch Coverage | Status |
+| :--- | :--- | :--- | :--- |
+| **Core Session** | 92.4% | 88.1% | 🟢 Passing |
+| **Routing Engine** | 89.7% | 85.3% | 🟢 Passing |
+| **Controllers** | 94.2% | 91.0% | 🟢 Passing |
+| **Security & Providers** | 98.5% | 95.8% | 🟢 Passing |
