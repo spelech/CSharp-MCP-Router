@@ -1,141 +1,131 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
+using Dapper;
 using McpRouter.Controllers;
 using McpRouter.Core.Database;
+using McpRouter.Core.Logging;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
+using Microsoft.Data.Sqlite;
+using Moq;
 using Xunit;
 
 namespace McpRouter.Tests
 {
-    public class ProvidersControllerTests
+    public class ProvidersControllerTests : IDisposable
     {
-        [Fact]
-        public async Task Controller_Can_Save_And_Get_Secret_Providers()
+        private readonly SqliteConnection _connection;
+        private readonly IDbConnectionFactory _dbFactory;
+
+        public ProvidersControllerTests()
         {
-            var tempDbFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".db");
-            try
+            _connection = new SqliteConnection("DataSource=:memory:;Mode=Memory;Cache=Shared");
+            _connection.Open();
+
+            _connection.Execute(@"
+                CREATE TABLE IF NOT EXISTS SecretProviders (
+                    ProviderId INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ProviderName TEXT UNIQUE NOT NULL,
+                    DisplayName TEXT NOT NULL,
+                    EncryptedConfigJson TEXT,
+                    IsEnabled INTEGER DEFAULT 1
+                );
+                CREATE TABLE IF NOT EXISTS AuthProviderConfigs (
+                    AuthId INTEGER PRIMARY KEY AUTOINCREMENT,
+                    ProviderName TEXT UNIQUE NOT NULL,
+                    DisplayName TEXT NOT NULL,
+                    UserHeader TEXT DEFAULT 'Remote-User',
+                    GroupsHeader TEXT DEFAULT 'Remote-Groups',
+                    ConfigJson TEXT,
+                    IsEnabled INTEGER DEFAULT 1
+                );");
+
+            var mockFactory = new Mock<IDbConnectionFactory>();
+            mockFactory.Setup(f => f.CreateConnection()).Returns(() =>
             {
-                var inMemoryConfig = new Dictionary<string, string?>
-                {
-                    { "DB_PROVIDER", "sqlite" },
-                    { "ConnectionStrings:DefaultConnection", $"Data Source={tempDbFile}" }
-                };
-                var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
-                var dbFactory = new DbConnectionFactory(config);
+                var conn = new SqliteConnection("DataSource=:memory:;Mode=Memory;Cache=Shared");
+                conn.Open();
+                return conn;
+            });
+            mockFactory.Setup(f => f.ProviderName).Returns("sqlite");
+            _dbFactory = mockFactory.Object;
+        }
 
-                // Ensure table exists in test SQLite DB
-                using (var conn = dbFactory.CreateConnection())
-                {
-                    conn.Open();
-                    using var cmd = conn.CreateCommand();
-                    cmd.CommandText = @"
-                        CREATE TABLE IF NOT EXISTS SecretProviders (
-                            ProviderId INTEGER PRIMARY KEY AUTOINCREMENT,
-                            ProviderName TEXT UNIQUE NOT NULL,
-                            DisplayName TEXT NOT NULL,
-                            EncryptedConfigJson TEXT NULL,
-                            IsEnabled INTEGER NOT NULL DEFAULT 1
-                        );";
-                    cmd.ExecuteNonQuery();
-                    try { cmd.CommandText = "ALTER TABLE SecretProviders ADD COLUMN EncryptedConfigJson TEXT NULL;"; cmd.ExecuteNonQuery(); } catch {}
-                }
+        public void Dispose()
+        {
+            _connection.Dispose();
+        }
 
-                var controller = new ProvidersController(dbFactory);
-                var saveResult = await controller.SaveSecretProvider(new SecretProviderDto
-                {
-                    ProviderName = "WindowsRegistry",
-                    DisplayName = "Windows Registry (DPAPI)",
-                    IsEnabled = true
-                }, new FakeAuditLogger());
-
-                Assert.IsType<OkObjectResult>(saveResult);
-
-                var getResult = await controller.GetSecretProviders();
-                var okResult = Assert.IsType<OkObjectResult>(getResult);
-                var list = Assert.IsAssignableFrom<IEnumerable<SecretProviderDto>>(okResult.Value);
-                Assert.Contains(list, p => p.ProviderName == "WindowsRegistry");
-            }
-            finally
+        private ProvidersController CreateController()
+        {
+            var controller = new ProvidersController(_dbFactory);
+            var user = new ClaimsPrincipal(new ClaimsIdentity(new[]
             {
-                if (File.Exists(tempDbFile))
-                {
-                    try { File.Delete(tempDbFile); } catch {}
-                }
-            }
+                new Claim(ClaimTypes.Name, "adminuser"),
+                new Claim(ClaimTypes.Role, "Admin")
+            }, "TestAuth"));
+
+            controller.ControllerContext = new ControllerContext
+            {
+                HttpContext = new DefaultHttpContext { User = user }
+            };
+            return controller;
         }
 
         [Fact]
-        public async Task Controller_Can_Save_And_Get_Auth_Providers()
+        public async Task SecretProviders_Save_And_Get()
         {
-            var tempDbFile = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N") + ".db");
-            try
+            var controller = CreateController();
+            var mockAudit = new Mock<IAuditLogger>();
+
+            var dto = new SecretProviderDto
             {
-                var inMemoryConfig = new Dictionary<string, string?>
-                {
-                    { "DB_PROVIDER", "sqlite" },
-                    { "ConnectionStrings:DefaultConnection", $"Data Source={tempDbFile}" }
-                };
-                var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
-                var dbFactory = new DbConnectionFactory(config);
+                ProviderName = "Vault",
+                DisplayName = "HashiCorp Vault",
+                ConfigJson = "{\"address\":\"https://vault:8200\"}",
+                IsEnabled = true
+            };
 
-                using (var conn = dbFactory.CreateConnection())
-                {
-                    conn.Open();
-                    using var cmd = conn.CreateCommand();
-                    cmd.CommandText = @"
-                        CREATE TABLE IF NOT EXISTS AuthProviderConfigs (
-                            AuthId INTEGER PRIMARY KEY AUTOINCREMENT,
-                            ProviderName TEXT UNIQUE NOT NULL,
-                            DisplayName TEXT NOT NULL,
-                            UserHeader TEXT NULL,
-                            GroupsHeader TEXT NULL,
-                            ConfigJson TEXT NULL,
-                            IsEnabled INTEGER NOT NULL DEFAULT 1
-                        );";
-                    cmd.ExecuteNonQuery();
-                    try { cmd.CommandText = "ALTER TABLE AuthProviderConfigs ADD COLUMN ConfigJson TEXT NULL;"; cmd.ExecuteNonQuery(); } catch {}
-                }
+            var saveResult = await controller.SaveSecretProvider(dto, mockAudit.Object);
+            var okSave = Assert.IsAssignableFrom<ObjectResult>(saveResult);
+            Assert.Equal(200, okSave.StatusCode);
 
-                var controller = new ProvidersController(dbFactory);
-                var saveResult = await controller.SaveAuthProvider(new AuthProviderDto
-                {
-                    ProviderName = "PocketID_TinyAuth",
-                    DisplayName = "PocketID / TinyAuth OIDC",
-                    UserHeader = "Remote-User",
-                    GroupsHeader = "Remote-Groups",
-                    IsEnabled = true
-                }, new FakeAuditLogger());
-
-                if (saveResult is ObjectResult objErr && objErr.StatusCode != 200)
-                {
-                    Assert.Fail($"SaveAuthProvider failed: {System.Text.Json.JsonSerializer.Serialize(objErr.Value)}");
-                }
-                Assert.IsType<OkObjectResult>(saveResult);
-
-                var getResult = await controller.GetAuthProviders();
-                var okResult = Assert.IsType<OkObjectResult>(getResult);
-                var list = Assert.IsAssignableFrom<IEnumerable<AuthProviderDto>>(okResult.Value);
-                Assert.Contains(list, p => p.ProviderName == "PocketID_TinyAuth");
-            }
-            finally
-            {
-                if (File.Exists(tempDbFile))
-                {
-                    try { File.Delete(tempDbFile); } catch {}
-                }
-            }
+            var getResult = await controller.GetSecretProviders();
+            var okResult = Assert.IsAssignableFrom<ObjectResult>(getResult);
+            Assert.Equal(200, okResult.StatusCode);
+            var providers = Assert.IsAssignableFrom<IEnumerable<SecretProviderDto>>(okResult.Value);
+            Assert.Single(providers);
+            Assert.Equal("Vault", providers.First().ProviderName);
         }
 
-        private class FakeAuditLogger : McpRouter.Core.Logging.IAuditLogger
+        [Fact]
+        public async Task AuthProviders_Save_And_Get()
         {
-            public Task LogInvocationAsync(string requestId, string userPrincipalName, string userSid, string serverCodeName, string itemName, string requestMethod, int executionTimeMs, int statusCode, string? requestPayload = null, string? responsePayload = null, string? errorMessage = null)
-                => Task.CompletedTask;
+            var controller = CreateController();
+            var mockAudit = new Mock<IAuditLogger>();
 
-            public Task LogAdminActionAsync(string username, string action, string target, string details, bool success, string? errorMessage = null)
-                => Task.CompletedTask;
+            var dto = new AuthProviderDto
+            {
+                ProviderName = "PocketID_TinyAuth",
+                DisplayName = "PocketID / TinyAuth Portal",
+                UserHeader = "Remote-User",
+                GroupsHeader = "Remote-Groups",
+                IsEnabled = true
+            };
+
+            var saveResult = await controller.SaveAuthProvider(dto, mockAudit.Object);
+            var okSave = Assert.IsAssignableFrom<ObjectResult>(saveResult);
+            Assert.Equal(200, okSave.StatusCode);
+
+            var getResult = await controller.GetAuthProviders();
+            var okResult = Assert.IsAssignableFrom<ObjectResult>(getResult);
+            Assert.Equal(200, okResult.StatusCode);
+            var providers = Assert.IsAssignableFrom<IEnumerable<AuthProviderDto>>(okResult.Value);
+            Assert.Single(providers);
+            Assert.Equal("PocketID_TinyAuth", providers.First().ProviderName);
         }
     }
 }

@@ -62,6 +62,7 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.0.1`** | 2026-08-07 | test(coverage): expand controller, secret retriever, and audit logger unit tests |
 | **`v4.0.0`** | 2026-08-07 | feat(security): Remediation Round 3 complete security hardening (R3-1 through R3-11) |
 | **`v3.9.7`** | 2026-08-07 | fix(security): resolve Remediation Round 2 P0 vulnerabilities (P0-1 through P0-7) |
 | **`v3.9.6`** | 2026-08-07 | fix(security): request-scoped SSE authorization — evaluate identity per-message, not from cached handshake context |
