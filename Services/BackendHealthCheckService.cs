@@ -14,7 +14,7 @@ using McpRouter.Models;
 namespace McpRouter.Services
 {
     /// <summary>
-    /// Auto-generated XML documentation.
+    /// Background hosted service that periodically probes downstream backend MCP servers and updates their health status.
     /// </summary>
     public class BackendHealthCheckService : BackgroundService
     {
@@ -23,6 +23,13 @@ namespace McpRouter.Services
         private readonly SessionManager _sessionManager;
         private readonly ILogger<BackendHealthCheckService> _logger;
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="BackendHealthCheckService"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The application service provider scope factory.</param>
+        /// <param name="httpClientFactory">The HTTP client factory for sending health probes.</param>
+        /// <param name="sessionManager">The session manager tracking active backend statuses.</param>
+        /// <param name="logger">The logger instance.</param>
         public BackendHealthCheckService(
             IServiceProvider serviceProvider,
             IHttpClientFactory httpClientFactory,

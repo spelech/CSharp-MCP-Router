@@ -11,13 +11,19 @@ using McpRouter.Services;
 namespace McpRouter.Core.Routing
 {
     /// <summary>
-    /// Auto-generated XML documentation.
+    /// Coordinates resource routing, resource template resolution, and multi-backend resource listing for MCP resources.
     /// </summary>
     public class ResourceRoutingManager
     {
         private readonly Dictionary<string, string> _resourceRoutingTable = new();
         private readonly ResourceCatalogManager _catalogManager = new();
 
+        /// <summary>
+        /// Searches through a list of resources matching the provided natural language query.
+        /// </summary>
+        /// <param name="query">The search term or query string.</param>
+        /// <param name="resources">The raw list of resource definitions.</param>
+        /// <returns>A task returning the top 15 matching resource items.</returns>
         public async Task<List<object>> SearchResourcesAsync(string query, List<object> resources)
         {
             return await _catalogManager.SearchResourcesAsync(query, resources);

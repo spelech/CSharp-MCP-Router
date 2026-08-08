@@ -13,7 +13,7 @@ using McpRouter.Services;
 namespace McpRouter.Core.Routing
 {
     /// <summary>
-    /// Auto-generated XML documentation.
+    /// Manages backend tool listing, caching, namespaced routing tables, and tool invocation execution.
     /// </summary>
     public class ToolRoutingManager
     {
@@ -22,8 +22,14 @@ namespace McpRouter.Core.Routing
         private readonly object _cacheLock = new();
         private bool _isCachePopulated = false;
 
+        /// <summary>
+        /// Gets the active thread-safe namespaced tool-to-server routing map.
+        /// </summary>
         public ConcurrentDictionary<string, string> ToolRoutingTable => _toolRoutingTable;
 
+        /// <summary>
+        /// Asynchronously lists available tools from connected backends or returns bootstrap Meta-Mode tools.
+        /// </summary>
         public async Task<List<object>> ListToolsAsync(string body, bool isMetaMode, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, IEnumerable<McpServer> servers, SessionManager? sessionManager = null)
         {
             if (isMetaMode)

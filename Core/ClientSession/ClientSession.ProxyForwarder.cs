@@ -9,10 +9,14 @@ using McpRouter.Models;
 namespace McpRouter
 {
     /// <summary>
-    /// Auto-generated XML documentation.
+    /// Partial class implementation providing request cancellation, client sampling request forwarding, and backend broadcast capabilities.
     /// </summary>
     public partial class ClientSession
     {
+        /// <summary>
+        /// Cancels an active request by triggering its registered cancellation token source.
+        /// </summary>
+        /// <param name="requestId">The unique request ID to cancel.</param>
         public void CancelRequest(string requestId)
         {
             if (_activeRequestCancellationTokens.TryRemove(requestId, out var cts))
