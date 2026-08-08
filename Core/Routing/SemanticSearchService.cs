@@ -7,6 +7,9 @@ using McpRouter.Services;
 
 namespace McpRouter.Core.Routing
 {
+    /// <summary>
+    /// Auto-generated XML documentation.
+    /// </summary>
     public class SemanticSearchService
     {
         private static readonly System.Collections.Concurrent.ConcurrentDictionary<string, float[]> _embeddingsCache = new();

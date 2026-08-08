@@ -10,6 +10,9 @@ using McpRouter.Services;
 
 namespace McpRouter.Core.Routing
 {
+    /// <summary>
+    /// Auto-generated XML documentation.
+    /// </summary>
     public class ResourceRoutingManager
     {
         private readonly Dictionary<string, string> _resourceRoutingTable = new();

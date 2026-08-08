@@ -12,6 +12,9 @@ using McpRouter.Services;
 
 namespace McpRouter.Core.Routing
 {
+    /// <summary>
+    /// Auto-generated XML documentation.
+    /// </summary>
     public class ToolRoutingManager
     {
         private readonly ConcurrentDictionary<string, string> _toolRoutingTable = new();
