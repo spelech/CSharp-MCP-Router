@@ -11,12 +11,8 @@ namespace McpRouter.Core.Secrets
         private static readonly object KeyLock = new object();
         private static (string secretString, byte[] key)? _cachedKey;
 
-        private static byte[] GetEncryptionKey(IConfiguration config)
+        private static byte[] DeriveKey(string secretString)
         {
-            var secretString = config["ROUTER_SECRET"]
-                ?? config["ROUTER_MASTER_KEY"]
-                ?? DbKeyHelper.ResolveDbEncryptionKey(config);
-
             if (_cachedKey.HasValue && _cachedKey.Value.secretString == secretString)
             {
                 return _cachedKey.Value.key;
@@ -36,6 +32,15 @@ namespace McpRouter.Core.Secrets
 
                 return derivedKey;
             }
+        }
+
+        private static byte[] GetEncryptionKey(IConfiguration config)
+        {
+            var secretString = config["ROUTER_SECRET"]
+                ?? config["ROUTER_MASTER_KEY"]
+                ?? DbKeyHelper.ResolveDbEncryptionKey(config);
+
+            return DeriveKey(secretString);
         }
 
         public static string Encrypt(string plaintext, IConfiguration config)
@@ -65,26 +70,66 @@ namespace McpRouter.Core.Secrets
         {
             if (string.IsNullOrEmpty(ciphertext)) return ciphertext;
 
-            var fullCipher = Convert.FromBase64String(ciphertext);
-            if (fullCipher.Length < 28) // 12 nonce + 16 tag minimum
+            byte[] fullCipher;
+            try
             {
-                throw new CryptographicException("Ciphertext payload is invalid or truncated.");
+                fullCipher = Convert.FromBase64String(ciphertext);
+            }
+            catch
+            {
+                return ciphertext; // Not valid base64 -> return raw plaintext
             }
 
-            var keyBytes = GetEncryptionKey(config);
-            var nonce = new byte[12];
-            var tag = new byte[16];
-            var cipherBytes = new byte[fullCipher.Length - 28];
+            if (fullCipher.Length < 28) // 12 nonce + 16 tag minimum
+            {
+                return ciphertext; // Payload too short for AES-GCM -> return raw plaintext
+            }
 
-            Array.Copy(fullCipher, 0, nonce, 0, 12);
-            Array.Copy(fullCipher, 12, tag, 0, 16);
-            Array.Copy(fullCipher, 28, cipherBytes, 0, cipherBytes.Length);
+            var primaryKey = GetEncryptionKey(config);
+            if (TryDecryptPayload(fullCipher, primaryKey, out var result))
+            {
+                return result;
+            }
 
-            var plaintextBytes = new byte[cipherBytes.Length];
-            using var aesGcm = new AesGcm(keyBytes, 16);
-            aesGcm.Decrypt(nonce, cipherBytes, tag, plaintextBytes);
+            // Fallback attempt: try legacy DB_ENCRYPTION_KEY if different from ROUTER_SECRET
+            var legacySecret = config["DB_ENCRYPTION_KEY"] ?? config["ROUTER_MASTER_KEY"];
+            if (!string.IsNullOrEmpty(legacySecret))
+            {
+                var legacyKey = DeriveKey(legacySecret);
+                if (TryDecryptPayload(fullCipher, legacyKey, out var legacyResult))
+                {
+                    return legacyResult;
+                }
+            }
 
-            return Encoding.UTF8.GetString(plaintextBytes);
+            System.Console.WriteLine($"[SymmetricEncryptionHelper] WARNING: Decryption failed for payload. Key tag mismatch or payload corrupted.");
+            return string.Empty;
+        }
+
+        private static bool TryDecryptPayload(byte[] fullCipher, byte[] keyBytes, out string plaintext)
+        {
+            plaintext = string.Empty;
+            try
+            {
+                var nonce = new byte[12];
+                var tag = new byte[16];
+                var cipherBytes = new byte[fullCipher.Length - 28];
+
+                Array.Copy(fullCipher, 0, nonce, 0, 12);
+                Array.Copy(fullCipher, 12, tag, 0, 16);
+                Array.Copy(fullCipher, 28, cipherBytes, 0, cipherBytes.Length);
+
+                var plaintextBytes = new byte[cipherBytes.Length];
+                using var aesGcm = new AesGcm(keyBytes, 16);
+                aesGcm.Decrypt(nonce, cipherBytes, tag, plaintextBytes);
+
+                plaintext = Encoding.UTF8.GetString(plaintextBytes);
+                return true;
+            }
+            catch (CryptographicException)
+            {
+                return false;
+            }
         }
     }
 }

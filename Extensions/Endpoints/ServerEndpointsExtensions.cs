@@ -218,14 +218,41 @@ namespace McpRouter.Extensions
                 var server = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @id", new { id });
                 if (server == null) return Results.NotFound(new { error = "Server not found" });
 
+                var sessionId = "inspect-" + id + "-" + Guid.NewGuid().ToString("N")[..8];
+                var tools = new List<object>();
+                var prompts = new List<object>();
+                var resources = new List<object>();
+
                 try
                 {
-                    var sessionId = "inspect-" + id + "-" + Guid.NewGuid().ToString("N")[..8];
                     var session = await sessionManager.CreateSessionAsync(sessionId, null!, id, false);
-                    var tools = await session.ListToolsAsync("{}");
-                    var prompts = await session.ListPromptsAsync("{}");
-                    var resources = await session.ListResourcesAsync("{}");
-                    sessionManager.CloseSession(sessionId);
+
+                    try
+                    {
+                        tools = await session.ListToolsAsync("{}");
+                    }
+                    catch (Exception exTools)
+                    {
+                        logger.LogWarning(exTools, "Failed to list tools for server {ServerId} during inspect", id);
+                    }
+
+                    try
+                    {
+                        prompts = await session.ListPromptsAsync("{}");
+                    }
+                    catch (Exception exPrompts)
+                    {
+                        logger.LogWarning(exPrompts, "Failed to list prompts for server {ServerId} during inspect", id);
+                    }
+
+                    try
+                    {
+                        resources = await session.ListResourcesAsync("{}");
+                    }
+                    catch (Exception exRes)
+                    {
+                        logger.LogWarning(exRes, "Failed to list resources for server {ServerId} during inspect", id);
+                    }
 
                     return Results.Ok(new
                     {
@@ -237,8 +264,19 @@ namespace McpRouter.Extensions
                 }
                 catch (Exception ex)
                 {
-                    logger.LogError(ex, "Error inspecting server {ServerId}", id);
-                    return Results.Problem($"Failed to inspect server capabilities: {ex.Message}");
+                    logger.LogError(ex, "Error creating session or connecting to server {ServerId} during inspect", id);
+                    return Results.Ok(new
+                    {
+                        server = new { id = server.Id, displayName = server.DisplayName, type = server.Type, url = server.Url, enabled = server.Enabled },
+                        tools = new List<object>(),
+                        prompts = new List<object>(),
+                        resources = new List<object>(),
+                        error = ex.Message
+                    });
+                }
+                finally
+                {
+                    sessionManager.CloseSession(sessionId);
                 }
             });
         }
