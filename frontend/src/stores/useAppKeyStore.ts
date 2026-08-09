@@ -1,0 +1,106 @@
+import { create } from 'zustand';
+import { apiRequest } from '../utils/api';
+import { showToast } from './useToastStore';
+
+export interface AppKeyItem {
+  id: string;
+  name: string;
+  username: string;
+  keyPrefix: string;
+  scopes: string[];
+  expiresAt?: string;
+  createdAt: string;
+}
+
+export interface AppKeyLimits {
+  globalMax: number;
+  userMax: number;
+  totalActiveKeys: number;
+  userActiveKeys: number;
+  isLimitReached: boolean;
+}
+
+export interface NewAppKeyResult {
+  id: string;
+  name: string;
+  username: string;
+  keyPrefix: string;
+  plaintextKey: string;
+  scopes: string[];
+  expiresAt?: string;
+  createdAt: string;
+}
+
+interface AppKeyStore {
+  appKeys: AppKeyItem[];
+  limits: AppKeyLimits | null;
+  isLoading: boolean;
+  isCreateModalOpen: boolean;
+  createdResult: NewAppKeyResult | null;
+
+  fetchAppKeys: () => Promise<void>;
+  fetchLimits: () => Promise<void>;
+  createAppKey: (payload: { name: string; username?: string; scopes: string[]; expiresInDays?: number }) => Promise<void>;
+  revokeAppKey: (id: string, name: string) => Promise<void>;
+  openModal: () => void;
+  closeModal: () => void;
+}
+
+export const useAppKeyStore = create<AppKeyStore>((set, get) => ({
+  appKeys: [],
+  limits: null,
+  isLoading: false,
+  isCreateModalOpen: false,
+  createdResult: null,
+
+  fetchAppKeys: async () => {
+    set({ isLoading: true });
+    try {
+      const data = await apiRequest<AppKeyItem[]>('/api/appkeys');
+      set({ appKeys: data || [], isLoading: false });
+    } catch (e: any) {
+      console.error('Error fetching app keys:', e);
+      set({ isLoading: false });
+    }
+  },
+
+  fetchLimits: async () => {
+    try {
+      const data = await apiRequest<AppKeyLimits>('/api/appkeys/limits');
+      set({ limits: data });
+    } catch (e: any) {
+      console.error('Error fetching app key limits:', e);
+    }
+  },
+
+  createAppKey: async (payload) => {
+    try {
+      const result = await apiRequest<NewAppKeyResult>('/api/appkeys', {
+        method: 'POST',
+        body: payload
+      });
+      set({ createdResult: result });
+      showToast('App Key created successfully', 'success');
+      get().fetchAppKeys();
+      get().fetchLimits();
+    } catch (e: any) {
+      showToast(`Error creating App Key: ${e.message}`, 'error');
+      throw e;
+    }
+  },
+
+  revokeAppKey: async (id, name) => {
+    if (!window.confirm(`Are you sure you want to revoke the App Key '${name}'?`)) return;
+    try {
+      await apiRequest(`/api/appkeys/${id}`, { method: 'DELETE' });
+      showToast('App Key revoked successfully', 'success');
+      get().fetchAppKeys();
+      get().fetchLimits();
+    } catch (e: any) {
+      showToast(`Error revoking App Key: ${e.message}`, 'error');
+    }
+  },
+
+  openModal: () => set({ isCreateModalOpen: true, createdResult: null }),
+  closeModal: () => set({ isCreateModalOpen: false, createdResult: null })
+}));
