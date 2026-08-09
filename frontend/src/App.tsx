@@ -1,19 +1,21 @@
 import React, { useState } from 'react';
 import { Header } from './components/Header';
 import { DashboardView } from './components/DashboardView';
+import { SecurityView } from './components/SecurityView';
 import { TestBenchView } from './components/TestBenchView';
 import { SettingsView } from './components/SettingsView';
 
 import { ServerModal } from './components/ServerModal';
 import { ServerInspectModal } from './components/ServerInspectModal';
 import { ClientModal } from './components/ClientModal';
+import { AppKeyModal } from './components/AppKeyModal';
 import { CustomFileModal } from './components/CustomFileModal';
 import { PolicyModal } from './components/PolicyModal';
 import { MappingModal } from './components/MappingModal';
 import { Toasts } from './components/Toasts';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'testbench' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'security' | 'testbench' | 'settings'>('dashboard');
 
   return (
     <>
@@ -33,6 +35,12 @@ const App: React.FC = () => {
             <i className="fa-solid fa-gauge"></i> Overview
           </button>
           <button
+            className={`tab-btn ${currentView === 'security' ? 'active' : ''}`}
+            onClick={() => setCurrentView('security')}
+          >
+            <i className="fa-solid fa-key"></i> App Keys & Security
+          </button>
+          <button
             className={`tab-btn ${currentView === 'testbench' ? 'active' : ''}`}
             onClick={() => setCurrentView('testbench')}
           >
@@ -47,6 +55,7 @@ const App: React.FC = () => {
         </nav>
 
         {currentView === 'dashboard' && <DashboardView />}
+        {currentView === 'security' && <SecurityView />}
         {currentView === 'testbench' && <TestBenchView />}
         {currentView === 'settings' && <SettingsView />}
 
@@ -59,6 +68,7 @@ const App: React.FC = () => {
       <ServerModal />
       <ServerInspectModal />
       <ClientModal />
+      <AppKeyModal />
       <CustomFileModal />
       <PolicyModal />
       <MappingModal />
