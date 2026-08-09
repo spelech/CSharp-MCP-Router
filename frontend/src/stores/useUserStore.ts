@@ -19,7 +19,7 @@ interface UserStore {
 
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
-  version: '4.4.1', // fallback default
+  version: '4.4.2', // fallback default
   isLoadingUser: false,
   loadUser: async () => {
     set({ isLoadingUser: true });

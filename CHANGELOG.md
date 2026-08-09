@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.4.2`** | 2026-08-09 | docs(plan): add implementation plan for dedicated App Keys & Security tab |
 | **`v4.4.1`** | 2026-08-09 | docs(spec): add design spec for dedicated App Keys & Security management tab |
 | **`v4.4.0`** | 2026-08-08 | feat(auth): add X-App-Key header extraction and default admin AppKey seeder |
 | **`v4.3.0`** | 2026-08-08 | feat(ui): implement interactive multi-target client setup guide generator |
