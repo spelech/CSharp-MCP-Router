@@ -77,11 +77,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.5.2`** | 2026-08-09 | fix(ui): remove RegisteredClientsCard from Overview and stabilize tab layout navigation width |
+| **`v4.5.1`** | 2026-08-09 | fix(ui): remove RegisteredClientsCard from Overview and stabilize tab layout navigation width |
 | **`v4.5.0`** | 2026-08-09 | feat(ui): add dedicated App Keys & Security tab with LiteLLM-style key management |
 | **`v4.4.2`** | 2026-08-09 | docs(plan): add implementation plan for dedicated App Keys & Security tab |
 | **`v4.4.1`** | 2026-08-09 | docs(spec): add design spec for dedicated App Keys & Security management tab |
-| **`v4.4.0`** | 2026-08-08 | feat(auth): add X-App-Key header extraction and default admin AppKey seeder |
-| **`v4.3.0`** | 2026-08-08 | feat(ui): implement interactive multi-target client setup guide generator |
 
 ---
 
