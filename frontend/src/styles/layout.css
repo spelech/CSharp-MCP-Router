@@ -14,9 +14,7 @@ body {
     color: var(--text-main);
     font-family: 'Outfit', sans-serif;
     min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
+    display: block;
     position: relative;
     overflow-x: hidden;
 }
@@ -68,6 +66,7 @@ body {
     display: flex;
     flex-direction: column;
     gap: 25px;
+    box-sizing: border-box;
 }
 
 /* Header */
@@ -82,8 +81,10 @@ body {
     justify-content: space-between;
     align-items: center;
     box-shadow: var(--card-shadow);
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     gap: 15px;
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .header-logo {
