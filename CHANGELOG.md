@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.5.3`** | 2026-08-09 | fix(build): add SecurityView.tsx component and asset screenshots to git tracking |
 | **`v4.5.2`** | 2026-08-09 | fix(ui): remove RegisteredClientsCard from Overview and stabilize tab layout navigation width |
 | **`v4.5.1`** | 2026-08-09 | fix(ui): remove RegisteredClientsCard from Overview and stabilize tab layout navigation width |
 | **`v4.5.0`** | 2026-08-09 | feat(ui): add dedicated App Keys & Security tab with LiteLLM-style key management |
