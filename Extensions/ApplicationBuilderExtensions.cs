@@ -27,6 +27,21 @@ namespace McpRouter.Extensions
 
         public static void ConfigureMcpRouterPipeline(this WebApplication app)
         {
+            var config = app.Services.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
+            var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("McpRouter.Startup");
+
+            var requireTrusted = config.GetValue<bool>("Oidc:RequireTrustedProxy", true);
+            if (!requireTrusted)
+            {
+                logger.LogWarning("SECURITY WARNING: Oidc:RequireTrustedProxy is set to false! This is dangerous in production as headers like Remote-User can be spoofed by any internal or external client.");
+            }
+
+            var trustedProxies = config["Oidc:TrustedProxies"];
+            if (string.IsNullOrWhiteSpace(trustedProxies))
+            {
+                logger.LogWarning("Notice: Oidc:TrustedProxies is unset. Header-based authentication (reverse proxy auth) will trust loopback-only (127.0.0.1 / ::1).");
+            }
+
             app.UseCors();
 
             // Extract token from query parameters for SSE / WebSocket bypass support

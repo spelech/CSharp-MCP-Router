@@ -28,8 +28,8 @@ namespace McpRouter.Core.Identity
 
             if (string.IsNullOrWhiteSpace(proxiesStrVal))
             {
-                // Default: trust local loopback and Docker container subnets (172.16.0.0/12)
-                return IPAddress.IsLoopback(effectiveIp) || IsDockerContainerSubnet(effectiveIp);
+                // Default: trust local loopback only (lock the trusted-proxy default to loopback-only)
+                return IPAddress.IsLoopback(effectiveIp);
             }
 
             var trustedProxies = proxiesStrVal.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
