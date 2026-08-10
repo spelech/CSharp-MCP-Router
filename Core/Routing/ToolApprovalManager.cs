@@ -26,7 +26,7 @@ namespace McpRouter.Core.Routing
                    name.Contains("unifi");
         }
 
-        public static async Task<bool> RequestManualApprovalAsync(string toolName, string body, SessionManager? sessionManager, string serverId, ILogger logger)
+        public static async Task<bool> RequestManualApprovalAsync(string toolName, string body, SessionManager? sessionManager, string serverId, ILogger logger, CancellationToken cancellationToken = default, string? clientSessionId = null)
         {
             if (sessionManager == null) return true;
 
@@ -49,13 +49,26 @@ namespace McpRouter.Core.Routing
             {
                 ToolName = toolName,
                 Arguments = argumentsText,
-                SessionId = serverId
+                SessionId = clientSessionId ?? serverId
             };
 
             sessionManager.PendingApprovals[approval.Id] = approval;
             logger.LogWarning("Tool call '{ToolName}' is pending user approval. Approval ID: {ApprovalId}", toolName, approval.Id);
 
-            return await approval.Tcs.Task;
+            try
+            {
+                return await approval.Tcs.Task.WaitAsync(cancellationToken);
+            }
+            catch (OperationCanceledException)
+            {
+                logger.LogWarning("Approval request '{ApprovalId}' was cancelled.", approval.Id);
+                sessionManager.PendingApprovals.TryRemove(approval.Id, out _);
+                throw;
+            }
+            finally
+            {
+                sessionManager.PendingApprovals.TryRemove(approval.Id, out _);
+            }
         }
     }
 }

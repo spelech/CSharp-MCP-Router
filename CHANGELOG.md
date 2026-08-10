@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.5.5`** | 2026-08-09 | reliability(gateway): fix socket leaks, Vault reconnect, approval cleanup, LDAP caching, and dead param cleanup |
 | **`v4.5.4`** | 2026-08-09 | fix(layout): lock body to block centering and header to flex-wrap nowrap to prevent tab navigation width shifts |
 | **`v4.5.3`** | 2026-08-09 | fix(build): add SecurityView.tsx component and asset screenshots to git tracking |
 | **`v4.5.2`** | 2026-08-09 | fix(ui): remove RegisteredClientsCard from Overview and stabilize tab layout navigation width |
