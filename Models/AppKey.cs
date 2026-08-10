@@ -12,6 +12,7 @@ namespace McpRouter.Models
         public string KeyPrefix { get; set; } = string.Empty;
         public string EncryptedKey { get; set; } = string.Empty;
         public string ScopesJson { get; set; } = "[]"; // JSON array of scopes, e.g. ["all"], ["server:ha"], etc.
+        public string OwnerSid { get; set; } = string.Empty;
         public DateTime? ExpiresAt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
