@@ -16,10 +16,12 @@ namespace McpRouter.Controllers
     public class ClientsController : ControllerBase
     {
         private readonly IDbConnectionFactory _dbFactory;
+        private readonly McpRouter.Core.Logging.IAuditLogger _auditLogger;
 
-        public ClientsController(IDbConnectionFactory dbFactory)
+        public ClientsController(IDbConnectionFactory dbFactory, McpRouter.Core.Logging.IAuditLogger auditLogger)
         {
             _dbFactory = dbFactory;
+            _auditLogger = auditLogger;
         }
 
         [HttpGet]
@@ -58,34 +60,59 @@ namespace McpRouter.Controllers
             var prefix = clientSecret.Substring(0, Math.Min(16, clientSecret.Length));
             var scopesJson = JsonSerializer.Serialize(model.Scopes ?? new List<string>());
 
-            using var conn = _dbFactory.CreateConnection();
-            await conn.ExecuteAsync(@"
-                INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson)
-                VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson)",
-                new {
-                    Id = keyId,
-                    Name = model.DisplayName,
-                    Username = clientId,
-                    KeyPrefix = prefix,
-                    EncryptedKey = clientSecret,
-                    ScopesJson = scopesJson
-                });
+            var username = User?.Identity?.Name ?? "unknown";
+            try
+            {
+                using var conn = _dbFactory.CreateConnection();
+                await conn.ExecuteAsync(@"
+                    INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson)
+                    VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson)",
+                    new {
+                        Id = keyId,
+                        Name = model.DisplayName,
+                        Username = clientId,
+                        KeyPrefix = prefix,
+                        EncryptedKey = clientSecret,
+                        ScopesJson = scopesJson
+                    });
 
-            return Ok(new {
-                ClientId = clientId,
-                ClientSecret = clientSecret,
-                DisplayName = model.DisplayName
-            });
+                await _auditLogger.LogAdminActionAsync(username, "client.create", clientId, JsonSerializer.Serialize(new { model.DisplayName, Scopes = model.Scopes }), true);
+
+                return Ok(new {
+                    ClientId = clientId,
+                    ClientSecret = clientSecret,
+                    DisplayName = model.DisplayName
+                });
+            }
+            catch (Exception ex)
+            {
+                await _auditLogger.LogAdminActionAsync(username, "client.create", "", JsonSerializer.Serialize(new { model.DisplayName }), false, ex.Message);
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
         
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(string id)
         {
-            using var conn = _dbFactory.CreateConnection();
-            var deleted = await conn.ExecuteAsync("DELETE FROM AppKeys WHERE Id = @id", new { id });
-            if (deleted == 0) return NotFound();
-            
-            return NoContent();
+            var username = User?.Identity?.Name ?? "unknown";
+            try
+            {
+                using var conn = _dbFactory.CreateConnection();
+                var deleted = await conn.ExecuteAsync("DELETE FROM AppKeys WHERE Id = @id", new { id });
+                if (deleted == 0)
+                {
+                    await _auditLogger.LogAdminActionAsync(username, "client.delete", id, "", false, "Client not found");
+                    return NotFound();
+                }
+
+                await _auditLogger.LogAdminActionAsync(username, "client.delete", id, "", true);
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                await _auditLogger.LogAdminActionAsync(username, "client.delete", id, "", false, ex.Message);
+                return StatusCode(500, new { error = ex.Message });
+            }
         }
 
         public class CreateClientModel

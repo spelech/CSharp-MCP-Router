@@ -45,7 +45,8 @@ namespace McpRouter.Tests
             var (conn, dbFactory) = CreateDbFactory();
             conn.Execute("INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson) VALUES ('id-1', 'Client One', 'client-1', 'mcp_prefix1', 'secret1', '[\"mcp_client\"]')");
 
-            var controller = new ClientsController(dbFactory);
+            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var controller = new ClientsController(dbFactory, mockAudit.Object);
 
             var result = await controller.GetClients();
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -59,7 +60,8 @@ namespace McpRouter.Tests
         public async Task CreateClient_ReturnsOk_WithGeneratedCredentials()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var controller = new ClientsController(dbFactory);
+            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var controller = new ClientsController(dbFactory, mockAudit.Object);
 
             var model = new ClientsController.CreateClientModel
             {
@@ -82,7 +84,8 @@ namespace McpRouter.Tests
             var (conn, dbFactory) = CreateDbFactory();
             conn.Execute("INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey) VALUES ('123', 'Client', 'user', 'pref', 'sec')");
 
-            var controller = new ClientsController(dbFactory);
+            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var controller = new ClientsController(dbFactory, mockAudit.Object);
             var result = await controller.DeleteClient("123");
 
             result.Should().BeOfType<NoContentResult>();
@@ -92,7 +95,8 @@ namespace McpRouter.Tests
         public async Task DeleteClient_ReturnsNotFound_WhenAppDoesNotExist()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var controller = new ClientsController(dbFactory);
+            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var controller = new ClientsController(dbFactory, mockAudit.Object);
 
             var result = await controller.DeleteClient("nonexistent");
             result.Should().BeOfType<NotFoundResult>();
