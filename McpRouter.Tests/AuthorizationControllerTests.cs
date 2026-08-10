@@ -16,7 +16,8 @@ namespace McpRouter.Tests
         public async Task Exchange_ThrowsInvalidOperationException_WhenRequestNull()
         {
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
-            var controller = new AuthorizationController(mockAppManager.Object)
+            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var controller = new AuthorizationController(mockAppManager.Object, mockAudit.Object)
             {
                 ControllerContext = new ControllerContext
                 {
@@ -33,8 +34,9 @@ namespace McpRouter.Tests
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
             mockAppManager.Setup(m => m.CreateAsync(It.IsAny<OpenIddictApplicationDescriptor>(), default))
                           .ReturnsAsync(new object());
+            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
 
-            var controller = new AuthorizationController(mockAppManager.Object);
+            var controller = new AuthorizationController(mockAppManager.Object, mockAudit.Object);
             var json = JsonDocument.Parse("{\"client_name\":\"IntegrationTestApp\"}").RootElement;
 
             var result = await controller.RegisterClient(json) as OkObjectResult;

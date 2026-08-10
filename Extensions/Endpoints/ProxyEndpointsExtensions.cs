@@ -425,6 +425,21 @@ namespace McpRouter.Extensions
                         if (policyCount == 0)
                         {
                             httpContext.Response.StatusCode = 403;
+                            var audit = httpContext.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
+                            if (audit != null)
+                            {
+                                await audit.LogInvocationAsync(
+                                    Guid.NewGuid().ToString("N"),
+                                    identity.Username,
+                                    identity.Sid ?? "",
+                                    targetServerId,
+                                    "server/connect",
+                                    httpContext.Request.Method,
+                                    0,
+                                    403,
+                                    errorMessage: "Access denied"
+                                );
+                            }
                             await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
                             return;
                         }
@@ -438,6 +453,21 @@ namespace McpRouter.Extensions
                         if (denyCount > 0 || allowCount == 0)
                         {
                             httpContext.Response.StatusCode = 403;
+                            var audit = httpContext.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
+                            if (audit != null)
+                            {
+                                await audit.LogInvocationAsync(
+                                    Guid.NewGuid().ToString("N"),
+                                    identity.Username,
+                                    identity.Sid ?? "",
+                                    targetServerId,
+                                    "server/connect",
+                                    httpContext.Request.Method,
+                                    0,
+                                    403,
+                                    errorMessage: "Access denied"
+                                );
+                            }
                             await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
                             return;
                         }
@@ -458,6 +488,21 @@ namespace McpRouter.Extensions
                         if (isAllowed == 0)
                         {
                             httpContext.Response.StatusCode = 403;
+                            var audit = httpContext.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
+                            if (audit != null)
+                            {
+                                await audit.LogInvocationAsync(
+                                    Guid.NewGuid().ToString("N"),
+                                    identity.Username,
+                                    identity.Sid ?? "",
+                                    targetServerId,
+                                    "server/connect",
+                                    httpContext.Request.Method,
+                                    0,
+                                    403,
+                                    errorMessage: "Access denied"
+                                );
+                            }
                             await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
                             return;
                         }

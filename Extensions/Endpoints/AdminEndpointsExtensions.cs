@@ -69,21 +69,21 @@ namespace McpRouter.Extensions
                 take = Math.Clamp(take, 1, 1000);
                 using var conn = dbf.CreateConnection();
                 string sql;
-                if (dbf.ProviderName == "sqlserver")
+                if (dbf.ProviderName == "mssql")
                 {
-                    sql = @"SELECT Timestamp, Username, UserSid, ServerId, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage
+                    sql = @"SELECT Timestamp, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage
                             FROM AuditLogs
-                            WHERE (@user   IS NULL OR Username = @user)
-                              AND (@server IS NULL OR ServerId = @server)
+                            WHERE (@user   IS NULL OR UserPrincipalName = @user)
+                              AND (@server IS NULL OR ServerCodeName = @server)
                               AND (@since  IS NULL OR Timestamp >= @since)
                             ORDER BY Timestamp DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY;";
                 }
                 else
                 {
-                    sql = @"SELECT Timestamp, Username, UserSid, ServerId, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage
+                    sql = @"SELECT Timestamp, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage
                             FROM AuditLogs
-                            WHERE (@user   IS NULL OR Username = @user)
-                              AND (@server IS NULL OR ServerId = @server)
+                            WHERE (@user   IS NULL OR UserPrincipalName = @user)
+                              AND (@server IS NULL OR ServerCodeName = @server)
                               AND (@since  IS NULL OR Timestamp >= @since)
                             ORDER BY Timestamp DESC LIMIT @take OFFSET @skip;";
                 }
@@ -124,7 +124,7 @@ namespace McpRouter.Extensions
                 return Results.Ok(approvals);
             });
 
-            api.MapPost("/api/approvals/{id}/action", ([FromRoute] string id, [FromBody] System.Text.Json.JsonElement body, [FromServices] SessionManager sessionManager) =>
+            api.MapPost("/api/approvals/{id}/action", async ([FromRoute] string id, [FromBody] System.Text.Json.JsonElement body, [FromServices] SessionManager sessionManager, HttpContext httpContext) =>
             {
                 if (sessionManager.PendingApprovals.TryRemove(id, out var approval))
                 {
@@ -134,6 +134,17 @@ namespace McpRouter.Extensions
                         approved = appProp.GetBoolean();
                     }
                     approval.Tcs.SetResult(approved);
+
+                    var audit = httpContext.RequestServices.GetService<IAuditLogger>();
+                    if (audit != null)
+                    {
+                        var username = httpContext.User?.Identity?.Name ?? "unknown";
+                        var action = approved ? "approval.grant" : "approval.deny";
+                        var target = approval.ToolName ?? "unknown";
+                        var details = JsonSerializer.Serialize(new { id, arguments = approval.Arguments, sessionId = approval.SessionId });
+                        await audit.LogAdminActionAsync(username, action, target, details, true);
+                    }
+
                     return Results.Ok(new { success = true });
                 }
                 return Results.NotFound(new { error = "Approval request not found." });
@@ -243,14 +254,23 @@ namespace McpRouter.Extensions
             });
 
             // 3. Test Call API
-            api.MapPost("/api/test/call", async ([FromBody] TestCallModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/call", async (
+                [FromBody] TestCallModel model,
+                [FromServices] IDbConnectionFactory dbFactory,
+                [FromServices] HttpClient httpClient,
+                [FromServices] IAuditLogger auditLogger,
+                ILogger<Program> logger,
+                HttpContext httpContext) =>
             {
+                var username = httpContext.User?.Identity?.Name ?? "unknown";
                 var secretRetriever = httpContext.RequestServices.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                 using var dbConn = dbFactory.CreateConnection();
                 var server = await dbConn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @Id", new { Id = model.ServerId });
                 if (server == null && model.ServerId != "custom")
                 {
-                    return Results.NotFound($"Server {model.ServerId} not found");
+                    var msg = $"Server {model.ServerId} not found";
+                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments }), false, msg);
+                    return Results.NotFound(msg);
                 }
 
                 // If executing a custom native tool
@@ -261,6 +281,10 @@ namespace McpRouter.Extensions
                     {
                         var args = model.Arguments.ValueKind == JsonValueKind.Undefined ? JsonDocument.Parse("{}").RootElement : model.Arguments;
                         var res = await customTool.ExecuteAsync(args, httpClient, dbFactory);
+
+                        var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
+                        await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, true);
+
                         return Results.Ok(new {
                             content = new[] {
                                 new { type = "text", text = JsonSerializer.Serialize(res, new JsonSerializerOptions { WriteIndented = true }) }
@@ -269,38 +293,58 @@ namespace McpRouter.Extensions
                     }
                     catch (Exception ex)
                     {
+                        var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
+                        await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, false, ex.Message);
                         return Results.Problem(ex.Message);
                     }
                 }
 
-                if (server == null) return Results.NotFound();
-
-                // Direct routing to backend
-                using var conn = new BackendConnection(server, httpClient, logger, secretRetriever);
-                if (server.Type != "http" && server.Type != "streamable")
+                if (server == null)
                 {
-                    await conn.ConnectAsync();
-                    conn.StartReader(msg => Task.CompletedTask);
+                    var msg = "Server not found";
+                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments }), false, msg);
+                    return Results.NotFound();
                 }
-                
-                var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
-                await conn.SendRequestAsync("initialize", initReq);
-                await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
 
-                var targetPayload = new
+                try
                 {
-                    jsonrpc = "2.0",
-                    id = "test-call-id",
-                    method = "tools/call",
-                    @params = new
+                    // Direct routing to backend
+                    using var conn = new BackendConnection(server, httpClient, logger, secretRetriever);
+                    if (server.Type != "http" && server.Type != "streamable")
                     {
-                        name = model.ToolName,
-                        arguments = model.Arguments
+                        await conn.ConnectAsync();
+                        conn.StartReader(msg => Task.CompletedTask);
                     }
-                };
-                var targetBody = JsonSerializer.Serialize(targetPayload);
-                var result = await conn.SendRequestAsync("tools/call", targetBody);
-                return Results.Ok(result);
+
+                    var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+                    await conn.SendRequestAsync("initialize", initReq);
+                    await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
+
+                    var targetPayload = new
+                    {
+                        jsonrpc = "2.0",
+                        id = "test-call-id",
+                        method = "tools/call",
+                        @params = new
+                        {
+                            name = model.ToolName,
+                            arguments = model.Arguments
+                        }
+                    };
+                    var targetBody = JsonSerializer.Serialize(targetPayload);
+                    var result = await conn.SendRequestAsync("tools/call", targetBody);
+
+                    var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
+                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, true);
+
+                    return Results.Ok(result);
+                }
+                catch (Exception ex)
+                {
+                    var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
+                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, false, ex.Message);
+                    return Results.Problem(ex.Message);
+                }
             });
 
             // 4. Test Semantic Search API
