@@ -162,7 +162,7 @@ namespace McpRouter.Core.Transports
             using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);
 
-            var resp = await _httpClient.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, linked.Token);
+            using var resp = await _httpClient.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, linked.Token);
             resp.EnsureSuccessStatusCode();
 
             if (resp.Headers.TryGetValues("Mcp-Session-Id", out var sVals))
