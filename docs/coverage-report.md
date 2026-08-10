@@ -12,26 +12,15 @@ dotnet test McpRouter.slnx --collect:"XPlat Code Coverage"
 
 ## Coverage Breakdown
 
-### Core Session
-| Component | Line Coverage | Branch Coverage |
-| :--- | :--- | :--- |
-| `ClientSession` | 93.1% | 89.2% |
-| `SessionManager` | 91.5% | 87.0% |
+To view the actual, real-time code coverage breakdown across core modules, run the locally collected coverage files using your preferred report generator (e.g. ReportGenerator tool).
 
-### Routing Engine
-| Component | Line Coverage | Branch Coverage |
-| :--- | :--- | :--- |
-| `ToolRoutingManager` | 88.4% | 84.1% |
-| `ResourceRoutingManager` | 90.0% | 86.2% |
+```bash
+dotnet tool install -g dotnet-reportgenerator-globaltool
+reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coveragereport" -reporttypes:Html
+```
 
-### Controllers
-| Component | Line Coverage | Branch Coverage |
-| :--- | :--- | :--- |
-| `ProvidersController` | 95.0% | 92.5% |
-| `ServersController` | 93.4% | 89.5% |
-
-### Security & Providers
-| Component | Line Coverage | Branch Coverage |
-| :--- | :--- | :--- |
-| `VaultSecretRetriever` | 99.0% | 96.5% |
-| `OidcIdentityProvider` | 98.0% | 95.1% |
+This will analyze all tests run and generate a comprehensive HTML report showing exact line-by-line coverage for all of our active components including:
+- **Core Session**: `ClientSession`, `SessionManager`, `BackendConnection`
+- **Routing Engine**: `ToolRoutingManager`, `ResourceRoutingManager`
+- **Controllers / Extensions**: `ProvidersController`, `ProxyEndpointsExtensions`
+- **Security & Providers**: `VaultSecretRetriever`, `OidcIdentityProvider`, `WindowsRegistrySecretRetriever`

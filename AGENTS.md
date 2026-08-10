@@ -13,10 +13,10 @@ This project is a high-performance C# ASP.NET Core gateway router for the Model 
 
 ## Code Organization
 
-- `/Core/`: Contains the core routing logic (`ClientSession`, `BackendConnection`, `SessionManager`, `CustomTools`).
+- `/Core/`: Contains the core routing logic (`ClientSession`, `BackendConnection`, `SessionManager`, `ToolRoutingManager`, `CustomToolRegistry`).
 - `/Models/`: Contains data transfer objects and protocol models.
 - `/Controllers/`, `/Middleware/`, `/Extensions/`: Standard ASP.NET Core components.
-- `/wwwroot/`: The frontend UI for the router dashboard.
+- `/frontend/`: The frontend UI source code for the router dashboard.
 
 ## Tests
 

@@ -8,8 +8,9 @@ using Microsoft.AspNetCore.Http;
 namespace McpRouter.Middleware
 {
     /// <summary>
-    /// Implements MCP 2026-07-28 Header-Based Routing (SEP-2243) and Dual-Spec Fallback.
-    /// Inspects Mcp-Method and Mcp-Name HTTP headers for fast routing, falling back to JSON body inspection if missing.
+    /// Implements MCP 2026-07-28 Spec-Compliant Header Annotation and Dual-Spec Fallback.
+    /// Inspects Mcp-Method and Mcp-Name HTTP headers, storing parsed metadata in HttpContext.Items for downstream use,
+    /// and always invokes the next delegate (no short-circuit).
     /// </summary>
     public class McpDualSpecMiddleware
     {
