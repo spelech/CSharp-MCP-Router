@@ -297,6 +297,68 @@ namespace McpRouter.Tests
             bool isTrusted = TrustedProxyHelper.IsTrustedProxy(context, config);
             Assert.False(isTrusted);
         }
+
+        [Fact]
+        public void TrustedProxyHelper_Unconfigured_LoopbackTrusted_LANNotTrusted()
+        {
+            // Unconfigured (TrustedProxies empty)
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Oidc:TrustedProxies"] = ""
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            // 1. Loopback ip address should be trusted
+            var loopbackCtx = new DefaultHttpContext();
+            loopbackCtx.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
+            Assert.True(TrustedProxyHelper.IsTrustedProxy(loopbackCtx, config));
+
+            // 2. LAN ip address (e.g., 10.0.0.50) should NOT be trusted
+            var lanCtx = new DefaultHttpContext();
+            lanCtx.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.50");
+            Assert.False(TrustedProxyHelper.IsTrustedProxy(lanCtx, config));
+        }
+
+        [Fact]
+        public void TrustedProxyHelper_ConfiguredProxyTrusted()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Oidc:TrustedProxies"] = "10.0.0.50"
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var proxyCtx = new DefaultHttpContext();
+            proxyCtx.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.50");
+            Assert.True(TrustedProxyHelper.IsTrustedProxy(proxyCtx, config));
+
+            var otherCtx = new DefaultHttpContext();
+            otherCtx.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.51");
+            Assert.False(TrustedProxyHelper.IsTrustedProxy(otherCtx, config));
+        }
+
+        [Fact]
+        public async Task TrustedProxyHelper_ForgedHeaderFromLanHost_DegradesToGuest()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Oidc:TrustedProxies"] = "127.0.0.1" // loopback only
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var context = new DefaultHttpContext();
+            context.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.50"); // LAN host (not trusted)
+            context.Request.Headers["Remote-User"] = "malicious_admin";
+            context.Request.Headers["Remote-Groups"] = "full_admin";
+
+            var provider = new OidcIdentityProvider(config);
+            var identity = await provider.ResolveIdentityAsync(context);
+
+            Assert.Equal("guest", identity.Username);
+            Assert.Empty(identity.GroupNames);
+            Assert.False(context.Request.Headers.ContainsKey("Remote-User"));
+            Assert.False(context.Request.Headers.ContainsKey("Remote-Groups"));
+        }
     }
 }
 
