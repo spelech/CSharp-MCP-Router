@@ -49,7 +49,7 @@ namespace McpRouter.Middleware
                 new Claim(ClaimTypes.NameIdentifier, username)
             };
 
-            if (identityContext.AllSids.Contains(adminGroupSid) || identityContext.GroupNames.Contains("full_admin") || identityContext.GroupNames.Contains("Administrator"))
+            if (identityContext.AllSids.Contains(adminGroupSid, StringComparer.OrdinalIgnoreCase))
             {
                 claims.Add(new Claim("Sid", adminGroupSid));
             }
