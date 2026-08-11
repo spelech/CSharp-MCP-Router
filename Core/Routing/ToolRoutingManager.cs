@@ -202,11 +202,12 @@ namespace McpRouter.Core.Routing
             Func<Task> ensureBackendsInitializedAsync,
             Func<string, string, string, string> rewriteRequestJson,
             CancellationToken cancellationToken = default,
-            SessionManager? sessionManager = null)
+            SessionManager? sessionManager = null,
+            string? clientSessionId = null)
         {
             try
             {
-                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
+                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
                 return await task.WaitAsync(cancellationToken);
             }
             catch (OperationCanceledException)
@@ -236,7 +237,9 @@ namespace McpRouter.Core.Routing
             IEmbeddingService embeddingService,
             Func<Task> ensureBackendsInitializedAsync,
             Func<string, string, string, string> rewriteRequestJson,
-            SessionManager? sessionManager)
+            CancellationToken cancellationToken,
+            SessionManager? sessionManager,
+            string? clientSessionId)
         {
             await ensureBackendsInitializedAsync();
 
@@ -334,7 +337,7 @@ namespace McpRouter.Core.Routing
 
                 try
                 {
-                    var result = await ExecuteTargetToolAsync(targetName, targetBody, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
+                    var result = await ExecuteTargetToolAsync(targetName, targetBody, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
                     return result;
                 }
                 catch (Exception ex)
@@ -352,7 +355,7 @@ namespace McpRouter.Core.Routing
                 }
             }
 
-            return await ExecuteTargetToolAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, sessionManager);
+            return await ExecuteTargetToolAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
         }
 
         private async Task<object> ExecuteTargetToolAsync(
@@ -365,7 +368,9 @@ namespace McpRouter.Core.Routing
             HttpClient httpClient,
             Func<Task> ensureBackendsInitializedAsync,
             Func<string, string, string, string> rewriteRequestJson,
-            SessionManager? sessionManager)
+            CancellationToken cancellationToken,
+            SessionManager? sessionManager,
+            string? clientSessionId)
         {
             var customTool = McpRouter.CustomTools.CustomToolRegistry.Get(toolName);
             if (customTool != null)
@@ -427,7 +432,7 @@ namespace McpRouter.Core.Routing
                 var settings = dbConn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings");
                 if (settings != null && settings.RequireManualApproval && ToolApprovalManager.IsSensitiveTool(toolName))
                 {
-                    var approved = await ToolApprovalManager.RequestManualApprovalAsync(toolName, body, sessionManager, serverId, logger);
+                    var approved = await ToolApprovalManager.RequestManualApprovalAsync(toolName, body, sessionManager, serverId, logger, cancellationToken, clientSessionId);
                     if (!approved)
                     {
                         return new

@@ -30,6 +30,7 @@ namespace McpRouter
         private readonly ConcurrentDictionary<string, BackendConnection> _backendConnections = new();
         private readonly SemaphoreSlim _writeLock = new(1, 1);
         private readonly IEmbeddingService _embeddingService;
+        private readonly IServiceProvider? _rootServices;
 
         private readonly Core.Routing.ToolRoutingManager _toolRoutingManager = new();
         private readonly Core.Routing.ResourceRoutingManager _resourceRoutingManager = new();
@@ -51,7 +52,7 @@ namespace McpRouter
 
         private readonly SessionManager? _sessionManager;
  
-        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, SessionManager? sessionManager, Microsoft.Extensions.Logging.ILogger logger)
+        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, SessionManager? sessionManager, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
         {
             _sessionId = sessionId;
             _clientResponse = clientResponse;
@@ -60,10 +61,11 @@ namespace McpRouter
             _embeddingService = embeddingService;
             _sessionManager = sessionManager;
             _logger = logger;
+            _rootServices = rootServices;
         }
 
-        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, Microsoft.Extensions.Logging.ILogger logger)
-            : this(sessionId, clientResponse, servers, httpClient, embeddingService, null, logger)
+        public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
+            : this(sessionId, clientResponse, servers, httpClient, embeddingService, sessionManager: null, logger, rootServices)
         {
         }
 
@@ -105,7 +107,7 @@ namespace McpRouter
                 }
 
                 // RBAC Check — use the live per-request HttpContext when provided
-                var isAuth = await IsUserAuthorizedAsync("tools/call", toolName, null, httpContext);
+                var isAuth = await IsUserAuthorizedAsync("tools/call", toolName, httpContext);
                 if (!isAuth)
                 {
                     var identity = await ResolveUserIdentityAsync(httpContext);
@@ -124,8 +126,10 @@ namespace McpRouter
                     return errResult;
                 }
 
+                var contextToUse = httpContext ?? _clientResponse?.HttpContext;
+                var abortToken = contextToUse?.RequestAborted ?? CancellationToken.None;
                 string? requestId = null;
-                using (var cts = new CancellationTokenSource())
+                using (var cts = CancellationTokenSource.CreateLinkedTokenSource(abortToken, _cts.Token))
                 {
                     try
                     {
@@ -141,7 +145,7 @@ namespace McpRouter
 
                     try
                     {
-                        var res = await _toolRoutingManager.CallToolAsync(toolName, body, dbFactory, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager);
+                        var res = await _toolRoutingManager.CallToolAsync(toolName, body, dbFactory, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager, _sessionId);
                         responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
                         return res;
                     }
@@ -181,6 +185,11 @@ namespace McpRouter
 
         public void Close()
         {
+            try
+            {
+                _cts.Cancel();
+            }
+            catch {}
             foreach (var conn in _backendConnections.Values)
             {
                 conn.Dispose();
@@ -214,7 +223,7 @@ namespace McpRouter
                 }
 
                 // RBAC Check — use the live per-request HttpContext when provided
-                var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri, null, httpContext);
+                var isAuth = await IsUserAuthorizedAsync("resources/read", resourceUri, httpContext);
                 if (!isAuth)
                 {
                     var identity = await ResolveUserIdentityAsync(httpContext);
@@ -357,7 +366,7 @@ namespace McpRouter
                 }
 
                 // RBAC Check — use the live per-request HttpContext when provided
-                var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName, null, httpContext);
+                var isAuth = await IsUserAuthorizedAsync("prompts/get", promptName, httpContext);
                 if (!isAuth)
                 {
                     var identity = await ResolveUserIdentityAsync(httpContext);

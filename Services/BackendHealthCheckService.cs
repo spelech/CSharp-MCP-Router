@@ -115,7 +115,7 @@ namespace McpRouter.Services
                     request.Headers.Add("X-API-Key", server.ApiKey);
                 }
 
-                var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
+                using var response = await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cts.Token);
                 // Any response means the server container / network process is listening and healthy
                 _sessionManager.UpdateBackendStatus(server.Id, "Connected", 1, "");
             }

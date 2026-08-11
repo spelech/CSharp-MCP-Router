@@ -106,7 +106,8 @@ namespace McpRouter
                     _logger.LogInformation("Attempting to connect to backend {ServerId} (attempt {Attempt}/{MaxAttempts}) at {Url}...", server.Id, attempt, maxAttempts, server.Url);
                     _sessionManager?.UpdateBackendStatus(server.Id, "Connecting", attempt, "");
 
-                    var retriever = _clientResponse?.HttpContext?.RequestServices?.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
+                    var retriever = _rootServices?.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>()
+                        ?? _clientResponse?.HttpContext?.RequestServices?.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
                     var conn = new BackendConnection(server, _httpClient, _logger, retriever);
                     if (server.Type != "http" && server.Type != "streamable")
                     {

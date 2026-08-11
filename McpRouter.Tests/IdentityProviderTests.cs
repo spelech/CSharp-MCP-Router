@@ -359,6 +359,57 @@ namespace McpRouter.Tests
             Assert.False(context.Request.Headers.ContainsKey("Remote-User"));
             Assert.False(context.Request.Headers.ContainsKey("Remote-Groups"));
         }
+
+        [Fact]
+        public async Task ConnectAndInitializeBackendAsync_WithVaultServer_ResolvesRetrieverFromRootServices_WhenHttpContextIsNull()
+        {
+            // Arrange
+            var server = new McpRouter.Models.McpServer
+            {
+                Id = "vault-server",
+                Enabled = true,
+                Url = "http://localhost:8080",
+                Type = "http", // Keep it simple so it doesn't try to open SSE sockets
+                SecretProvider = "Vault"
+            };
+
+            var mockInnerRetriever = new Mock<McpRouter.Core.Secrets.ISecretRetriever>();
+            mockInnerRetriever.Setup(r => r.ProviderName).Returns("Vault");
+            mockInnerRetriever.Setup(r => r.GetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ReturnsAsync("dummy-secret-value");
+
+            var realComposite = new McpRouter.Core.Secrets.CompositeSecretRetriever(new List<McpRouter.Core.Secrets.ISecretRetriever> { mockInnerRetriever.Object }, null);
+
+            var services = new ServiceCollection();
+            services.AddSingleton(realComposite);
+            var rootServices = services.BuildServiceProvider();
+
+            // ClientSession with null HttpContext (so clientResponse is null)
+            var session = new ClientSession(
+                "session-id",
+                null!, // clientResponse is null
+                new List<McpRouter.Models.McpServer> { server },
+                new HttpClient(),
+                new Mock<McpRouter.Services.IEmbeddingService>().Object,
+                null,
+                new Mock<Microsoft.Extensions.Logging.ILogger<ClientSession>>().Object,
+                rootServices
+            );
+
+            // Act
+            // ConnectAndInitializeBackendAsync is private, so we invoke it via reflection.
+            var method = typeof(ClientSession).GetMethod("ConnectAndInitializeBackendAsync", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            Assert.NotNull(method);
+
+            var task = (Task)method.Invoke(session, new object[] { server })!;
+            await task;
+
+            // Assert
+            // The method executes without throwing a NullReferenceException on HTTP context or missing secret retriever.
+            // Since it's configured as type="http", it won't attempt to open persistent SSE/Stream connections, but it does
+            // invoke secret retrieval.
+            mockInnerRetriever.Verify(r => r.GetSecretAsync(It.IsAny<string>(), It.IsAny<string>()), Times.AtLeastOnce());
+        }
     }
 }
 

@@ -229,8 +229,8 @@ namespace McpRouter.Tests
                 new Mock<Microsoft.Extensions.Logging.ILogger<ClientSession>>().Object
             );
 
-            bool tool1Auth = await session.IsUserAuthorizedAsync("tools/list", "serverA__tool1", null, context);
-            bool tool2Auth = await session.IsUserAuthorizedAsync("tools/list", "serverB__tool2", null, context);
+            bool tool1Auth = await session.IsUserAuthorizedAsync("tools/list", "serverA__tool1", context);
+            bool tool2Auth = await session.IsUserAuthorizedAsync("tools/list", "serverB__tool2", context);
 
             Assert.True(tool1Auth);
             Assert.False(tool2Auth);

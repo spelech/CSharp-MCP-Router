@@ -27,6 +27,13 @@ namespace McpRouter
         {
             var contextToUse = httpContext ?? _clientResponse?.HttpContext;
 
+            if (contextToUse != null && contextToUse.Items.TryGetValue("ResolvedUserIdentity", out var cachedIdentityObj) && cachedIdentityObj is UserIdentityContext cachedIdentity)
+            {
+                return cachedIdentity;
+            }
+
+            UserIdentityContext identity;
+
             if (contextToUse?.User?.Identity?.IsAuthenticated == true)
             {
                 var username = contextToUse.User.Identity.Name ?? "anonymous";
@@ -41,29 +48,42 @@ namespace McpRouter
                     .Distinct()
                     .ToList();
 
-                return new UserIdentityContext(username, contextToUse.User.Identity.AuthenticationType ?? "Claims", GroupNames: groupNames, Sid: "", Sids: sids);
+                identity = new UserIdentityContext(username, contextToUse.User.Identity.AuthenticationType ?? "Claims", GroupNames: groupNames, Sid: "", Sids: sids);
             }
-
-            if (contextToUse?.RequestServices != null)
+            else if (contextToUse?.RequestServices != null)
             {
                 try
                 {
                     var compositeProvider = contextToUse.RequestServices.GetService<CompositeIdentityProvider>();
                     if (compositeProvider != null)
                     {
-                        return await compositeProvider.ResolveIdentityAsync(contextToUse);
+                        identity = await compositeProvider.ResolveIdentityAsync(contextToUse);
+                    }
+                    else
+                    {
+                        identity = new UserIdentityContext("anonymous", "None", new List<string>());
                     }
                 }
                 catch (Exception ex)
                 {
                     _logger.LogWarning(ex, "Failed to resolve user identity via CompositeIdentityProvider");
+                    identity = new UserIdentityContext("anonymous", "None", new List<string>());
                 }
             }
+            else
+            {
+                identity = new UserIdentityContext("anonymous", "None", new List<string>());
+            }
 
-            return new UserIdentityContext("anonymous", "None", new List<string>());
+            if (contextToUse != null)
+            {
+                contextToUse.Items["ResolvedUserIdentity"] = identity;
+            }
+
+            return identity;
         }
 
-        public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, string? category = null, HttpContext? httpContext = null)
+        public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, HttpContext? httpContext = null)
         {
             var contextToUse = httpContext ?? _clientResponse?.HttpContext;
             // If authenticated via AppKey, check key-level scopes first
@@ -152,10 +172,6 @@ namespace McpRouter
                     serverId = targetId.Contains("__") ? targetId.Split("__", 2)[0] : targetId;
                 }
                 targetKeys.Add($"server:{serverId}");
-                if (!string.IsNullOrEmpty(category))
-                {
-                    targetKeys.Add($"category:{category}");
-                }
 
                 var externalIds = identity.GroupNames.Concat(identity.AllSids).Distinct().ToList();
                 if (!string.IsNullOrEmpty(identity.Username) && !externalIds.Contains(identity.Username)) externalIds.Add(identity.Username);
@@ -233,7 +249,7 @@ namespace McpRouter
                 }
                 catch { /* fall through to fail-closed exclude */ }
                 if (string.IsNullOrEmpty(id)) continue;                       // can't identify → exclude
-                if (await IsUserAuthorizedAsync(method, id, null, httpContext)) allowed.Add(item);
+                if (await IsUserAuthorizedAsync(method, id, httpContext)) allowed.Add(item);
             }
             return allowed;
         }

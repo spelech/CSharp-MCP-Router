@@ -4,6 +4,7 @@ using System.DirectoryServices.Protocols;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
 
@@ -13,11 +14,13 @@ namespace McpRouter.Core.Identity
     {
         private readonly IConfiguration _config;
         private readonly ILogger<LdapActiveDirectoryService> _logger;
+        private readonly IMemoryCache? _cache;
 
-        public LdapActiveDirectoryService(IConfiguration config, ILogger<LdapActiveDirectoryService> logger)
+        public LdapActiveDirectoryService(IConfiguration config, ILogger<LdapActiveDirectoryService> logger, IMemoryCache? cache = null)
         {
             _config = config;
             _logger = logger;
+            _cache = cache;
         }
 
         public Task<List<string>> ResolveUserSidsAsync(string username)
@@ -26,6 +29,16 @@ namespace McpRouter.Core.Identity
             if (string.IsNullOrWhiteSpace(username))
             {
                 return Task.FromResult(sids);
+            }
+
+            if (_cache != null)
+            {
+                var cacheKey = $"LdapSids_{username.ToLowerInvariant()}";
+                if (_cache.TryGetValue<List<string>>(cacheKey, out var cachedSids) && cachedSids != null)
+                {
+                    _logger.LogDebug("LDAP SIDs cache hit for user {Username}", username);
+                    return Task.FromResult(cachedSids);
+                }
             }
 
             var server = _config["Ldap:Server"] ?? _config["AD:Server"];
@@ -118,6 +131,12 @@ namespace McpRouter.Core.Identity
             {
                 _logger.LogError(ex, "Failed to resolve SIDs via LDAP for user {Username}", username);
                 throw new System.Security.SecurityException($"LDAP SID resolution failed for user '{username}'. Fail-closed policy active.", ex);
+            }
+
+            if (_cache != null && sids.Count > 0)
+            {
+                var cacheKey = $"LdapSids_{username.ToLowerInvariant()}";
+                _cache.Set(cacheKey, sids, TimeSpan.FromMinutes(5));
             }
 
             return Task.FromResult(sids);
