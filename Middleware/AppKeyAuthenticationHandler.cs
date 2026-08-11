@@ -89,7 +89,7 @@ namespace McpRouter.Middleware
                 }
                 else
                 {
-                    const string sql = "SELECT Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys WHERE KeyPrefix = @KeyPrefix;";
+                    const string sql = "SELECT Id, Name, Username, OwnerSid, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys WHERE KeyPrefix = @KeyPrefix;";
                     appKey = await conn.QueryFirstOrDefaultAsync<AppKey>(sql, new { KeyPrefix = prefix });
                 }
 
@@ -125,11 +125,15 @@ namespace McpRouter.Middleware
                 }
 
                 // Successfully authenticated!
-                var claims = new[]
+                var claims = new System.Collections.Generic.List<Claim>
                 {
                     new Claim(ClaimTypes.Name, appKey.Username),
                     new Claim(ClaimTypes.Role, "McpClient")
                 };
+                if (!string.IsNullOrEmpty(appKey.OwnerSid))
+                {
+                    claims.Add(new Claim("Sid", appKey.OwnerSid));
+                }
 
                 var identity = new ClaimsIdentity(claims, Scheme.Name);
                 var principal = new ClaimsPrincipal(identity);
@@ -139,6 +143,7 @@ namespace McpRouter.Middleware
                 Context.Items["AppKeyUsed"] = true;
                 Context.Items["AppKeyScopes"] = appKey.ScopesJson;
                 Context.Items["AppKeyOwner"] = appKey.Username;
+                Context.Items["AppKeyOwnerSid"] = appKey.OwnerSid;
 
                 return AuthenticateResult.Success(ticket);
             }
