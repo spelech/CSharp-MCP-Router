@@ -8,7 +8,8 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.5.5`** | 2026-08-09 | feat(audit): make the audit trail readable & complete across admin/proxy endpoints |
+| **`v4.5.6`** | 2026-08-10 | fix(auth): make gateway admin SID-only and fail-closed on missing OpenIddict prod certs |
+| **`v4.5.5`** | 2026-08-09 | docs(hygiene): fix test/coverage badges, header-routing claim, phantom type refs |
 | **`v4.5.4`** | 2026-08-09 | fix(layout): lock body to block centering and header to flex-wrap nowrap to prevent tab navigation width shifts |
 | **`v4.5.3`** | 2026-08-09 | fix(build): add SecurityView.tsx component and asset screenshots to git tracking |
 | **`v4.5.2`** | 2026-08-09 | fix(ui): remove RegisteredClientsCard from Overview and stabilize tab layout navigation width |
@@ -57,7 +58,7 @@ For summary details and quick references, see [README.md](README.md).
 | **`v4.0.10`** | 2026-08-07 | refactor(seeder): extract CatalogDatabaseSeeder and ClientAppKeySeeder helpers |
 | **`v4.0.9`** | 2026-08-07 | refactor(endpoints): extract modular endpoint extension classes from ApplicationBuilderExtensions |
 | **`v4.0.8`** | 2026-08-07 | refactor(session): extract ClientSession rewriter and notification broadcaster partials |
-| **`v4.0.7`** | 2026-08-07 | refactor(routing): break apart ToolRoutingManager and expand unit tests for Docker, LDAP, AD, and ONNX |
+| **`v4.0.7`** | 2026-08-07 | break apart ToolRoutingManager and expand unit tests for Docker, LDAP, AD, and ONNX |
 | **`v4.0.6`** | 2026-08-07 | test(coverage): expand test suites for moderate core modules to reach >= 80% coverage |
 | **`v4.0.5`** | 2026-08-07 | test(coverage): expand core service unit test suites and bump version to v4.0.4 |
 | **`v4.0.4`** | 2026-08-07 | test(coverage): expand core service unit test suites (+1,500 covered lines, 217 passing tests) |
