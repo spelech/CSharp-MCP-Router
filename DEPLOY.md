@@ -31,6 +31,62 @@ In previous releases, the default trusted-proxy fallback automatically trusted a
 
 ---
 
+## 🟢 Quick Start — SQLite (Default Provider)
+
+SQLite is the default and requires **no manual schema steps**: on first start the gateway creates every table and applies all column migrations (including `AppKeys.OwnerSid`) automatically and idempotently via the built-in seeder. This is the recommended path for a single-node internal deployment.
+
+### Prerequisites
+* **.NET 10 runtime** on the host (or use the container image).
+* **Windows host** if you rely on Active Directory **SID** resolution — the AD/Windows SID path (`WindowsIdentity`/LDAP) is Windows-only. Header-based (reverse-proxy) identity works cross-platform.
+* A reverse proxy (IIS/Nginx/Caddy/Traefik) terminating TLS and injecting identity headers, if using header auth.
+
+### Step 1 — Generate the master key
+`ROUTER_MASTER_KEY` encrypts downstream credentials at rest (AES-GCM). Generate a 256-bit key:
+```bash
+openssl rand -base64 32
+```
+
+### Step 2 — Generate the OpenIddict signing certificate
+Production fails closed if no certificate is configured (tokens would otherwise reset every restart):
+```bash
+openssl req -x509 -newkey rsa:2048 -keyout key.pem -out cert.pem -days 3650 -nodes -subj "/CN=mcp-router"
+openssl pkcs12 -export -out openiddict.pfx -inkey key.pem -in cert.pem -passout pass:
+```
+Point `OpenIddict:CertificatePath` at the resulting `openiddict.pfx`.
+
+### Step 3 — Minimal configuration
+Copy `.env.example` to `.env` (or use `appsettings.Production.json.example`) and set at minimum:
+```bash
+ASPNETCORE_ENVIRONMENT=Production
+ROUTER_MASTER_KEY=<from step 1>
+DB_PROVIDER=sqlite                                   # default; may be omitted
+ConnectionStrings__DefaultConnection=Data Source=/data/mcprouter.db
+CORS_ALLOWED_ORIGINS=https://mcp.internal.example.com
+OpenIddict__CertificatePath=/data/openiddict.pfx
+Oidc__TrustedProxies=10.20.30.40                     # your reverse proxy IP (loopback-only if unset)
+Admin__GroupSid=S-1-5-21-...                         # your AD admins group SID
+```
+
+### Step 4 — Persist the database file
+The SQLite `.db` file (and the PFX) **must live on persistent storage**. In containers, mount a volume at the directory referenced by `Data Source` (e.g. `-v mcprouter-data:/data`). Losing the file loses all servers, keys, policies, and audit history.
+
+### Step 5 — Run
+```bash
+# from a published build
+dotnet mcp-router.dll
+# or the container image, with the data volume and env file
+docker run --env-file .env -v mcprouter-data:/data -p 8080:8080 <image>
+```
+
+### Step 6 — Verify
+* The gateway logs `Initializing database via Dapper...` and creates the schema on first boot.
+* Liveness: `GET /health` returns healthy (note: this is a static liveness probe — a true readiness probe is on the observability backlog).
+* Confirm audit capture by making an authenticated call and reading it back via `GET /api/audit`.
+
+> ⚠️ **Scope note:** Only the SQLite path is exercised in the current CI/test suite (159 tests, SQLite). The SQL Server / MySQL provider paths, real AD/LDAP, and Vault integration are implemented but have **not** been validated end-to-end in this repo — verify those in your own environment before relying on them.
+
+---
+
 ## 📂 Database Providers & Schema Initialization
 
 The MCP Router supports SQL Server, MySQL/MariaDB, and SQLite. When configuring MS SQL Server or MySQL, you must execute the database scripts in the exact sequence described below to initialize the database and stored procedures.
