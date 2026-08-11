@@ -185,14 +185,16 @@ CREATE PROCEDURE `sp_SaveAppKey`(
     IN p_KeyPrefix VARCHAR(50),
     IN p_EncryptedKey LONGTEXT,
     IN p_ScopesJson LONGTEXT,
+    IN p_OwnerSid VARCHAR(200),
     IN p_ExpiresAt DATETIME
 )
 BEGIN
-    INSERT INTO `AppKeys` (`Id`, `Name`, `Username`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`)
-    VALUES (p_Id, p_Name, p_Username, p_KeyPrefix, p_EncryptedKey, p_ScopesJson, p_ExpiresAt, NOW())
+    INSERT INTO `AppKeys` (`Id`, `Name`, `Username`, `OwnerSid`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`)
+    VALUES (p_Id, p_Name, p_Username, p_OwnerSid, p_KeyPrefix, p_EncryptedKey, p_ScopesJson, p_ExpiresAt, NOW())
     ON DUPLICATE KEY UPDATE
         `Name` = p_Name,
         `Username` = p_Username,
+        `OwnerSid` = p_OwnerSid,
         `KeyPrefix` = p_KeyPrefix,
         `EncryptedKey` = p_EncryptedKey,
         `ScopesJson` = p_ScopesJson,

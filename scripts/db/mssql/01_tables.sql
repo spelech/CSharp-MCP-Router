@@ -45,9 +45,15 @@ BEGIN
         [EncryptedKey] NVARCHAR(MAX) NOT NULL,
         [ScopesJson]   NVARCHAR(MAX) NOT NULL DEFAULT '[]',
         [ExpiresAt]    DATETIME2 NULL,
-        [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+        [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        [OwnerSid]     NVARCHAR(200) NOT NULL DEFAULT ''
     );
 END;
+GO
+
+-- Idempotent: add OwnerSid to pre-existing AppKeys tables so app-key calls are attributable.
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE Name = N'OwnerSid' AND Object_ID = Object_ID(N'dbo.AppKeys'))
+    ALTER TABLE [dbo].[AppKeys] ADD [OwnerSid] NVARCHAR(200) NOT NULL DEFAULT '';
 GO
 
 -- 2. Secret Providers Configuration Table

@@ -16,6 +16,7 @@ namespace McpRouter.Core.Identity
         private readonly IConfiguration? _configuration;
         private static readonly string[] DefaultUserHeaders = new[] { "Remote-User", "X-Forwarded-User", "X-Auth-Request-User", "X-User" };
         private static readonly string[] DefaultGroupHeaders = new[] { "Remote-Groups", "X-Forwarded-Groups", "X-Auth-Request-Groups", "sso_groups" };
+        private static readonly string[] DefaultSidHeaders = new[] { "Remote-User-Sid", "X-Auth-Request-Sid" };
 
         public HeaderIdentityProvider(IConfiguration? configuration = null)
         {
@@ -64,7 +65,26 @@ namespace McpRouter.Core.Identity
                 }
             }
 
-            return Task.FromResult(new UserIdentityContext(user, ProviderName, groups.Distinct().ToList(), Sid: "", Sids: new List<string>()));
+            var sidHeadersSection = config?.GetSection("Identity:HeaderAuth:SidHeaders");
+            var sidHeaders = (sidHeadersSection != null && sidHeadersSection.Exists())
+                ? sidHeadersSection.Get<string[]>()
+                : null;
+            sidHeaders ??= DefaultSidHeaders;
+
+            string? sid = null;
+            foreach (var header in sidHeaders)
+            {
+                var val = httpContext.Request.Headers[header].FirstOrDefault();
+                if (!string.IsNullOrWhiteSpace(val))
+                {
+                    sid = val.Trim();
+                    break;
+                }
+            }
+
+            var sids = !string.IsNullOrEmpty(sid) ? new List<string> { sid } : new List<string>();
+
+            return Task.FromResult(new UserIdentityContext(user, ProviderName, groups.Distinct().ToList(), Sid: sid ?? "", Sids: sids));
         }
     }
 

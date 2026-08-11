@@ -69,6 +69,8 @@ namespace McpRouter.Extensions
 
         // Register Pluggable Identity Providers (Active Directory & Configurable Header Auth)
         builder.Services.AddSingleton<McpRouter.Core.Identity.ILdapService, McpRouter.Core.Identity.LdapActiveDirectoryService>();
+        // App-key requests carry no AD/OIDC headers; resolve their owner+SID first so audit rows are attributable.
+        builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.AppKeyIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.ActiveDirectoryIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.HeaderIdentityProvider>();
         builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.OidcIdentityProvider>();

@@ -47,10 +47,21 @@ namespace McpRouter.Core.Identity
 
                 if (ldapService != null)
                 {
-                    var ldapSids = await ldapService.ResolveUserSidsAsync(username);
-                    if (ldapSids != null)
+                    try
                     {
-                        sids.AddRange(ldapSids);
+                        var ldapSids = await ldapService.ResolveUserSidsAsync(username);
+                        if (ldapSids != null)
+                        {
+                            sids.AddRange(ldapSids);
+                        }
+                    }
+                    catch (System.Exception exLdap)
+                    {
+                        // A transient LDAP failure must never demote an already-authenticated Windows user to anonymous;
+                        // keep the token-group SIDs collected above and continue.
+                        var logger = httpContext.RequestServices?.GetService(typeof(Microsoft.Extensions.Logging.ILogger<ActiveDirectoryIdentityProvider>))
+                            as Microsoft.Extensions.Logging.ILogger<ActiveDirectoryIdentityProvider>;
+                        logger?.LogWarning(exLdap, "LDAP SID augmentation failed for {Username}; using token-group SIDs only.", username);
                     }
                 }
 
