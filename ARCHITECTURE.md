@@ -7,7 +7,7 @@ This document outlines the internal architecture, security mechanisms, design re
 ## 📐 Architectural Design Requirements
 
 ### 1. Performance & Latency Requirements
-- **Sub-millisecond Routing Decision**: The gateway must route messages based on headers (`Mcp-Method` and `Mcp-Name` compliant with the MCP 2026-07-28 Spec) without having to read or buffer the request body. This keeps CPU usage low and routes requests almost instantly.
+- **Sub-millisecond Routing Decision**: The gateway annotates request metadata based on headers (`Mcp-Method` and `Mcp-Name` compliant with the MCP 2026-07-28 Spec) without having to read or buffer the request body if present, enabling downstream components to inspect annotated metadata. Routing is ultimately body/path based.
 - **Concurrent Request Handling**: Highly thread-safe design. The router must manage simultaneous SSE client channels, background health probes, and on-demand semantic search requests using thread-safe state wrappers (`ConcurrentDictionary` and thread-safe locks).
 - **Background Startup Warming**: Embedding models, backend connection channels, and configuration caches must be preloaded asynchronously during server initialization. This prevents first-request latency spikes (cold starts).
 
@@ -118,16 +118,16 @@ The codebase is organized in directories mirroring its sub-system boundaries:
   - `ClientSession.cs`: Controls client connections, tracks execution threads, and rewrites JSON payloads.
   - `BackendConnection.cs`: Represents connection tunnels to upstream servers.
   - `SessionManager.cs`: Monitors all active connections and handles cleanup.
-  - `CustomTools.cs`: Directs semantic tool searching and routing workflows.
+  - `ToolRoutingManager.cs` & `CustomToolRegistry.cs`: Direct semantic tool searching, registration, and routing workflows.
 - **`/Middleware/`**:
   - `McpAuthorizationSpecMiddleware.cs`: Appends standard-compliant authorization challenges (`WWW-Authenticate`).
   - `McpDualSpecMiddleware.cs`: Core request interception for specification headers.
 - **`/Services/`**:
   - `SemanticSearchService.cs`: Merges vector embeddings and hybrid keyword matches.
   - `BackendHealthCheckService.cs`: Periodically checks the health of downstream targets.
-- **`/Controllers/`**:
-  - `ProvidersController.cs`: Controls administrative configuration for security providers.
-  - `McpController.cs`: Exposes SSE tunnels and routing routes.
+- **`/Extensions/`**:
+  - Minimal-API handlers in `ProxyEndpointsExtensions.cs` & `ServerEndpointsExtensions.cs`: Expose SSE tunnels, server listing, inspection, and routing routes.
+  - `ProvidersController.cs` (in `/Controllers/`): Controls administrative configuration for security providers.
 - **`/data/`**:
   - Persistent volume holding configurations, local ONNX files, and SQLite databases.
 
@@ -174,32 +174,32 @@ classDiagram
     class IIdentityProvider {
         <<interface>>
     }
-    class ActiveDirectoryProvider
-    class OidcProvider
-    IIdentityProvider <|-- ActiveDirectoryProvider
-    IIdentityProvider <|-- OidcProvider
+    class ActiveDirectoryIdentityProvider
+    class OidcIdentityProvider
+    IIdentityProvider <|-- ActiveDirectoryIdentityProvider
+    IIdentityProvider <|-- OidcIdentityProvider
 
     class ISecretRetriever {
         <<interface>>
     }
     class VaultSecretRetriever
-    class DpapiSecretRetriever
+    class WindowsRegistrySecretRetriever
     ISecretRetriever <|-- VaultSecretRetriever
-    ISecretRetriever <|-- DpapiSecretRetriever
+    ISecretRetriever <|-- WindowsRegistrySecretRetriever
 
     class ITransport {
         <<interface>>
     }
     class SseTransport
-    class StdioTransport
+    class HttpTransport
     ITransport <|-- SseTransport
-    ITransport <|-- StdioTransport
+    ITransport <|-- HttpTransport
 
     class IAuditLogger {
         <<interface>>
     }
-    class SqlAuditLogger
-    IAuditLogger <|-- SqlAuditLogger
+    class AuditLogger
+    IAuditLogger <|-- AuditLogger
 ```
 
 ### 3. Routing Engine Architecture & Helper Separation

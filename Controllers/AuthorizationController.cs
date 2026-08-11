@@ -14,10 +14,12 @@ namespace McpRouter.Controllers
     public class AuthorizationController : Controller
     {
         private readonly IOpenIddictApplicationManager _applicationManager;
+        private readonly McpRouter.Core.Logging.IAuditLogger _auditLogger;
 
-        public AuthorizationController(IOpenIddictApplicationManager applicationManager)
+        public AuthorizationController(IOpenIddictApplicationManager applicationManager, McpRouter.Core.Logging.IAuditLogger auditLogger)
         {
             _applicationManager = applicationManager;
+            _auditLogger = auditLogger;
         }
 
         [HttpPost("~/connect/token")]
@@ -78,16 +80,28 @@ namespace McpRouter.Controllers
                 }
             };
 
-            await _applicationManager.CreateAsync(descriptor);
-
-            return Ok(new
+            try
             {
-                client_id = clientId,
-                client_secret = clientSecret,
-                client_id_issued_at = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
-                client_secret_expires_at = 0,
-                token_endpoint_auth_method = "client_secret_post"
-            });
+                await _applicationManager.CreateAsync(descriptor);
+
+                var username = User?.Identity?.Name ?? "unknown";
+                await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName }), true);
+
+                return Ok(new
+                {
+                    client_id = clientId,
+                    client_secret = clientSecret,
+                    client_id_issued_at = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                    client_secret_expires_at = 0,
+                    token_endpoint_auth_method = "client_secret_post"
+                });
+            }
+            catch (Exception ex)
+            {
+                var username = User?.Identity?.Name ?? "unknown";
+                await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName }), false, ex.Message);
+                throw;
+            }
         }
     }
 }
