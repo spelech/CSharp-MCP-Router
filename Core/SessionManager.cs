@@ -100,7 +100,7 @@ namespace McpRouter
             var client = _httpClientFactory.CreateClient("McpClient");
             var embeddingService = scope.ServiceProvider.GetRequiredService<IEmbeddingService>();
 
-            var session = new ClientSession(sessionId, clientResponse, servers, client, embeddingService, this, sessionLogger);
+            var session = new ClientSession(sessionId, clientResponse, servers, client, embeddingService, this, sessionLogger, _serviceProvider);
             session.IsMetaMode = metaMode;
 
             if (_sessions.TryRemove(sessionId, out var oldSession))
@@ -130,6 +130,15 @@ namespace McpRouter
             if (_sessions.TryRemove(sessionId, out var session))
             {
                 session.Close();
+                // Sweep pending approvals for this session
+                var toRemove = PendingApprovals.Values.Where(a => a.SessionId == sessionId).ToList();
+                foreach (var approval in toRemove)
+                {
+                    if (PendingApprovals.TryRemove(approval.Id, out var removed))
+                    {
+                        removed.Tcs.TrySetCanceled();
+                    }
+                }
             }
         }
 
