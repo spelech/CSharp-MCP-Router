@@ -215,6 +215,7 @@ CREATE OR ALTER PROCEDURE [dbo].[sp_SaveAppKey]
     @KeyPrefix VARCHAR(50),
     @EncryptedKey NVARCHAR(MAX),
     @ScopesJson NVARCHAR(MAX),
+    @OwnerSid NVARCHAR(200) = '',
     @ExpiresAt DATETIME2 = NULL
 AS
 BEGIN
@@ -225,6 +226,7 @@ BEGIN
         UPDATE [dbo].[AppKeys]
         SET [Name] = @Name,
             [Username] = @Username,
+            [OwnerSid] = @OwnerSid,
             [KeyPrefix] = @KeyPrefix,
             [EncryptedKey] = @EncryptedKey,
             [ScopesJson] = @ScopesJson,
@@ -233,8 +235,8 @@ BEGIN
     END
     ELSE
     BEGIN
-        INSERT INTO [dbo].[AppKeys] ([Id], [Name], [Username], [KeyPrefix], [EncryptedKey], [ScopesJson], [ExpiresAt], [CreatedAt])
-        VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, SYSUTCDATETIME());
+        INSERT INTO [dbo].[AppKeys] ([Id], [Name], [Username], [OwnerSid], [KeyPrefix], [EncryptedKey], [ScopesJson], [ExpiresAt], [CreatedAt])
+        VALUES (@Id, @Name, @Username, @OwnerSid, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, SYSUTCDATETIME());
     END
 END;
 GO

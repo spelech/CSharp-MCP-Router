@@ -22,11 +22,13 @@ namespace McpRouter.Controllers
     {
         private readonly IDbConnectionFactory _dbFactory;
         private readonly IConfiguration _config;
+        private readonly McpRouter.Core.Logging.IAuditLogger _auditLogger;
 
-        public AppKeysController(IDbConnectionFactory dbFactory, IConfiguration config)
+        public AppKeysController(IDbConnectionFactory dbFactory, IConfiguration config, McpRouter.Core.Logging.IAuditLogger auditLogger)
         {
             _dbFactory = dbFactory;
             _config = config;
+            _auditLogger = auditLogger;
         }
 
         private async Task<McpRouter.Core.Identity.UserIdentityContext> GetIdentityAsync()
@@ -151,6 +153,7 @@ namespace McpRouter.Controllers
             var identity = await GetIdentityAsync();
             var currentUser = identity.Username;
             var isAdmin = IsAdmin(identity);
+            var ownerSid = identity.AllSids.FirstOrDefault() ?? "";
 
             // Allow admins to generate key for another user, default to current user
             var targetUser = isAdmin && !string.IsNullOrEmpty(model.Username) ? model.Username : currentUser;
@@ -231,6 +234,7 @@ namespace McpRouter.Controllers
                     Id = Guid.NewGuid().ToString("N"),
                     Name = model.Name,
                     Username = targetUser,
+                    OwnerSid = ownerSid,
                     KeyPrefix = prefix,
                     EncryptedKey = encryptedKey,
                     ScopesJson = JsonSerializer.Serialize(scopes),
@@ -241,8 +245,8 @@ namespace McpRouter.Controllers
                 if (_dbFactory.ProviderName == "sqlite")
                 {
                     const string insertSql = @"
-                        INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
-                        VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
+                        INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
+                        VALUES (@Id, @Name, @Username, @OwnerSid, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
                     await conn.ExecuteAsync(insertSql, appKey);
                 }
                 else
@@ -255,6 +259,7 @@ namespace McpRouter.Controllers
                             appKey.Id,
                             appKey.Name,
                             appKey.Username,
+                            appKey.OwnerSid,
                             appKey.KeyPrefix,
                             appKey.EncryptedKey,
                             appKey.ScopesJson,
@@ -263,6 +268,10 @@ namespace McpRouter.Controllers
                         commandType: CommandType.StoredProcedure
                     );
                 }
+
+                await _auditLogger.LogAdminActionAsync(
+                    identity.Username, "appkey.create", appKey.Id,
+                    $"name={appKey.Name};owner={targetUser};ownerSid={ownerSid}", true);
 
                 // Return plaintext key ONCE to the user
                 return Ok(new
@@ -321,6 +330,10 @@ namespace McpRouter.Controllers
                         commandType: CommandType.StoredProcedure
                     );
                 }
+
+                await _auditLogger.LogAdminActionAsync(
+                    identity.Username, "appkey.revoke", id,
+                    $"owner={appKey.Username}", true);
 
                 return Ok(new { success = true });
             }

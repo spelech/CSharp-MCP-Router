@@ -108,19 +108,19 @@ namespace McpRouter.Services
                     {
                         conn.Execute("ALTER TABLE Settings ADD COLUMN RequireManualApproval INTEGER DEFAULT 0");
                     }
-                    catch { }
+                    catch (Exception exReqApproval) { logger.LogDebug(exReqApproval, "Settings.RequireManualApproval DDL notice: {Message}", exReqApproval.Message); }
 
                     try
                     {
                         conn.Execute("ALTER TABLE Settings ADD COLUMN GlobalMaxKeys INTEGER DEFAULT 100");
                     }
-                    catch { }
+                    catch (Exception exGlobalMax) { logger.LogDebug(exGlobalMax, "Settings.GlobalMaxKeys DDL notice: {Message}", exGlobalMax.Message); }
 
                     try
                     {
                         conn.Execute("ALTER TABLE Settings ADD COLUMN UserMaxKeys INTEGER DEFAULT 5");
                     }
-                    catch { }
+                    catch (Exception exUserMax) { logger.LogDebug(exUserMax, "Settings.UserMaxKeys DDL notice: {Message}", exUserMax.Message); }
 
                     try
                     {
@@ -129,6 +129,7 @@ namespace McpRouter.Services
                             "Id TEXT PRIMARY KEY, " +
                             "Name TEXT, " +
                             "Username TEXT, " +
+                            "OwnerSid TEXT DEFAULT '', " +
                             "KeyPrefix TEXT, " +
                             "EncryptedKey TEXT, " +
                             "ScopesJson TEXT DEFAULT '[]', " +
@@ -139,6 +140,10 @@ namespace McpRouter.Services
                     {
                         logger.LogWarning(exAppKeys, "AppKeys table init warning");
                     }
+
+                    // Idempotent migration: attribute app-key calls to their owner's SID on pre-existing databases.
+                    try { conn.Execute("ALTER TABLE AppKeys ADD COLUMN OwnerSid TEXT DEFAULT ''"); }
+                    catch (Exception exOwnerSid) { logger.LogDebug(exOwnerSid, "AppKeys.OwnerSid DDL notice: {Message}", exOwnerSid.Message); }
 
                     var colDefs = new (string Name, string Ddl)[]
                     {
@@ -170,7 +175,7 @@ namespace McpRouter.Services
                             "UPDATE Servers SET AuthShape = 'bearer' " +
                             "WHERE AuthShape IS NULL OR AuthShape = '';");
                     }
-                    catch { }
+                    catch (Exception exAuthShapeBackfill) { logger.LogDebug(exAuthShapeBackfill, "Servers.AuthShape backfill notice: {Message}", exAuthShapeBackfill.Message); }
 
                     // Create AccessPolicies table for SQLite
                     try
