@@ -24,6 +24,46 @@ namespace McpRouter.Extensions
         builder.Logging.AddDebug();
         builder.Logging.AddProvider(new InMemoryLoggerProvider());
 
+        // Decorate Console and Debug providers with SanitizingLoggerProvider to sanitize all logs
+        for (int i = 0; i < builder.Services.Count; i++)
+        {
+            var sd = builder.Services[i];
+            if (sd.ServiceType == typeof(ILoggerProvider))
+            {
+                var implType = sd.ImplementationType;
+                var implInstance = sd.ImplementationInstance;
+                var implFactory = sd.ImplementationFactory;
+
+                bool isInMemory = false;
+                if (implType != null && implType.Name.Contains("InMemoryLoggerProvider")) isInMemory = true;
+                if (implInstance != null && implInstance.GetType().Name.Contains("InMemoryLoggerProvider")) isInMemory = true;
+
+                if (isInMemory) continue;
+
+                if (implInstance != null)
+                {
+                    var provider = (ILoggerProvider)implInstance;
+                    builder.Services[i] = ServiceDescriptor.Singleton<ILoggerProvider>(sp => new McpRouter.Core.Logging.SanitizingLoggerProvider(provider));
+                }
+                else if (implType != null)
+                {
+                    builder.Services[i] = ServiceDescriptor.Singleton<ILoggerProvider>(sp =>
+                    {
+                        var original = (ILoggerProvider)ActivatorUtilities.CreateInstance(sp, implType);
+                        return new McpRouter.Core.Logging.SanitizingLoggerProvider(original);
+                    });
+                }
+                else if (implFactory != null)
+                {
+                    builder.Services[i] = ServiceDescriptor.Singleton<ILoggerProvider>(sp =>
+                    {
+                        var original = (ILoggerProvider)implFactory(sp);
+                        return new McpRouter.Core.Logging.SanitizingLoggerProvider(original);
+                    });
+                }
+            }
+        }
+
         // Register Multi-Database Provider Factory (Pure Dapper)
         builder.Services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory, McpRouter.Core.Database.DbConnectionFactory>();
 

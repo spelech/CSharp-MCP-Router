@@ -1,0 +1,39 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "McpRouter": "Information"
+    }
+  },
+  "DB_PROVIDER": "sqlite",
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=data/mcp_router.db"
+  },
+  "ROUTER_MASTER_KEY": "YourSuperSecureHighEntropyBase64EncodedKeyHere==",
+  "CORS_ALLOWED_ORIGINS": "https://mcp-dashboard.enterprise.com",
+  "OpenIddict": {
+    "CertificatePath": "/app/certs/oauth_signing.pfx",
+    "CertificatePassword": "MySecretCertPassword123!"
+  },
+  "Admin": {
+    "GroupSid": "S-1-5-32-544"
+  },
+  "Oidc": {
+    "TrustedProxies": "10.0.5.10,172.17.0.1",
+    "RequireTrustedProxy": true
+  },
+  "Identity": {
+    "HeaderAuth": {
+      "UserHeaders": [
+        "Remote-User",
+        "X-Forwarded-User"
+      ],
+      "GroupHeaders": [
+        "Remote-Groups",
+        "X-Forwarded-Groups",
+        "sso_groups"
+      ]
+    }
+  }
+}

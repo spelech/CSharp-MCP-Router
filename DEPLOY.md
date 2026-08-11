@@ -1,0 +1,72 @@
+# 🚀 Enterprise Production Deployment & Database Migration Guide
+
+This guide outlines requirements, configurations, and migration paths for deploying the **Model Context Protocol (MCP) Router Gateway** into production environments.
+
+---
+
+## 🔒 Required Production Configuration
+
+Production environments must be locked down to prevent spoofing, unauthorized access, and credential leakage. Below are the mandatory configuration parameters.
+
+### 🚨 Critical Parameters
+
+| Configuration Key | Environment Variable Equivalent | Type | Description / Behavior |
+| :--- | :--- | :--- | :--- |
+| **`ROUTER_MASTER_KEY`** | `ROUTER_MASTER_KEY` | **Mandatory** | A high-entropy Base64/hex-encoded 256-bit key. Used to encrypt downstream server credentials, API tokens, and configurations in the database. **Fatal error on startup if missing!** |
+| **`DB_PROVIDER`** | `DB_PROVIDER` | Optional | Supported: `sqlite`, `mssql`, `mysql`. Defaults silently to `sqlite` if missing or unconfigured. |
+| **`ConnectionStrings:DefaultConnection`** | `ConnectionStrings__DefaultConnection` | **Mandatory** | Connection string for the chosen database provider. |
+| **`CORS_ALLOWED_ORIGINS`** | `CORS_ALLOWED_ORIGINS` | **Mandatory** | Comma/semicolon/whitespace-separated list of allowed origins. Unconfigured/empty locks out browser access in production. |
+| **`OpenIddict:CertificatePath`** | `OpenIddict__CertificatePath` | **Mandatory** | Filepath to the PFX/PKCS#12 certificate used to sign OAuth tokens in production. Unconfigured fallbacks reset on application restart, invalidating active client sessions. |
+| **`Oidc:TrustedProxies`** | `Oidc__TrustedProxies` | **Highly Recommended** | List of upstream reverse proxy IP addresses trusted by the gateway. Defaults strictly to loopback-only (`127.0.0.1` / `::1`) if unconfigured. |
+| **`Admin:GroupSid`** | `Admin__GroupSid` | Optional | Active Directory Group SID designated for Administrators. Defaults to `S-1-5-32-544` (Local Administrators). |
+
+---
+
+## ⚠️ Key Deploy-Time Behavior Change
+
+In previous releases, the default trusted-proxy fallback automatically trusted all IP addresses in standard container/homelab subnets (`10.0.0.0/8`, `172.16.0.0/12`).
+**Starting in version 4.5.5, the unconfigured default has been locked down to loopback-only (`127.0.0.1` and `::1`).**
+
+> 💡 **Important Deployment Action:** If your reverse proxy (e.g., Caddy, Nginx, Traefik, or IIS) runs on a bridge network (e.g., `172.17.x.x` or `10.x.x.x`), you **MUST** configure `Oidc:TrustedProxies` (or `OIDC__TRUSTEDPROXIES`) explicitly with the proxy's IP address. If left unset, proxy-passed SSO headers (e.g., `Remote-User`) from any remote/LAN hosts will be stripped, degrading authentication to guest access.
+
+---
+
+## 📂 Database Providers & Schema Initialization
+
+The MCP Router supports SQL Server, MySQL/MariaDB, and SQLite. When configuring MS SQL Server or MySQL, you must execute the database scripts in the exact sequence described below to initialize the database and stored procedures.
+
+### Schema Initialization Order
+
+1. **`01_tables.sql`**: Renders database tables, constraints, and indexes.
+2. **`02_procedures.sql`**: Renders model access evaluation, audit logging, and JIT secret retrieval stored procedures.
+
+### DB Script Directories
+* **MS SQL Server**: `scripts/db/mssql/`
+* **MySQL / MariaDB**: `scripts/db/mysql/`
+
+---
+
+## 🔄 Upgrading Existing Database Schemas (Migrations)
+
+When upgrading existing deployments, you must apply versioned delta migration scripts sequentially.
+
+### Initial Migration (Version 003)
+The migration `003_add_appkeys_ownersid.sql` introduces an optional `OwnerSid` field to the `AppKeys` table and updates stored procedures (`sp_SaveAppKey` and `sp_GetAppKeys`) to track app key owners dynamically.
+
+#### Upgrade Execution Procedure:
+Run the corresponding delta migration script against your database using standard CLI tools.
+
+* **MS SQL Server**:
+  ```bash
+  sqlcmd -S localhost -U sa -P Password123! -i scripts/db/mssql/migrations/003_add_appkeys_ownersid.sql
+  ```
+* **MySQL / MariaDB**:
+  ```bash
+  mysql -u root -p McpEnterpriseDb < scripts/db/mysql/migrations/003_add_appkeys_ownersid.sql
+  ```
+
+---
+
+## 📦 Deployment Configuration Templates
+
+For quick integration, copy `.env.example` to `.env` or copy `appsettings.Production.json.example` to `appsettings.Production.json` directly into your container/server configuration.

@@ -16,11 +16,28 @@ namespace McpRouter.Tests
     public class OpenIddictProductionTests
     {
         [Fact]
-        public void OpenIddict_Boots_WithDevelopmentCertificates_WhenNoCertConfigured()
+        public void Production_WithNoCert_Throws_InvalidOperationException()
         {
             var services = new ServiceCollection();
             var mockEnv = new Mock<IHostEnvironment>();
             mockEnv.Setup(e => e.EnvironmentName).Returns("Production");
+
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
+
+            var exception = Assert.Throws<InvalidOperationException>(() =>
+            {
+                services.AddMcpOpenIddict(mockEnv.Object, config);
+            });
+
+            Assert.Contains("OpenIddict:CertificatePath must be configured in Production environment", exception.Message);
+        }
+
+        [Fact]
+        public void Development_WithNoCert_BootsOnDevCerts()
+        {
+            var services = new ServiceCollection();
+            var mockEnv = new Mock<IHostEnvironment>();
+            mockEnv.Setup(e => e.EnvironmentName).Returns("Development");
 
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
 
@@ -31,7 +48,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        public void OpenIddict_Production_Boots_WithCertificate()
+        public void Production_WithValidPfx_Boots()
         {
             var tempPfxPath = Path.Combine(Path.GetTempPath(), $"test_cert_{Guid.NewGuid():N}.pfx");
             try
