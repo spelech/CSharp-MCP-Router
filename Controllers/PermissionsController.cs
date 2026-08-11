@@ -15,10 +15,12 @@ namespace McpRouter.Controllers
     public class PermissionsController : ControllerBase
     {
         private readonly IDbConnectionFactory _dbFactory;
+        private readonly McpRouter.Core.Logging.IAuditLogger _auditLogger;
 
-        public PermissionsController(IDbConnectionFactory dbFactory)
+        public PermissionsController(IDbConnectionFactory dbFactory, McpRouter.Core.Logging.IAuditLogger auditLogger)
         {
             _dbFactory = dbFactory;
+            _auditLogger = auditLogger;
         }
 
         // --- POLICIES ---
@@ -50,6 +52,7 @@ namespace McpRouter.Controllers
                 policy.Id = Guid.NewGuid().ToString("N");
             }
 
+            var username = User?.Identity?.Name ?? "unknown";
             try
             {
                 using var conn = _dbFactory.CreateConnection();
@@ -84,10 +87,12 @@ namespace McpRouter.Controllers
                     await conn.ExecuteAsync(mssqlSql, policy);
                 }
 
+                await _auditLogger.LogAdminActionAsync(username, "policy.save", policy.TargetId ?? policy.Id ?? "", System.Text.Json.JsonSerializer.Serialize(policy), true);
                 return Ok(new { success = true, policy });
             }
             catch (Exception ex)
             {
+                await _auditLogger.LogAdminActionAsync(username, "policy.save", policy.TargetId ?? policy.Id ?? "", System.Text.Json.JsonSerializer.Serialize(policy), false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
             }
         }
@@ -95,15 +100,18 @@ namespace McpRouter.Controllers
         [HttpDelete("policies/{id}")]
         public async Task<IActionResult> DeletePolicy(string id)
         {
+            var username = User?.Identity?.Name ?? "unknown";
             try
             {
                 using var conn = _dbFactory.CreateConnection();
                 const string sql = "DELETE FROM AccessPolicies WHERE Id = @Id;";
                 await conn.ExecuteAsync(sql, new { Id = id });
+                await _auditLogger.LogAdminActionAsync(username, "policy.delete", id, "", true);
                 return Ok(new { success = true });
             }
             catch (Exception ex)
             {
+                await _auditLogger.LogAdminActionAsync(username, "policy.delete", id, "", false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
             }
         }
@@ -137,6 +145,7 @@ namespace McpRouter.Controllers
                 mapping.Id = Guid.NewGuid().ToString("N");
             }
 
+            var username = User?.Identity?.Name ?? "unknown";
             try
             {
                 using var conn = _dbFactory.CreateConnection();
@@ -171,10 +180,12 @@ namespace McpRouter.Controllers
                     await conn.ExecuteAsync(mssqlSql, mapping);
                 }
 
+                await _auditLogger.LogAdminActionAsync(username, "mapping.save", mapping.ExternalId ?? mapping.Id ?? "", System.Text.Json.JsonSerializer.Serialize(mapping), true);
                 return Ok(new { success = true, mapping });
             }
             catch (Exception ex)
             {
+                await _auditLogger.LogAdminActionAsync(username, "mapping.save", mapping.ExternalId ?? mapping.Id ?? "", System.Text.Json.JsonSerializer.Serialize(mapping), false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
             }
         }
@@ -182,15 +193,18 @@ namespace McpRouter.Controllers
         [HttpDelete("mappings/{id}")]
         public async Task<IActionResult> DeleteMapping(string id)
         {
+            var username = User?.Identity?.Name ?? "unknown";
             try
             {
                 using var conn = _dbFactory.CreateConnection();
                 const string sql = "DELETE FROM GroupMappings WHERE Id = @Id;";
                 await conn.ExecuteAsync(sql, new { Id = id });
+                await _auditLogger.LogAdminActionAsync(username, "mapping.delete", id, "", true);
                 return Ok(new { success = true });
             }
             catch (Exception ex)
             {
+                await _auditLogger.LogAdminActionAsync(username, "mapping.delete", id, "", false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
             }
         }
