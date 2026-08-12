@@ -5,6 +5,7 @@ using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods.AppRole;
+using VaultSharp.V1.AuthMethods.Token;
 
 namespace McpRouter.Core.Secrets
 {
@@ -51,27 +52,37 @@ namespace McpRouter.Core.Secrets
                     return _vaultClient;
                 }
 
-                var address = _config["Vault:Address"];
+                var address = _config["Vault:Address"] ?? _config["VAULT_ADDR"] ?? Environment.GetEnvironmentVariable("VAULT_ADDR");
                 if (string.IsNullOrEmpty(address))
                 {
                     _vaultClient = null;
                     return null;
                 }
 
-                if (!address.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                if (!address.StartsWith("https://", StringComparison.OrdinalIgnoreCase) && !address.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
                 {
-                    throw new ArgumentException("Vault Address must use the HTTPS scheme.");
+                    throw new ArgumentException("Vault Address must use the HTTP or HTTPS scheme.");
                 }
 
                 var roleId = _config["Vault:RoleId"];
                 var secretId = _config["Vault:SecretId"];
-                if (string.IsNullOrEmpty(roleId) || string.IsNullOrEmpty(secretId))
+                var token = _config["Vault:Token"] ?? _config["VAULT_TOKEN"] ?? Environment.GetEnvironmentVariable("VAULT_TOKEN");
+                VaultSharp.V1.AuthMethods.IAuthMethodInfo authMethod;
+
+                if (!string.IsNullOrEmpty(roleId) && !string.IsNullOrEmpty(secretId))
+                {
+                    authMethod = new AppRoleAuthMethodInfo(roleId, secretId);
+                }
+                else if (!string.IsNullOrEmpty(token))
+                {
+                    authMethod = new TokenAuthMethodInfo(token);
+                }
+                else
                 {
                     _vaultClient = null;
                     return null;
                 }
 
-                var authMethod = new AppRoleAuthMethodInfo(roleId, secretId);
                 var settings = new VaultClientSettings(address, authMethod);
                 _vaultClient = new VaultClient(settings);
 

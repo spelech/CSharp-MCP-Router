@@ -22,6 +22,7 @@ export async function apiRequest<T = any>(url: string, options: any = {}): Promi
   const response = await fetch(url, fetchOptions);
   if (!response.ok) {
     const text = await response.text();
+    console.error(`API Error: ${response.status} ${response.statusText} - ${text}`);
     throw new Error(text || `Request failed with status ${response.status}`);
   }
 

@@ -6,10 +6,10 @@ test.describe('Dashboard & Navigation Flow', () => {
     await page.goto('/');
     
     // Check navigation buttons exist
-    await expect(page.locator('button:has-text("Dashboard")')).toBeVisible();
+    await expect(page.locator('button:has-text("Overview")')).toBeVisible();
     await expect(page.locator('button:has-text("Test Bench")')).toBeVisible();
     await expect(page.locator('button:has-text("Settings")')).toBeVisible();
-    await expect(page.locator('button:has-text("Clients")')).toBeVisible();
+    await expect(page.locator('button:has-text("App Keys & Security")')).toBeVisible();
   });
 
   test('should display aggregate statistics cards', async ({ page }) => {

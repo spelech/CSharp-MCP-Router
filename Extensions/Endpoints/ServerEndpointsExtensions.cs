@@ -124,9 +124,10 @@ namespace McpRouter.Extensions
                 server.Hidden = update.Hidden;
                 
                 if (!string.IsNullOrEmpty(update.DisplayName)) server.DisplayName = update.DisplayName;
+                if (!string.IsNullOrEmpty(update.Type)) server.Type = update.Type;
                 if (!string.IsNullOrEmpty(update.Url))
                 {
-                    if (!IsValidServerUrl(update.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
+                    if (server.Type != "stdio" && !IsValidServerUrl(update.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
                     {
                         _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, err);
                         return Results.BadRequest(new { error = err });
@@ -160,14 +161,19 @@ namespace McpRouter.Extensions
                 return Results.Ok(server);
             });
             
-            api.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
+            api.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger, ILogger<Program> logger) =>
             {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
-                if (!IsValidServerUrl(server.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
+                logger.LogInformation("POST /api/servers started for {url}", server.Url);
+                
+                if (server.Type != "stdio" && !IsValidServerUrl(server.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
                 {
+                    logger.LogInformation("IsValidServerUrl failed after {ms}ms", sw.ElapsedMilliseconds);
                     _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id ?? "unknown", JsonSerializer.Serialize(server), false, err);
                     return Results.BadRequest(new { error = err });
                 }
+                logger.LogInformation("IsValidServerUrl passed after {ms}ms", sw.ElapsedMilliseconds);
 
                 if (string.IsNullOrEmpty(server.Id))
                 {
@@ -176,6 +182,7 @@ namespace McpRouter.Extensions
                 
                 using var conn = dbFactory.CreateConnection();
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
+                var dbStart = sw.ElapsedMilliseconds;
                 await conn.ExecuteAsync(@"INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson)
                     VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson)",
                     new {
@@ -183,8 +190,11 @@ namespace McpRouter.Extensions
                         SecretProvider = server.SecretProvider ?? "None", server.SecretItemKey, AuthShape = server.AuthShape ?? "bearer", server.CustomHeaderName,
                         Categories = catJson, server.ApiKey, server.HeadersJson
                     });
+                logger.LogInformation("DB Insert finished after {ms}ms", sw.ElapsedMilliseconds - dbStart);
                 
+                var resetStart = sw.ElapsedMilliseconds;
                 sessionManager.ResetAll();
+                logger.LogInformation("ResetAll finished after {ms}ms", sw.ElapsedMilliseconds - resetStart);
 
                 _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id, JsonSerializer.Serialize(server), true);
 
