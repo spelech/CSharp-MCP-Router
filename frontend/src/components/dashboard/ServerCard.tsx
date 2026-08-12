@@ -73,7 +73,7 @@ export const ServerCard: React.FC<ServerCardProps> = ({ server }) => {
   }
 
   return (
-    <div className={itemClass}>
+    <div className={itemClass} data-server-id={server.id}>
       <div className="server-info">
         <div className="server-name-row">
           <span className={nameClass}>{server.displayName}</span>

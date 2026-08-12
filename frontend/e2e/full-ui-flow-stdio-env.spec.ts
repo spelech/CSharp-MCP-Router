@@ -22,7 +22,7 @@ test.describe('Full UI Flow: STDIO Transport + Env Variable Secret Provider', ()
         name: 'STDIO Env Mock',
         type: 'stdio',
         url: 'node /app/mock_stdio.js',
-        secretProvider: 'Env',
+        secretProvider: 'Environment',
         secretKey: 'TEST_API_KEY'
       });
 
@@ -30,7 +30,7 @@ test.describe('Full UI Flow: STDIO Transport + Env Variable Secret Provider', ()
       await serverModal.save();
 
       // 5. Assert server card appears on dashboard
-      await dashboard.searchServer('stdio_env_mock');
+      await dashboard.searchServer('STDIO Env Mock');
     }
   });
 

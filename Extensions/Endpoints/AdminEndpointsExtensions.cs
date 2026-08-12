@@ -228,7 +228,8 @@ namespace McpRouter.Extensions
                             logger.LogError(ex, "Failed to connect to server {ServerId} for tool listing", server.Id);
                         }
                     });
-                    await Task.WhenAll(tasks);
+                    var allTasks = Task.WhenAll(tasks);
+                    await Task.WhenAny(allTasks, Task.Delay(3000));
 
                     var routing = new Core.Routing.ToolRoutingManager();
                     await routing.PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"test-list\"}", backendConnections, logger, missingServers, sessionManager);
@@ -415,7 +416,8 @@ namespace McpRouter.Extensions
                             logger.LogError(ex, "Failed to connect to server {ServerId} for tool search", server.Id);
                         }
                     });
-                    await Task.WhenAll(tasks);
+                    var allTasks = Task.WhenAll(tasks);
+                    await Task.WhenAny(allTasks, Task.Delay(3000));
 
                     var routing = new Core.Routing.ToolRoutingManager();
                     await routing.PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"test-list\"}", backendConnections, logger, missingServers, sessionManager);
@@ -495,7 +497,8 @@ namespace McpRouter.Extensions
                             logger.LogError(ex, "Failed to connect to server {ServerId} for prompt listing", server.Id);
                         }
                     });
-                    await Task.WhenAll(tasks);
+                    var allTasks = Task.WhenAll(tasks);
+                    await Task.WhenAny(allTasks, Task.Delay(3000));
 
                     var routing = new Core.Routing.PromptRoutingManager();
                     await routing.ListPromptsAsync("{\"jsonrpc\":\"2.0\",\"method\":\"prompts/list\",\"id\":\"test-list\"}", backendConnections, logger, () => Task.CompletedTask, sessionManager);
@@ -641,7 +644,8 @@ namespace McpRouter.Extensions
                             logger.LogError(ex, "Failed to connect to server {ServerId} for resource listing", server.Id);
                         }
                     });
-                    await Task.WhenAll(tasks);
+                    var allTasks = Task.WhenAll(tasks);
+                    await Task.WhenAny(allTasks, Task.Delay(3000));
 
                     var routing = new Core.Routing.ResourceRoutingManager();
                     await routing.ListResourcesAsync("{\"jsonrpc\":\"2.0\",\"method\":\"resources/list\",\"id\":\"test-list\"}", backendConnections, logger, () => Task.CompletedTask, sessionManager);

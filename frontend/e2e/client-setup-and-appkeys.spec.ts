@@ -10,21 +10,13 @@ test.describe('Client Setup & App Key Management Flow', () => {
     if (await clientsBtn.isVisible()) {
       await clientsBtn.click();
 
-      // Verify Clients Modal opens
-      const clientsModal = page.locator('.modal, #clients-modal, [role="dialog"]');
-      await expect(clientsModal.first()).toBeVisible();
+      // Verify Security View opens
+      const securityView = page.locator('#view-security');
+      await expect(securityView).toBeVisible();
 
       // Check Generate App Key button
-      const generateKeyBtn = page.locator('button:has-text("Generate"), button:has-text("+ Create Key")');
-      if (await generateKeyBtn.isVisible()) {
-        await expect(generateKeyBtn).toBeVisible();
-      }
-
-      // Close modal
-      const closeBtn = page.locator('.modal-close, button:has-text("Close")');
-      if (await closeBtn.isVisible()) {
-        await closeBtn.first().click();
-      }
+      const generateKeyBtn = page.locator('button:has-text("Create App Key")');
+      await expect(generateKeyBtn).toBeVisible();
     }
   });
 
