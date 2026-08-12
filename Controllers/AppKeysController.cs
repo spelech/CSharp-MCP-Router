@@ -158,6 +158,20 @@ namespace McpRouter.Controllers
             // Allow admins to generate key for another user, default to current user
             var targetUser = isAdmin && !string.IsNullOrEmpty(model.Username) ? model.Username : currentUser;
 
+            if (!targetUser.Equals(currentUser, StringComparison.OrdinalIgnoreCase))
+            {
+                var ldapService = HttpContext.RequestServices.GetService<McpRouter.Core.Identity.ILdapService>();
+                if (ldapService != null)
+                {
+                    var targetSids = await ldapService.ResolveUserSidsAsync(targetUser);
+                    var primarySid = targetSids.FirstOrDefault();
+                    if (!string.IsNullOrEmpty(primarySid))
+                    {
+                        ownerSid = primarySid;
+                    }
+                }
+            }
+
             if (string.IsNullOrWhiteSpace(model.Name))
             {
                 return BadRequest(new { error = "Name is required." });

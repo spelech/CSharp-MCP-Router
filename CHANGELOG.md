@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.5.9`** | 2026-08-12 | fix(keys): target user SID resolution for admin-minted app keys |
 | **`v4.5.8`** | 2026-08-12 | fix(vault): support VAULT_TOKEN fallback for dev testing and init test secrets via docker-compose |
 | **`v4.5.7`** | 2026-08-12 | fix(vault): support VAULT_TOKEN fallback for dev testing and init test secrets via docker-compose |
 | **`v4.5.6`** | 2026-08-10 | fix(auth): make gateway admin SID-only and fail-closed on missing OpenIddict prod certs |
