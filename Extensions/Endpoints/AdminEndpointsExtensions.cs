@@ -144,7 +144,7 @@ namespace McpRouter.Extensions
                     workingSet64 = proc.WorkingSet64,
                     handleCount = fdCount > 0 ? fdCount : proc.HandleCount
                 });
-            });
+            }).AllowAnonymous();
 
             api.MapPost("/api/approvals/{id}/action", async ([FromRoute] string id, [FromBody] System.Text.Json.JsonElement body, [FromServices] SessionManager sessionManager, HttpContext httpContext) =>
             {
