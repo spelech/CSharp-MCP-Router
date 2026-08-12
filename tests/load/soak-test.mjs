@@ -5,7 +5,12 @@ const CONCURRENT_CLIENTS = 20;
 const SOAK_DURATION_MS = 30000; // 30 seconds
 
 async function getDiagnostics() {
-    const res = await fetch(`${ROUTER_URL}/api/diagnostics`);
+    const res = await fetch(`${ROUTER_URL}/api/diagnostics`, {
+        headers: {
+            'Remote-User': 'admin',
+            'Remote-Groups': 'full_admin'
+        }
+    });
     if (!res.ok) throw new Error(`Failed to get diagnostics: ${res.status}`);
     return await res.json();
 }
@@ -18,7 +23,11 @@ async function runClient(durationMs) {
             // Establish SSE connection
             const req = http.request(`${ROUTER_URL}/sse`, {
                 method: 'GET',
-                headers: { 'Accept': 'text/event-stream' }
+                headers: { 
+                    'Accept': 'text/event-stream',
+                    'Remote-User': 'admin',
+                    'Remote-Groups': 'full_admin'
+                }
             });
             
             let sessionId = null;
@@ -57,7 +66,11 @@ async function runClient(durationMs) {
                 try {
                     await fetch(`${ROUTER_URL}/message?sessionId=${sessionId}`, {
                         method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Remote-User': 'admin',
+                            'Remote-Groups': 'full_admin'
+                        },
                         body: JSON.stringify({
                             jsonrpc: '2.0',
                             id: 1,
@@ -87,7 +100,7 @@ async function main() {
         initialDiag = await getDiagnostics();
         console.log('Initial diagnostics:', initialDiag);
     } catch (e) {
-        console.error('Could not reach router. Ensure it is running on port 8080.');
+        console.error('Could not reach router. Error:', e.message);
         process.exit(1);
     }
     
