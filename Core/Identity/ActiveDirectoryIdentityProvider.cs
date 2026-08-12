@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
@@ -31,13 +32,33 @@ namespace McpRouter.Core.Identity
                 return new UserIdentityContext("anonymous", ProviderName, new List<string>());
             }
 
-            if (httpContext.User.Identity is WindowsIdentity winIdentity && winIdentity.IsAuthenticated)
+            if (httpContext.User.Identity != null && httpContext.User.Identity.IsAuthenticated)
             {
-                var username = winIdentity.Name;
-                var sid = winIdentity.User?.Value ?? "";
-                var groups = winIdentity.Groups?
-                    .Select(g => g.Value)
-                    .ToList() ?? new List<string>();
+                var username = httpContext.User.Identity.Name ?? "";
+                string sid = "";
+                var groups = new List<string>();
+
+                if (httpContext.User.Identity is WindowsIdentity winIdentity)
+                {
+#pragma warning disable CA1416
+                    sid = winIdentity.User?.Value ?? "";
+                    groups = winIdentity.Groups?
+                        .Select(g => g.Value)
+                        .ToList() ?? new List<string>();
+#pragma warning restore CA1416
+                }
+                else if (httpContext.User.Identity is ClaimsIdentity claimsIdentity)
+                {
+                    var primarySidClaim = claimsIdentity.FindFirst(ClaimTypes.PrimarySid);
+                    if (primarySidClaim != null)
+                    {
+                        sid = primarySidClaim.Value;
+                    }
+
+                    groups = claimsIdentity.FindAll(ClaimTypes.GroupSid)
+                        .Select(c => c.Value)
+                        .ToList();
+                }
 
                 var sids = new List<string>(groups);
                 if (!string.IsNullOrEmpty(sid))
@@ -45,19 +66,25 @@ namespace McpRouter.Core.Identity
                     sids.Add(sid);
                 }
 
-                if (ldapService != null)
+                if (ldapService != null && !string.IsNullOrEmpty(username))
                 {
                     try
                     {
                         var ldapSids = await ldapService.ResolveUserSidsAsync(username);
-                        if (ldapSids != null)
+                        if (ldapSids != null && ldapSids.Count > 0)
                         {
                             sids.AddRange(ldapSids);
+                            
+                            // If primary SID is missing, take the first SID returned by LDAP
+                            if (string.IsNullOrEmpty(sid))
+                            {
+                                sid = ldapSids.First();
+                            }
                         }
                     }
                     catch (System.Exception exLdap)
                     {
-                        // A transient LDAP failure must never demote an already-authenticated Windows user to anonymous;
+                        // A transient LDAP failure must never demote an already-authenticated user to anonymous;
                         // keep the token-group SIDs collected above and continue.
                         var logger = httpContext.RequestServices?.GetService(typeof(Microsoft.Extensions.Logging.ILogger<ActiveDirectoryIdentityProvider>))
                             as Microsoft.Extensions.Logging.ILogger<ActiveDirectoryIdentityProvider>;
