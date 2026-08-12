@@ -19,11 +19,7 @@ interface UserStore {
 
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
-<<<<<<< HEAD
-  version: '4.5.9', // fallback default
-=======
   version: '4.6.0', // fallback default
->>>>>>> 1230f47 (feat(identity): implement cross-platform Active Directory SID resolution via LDAP)
   isLoadingUser: false,
   loadUser: async () => {
     set({ isLoadingUser: true });

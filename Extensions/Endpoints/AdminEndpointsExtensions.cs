@@ -124,6 +124,28 @@ namespace McpRouter.Extensions
                 return Results.Ok(approvals);
             });
 
+            api.MapGet("/api/diagnostics", ([FromServices] SessionManager sessionManager) => 
+            {
+                var proc = System.Diagnostics.Process.GetCurrentProcess();
+                int fdCount = 0;
+                
+                if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
+                {
+                    try 
+                    {
+                        fdCount = System.IO.Directory.GetFiles($"/proc/{proc.Id}/fd").Length;
+                    }
+                    catch { /* Fallback if restricted */ }
+                }
+                
+                return Results.Ok(new {
+                    activeSessions = sessionManager.ActiveSessionsCount,
+                    pendingApprovals = sessionManager.PendingApprovals.Count,
+                    workingSet64 = proc.WorkingSet64,
+                    handleCount = fdCount > 0 ? fdCount : proc.HandleCount
+                });
+            });
+
             api.MapPost("/api/approvals/{id}/action", async ([FromRoute] string id, [FromBody] System.Text.Json.JsonElement body, [FromServices] SessionManager sessionManager, HttpContext httpContext) =>
             {
                 if (sessionManager.PendingApprovals.TryRemove(id, out var approval))
