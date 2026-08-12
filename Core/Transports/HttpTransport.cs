@@ -47,13 +47,26 @@ namespace McpRouter.Core.Transports
             }
 
             string path = !string.IsNullOrWhiteSpace(_server.SecretPath) ? _server.SecretPath : _server.Url;
+            string field = !string.IsNullOrWhiteSpace(_server.SecretField)
+                ? _server.SecretField
+                : (!string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "ApiKey");
+
             if (!string.IsNullOrWhiteSpace(_server.SecretMount))
             {
                 path = $"{_server.SecretMount}:{path}";
             }
-            string field = !string.IsNullOrWhiteSpace(_server.SecretField)
-                ? _server.SecretField
-                : (!string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "ApiKey");
+            else if (provider.Equals("Vault", StringComparison.OrdinalIgnoreCase) && 
+                     string.IsNullOrWhiteSpace(_server.SecretPath) && 
+                     !string.IsNullOrWhiteSpace(_server.SecretItemKey))
+            {
+                // Frontend passes 'mount:path:field' inside SecretItemKey
+                var parts = _server.SecretItemKey.Split(':', 3);
+                if (parts.Length == 3)
+                {
+                    path = $"{parts[0]}:{parts[1]}";
+                    field = parts[2];
+                }
+            }
 
             string? secret = null;
             if (retriever is CompositeSecretRetriever composite)

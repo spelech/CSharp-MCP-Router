@@ -8,13 +8,29 @@ services:
     environment:
       VAULT_DEV_ROOT_TOKEN_ID: "root-test-token"
       VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
-    ports:
-      - "8200:8200"
+      VAULT_ADDR: "http://127.0.0.1:8200"
     healthcheck:
       test: ["CMD", "vault", "status"]
       interval: 5s
       timeout: 3s
       retries: 5
+
+  vault-init:
+    image: hashicorp/vault:latest
+    container_name: mcp-vault-init
+    depends_on:
+      vault-test:
+        condition: service_healthy
+    environment:
+      VAULT_ADDR: "http://vault-test:8200"
+      VAULT_TOKEN: "root-test-token"
+    command: >
+      sh -c '
+        echo "Populating vault secrets..." &&
+        vault kv put secret/services/vault-test token=test-vault-token-123 &&
+        echo "Vault populated."
+      '
+
 
   # 2. Mock HTTP/SSE MCP Backend Server
   mock-mcp-server:
@@ -23,23 +39,80 @@ services:
     command: >
       node -e '
         const http = require("http");
+        let sseConnections = [];
         const server = http.createServer((req, res) => {
-          if (req.url === "/mcp" || req.url === "/") {
-            res.writeHead(200, { "Content-Type": "application/json" });
-            res.end(JSON.stringify({
-              jsonrpc: "2.0",
-              result: {
-                tools: [
-                  { name: "echo", description: "Echoes input back", inputSchema: { type: "object" } },
-                  { name: "health", description: "Returns service status", inputSchema: { type: "object" } }
-                ]
-              },
-              id: 1
-            }));
-          } else {
-            res.writeHead(200);
-            res.end("OK");
+          console.log("[MOCK] Incoming " + req.method + " request to " + req.url);
+          if (req.url === "/sse") {
+            res.writeHead(200, {
+              "Content-Type": "text/event-stream",
+              "Cache-Control": "no-cache",
+              "Connection": "keep-alive"
+            });
+            sseConnections.push(res);
+            res.write("event: endpoint\n");
+            res.write("data: http://mock-mcp-server:8090/message\n\n");
+            const interval = setInterval(() => {
+                res.write(": keepalive\n\n");
+            }, 10000);
+            res.on("close", () => {
+                clearInterval(interval);
+                sseConnections = sseConnections.filter(c => c !== res);
+            });
+            return;
           }
+          if (req.method === "POST" || req.url === "/mcp" || req.url === "/") {
+            let body = "";
+            req.on("data", chunk => body += chunk.toString());
+            req.on("end", () => {
+              let parsedId = 1;
+              let method = "";
+              try { 
+                if (body) {
+                  const j = JSON.parse(body);
+                  parsedId = j.id || 1; 
+                  method = j.method;
+                }
+              } catch(e) {}
+              
+              console.log("[MOCK] Parsed method: " + method);
+              
+              const isSsePost = req.url === "/message";
+              const sendResponse = (payload) => {
+                  if (isSsePost) {
+                      console.log("[MOCK] Sending SSE message payload for " + method + " to " + sseConnections.length + " clients");
+                      sseConnections.forEach(c => c.write("event: message\ndata: " + JSON.stringify(payload) + "\n\n"));
+                      res.writeHead(202);
+                      res.end();
+                  } else {
+                      console.log("[MOCK] Sending direct HTTP payload for " + method);
+                      res.writeHead(200, { "Content-Type": "application/json" });
+                      res.end(JSON.stringify(payload));
+                  }
+              };
+
+              if (method === "initialize") {
+                sendResponse({
+                  jsonrpc: "2.0",
+                  id: parsedId,
+                  result: { protocolVersion: "2024-11-05", capabilities: {}, serverInfo: { name: "mock", version: "1" } }
+                });
+              } else {
+                sendResponse({
+                  jsonrpc: "2.0",
+                  result: {
+                    tools: [
+                      { name: "semantic_search", description: "Search docs", inputSchema: { type: "object" } },
+                      { name: "health", description: "Returns service status", inputSchema: { type: "object" } }
+                    ]
+                  },
+                  id: parsedId
+                });
+              }
+            });
+            return;
+          }
+          res.writeHead(200);
+          res.end("OK");
         });
         server.listen(8090, () => console.log("Mock MCP server running on 8090"));
       '
@@ -59,6 +132,7 @@ services:
       - DB_ENCRYPTION_KEY=SecurePassphraseForMcpDb2026!
       - VAULT_ADDR=http://vault-test:8200
       - VAULT_TOKEN=root-test-token
+      - Oidc__RequireTrustedProxy=false
     depends_on:
       vault-test:
         condition: service_healthy
