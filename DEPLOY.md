@@ -37,7 +37,7 @@ SQLite is the default and requires **no manual schema steps**: on first start th
 
 ### Prerequisites
 * **.NET 10 runtime** on the host (or use the container image).
-* **Windows host** if you rely on Active Directory **SID** resolution — the AD/Windows SID path (`WindowsIdentity`/LDAP) is Windows-only. Header-based (reverse-proxy) identity works cross-platform.
+* Active Directory **SID** resolution is fully cross-platform via LDAP. Native `WindowsIdentity` is automatically used as a fast-path on Windows hosts. Header-based (reverse-proxy) identity also works cross-platform.
 * A reverse proxy (IIS/Nginx/Caddy/Traefik) terminating TLS and injecting identity headers, if using header auth.
 
 ### Step 1 — Generate the master key
