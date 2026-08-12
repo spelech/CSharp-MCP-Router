@@ -13,7 +13,7 @@ export class DashboardPage {
 
   constructor(page: Page) {
     this.page = page;
-    this.navDashboardBtn = page.getByRole('button', { name: /Dashboard/i });
+    this.navDashboardBtn = page.getByRole('button', { name: /Overview/i });
     this.navTestbenchBtn = page.getByRole('button', { name: /Test Bench/i });
     this.navSettingsBtn = page.getByRole('button', { name: /Settings/i });
     this.navClientsBtn = page.getByRole('button', { name: /Clients|App Keys/i });
@@ -50,6 +50,17 @@ export class DashboardPage {
   }
 
   getServerStatusBadge(serverId: string): Locator {
-    return this.page.locator(`[data-testid="server-status-badge-${serverId}"], .server-item:has-text("${serverId}") .status-badge, .server-card:has-text("${serverId}") .indicator`);
+    return this.page.locator(`[data-server-id="${serverId}"] .indicator, [data-server-id="${serverId}"] .status-badge`);
+  }
+
+  getServerStatusBadgeByName(name: string): Locator {
+    return this.page.locator(`.server-card:has-text("${name}"), .server-item:has-text("${name}")`).locator('.status-badge, .indicator').first();
+  }
+
+  async getServerIdByName(name: string): Promise<string> {
+    const card = this.page.locator(`.server-card:has-text("${name}"), .server-item:has-text("${name}")`).first();
+    await card.waitFor({ state: 'visible' });
+    const id = await card.getAttribute('data-server-id');
+    return id || '';
   }
 }

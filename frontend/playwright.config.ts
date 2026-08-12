@@ -11,10 +11,19 @@ export default defineConfig({
     baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:8080',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
+    actionTimeout: 10000,
+    trace: 'on-first-retry',
+    contextOptions: {
+      logger: {
+        isEnabled: (name, severity) => true,
+        log: (name, severity, message, args) => console.log(`${name} ${message}`)
+      }
+    },
     extraHTTPHeaders: {
       'Remote-User': 'admin',
       'Remote-Groups': 'full_admin,house_member',
-      'Remote-Name': 'Administrator'
+      'Remote-Name': 'Administrator',
+      'Remote-User-Sid': 'S-1-5-32-544'
     }
   },
   projects: [

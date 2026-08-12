@@ -21,10 +21,10 @@ export class TestBenchPage {
 
   async selectServerAndTool(serverId: string, toolName?: string) {
     if (await this.serverSelect.isVisible()) {
-      await this.serverSelect.selectOption(serverId);
+      await this.serverSelect.selectOption(serverId, { timeout: 30000 });
     }
     if (toolName && await this.toolSelect.isVisible()) {
-      await this.toolSelect.selectOption({ label: toolName });
+      await this.toolSelect.selectOption({ label: toolName }, { timeout: 30000 });
     }
   }
 

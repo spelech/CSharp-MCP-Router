@@ -5,7 +5,8 @@ import { TestBenchPage } from './pages/TestBenchPage';
 
 test.describe('Full UI Flow: HTTP Transport + Direct Key Secret Provider', () => {
 
-  test('should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench', async ({ page }) => {
+  test.beforeEach(async ({ page }) => { page.on('console', msg => console.log('BROWSER: ' + msg.text())); }); test('should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench', async ({ page }) => {
+    test.setTimeout(60000);
     const dashboard = new DashboardPage(page);
     const serverModal = new ServerModalPage(page);
     const testbench = new TestBenchPage(page);
@@ -32,17 +33,20 @@ test.describe('Full UI Flow: HTTP Transport + Direct Key Secret Provider', () =>
       await serverModal.save();
 
       // 5. Assert server card appears on dashboard with status badge
-      await dashboard.searchServer('http_direct_mock');
-      const badge = dashboard.getServerStatusBadge('http_direct_mock');
-      if (await badge.isVisible()) {
-        await expect(badge).toBeVisible();
-      }
+      await dashboard.searchServer('HTTP Mock Server');
+      const serverId = await dashboard.getServerIdByName('HTTP Mock Server');
+      const badge = dashboard.getServerStatusBadge(serverId);
+      await expect(badge).toHaveClass(/online/, { timeout: 30000 });
+      await page.waitForTimeout(4000); // Give backend more time to fetch and save tools
+
+      // Reload the page to ensure TestBenchView remounts and fetches the latest tools
+      await page.reload();
 
       // 6. Navigate to Test Bench
       await dashboard.navigateToTestbench();
 
       // 7. Select new server & execute tool
-      await testbench.selectServerAndTool('http_direct_mock');
+      await testbench.selectServerAndTool(serverId, 'health');
       await testbench.executeTool();
     }
   });

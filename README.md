@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.5.6-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.5.9-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-145%20passing-2ea44f?style=for-the-badge)
@@ -76,12 +76,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.5.9`** | 2026-08-12 | fix(keys): target user SID resolution for admin-minted app keys |
+| **`v4.5.8`** | 2026-08-12 | fix(vault): support VAULT_TOKEN fallback for dev testing and init test secrets via docker-compose |
+| **`v4.5.7`** | 2026-08-12 | fix(vault): support VAULT_TOKEN fallback for dev testing and init test secrets via docker-compose |
 | **`v4.5.6`** | 2026-08-10 | fix(auth): make gateway admin SID-only and fail-closed on missing OpenIddict prod certs |
 | **`v4.5.5`** | 2026-08-09 | docs(hygiene): fix test/coverage badges, header-routing claim, phantom type refs |
-| **`v4.5.4`** | 2026-08-09 | fix(layout): lock body to block centering and header to flex-wrap nowrap to prevent tab navigation width shifts |
-| **`v4.5.3`** | 2026-08-09 | fix(build): add SecurityView.tsx component and asset screenshots to git tracking |
-| **`v4.5.2`** | 2026-08-09 | fix(ui): remove RegisteredClientsCard from Overview and stabilize tab layout navigation width |
-| **`v4.5.1`** | 2026-08-09 | fix(ui): remove RegisteredClientsCard from Overview and stabilize tab layout navigation width |
 
 ---
 

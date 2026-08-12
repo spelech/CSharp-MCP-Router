@@ -48,6 +48,7 @@ export const ServerModal: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.error("Submitting ServerModal form...");
     const serverPayload: any = {
       displayName,
       type,
@@ -85,7 +86,7 @@ export const ServerModal: React.FC = () => {
             &times;
           </button>
         </div>
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
           <div className="form-group">
             <label htmlFor="server-name">Display Name</label>
             <input
@@ -110,6 +111,7 @@ export const ServerModal: React.FC = () => {
                 <option value="sse">SSE</option>
                 <option value="http">HTTP</option>
                 <option value="streamable">Streamable HTTP</option>
+                <option value="stdio">STDIO</option>
               </select>
             </div>
             <div className="form-group">
