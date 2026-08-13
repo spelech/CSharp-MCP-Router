@@ -137,14 +137,22 @@ namespace McpRouter
                         var root = doc.RootElement;
                         if (root.TryGetProperty("id", out var idProp))
                         {
-                            requestId = idProp.GetString() ?? idProp.GetRawText();
-                            if (!_activeRequestCancellationTokens.TryAdd(requestId, cts))
+                            requestId = idProp.ValueKind == JsonValueKind.String ? idProp.GetString() : idProp.GetRawText();
+
+                            var scopeId = _sessionId;
+                            if (_sessionId == "global-stateless-session" && httpContext != null)
                             {
-                                throw new InvalidOperationException($"A request with cancellation token ID '{requestId}' already exists. Cannot overwrite silently.");
+                                scopeId = $"{_sessionId}:{httpContext.TraceIdentifier}";
+                            }
+                            var cancellationKey = $"{scopeId}:{requestId}";
+
+                            if (!_activeRequestCancellationTokens.TryAdd(cancellationKey, cts))
+                            {
+                                throw new InvalidOperationException($"Duplicate request ID '{requestId}' detected in session '{scopeId}'. Silent overwrite prevented.");
                             }
                         }
                     }
-                    catch (Exception exVal) when (exVal is InvalidOperationException)
+                    catch (Exception exVal) when (exVal is InvalidOperationException && exVal.Message.Contains("Duplicate request ID"))
                     {
                         throw;
                     }
