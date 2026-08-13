@@ -33,9 +33,17 @@ namespace McpRouter
             {
                 _transport = new HttpTransport(server, httpClient, logger, secretRetriever);
             }
-            else
+            else if (server.Type == "sse")
             {
                 _transport = new SseTransport(server, httpClient, logger, _stateManager, secretRetriever);
+            }
+            else if (server.Type == "stdio")
+            {
+                _transport = new StdioTransport(server, logger, _stateManager, secretRetriever);
+            }
+            else
+            {
+                throw new NotSupportedException($"Transport type '{server.Type}' is not supported by the gateway.");
             }
         }
 
@@ -81,6 +89,8 @@ namespace McpRouter
                 return await sse.CallMethodAsync(method, parameters, overrideId);
             else if (_transport is HttpTransport http)
                 return await http.CallMethodAsync(method, parameters, overrideId);
+            else if (_transport is StdioTransport stdio)
+                return await stdio.CallMethodAsync(method, parameters, overrideId);
                 
             throw new NotSupportedException();
         }
