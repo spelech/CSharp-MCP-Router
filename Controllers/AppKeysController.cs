@@ -9,6 +9,7 @@ using Dapper;
 using McpRouter.Core.Database;
 using McpRouter.Core.Secrets;
 using McpRouter.Models;
+using McpRouter.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
@@ -23,12 +24,14 @@ namespace McpRouter.Controllers
         private readonly IDbConnectionFactory _dbFactory;
         private readonly IConfiguration _config;
         private readonly McpRouter.Core.Logging.IAuditLogger _auditLogger;
+        private readonly ICredentialService _credentialService;
 
-        public AppKeysController(IDbConnectionFactory dbFactory, IConfiguration config, McpRouter.Core.Logging.IAuditLogger auditLogger)
+        public AppKeysController(IDbConnectionFactory dbFactory, IConfiguration config, McpRouter.Core.Logging.IAuditLogger auditLogger, ICredentialService credentialService)
         {
             _dbFactory = dbFactory;
             _config = config;
             _auditLogger = auditLogger;
+            _credentialService = credentialService;
         }
 
         private async Task<McpRouter.Core.Identity.UserIdentityContext> GetIdentityAsync()
@@ -210,78 +213,14 @@ namespace McpRouter.Controllers
                     }
                 }
 
-                // Derive scope slug for key formatting
                 var scopes = model.Scopes ?? new List<string> { "all" };
-                var scopeSlug = "global";
-                if (scopes.Any(s => s.StartsWith("server:", StringComparison.OrdinalIgnoreCase)))
-                {
-                    scopeSlug = "server";
-                }
-                else if (scopes.Any(s => s.StartsWith("group:", StringComparison.OrdinalIgnoreCase)))
-                {
-                    scopeSlug = "group";
-                }
-                else if (scopes.Any(s => s.StartsWith("tool:", StringComparison.OrdinalIgnoreCase)))
-                {
-                    scopeSlug = "tool";
-                }
-
-                // Generate random secure key
-                var randomBytes = new byte[24];
-                using (var rng = RandomNumberGenerator.Create())
-                {
-                    rng.GetBytes(randomBytes);
-                }
-                var randomPart = Convert.ToHexString(randomBytes).ToLowerInvariant();
-                var plaintextKey = $"mcp-{scopeSlug}-{randomPart}";
-
-                // KeyPrefix is first 16 characters (e.g. "mcp-global-abcde")
-                var prefix = plaintextKey.Substring(0, 16);
-
-                // Store a secure one-way hash of the key
-                using var sha256 = System.Security.Cryptography.SHA256.Create();
-                var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(plaintextKey));
-                var encryptedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
-
-                var appKey = new AppKey
-                {
-                    Id = Guid.NewGuid().ToString("N"),
-                    Name = model.Name,
-                    Username = targetUser,
-                    OwnerSid = ownerSid,
-                    KeyPrefix = prefix,
-                    EncryptedKey = encryptedKey,
-                    ScopesJson = JsonSerializer.Serialize(scopes),
-                    ExpiresAt = model.ExpiresInDays.HasValue ? DateTime.UtcNow.AddDays(model.ExpiresInDays.Value) : null,
-                    CreatedAt = DateTime.UtcNow
-                };
-
-                if (_dbFactory.ProviderName == "sqlite")
-                {
-                    const string insertSql = @"
-                        INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
-                        VALUES (@Id, @Name, @Username, @OwnerSid, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
-                    await conn.ExecuteAsync(insertSql, appKey);
-                }
-                else
-                {
-                    // Call MS SQL / MySQL stored procedure
-                    await conn.ExecuteAsync(
-                        "sp_SaveAppKey",
-                        new
-                        {
-                            appKey.Id,
-                            appKey.Name,
-                            appKey.Username,
-                            appKey.OwnerSid,
-                            appKey.KeyPrefix,
-                            appKey.EncryptedKey,
-                            appKey.ScopesJson,
-                            appKey.ExpiresAt
-                        },
-                        commandType: CommandType.StoredProcedure
-                    );
-                }
+                var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
+                    model.Name,
+                    targetUser,
+                    ownerSid,
+                    scopes,
+                    model.ExpiresInDays
+                );
 
                 await _auditLogger.LogAdminActionAsync(
                     identity.Username, "appkey.create", appKey.Id,
@@ -331,19 +270,7 @@ namespace McpRouter.Controllers
                     return Forbid();
                 }
 
-                if (_dbFactory.ProviderName == "sqlite")
-                {
-                    const string deleteSql = "DELETE FROM AppKeys WHERE Id = @Id;";
-                    await conn.ExecuteAsync(deleteSql, new { Id = id });
-                }
-                else
-                {
-                    await conn.ExecuteAsync(
-                        "sp_DeleteAppKey",
-                        new { Id = id },
-                        commandType: CommandType.StoredProcedure
-                    );
-                }
+                await _credentialService.RevokeCredentialAsync(id);
 
                 await _auditLogger.LogAdminActionAsync(
                     identity.Username, "appkey.revoke", id,
