@@ -128,11 +128,13 @@ export const ServerModal: React.FC = () => {
           </div>
 
           <div className="form-group">
-            <label htmlFor="server-url">Connection URL</label>
+            <label htmlFor="server-url">
+              {type === 'stdio' ? 'Connection Command' : 'Connection URL'}
+            </label>
             <input
               type="text"
               id="server-url"
-              placeholder="e.g. http://notes-rag-mcp:3000/sse"
+              placeholder={type === 'stdio' ? 'e.g. node /app/mock_stdio.js' : 'e.g. http://notes-rag-mcp:3000/sse'}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               required
