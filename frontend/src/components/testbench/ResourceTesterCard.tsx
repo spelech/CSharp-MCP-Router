@@ -53,7 +53,9 @@ export const ResourceTesterCard: React.FC<ResourceTesterCardProps> = ({
     try {
       const parsed = new URL(uri);
       if (parsed.protocol === 'mcp:') return parsed.hostname;
-    } catch {}
+    } catch {
+      // Ignore URL parsing exceptions for malformed or custom URIs
+    }
     return null;
   };
 
