@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState } from 'react';
 import { apiRequest } from '../utils/api';
 import { showToast } from '../stores/useToastStore';
@@ -75,12 +76,6 @@ export const TestBenchView: React.FC = () => {
   const [consoleRequest, setConsoleRequest] = useState('Ready');
   const [consoleResponse, setConsoleResponse] = useState('Waiting for execution...');
 
-  useEffect(() => {
-    loadTools();
-    loadPrompts();
-    loadResources();
-  }, []);
-
   const loadTools = async () => {
     try {
       const data = await apiRequest<ToolItem[]>('/api/test/tools');
@@ -107,6 +102,12 @@ export const TestBenchView: React.FC = () => {
       console.error('Failed to load resources:', e);
     }
   };
+
+  useEffect(() => {
+    loadTools();
+    loadPrompts();
+    loadResources();
+  }, []);
 
   // Run Tools Call
   const handleToolServerChange = (server: string) => {
