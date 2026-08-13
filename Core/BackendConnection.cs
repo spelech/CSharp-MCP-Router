@@ -44,6 +44,11 @@ namespace McpRouter
             await _transport.ConnectAsync();
         }
 
+        public bool TryCompleteRequest(string id, JsonRpcResponse response)
+        {
+            return _stateManager.TryCompleteRequest(id, response);
+        }
+
         public void StartReader(Func<JsonRpcMessage, Task> onMessageReceived)
         {
             _transport.StartReader(async (message) => 
@@ -53,12 +58,6 @@ namespace McpRouter
                     var idStr = response.Id.ToString();
                     if (idStr != null)
                     {
-                        // Fallback hook for old way, even though stateManager handles it inside SseTransport
-                        if (PendingRequests.TryRemove(idStr, out var oldTcs))
-                        {
-                            oldTcs.SetResult(response);
-                        }
-                        
                         if (_stateManager.TryCompleteRequest(idStr, response))
                         {
                             return;

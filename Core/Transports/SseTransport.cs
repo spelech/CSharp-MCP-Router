@@ -279,6 +279,9 @@ namespace McpRouter.Core.Transports
                                 currentEvent = null;
                             }
                         }
+                        _logger.LogWarning("Disconnected from backend {ServerId} (clean EOF). Reconnecting in 5s...", _server.Id);
+                        _stateManager.CancelAll();
+                        await Task.Delay(5000, _cts.Token);
                     }
                     catch (Exception ex)
                     {
@@ -310,6 +313,27 @@ namespace McpRouter.Core.Transports
             });
         }
 
+        private static object? GetJsonElementValue(JsonElement element)
+        {
+            switch (element.ValueKind)
+            {
+                case JsonValueKind.String:
+                    return element.GetString();
+                case JsonValueKind.Number:
+                    if (element.TryGetInt64(out long l)) return l;
+                    if (element.TryGetDouble(out double d)) return d;
+                    return element.GetRawText();
+                case JsonValueKind.True:
+                    return true;
+                case JsonValueKind.False:
+                    return false;
+                case JsonValueKind.Null:
+                    return null;
+                default:
+                    return element.GetRawText();
+            }
+        }
+
         public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
         {
             if (_messageUrl == null)
@@ -328,26 +352,58 @@ namespace McpRouter.Core.Transports
                 return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
             }
 
-            string requestId = Guid.NewGuid().ToString("N");
+            string upstreamRequestId = Guid.NewGuid().ToString("N");
+            object? originalId = null;
             string modifiedBody = bodyJson;
-            
-            try 
-            {
-                using var doc = JsonDocument.Parse(bodyJson);
-                var root = doc.RootElement;
-                if (root.TryGetProperty("id", out var idProp))
-                {
-                    requestId = idProp.ToString();
-                }
-                else
-                {
-                    var dict = JsonSerializer.Deserialize<System.Collections.Generic.Dictionary<string, object>>(bodyJson) ?? new();
-                    dict["id"] = requestId;
-                    modifiedBody = JsonSerializer.Serialize(dict);
-                }
-            } catch { }
+            bool isNotification = true;
 
-            var tcs = _stateManager.CreateRequest(requestId);
+            try
+            {
+                var node = System.Text.Json.Nodes.JsonNode.Parse(bodyJson);
+                if (node is System.Text.Json.Nodes.JsonObject obj)
+                {
+                    if (obj.TryGetPropertyValue("id", out var idNode) && idNode != null)
+                    {
+                        isNotification = false;
+                        using var doc = JsonDocument.Parse(idNode.ToJsonString());
+                        originalId = GetJsonElementValue(doc.RootElement);
+
+                        obj["id"] = upstreamRequestId;
+                        modifiedBody = node.ToJsonString();
+                    }
+                    else
+                    {
+                        isNotification = true;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to parse/rewrite JSON ID in SendRequestAsync");
+            }
+
+            if (isNotification)
+            {
+                var content = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
+
+                using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
+                req.Headers.Host = "localhost";
+                req.Headers.Accept.Clear();
+                req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+                if (!string.IsNullOrEmpty(_sessionId))
+                {
+                    req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+                }
+
+                await ApplyAuthAndCustomHeadersAsync(req);
+                using var res = await _httpClient.SendAsync(req, _cts.Token);
+                res.EnsureSuccessStatusCode();
+
+                return new JsonRpcResponse();
+            }
+
+            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, _sessionId, _cts.Token, RequestTimeout);
 
             try
             {
@@ -377,14 +433,16 @@ namespace McpRouter.Core.Transports
             }
             finally
             {
-                // Ensure it is removed if not already completed by the reader
-                _stateManager.TryCompleteRequest(requestId, null!);
+                _stateManager.TryCompleteRequest(upstreamRequestId, null!);
             }
         }
 
         public async Task<JsonRpcResponse> CallMethodAsync(string method, object parameters, string? overrideId = null)
         {
-            var bodyObj = new { jsonrpc = "2.0", method = method, @params = parameters, id = overrideId ?? Guid.NewGuid().ToString("N") };
+            string upstreamRequestId = Guid.NewGuid().ToString("N");
+            object? originalId = overrideId ?? Guid.NewGuid().ToString("N");
+
+            var bodyObj = new { jsonrpc = "2.0", method = method, @params = parameters, id = upstreamRequestId };
             var bodyJson = JsonSerializer.Serialize(bodyObj);
 
             if (_messageUrl == null)
@@ -403,8 +461,7 @@ namespace McpRouter.Core.Transports
                 throw new InvalidOperationException($"Backend {_server.Id} has not sent its endpoint event yet.");
             }
 
-            string requestId = bodyObj.id;
-            var tcs = _stateManager.CreateRequest(requestId);
+            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, _sessionId, _cts.Token, TimeSpan.FromSeconds(15));
 
             try
             {
@@ -430,7 +487,7 @@ namespace McpRouter.Core.Transports
             }
             finally
             {
-                _stateManager.TryCompleteRequest(requestId, null!);
+                _stateManager.TryCompleteRequest(upstreamRequestId, null!);
             }
         }
 

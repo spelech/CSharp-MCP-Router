@@ -122,9 +122,8 @@ namespace McpRouter
                         if (message is JsonRpcResponse response && response.Id != null)
                         {
                             var idStr = response.Id.ToString();
-                            if (idStr != null && conn.PendingRequests.TryRemove(idStr, out var tcs))
+                            if (idStr != null && conn.TryCompleteRequest(idStr, response))
                             {
-                                tcs.SetResult(response);
                                 return;
                             }
                         }

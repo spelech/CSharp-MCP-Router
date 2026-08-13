@@ -58,7 +58,10 @@ namespace McpRouter
             var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             var requestId = request.Id?.ToString() ?? Guid.NewGuid().ToString("N");
             
-            _clientPendingRequests[requestId] = tcs;
+            if (!_clientPendingRequests.TryAdd(requestId, tcs))
+            {
+                throw new InvalidOperationException($"A client pending request with ID '{requestId}' already exists. Cannot overwrite silently.");
+            }
 
             var clientRequest = new {
                 jsonrpc = "2.0",
