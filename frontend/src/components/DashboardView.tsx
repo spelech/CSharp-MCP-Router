@@ -38,7 +38,7 @@ export const DashboardView: React.FC = () => {
   }, []);
 
   // Filter & Sort
-  let filtered = servers.filter((s) => {
+  const filtered = servers.filter((s) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     const nameMatch = (s.displayName || '').toLowerCase().includes(q);

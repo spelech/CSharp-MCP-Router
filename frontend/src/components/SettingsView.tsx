@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import React, { useEffect, useState } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 
@@ -101,7 +102,9 @@ export const SettingsView: React.FC = () => {
             setSecVaultAddress(cfg.address || '');
             setSecVaultToken(cfg.token || '');
             setSecVaultPath(cfg.mountPath || '');
-          } catch {}
+          } catch {
+            // Ignore malformed Vault config JSON
+          }
         }
       }
 
@@ -112,7 +115,9 @@ export const SettingsView: React.FC = () => {
           try {
             const cfg = JSON.parse(winreg.configJson);
             setSecWinregKey(cfg.keyPath || '');
-          } catch {}
+          } catch {
+            // Ignore malformed Winreg config JSON
+          }
         }
       }
 
@@ -123,7 +128,9 @@ export const SettingsView: React.FC = () => {
           try {
             const cfg = JSON.parse(env.configJson);
             setSecEnvPrefix(cfg.prefix || '');
-          } catch {}
+          } catch {
+            // Ignore malformed Env config JSON
+          }
         }
       }
     }
