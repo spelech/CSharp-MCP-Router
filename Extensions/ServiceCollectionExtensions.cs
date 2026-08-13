@@ -67,6 +67,9 @@ namespace McpRouter.Extensions
         // Register Multi-Database Provider Factory (Pure Dapper)
         builder.Services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory, McpRouter.Core.Database.DbConnectionFactory>();
 
+        // Register Credential Service
+        builder.Services.AddSingleton<ICredentialService, CredentialService>();
+
         // Register Pluggable Identity Providers (Active Directory & Configurable Header Auth)
         builder.Services.AddSingleton<McpRouter.Core.Identity.ILdapService, McpRouter.Core.Identity.LdapActiveDirectoryService>();
         // App-key requests carry no AD/OIDC headers; resolve their owner+SID first so audit rows are attributable.

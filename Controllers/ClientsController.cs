@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using McpRouter.Core.Database;
+using McpRouter.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Dapper;
 
 namespace McpRouter.Controllers
@@ -17,11 +19,13 @@ namespace McpRouter.Controllers
     {
         private readonly IDbConnectionFactory _dbFactory;
         private readonly McpRouter.Core.Logging.IAuditLogger _auditLogger;
+        private readonly ICredentialService _credentialService;
 
-        public ClientsController(IDbConnectionFactory dbFactory, McpRouter.Core.Logging.IAuditLogger auditLogger)
+        public ClientsController(IDbConnectionFactory dbFactory, McpRouter.Core.Logging.IAuditLogger _auditLogger, ICredentialService credentialService)
         {
             _dbFactory = dbFactory;
-            _auditLogger = auditLogger;
+            this._auditLogger = _auditLogger;
+            _credentialService = credentialService;
         }
 
         [HttpGet]
@@ -55,32 +59,41 @@ namespace McpRouter.Controllers
                 return BadRequest("DisplayName is required.");
 
             var clientId = Guid.NewGuid().ToString("N");
-            var clientSecret = "mcp_" + Guid.NewGuid().ToString("N");
-            var keyId = Guid.NewGuid().ToString("N").Substring(0, 8);
-            var prefix = clientSecret.Substring(0, Math.Min(16, clientSecret.Length));
-            var scopesJson = JsonSerializer.Serialize(model.Scopes ?? new List<string>());
+            var scopes = model.Scopes ?? new List<string>();
 
             var username = User?.Identity?.Name ?? "unknown";
+            var ownerSid = "";
+
             try
             {
-                using var conn = _dbFactory.CreateConnection();
-                await conn.ExecuteAsync(@"
-                    INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson)
-                    VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson)",
-                    new {
-                        Id = keyId,
-                        Name = model.DisplayName,
-                        Username = clientId,
-                        KeyPrefix = prefix,
-                        EncryptedKey = clientSecret,
-                        ScopesJson = scopesJson
-                    });
+                var compositeProvider = HttpContext.RequestServices.GetService<McpRouter.Core.Identity.CompositeIdentityProvider>();
+                if (compositeProvider != null)
+                {
+                    var identity = await compositeProvider.ResolveIdentityAsync(HttpContext);
+                    if (identity != null)
+                    {
+                        username = identity.Username;
+                        ownerSid = identity.AllSids.FirstOrDefault() ?? "";
+                    }
+                }
+            }
+            catch { }
+
+            try
+            {
+                var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
+                    model.DisplayName,
+                    clientId, // Username/ClientId of the AppKey
+                    ownerSid,
+                    scopes,
+                    null // Registered clients have no expiration by default
+                );
 
                 await _auditLogger.LogAdminActionAsync(username, "client.create", clientId, JsonSerializer.Serialize(new { model.DisplayName, Scopes = model.Scopes }), true);
 
                 return Ok(new {
                     ClientId = clientId,
-                    ClientSecret = clientSecret,
+                    ClientSecret = plaintextKey,
                     DisplayName = model.DisplayName
                 });
             }
@@ -97,9 +110,22 @@ namespace McpRouter.Controllers
             var username = User?.Identity?.Name ?? "unknown";
             try
             {
-                using var conn = _dbFactory.CreateConnection();
-                var deleted = await conn.ExecuteAsync("DELETE FROM AppKeys WHERE Id = @id", new { id });
-                if (deleted == 0)
+                try
+                {
+                    var compositeProvider = HttpContext.RequestServices.GetService<McpRouter.Core.Identity.CompositeIdentityProvider>();
+                    if (compositeProvider != null)
+                    {
+                        var identity = await compositeProvider.ResolveIdentityAsync(HttpContext);
+                        if (identity != null)
+                        {
+                            username = identity.Username;
+                        }
+                    }
+                }
+                catch { }
+
+                var success = await _credentialService.RevokeCredentialAsync(id);
+                if (!success)
                 {
                     await _auditLogger.LogAdminActionAsync(username, "client.delete", id, "", false, "Client not found");
                     return NotFound();
