@@ -138,8 +138,15 @@ namespace McpRouter
                         if (root.TryGetProperty("id", out var idProp))
                         {
                             requestId = idProp.GetString() ?? idProp.GetRawText();
-                            _activeRequestCancellationTokens[requestId] = cts;
+                            if (!_activeRequestCancellationTokens.TryAdd(requestId, cts))
+                            {
+                                throw new InvalidOperationException($"A request with cancellation token ID '{requestId}' already exists. Cannot overwrite silently.");
+                            }
                         }
+                    }
+                    catch (Exception exVal) when (exVal is InvalidOperationException)
+                    {
+                        throw;
                     }
                     catch { }
 
