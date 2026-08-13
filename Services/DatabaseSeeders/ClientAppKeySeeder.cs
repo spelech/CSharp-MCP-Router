@@ -99,9 +99,10 @@ namespace McpRouter.Services.DatabaseSeeders
                             defaultKey.KeyPrefix,
                             defaultKey.EncryptedKey,
                             defaultKey.ScopesJson,
+                            defaultKey.OwnerSid,
                             defaultKey.ExpiresAt,
                             defaultKey.CreatedAt
-                        });
+                        }, commandType: System.Data.CommandType.StoredProcedure);
                     }
                     logger.LogInformation("Seeded default CLI Admin AppKey for 'steve'.");
                 }

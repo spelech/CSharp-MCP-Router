@@ -176,7 +176,7 @@ namespace McpRouter.Tests
             Assert.Equal(5, count);
 
             // Fetch limits setting using RouterSettings typed model
-            var settings = await _connection.QueryFirstOrDefaultAsync<RouterSettings>("SELECT * FROM Settings LIMIT 1;");
+            var settings = await _connection.QueryFirstOrDefaultAsync<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default';");
             Assert.NotNull(settings);
             int maxKeys = settings.UserMaxKeys;
 

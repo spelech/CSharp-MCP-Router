@@ -85,18 +85,18 @@ BEGIN
     SELECT DISTINCT 
         t.[ToolId], 
         t.[ServerId], 
-        s.[CodeName] AS ServerCodeName, 
+        s.[Id] AS ServerCodeName,
         t.[ToolName], 
         t.[VaultSecretPath],
         t.[SecretProvider]
     FROM [dbo].[Tools] t
-    INNER JOIN [dbo].[McpServers] s ON t.[ServerId] = s.[ServerId]
+    INNER JOIN [dbo].[Servers] s ON t.[ServerId] = s.[Id]
     INNER JOIN [dbo].[ToolAccessPolicies] tap ON t.[ToolId] = tap.[ToolId]
     INNER JOIN [dbo].[AdGroups] g ON tap.[GroupId] = g.[GroupId]
     WHERE g.[GroupName] IN (SELECT value FROM STRING_SPLIT(@GroupNames, ','))
       AND tap.[IsAllowed] = 1
       AND t.[IsEnabled] = 1
-      AND s.[IsActive] = 1;
+      AND s.[Enabled] = 1;
 END;
 GO
 
@@ -108,16 +108,16 @@ BEGIN
     SET NOCOUNT ON;
     
     SELECT 
-        s.[ServerId],
-        s.[CodeName],
+        s.[Id] AS ServerId,
+        s.[Id] AS CodeName,
         s.[SecretProvider] AS ServerSecretProvider,
         t.[ToolName],
         t.[VaultSecretPath],
         t.[SecretProvider] AS ToolSecretProvider
-    FROM [dbo].[McpServers] s
-    LEFT JOIN [dbo].[Tools] t ON s.[ServerId] = t.[ServerId]
-    WHERE s.[CodeName] = @ServerCodeName
-      AND s.[IsActive] = 1;
+    FROM [dbo].[Servers] s
+    LEFT JOIN [dbo].[Tools] t ON s.[Id] = t.[ServerId]
+    WHERE s.[Id] = @ServerCodeName
+      AND s.[Enabled] = 1;
 END;
 GO
 
@@ -154,6 +154,7 @@ CREATE OR ALTER PROCEDURE [dbo].[sp_SaveAuthProvider]
     @DisplayName NVARCHAR(100),
     @UserHeader VARCHAR(100),
     @GroupsHeader VARCHAR(100),
+    @ConfigJson NVARCHAR(MAX) = NULL,
     @IsEnabled BIT
 AS
 BEGIN
@@ -165,14 +166,15 @@ BEGIN
         SET [DisplayName] = @DisplayName,
             [UserHeader] = @UserHeader,
             [GroupsHeader] = @GroupsHeader,
+            [ConfigJson] = @ConfigJson,
             [IsEnabled] = @IsEnabled,
             [UpdatedAt] = SYSUTCDATETIME()
         WHERE [ProviderName] = @ProviderName;
     END
     ELSE
     BEGIN
-        INSERT INTO [dbo].[AuthProviderConfigs] ([ProviderName], [DisplayName], [UserHeader], [GroupsHeader], [IsEnabled])
-        VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @IsEnabled);
+        INSERT INTO [dbo].[AuthProviderConfigs] ([ProviderName], [DisplayName], [UserHeader], [GroupsHeader], [ConfigJson], [IsEnabled])
+        VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @ConfigJson, @IsEnabled);
     END
 END;
 GO

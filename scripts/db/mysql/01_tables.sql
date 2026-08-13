@@ -6,25 +6,40 @@ CREATE DATABASE IF NOT EXISTS `McpEnterpriseDb`;
 USE `McpEnterpriseDb`;
 
 -- 1. Registered MCP Servers
-CREATE TABLE IF NOT EXISTS `McpServers` (
-    `ServerId`          INT AUTO_INCREMENT PRIMARY KEY,
-    `CodeName`          VARCHAR(100) NOT NULL UNIQUE,
+CREATE TABLE IF NOT EXISTS `Servers` (
+    `Id`                VARCHAR(100) PRIMARY KEY,
     `DisplayName`       VARCHAR(200) NOT NULL,
-    `Description`       TEXT NULL,
-    `BaseUrl`           VARCHAR(500) NOT NULL,
-    `TransportType`     VARCHAR(20) NOT NULL DEFAULT 'SSE',
+    `Url`               VARCHAR(500) NOT NULL,
+    `Enabled`           TINYINT(1) NOT NULL DEFAULT 1,
+    `Hidden`            TINYINT(1) NOT NULL DEFAULT 0,
+    `Type`              VARCHAR(20) NOT NULL DEFAULT 'sse',
     `SecretProvider`    VARCHAR(50) NOT NULL DEFAULT 'None',
+    `SecretItemKey`     VARCHAR(100) NULL,
     `SecretMount`       VARCHAR(100) NULL,
     `SecretPath`        VARCHAR(250) NULL,
     `SecretField`       VARCHAR(100) NULL,
-    `HealthStatus`      VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
-    `HealthCheckUrl`    VARCHAR(500) NULL,
-    `IsActive`          TINYINT(1) NOT NULL DEFAULT 1,
-    `CreatedAt`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `UpdatedAt`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    `AuthShape`         VARCHAR(20) NOT NULL DEFAULT 'bearer',
+    `CustomHeaderName`  VARCHAR(100) NULL,
+    `Categories`        LONGTEXT NOT NULL,
+    `ApiKey`            LONGTEXT NULL,
+    `HeadersJson`       LONGTEXT NULL,
+    `AutoDiscovered`    TINYINT(1) NOT NULL DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 2. Secret Providers Configuration Table
+-- 2. Settings Table
+CREATE TABLE IF NOT EXISTS `Settings` (
+    `Id`                      VARCHAR(50) PRIMARY KEY,
+    `EmbeddingProvider`       VARCHAR(50) NULL,
+    `EmbeddingApiUrl`         VARCHAR(500) NULL,
+    `EmbeddingApiKey`         LONGTEXT NULL,
+    `EmbeddingApiModel`       VARCHAR(100) NULL,
+    `EmbeddingModelDir`       VARCHAR(500) NULL,
+    `RequireManualApproval`   TINYINT(1) NOT NULL DEFAULT 0,
+    `GlobalMaxKeys`           INT NOT NULL DEFAULT 100,
+    `UserMaxKeys`             INT NOT NULL DEFAULT 5
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 3. Secret Providers Configuration Table
 CREATE TABLE IF NOT EXISTS `SecretProviders` (
     `ProviderId`          INT AUTO_INCREMENT PRIMARY KEY,
     `ProviderName`        VARCHAR(50) NOT NULL UNIQUE,
@@ -34,18 +49,19 @@ CREATE TABLE IF NOT EXISTS `SecretProviders` (
     `UpdatedAt`           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 3. Identity & Auth Providers Configuration Table
+-- 4. Identity & Auth Providers Configuration Table
 CREATE TABLE IF NOT EXISTS `AuthProviderConfigs` (
     `AuthId`              INT AUTO_INCREMENT PRIMARY KEY,
     `ProviderName`        VARCHAR(50) NOT NULL UNIQUE,
     `DisplayName`         VARCHAR(100) NOT NULL,
     `UserHeader`          VARCHAR(100) NULL DEFAULT 'Remote-User',
     `GroupsHeader`        VARCHAR(100) NULL DEFAULT 'Remote-Groups',
+    `ConfigJson`          LONGTEXT NULL,
     `IsEnabled`           TINYINT(1) NOT NULL DEFAULT 1,
     `UpdatedAt`           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 4. User & Group Security Groups
+-- 5. User & Group Security Groups
 CREATE TABLE IF NOT EXISTS `AdGroups` (
     `GroupId`           INT AUTO_INCREMENT PRIMARY KEY,
     `ObjectSid`         VARCHAR(180) NOT NULL UNIQUE,
@@ -55,10 +71,10 @@ CREATE TABLE IF NOT EXISTS `AdGroups` (
     `CreatedAt`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 5. Tools Registry & Access Control
+-- 6. Tools Registry & Access Control
 CREATE TABLE IF NOT EXISTS `Tools` (
     `ToolId`            INT AUTO_INCREMENT PRIMARY KEY,
-    `ServerId`          INT NOT NULL,
+    `ServerId`          VARCHAR(100) NOT NULL,
     `ToolName`          VARCHAR(150) NOT NULL,
     `Description`       TEXT NULL,
     `InputSchemaJson`   LONGTEXT NULL,
@@ -66,7 +82,7 @@ CREATE TABLE IF NOT EXISTS `Tools` (
     `SecretProvider`    VARCHAR(50) NOT NULL DEFAULT 'None',
     `IsEnabled`         TINYINT(1) NOT NULL DEFAULT 1,
     `CreatedAt`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT `FK_Tools_McpServers` FOREIGN KEY (`ServerId`) REFERENCES `McpServers` (`ServerId`) ON DELETE CASCADE,
+    CONSTRAINT `FK_Tools_Servers` FOREIGN KEY (`ServerId`) REFERENCES `Servers` (`Id`) ON DELETE CASCADE,
     CONSTRAINT `UQ_Server_ToolName` UNIQUE (`ServerId`, `ToolName`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -99,7 +115,7 @@ CREATE TABLE IF NOT EXISTS `GroupMappings` (
     `CreatedAt`      DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 6. Audit Logging Table
+-- 7. Audit Logging Table
 CREATE TABLE IF NOT EXISTS `AuditLogs` (
     `AuditId`           BIGINT AUTO_INCREMENT PRIMARY KEY,
     `RequestId`         VARCHAR(64) NOT NULL,
@@ -116,7 +132,7 @@ CREATE TABLE IF NOT EXISTS `AuditLogs` (
     `Timestamp`         DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 7. App Keys Table
+-- 8. App Keys Table
 CREATE TABLE IF NOT EXISTS `AppKeys` (
     `Id`           VARCHAR(100) PRIMARY KEY,
     `Name`         VARCHAR(200) NOT NULL,
@@ -129,7 +145,7 @@ CREATE TABLE IF NOT EXISTS `AppKeys` (
     `OwnerSid`     VARCHAR(200) NOT NULL DEFAULT ''
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 8. Admin Audit Logging Table
+-- 9. Admin Audit Logging Table
 CREATE TABLE IF NOT EXISTS `AdminAuditLogs` (
     `Id`           VARCHAR(50) NOT NULL PRIMARY KEY,
     `Username`     VARCHAR(256) NOT NULL,
