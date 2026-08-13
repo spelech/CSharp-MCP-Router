@@ -124,7 +124,9 @@ export const LogsTerminalCard: React.FC = () => {
                   let payload = match[2];
                   try {
                     payload = JSON.stringify(JSON.parse(payload), null, 2);
-                  } catch {}
+                  } catch {
+                    // Ignore parsing errors for non-JSON content
+                  }
                   const badgeClass = direction.includes('->') ? 'log-level-badge log-level-info' : 'log-level-badge log-level-warning';
                   return (
                     <div key={log.id} className="log-line" style={{ borderLeft: '2px solid var(--accent)', paddingLeft: '8px', marginBottom: '8px' }}>

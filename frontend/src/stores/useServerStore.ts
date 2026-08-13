@@ -101,7 +101,9 @@ export const useServerStore = create<ServerStore>((set, get) => ({
       if (refreshAll) {
         try {
           await apiRequest('/api/servers/reconnect-all', { method: 'POST' });
-        } catch {}
+        } catch {
+          // Ignore error during batch reconnection attempt
+        }
       }
       const data = await apiRequest<McpServer[]>('/api/servers');
       set({ servers: data || [], isLoadingServers: false });
