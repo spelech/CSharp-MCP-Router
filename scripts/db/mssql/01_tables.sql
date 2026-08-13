@@ -12,24 +12,43 @@ USE [McpEnterpriseDb];
 GO
 
 -- 1. Registered MCP Servers
-IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'McpServers')
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Servers')
 BEGIN
-    CREATE TABLE [dbo].[McpServers] (
-        [ServerId]          INT IDENTITY(1,1) PRIMARY KEY,
-        [CodeName]          VARCHAR(100) NOT NULL UNIQUE,
+    CREATE TABLE [dbo].[Servers] (
+        [Id]                VARCHAR(100) PRIMARY KEY,
         [DisplayName]       NVARCHAR(200) NOT NULL,
-        [Description]       NVARCHAR(MAX) NULL,
-        [BaseUrl]           VARCHAR(500) NOT NULL,
-        [TransportType]     VARCHAR(20) NOT NULL DEFAULT 'SSE',
+        [Url]               VARCHAR(500) NOT NULL,
+        [Enabled]           BIT NOT NULL DEFAULT 1,
+        [Hidden]            BIT NOT NULL DEFAULT 0,
+        [Type]              VARCHAR(20) NOT NULL DEFAULT 'sse',
         [SecretProvider]    VARCHAR(50) NOT NULL DEFAULT 'None',
+        [SecretItemKey]     VARCHAR(100) NULL,
         [SecretMount]       VARCHAR(100) NULL,
         [SecretPath]        VARCHAR(250) NULL,
         [SecretField]       VARCHAR(100) NULL,
-        [HealthStatus]      VARCHAR(20) NOT NULL DEFAULT 'UNKNOWN',
-        [HealthCheckUrl]    VARCHAR(500) NULL,
-        [IsActive]          BIT NOT NULL DEFAULT 1,
-        [CreatedAt]         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-        [UpdatedAt]         DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+        [AuthShape]         VARCHAR(20) NOT NULL DEFAULT 'bearer',
+        [CustomHeaderName]  VARCHAR(100) NULL,
+        [Categories]        NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+        [ApiKey]            NVARCHAR(MAX) NULL,
+        [HeadersJson]       NVARCHAR(MAX) NULL,
+        [AutoDiscovered]    BIT NOT NULL DEFAULT 0
+    );
+END;
+GO
+
+-- 2. Settings Table
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Settings')
+BEGIN
+    CREATE TABLE [dbo].[Settings] (
+        [Id]                      VARCHAR(50) PRIMARY KEY,
+        [EmbeddingProvider]       VARCHAR(50) NULL,
+        [EmbeddingApiUrl]         VARCHAR(500) NULL,
+        [EmbeddingApiKey]         NVARCHAR(MAX) NULL,
+        [EmbeddingApiModel]       VARCHAR(100) NULL,
+        [EmbeddingModelDir]       VARCHAR(500) NULL,
+        [RequireManualApproval]   BIT NOT NULL DEFAULT 0,
+        [GlobalMaxKeys]           INT NOT NULL DEFAULT 100,
+        [UserMaxKeys]             INT NOT NULL DEFAULT 5
     );
 END;
 GO
@@ -56,7 +75,7 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE Name = N'OwnerSid' AND Object_ID 
     ALTER TABLE [dbo].[AppKeys] ADD [OwnerSid] NVARCHAR(200) NOT NULL DEFAULT '';
 GO
 
--- 2. Secret Providers Configuration Table
+-- 3. Secret Providers Configuration Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SecretProviders')
 BEGIN
     CREATE TABLE [dbo].[SecretProviders] (
@@ -70,7 +89,7 @@ BEGIN
 END;
 GO
 
--- 3. Identity & Auth Providers Configuration Table
+-- 4. Identity & Auth Providers Configuration Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AuthProviderConfigs')
 BEGIN
     CREATE TABLE [dbo].[AuthProviderConfigs] (
@@ -79,13 +98,14 @@ BEGIN
         [DisplayName]         NVARCHAR(100) NOT NULL,
         [UserHeader]          VARCHAR(100) NULL DEFAULT 'Remote-User',
         [GroupsHeader]        VARCHAR(100) NULL DEFAULT 'Remote-Groups',
+        [ConfigJson]          NVARCHAR(MAX) NULL,
         [IsEnabled]           BIT NOT NULL DEFAULT 1,
         [UpdatedAt]           DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
 END;
 GO
 
--- 4. User & Group Security Groups
+-- 5. User & Group Security Groups
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AdGroups')
 BEGIN
     CREATE TABLE [dbo].[AdGroups] (
@@ -99,12 +119,12 @@ BEGIN
 END;
 GO
 
--- 5. Tools Registry & Access Control
+-- 6. Tools Registry & Access Control
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'Tools')
 BEGIN
     CREATE TABLE [dbo].[Tools] (
         [ToolId]            INT IDENTITY(1,1) PRIMARY KEY,
-        [ServerId]          INT NOT NULL FOREIGN KEY REFERENCES [dbo].[McpServers]([ServerId]),
+        [ServerId]          VARCHAR(100) NOT NULL FOREIGN KEY REFERENCES [dbo].[Servers]([Id]),
         [ToolName]          VARCHAR(150) NOT NULL,
         [Description]       NVARCHAR(MAX) NULL,
         [InputSchemaJson]   NVARCHAR(MAX) NULL,
@@ -156,7 +176,7 @@ BEGIN
 END;
 GO
 
--- 6. Audit Logging Table
+-- 8. Audit Logging Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AuditLogs')
 BEGIN
     CREATE TABLE [dbo].[AuditLogs] (
@@ -177,7 +197,7 @@ BEGIN
 END;
 GO
 
--- 7. Admin Audit Logging Table
+-- 9. Admin Audit Logging Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'AdminAuditLogs')
 BEGIN
     CREATE TABLE [dbo].[AdminAuditLogs] (

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Dapper;
 using McpRouter.Core.Database;
 using McpRouter.Core.Logging;
 using Microsoft.AspNetCore.Mvc;
@@ -32,11 +31,15 @@ namespace McpRouter.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class ProvidersController : ControllerBase
     {
-        private readonly IDbConnectionFactory _dbFactory;
+        private readonly ISecretProviderRepository _secretRepo;
+        private readonly IAuthProviderRepository _authRepo;
 
-        public ProvidersController(IDbConnectionFactory dbFactory)
+        public ProvidersController(
+            ISecretProviderRepository secretRepo,
+            IAuthProviderRepository authRepo)
         {
-            _dbFactory = dbFactory;
+            _secretRepo = secretRepo;
+            _authRepo = authRepo;
         }
 
         [HttpGet("secrets")]
@@ -44,9 +47,7 @@ namespace McpRouter.Controllers
         {
             try
             {
-                using var conn = _dbFactory.CreateConnection();
-                const string sql = "SELECT ProviderName, DisplayName, EncryptedConfigJson AS ConfigJson, IsEnabled FROM SecretProviders;";
-                var providers = await conn.QueryAsync<SecretProviderDto>(sql);
+                var providers = await _secretRepo.GetSecretProvidersAsync();
                 return Ok(providers);
             }
             catch (Exception ex)
@@ -65,24 +66,7 @@ namespace McpRouter.Controllers
             {
                 McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);
 
-                using var conn = _dbFactory.CreateConnection();
-                if (_dbFactory.ProviderName == "sqlite")
-                {
-                    const string sql = @"
-                        INSERT INTO SecretProviders (ProviderName, DisplayName, EncryptedConfigJson, IsEnabled)
-                        VALUES (@ProviderName, @DisplayName, @ConfigJson, @IsEnabled)
-                        ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, EncryptedConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
-                    await conn.ExecuteAsync(sql, dto);
-                }
-                else
-                {
-                    await conn.ExecuteAsync("sp_SaveSecretProvider", new {
-                        dto.ProviderName,
-                        dto.DisplayName,
-                        EncryptedConfigJson = dto.ConfigJson,
-                        dto.IsEnabled
-                    }, commandType: System.Data.CommandType.StoredProcedure);
-                }
+                await _secretRepo.SaveSecretProviderAsync(dto);
 
                 _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, dto.ConfigJson ?? "", true);
 
@@ -105,9 +89,7 @@ namespace McpRouter.Controllers
         {
             try
             {
-                using var conn = _dbFactory.CreateConnection();
-                const string sql = "SELECT ProviderName, DisplayName, UserHeader, GroupsHeader, ConfigJson, IsEnabled FROM AuthProviderConfigs;";
-                var providers = await conn.QueryAsync<AuthProviderDto>(sql);
+                var providers = await _authRepo.GetAuthProvidersAsync();
                 return Ok(providers);
             }
             catch (Exception ex)
@@ -126,25 +108,7 @@ namespace McpRouter.Controllers
             {
                 McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);
 
-                using var conn = _dbFactory.CreateConnection();
-                if (_dbFactory.ProviderName == "sqlite")
-                {
-                    const string sql = @"
-                        INSERT INTO AuthProviderConfigs (ProviderName, DisplayName, UserHeader, GroupsHeader, ConfigJson, IsEnabled)
-                        VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @ConfigJson, @IsEnabled)
-                        ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, UserHeader = @UserHeader, GroupsHeader = @GroupsHeader, ConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
-                    await conn.ExecuteAsync(sql, dto);
-                }
-                else
-                {
-                    await conn.ExecuteAsync("sp_SaveAuthProvider", new {
-                        dto.ProviderName,
-                        dto.DisplayName,
-                        dto.UserHeader,
-                        dto.GroupsHeader,
-                        dto.IsEnabled
-                    }, commandType: System.Data.CommandType.StoredProcedure);
-                }
+                await _authRepo.SaveAuthProviderAsync(dto);
 
                 _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, dto.ConfigJson ?? "", true);
 
