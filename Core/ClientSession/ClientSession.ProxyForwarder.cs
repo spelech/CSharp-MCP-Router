@@ -19,14 +19,26 @@ namespace McpRouter
         /// <param name="requestId">The unique request ID to cancel.</param>
         public void CancelRequest(string requestId)
         {
-            if (_activeRequestCancellationTokens.TryRemove(requestId, out var cts))
+            var keysToCancel = new List<string>();
+            foreach (var key in _activeRequestCancellationTokens.Keys)
             {
-                try
+                if (key == requestId || key.EndsWith($":{requestId}"))
                 {
-                    cts.Cancel();
-                    _logger.LogInformation("Cancelled active request: {RequestId}", requestId);
+                    keysToCancel.Add(key);
                 }
-                catch (ObjectDisposedException) { }
+            }
+
+            foreach (var key in keysToCancel)
+            {
+                if (_activeRequestCancellationTokens.TryRemove(key, out var cts))
+                {
+                    try
+                    {
+                        cts.Cancel();
+                        _logger.LogInformation("Cancelled active request: {Key}", key);
+                    }
+                    catch (ObjectDisposedException) { }
+                }
             }
         }
 

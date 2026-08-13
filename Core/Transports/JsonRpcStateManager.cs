@@ -33,15 +33,19 @@ namespace McpRouter.Core.Transports
     public class JsonRpcStateManager
     {
         public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests { get; } = new();
+        private readonly object _lock = new();
 
         public TaskCompletionSource<JsonRpcResponse> CreateRequest(string id)
         {
-            var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
-            if (!PendingRequests.TryAdd(id, tcs))
+            lock (_lock)
             {
-                throw new InvalidOperationException($"A pending request with ID '{id}' already exists. Cannot overwrite silently.");
+                var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
+                if (!PendingRequests.TryAdd(id, tcs))
+                {
+                    throw new InvalidOperationException($"Duplicate request ID '{id}' detected. Silent overwrite prevented.");
+                }
+                return tcs;
             }
-            return tcs;
         }
 
         public PendingRequestTcs CreateTrackedRequest(
@@ -51,35 +55,44 @@ namespace McpRouter.Core.Transports
             CancellationToken cancellationToken,
             TimeSpan timeout)
         {
-            var tcs = new PendingRequestTcs(originalId, upstreamId, sessionId, cancellationToken, timeout);
-            if (!PendingRequests.TryAdd(upstreamId, tcs))
+            lock (_lock)
             {
-                throw new InvalidOperationException($"A pending request with upstream ID '{upstreamId}' already exists. Cannot overwrite silently.");
+                var tcs = new PendingRequestTcs(originalId, upstreamId, sessionId, cancellationToken, timeout);
+                if (!PendingRequests.TryAdd(upstreamId, tcs))
+                {
+                    throw new InvalidOperationException($"Duplicate request ID '{upstreamId}' detected. Silent overwrite prevented.");
+                }
+                return tcs;
             }
-            return tcs;
         }
 
         public bool TryCompleteRequest(string id, JsonRpcResponse response)
         {
-            if (PendingRequests.TryRemove(id, out var tcs))
+            lock (_lock)
             {
-                if (tcs is PendingRequestTcs tracked && response != null)
+                if (PendingRequests.TryRemove(id, out var tcs))
                 {
-                    response.Id = tracked.OriginalId;
+                    if (tcs is PendingRequestTcs tracked && response != null)
+                    {
+                        response.Id = tracked.OriginalId;
+                    }
+                    tcs.TrySetResult(response);
+                    return true;
                 }
-                tcs.TrySetResult(response);
-                return true;
+                return false;
             }
-            return false;
         }
 
         public void CancelAll()
         {
-            foreach (var tcs in PendingRequests.Values)
+            lock (_lock)
             {
-                tcs.TrySetCanceled();
+                foreach (var tcs in PendingRequests.Values)
+                {
+                    tcs.TrySetCanceled();
+                }
+                PendingRequests.Clear();
             }
-            PendingRequests.Clear();
         }
     }
 }

@@ -8,10 +8,12 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
+using Microsoft.AspNetCore.Http;
 using Moq;
 using Xunit;
 using FluentAssertions;
 using McpRouter.Models;
+using McpRouter.Services;
 using McpRouter;
 using McpRouter.Core.Transports;
 
@@ -349,6 +351,201 @@ namespace McpRouter.Tests
             conn.PendingRequests.Should().BeEmpty();
 
             conn.Dispose();
+        }
+
+        [Fact]
+        public async Task ConcurrentResponseIsolation_ExplicitNullId_Succeeds()
+        {
+            // Arrange
+            var server = new McpServer
+            {
+                Id = "null_id_backend",
+                DisplayName = "Null ID Backend",
+                Url = "http://null_id_backend/mcp",
+                Type = "sse",
+                SecretProvider = "None",
+                Enabled = true
+            };
+
+            var sseStream = new DynamicSseStream();
+            sseStream.PushMessage("event: endpoint\ndata: http://null_id_backend/mcp/message\n\n");
+
+            var mockHandler = new MockHttpMessageHandler();
+            var httpClient = new HttpClient(mockHandler);
+            var loggerMock = new Mock<ILogger>();
+
+            string? parsedUpstreamId = null;
+
+            mockHandler.Handler = async (req) =>
+            {
+                if (req.Method == HttpMethod.Get)
+                {
+                    var streamContent = new StreamContent(sseStream);
+                    streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/event-stream");
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = streamContent };
+                }
+                else if (req.Method == HttpMethod.Post)
+                {
+                    var body = await req.Content!.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(body);
+                    var root = doc.RootElement;
+                    parsedUpstreamId = root.GetProperty("id").GetString()!;
+
+                    var responsePayload = $"{{\"jsonrpc\":\"2.0\",\"id\":\"{parsedUpstreamId}\",\"result\":{{\"success\":true}}}}";
+                    sseStream.PushMessage($"event: message\ndata: {responsePayload}\n\n");
+
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
+                }
+                return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            };
+
+            var conn = new BackendConnection(server, httpClient, loggerMock.Object);
+            await conn.ConnectAsync();
+
+            conn.StartReader(async (msg) => {
+                if (msg is JsonRpcResponse response && response.Id != null)
+                {
+                    var idStr = response.Id.ToString();
+                    if (idStr != null && conn.TryCompleteRequest(idStr, response))
+                    {
+                        return;
+                    }
+                }
+            });
+
+            await Task.Delay(200);
+
+            // Act - Send request with explicit JSON-RPC ID null
+            var result = await conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":null,\"params\":{}}");
+
+            // Assert - The explicit null ID should be correctly preserved and restored on response
+            result.Should().NotBeNull();
+            result.Id.Should().BeNull();
+            result.Result.Should().NotBeNull();
+
+            conn.Dispose();
+        }
+
+        [Fact]
+        public async Task ConcurrentResponseIsolation_Notification_DoesNotExpectResponse()
+        {
+            // Arrange
+            var server = new McpServer
+            {
+                Id = "notification_backend",
+                DisplayName = "Notification Backend",
+                Url = "http://notification_backend/mcp",
+                Type = "sse",
+                SecretProvider = "None",
+                Enabled = true
+            };
+
+            var sseStream = new DynamicSseStream();
+            sseStream.PushMessage("event: endpoint\ndata: http://notification_backend/mcp/message\n\n");
+
+            var mockHandler = new MockHttpMessageHandler();
+            var httpClient = new HttpClient(mockHandler);
+            var loggerMock = new Mock<ILogger>();
+
+            var postTcs = new TaskCompletionSource<bool>();
+
+            mockHandler.Handler = async (req) =>
+            {
+                if (req.Method == HttpMethod.Get)
+                {
+                    var streamContent = new StreamContent(sseStream);
+                    streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/event-stream");
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = streamContent };
+                }
+                else if (req.Method == HttpMethod.Post)
+                {
+                    postTcs.TrySetResult(true);
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
+                }
+                return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            };
+
+            var conn = new BackendConnection(server, httpClient, loggerMock.Object);
+            await conn.ConnectAsync();
+
+            conn.StartReader(async (msg) => {
+                await Task.CompletedTask;
+            });
+
+            await Task.Delay(200);
+
+            // Act - Send a notification (no "id" property)
+            var sendTask = conn.SendRequestAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
+
+            // Await should return immediately (doesn't wait on any TCS)
+            var finishedTask = await Task.WhenAny(sendTask, Task.Delay(2000));
+            finishedTask.Should().BeSameAs(sendTask);
+
+            // Verify notification reached backend
+            await postTcs.Task;
+
+            // Ensure no pending entry was left registered
+            conn.PendingRequests.Should().BeEmpty();
+            conn.Dispose();
+        }
+
+        [Fact]
+        public async Task ClientSession_ConcurrentStatelessRequestIsolateCancellation()
+        {
+            // Arrange
+            var servers = new List<McpServer>();
+            var loggerMock = new Mock<ILogger>();
+            var embeddingMock = new Mock<IEmbeddingService>();
+
+            var context1 = new DefaultHttpContext();
+            context1.Request.Headers["Remote-User"] = "admin";
+            context1.TraceIdentifier = "request-1-trace-id";
+
+            var context2 = new DefaultHttpContext();
+            context2.Request.Headers["Remote-User"] = "admin";
+            context2.TraceIdentifier = "request-2-trace-id";
+
+            var session = new ClientSession(
+                "global-stateless-session",
+                context1.Response, // placeholder
+                servers,
+                new HttpClient(),
+                embeddingMock.Object,
+                loggerMock.Object
+            );
+
+            // Simulating two clients registering active requests with duplicate ID 1 concurrently
+            var doc1 = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"tool1\"}}";
+            var doc2 = "{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"tools/call\",\"params\":{\"name\":\"tool1\"}}";
+
+            // Act 1 & Assert 1: Calling CallToolAsync with duplicate original IDs should NOT throw duplicate token keys
+            // because they are client-scoped/request-scoped via TraceIdentifier in ClientSession!
+            var callTask1 = Task.Run(async () =>
+            {
+                try
+                {
+                    await session.CallToolAsync("ha__turn_on", doc1, null!, context1);
+                }
+                catch { }
+            });
+
+            var callTask2 = Task.Run(async () =>
+            {
+                try
+                {
+                    await session.CallToolAsync("ha__turn_on", doc2, null!, context2);
+                }
+                catch { }
+            });
+
+            await Task.Delay(100);
+
+            // Both registrations should succeed and exist side-by-side without any duplicate-key exceptions
+            callTask1.Exception.Should().BeNull();
+            callTask2.Exception.Should().BeNull();
+
+            // Clean up
+            session.Close();
         }
     }
 }

@@ -362,11 +362,19 @@ namespace McpRouter.Core.Transports
                 var node = System.Text.Json.Nodes.JsonNode.Parse(bodyJson);
                 if (node is System.Text.Json.Nodes.JsonObject obj)
                 {
-                    if (obj.TryGetPropertyValue("id", out var idNode) && idNode != null)
+                    if (obj.ContainsKey("id"))
                     {
                         isNotification = false;
-                        using var doc = JsonDocument.Parse(idNode.ToJsonString());
-                        originalId = GetJsonElementValue(doc.RootElement);
+                        var idNode = obj["id"];
+                        if (idNode != null)
+                        {
+                            using var doc = JsonDocument.Parse(idNode.ToJsonString());
+                            originalId = GetJsonElementValue(doc.RootElement);
+                        }
+                        else
+                        {
+                            originalId = null;
+                        }
 
                         obj["id"] = upstreamRequestId;
                         modifiedBody = node.ToJsonString();
@@ -426,7 +434,7 @@ namespace McpRouter.Core.Transports
                 using var res = await _httpClient.SendAsync(req, _cts.Token);
                 res.EnsureSuccessStatusCode();
 
-                var response = await tcs.Task.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
+                var response = await tcs.Task.WaitAsync(RequestTimeout, _cts.Token);
                 var responseJson = JsonSerializer.Serialize(response, _jsonOptions);
                 _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(responseJson));
                 return response;
@@ -461,7 +469,7 @@ namespace McpRouter.Core.Transports
                 throw new InvalidOperationException($"Backend {_server.Id} has not sent its endpoint event yet.");
             }
 
-            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, _sessionId, _cts.Token, TimeSpan.FromSeconds(15));
+            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, _sessionId, _cts.Token, RequestTimeout);
 
             try
             {
@@ -483,7 +491,7 @@ namespace McpRouter.Core.Transports
                 using var res = await _httpClient.SendAsync(postReq, _cts.Token);
                 res.EnsureSuccessStatusCode();
 
-                return await tcs.Task.WaitAsync(TimeSpan.FromSeconds(15), _cts.Token);
+                return await tcs.Task.WaitAsync(RequestTimeout, _cts.Token);
             }
             finally
             {
