@@ -341,7 +341,8 @@ namespace McpRouter.Core.Database
             }
             else if (provider == "mysql")
             {
-                await conn.ExecuteAsync("sp_SaveSecretProvider", new {
+                await conn.ExecuteAsync("sp_SaveSecretProvider", new
+                {
                     p_ProviderName = dto.ProviderName,
                     p_DisplayName = dto.DisplayName,
                     p_EncryptedConfigJson = dto.ConfigJson,
@@ -350,7 +351,8 @@ namespace McpRouter.Core.Database
             }
             else
             {
-                await conn.ExecuteAsync("sp_SaveSecretProvider", new {
+                await conn.ExecuteAsync("sp_SaveSecretProvider", new
+                {
                     dto.ProviderName,
                     dto.DisplayName,
                     EncryptedConfigJson = dto.ConfigJson,
@@ -383,7 +385,8 @@ namespace McpRouter.Core.Database
             }
             else if (provider == "mysql")
             {
-                await conn.ExecuteAsync("sp_SaveAuthProvider", new {
+                await conn.ExecuteAsync("sp_SaveAuthProvider", new
+                {
                     p_ProviderName = dto.ProviderName,
                     p_DisplayName = dto.DisplayName,
                     p_UserHeader = dto.UserHeader,
@@ -394,7 +397,8 @@ namespace McpRouter.Core.Database
             }
             else
             {
-                await conn.ExecuteAsync("sp_SaveAuthProvider", new {
+                await conn.ExecuteAsync("sp_SaveAuthProvider", new
+                {
                     dto.ProviderName,
                     dto.DisplayName,
                     dto.UserHeader,

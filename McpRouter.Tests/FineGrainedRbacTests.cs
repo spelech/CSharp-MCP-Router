@@ -194,7 +194,7 @@ namespace McpRouter.Tests
                 null,
                 new Mock<Microsoft.Extensions.Logging.ILogger<ClientSession>>().Object
             );
-            
+
             var authorized = await session.IsUserAuthorizedAsync("tools/call", "ha__turn_on");
             Assert.False(authorized);
         }

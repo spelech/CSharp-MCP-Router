@@ -22,7 +22,7 @@ namespace McpRouter.Extensions
 
         public static void MapProxyEndpoints(this WebApplication app)
         {
-// ----------------------------------------------------
+            // ----------------------------------------------------
             // MCP CLIENT SSE HANDLER
             // ----------------------------------------------------
             app.MapMethods("/sse", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
@@ -30,12 +30,12 @@ namespace McpRouter.Extensions
                 httpContext.Response.Headers.ContentType = "text/event-stream";
                 httpContext.Response.Headers.CacheControl = "no-cache";
                 httpContext.Response.Headers.Connection = "keep-alive";
-            
+
                 if (httpContext.Request.Method == "HEAD")
                 {
                     return;
                 }
-            
+
                 // Read body if POST
                 string requestBody = string.Empty;
                 string method = string.Empty;
@@ -50,7 +50,7 @@ namespace McpRouter.Extensions
                             requestBody = await reader.ReadToEndAsync();
                             httpContext.Request.Body.Position = 0;
                         }
-            
+
                         if (!string.IsNullOrEmpty(requestBody))
                         {
                             using var doc = JsonDocument.Parse(requestBody);
@@ -71,7 +71,8 @@ namespace McpRouter.Extensions
                         logger.LogWarning(exAuth, "Unauthorized access during stateless request handling");
                         httpContext.Response.StatusCode = 403;
                         httpContext.Response.Headers.ContentType = "application/json";
-                        await httpContext.Response.WriteAsJsonAsync(new {
+                        await httpContext.Response.WriteAsJsonAsync(new
+                        {
                             jsonrpc = "2.0",
                             error = new { code = -32001, message = exAuth.Message }
                         });
@@ -84,8 +85,8 @@ namespace McpRouter.Extensions
                 }
 
                 // Determine if this is a subsequent request for an existing stateless/global session
-                bool isSubsequentRequest = httpContext.Request.Method == "POST" && 
-                                           method != "initialize" && 
+                bool isSubsequentRequest = httpContext.Request.Method == "POST" &&
+                                           method != "initialize" &&
                                            method != "server/discover";
 
                 if (isSubsequentRequest)
@@ -185,7 +186,7 @@ namespace McpRouter.Extensions
                         }
                         else if (method == "resources/templates/list")
                         {
-                            var templates = await activeSession.ListResourceTemplatesAsync(requestBody);
+                            var templates = await activeSession.ListResourceTemplatesAsync(requestBody, httpContext);
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -253,7 +254,7 @@ namespace McpRouter.Extensions
                         }
                         else if (method == "completion/complete")
                         {
-                            var res = await activeSession.CompleteAsync(requestBody);
+                            var res = await activeSession.CompleteAsync(requestBody, httpContext);
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -270,7 +271,8 @@ namespace McpRouter.Extensions
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new {
+                                result = new
+                                {
                                     roots = new[] {
                                         new {
                                             uri = "file:///containers",
@@ -295,7 +297,8 @@ namespace McpRouter.Extensions
                         logger.LogWarning(exAuth, "Unauthorized access during stateless request handling");
                         httpContext.Response.StatusCode = 403;
                         httpContext.Response.Headers.ContentType = "application/json";
-                        await httpContext.Response.WriteAsJsonAsync(new {
+                        await httpContext.Response.WriteAsJsonAsync(new
+                        {
                             jsonrpc = "2.0",
                             error = new { code = -32001, message = exAuth.Message }
                         });
@@ -312,7 +315,7 @@ namespace McpRouter.Extensions
                 // Otherwise, this is a new session establishment request (GET /sse or POST with initialize/discover)
                 var sessionId = (httpContext.Request.Method == "POST") ? "global-stateless-session" : Guid.NewGuid().ToString("N");
                 logger.LogInformation("New client SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
-            
+
                 // Write SSE endpoint event
                 var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
                 if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
@@ -320,9 +323,9 @@ namespace McpRouter.Extensions
                 var absoluteUrl = $"{scheme}://{host}/message?sessionId={sessionId}";
                 await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
                 await httpContext.Response.Body.FlushAsync();
-            
+
                 bool metaMode = httpContext.Request.Query["meta"] != "false";
-                
+
                 // Retrieve or create session
                 ClientSession session;
                 var existingSession = sessionManager.GetSession(sessionId);
@@ -334,7 +337,7 @@ namespace McpRouter.Extensions
                 {
                     session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId: null, metaMode);
                 }
-            
+
                 if (httpContext.Request.Method == "POST")
                 {
                     if (method == "initialize")
@@ -384,7 +387,7 @@ namespace McpRouter.Extensions
                         session.StartInitialization(requestBody);
                     }
                 }
-            
+
                 // Keep connection alive
                 try
                 {
@@ -407,7 +410,7 @@ namespace McpRouter.Extensions
                     }
                 }
             }).RequireAuthorization();
-            
+
             // Minimal API route for handling GET (SSE initialization) and POST (JSON-RPC requests)
             app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, ILogger<Program> logger, string targetServerId) =>
             {
@@ -479,12 +482,14 @@ namespace McpRouter.Extensions
                     {
                         var groupNamesCsv = string.Join(",", identity.GroupNames);
                         object parameters = dbFactory.ProviderName == "mysql"
-                            ? new {
+                            ? new
+                            {
                                 p_GroupNames = groupNamesCsv,
                                 p_ItemName = targetServerId,
                                 p_RequestMethod = "GET"
                             }
-                            : new {
+                            : new
+                            {
                                 GroupNames = groupNamesCsv,
                                 ItemName = targetServerId,
                                 RequestMethod = "GET"
@@ -521,18 +526,18 @@ namespace McpRouter.Extensions
                 var isSse = httpContext.Request.Headers.Accept.ToString().Contains("text/event-stream");
                 var isPost = HttpMethods.IsPost(httpContext.Request.Method);
                 bool metaMode = httpContext.Request.Query["meta"] == "true";
-            
+
                 // Session id is an opaque server-issued capability, NEVER the caller's token.
                 // Clients receive it in the SSE `endpoint` URL and echo it back on /mcp/message.
                 string sessionId = Guid.NewGuid().ToString("N");
-            
+
                 // Read body if POST
                 string requestBody = string.Empty;
                 string method = string.Empty;
                 JsonElement? id = null;
 
 
-            
+
                 if (httpContext.Request.Method == "POST")
                 {
                     try
@@ -543,7 +548,7 @@ namespace McpRouter.Extensions
                             requestBody = await reader.ReadToEndAsync();
                             httpContext.Request.Body.Position = 0;
                         }
-            
+
                         if (!string.IsNullOrEmpty(requestBody))
                         {
                             using var doc = JsonDocument.Parse(requestBody);
@@ -563,25 +568,25 @@ namespace McpRouter.Extensions
                         logger.LogError(ex, "Failed to parse POST message body for /mcp");
                     }
                 }
-            
 
-            
+
+
                 // Otherwise, establish a new SSE stream (for GET requests, or POST with method "initialize")
                 httpContext.Response.Headers.ContentType = "text/event-stream";
                 httpContext.Response.Headers.CacheControl = "no-cache";
                 httpContext.Response.Headers.Connection = "keep-alive";
-            
+
                 logger.LogInformation("New client /mcp SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
-            
+
                 var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
                 if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
                 var host = httpContext.Request.Host.Value;
                 var absoluteUrl = $"{scheme}://{host}/mcp/message?sessionId={sessionId}";
                 await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
                 await httpContext.Response.Body.FlushAsync();
-            
+
                 var session = await sessionManager.CreateSessionAsync(sessionId, httpContext.Response, targetServerId, metaMode);
-            
+
                 if (httpContext.Request.Method == "POST" && (method == "initialize" || method == "server/discover"))
                 {
                     try
@@ -644,7 +649,7 @@ namespace McpRouter.Extensions
                         logger.LogError(ex, "Failed to initialize POST message body for /mcp SessionId: {SessionId}", sessionId);
                     }
                 }
-            
+
                 try
                 {
                     while (!httpContext.RequestAborted.IsCancellationRequested)
@@ -663,7 +668,7 @@ namespace McpRouter.Extensions
                     sessionManager.CloseSession(sessionId);
                 }
             }).RequireAuthorization();
-            
+
             // ----------------------------------------------------
             // MCP CLIENT MESSAGE ROUTER
             // ----------------------------------------------------
@@ -685,17 +690,17 @@ namespace McpRouter.Extensions
                     return Results.NotFound(new { error = "Session not found." });
                 }
                 sessionManager.IncrementTotalRequests();
-            
+
                 using var reader = new StreamReader(httpContext.Request.Body);
                 var body = await reader.ReadToEndAsync();
-                
+
                 logger.LogDebug("[JSON-RPC Client -> Gateway] {Payload}", McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(body));
-            
+
                 try
                 {
                     using var doc = JsonDocument.Parse(body);
                     var root = doc.RootElement;
-                    
+
                     if (!root.TryGetProperty("method", out var methodProp))
                     {
                         if (root.TryGetProperty("id", out var idPropClient))
@@ -708,10 +713,10 @@ namespace McpRouter.Extensions
                         }
                         return Results.BadRequest(new { error = "Invalid JSON-RPC: missing method" });
                     }
-            
+
                     var method = methodProp.GetString() ?? string.Empty;
                     var id = root.TryGetProperty("id", out var idProp) ? idProp.Clone() : (JsonElement?)null;
-            
+
                     if (method == "initialize")
                     {
                         // Respond directly matching the standard server information
@@ -735,12 +740,12 @@ namespace McpRouter.Extensions
                                 }
                             }
                         };
-                        
+
                         // Write SSE event to client stream
                         await session.WriteMessageAsync(response);
-                        
+
                         session.StartInitialization(body);
-                        
+
                         return Results.Accepted();
                     }
                     else if (method == "server/discover")
@@ -765,7 +770,7 @@ namespace McpRouter.Extensions
                                 }
                             }
                         };
-                        
+
                         await session.WriteMessageAsync(response);
                         session.StartInitialization(body);
                         return Results.Accepted();
@@ -789,7 +794,7 @@ namespace McpRouter.Extensions
                             var toolName = nameProp.GetString() ?? string.Empty;
                             var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
                             var res = await session.CallToolAsync(toolName, body, dbFactory, httpContext);
-                            
+
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -832,7 +837,7 @@ namespace McpRouter.Extensions
                     }
                     else if (method == "resources/templates/list")
                     {
-                        var templates = await session.ListResourceTemplatesAsync(body);
+                        var templates = await session.ListResourceTemplatesAsync(body, httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -844,7 +849,7 @@ namespace McpRouter.Extensions
                     }
                     else if (method == "completion/complete")
                     {
-                        var res = await session.CompleteAsync(body);
+                        var res = await session.CompleteAsync(body, httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -860,7 +865,8 @@ namespace McpRouter.Extensions
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new {
+                            result = new
+                            {
                                 roots = new[] {
                                     new {
                                         uri = "file:///containers",
@@ -949,7 +955,8 @@ namespace McpRouter.Extensions
                 {
                     logger.LogWarning(exAuth, "Unauthorized access during client message routing");
                     httpContext.Response.StatusCode = 403;
-                    return Results.Json(new {
+                    return Results.Json(new
+                    {
                         jsonrpc = "2.0",
                         error = new { code = -32001, message = exAuth.Message }
                     }, statusCode: 403);
@@ -960,14 +967,14 @@ namespace McpRouter.Extensions
                     return Results.Problem(ex.Message);
                 }
             };
-            
-            app.MapPost("/message", async (HttpContext httpContext, [FromQuery] string sessionId, [FromServices] SessionManager sessionManager, ILogger<Program> logger) => 
+
+            app.MapPost("/message", async (HttpContext httpContext, [FromQuery] string sessionId, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
                 await handleMessage(httpContext, sessionId, sessionManager, logger)).RequireAuthorization();
-            
-            app.MapPost("/mcp/message", async (HttpContext httpContext, [FromQuery] string sessionId, [FromServices] SessionManager sessionManager, ILogger<Program> logger) => 
+
+            app.MapPost("/mcp/message", async (HttpContext httpContext, [FromQuery] string sessionId, [FromServices] SessionManager sessionManager, ILogger<Program> logger) =>
                 await handleMessage(httpContext, sessionId, sessionManager, logger)).RequireAuthorization();
-            
-            
+
+
         }
     }
 }

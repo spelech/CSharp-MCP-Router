@@ -108,9 +108,9 @@ namespace McpRouter.Tests
             var cache = new MemoryCache(new MemoryCacheOptions());
 
             var mockVaultClient = new Mock<IVaultClient>();
-            
+
             var retriever = new VaultSecretRetriever(config, cache, () => mockVaultClient.Object);
-            
+
             await Assert.ThrowsAsync<SecurityException>(() => retriever.GetSecretAsync("secret:my-app", "api_key"));
         }
     }

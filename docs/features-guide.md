@@ -107,9 +107,21 @@ Through the Settings panel, you can choose:
 
 ---
 
-## 🔐 4. Authentication & Group Mapping
+## 🔐 4. Authentication, Group Mapping & Unified MCP Capability Authorization
 
-The MCP Router supports advanced identity mapping to control tool and backend server execution access.
+The MCP Router enforces a **Unified Authorization Pipeline** across all Model Context Protocol capabilities:
+- **Tools**: `tools/list`, `tools/call`
+- **Prompts**: `prompts/list`, `prompts/get`
+- **Resources**: `resources/list`, `resources/read`
+- **Resource Templates**: `resources/templates/list`
+- **Completions**: `completion/complete` (prompt & resource references)
+
+Every request evaluates against the identical authorization pipeline:
+1. **AppKey Scope Validation**: Checks key scopes (`*`, `all`, `server:{id}`, `tool:{id}`, `prompt:{id}`, `resource:{id}`, `resource_template:{id}`, `completion:{id}`).
+2. **Admin SID Bypass**: Evaluates caller SIDs against `Admin:GroupSid` (e.g. `S-1-5-32-544`).
+3. **Database Access Policies & Group Mapping**: Evaluates explicit allows and denies in `AccessPolicies` table / `sp_EvaluateUserAccess` stored procedure with mapped external groups/SIDs.
+4. **Discovery Filtering**: Discovery list endpoints (`tools/list`, `prompts/list`, `resources/list`, `resources/templates/list`) automatically filter out unauthorized items.
+5. **Fail-Closed Default**: Unknown capability types or unresolved target backends fail closed with audited 403 entries without leaking sensitive payloads.
 
 ### Dual Identity Providers
 - **Active Directory (Kerberos/NTLM)**: Resolves caller identities using standard Active Directory SIDs (`WindowsIdentity`).
@@ -118,7 +130,7 @@ The MCP Router supports advanced identity mapping to control tool and backend se
 ### Group & SID Mapping Policy
 External groups are mapped to virtual internal groups via the database `GroupMappings` table (accessible through the Web Dashboard UI under Settings -> Identity & Auth):
 1. **Create Mapping**: Link an external Active Directory SID (e.g., `S-1-5-21-...`) or OIDC group (e.g., `house_member`) to an internal security group (`admin`, `operator`, `readonly`).
-2. **Evaluate Access**: When a tool is invoked, the router executes the `sp_EvaluateUserAccess` stored procedure to verify that the active user's groups permit invoking that specific namespace / target server.
+2. **Evaluate Access**: When any capability is invoked or listed, the router executes access evaluation to verify that the active user's groups permit invoking that specific namespace / target item / target server.
 
 ### CORS & Cross-Origin Security Configuration
 By default, the gateway restricts cross-origin request access to standard safe localhost development origins (`http://localhost:3000`, `http://localhost:5000`, `https://localhost:5001`) to protect your local environment from cross-site request forgery and malicious third-party websites.

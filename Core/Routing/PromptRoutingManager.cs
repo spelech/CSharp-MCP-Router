@@ -16,7 +16,7 @@ namespace McpRouter.Core.Routing
         {
             var allPrompts = new List<object>();
             var tasks = new List<Task<(string ServerId, JsonElement Prompts)>>();
-            
+
             await ensureBackendsInitializedAsync();
 
             foreach (var entry in backendConnections)
@@ -54,9 +54,9 @@ namespace McpRouter.Core.Routing
                         {
                             var rawName = nameProp.GetString() ?? string.Empty;
                             var exposedName = item.ServerId + "__" + rawName;
-                            
+
                             _promptRoutingTable[exposedName] = item.ServerId;
-                            
+
                             var promptDict = JsonSerializer.Deserialize<Dictionary<string, object>>(prompt.GetRawText());
                             if (promptDict != null)
                             {
@@ -116,7 +116,7 @@ namespace McpRouter.Core.Routing
                         var root = doc.RootElement;
 
                         var description = root.TryGetProperty("description", out var descProp) ? descProp.GetString() ?? "" : "Custom user prompt.";
-                        
+
                         var argumentsList = new List<object>();
                         if (root.TryGetProperty("arguments", out var argsProp) && argsProp.ValueKind == JsonValueKind.Array)
                         {
@@ -221,7 +221,7 @@ namespace McpRouter.Core.Routing
                             {
                                 var role = msg.GetProperty("role").GetString() ?? "user";
                                 var contentObj = msg.GetProperty("content");
-                                
+
                                 if (contentObj.ValueKind == JsonValueKind.Object)
                                 {
                                     var type = contentObj.GetProperty("type").GetString() ?? "text";
@@ -233,9 +233,11 @@ namespace McpRouter.Core.Routing
                                         msgText = msgText.Replace("{{" + arg.Key + "}}", arg.Value);
                                     }
 
-                                    compiledMessages.Add(new {
+                                    compiledMessages.Add(new
+                                    {
                                         role = role,
-                                        content = new {
+                                        content = new
+                                        {
                                             type = type,
                                             text = msgText
                                         }
@@ -244,7 +246,8 @@ namespace McpRouter.Core.Routing
                             }
                         }
 
-                        return new {
+                        return new
+                        {
                             description = fileRoot.TryGetProperty("description", out var descProp) ? descProp.GetString() : "Custom prompt template.",
                             messages = compiledMessages
                         };
@@ -254,11 +257,12 @@ namespace McpRouter.Core.Routing
                         throw new InvalidOperationException($"Error compiling custom prompt '{promptName}': {ex.Message}", ex);
                     }
                 }
-                
+
                 throw new KeyNotFoundException($"Prompt {promptName} is not registered on the router.");
             }
 
-            return new {
+            return new
+            {
                 description = "Router Local Meta-Prompt",
                 messages = new[] {
                     new {

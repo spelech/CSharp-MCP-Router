@@ -55,8 +55,8 @@ namespace McpRouter.Core.Identity
             }
 
             int port = int.TryParse(portStr, out var p) ? p : 636;
-            bool useSsl = _config.GetValue<bool>("Ldap:UseSsl", false) 
-                       || _config.GetValue<bool>("AD:UseSsl", false) 
+            bool useSsl = _config.GetValue<bool>("Ldap:UseSsl", false)
+                       || _config.GetValue<bool>("AD:UseSsl", false)
                        || port == 636;
 
             if (!useSsl)
@@ -151,11 +151,11 @@ namespace McpRouter.Core.Identity
                 switch (c)
                 {
                     case '\\': sb.Append("\\5c"); break;
-                    case '*':  sb.Append("\\2a"); break;
-                    case '(':  sb.Append("\\28"); break;
-                    case ')':  sb.Append("\\29"); break;
+                    case '*': sb.Append("\\2a"); break;
+                    case '(': sb.Append("\\28"); break;
+                    case ')': sb.Append("\\29"); break;
                     case '\0': sb.Append("\\00"); break;
-                    default:   sb.Append(c); break;
+                    default: sb.Append(c); break;
                 }
             }
             return sb.ToString();

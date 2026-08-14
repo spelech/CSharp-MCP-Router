@@ -133,7 +133,7 @@ namespace McpRouter.Tests
             bobContext.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
 
             var aliceIdentity = new UserIdentityContext("alice", "Test", new List<string> { "full_admin" }, AdminSid);
-            var bobIdentity   = new UserIdentityContext("bob",   "Test", new List<string>(), "");
+            var bobIdentity = new UserIdentityContext("bob", "Test", new List<string>(), "");
 
             var mockProvider = new Moq.Mock<IIdentityProvider>();
             mockProvider.Setup(p => p.ResolveIdentityAsync(aliceContext)).ReturnsAsync(aliceIdentity);
@@ -143,7 +143,7 @@ namespace McpRouter.Tests
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Audit:FailClosed"] = "false",
-                ["Admin:GroupSid"]   = AdminSid
+                ["Admin:GroupSid"] = AdminSid
             }).Build();
 
             var services = new ServiceCollection();
@@ -152,7 +152,7 @@ namespace McpRouter.Tests
             var sp = services.BuildServiceProvider();
 
             aliceContext.RequestServices = sp;
-            bobContext.RequestServices   = sp;
+            bobContext.RequestServices = sp;
 
             // Handshake context — session constructed with Alice's response but identity
             // must NOT be used for subsequent per-message calls
@@ -178,7 +178,7 @@ namespace McpRouter.Tests
             // --- Bob's call: no SID, no DB policy → RBAC must deny (isError:true) ---
             // CallToolAsync returns an MCP error object on RBAC denial (protocol-conformant).
             var bobResult = await session.CallToolAsync("search_tools", toolBody, dbFactory: null!, httpContext: bobContext);
-            var bobJson   = System.Text.Json.JsonSerializer.Serialize(bobResult);
+            var bobJson = System.Text.Json.JsonSerializer.Serialize(bobResult);
             Assert.Contains("\"isError\":true", bobJson);
             Assert.Contains("Security Error", bobJson);
             Assert.Contains("bob", bobJson);

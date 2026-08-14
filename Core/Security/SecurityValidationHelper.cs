@@ -152,7 +152,7 @@ namespace McpRouter.Core.Security
             {
                 var addresses = Dns.GetHostAddresses(host);
                 if (addresses == null || addresses.Length == 0) return false;
-                
+
                 return addresses.Any(IsPrivateOrLoopbackAddress);
             }
             catch
@@ -187,7 +187,7 @@ namespace McpRouter.Core.Security
                 {
                     return true;
                 }
-                
+
                 byte[] bytes = ipAddress.GetAddressBytes();
                 // Unique Local Address (fc00::/7)
                 if ((bytes[0] & 0xFE) == 0xFC) return true;
