@@ -478,11 +478,17 @@ namespace McpRouter.Extensions
                     else
                     {
                         var groupNamesCsv = string.Join(",", identity.GroupNames);
-                        var parameters = new {
-                            GroupNames = groupNamesCsv,
-                            ItemName = targetServerId,
-                            RequestMethod = "GET"
-                        };
+                        object parameters = dbFactory.ProviderName == "mysql"
+                            ? new {
+                                p_GroupNames = groupNamesCsv,
+                                p_ItemName = targetServerId,
+                                p_RequestMethod = "GET"
+                            }
+                            : new {
+                                GroupNames = groupNamesCsv,
+                                ItemName = targetServerId,
+                                RequestMethod = "GET"
+                            };
                         int isAllowed = await conn.ExecuteScalarAsync<int>(
                             "sp_EvaluateUserAccess",
                             parameters,

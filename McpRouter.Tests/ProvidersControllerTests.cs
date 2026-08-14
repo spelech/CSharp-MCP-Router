@@ -16,6 +16,7 @@ namespace McpRouter.Tests
         private const string ConnectionString = "Data Source=InMemoryProvidersDb;Mode=Memory;Cache=Shared";
         private readonly SqliteConnection _masterConnection;
         private readonly IDbConnectionFactory _dbFactory;
+        private readonly DatabaseRepository _dbRepo;
 
         public ProvidersControllerTests()
         {
@@ -47,6 +48,7 @@ namespace McpRouter.Tests
             });
             mockFactory.Setup(f => f.ProviderName).Returns("sqlite");
             _dbFactory = mockFactory.Object;
+            _dbRepo = new DatabaseRepository(_dbFactory);
         }
 
         public void Dispose()
@@ -57,7 +59,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task GetSecretProviders_ReturnsOkWithList()
         {
-            var controller = new ProvidersController(_dbFactory);
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
             var result = await controller.GetSecretProviders() as OkObjectResult;
 
             Assert.NotNull(result);
@@ -68,7 +70,7 @@ namespace McpRouter.Tests
         public async Task SaveSecretProvider_ReturnsBadRequest_WhenProviderNameMissing()
         {
             var mockAudit = new Mock<IAuditLogger>();
-            var controller = new ProvidersController(_dbFactory);
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
             var dto = new SecretProviderDto { ProviderName = "" };
 
             var result = await controller.SaveSecretProvider(dto, mockAudit.Object) as BadRequestObjectResult;
@@ -80,7 +82,7 @@ namespace McpRouter.Tests
         public async Task SaveSecretProvider_ReturnsBadRequest_WhenHttpUrlPassedInConfig()
         {
             var mockAudit = new Mock<IAuditLogger>();
-            var controller = new ProvidersController(_dbFactory);
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
             var dto = new SecretProviderDto
             {
                 ProviderName = "Vault",
@@ -97,7 +99,7 @@ namespace McpRouter.Tests
         public async Task SaveSecretProvider_SavesSuccessfully()
         {
             var mockAudit = new Mock<IAuditLogger>();
-            var controller = new ProvidersController(_dbFactory);
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
             var dto = new SecretProviderDto
             {
                 ProviderName = "Vault",
@@ -114,7 +116,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task GetAuthProviders_ReturnsOkWithList()
         {
-            var controller = new ProvidersController(_dbFactory);
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
             var result = await controller.GetAuthProviders() as OkObjectResult;
 
             Assert.NotNull(result);
@@ -125,7 +127,7 @@ namespace McpRouter.Tests
         public async Task SaveAuthProvider_ReturnsBadRequest_WhenProviderNameMissing()
         {
             var mockAudit = new Mock<IAuditLogger>();
-            var controller = new ProvidersController(_dbFactory);
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
             var dto = new AuthProviderDto { ProviderName = "" };
 
             var result = await controller.SaveAuthProvider(dto, mockAudit.Object) as BadRequestObjectResult;
@@ -137,7 +139,7 @@ namespace McpRouter.Tests
         public async Task SaveAuthProvider_SavesSuccessfully()
         {
             var mockAudit = new Mock<IAuditLogger>();
-            var controller = new ProvidersController(_dbFactory);
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
             var dto = new AuthProviderDto
             {
                 ProviderName = "PocketID",
@@ -159,7 +161,8 @@ namespace McpRouter.Tests
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
             mockFailingFactory.Setup(f => f.CreateConnection()).Throws(new Exception("DB Connection Failed"));
 
-            var controller = new ProvidersController(mockFailingFactory.Object);
+            var failingRepo = new DatabaseRepository(mockFailingFactory.Object);
+            var controller = new ProvidersController(failingRepo, failingRepo);
             var result = await controller.GetSecretProviders() as ObjectResult;
 
             Assert.NotNull(result);
@@ -172,7 +175,8 @@ namespace McpRouter.Tests
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
             mockFailingFactory.Setup(f => f.CreateConnection()).Throws(new Exception("DB Connection Failed"));
 
-            var controller = new ProvidersController(mockFailingFactory.Object);
+            var failingRepo = new DatabaseRepository(mockFailingFactory.Object);
+            var controller = new ProvidersController(failingRepo, failingRepo);
             var result = await controller.GetAuthProviders() as ObjectResult;
 
             Assert.NotNull(result);

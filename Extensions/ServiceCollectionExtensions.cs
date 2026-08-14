@@ -67,6 +67,14 @@ namespace McpRouter.Extensions
         // Register Multi-Database Provider Factory (Pure Dapper)
         builder.Services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory, McpRouter.Core.Database.DbConnectionFactory>();
 
+        // Register Aligned Repositories (ISettingRepository, IServerRepository, IAppKeyRepository, ISecretProviderRepository, IAuthProviderRepository)
+        builder.Services.AddSingleton<McpRouter.Core.Database.DatabaseRepository>();
+        builder.Services.AddSingleton<McpRouter.Core.Database.ISettingRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
+        builder.Services.AddSingleton<McpRouter.Core.Database.IServerRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
+        builder.Services.AddSingleton<McpRouter.Core.Database.IAppKeyRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
+        builder.Services.AddSingleton<McpRouter.Core.Database.ISecretProviderRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
+        builder.Services.AddSingleton<McpRouter.Core.Database.IAuthProviderRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
+
         // Register Pluggable Identity Providers (Active Directory & Configurable Header Auth)
         builder.Services.AddSingleton<McpRouter.Core.Identity.ILdapService, McpRouter.Core.Identity.LdapActiveDirectoryService>();
         // App-key requests carry no AD/OIDC headers; resolve their owner+SID first so audit rows are attributable.
