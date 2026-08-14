@@ -90,6 +90,19 @@ namespace McpRouter.Services.DatabaseSeeders
                             VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
                         conn.Execute(insertSql, defaultKey);
                     }
+                    else if (dbFactory.ProviderName == "mysql")
+                    {
+                        conn.Execute("sp_SaveAppKey", new {
+                            p_Id = defaultKey.Id,
+                            p_Name = defaultKey.Name,
+                            p_Username = defaultKey.Username,
+                            p_KeyPrefix = defaultKey.KeyPrefix,
+                            p_EncryptedKey = defaultKey.EncryptedKey,
+                            p_ScopesJson = defaultKey.ScopesJson,
+                            p_OwnerSid = defaultKey.OwnerSid ?? "",
+                            p_ExpiresAt = defaultKey.ExpiresAt
+                        }, commandType: System.Data.CommandType.StoredProcedure);
+                    }
                     else
                     {
                         conn.Execute("sp_SaveAppKey", new {
@@ -100,8 +113,7 @@ namespace McpRouter.Services.DatabaseSeeders
                             defaultKey.EncryptedKey,
                             defaultKey.ScopesJson,
                             defaultKey.OwnerSid,
-                            defaultKey.ExpiresAt,
-                            defaultKey.CreatedAt
+                            defaultKey.ExpiresAt
                         }, commandType: System.Data.CommandType.StoredProcedure);
                     }
                     logger.LogInformation("Seeded default CLI Admin AppKey for 'steve'.");

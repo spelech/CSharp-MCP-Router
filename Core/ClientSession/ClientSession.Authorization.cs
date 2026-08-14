@@ -216,11 +216,17 @@ namespace McpRouter
                 {
                     // Call stored procedure with mapped groups!
                     var groupNamesCsv = string.Join(",", allUserGroups);
-                    var parameters = new {
-                        GroupNames = groupNamesCsv,
-                        ItemName = targetId,
-                        RequestMethod = requestMethod
-                    };
+                    object parameters = dbFactory.ProviderName == "mysql"
+                        ? new {
+                            p_GroupNames = groupNamesCsv,
+                            p_ItemName = targetId,
+                            p_RequestMethod = requestMethod
+                        }
+                        : new {
+                            GroupNames = groupNamesCsv,
+                            ItemName = targetId,
+                            RequestMethod = requestMethod
+                        };
                     int isAllowed = await conn.ExecuteScalarAsync<int>(
                         "sp_EvaluateUserAccess",
                         parameters,

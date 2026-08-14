@@ -199,6 +199,15 @@ namespace McpRouter.Core.Database
                 }
                 return await conn.QueryAsync<AppKey>("SELECT * FROM AppKeys WHERE Username = @Username ORDER BY CreatedAt DESC;", new { Username = currentUser });
             }
+            else if (provider == "mysql")
+            {
+                var parameters = new { p_Username = isAdmin ? usernameFilter : currentUser };
+                return await conn.QueryAsync<AppKey>(
+                    "sp_GetAppKeys",
+                    parameters,
+                    commandType: CommandType.StoredProcedure
+                );
+            }
             else
             {
                 var parameters = new { Username = isAdmin ? usernameFilter : currentUser };
@@ -231,6 +240,24 @@ namespace McpRouter.Core.Database
                         EncryptedKey = @EncryptedKey, ScopesJson = @ScopesJson, ExpiresAt = @ExpiresAt;";
                 await conn.ExecuteAsync(sql, key);
             }
+            else if (provider == "mysql")
+            {
+                await conn.ExecuteAsync(
+                    "sp_SaveAppKey",
+                    new
+                    {
+                        p_Id = key.Id,
+                        p_Name = key.Name,
+                        p_Username = key.Username,
+                        p_KeyPrefix = key.KeyPrefix,
+                        p_EncryptedKey = key.EncryptedKey,
+                        p_ScopesJson = key.ScopesJson,
+                        p_OwnerSid = key.OwnerSid ?? "",
+                        p_ExpiresAt = key.ExpiresAt
+                    },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
             else
             {
                 await conn.ExecuteAsync(
@@ -259,6 +286,14 @@ namespace McpRouter.Core.Database
             if (provider == "sqlite")
             {
                 await conn.ExecuteAsync("DELETE FROM AppKeys WHERE Id = @Id;", new { Id = id });
+            }
+            else if (provider == "mysql")
+            {
+                await conn.ExecuteAsync(
+                    "sp_DeleteAppKey",
+                    new { p_Id = id },
+                    commandType: CommandType.StoredProcedure
+                );
             }
             else
             {
@@ -304,6 +339,15 @@ namespace McpRouter.Core.Database
                     ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, EncryptedConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
                 await conn.ExecuteAsync(sql, dto);
             }
+            else if (provider == "mysql")
+            {
+                await conn.ExecuteAsync("sp_SaveSecretProvider", new {
+                    p_ProviderName = dto.ProviderName,
+                    p_DisplayName = dto.DisplayName,
+                    p_EncryptedConfigJson = dto.ConfigJson,
+                    p_IsEnabled = dto.IsEnabled ? 1 : 0
+                }, commandType: CommandType.StoredProcedure);
+            }
             else
             {
                 await conn.ExecuteAsync("sp_SaveSecretProvider", new {
@@ -336,6 +380,17 @@ namespace McpRouter.Core.Database
                     VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @ConfigJson, @IsEnabled)
                     ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, UserHeader = @UserHeader, GroupsHeader = @GroupsHeader, ConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
                 await conn.ExecuteAsync(sql, dto);
+            }
+            else if (provider == "mysql")
+            {
+                await conn.ExecuteAsync("sp_SaveAuthProvider", new {
+                    p_ProviderName = dto.ProviderName,
+                    p_DisplayName = dto.DisplayName,
+                    p_UserHeader = dto.UserHeader,
+                    p_GroupsHeader = dto.GroupsHeader,
+                    p_ConfigJson = dto.ConfigJson,
+                    p_IsEnabled = dto.IsEnabled ? 1 : 0
+                }, commandType: CommandType.StoredProcedure);
             }
             else
             {

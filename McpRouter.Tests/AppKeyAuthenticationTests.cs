@@ -263,7 +263,7 @@ namespace McpRouter.Tests
             var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger>();
             var servers = new List<McpServer> { new McpServer { Id = "testserver", Enabled = true } };
 
-            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), null, null, loggerMock.Object);
+            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), (McpRouter.Services.IEmbeddingService)null!, null, loggerMock.Object);
 
             await Assert.ThrowsAsync<System.Security.SecurityException>(async () =>
             {
@@ -294,7 +294,7 @@ namespace McpRouter.Tests
             var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger>();
             var servers = new List<McpServer> { new McpServer { Id = "testserver", Enabled = true } };
 
-            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), null, null, loggerMock.Object);
+            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), (McpRouter.Services.IEmbeddingService)null!, null, loggerMock.Object);
 
             await Assert.ThrowsAsync<System.Security.SecurityException>(async () =>
             {
