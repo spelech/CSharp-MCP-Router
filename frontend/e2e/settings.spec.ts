@@ -6,28 +6,28 @@ test.describe('Settings View Flow', () => {
     await page.goto('/');
 
     // Click Settings button
-    const settingsTab = page.locator('button:has-text("Settings"), button[data-view="view-settings"]');
-    await expect(settingsTab.first()).toBeVisible();
-    await settingsTab.first().click();
+    const settingsTab = page.locator('button:has-text("Settings")').first();
+    await expect(settingsTab).toBeVisible();
+    await settingsTab.click();
 
     // Verify Settings view is rendered
     await expect(page.locator('#view-settings, .settings-container, main')).toBeVisible();
 
     // Check Embedding Provider select dropdown
-    const providerSelect = page.locator('select#embedding-provider, select[name="embeddingProvider"]');
-    if (await providerSelect.isVisible()) {
-      // Test selecting Local ONNX
-      await providerSelect.selectOption({ label: 'Local ONNX' });
+    const providerSelect = page.locator('select#settings-provider, select[name="embeddingProvider"]').first();
+    await expect(providerSelect).toBeVisible();
 
-      // Test selecting OpenAI / Ollama API
-      await providerSelect.selectOption({ label: 'API Provider' });
-    }
+    // Select Local ONNX
+    await providerSelect.selectOption('local');
+    await expect(providerSelect).toHaveValue('local');
+
+    // Select External API Provider
+    await providerSelect.selectOption('api');
+    await expect(providerSelect).toHaveValue('api');
 
     // Check Save Settings button
-    const saveBtn = page.locator('button:has-text("Save Settings"), button[type="submit"]');
-    if (await saveBtn.isVisible()) {
-      await expect(saveBtn).toBeVisible();
-    }
+    const saveBtn = page.locator('#btn-save-settings, button:has-text("Save Settings")').first();
+    await expect(saveBtn).toBeVisible();
   });
 
 });

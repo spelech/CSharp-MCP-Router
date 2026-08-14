@@ -8,7 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.11.0`** | 2026-08-14 | feat(ci): add PR quality gates, CodeQL SAST, and security workflows (#49) |
+| **`v4.11.0`** | 2026-08-14 | feat(testing): complete Sprint 3 merge — frontend unit/component test suite (#48), pull-request CI quality gates & security scanning (#49), and pairwise integration matrix with multi-user E2E fixtures (#50) |
 | **`v4.10.0`** | 2026-08-14 | feat(core): complete Sprint 2 merge — provider settings encryption & dynamic reload (#44), unified MCP capability authorization (#45), and category-scoped AppKeys (#46) |
 | **`v4.9.0`** | 2026-08-14 | feat(core): complete Sprint 1 merge — database schema alignment, STDIO transport, AppKey security hardening, SSE concurrency isolation, and lint/build baseline |
 | **`v4.7.0`** | 2026-08-12 | feat(diagnostics): add diagnostics API and soak test suite |

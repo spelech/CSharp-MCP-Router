@@ -3,7 +3,11 @@
 ![Version](https://img.shields.io/badge/version-v4.11.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
+<<<<<<< HEAD
 ![Tests](https://img.shields.io/badge/tests-410%20passing-2ea44f?style=for-the-badge)
+=======
+![Tests](https://img.shields.io/badge/tests-515%20passing-2ea44f?style=for-the-badge)
+>>>>>>> feat/issue-50-pairwise-integration-matrix
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -46,7 +50,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 ## 🏗️ Architecture, Requirements & Connection Flow
 
-For deep technical details on the router's internal design, dependency injection, routing managers, transport layers, and architectural requirements, see [ARCHITECTURE.md](ARCHITECTURE.md).
+For deep technical details on the router's internal design, dependency injection, routing managers, transport layers, and architectural requirements, see [ARCHITECTURE.md](ARCHITECTURE.md) and the [Pairwise Testing Matrix](docs/testing-matrix.md).
 
 ---
 
@@ -76,7 +80,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.11.0`** | 2026-08-14 | feat(ci): add PR quality gates, CodeQL SAST, and security workflows (#49) |
+| **`v4.11.0`** | 2026-08-14 | feat(testing): complete Sprint 3 merge — frontend unit/component test suite (#48), pull-request CI quality gates & security scanning (#49), and pairwise integration matrix with multi-user E2E fixtures (#50) |
 | **`v4.10.0`** | 2026-08-14 | feat(core): complete Sprint 2 merge — provider settings encryption & dynamic reload (#44), unified MCP capability authorization (#45), and category-scoped AppKeys (#46) |
 | **`v4.9.0`** | 2026-08-14 | feat(core): complete Sprint 1 merge — database schema alignment, STDIO transport, AppKey security hardening, SSE concurrency isolation, and lint/build baseline |
 | **`v4.7.0`** | 2026-08-12 | feat(diagnostics): add diagnostics API and soak test suite |
