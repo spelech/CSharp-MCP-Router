@@ -44,6 +44,12 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 ---
 
+## 🚀 Transport Capability & Configuration Guide
+
+For an in-depth breakdown of downstream transports (`sse`, `http`/`streamable`, `stdio`, target proxying `/{targetServerId}`), subprocess STDIO security policies, environment variable secret injection, process tree lifecycle management, SSE concurrency/ID isolation, configuration examples, and troubleshooting procedures, see [**docs/transports.md**](docs/transports.md).
+
+---
+
 ## 🏗️ Architecture, Requirements & Connection Flow
 
 For deep technical details on the router's internal design, dependency injection, routing managers, transport layers, and architectural requirements, see [ARCHITECTURE.md](ARCHITECTURE.md) and the [Pairwise Testing Matrix](docs/testing-matrix.md).
@@ -88,7 +94,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.12.1`** | 2026-08-14 | docs(auth): publish canonical AppKey scope and authorization guide (#54) |
+| **`v4.12.1`** | 2026-08-14 | docs: complete Stage 1 documentation — database-provider support matrix (#53), canonical AppKey scope and authorization guide (#54), transport capability & STDIO lifecycle guide (#55), and secret-provider security reference (#56) |
 | **`v4.12.0`** | 2026-08-14 | refactor(architecture): complete Sprint 4 merge — modularize backend into `Components/` and `Infrastructure/` domain boundaries with decomposed endpoint mappers (#51), and refactor frontend into domain `components/` with typed API layer and modular settings tabs (#52) |
 | **`v4.11.0`** | 2026-08-14 | feat(testing): complete Sprint 3 merge — frontend unit/component test suite (#48), pull-request CI quality gates & security scanning (#49), and pairwise integration matrix with multi-user E2E fixtures (#50) |
 | **`v4.10.0`** | 2026-08-14 | feat(core): complete Sprint 2 merge — provider settings encryption & dynamic reload (#44), unified MCP capability authorization (#45), and category-scoped AppKeys (#46) |

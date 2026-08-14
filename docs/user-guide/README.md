@@ -31,3 +31,5 @@ Welcome to the official documentation for the **Model Context Protocol (MCP) Gat
 - **Namespaced Routing**: Backend tools are automatically namespaced as `<serverId>__<toolName>` (e.g. `docker__restart_container` or `homeassistant__turn_off`).
 - **Pluggable Security**: Supports Active Directory / LDAP Windows Principal resolution, OIDC header authentication (`Remote-User`, `Remote-Groups`), AppKeys, and HashiCorp Vault.
 - **Multi-Database Persistence**: Supports SQLite, Microsoft SQL Server, and MySQL. For dialect specifications and deployment templates, see the [Database Provider Support & Deployment Matrix](../database-providers.md).
+- **Transport Architecture**: Supports `sse` (stateful duplex), `http` (stateless/chunked), `stdio` (sandboxed subprocess with environment-injected secrets), and target proxying (`/{server_id}`). See the [**Transport Capability & Configuration Guide**](../transports.md).
+
