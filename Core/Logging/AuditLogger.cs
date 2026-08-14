@@ -59,17 +59,34 @@ namespace McpRouter.Core.Logging
                 var cleanResponse = PiiSanitizer.SanitizePayload(responsePayload ?? "");
 
                 var parameters = new DynamicParameters();
-                parameters.Add("RequestId", requestId);
-                parameters.Add("UserPrincipalName", userPrincipalName);
-                parameters.Add("UserSid", userSid);
-                parameters.Add("ServerCodeName", serverCodeName);
-                parameters.Add("ItemName", itemName);
-                parameters.Add("RequestMethod", requestMethod);
-                parameters.Add("ExecutionTimeMs", executionTimeMs);
-                parameters.Add("StatusCode", statusCode);
-                parameters.Add("RequestPayload", cleanRequest);
-                parameters.Add("ResponsePayload", cleanResponse);
-                parameters.Add("ErrorMessage", errorMessage);
+                if (_dbFactory.ProviderName == "mysql")
+                {
+                    parameters.Add("p_RequestId", requestId);
+                    parameters.Add("p_UserPrincipalName", userPrincipalName);
+                    parameters.Add("p_UserSid", userSid);
+                    parameters.Add("p_ServerCodeName", serverCodeName);
+                    parameters.Add("p_ItemName", itemName);
+                    parameters.Add("p_RequestMethod", requestMethod);
+                    parameters.Add("p_ExecutionTimeMs", executionTimeMs);
+                    parameters.Add("p_StatusCode", statusCode);
+                    parameters.Add("p_RequestPayload", cleanRequest);
+                    parameters.Add("p_ResponsePayload", cleanResponse);
+                    parameters.Add("p_ErrorMessage", errorMessage);
+                }
+                else
+                {
+                    parameters.Add("RequestId", requestId);
+                    parameters.Add("UserPrincipalName", userPrincipalName);
+                    parameters.Add("UserSid", userSid);
+                    parameters.Add("ServerCodeName", serverCodeName);
+                    parameters.Add("ItemName", itemName);
+                    parameters.Add("RequestMethod", requestMethod);
+                    parameters.Add("ExecutionTimeMs", executionTimeMs);
+                    parameters.Add("StatusCode", statusCode);
+                    parameters.Add("RequestPayload", cleanRequest);
+                    parameters.Add("ResponsePayload", cleanResponse);
+                    parameters.Add("ErrorMessage", errorMessage);
+                }
 
                 if (_dbFactory.ProviderName == "sqlite")
                 {
@@ -105,13 +122,26 @@ namespace McpRouter.Core.Logging
                 var cleanDetails = PiiSanitizer.SanitizePayload(details);
 
                 var parameters = new DynamicParameters();
-                parameters.Add("Id", Guid.NewGuid().ToString("N"));
-                parameters.Add("Username", username);
-                parameters.Add("Action", action);
-                parameters.Add("Target", target);
-                parameters.Add("Details", cleanDetails);
-                parameters.Add("Success", success ? 1 : 0);
-                parameters.Add("ErrorMessage", errorMessage);
+                if (_dbFactory.ProviderName == "mysql")
+                {
+                    parameters.Add("p_Id", Guid.NewGuid().ToString("N"));
+                    parameters.Add("p_Username", username);
+                    parameters.Add("p_Action", action);
+                    parameters.Add("p_Target", target);
+                    parameters.Add("p_Details", cleanDetails);
+                    parameters.Add("p_Success", success ? 1 : 0);
+                    parameters.Add("p_ErrorMessage", errorMessage);
+                }
+                else
+                {
+                    parameters.Add("Id", Guid.NewGuid().ToString("N"));
+                    parameters.Add("Username", username);
+                    parameters.Add("Action", action);
+                    parameters.Add("Target", target);
+                    parameters.Add("Details", cleanDetails);
+                    parameters.Add("Success", success ? 1 : 0);
+                    parameters.Add("ErrorMessage", errorMessage);
+                }
 
                 if (_dbFactory.ProviderName == "sqlite")
                 {

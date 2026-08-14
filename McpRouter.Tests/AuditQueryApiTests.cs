@@ -189,11 +189,11 @@ namespace McpRouter.Tests
             var row = await connAssert.QueryFirstOrDefaultAsync("SELECT * FROM AdminAuditLogs WHERE Username = 'test-admin'");
 
             Assert.NotNull(row);
-            Assert.Equal("test-action", (string)row.Action);
-            Assert.Equal("test-target", (string)row.Target);
-            Assert.Equal("test-details", (string)row.Details);
-            Assert.Equal(1, (int)row.Success);
-            Assert.Equal("no-error", (string)row.ErrorMessage);
+            Assert.Equal("test-action", (string)row!.Action);
+            Assert.Equal("test-target", (string)row!.Target);
+            Assert.Equal("test-details", (string)row!.Details);
+            Assert.Equal(1, (int)row!.Success);
+            Assert.Equal("no-error", (string)row!.ErrorMessage);
         }
     }
 }

@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.6.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.8.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-145%20passing-2ea44f?style=for-the-badge)
@@ -76,11 +76,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.8.0`** | 2026-08-14 | feat(db): align runtime persistence, migrations, and validation with SQLite, MSSQL, and MySQL schemas |
 | **`v4.7.0`** | 2026-08-12 | feat(diagnostics): add diagnostics API and soak test suite |
 | **`v4.6.0`** | 2026-08-12 | feat(identity): implement cross-platform Active Directory SID resolution via LDAP |
 | **`v4.5.9`** | 2026-08-12 | fix(keys): target user SID resolution for admin-minted app keys |
 | **`v4.5.8`** | 2026-08-12 | fix(vault): support VAULT_TOKEN fallback for dev testing and init test secrets via docker-compose |
-| **`v4.5.7`** | 2026-08-12 | fix(vault): support VAULT_TOKEN fallback for dev testing and init test secrets via docker-compose |
 
 ---
 
