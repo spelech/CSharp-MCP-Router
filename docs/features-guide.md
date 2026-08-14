@@ -59,6 +59,8 @@ You can connect your client (Cursor, VS Code, Claude Desktop, Antigravity CLI) v
 | `/sse?meta=false` | **Full-List Mode** | Directly exposes all underlying tools (300+) from every connected backend server. |
 | `/{targetServerId}` | **Target-Specific Proxying** | Bridges connections directly and exclusively to the target server (e.g., `/docker` or `/ha`). |
 
+> For a complete comparison of transport protocols (`sse`, `http`, `stdio`, target proxying), concurrency isolation, security policies, and error recovery, see the [**Transport Capability & Configuration Guide**](transports.md).
+
 ### Client Setup Examples
 
 #### Claude Desktop Configuration (`config.json`)
