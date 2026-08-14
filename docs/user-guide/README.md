@@ -12,8 +12,9 @@ Welcome to the official documentation for the **Model Context Protocol (MCP) Gat
    - Registering backend MCP servers (`http`, `sse`, `stdio`), custom tool JSON definitions, and configuring Secret Providers:
      - Direct API Keys
      - Environment Variables (`ENV:KEY`)
-     - HashiCorp Vault (KV v1/v2 engine integration)
-     - Windows Registry / File Secrets (`/etc/mcp-secrets`)
+     - HashiCorp Vault (KV v2 engine integration, AppRole, JIT token renewal)
+     - Windows Registry (DPAPI)
+   - *For deep architectural details, encryption-at-rest specs, and Docker recipes, see [**Enterprise Secret Providers Guide**](../secret-providers.md).*
 3. [**03. RBAC, Security & Approvals**](03-rbac-and-security.md)
    - Fine-grained Access Control (RBAC) rules, Active Directory / OIDC group mappings, OAuth shapes, and the manual tool execution approval queue.
 4. [**04. Client Setup & App Key Management**](04-client-setup-and-app-keys.md)
