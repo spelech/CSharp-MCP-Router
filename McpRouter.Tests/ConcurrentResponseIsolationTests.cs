@@ -71,7 +71,8 @@ namespace McpRouter.Tests
             conn.RequestTimeout = TimeSpan.FromSeconds(15);
             await conn.ConnectAsync();
 
-            conn.StartReader(async (msg) => {
+            conn.StartReader(async (msg) =>
+            {
                 await Task.CompletedTask;
             });
 
@@ -170,7 +171,8 @@ namespace McpRouter.Tests
             conn.RequestTimeout = TimeSpan.FromSeconds(15);
             await conn.ConnectAsync();
 
-            conn.StartReader(async (msg) => {
+            conn.StartReader(async (msg) =>
+            {
                 await Task.CompletedTask;
             });
 
@@ -268,7 +270,8 @@ namespace McpRouter.Tests
             conn.RequestTimeout = TimeSpan.FromMilliseconds(300);
             await conn.ConnectAsync();
 
-            conn.StartReader(async (msg) => {
+            conn.StartReader(async (msg) =>
+            {
                 await Task.CompletedTask;
             });
 
@@ -327,7 +330,8 @@ namespace McpRouter.Tests
             conn.RequestTimeout = TimeSpan.FromSeconds(15);
             await conn.ConnectAsync();
 
-            conn.StartReader(async (msg) => {
+            conn.StartReader(async (msg) =>
+            {
                 await Task.CompletedTask;
             });
 
@@ -402,7 +406,8 @@ namespace McpRouter.Tests
             var conn = new BackendConnection(server, httpClient, loggerMock.Object);
             await conn.ConnectAsync();
 
-            conn.StartReader(async (msg) => {
+            conn.StartReader(async (msg) =>
+            {
                 if (msg is JsonRpcResponse response && response.Id != null)
                 {
                     var idStr = response.Id.ToString();
@@ -468,7 +473,8 @@ namespace McpRouter.Tests
             var conn = new BackendConnection(server, httpClient, loggerMock.Object);
             await conn.ConnectAsync();
 
-            conn.StartReader(async (msg) => {
+            conn.StartReader(async (msg) =>
+            {
                 await Task.CompletedTask;
             });
 
@@ -664,7 +670,8 @@ namespace McpRouter.Tests
             conn.RequestTimeout = TimeSpan.FromSeconds(15);
             await conn.ConnectAsync();
 
-            conn.StartReader(async (msg) => {
+            conn.StartReader(async (msg) =>
+            {
                 await Task.CompletedTask;
             });
 

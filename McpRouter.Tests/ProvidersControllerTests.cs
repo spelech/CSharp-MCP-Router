@@ -35,7 +35,7 @@ namespace McpRouter.Tests
                     DisplayName TEXT,
                     UserHeader TEXT,
                     GroupsHeader TEXT,
-                    ConfigJson TEXT,
+                    EncryptedConfigJson TEXT,
                     IsEnabled INTEGER
                 );");
 

@@ -55,8 +55,8 @@ namespace McpRouter.Core.Transports
             {
                 path = $"{_server.SecretMount}:{path}";
             }
-            else if (provider.Equals("Vault", StringComparison.OrdinalIgnoreCase) && 
-                     string.IsNullOrWhiteSpace(_server.SecretPath) && 
+            else if (provider.Equals("Vault", StringComparison.OrdinalIgnoreCase) &&
+                     string.IsNullOrWhiteSpace(_server.SecretPath) &&
                      !string.IsNullOrWhiteSpace(_server.SecretItemKey))
             {
                 // Frontend passes 'mount:path:field' inside SecretItemKey

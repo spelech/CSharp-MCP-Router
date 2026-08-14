@@ -52,7 +52,7 @@ namespace McpRouter.Tests
             var services = new ServiceCollection();
             services.AddLogging();
             services.AddSingleton<IDbConnectionFactory>(mockFactory.Object);
-            
+
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
@@ -75,7 +75,7 @@ namespace McpRouter.Tests
             var services = new ServiceCollection();
             services.AddLogging();
             services.AddSingleton<IDbConnectionFactory>(mockFactory.Object);
-            
+
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }

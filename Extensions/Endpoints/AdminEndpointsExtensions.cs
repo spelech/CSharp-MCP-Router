@@ -24,10 +24,10 @@ namespace McpRouter.Extensions
 
         public static void MapAdminEndpoints(this WebApplication app)
         {
-// ----------------------------------------------------
+            // ----------------------------------------------------
             // DCR & OAUTH ENDPOINTS
             // ----------------------------------------------------
-            
+
             var api = app.MapGroup("").RequireAuthorization("AdminPolicy");
 
             api.MapGet("/api/me", async (HttpContext context, [FromServices] McpRouter.Core.Identity.CompositeIdentityProvider identityProvider) =>
@@ -47,15 +47,16 @@ namespace McpRouter.Extensions
                     groups = identity.GroupNames
                 });
             });
-            
-            
-            
-            
-// --- TEST BENCH & LOGS ENDPOINTS ---
+
+
+
+
+            // --- TEST BENCH & LOGS ENDPOINTS ---
 
             // 1. Logs API
             api.MapGet("/api/logs", () => Results.Ok(LogBuffer.GetLogs()));
-            api.MapDelete("/api/logs", async (HttpContext ctx) => {
+            api.MapDelete("/api/logs", async (HttpContext ctx) =>
+            {
                 LogBuffer.Clear();
                 var audit = ctx.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
                 if (audit != null) await audit.LogAdminActionAsync(ctx.User?.Identity?.Name ?? "unknown", "logs.clear", "InMemoryLogBuffer", "", true);
@@ -94,10 +95,11 @@ namespace McpRouter.Extensions
             });
 
             // 1.5. Settings API
-            api.MapGet("/api/settings", (DynamicEmbeddingService embeddingService) => 
+            api.MapGet("/api/settings", (DynamicEmbeddingService embeddingService) =>
                 Results.Ok(embeddingService.GetSettings()));
-                
-            api.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) => {
+
+            api.MapPost("/api/settings", (RouterSettings settings, DynamicEmbeddingService embeddingService, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
+            {
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
                 try
                 {
@@ -124,21 +126,22 @@ namespace McpRouter.Extensions
                 return Results.Ok(approvals);
             });
 
-            api.MapGet("/api/diagnostics", ([FromServices] SessionManager sessionManager) => 
+            api.MapGet("/api/diagnostics", ([FromServices] SessionManager sessionManager) =>
             {
                 var proc = System.Diagnostics.Process.GetCurrentProcess();
                 int fdCount = 0;
-                
+
                 if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
                 {
-                    try 
+                    try
                     {
                         fdCount = System.IO.Directory.GetFiles($"/proc/{proc.Id}/fd").Length;
                     }
                     catch { /* Fallback if restricted */ }
                 }
-                
-                return Results.Ok(new {
+
+                return Results.Ok(new
+                {
                     activeSessions = sessionManager.ActiveSessionsCount,
                     pendingApprovals = sessionManager.PendingApprovals.Count,
                     workingSet64 = proc.WorkingSet64,
@@ -178,11 +181,11 @@ namespace McpRouter.Extensions
                 using var connDb = dbFactory.CreateConnection();
                 var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
                 var servers = rawServers.ToList();
-                
+
                 if (!string.IsNullOrWhiteSpace(serverId))
                 {
-                    servers = servers.Where(s => 
-                        s.Id == serverId || 
+                    servers = servers.Where(s =>
+                        s.Id == serverId ||
                         (s.Categories != null && s.Categories.Contains(serverId))
                     ).ToList();
                 }
@@ -212,7 +215,7 @@ namespace McpRouter.Extensions
                 foreach (var server in servers)
                 {
                     if (server.Type == "custom") continue;
-                    
+
                     var cached = sessionManager.GetServerToolsCache(server.Id);
                     if (cached != null)
                     {
@@ -316,7 +319,8 @@ namespace McpRouter.Extensions
                         var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
                         await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, true);
 
-                        return Results.Ok(new {
+                        return Results.Ok(new
+                        {
                             content = new[] {
                                 new { type = "text", text = JsonSerializer.Serialize(res, new JsonSerializerOptions { WriteIndented = true }) }
                             }
@@ -488,11 +492,11 @@ namespace McpRouter.Extensions
                 using var connDb = dbFactory.CreateConnection();
                 var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
                 var servers = rawServers.ToList();
-                
+
                 if (!string.IsNullOrWhiteSpace(serverId))
                 {
-                    servers = servers.Where(s => 
-                        s.Id == serverId || 
+                    servers = servers.Where(s =>
+                        s.Id == serverId ||
                         (s.Categories != null && s.Categories.Contains(serverId))
                     ).ToList();
                 }
@@ -595,11 +599,11 @@ namespace McpRouter.Extensions
                 using var connDb = dbFactory.CreateConnection();
                 var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
                 var servers = rawServers.ToList();
-                
+
                 if (!string.IsNullOrWhiteSpace(serverId))
                 {
-                    servers = servers.Where(s => 
-                        s.Id == serverId || 
+                    servers = servers.Where(s =>
+                        s.Id == serverId ||
                         (s.Categories != null && s.Categories.Contains(serverId))
                     ).ToList();
                 }
@@ -756,32 +760,40 @@ namespace McpRouter.Extensions
 
                 var routing = new Core.Routing.PromptRoutingManager();
                 var promptName = model.PromptName;
-                
-                Func<string, string, string, string> rewriteRequestJson = (json, key, value) => {
-                    try {
+
+                Func<string, string, string, string> rewriteRequestJson = (json, key, value) =>
+                {
+                    try
+                    {
                         using var doc = JsonDocument.Parse(json);
                         var root = doc.RootElement;
-                        if (root.TryGetProperty("params", out var paramsProp)) {
+                        if (root.TryGetProperty("params", out var paramsProp))
+                        {
                             var paramsDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(paramsProp.GetRawText());
-                            if (paramsDict != null) {
+                            if (paramsDict != null)
+                            {
                                 paramsDict[key] = JsonSerializer.SerializeToElement(value);
                                 var newParams = JsonSerializer.Serialize(paramsDict);
                                 var rootDict = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(json);
-                                if (rootDict != null) {
+                                if (rootDict != null)
+                                {
                                     rootDict["params"] = JsonDocument.Parse(newParams).RootElement;
                                     return JsonSerializer.Serialize(rootDict);
                                 }
                             }
                         }
-                    } catch {}
+                    }
+                    catch { }
                     return json;
                 };
 
-                var payload = new {
+                var payload = new
+                {
                     jsonrpc = "2.0",
                     id = "test-prompt-id",
                     method = "prompts/get",
-                    @params = new {
+                    @params = new
+                    {
                         name = promptName,
                         arguments = model.Arguments.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : model.Arguments
                     }
@@ -825,11 +837,13 @@ namespace McpRouter.Extensions
                 var routing = new Core.Routing.ResourceRoutingManager();
                 Func<string, string, string, string> rewriteRequestJson = (json, key, value) => json;
 
-                var payload = new {
+                var payload = new
+                {
                     jsonrpc = "2.0",
                     id = "test-resource-id",
                     method = "resources/read",
-                    @params = new {
+                    @params = new
+                    {
                         uri = uri
                     }
                 };
@@ -871,7 +885,7 @@ namespace McpRouter.Extensions
             });
 
             // --- Custom Files Management APIs ---
-            
+
             string SanitizeFileName(string name)
             {
                 var invalidChars = Path.GetInvalidFileNameChars();
@@ -1000,7 +1014,7 @@ namespace McpRouter.Extensions
                 }
             });
 
-            
+
         }
     }
 }

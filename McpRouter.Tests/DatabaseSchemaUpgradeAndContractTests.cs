@@ -71,6 +71,7 @@ namespace McpRouter.Tests
                     DisplayName TEXT,
                     UserHeader TEXT,
                     GroupsHeader TEXT,
+                    ConfigJson TEXT,
                     IsEnabled INTEGER DEFAULT 1
                 );
 
@@ -95,8 +96,8 @@ namespace McpRouter.Tests
                 INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey)
                 VALUES ('key1', 'Test Key', 'admin', 'prefix1234567890', 'some_hash_val');
 
-                INSERT INTO AuthProviderConfigs (ProviderName, DisplayName)
-                VALUES ('ActiveDirectory', 'Active Directory');
+                INSERT INTO AuthProviderConfigs (ProviderName, DisplayName, ConfigJson)
+                VALUES ('ActiveDirectory', 'Active Directory', '{""server"":""ldaps.corp.local""}');
 
                 INSERT INTO McpServers (Id, DisplayName, Url)
                 VALUES ('legacy-server-1', 'Legacy Server 1', 'http://legacy:3000/sse');
@@ -121,12 +122,22 @@ namespace McpRouter.Tests
             Assert.NotNull(spRow);
             Assert.Equal("{\"vault_addr\":\"https://vault.local:8200\"}", spRow.ConfigJson);
 
+            // Assert: AuthProviderConfigs has EncryptedConfigJson with the migrated ConfigJson data
+            var apRow = conn.QueryFirstOrDefault<AuthProviderDto>("SELECT ProviderName, DisplayName, EncryptedConfigJson AS ConfigJson, IsEnabled FROM AuthProviderConfigs WHERE ProviderName = 'ActiveDirectory'");
+            Assert.NotNull(apRow);
+            Assert.Equal("{\"server\":\"ldaps.corp.local\"}", apRow.ConfigJson);
+
             // Assert: Repository reads it correctly
             var repo = new DatabaseRepository(factory);
             var providers = (await repo.GetSecretProvidersAsync()).ToList();
             var vaultProvider = providers.FirstOrDefault(p => p.ProviderName == "Vault");
             Assert.NotNull(vaultProvider);
             Assert.Equal("{\"vault_addr\":\"https://vault.local:8200\"}", vaultProvider.ConfigJson);
+
+            var authProviders = (await repo.GetAuthProvidersAsync()).ToList();
+            var adProvider = authProviders.FirstOrDefault(p => p.ProviderName == "ActiveDirectory");
+            Assert.NotNull(adProvider);
+            Assert.Equal("{\"server\":\"ldaps.corp.local\"}", adProvider.ConfigJson);
 
             // Assert: AppKeys has OwnerSid
             var keyRow = await repo.GetAppKeyByIdAsync("key1");

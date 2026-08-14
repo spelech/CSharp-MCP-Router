@@ -44,7 +44,7 @@ namespace McpRouter.Services
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("Starting Backend MCP Server Health Check background service...");
-            
+
             // Immediate probe on startup
             await ProbeAllServersAsync();
 

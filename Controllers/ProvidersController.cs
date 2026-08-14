@@ -1,10 +1,15 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using McpRouter.Core.Database;
+using McpRouter.Core.Identity;
 using McpRouter.Core.Logging;
-using Microsoft.AspNetCore.Mvc;
+using McpRouter.Core.Secrets;
+using McpRouter.Core.Security;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace McpRouter.Controllers
 {
@@ -42,12 +47,47 @@ namespace McpRouter.Controllers
             _authRepo = authRepo;
         }
 
+        [HttpGet("")]
+        [HttpGet("/api/admin/providers")]
+        public async Task<IActionResult> GetAllProviders()
+        {
+            try
+            {
+                var secretProviders = (await _secretRepo.GetSecretProvidersAsync()).ToList();
+                foreach (var p in secretProviders)
+                {
+                    p.ConfigJson = ProviderConfigSecurityHelper.RedactConfigJson(p.ConfigJson);
+                }
+
+                var authProviders = (await _authRepo.GetAuthProvidersAsync()).ToList();
+                foreach (var p in authProviders)
+                {
+                    p.ConfigJson = ProviderConfigSecurityHelper.RedactConfigJson(p.ConfigJson);
+                }
+
+                return Ok(new
+                {
+                    secretProviders,
+                    authProviders
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
         [HttpGet("secrets")]
+        [HttpGet("secret")]
         public async Task<IActionResult> GetSecretProviders()
         {
             try
             {
-                var providers = await _secretRepo.GetSecretProvidersAsync();
+                var providers = (await _secretRepo.GetSecretProvidersAsync()).ToList();
+                foreach (var p in providers)
+                {
+                    p.ConfigJson = ProviderConfigSecurityHelper.RedactConfigJson(p.ConfigJson);
+                }
                 return Ok(providers);
             }
             catch (Exception ex)
@@ -57,29 +97,56 @@ namespace McpRouter.Controllers
         }
 
         [HttpPost("secrets")]
-        public async Task<IActionResult> SaveSecretProvider([FromBody] SecretProviderDto dto, [FromServices] IAuditLogger auditLogger)
+        [HttpPost("secret")]
+        public async Task<IActionResult> SaveSecretProvider(
+            [FromBody] SecretProviderDto dto,
+            [FromServices] IAuditLogger auditLogger,
+            [FromServices] IServiceProvider? serviceProvider = null)
         {
             if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
 
             var username = User?.Identity?.Name ?? "anonymous";
             try
             {
-                McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);
+                ProviderConfigSecurityHelper.ValidateSecretProviderConfig(dto);
+
+                // Merge masked asterisks with existing decrypted config if updating existing provider
+                var existingProviders = await _secretRepo.GetSecretProvidersAsync();
+                var existing = existingProviders?.FirstOrDefault(p =>
+                    string.Equals(p.ProviderName, dto.ProviderName, StringComparison.OrdinalIgnoreCase));
+                if (existing != null && !string.IsNullOrEmpty(existing.ConfigJson))
+                {
+                    dto.ConfigJson = ProviderConfigSecurityHelper.MergeWithExistingConfig(dto.ConfigJson, existing.ConfigJson);
+                }
 
                 await _secretRepo.SaveSecretProviderAsync(dto);
 
-                _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, dto.ConfigJson ?? "", true);
+                var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
+                _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, redactedDetails ?? "", true);
+
+                // Dynamic runtime reload
+                var sp = serviceProvider ?? HttpContext?.RequestServices;
+                if (sp != null)
+                {
+                    var retrievers = sp.GetServices<ISecretRetriever>();
+                    foreach (var retriever in retrievers.OfType<VaultSecretRetriever>())
+                    {
+                        await retriever.ReloadConfigAsync();
+                    }
+                }
 
                 return Ok(new { success = true });
             }
             catch (ArgumentException ex)
             {
-                _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, dto.ConfigJson ?? "", false, ex.Message);
+                var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
+                _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
                 return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
-                _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, dto.ConfigJson ?? "", false, ex.Message);
+                var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
+                _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
             }
         }
@@ -89,7 +156,11 @@ namespace McpRouter.Controllers
         {
             try
             {
-                var providers = await _authRepo.GetAuthProvidersAsync();
+                var providers = (await _authRepo.GetAuthProvidersAsync()).ToList();
+                foreach (var p in providers)
+                {
+                    p.ConfigJson = ProviderConfigSecurityHelper.RedactConfigJson(p.ConfigJson);
+                }
                 return Ok(providers);
             }
             catch (Exception ex)
@@ -99,29 +170,55 @@ namespace McpRouter.Controllers
         }
 
         [HttpPost("auth")]
-        public async Task<IActionResult> SaveAuthProvider([FromBody] AuthProviderDto dto, [FromServices] IAuditLogger auditLogger)
+        public async Task<IActionResult> SaveAuthProvider(
+            [FromBody] AuthProviderDto dto,
+            [FromServices] IAuditLogger auditLogger,
+            [FromServices] IServiceProvider? serviceProvider = null)
         {
             if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
 
             var username = User?.Identity?.Name ?? "anonymous";
             try
             {
-                McpRouter.Core.Security.SecurityValidationHelper.ValidateJsonUrlsRequireHttps(dto.ConfigJson);
+                ProviderConfigSecurityHelper.ValidateAuthProviderConfig(dto);
+
+                // Merge masked asterisks with existing decrypted config if updating existing provider
+                var existingProviders = await _authRepo.GetAuthProvidersAsync();
+                var existing = existingProviders?.FirstOrDefault(p =>
+                    string.Equals(p.ProviderName, dto.ProviderName, StringComparison.OrdinalIgnoreCase));
+                if (existing != null && !string.IsNullOrEmpty(existing.ConfigJson))
+                {
+                    dto.ConfigJson = ProviderConfigSecurityHelper.MergeWithExistingConfig(dto.ConfigJson, existing.ConfigJson);
+                }
 
                 await _authRepo.SaveAuthProviderAsync(dto);
 
-                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, dto.ConfigJson ?? "", true);
+                var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
+                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, redactedDetails ?? "", true);
+
+                // Dynamic runtime reload
+                var sp = serviceProvider ?? HttpContext?.RequestServices;
+                if (sp != null)
+                {
+                    var ldapService = sp.GetService<ILdapService>();
+                    if (ldapService is LdapActiveDirectoryService ldapAd)
+                    {
+                        ldapAd.Reload();
+                    }
+                }
 
                 return Ok(new { success = true });
             }
             catch (ArgumentException ex)
             {
-                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, dto.ConfigJson ?? "", false, ex.Message);
+                var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
+                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
                 return BadRequest(new { error = ex.Message });
             }
             catch (Exception ex)
             {
-                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, dto.ConfigJson ?? "", false, ex.Message);
+                var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
+                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
             }
         }

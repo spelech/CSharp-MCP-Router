@@ -66,7 +66,7 @@ namespace McpRouter.Extensions
             app.UseAuthorization();
             app.UseMiddleware<McpRouter.Middleware.McpDualSpecMiddleware>();
             app.MapControllers();
-            
+
             // Request logging middleware (metadata only — never headers/body/query, which carry credentials)
             app.Use(async (context, next) =>
             {
@@ -75,7 +75,7 @@ namespace McpRouter.Extensions
                     context.Request.Method, context.Request.Path, context.Connection.RemoteIpAddress);
                 await next();
             });
-            
+
             app.UseDefaultFiles();
             app.UseStaticFiles(new StaticFileOptions
             {
@@ -86,16 +86,16 @@ namespace McpRouter.Extensions
                     ctx.Context.Response.Headers.Append("Expires", "0");
                 }
             }); // Serves dashboard files from wwwroot with no-cache headers
-            
 
-            
+
+
             app.SeedDatabase();
-            
+
             // ----------------------------------------------------
             // SYSTEM/HEALTH ENDPOINTS
             // ----------------------------------------------------
             app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = AppVersion }));
-            
+
             // ----------------------------------------------------
             // OAUTH & OIDC DISCOVERY ENDPOINTS
             // ----------------------------------------------------
@@ -110,7 +110,7 @@ namespace McpRouter.Extensions
                     bearer_methods_supported = new[] { "header" }
                 });
             });
-            
+
             app.MapGet("/.well-known/oauth-protected-resource/{**path}", (HttpContext context, string path) =>
             {
                 var host = context.Request.Host;
@@ -122,7 +122,7 @@ namespace McpRouter.Extensions
                     bearer_methods_supported = new[] { "header" }
                 });
             });
-            
+
             app.MapGet("/.well-known/oauth-authorization-server", (HttpContext context) =>
             {
                 var host = context.Request.Host;
@@ -138,7 +138,7 @@ namespace McpRouter.Extensions
                     token_endpoint_auth_methods_supported = new[] { "client_secret_post", "client_secret_basic" }
                 });
             });
-            
+
             app.MapGet("/.well-known/openid-configuration", (HttpContext context) =>
             {
                 var host = context.Request.Host;
@@ -155,14 +155,14 @@ namespace McpRouter.Extensions
                     id_token_signing_alg_values_supported = new[] { "RS256" }
                 });
             });
-            
-            
+
+
             app.MapProxyEndpoints();
             app.MapServerEndpoints();
             app.MapAdminEndpoints();
 
             app.Run();
-            
+
         }
     }
 
