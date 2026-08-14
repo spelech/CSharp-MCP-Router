@@ -1,26 +1,18 @@
 import { create } from 'zustand';
-import { apiRequest } from '../utils/api';
 import { showToast } from './useToastStore';
+import { McpServer, InspectCapabilityData, ServerPayload } from '../shared/types';
+import {
+  fetchServersApi,
+  reconnectAllServersApi,
+  toggleServerEnabledApi,
+  reconnectServerApi,
+  createServerApi,
+  updateServerApi,
+  deleteServerApi,
+  inspectServerApi,
+} from '../api/serverApi';
 
-export interface McpServer {
-  id: string;
-  displayName: string;
-  url: string;
-  enabled: boolean;
-  hidden: boolean;
-  type: string;
-  categories: string[];
-  secretProvider?: string;
-  secretItemKey?: string;
-  authShape?: string;
-  customHeaderName?: string;
-  headersJson?: string;
-  hasApiKey: boolean;
-  apiKey?: string; // fallback / input
-  connectionStatus: string;
-  connectionAttempts: number;
-  connectionError: string;
-}
+export type { McpServer, ServerPayload };
 
 interface ServerStore {
   servers: McpServer[];
@@ -39,11 +31,7 @@ interface ServerStore {
   // Inspect Modal
   isInspectOpen: boolean;
   inspectServer: McpServer | null;
-  inspectData: {
-    tools: any[];
-    resources: any[];
-    prompts: any[];
-  };
+  inspectData: InspectCapabilityData;
   inspectLoading: boolean;
   inspectActiveTab: 'tools' | 'resources' | 'prompts';
   inspectSearchQuery: string;
@@ -60,7 +48,7 @@ interface ServerStore {
   // Crud
   toggleServerEnabled: (id: string, enabled: boolean) => Promise<void>;
   reconnectServer: (id: string) => Promise<void>;
-  saveServer: (serverData: Partial<McpServer>) => Promise<void>;
+  saveServer: (serverData: ServerPayload | Partial<McpServer>) => Promise<void>;
   deleteServer: (id: string, name: string) => Promise<void>;
 
   // Modals actions
@@ -100,12 +88,12 @@ export const useServerStore = create<ServerStore>((set, get) => ({
     try {
       if (refreshAll) {
         try {
-          await apiRequest('/api/servers/reconnect-all', { method: 'POST' });
+          await reconnectAllServersApi();
         } catch {
           // Ignore error during batch reconnection attempt
         }
       }
-      const data = await apiRequest<McpServer[]>('/api/servers');
+      const data = await fetchServersApi();
       set({ servers: data || [], isLoadingServers: false });
     } catch (e: any) {
       console.error('Error fetching servers:', e);
@@ -128,10 +116,7 @@ export const useServerStore = create<ServerStore>((set, get) => ({
 
   toggleServerEnabled: async (id, enabled) => {
     try {
-      await apiRequest(`/api/servers/${id}`, {
-        method: 'PUT',
-        body: { enabled }
-      });
+      await toggleServerEnabledApi(id, enabled);
       showToast(`Server ${enabled ? 'enabled' : 'disabled'} successfully`, 'success');
       get().fetchServers();
     } catch (e: any) {
@@ -143,7 +128,7 @@ export const useServerStore = create<ServerStore>((set, get) => ({
     try {
       const server = get().servers.find(s => s.id === id);
       showToast(`Triggering reconnection for ${server?.displayName || id}...`, 'info');
-      await apiRequest(`/api/servers/${id}/reconnect`, { method: 'POST' });
+      await reconnectServerApi(id);
       get().fetchServers();
     } catch (e: any) {
       showToast(`Failed to reconnect server: ${e.message}`, 'error');
@@ -154,16 +139,10 @@ export const useServerStore = create<ServerStore>((set, get) => ({
     try {
       const id = serverData.id;
       if (id) {
-        await apiRequest(`/api/servers/${id}`, {
-          method: 'PUT',
-          body: serverData
-        });
+        await updateServerApi(id, serverData);
         showToast('Server updated successfully', 'success');
       } else {
-        await apiRequest('/api/servers', {
-          method: 'POST',
-          body: serverData
-        });
+        await createServerApi(serverData);
         showToast('Server added successfully', 'success');
       }
       set({ isAddEditOpen: false, editingServer: null });
@@ -177,7 +156,7 @@ export const useServerStore = create<ServerStore>((set, get) => ({
   deleteServer: async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete the MCP server '${name}'?`)) return;
     try {
-      await apiRequest(`/api/servers/${id}`, { method: 'DELETE' });
+      await deleteServerApi(id);
       showToast('Server deleted successfully', 'success');
       get().fetchServers();
     } catch (e: any) {
@@ -200,7 +179,7 @@ export const useServerStore = create<ServerStore>((set, get) => ({
     });
 
     try {
-      const data = await apiRequest(`/api/servers/${server.id}/inspect`);
+      const data = await inspectServerApi(server.id);
       set({
         inspectData: data || { tools: [], resources: [], prompts: [] },
         inspectLoading: false
