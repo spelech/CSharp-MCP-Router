@@ -44,10 +44,8 @@ This document serves as the **definitive architectural specification**, detailin
 8. [Database & Persistence Architecture](#8-database--persistence-architecture)
    - [Unified Entity-Relationship Diagram (Mermaid ERD)](#unified-entity-relationship-diagram-mermaid-erd)
    - [Engine Dialect Strategies (SQLite, MS SQL Server, MySQL)](#engine-dialect-strategies-sqlite-ms-sql-server-mysql)
-   - [In-Process DDL Migrations & Stored Procedure Suites](#in-process-ddl-migrations--stored-procedure-suites)
 9. [Secret Provider & Envelope Encryption Pipeline](#9-secret-provider--envelope-encryption-pipeline)
    - [AES-256-GCM Envelope Encryption Specification](#aes-256-gcm-envelope-encryption-specification)
-   - [Master Key Derivation (PBKDF2 SHA-256)](#master-key-derivation-pbkdf2-sha-256)
    - [Pluggable Retrievers & Dynamic Reload Without Restart](#pluggable-retrievers--dynamic-reload-without-restart)
    - [Secret Resolution & Encryption Pipeline Flowchart](#secret-resolution--encryption-pipeline-flowchart)
 10. [Cross-References, Verification & Operational Guide](#10-cross-references-verification--operational-guide)
@@ -1155,7 +1153,7 @@ For complete setup guides, AppRole configuration commands, and DPAPI registry re
 | **Vault, DPAPI & AES-256-GCM Encryption** | [**Enterprise Secret Providers & Key Management Guide**](secret-providers.md) |
 | **CI Quality Gates, Static Analysis & Testing** | [**CI Quality Gates & Verification Guide**](ci-quality-gates.md) |
 | **Pairwise Integration Matrix & E2E Tests** | [**Testing Matrix & Integration Guide**](testing-matrix.md) |
-| **End-User Guides & Interactive UI Test Bench** | [**User Guide & Test Bench Operations**](user-guide/testbench.md) |
+| **End-User Guides & Interactive UI Test Bench** | [**User Guide & Test Bench Operations**](user-guide/05-interactive-test-bench.md) |
 | **Core README & Getting Started** | [**Project Overview & Quickstart**](../README.md) |
 
 ### Verification & Test Suite Execution
