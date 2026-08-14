@@ -42,7 +42,7 @@ export default defineConfig({
     coverage: {
       provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['src/test/**', 'vite.config.ts', '**/e2e/**'],
+      exclude: ['src/test/**', 'vite.config.ts', 'eslint.config.js', 'playwright.config.ts', '**/e2e/**'],
     },
   },
 });

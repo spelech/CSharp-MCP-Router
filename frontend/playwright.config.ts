@@ -12,7 +12,6 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     actionTimeout: 10000,
-    trace: 'on-first-retry',
     contextOptions: {
       logger: {
         isEnabled: (name, severity) => true,
