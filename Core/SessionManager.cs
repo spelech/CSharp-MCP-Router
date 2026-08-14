@@ -91,8 +91,8 @@ namespace McpRouter
             if (!string.IsNullOrWhiteSpace(targetServerId))
             {
                 servers = servers.Where(s =>
-                    s.Id == targetServerId ||
-                    (s.Categories != null && s.Categories.Contains(targetServerId))
+                    string.Equals(s.Id, targetServerId, StringComparison.OrdinalIgnoreCase) ||
+                    (s.Categories != null && s.Categories.Any(c => string.Equals(c, targetServerId, StringComparison.OrdinalIgnoreCase)))
                 ).ToList();
             }
 

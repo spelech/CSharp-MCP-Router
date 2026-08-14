@@ -132,6 +132,16 @@ External groups are mapped to virtual internal groups via the database `GroupMap
 1. **Create Mapping**: Link an external Active Directory SID (e.g., `S-1-5-21-...`) or OIDC group (e.g., `house_member`) to an internal security group (`admin`, `operator`, `readonly`).
 2. **Evaluate Access**: When any capability is invoked or listed, the router executes access evaluation to verify that the active user's groups permit invoking that specific namespace / target item / target server.
 
+### AppKey Credentials & Category-Scoped Authorization
+The router supports fine-grained, scoped AppKeys and Machine Client credentials for automated agents, IDE extensions, and services:
+- **Scope Granularity**:
+  - `all` or `*` or `mcp_client`: Full access across all backend servers and tools.
+  - `server:<serverId>` or `<serverId>`: Direct access to all capabilities of a specific backend server.
+  - `category:<name>` or `group:<name>`: Authorizes all tools, prompts, resources, templates, completions, and target-specific proxying for any server currently belonging to that category (evaluated dynamically from the database).
+  - `tool:<name>`, `prompt:<name>`, `resource:<uri>`: Pinpoint access to single capabilities.
+- **Dynamic Membership**: Category scopes evaluate server memberships in real time from the database. Adding or removing a category from a server takes effect immediately without needing to re-issue or recreate keys.
+- **Creation Validation**: When creating AppKeys or Client credentials, `category:<name>` scopes are validated against registered server categories. Unknown or empty categories are rejected (400 Bad Request) unless provisioned by an administrator.
+
 ### CORS & Cross-Origin Security Configuration
 By default, the gateway restricts cross-origin request access to standard safe localhost development origins (`http://localhost:3000`, `http://localhost:5000`, `https://localhost:5001`) to protect your local environment from cross-site request forgery and malicious third-party websites.
 
