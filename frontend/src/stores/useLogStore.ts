@@ -1,14 +1,8 @@
 import { create } from 'zustand';
-import { apiRequest } from '../utils/api';
+import { LogEntry } from '../shared/types';
+import { fetchLogsApi, clearLogsApi } from '../api/testbenchApi';
 
-export interface LogEntry {
-  id: string;
-  timestamp: string;
-  level: number;
-  category: string;
-  message: string;
-  exception?: string;
-}
+export type { LogEntry };
 
 interface LogStore {
   logs: LogEntry[];
@@ -34,7 +28,7 @@ export const useLogStore = create<LogStore>((set) => ({
 
   fetchLogs: async () => {
     try {
-      const data = await apiRequest<LogEntry[]>('/api/logs');
+      const data = await fetchLogsApi();
       set({ logs: data || [] });
     } catch (err) {
       console.error('Failed to fetch logs:', err);
@@ -47,7 +41,7 @@ export const useLogStore = create<LogStore>((set) => ({
 
   clearLogs: async () => {
     try {
-      await apiRequest('/api/logs', { method: 'DELETE' });
+      await clearLogsApi();
       set({ logs: [] });
     } catch (err) {
       console.error('Failed to clear logs:', err);
