@@ -185,8 +185,8 @@ namespace McpRouter.Extensions
                 if (!string.IsNullOrWhiteSpace(serverId))
                 {
                     servers = servers.Where(s =>
-                        s.Id == serverId ||
-                        (s.Categories != null && s.Categories.Contains(serverId))
+                        string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) ||
+                        (s.Categories != null && s.Categories.Any(c => string.Equals(c, serverId, StringComparison.OrdinalIgnoreCase)))
                     ).ToList();
                 }
                 var allTools = new System.Collections.Generic.List<object>();
@@ -496,8 +496,8 @@ namespace McpRouter.Extensions
                 if (!string.IsNullOrWhiteSpace(serverId))
                 {
                     servers = servers.Where(s =>
-                        s.Id == serverId ||
-                        (s.Categories != null && s.Categories.Contains(serverId))
+                        string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) ||
+                        (s.Categories != null && s.Categories.Any(c => string.Equals(c, serverId, StringComparison.OrdinalIgnoreCase)))
                     ).ToList();
                 }
                 var allPrompts = new System.Collections.Generic.List<object>();
@@ -603,8 +603,8 @@ namespace McpRouter.Extensions
                 if (!string.IsNullOrWhiteSpace(serverId))
                 {
                     servers = servers.Where(s =>
-                        s.Id == serverId ||
-                        (s.Categories != null && s.Categories.Contains(serverId))
+                        string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase) ||
+                        (s.Categories != null && s.Categories.Any(c => string.Equals(c, serverId, StringComparison.OrdinalIgnoreCase)))
                     ).ToList();
                 }
                 var allResources = new System.Collections.Generic.List<object>();

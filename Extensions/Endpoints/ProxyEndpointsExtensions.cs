@@ -414,51 +414,80 @@ namespace McpRouter.Extensions
             // Minimal API route for handling GET (SSE initialization) and POST (JSON-RPC requests)
             app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, ILogger<Program> logger, string targetServerId) =>
             {
-                // RBAC Check for targetServerId
-                var compositeProvider = httpContext.RequestServices.GetRequiredService<McpRouter.Core.Identity.CompositeIdentityProvider>();
-                var identity = await compositeProvider.ResolveIdentityAsync(httpContext);
-
-                if (!McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(identity, httpContext.RequestServices.GetService<IConfiguration>()))
+                // First check AppKey authorization if authenticated via AppKey
+                if (httpContext.Items.TryGetValue("AppKeyUsed", out var appKeyUsedObj) == true && appKeyUsedObj is bool appKeyUsed && appKeyUsed)
                 {
-                    var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
-                    using var conn = dbFactory.CreateConnection();
-                    var targetServerKey = $"server:{targetServerId}";
-
-                    if (dbFactory.ProviderName == "sqlite")
+                    if (httpContext.Items.TryGetValue("AppKeyScopes", out var scopesObj) == true && scopesObj is string scopesJson)
                     {
-                        const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId;";
-                        int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetId = targetServerKey });
-                        if (policyCount == 0)
+                        bool scopeAllowed = false;
+                        try
                         {
-                            httpContext.Response.StatusCode = 403;
-                            var audit = httpContext.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
-                            if (audit != null)
+                            var scopes = JsonSerializer.Deserialize<List<string>>(scopesJson);
+                            if (scopes != null)
                             {
-                                await audit.LogInvocationAsync(
-                                    Guid.NewGuid().ToString("N"),
-                                    identity.Username,
-                                    identity.Sid ?? "",
-                                    targetServerId,
-                                    "server/connect",
-                                    httpContext.Request.Method,
-                                    0,
-                                    403,
-                                    errorMessage: "Access denied"
-                                );
+                                var dbFactory = httpContext.RequestServices.GetService<IDbConnectionFactory>();
+                                List<string>? serverCategories = null;
+                                if (dbFactory != null)
+                                {
+                                    try
+                                    {
+                                        using var dbConn = dbFactory.CreateConnection();
+                                        var rawCat = await dbConn.ExecuteScalarAsync<string>("SELECT Categories FROM Servers WHERE Id = @Id", new { Id = targetServerId });
+                                        if (!string.IsNullOrEmpty(rawCat))
+                                        {
+                                            try { serverCategories = JsonSerializer.Deserialize<List<string>>(rawCat); }
+                                            catch { serverCategories = rawCat.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList(); }
+                                        }
+                                    }
+                                    catch { }
+                                }
+
+                                foreach (var s in scopes)
+                                {
+                                    var cleanScope = s.Trim().ToLowerInvariant();
+                                    if (cleanScope == "all" || cleanScope == "mcp_client" || cleanScope == "*")
+                                    {
+                                        scopeAllowed = true;
+                                        break;
+                                    }
+                                    if (cleanScope == $"server:{targetServerId}".ToLowerInvariant() || cleanScope == targetServerId.ToLowerInvariant())
+                                    {
+                                        scopeAllowed = true;
+                                        break;
+                                    }
+                                    if (cleanScope.StartsWith("category:") || cleanScope.StartsWith("group:"))
+                                    {
+                                        var scopeCategory = cleanScope.StartsWith("category:")
+                                            ? cleanScope.Substring("category:".Length).Trim()
+                                            : cleanScope.Substring("group:".Length).Trim();
+
+                                        if (!string.IsNullOrEmpty(scopeCategory))
+                                        {
+                                            if (string.Equals(targetServerId, scopeCategory, StringComparison.OrdinalIgnoreCase))
+                                            {
+                                                scopeAllowed = true;
+                                                break;
+                                            }
+                                            if (serverCategories != null && serverCategories.Any(c => string.Equals(c, scopeCategory, StringComparison.OrdinalIgnoreCase)))
+                                            {
+                                                scopeAllowed = true;
+                                                break;
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                            await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
-                            return;
+                        }
+                        catch (Exception exScopes)
+                        {
+                            logger.LogWarning(exScopes, "Failed to parse AppKey scopes JSON: {ScopesJson}", scopesJson);
                         }
 
-                        const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
-                        int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
-
-                        const string allowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 1;";
-                        int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
-
-                        if (denyCount > 0 || allowCount == 0)
+                        if (!scopeAllowed)
                         {
                             httpContext.Response.StatusCode = 403;
+                            var compositeProvider = httpContext.RequestServices.GetRequiredService<McpRouter.Core.Identity.CompositeIdentityProvider>();
+                            var identity = await compositeProvider.ResolveIdentityAsync(httpContext);
                             var audit = httpContext.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
                             if (audit != null)
                             {
@@ -478,47 +507,115 @@ namespace McpRouter.Extensions
                             return;
                         }
                     }
-                    else
+                }
+                else
+                {
+                    // RBAC Check for targetServerId
+                    var compositeProvider = httpContext.RequestServices.GetRequiredService<McpRouter.Core.Identity.CompositeIdentityProvider>();
+                    var identity = await compositeProvider.ResolveIdentityAsync(httpContext);
+
+                    if (!McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(identity, httpContext.RequestServices.GetService<IConfiguration>()))
                     {
-                        var groupNamesCsv = string.Join(",", identity.GroupNames);
-                        object parameters = dbFactory.ProviderName == "mysql"
-                            ? new
-                            {
-                                p_GroupNames = groupNamesCsv,
-                                p_ItemName = targetServerId,
-                                p_RequestMethod = "GET"
-                            }
-                            : new
-                            {
-                                GroupNames = groupNamesCsv,
-                                ItemName = targetServerId,
-                                RequestMethod = "GET"
-                            };
-                        int isAllowed = await conn.ExecuteScalarAsync<int>(
-                            "sp_EvaluateUserAccess",
-                            parameters,
-                            commandType: System.Data.CommandType.StoredProcedure
-                        );
-                        if (isAllowed == 0)
+                        var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
+                        using var conn = dbFactory.CreateConnection();
+                        var targetServerKey = $"server:{targetServerId}";
+
+                        if (dbFactory.ProviderName == "sqlite")
                         {
-                            httpContext.Response.StatusCode = 403;
-                            var audit = httpContext.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
-                            if (audit != null)
+                            const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId;";
+                            int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetId = targetServerKey });
+                            if (policyCount == 0)
                             {
-                                await audit.LogInvocationAsync(
-                                    Guid.NewGuid().ToString("N"),
-                                    identity.Username,
-                                    identity.Sid ?? "",
-                                    targetServerId,
-                                    "server/connect",
-                                    httpContext.Request.Method,
-                                    0,
-                                    403,
-                                    errorMessage: "Access denied"
-                                );
+                                httpContext.Response.StatusCode = 403;
+                                var audit = httpContext.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
+                                if (audit != null)
+                                {
+                                    await audit.LogInvocationAsync(
+                                        Guid.NewGuid().ToString("N"),
+                                        identity.Username,
+                                        identity.Sid ?? "",
+                                        targetServerId,
+                                        "server/connect",
+                                        httpContext.Request.Method,
+                                        0,
+                                        403,
+                                        errorMessage: "Access denied"
+                                    );
+                                }
+                                await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
+                                return;
                             }
-                            await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
-                            return;
+
+                            const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
+                            int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
+
+                            const string allowSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId = @TargetId AND RequiredGroup IN @GroupNames AND IsAllowed = 1;";
+                            int allowCount = await conn.ExecuteScalarAsync<int>(allowSql, new { TargetId = targetServerKey, GroupNames = identity.GroupNames });
+
+                            if (denyCount > 0 || allowCount == 0)
+                            {
+                                httpContext.Response.StatusCode = 403;
+                                var audit = httpContext.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
+                                if (audit != null)
+                                {
+                                    await audit.LogInvocationAsync(
+                                        Guid.NewGuid().ToString("N"),
+                                        identity.Username,
+                                        identity.Sid ?? "",
+                                        targetServerId,
+                                        "server/connect",
+                                        httpContext.Request.Method,
+                                        0,
+                                        403,
+                                        errorMessage: "Access denied"
+                                    );
+                                }
+                                await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
+                                return;
+                            }
+                        }
+                        else
+                        {
+                            var groupNamesCsv = string.Join(",", identity.GroupNames);
+                            object parameters = dbFactory.ProviderName == "mysql"
+                                ? new
+                                {
+                                    p_GroupNames = groupNamesCsv,
+                                    p_ItemName = targetServerId,
+                                    p_RequestMethod = "GET"
+                                }
+                                : new
+                                {
+                                    GroupNames = groupNamesCsv,
+                                    ItemName = targetServerId,
+                                    RequestMethod = "GET"
+                                };
+                            int isAllowed = await conn.ExecuteScalarAsync<int>(
+                                "sp_EvaluateUserAccess",
+                                parameters,
+                                commandType: System.Data.CommandType.StoredProcedure
+                            );
+                            if (isAllowed == 0)
+                            {
+                                httpContext.Response.StatusCode = 403;
+                                var audit = httpContext.RequestServices.GetService<McpRouter.Core.Logging.IAuditLogger>();
+                                if (audit != null)
+                                {
+                                    await audit.LogInvocationAsync(
+                                        Guid.NewGuid().ToString("N"),
+                                        identity.Username,
+                                        identity.Sid ?? "",
+                                        targetServerId,
+                                        "server/connect",
+                                        httpContext.Request.Method,
+                                        0,
+                                        403,
+                                        errorMessage: "Access denied"
+                                    );
+                                }
+                                await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to target server: {targetServerId}" });
+                                return;
+                            }
                         }
                     }
                 }
@@ -604,7 +701,7 @@ namespace McpRouter.Extensions
                             {
                                 serverName = targetServer.DisplayName;
                             }
-                            else if (allServers.Any(s => s.Categories != null && s.Categories.Contains(targetServerId)))
+                            else if (allServers.Any(s => s.Categories != null && s.Categories.Any(c => string.Equals(c, targetServerId, StringComparison.OrdinalIgnoreCase))))
                             {
                                 // Fallback to Category name
                                 serverName = char.ToUpper(targetServerId[0]) + targetServerId.Substring(1) + " Services";

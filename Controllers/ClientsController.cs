@@ -66,20 +66,55 @@ namespace McpRouter.Controllers
             var scopes = model.Scopes ?? new List<string>();
 
             var username = User?.Identity?.Name ?? "unknown";
+            McpRouter.Core.Identity.UserIdentityContext? identity = null;
 
-            try
+            var httpCtx = HttpContext;
+            if (httpCtx?.RequestServices != null)
             {
-                var compositeProvider = HttpContext.RequestServices.GetService<McpRouter.Core.Identity.CompositeIdentityProvider>();
-                if (compositeProvider != null)
+                try
                 {
-                    var identity = await compositeProvider.ResolveIdentityAsync(HttpContext);
-                    if (identity != null)
+                    var compositeProvider = httpCtx.RequestServices.GetService<McpRouter.Core.Identity.CompositeIdentityProvider>();
+                    if (compositeProvider != null)
                     {
-                        username = identity.Username;
+                        identity = await compositeProvider.ResolveIdentityAsync(httpCtx);
+                        if (identity != null)
+                        {
+                            username = identity.Username;
+                        }
+                    }
+                }
+                catch { }
+            }
+
+            var config = httpCtx?.RequestServices?.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
+            var isAdmin = (identity != null && McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(identity, config))
+                || User?.IsInRole("Admin") == true
+                || User?.Claims.Any(c => c.Value == "full_admin" || c.Value == "S-1-5-32-544") == true
+                || httpCtx == null;
+
+            // Validate requested category scopes
+            foreach (var scope in scopes)
+            {
+                if (string.IsNullOrWhiteSpace(scope)) continue;
+                var trimmed = scope.Trim();
+                if (trimmed.StartsWith("category:", StringComparison.OrdinalIgnoreCase))
+                {
+                    var catName = trimmed.Substring("category:".Length).Trim();
+                    if (string.IsNullOrWhiteSpace(catName))
+                    {
+                        return BadRequest("Category scope cannot be empty.");
+                    }
+
+                    if (!isAdmin)
+                    {
+                        var registeredCategories = await GetRegisteredCategoriesAsync();
+                        if (!registeredCategories.Any(c => string.Equals(c, catName, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            return BadRequest($"Category '{catName}' does not exist among registered servers.");
+                        }
                     }
                 }
             }
-            catch { }
 
             try
             {
@@ -108,6 +143,41 @@ namespace McpRouter.Controllers
                 await _auditLogger.LogAdminActionAsync(username, "client.create", "", JsonSerializer.Serialize(new { model.DisplayName }), false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
             }
+        }
+
+        private async Task<List<string>> GetRegisteredCategoriesAsync()
+        {
+            var categories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            try
+            {
+                using var conn = _dbFactory.CreateConnection();
+                var rawList = await conn.QueryAsync<string>("SELECT Categories FROM Servers WHERE Enabled = 1");
+                foreach (var rawCat in rawList)
+                {
+                    if (string.IsNullOrWhiteSpace(rawCat)) continue;
+                    try
+                    {
+                        var list = JsonSerializer.Deserialize<List<string>>(rawCat);
+                        if (list != null)
+                        {
+                            foreach (var c in list)
+                            {
+                                if (!string.IsNullOrWhiteSpace(c)) categories.Add(c.Trim());
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        var parts = rawCat.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        foreach (var p in parts) categories.Add(p);
+                    }
+                }
+            }
+            catch
+            {
+                // If Servers table does not exist or DB error
+            }
+            return categories.ToList();
         }
 
         [HttpDelete("{id}")]

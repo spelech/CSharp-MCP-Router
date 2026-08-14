@@ -11,6 +11,7 @@ using McpRouter.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
+using Dapper;
 
 namespace McpRouter.Controllers
 {
@@ -181,6 +182,30 @@ namespace McpRouter.Controllers
 
                 var scopes = model.Scopes ?? new List<string> { "all" };
 
+                // Validate category scopes
+                foreach (var scope in scopes)
+                {
+                    if (string.IsNullOrWhiteSpace(scope)) continue;
+                    var trimmed = scope.Trim();
+                    if (trimmed.StartsWith("category:", StringComparison.OrdinalIgnoreCase))
+                    {
+                        var catName = trimmed.Substring("category:".Length).Trim();
+                        if (string.IsNullOrWhiteSpace(catName))
+                        {
+                            return BadRequest(new { error = "Category scope cannot be empty." });
+                        }
+
+                        if (!isAdmin)
+                        {
+                            var registeredCategories = await GetRegisteredCategoriesAsync();
+                            if (!registeredCategories.Any(c => string.Equals(c, catName, StringComparison.OrdinalIgnoreCase)))
+                            {
+                                return BadRequest(new { error = $"Category '{catName}' does not exist among registered servers." });
+                            }
+                        }
+                    }
+                }
+
                 var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
                     model.Name,
                     targetUser,
@@ -245,6 +270,45 @@ namespace McpRouter.Controllers
             {
                 return StatusCode(500, new { error = ex.Message });
             }
+        }
+
+        private async Task<List<string>> GetRegisteredCategoriesAsync()
+        {
+            var categories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var dbFactory = HttpContext.RequestServices.GetService<IDbConnectionFactory>();
+            if (dbFactory != null)
+            {
+                try
+                {
+                    using var conn = dbFactory.CreateConnection();
+                    var rawList = await conn.QueryAsync<string>("SELECT Categories FROM Servers WHERE Enabled = 1");
+                    foreach (var rawCat in rawList)
+                    {
+                        if (string.IsNullOrWhiteSpace(rawCat)) continue;
+                        try
+                        {
+                            var list = JsonSerializer.Deserialize<List<string>>(rawCat);
+                            if (list != null)
+                            {
+                                foreach (var c in list)
+                                {
+                                    if (!string.IsNullOrWhiteSpace(c)) categories.Add(c.Trim());
+                                }
+                            }
+                        }
+                        catch
+                        {
+                            var parts = rawCat.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                            foreach (var p in parts) categories.Add(p);
+                        }
+                    }
+                }
+                catch
+                {
+                    // If Servers table does not exist or DB error
+                }
+            }
+            return categories.ToList();
         }
 
         private List<string> DeserializeScopes(string json)

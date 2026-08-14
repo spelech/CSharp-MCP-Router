@@ -203,11 +203,12 @@ namespace McpRouter.Core.Routing
             Func<string, string, string, string> rewriteRequestJson,
             CancellationToken cancellationToken = default,
             SessionManager? sessionManager = null,
-            string? clientSessionId = null)
+            string? clientSessionId = null,
+            Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null)
         {
             try
             {
-                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
+                var task = CallToolInternalAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, embeddingService, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId, filterAuthorizedToolsAsync);
                 return await task.WaitAsync(cancellationToken);
             }
             catch (OperationCanceledException)
@@ -239,7 +240,8 @@ namespace McpRouter.Core.Routing
             Func<string, string, string, string> rewriteRequestJson,
             CancellationToken cancellationToken,
             SessionManager? sessionManager,
-            string? clientSessionId)
+            string? clientSessionId,
+            Func<List<object>, Task<List<object>>>? filterAuthorizedToolsAsync = null)
         {
             await ensureBackendsInitializedAsync();
 
@@ -260,6 +262,11 @@ namespace McpRouter.Core.Routing
                 lock (_cacheLock)
                 {
                     tools.AddRange(_cachedTools);
+                }
+
+                if (filterAuthorizedToolsAsync != null)
+                {
+                    tools = await filterAuthorizedToolsAsync(tools);
                 }
 
                 var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService, logger);

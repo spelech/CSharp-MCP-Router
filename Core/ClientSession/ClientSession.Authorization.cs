@@ -91,7 +91,6 @@ namespace McpRouter
             }
 
             var contextToUse = httpContext ?? _clientResponse?.HttpContext;
-
             // Extract serverId across all URI and namespaced formats
             string serverId;
             if (targetId.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
@@ -112,9 +111,21 @@ namespace McpRouter
             {
                 serverId = "router";
             }
+            else if (targetId.StartsWith("server:", StringComparison.OrdinalIgnoreCase))
+            {
+                serverId = targetId.Substring("server:".Length);
+            }
             else if (targetId.Contains("__"))
             {
                 serverId = targetId.Split("__", 2)[0];
+            }
+            else if (targetId.StartsWith("plex_", StringComparison.OrdinalIgnoreCase))
+            {
+                serverId = "plex";
+            }
+            else if (targetId.StartsWith("seerr_", StringComparison.OrdinalIgnoreCase))
+            {
+                serverId = "seerr";
             }
             else
             {
@@ -132,6 +143,8 @@ namespace McpRouter
                         var scopes = JsonSerializer.Deserialize<List<string>>(scopesJson);
                         if (scopes != null)
                         {
+                            List<string>? serverCategories = null;
+
                             foreach (var s in scopes)
                             {
                                 var cleanScope = s.Trim().ToLowerInvariant();
@@ -140,8 +153,14 @@ namespace McpRouter
                                     scopeAllowed = true;
                                     break;
                                 }
+                                if ((targetId == "search_tools" || targetId == "execute_tool") && (IsMetaMode || requestMethod.StartsWith("tools/")))
+                                {
+                                    scopeAllowed = true;
+                                    break;
+                                }
                                 if (cleanScope == $"server:{serverId}".ToLowerInvariant() ||
-                                    cleanScope == $"server:{targetId}".ToLowerInvariant())
+                                    cleanScope == $"server:{targetId}".ToLowerInvariant() ||
+                                    cleanScope == serverId.ToLowerInvariant())
                                 {
                                     scopeAllowed = true;
                                     break;
@@ -156,6 +175,30 @@ namespace McpRouter
                                 {
                                     scopeAllowed = true;
                                     break;
+                                }
+
+                                if (cleanScope.StartsWith("category:") || cleanScope.StartsWith("group:"))
+                                {
+                                    var scopeCategory = cleanScope.StartsWith("category:")
+                                        ? cleanScope.Substring("category:".Length).Trim()
+                                        : cleanScope.Substring("group:".Length).Trim();
+
+                                    if (!string.IsNullOrEmpty(scopeCategory))
+                                    {
+                                        if (string.Equals(targetId, scopeCategory, StringComparison.OrdinalIgnoreCase) ||
+                                            string.Equals(serverId, scopeCategory, StringComparison.OrdinalIgnoreCase))
+                                        {
+                                            scopeAllowed = true;
+                                            break;
+                                        }
+
+                                        serverCategories ??= await GetServerCategoriesAsync(serverId, contextToUse);
+                                        if (serverCategories.Any(c => string.Equals(c, scopeCategory, StringComparison.OrdinalIgnoreCase)))
+                                        {
+                                            scopeAllowed = true;
+                                            break;
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -209,6 +252,13 @@ namespace McpRouter
                     $"completion:{targetId}",
                     $"server:{serverId}"
                 };
+
+                var serverCategoriesForRbac = await GetServerCategoriesAsync(serverId, contextToUse);
+                foreach (var cat in serverCategoriesForRbac)
+                {
+                    targetKeys.Add($"category:{cat}".ToLowerInvariant());
+                    targetKeys.Add($"group:{cat}".ToLowerInvariant());
+                }
 
                 var externalIds = identity.GroupNames.Concat(identity.AllSids).Distinct().ToList();
                 if (!string.IsNullOrEmpty(identity.Username) && !externalIds.Contains(identity.Username)) externalIds.Add(identity.Username);
@@ -285,6 +335,52 @@ namespace McpRouter
                 _logger.LogError(ex, "Error checking user authorization for target '{TargetId}'", targetId);
                 return false; // Fail closed fallback
             }
+        }
+
+        private async Task<List<string>> GetServerCategoriesAsync(string serverId, HttpContext? httpContext)
+        {
+            if (string.IsNullOrWhiteSpace(serverId)) return new List<string>();
+
+            var services = httpContext?.RequestServices ?? _clientResponse?.HttpContext?.RequestServices ?? _rootServices;
+            var dbFactory = services?.GetService<IDbConnectionFactory>();
+
+            if (dbFactory != null)
+            {
+                try
+                {
+                    using var conn = dbFactory.CreateConnection();
+                    var rawCat = await conn.ExecuteScalarAsync<string>("SELECT Categories FROM Servers WHERE Id = @Id", new { Id = serverId });
+                    if (!string.IsNullOrEmpty(rawCat))
+                    {
+                        try
+                        {
+                            var categories = JsonSerializer.Deserialize<List<string>>(rawCat);
+                            if (categories != null && categories.Count > 0)
+                            {
+                                return categories;
+                            }
+                        }
+                        catch
+                        {
+                            var parts = rawCat.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+                            if (parts.Count > 0) return parts;
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Failed to query server categories from DB for server '{ServerId}'", serverId);
+                }
+            }
+
+            // Fallback to local session servers list
+            var server = _servers.FirstOrDefault(s => string.Equals(s.Id, serverId, StringComparison.OrdinalIgnoreCase));
+            if (server?.Categories != null && server.Categories.Count > 0)
+            {
+                return server.Categories;
+            }
+
+            return new List<string>();
         }
 
         private async Task<List<object>> FilterAuthorizedAsync(List<object> items, string method, string idProp, HttpContext? httpContext)
