@@ -17,12 +17,28 @@ namespace McpRouter
         /// Cancels an active request by triggering its registered cancellation token source.
         /// </summary>
         /// <param name="requestId">The unique request ID to cancel.</param>
-        public void CancelRequest(string requestId)
+        /// <param name="traceIdentifier">Optional HTTP trace identifier for scoping stateless requests.</param>
+        public void CancelRequest(string requestId, string? traceIdentifier = null)
         {
+            if (!string.IsNullOrEmpty(traceIdentifier))
+            {
+                var targetKey = $"{_sessionId}:{traceIdentifier}:{requestId}";
+                if (_activeRequestCancellationTokens.TryRemove(targetKey, out var ctsTrace))
+                {
+                    try
+                    {
+                        ctsTrace.Cancel();
+                        _logger.LogInformation("Cancelled active request: {Key}", targetKey);
+                    }
+                    catch (ObjectDisposedException) { }
+                    return;
+                }
+            }
+
             var keysToCancel = new List<string>();
             foreach (var key in _activeRequestCancellationTokens.Keys)
             {
-                if (key == requestId || key.EndsWith($":{requestId}"))
+                if (key == requestId || key == $"{_sessionId}:{requestId}" || key.EndsWith($":{requestId}"))
                 {
                     keysToCancel.Add(key);
                 }

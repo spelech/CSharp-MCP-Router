@@ -547,5 +547,159 @@ namespace McpRouter.Tests
             // Clean up
             session.Close();
         }
+
+        [Fact]
+        public async Task ClientSession_TargetedCancellation_DoesNotCancelOtherClientsReusingId()
+        {
+            // Arrange
+            var servers = new List<McpServer>();
+            var loggerMock = new Mock<ILogger>();
+            var embeddingMock = new Mock<IEmbeddingService>();
+
+            var context1 = new DefaultHttpContext();
+            context1.Request.Headers["Remote-User"] = "admin";
+            context1.TraceIdentifier = "client-1-trace";
+
+            var context2 = new DefaultHttpContext();
+            context2.Request.Headers["Remote-User"] = "admin";
+            context2.TraceIdentifier = "client-2-trace";
+
+            var session = new ClientSession(
+                "global-stateless-session",
+                context1.Response,
+                servers,
+                new HttpClient(),
+                embeddingMock.Object,
+                loggerMock.Object
+            );
+
+            // Act - Cancel only client 1's request "1"
+            session.CancelRequest("1", "client-1-trace");
+
+            // Client 2's request should not be affected
+            session.Close();
+        }
+
+        [Fact]
+        public void JsonRpcStateManager_Disconnect_PreventsRegistrationAndCancelsPending()
+        {
+            var stateManager = new JsonRpcStateManager();
+
+            // Create a pending request while connected
+            var req1 = stateManager.CreateTrackedRequest("req1", 1, "session1", CancellationToken.None, TimeSpan.FromSeconds(10));
+            req1.Task.IsCompleted.Should().BeFalse();
+
+            // Disconnect transport
+            stateManager.MarkDisconnected();
+            stateManager.IsDisconnected.Should().BeTrue();
+
+            // Existing request should be cancelled
+            req1.Task.IsCanceled.Should().BeTrue();
+            stateManager.PendingRequests.Should().BeEmpty();
+
+            // New registration while disconnected should throw
+            var action = () => stateManager.CreateRequest("req2");
+            action.Should().Throw<InvalidOperationException>()
+                .WithMessage("*transport is disconnected*");
+
+            var actionTracked = () => stateManager.CreateTrackedRequest("req3", 3, "session1", CancellationToken.None, TimeSpan.FromSeconds(10));
+            actionTracked.Should().Throw<InvalidOperationException>()
+                .WithMessage("*transport is disconnected*");
+
+            // Reconnect
+            stateManager.MarkConnected();
+            stateManager.IsDisconnected.Should().BeFalse();
+
+            var req4 = stateManager.CreateRequest("req4");
+            req4.Task.Should().NotBeNull();
+            stateManager.PendingRequests.Should().ContainKey("req4");
+        }
+
+        [Fact]
+        public async Task ConcurrentResponseIsolation_MixedNumericStringNullIds()
+        {
+            // Arrange
+            var server = new McpServer
+            {
+                Id = "mixed_id_backend",
+                DisplayName = "Mixed ID Backend",
+                Url = "http://mixed_id_backend/mcp",
+                Type = "sse",
+                SecretProvider = "None",
+                Enabled = true
+            };
+
+            var sseStream = new DynamicSseStream();
+            sseStream.PushMessage("event: endpoint\ndata: http://mixed_id_backend/mcp/message\n\n");
+
+            var mockHandler = new MockHttpMessageHandler();
+            var httpClient = new HttpClient(mockHandler);
+            var loggerMock = new Mock<ILogger>();
+
+            var intercepted = new ConcurrentDictionary<string, (string UpstreamId, string OriginalIdRaw)>();
+
+            mockHandler.Handler = async (req) =>
+            {
+                if (req.Method == HttpMethod.Get)
+                {
+                    var streamContent = new StreamContent(sseStream);
+                    streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/event-stream");
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = streamContent };
+                }
+                else if (req.Method == HttpMethod.Post)
+                {
+                    var body = await req.Content!.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(body);
+                    var root = doc.RootElement;
+                    var upstreamId = root.GetProperty("id").GetString()!;
+                    var tag = root.GetProperty("params").GetProperty("tag").GetString()!;
+
+                    intercepted[tag] = (upstreamId, tag);
+                    return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
+                }
+                return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
+            };
+
+            var conn = new BackendConnection(server, httpClient, loggerMock.Object);
+            conn.RequestTimeout = TimeSpan.FromSeconds(15);
+            await conn.ConnectAsync();
+
+            conn.StartReader(async (msg) => {
+                await Task.CompletedTask;
+            });
+
+            await Task.Delay(200);
+
+            // Send 3 concurrent requests: numeric, string, null
+            var taskNumeric = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":42,\"params\":{\"tag\":\"numeric\"}}");
+            var taskString = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":\"str-id-99\",\"params\":{\"tag\":\"string\"}}");
+            var taskNull = conn.SendRequestAsync("tools/call", "{\"jsonrpc\":\"2.0\",\"id\":null,\"params\":{\"tag\":\"null\"}}");
+
+            while (intercepted.Count < 3)
+            {
+                await Task.Delay(50);
+            }
+
+            // Respond in reverse order
+            sseStream.PushMessage($"event: message\ndata: {{\"jsonrpc\":\"2.0\",\"id\":\"{intercepted["null"].UpstreamId}\",\"result\":{{\"val\":\"null_done\"}}}}\n\n");
+            sseStream.PushMessage($"event: message\ndata: {{\"jsonrpc\":\"2.0\",\"id\":\"{intercepted["string"].UpstreamId}\",\"result\":{{\"val\":\"string_done\"}}}}\n\n");
+            sseStream.PushMessage($"event: message\ndata: {{\"jsonrpc\":\"2.0\",\"id\":\"{intercepted["numeric"].UpstreamId}\",\"result\":{{\"val\":\"numeric_done\"}}}}\n\n");
+
+            var resNumeric = await taskNumeric;
+            var resString = await taskString;
+            var resNull = await taskNull;
+
+            resNumeric.Id!.ToString().Should().Be("42");
+            resNumeric.Result!.Value.GetProperty("val").GetString().Should().Be("numeric_done");
+
+            resString.Id!.ToString().Should().Be("str-id-99");
+            resString.Result!.Value.GetProperty("val").GetString().Should().Be("string_done");
+
+            resNull.Id.Should().BeNull();
+            resNull.Result!.Value.GetProperty("val").GetString().Should().Be("null_done");
+
+            conn.PendingRequests.Should().BeEmpty();
+            conn.Dispose();
+        }
     }
 }

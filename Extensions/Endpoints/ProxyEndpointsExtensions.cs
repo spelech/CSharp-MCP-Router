@@ -108,8 +108,8 @@ namespace McpRouter.Extensions
                         {
                             if (id != null)
                             {
-                                var idStr = id.Value.GetString() ?? id.Value.GetRawText();
-                                if (activeSession.TryHandleClientResponse(idStr, requestBody))
+                                var idStr = id.Value.ValueKind == JsonValueKind.String ? id.Value.GetString() : id.Value.GetRawText();
+                                if (idStr != null && activeSession.TryHandleClientResponse(idStr, requestBody))
                                 {
                                     httpContext.Response.StatusCode = 202;
                                     return;
@@ -125,8 +125,11 @@ namespace McpRouter.Extensions
                             var root = doc.RootElement;
                             if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("requestId", out var reqIdProp))
                             {
-                                var reqId = reqIdProp.GetString() ?? reqIdProp.GetRawText();
-                                activeSession.CancelRequest(reqId);
+                                var reqId = reqIdProp.ValueKind == JsonValueKind.String ? reqIdProp.GetString() : reqIdProp.GetRawText();
+                                if (!string.IsNullOrEmpty(reqId))
+                                {
+                                    activeSession.CancelRequest(reqId, httpContext.TraceIdentifier);
+                                }
                             }
                             httpContext.Response.StatusCode = 202;
                             return;
@@ -896,8 +899,11 @@ namespace McpRouter.Extensions
                     {
                         if (root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("requestId", out var reqIdProp))
                         {
-                            var reqId = reqIdProp.GetString() ?? reqIdProp.GetRawText();
-                            session.CancelRequest(reqId);
+                            var reqId = reqIdProp.ValueKind == JsonValueKind.String ? reqIdProp.GetString() : reqIdProp.GetRawText();
+                            if (!string.IsNullOrEmpty(reqId))
+                            {
+                                session.CancelRequest(reqId, httpContext?.TraceIdentifier);
+                            }
                         }
                         await session.BroadcastNotificationAsync(method, body);
                         return Results.Accepted();
@@ -912,16 +918,23 @@ namespace McpRouter.Extensions
                         // Forward other JSON-RPC requests (like resources/list, prompts/list) directly to all backends, returning combined or first valid
                         // In a router, we route based on the request method
                         logger.LogWarning("Method {Method} not explicitly handled by Router; forwarding to active backends", method);
-                        var results = await session.BroadcastRequestAsync(body);
-                        if (results.Count > 0 && id != null)
+                        if (id == null)
                         {
-                            var response = new
+                            await session.BroadcastNotificationAsync(method, body);
+                        }
+                        else
+                        {
+                            var results = await session.BroadcastRequestAsync(body);
+                            if (results.Count > 0)
                             {
-                                jsonrpc = "2.0",
-                                id = (object)id,
-                                result = results.First().Value
-                            };
-                            await session.WriteMessageAsync(response);
+                                var response = new
+                                {
+                                    jsonrpc = "2.0",
+                                    id = (object)id,
+                                    result = results.First().Value
+                                };
+                                await session.WriteMessageAsync(response);
+                            }
                         }
                         return Results.Accepted();
                     }

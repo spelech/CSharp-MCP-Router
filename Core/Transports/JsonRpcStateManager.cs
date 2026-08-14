@@ -34,11 +34,49 @@ namespace McpRouter.Core.Transports
     {
         public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests { get; } = new();
         private readonly object _lock = new();
+        private bool _isDisconnected = false;
+
+        public bool IsDisconnected
+        {
+            get
+            {
+                lock (_lock)
+                {
+                    return _isDisconnected;
+                }
+            }
+        }
+
+        public void MarkConnected()
+        {
+            lock (_lock)
+            {
+                _isDisconnected = false;
+            }
+        }
+
+        public void MarkDisconnected()
+        {
+            lock (_lock)
+            {
+                _isDisconnected = true;
+                foreach (var tcs in PendingRequests.Values)
+                {
+                    tcs.TrySetCanceled();
+                }
+                PendingRequests.Clear();
+            }
+        }
 
         public TaskCompletionSource<JsonRpcResponse> CreateRequest(string id)
         {
             lock (_lock)
             {
+                if (_isDisconnected)
+                {
+                    throw new InvalidOperationException($"Cannot create request '{id}': transport is disconnected.");
+                }
+
                 var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
                 if (!PendingRequests.TryAdd(id, tcs))
                 {
@@ -57,6 +95,11 @@ namespace McpRouter.Core.Transports
         {
             lock (_lock)
             {
+                if (_isDisconnected)
+                {
+                    throw new InvalidOperationException($"Cannot create tracked request '{upstreamId}': transport is disconnected.");
+                }
+
                 var tcs = new PendingRequestTcs(originalId, upstreamId, sessionId, cancellationToken, timeout);
                 if (!PendingRequests.TryAdd(upstreamId, tcs))
                 {
@@ -66,7 +109,7 @@ namespace McpRouter.Core.Transports
             }
         }
 
-        public bool TryCompleteRequest(string id, JsonRpcResponse response)
+        public bool TryCompleteRequest(string id, JsonRpcResponse? response)
         {
             lock (_lock)
             {
@@ -76,23 +119,31 @@ namespace McpRouter.Core.Transports
                     {
                         response.Id = tracked.OriginalId;
                     }
-                    tcs.TrySetResult(response);
+                    if (response != null)
+                    {
+                        tcs.TrySetResult(response);
+                    }
+                    else
+                    {
+                        tcs.TrySetCanceled();
+                    }
                     return true;
                 }
                 return false;
             }
         }
 
-        public void CancelAll()
+        public bool TryRemoveRequest(string id)
         {
             lock (_lock)
             {
-                foreach (var tcs in PendingRequests.Values)
-                {
-                    tcs.TrySetCanceled();
-                }
-                PendingRequests.Clear();
+                return PendingRequests.TryRemove(id, out _);
             }
+        }
+
+        public void CancelAll()
+        {
+            MarkDisconnected();
         }
     }
 }
