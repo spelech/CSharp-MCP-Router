@@ -152,7 +152,7 @@ namespace McpRouter.Core.Security
             {
                 var addresses = Dns.GetHostAddresses(host);
                 if (addresses == null || addresses.Length == 0) return false;
-                
+
                 return addresses.Any(IsPrivateOrLoopbackAddress);
             }
             catch
@@ -187,7 +187,7 @@ namespace McpRouter.Core.Security
                 {
                     return true;
                 }
-                
+
                 byte[] bytes = ipAddress.GetAddressBytes();
                 // Unique Local Address (fc00::/7)
                 if ((bytes[0] & 0xFE) == 0xFC) return true;
@@ -279,7 +279,7 @@ namespace McpRouter.Core.Security
                     foreach (var prop in root.EnumerateObject())
                     {
                         var name = prop.Name.ToLowerInvariant();
-                        if (name.Contains("url") || name.Contains("uri") || name.Contains("authority") || name.Contains("issuer") || name.Contains("endpoint"))
+                        if (name.Contains("url") || name.Contains("uri") || name.Contains("authority") || name.Contains("issuer") || name.Contains("endpoint") || name.Contains("address") || name.Contains("addr"))
                         {
                             var val = prop.Value.GetString();
                             if (!string.IsNullOrEmpty(val) && (val.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || val.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))

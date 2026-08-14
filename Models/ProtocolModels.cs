@@ -42,7 +42,7 @@ namespace McpRouter.Models
                 {
                     return JsonSerializer.Deserialize<JsonRpcResponse>(root.GetRawText(), newOptions);
                 }
-                
+
                 // If it has id, but doesn't have method, it's definitely a response (even if result/error are missing or null)
                 if (hasId && !hasMethod)
                 {

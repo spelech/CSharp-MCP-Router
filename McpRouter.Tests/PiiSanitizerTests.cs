@@ -43,7 +43,7 @@ namespace McpRouter.Tests
         {
             LogBuffer.Clear();
             LogBuffer.Add(Microsoft.Extensions.Logging.LogLevel.Information, "TestCategory", "This is an API key check: {\"apiKey\":\"super_secret_key_123\"}", null);
-            
+
             var logs = LogBuffer.GetLogs();
             Assert.Single(logs);
             Assert.DoesNotContain("super_secret_key_123", logs[0].Message);

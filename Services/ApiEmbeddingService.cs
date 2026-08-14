@@ -54,7 +54,7 @@ namespace McpRouter.Services
             using var doc = JsonDocument.Parse(content);
             var root = doc.RootElement;
             var dataArray = root.GetProperty("data").EnumerateArray();
-            
+
             dataArray.MoveNext();
             var embeddingElement = dataArray.Current.GetProperty("embedding");
 

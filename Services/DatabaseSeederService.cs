@@ -136,14 +136,23 @@ namespace McpRouter.Services
                 }
             }
 
-            // 2. AuthProviderConfigs.ConfigJson
+            // 2. AuthProviderConfigs.ConfigJson -> EncryptedConfigJson
             var apTableExists = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='AuthProviderConfigs';") > 0;
             if (apTableExists)
             {
                 var cols = conn.Query<string>("SELECT name FROM pragma_table_info('AuthProviderConfigs');").ToHashSet(StringComparer.OrdinalIgnoreCase);
-                if (!cols.Contains("ConfigJson"))
+                if (!cols.Contains("EncryptedConfigJson"))
                 {
-                    conn.Execute("ALTER TABLE AuthProviderConfigs ADD COLUMN ConfigJson TEXT;");
+                    if (cols.Contains("ConfigJson"))
+                    {
+                        logger.LogInformation("Migrating SQLite AuthProviderConfigs.ConfigJson to EncryptedConfigJson...");
+                        conn.Execute("ALTER TABLE AuthProviderConfigs ADD COLUMN EncryptedConfigJson TEXT;");
+                        conn.Execute("UPDATE AuthProviderConfigs SET EncryptedConfigJson = ConfigJson WHERE EncryptedConfigJson IS NULL;");
+                    }
+                    else
+                    {
+                        conn.Execute("ALTER TABLE AuthProviderConfigs ADD COLUMN EncryptedConfigJson TEXT;");
+                    }
                 }
             }
 
@@ -363,13 +372,21 @@ namespace McpRouter.Services
                 END;
             ");
 
-            // 4. Migrate AuthProviderConfigs.ConfigJson
+            // 4. Migrate AuthProviderConfigs.ConfigJson -> EncryptedConfigJson
             conn.Execute(@"
                 IF OBJECT_ID('dbo.AuthProviderConfigs', 'U') IS NOT NULL
                 BEGIN
-                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.AuthProviderConfigs') AND name = 'ConfigJson')
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.AuthProviderConfigs') AND name = 'EncryptedConfigJson')
                     BEGIN
-                        ALTER TABLE [dbo].[AuthProviderConfigs] ADD [ConfigJson] NVARCHAR(MAX) NULL;
+                        IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.AuthProviderConfigs') AND name = 'ConfigJson')
+                        BEGIN
+                            ALTER TABLE [dbo].[AuthProviderConfigs] ADD [EncryptedConfigJson] NVARCHAR(MAX) NULL;
+                            EXEC(N'UPDATE [dbo].[AuthProviderConfigs] SET [EncryptedConfigJson] = [ConfigJson] WHERE [EncryptedConfigJson] IS NULL');
+                        END
+                        ELSE
+                        BEGIN
+                            ALTER TABLE [dbo].[AuthProviderConfigs] ADD [EncryptedConfigJson] NVARCHAR(MAX) NULL;
+                        END;
                     END;
                 END;
             ");
@@ -556,20 +573,32 @@ namespace McpRouter.Services
                 }
             }
 
-            // 4. Migrate AuthProviderConfigs.ConfigJson
+            // 4. Migrate AuthProviderConfigs.ConfigJson -> EncryptedConfigJson
             var authProvidersExists = conn.ExecuteScalar<int>(@"
                 SELECT COUNT(*) FROM information_schema.tables 
                 WHERE table_schema = DATABASE() AND table_name = 'AuthProviderConfigs';") > 0;
 
             if (authProvidersExists)
             {
-                var hasConfig = conn.ExecuteScalar<int>(@"
+                var hasEncConfig = conn.ExecuteScalar<int>(@"
                     SELECT COUNT(*) FROM information_schema.columns 
-                    WHERE table_schema = DATABASE() AND table_name = 'AuthProviderConfigs' AND column_name = 'ConfigJson';") > 0;
+                    WHERE table_schema = DATABASE() AND table_name = 'AuthProviderConfigs' AND column_name = 'EncryptedConfigJson';") > 0;
 
-                if (!hasConfig)
+                if (!hasEncConfig)
                 {
-                    conn.Execute("ALTER TABLE `AuthProviderConfigs` ADD COLUMN `ConfigJson` LONGTEXT NULL;");
+                    var hasConfig = conn.ExecuteScalar<int>(@"
+                        SELECT COUNT(*) FROM information_schema.columns 
+                        WHERE table_schema = DATABASE() AND table_name = 'AuthProviderConfigs' AND column_name = 'ConfigJson';") > 0;
+
+                    if (hasConfig)
+                    {
+                        conn.Execute("ALTER TABLE `AuthProviderConfigs` ADD COLUMN `EncryptedConfigJson` LONGTEXT NULL;");
+                        conn.Execute("UPDATE `AuthProviderConfigs` SET `EncryptedConfigJson` = `ConfigJson` WHERE `EncryptedConfigJson` IS NULL;");
+                    }
+                    else
+                    {
+                        conn.Execute("ALTER TABLE `AuthProviderConfigs` ADD COLUMN `EncryptedConfigJson` LONGTEXT NULL;");
+                    }
                 }
             }
 
@@ -691,7 +720,7 @@ namespace McpRouter.Services
                         DisplayName TEXT,
                         UserHeader TEXT,
                         GroupsHeader TEXT,
-                        ConfigJson TEXT,
+                        EncryptedConfigJson TEXT,
                         IsEnabled INTEGER DEFAULT 1
                     );
                 ");
@@ -709,7 +738,7 @@ namespace McpRouter.Services
 
                 foreach (var (_, ddl) in colDefs)
                 {
-                    try { conn.Execute(ddl); } catch {}
+                    try { conn.Execute(ddl); } catch { }
                 }
             }
             else if (provider == "mssql")
@@ -842,7 +871,7 @@ namespace McpRouter.Services
                             [DisplayName]         NVARCHAR(100) NOT NULL,
                             [UserHeader]          VARCHAR(100) NULL DEFAULT 'Remote-User',
                             [GroupsHeader]        VARCHAR(100) NULL DEFAULT 'Remote-Groups',
-                            [ConfigJson]          NVARCHAR(MAX) NULL,
+                            [EncryptedConfigJson] NVARCHAR(MAX) NULL,
                             [IsEnabled]           BIT NOT NULL DEFAULT 1,
                             [UpdatedAt]           DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
                         );
@@ -953,7 +982,7 @@ namespace McpRouter.Services
                         `DisplayName`         VARCHAR(100) NOT NULL,
                         `UserHeader`          VARCHAR(100) NULL DEFAULT 'Remote-User',
                         `GroupsHeader`        VARCHAR(100) NULL DEFAULT 'Remote-Groups',
-                        `ConfigJson`          LONGTEXT NULL,
+                        `EncryptedConfigJson` LONGTEXT NULL,
                         `IsEnabled`           TINYINT(1) NOT NULL DEFAULT 1,
                         `UpdatedAt`           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -1018,7 +1047,7 @@ namespace McpRouter.Services
                 { "AuditLogs", "SELECT RequestId, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, ExecutionTimeMs, StatusCode, RequestPayload, ResponsePayload, ErrorMessage, Timestamp FROM AuditLogs WHERE 1=0" },
                 { "AdminAuditLogs", "SELECT Id, Username, Action, Target, Details, Success, ErrorMessage, Timestamp FROM AdminAuditLogs WHERE 1=0" },
                 { "SecretProviders", "SELECT ProviderName, DisplayName, EncryptedConfigJson, IsEnabled FROM SecretProviders WHERE 1=0" },
-                { "AuthProviderConfigs", "SELECT ProviderName, DisplayName, UserHeader, GroupsHeader, ConfigJson, IsEnabled FROM AuthProviderConfigs WHERE 1=0" }
+                { "AuthProviderConfigs", "SELECT ProviderName, DisplayName, UserHeader, GroupsHeader, EncryptedConfigJson, IsEnabled FROM AuthProviderConfigs WHERE 1=0" }
             };
 
             foreach (var table in tablesToCheck)
@@ -1061,9 +1090,9 @@ namespace McpRouter.Services
             }
 
             var apCols = conn.Query<string>("SELECT name FROM pragma_table_info('AuthProviderConfigs');").ToHashSet(StringComparer.OrdinalIgnoreCase);
-            if (!apCols.Contains("ConfigJson"))
+            if (!apCols.Contains("EncryptedConfigJson"))
             {
-                throw new InvalidOperationException("SQLite schema compatibility check failed: AuthProviderConfigs table is missing 'ConfigJson' column.");
+                throw new InvalidOperationException("SQLite schema compatibility check failed: AuthProviderConfigs table is missing 'EncryptedConfigJson' column.");
             }
 
             var appKeyCols = conn.Query<string>("SELECT name FROM pragma_table_info('AppKeys');").ToHashSet(StringComparer.OrdinalIgnoreCase);

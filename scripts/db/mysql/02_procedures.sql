@@ -184,17 +184,17 @@ CREATE PROCEDURE `sp_SaveAuthProvider`(
     IN p_DisplayName VARCHAR(100),
     IN p_UserHeader VARCHAR(100),
     IN p_GroupsHeader VARCHAR(100),
-    IN p_ConfigJson LONGTEXT,
+    IN p_EncryptedConfigJson LONGTEXT,
     IN p_IsEnabled TINYINT(1)
 )
 BEGIN
-    INSERT INTO `AuthProviderConfigs` (`ProviderName`, `DisplayName`, `UserHeader`, `GroupsHeader`, `ConfigJson`, `IsEnabled`)
-    VALUES (p_ProviderName, p_DisplayName, p_UserHeader, p_GroupsHeader, p_ConfigJson, p_IsEnabled)
+    INSERT INTO `AuthProviderConfigs` (`ProviderName`, `DisplayName`, `UserHeader`, `GroupsHeader`, `EncryptedConfigJson`, `IsEnabled`)
+    VALUES (p_ProviderName, p_DisplayName, p_UserHeader, p_GroupsHeader, p_EncryptedConfigJson, p_IsEnabled)
     ON DUPLICATE KEY UPDATE
         `DisplayName` = p_DisplayName,
         `UserHeader` = p_UserHeader,
         `GroupsHeader` = p_GroupsHeader,
-        `ConfigJson` = p_ConfigJson,
+        `EncryptedConfigJson` = p_EncryptedConfigJson,
         `IsEnabled` = p_IsEnabled;
 END //
 
