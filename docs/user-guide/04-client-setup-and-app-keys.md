@@ -13,9 +13,12 @@ To connect external clients securely without passing raw SSO headers:
 3. Fill in:
    - **Key Name**: Descriptive name (e.g. `Cursor IDE Laptop` or `OpenClaw Agent`).
    - **Assigned User**: Principal UPN (e.g. `steve`).
-   - **Scopes**: Select `read:tools`, `execute:tools`, `admin:full`.
+   - **Scopes**: Select global (`*`), server-level (`server:docker`), category-level (`category:smarthome`), or granular capabilities (`tool:docker__ps`). See the [**AppKey Scopes & Authorization Guide**](../appkey-scopes.md) for full scope syntax rules.
    - **Expiration**: Select 30 days, 90 days, 1 year, or Never.
 4. Click **Create Key**. Copy the generated secret key (it will only be displayed once).
+
+> [!TIP]
+> For comprehensive details on scope syntax grammar, dynamic category evaluation, token hashing, and multi-stage RBAC evaluation rules, consult the [**AppKey Scopes & Authorization Guide**](../appkey-scopes.md).
 
 ---
 
