@@ -2,38 +2,21 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Server Inspector Modal Flow', () => {
 
-  test('should open Server Inspect Modal and display tool schemas', async ({ page }) => {
+  test('should open Server Inspect Modal if servers are present on dashboard', async ({ page }) => {
     await page.goto('/');
 
-    // Click Inspect button on the first server card
-    const inspectBtn = page.locator('button:has-text("Inspect"), button:has-text("Tools")');
+    // Check if server cards exist
+    const inspectBtn = page.locator('button:has-text("Inspect"), button:has-text("Tools"), .btn-inspect').first();
     if (await inspectBtn.count() > 0) {
-      await inspectBtn.first().click();
+      await inspectBtn.click();
 
       // Verify Inspect Modal overlay opens
-      const inspectModal = page.locator('.modal, #inspect-modal, [role="dialog"]');
-      await expect(inspectModal.first()).toBeVisible();
-
-      // Check tool inspection tabs (Tools, Resources, Prompts)
-      const toolsTab = page.locator('button:has-text("Tools"), .tab-btn:has-text("Tools")');
-      const resourcesTab = page.locator('button:has-text("Resources"), .tab-btn:has-text("Resources")');
-      const promptsTab = page.locator('button:has-text("Prompts"), .tab-btn:has-text("Prompts")');
-
-      if (await toolsTab.isVisible()) {
-        await toolsTab.click();
-      }
-      if (await resourcesTab.isVisible()) {
-        await resourcesTab.click();
-      }
-      if (await promptsTab.isVisible()) {
-        await promptsTab.click();
-      }
+      const inspectModal = page.locator('.modal-backdrop, #inspect-modal, [role="dialog"]').first();
+      await expect(inspectModal).toBeVisible();
 
       // Close modal
-      const closeBtn = page.locator('.modal-close, button:has-text("Close")');
-      if (await closeBtn.isVisible()) {
-        await closeBtn.first().click();
-      }
+      const closeBtn = page.locator('.btn-close, button:has-text("Close")').first();
+      await closeBtn.click();
     }
   });
 
