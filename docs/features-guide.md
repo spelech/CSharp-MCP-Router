@@ -176,3 +176,9 @@ The Web Dashboard features a robust developer environment to debug, simulate, an
 4. **Manual Approval Modal**: If "Manual Approval for Dangerous Tools" is toggled, dangerous executions pause, triggering an approval card on the Web UI awaiting administrator click.
 
 ![Test Bench View](../docs/assets/test_bench_view.jpg)
+
+---
+
+## 🗄️ 7. Database Engine Support & Deployment
+
+For complete dialect specifications across SQLite, Microsoft SQL Server, and MySQL, stored procedure catalogs, AES-256-GCM envelope encryption architecture, and production Docker Compose configurations, see [**Database Provider Support & Deployment Matrix**](database-providers.md).

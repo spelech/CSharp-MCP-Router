@@ -30,3 +30,4 @@ Welcome to the official documentation for the **Model Context Protocol (MCP) Gat
 - **Meta-Mode (`/sse`)**: Exposes only `search_tools` and `execute_tool` to AI clients, hiding 100+ backend tools from the context window until dynamically queried.
 - **Namespaced Routing**: Backend tools are automatically namespaced as `<serverId>__<toolName>` (e.g. `docker__restart_container` or `homeassistant__turn_off`).
 - **Pluggable Security**: Supports Active Directory / LDAP Windows Principal resolution, OIDC header authentication (`Remote-User`, `Remote-Groups`), AppKeys, and HashiCorp Vault.
+- **Multi-Database Persistence**: Supports SQLite, Microsoft SQL Server, and MySQL. For dialect specifications and deployment templates, see the [Database Provider Support & Deployment Matrix](../database-providers.md).
