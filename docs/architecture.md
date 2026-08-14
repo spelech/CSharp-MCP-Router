@@ -916,6 +916,8 @@ sequenceDiagram
 
 ### Unified Entity-Relationship Diagram (Mermaid ERD)
 
+For the standalone schema reference and column constraints catalog, see [**Canonical Data Model & Database ERD**](data-model.md) and [**Database Provider Support & Deployment Matrix**](database-providers.md).
+
 ```mermaid
 erDiagram
     Servers ||--o{ Tools : "exposes (FK: ServerId)"
