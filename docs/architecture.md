@@ -1149,13 +1149,17 @@ For complete setup guides, AppRole configuration commands, and DPAPI registry re
 
 | Topic / Focus Area | Target Specification Guide |
 | :--- | :--- |
+| **Product Overview & Problem Statement** | [**Evaluation & Product Overview Guide**](evaluation-guide.md) |
 | **AppKey Scopes & Authorization Rules** | [**AppKey Scopes & Authorization Guide**](appkey-scopes.md) |
 | **Database Engines, Schemas & Stored Procs** | [**Database Provider Support & Deployment Matrix**](database-providers.md) |
 | **Transports, Concurrency & STDIO Subprocesses** | [**Transport Capability & Configuration Guide**](transports.md) |
 | **Vault, DPAPI & AES-256-GCM Encryption** | [**Enterprise Secret Providers & Key Management Guide**](secret-providers.md) |
 | **CI Quality Gates, Static Analysis & Testing** | [**CI Quality Gates & Verification Guide**](ci-quality-gates.md) |
 | **Pairwise Integration Matrix & E2E Tests** | [**Testing Matrix & Integration Guide**](testing-matrix.md) |
-| **End-User Guides & Interactive UI Test Bench** | [**User Guide & Test Bench Operations**](user-guide/testbench.md) |
+| **End-User Guides & Interactive UI Manual** | [**Official User Guide Suite**](user-guide/README.md) |
+| **Developer Environment & Coding Guidelines** | [**Developer Guide & Local Setup**](developer-guide.md) |
+| **Operations, Deployment & Disaster Recovery** | [**Operations & Production Runbook**](runbook.md) |
+| **Contributor Workflow & PR Standards** | [**Contributing Guide**](../CONTRIBUTING.md) |
 | **Core README & Getting Started** | [**Project Overview & Quickstart**](../README.md) |
 
 ### Verification & Test Suite Execution
@@ -1169,4 +1173,4 @@ CI=true dotnet test McpRouter.slnx
 
 ---
 
-*Document Version: `v4.12.2` | Maintained by the MCP Router Core Architecture Group.*
+*Document Version: `v4.12.3` | Maintained by the MCP Router Core Architecture Group.*
