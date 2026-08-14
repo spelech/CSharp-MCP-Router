@@ -1,6 +1,6 @@
 using System;
 using System.Threading.Tasks;
-using McpRouter.Core.Secrets;
+using McpRouter.Infrastructure.Secrets;
 using Xunit;
 
 namespace McpRouter.Tests

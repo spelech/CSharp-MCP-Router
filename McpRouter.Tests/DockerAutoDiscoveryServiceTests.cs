@@ -9,9 +9,9 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using McpRouter.Core.Database;
+using McpRouter.Infrastructure.Persistence;
 using McpRouter.Models;
-using McpRouter.Services;
+using McpRouter.Core.Routing;
 using Moq;
 using Xunit;
 using Dapper;
@@ -76,8 +76,8 @@ namespace McpRouter.Tests
             var discoveryService = new DockerAutoDiscoveryService(serviceProvider, NullLogger<DockerAutoDiscoveryService>.Instance);
             Assert.NotNull(discoveryService);
 
-            bool isBlocked1 = McpRouter.Core.Security.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("127.0.0.1"), Array.Empty<string>());
-            bool isBlocked2 = McpRouter.Core.Security.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("169.254.169.254"), Array.Empty<string>());
+            bool isBlocked1 = McpRouter.Components.Authorization.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("127.0.0.1"), Array.Empty<string>());
+            bool isBlocked2 = McpRouter.Components.Authorization.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("169.254.169.254"), Array.Empty<string>());
 
             Assert.True(isBlocked1);
             Assert.True(isBlocked2);

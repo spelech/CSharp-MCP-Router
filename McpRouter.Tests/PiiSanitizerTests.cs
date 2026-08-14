@@ -1,5 +1,5 @@
-using McpRouter.Core.Logging;
-using McpRouter.Services;
+using McpRouter.Infrastructure.Logging;
+using McpRouter.Core.Routing;
 using Xunit;
 
 namespace McpRouter.Tests

@@ -3,7 +3,7 @@ using System.IO;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
-using McpRouter.Core.Secrets;
+using McpRouter.Infrastructure.Secrets;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 

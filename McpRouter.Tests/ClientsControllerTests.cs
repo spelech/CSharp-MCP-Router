@@ -17,11 +17,14 @@ using Microsoft.Extensions.Options;
 using Moq;
 using Xunit;
 using FluentAssertions;
-using McpRouter.Controllers;
-using McpRouter.Core.Database;
+using McpRouter.Components.Clients;
+using McpRouter.Components.AppKeys;
+using McpRouter.Components.Providers;
+using McpRouter.Components.Authorization;
+using McpRouter.Infrastructure.Persistence;
 using McpRouter.Middleware;
 using McpRouter.Models;
-using McpRouter.Services;
+using McpRouter.Core.Routing;
 using Dapper;
 
 namespace McpRouter.Tests
@@ -74,7 +77,7 @@ namespace McpRouter.Tests
             var (conn, dbFactory) = CreateDbFactory();
             conn.Execute("INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson) VALUES ('id-1', 'Client One', 'client-1', 'mcp_prefix1', 'secret1', '[\"mcp_client\"]')");
 
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -90,7 +93,7 @@ namespace McpRouter.Tests
         public async Task CreateClient_ReturnsOk_WithGeneratedCredentials()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -115,7 +118,7 @@ namespace McpRouter.Tests
             var (conn, dbFactory) = CreateDbFactory();
             conn.Execute("INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey) VALUES ('123', 'Client', 'user', 'pref', 'sec')");
 
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
             var result = await controller.DeleteClient("123");
@@ -127,7 +130,7 @@ namespace McpRouter.Tests
         public async Task DeleteClient_ReturnsNotFound_WhenAppDoesNotExist()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -141,7 +144,7 @@ namespace McpRouter.Tests
         public async Task CreateThenAuthenticate_IntegrationTest_Succeeds()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -193,7 +196,7 @@ namespace McpRouter.Tests
         public async Task DatabaseAssertion_PlaintextNotPersisted()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -219,7 +222,7 @@ namespace McpRouter.Tests
         public async Task InvalidPrefix_Test_ReturnsNoResult()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -253,7 +256,7 @@ namespace McpRouter.Tests
         public async Task InvalidHash_Test_Fails()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -314,7 +317,7 @@ namespace McpRouter.Tests
         public async Task RevokedOrDeleted_Test_Fails()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -369,7 +372,7 @@ namespace McpRouter.Tests
             conn.Execute("INSERT INTO AccessPolicies (Id, TargetId, RequiredGroup, IsAllowed) VALUES ('p1', 'server:mcp-github', 'McpClient', 1);");
             conn.Execute("INSERT INTO AccessPolicies (Id, TargetId, RequiredGroup, IsAllowed) VALUES ('p2', 'server:mcp-docker', 'McpClient', 1);");
 
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -411,7 +414,7 @@ namespace McpRouter.Tests
             var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger>();
             var servers = new List<McpServer> { new McpServer { Id = "mcp-github", Enabled = true } };
 
-            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), new Mock<McpRouter.Services.IEmbeddingService>().Object, null, loggerMock.Object);
+            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), new Mock<IEmbeddingService>().Object, null, loggerMock.Object);
 
             // Check authorized target (in scope)
             var authorized = await session.IsUserAuthorizedAsync("callTool", "mcp-github__get_repo", httpContext);
@@ -426,7 +429,7 @@ namespace McpRouter.Tests
         public async Task CreateClient_AdminCreator_DoesNotInheritAdminSid_AndCannotAccessAdminPolicy()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -513,7 +516,7 @@ namespace McpRouter.Tests
         public async Task CreateClient_WithExpiresInDays_SetsExpiration_AndEnforcesExpiredAuthentication()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 
@@ -562,7 +565,7 @@ namespace McpRouter.Tests
         public async Task GetClients_NeverLeaksRawBearerSecretOrEncryptedKey()
         {
             var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
 

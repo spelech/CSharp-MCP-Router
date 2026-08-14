@@ -2,7 +2,7 @@ using System;
 using System.IO;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
-using McpRouter.Core.Secrets;
+using McpRouter.Infrastructure.Secrets;
 using Xunit;
 
 namespace McpRouter.Tests

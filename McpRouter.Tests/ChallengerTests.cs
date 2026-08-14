@@ -14,15 +14,15 @@ using Moq;
 using Xunit;
 using FluentAssertions;
 using McpRouter.Models;
-using McpRouter.Services;
+using McpRouter.Core.Routing;
 using McpRouter;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using McpRouter.Extensions;
-using McpRouter.Core.Security;
-using McpRouter.Core.Transports;
+using McpRouter.Components.Authorization;
+using McpRouter.Infrastructure.Transports;
 
 namespace McpRouter.Tests
 {

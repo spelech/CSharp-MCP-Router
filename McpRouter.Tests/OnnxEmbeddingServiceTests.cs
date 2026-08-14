@@ -3,7 +3,7 @@ using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 using McpRouter.Models;
-using McpRouter.Services;
+using McpRouter.Core.Routing;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
