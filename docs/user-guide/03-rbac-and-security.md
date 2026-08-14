@@ -1,51 +1,174 @@
 # 03. RBAC, Security & Approvals
 
-The MCP Gateway Router implements multi-tenant, enterprise-grade security including Role-Based Access Control (RBAC), Identity Provider group mappings, and manual tool execution approval queues.
+The **MCP Gateway Router** enforces multi-stage Role-Based Access Control (RBAC), multi-provider identity resolution, explicit deny safety barriers, and a real-time manual approval queue for sensitive operations.
 
 ---
 
-## 🛡️ Fine-Grained RBAC Policies
+## 🛡️ The 4-Stage Authorization Pipeline
 
-Access to backend servers and individual tools can be restricted by Active Directory / OIDC group membership:
+Every request directed at a backend tool, virtual resource, or prompt undergoes rigorous 4-stage pipeline evaluation before execution:
 
-1. Click **`Policy`** on any server card.
-2. Define access rules:
-   - **Allowed Groups**: Comma-separated list of group SIDs or group names (e.g. `full_admin, house_member`).
-   - **Denied Groups**: Comma-separated list of explicitly forbidden groups.
-   - **Default Behavior**: Allow or Deny by default when no specific policy rule matches.
+```
+                           4-STAGE AUTHORIZATION PIPELINE
+                           
+                           +----------------------------+
+                           |  Incoming MCP Invocation   |
+                           | (Principal, Groups, Scope) |
+                           +----------------------------+
+                                         |
+                                         v
+                      +--------------------------------------+
+                      |  Stage 1: Explicit Deny Evaluation   |
+                      |  Is any principal group in Denied?   |
+                      +--------------------------------------+
+                                  |              |
+                              YES |              | NO
+                                  v              v
+                           [ 403 Forbidden ]  +--------------------------------------+
+                                              |  Stage 2: Explicit Allow Evaluation  |
+                                              |  Is any principal group in Allowed?  |
+                                              +--------------------------------------+
+                                                          |              |
+                                                      YES |              | NO
+                                                          v              v
+                                           +-----------------------------------+
+                                           | Stage 3: AppKey Scope Evaluation  |
+                                           | Does AppKey scope grant access?   |
+                                           +-----------------------------------+
+                                                          |              |
+                                                      YES |              | NO
+                                                          v              v
+                                                   [ Authorized ]  +-----------------------------------+
+                                                                   | Stage 4: Default Policy Fallback  |
+                                                                   | Is DefaultAllow enabled on server?|
+                                                                   +-----------------------------------+
+                                                                               |              |
+                                                                           YES |              | NO
+                                                                               v              v
+                                                                        [ Authorized ] [ 403 Forbidden ]
+```
+
+### Stage 1: Explicit Deny Rules (Highest Precedence)
+* If **any** of the caller's Active Directory SIDs or OIDC groups match a server's `DeniedGroups` list, the request is immediately rejected (`403 Forbidden`).
+* Deny rules always override allow rules or administrative scopes.
+
+### Stage 2: Explicit Allow Rules
+* If any of the caller's groups match a server's `AllowedGroups` list, the request passes group-level checks and advances to scope verification.
+
+### Stage 3: AppKey Scope Verification
+* When authenticating via an AppKey, the router verifies whether the requested action is permitted by the key's scopes (`*`, `category:<name>`, `server:<id>`, `tool:<name>`, `resource:<uri>`, `prompt:<name>`).
+
+### Stage 4: Default Policy Fallback
+* If no explicit group policy matches, the router checks the server's `DefaultAllow` flag. If `DefaultAllow` is `false`, the request is rejected by default (fail-closed security).
 
 ---
 
-## 👥 Group Mappings & Identity Resolution
+## 👥 Pluggable Identity Providers
 
-The router integrates with 3 Identity Provider modes via `IIdentityProvider`:
+The router determines the caller's identity and group claims through the `IIdentityProvider` interface:
 
-1. **OIDC / Reverse Proxy Headers (`OidcHeader`)**:
-   - Reads incoming HTTP headers passed by identity proxies like Authelia, TinyAuth, or PocketID:
-     - `Remote-User`: User UPN / username (e.g. `steve`).
-     - `Remote-Groups`: Comma-separated group claims (e.g. `full_admin, house_member`).
-     - `Remote-Email`: User email address.
-     - `Remote-Name`: User full name.
+```mermaid
+graph TD
+    Client[Incoming Request] --> AuthRouter{Auth Method}
+    
+    AuthRouter -->|Reverse Proxy SSO| OIDC[OidcHeader Provider]
+    AuthRouter -->|Windows Kerberos/NTLM| AD[ActiveDirectory Provider]
+    AuthRouter -->|X-App-Key Header| AppKey[AppKey Provider]
+    AuthRouter -->|Bearer Token| OAuth[OpenIddict OAuth2]
 
-2. **Active Directory / Windows SID (`ActiveDirectory`)**:
-   - Resolves Windows Kerberos / NTLM Security Identifiers (SIDs) and Active Directory group memberships.
-   - Maps Windows Domain Groups (e.g. `S-1-5-32-544` / Domain Admins) to router permissions.
+    OIDC --> Context[Security Context: Principal + Groups]
+    AD --> Context
+    AppKey --> Context
+    OAuth --> Context
 
-3. **AppKey Identity (`AppKey`)**:
-   - Maps AppKeys issued to external clients/agents to assigned role scopes (`read:tools`, `execute:admin`, `full_access`).
+    Context --> Pipeline[4-Stage Authorization Pipeline]
+```
+
+### 1. Reverse Proxy SSO Headers (`OidcHeader`)
+* Integrates with identity proxies such as **PocketID**, **TinyAuth**, **Authelia**, or **Authentik**.
+* Inspects standard forward-auth headers:
+  * `Remote-User`: Username or UPN (e.g. `steve`).
+  * `Remote-Groups`: Comma-delimited list of group claims (e.g. `full_admin, house_member, devops`).
+  * `Remote-Email`: User email address.
+  * `Remote-Name`: Full display name.
+
+### 2. Active Directory Windows SIDs (`ActiveDirectory`)
+* Integrates directly with Windows Domain Controllers and Active Directory.
+* Resolves Windows Kerberos / NTLM Security Identifiers (SIDs) and Active Directory group memberships (e.g. `S-1-5-32-544` / Administrators, `Domain Admins`).
+
+### 3. AppKey Authentication (`AppKey`)
+* Connects AI agents and external IDEs using cryptographically hashed SHA-256 tokens.
+* Maps caller tokens to assigned user identities and fine-grained scope permissions.
+
+### 4. OAuth 2.0 Authorization Server (`OpenIddict`)
+* Built-in OAuth 2.0 authorization server for issuing signed access tokens with standard token lifecycles and scopes.
+
+---
+
+## 🎛️ Configuring Access Control & Group Mappings
+
+### 1. Server Policy Configuration Modal
+Click **`Policy`** on any server card on the Overview dashboard:
+
+* **Allowed Groups**: Comma-separated group names or SIDs permitted to access this server (e.g. `full_admin, homelab_users`).
+* **Denied Groups**: Comma-separated group names or SIDs explicitly blocked from accessing this server (e.g. `contractors, guest_users`).
+* **Default Behavior**: Toggle **Allow by Default** or **Deny by Default**.
+
+### 2. Access Control Settings Tab
+Navigate to **`Settings`** -> **`Access Control`**:
+* **Group Mappings Table**: Map external SSO/AD groups to standardized internal roles.
+* **Server Policies Table**: Centralized grid of all server policies with quick inline editing.
 
 ---
 
 ## 🛑 Manual Tool Execution Approval Queue
 
-For destructive or sensitive tools (e.g. `docker__remove_container` or `homeassistant__unlock_door`), the router supports **Manual Approval Mode**:
+To safeguard production environments from unintended or destructive AI agent actions (e.g. `docker__remove_container`, `kubernetes__delete_namespace`, `homeassistant__unlock_door`), the router includes an interactive **Human-in-the-Loop Approval Queue**:
 
-1. **Enabling Manual Approval**:
-   - Go to **Settings View** -> Toggle `Require Manual Approval for Destructive Tools` ON.
-   - Or set `RequireManualApproval = 1` in Settings.
+```
+                       MANUAL APPROVAL WORKFLOW
+                       
+   +-------------------+                     +--------------------+
+   |  AI Agent / IDE   |                     |  MCP Router        |
+   +-------------------+                     +--------------------+
+             |                                         |
+             | 1. tools/call: docker__rm_container     |
+             |---------------------------------------->|
+             |                                         | 2. Intercepts call
+             |                                         |    Creates PendingApproval
+             | 3. Returns Pending (Status: 202)        |    Pushes to Dashboard UI
+             |<----------------------------------------|
+             |                                         |
+             |                                         |       +--------------------+
+             |                                         |       | Administrator (UI) |
+             |                                         |       +--------------------+
+             |                                         |                 |
+             |                                         | 4. Views Card   |
+             |                                         |<----------------|
+             |                                         | 5. Clicks       |
+             |                                         |    "Approve"    |
+             |                                         |<----------------|
+             |                                         |
+             |                                         | 6. Executes tool on backend
+             | 7. Delivers execution result            |    Logs audit record
+             |<----------------------------------------|
+```
 
-2. **Approval Flow**:
-   - When an AI agent calls a sensitive tool, the router intercepts the invocation and places the request into the **Pending Approvals Queue**.
-   - The AI agent receives a pending notification response (`{"status": "pending_approval", "request_id": "req-12345"}`).
-   - An administrator views the **Approvals Card** on the Dashboard and clicks **Approve** or **Reject**.
-   - Upon approval, the tool execution resumes automatically and returns the result payload to the AI agent session.
+### Enabling Manual Approvals
+1. Navigate to **`Settings`** -> **`Security & Approvals`**.
+2. Toggle **`Require Manual Approval for Destructive Tools`** to **ON**.
+3. Destructive tool calls will automatically pause and generate approval requests.
+
+### Reviewing & Approving Requests
+1. The **Pending Approvals Card** on the Overview dashboard displays all open approval requests in real time.
+2. Review the caller identity, tool name, timestamp, and JSON argument payload.
+3. Click **`Approve`** to resume execution immediately and deliver the result to the waiting agent.
+4. Click **`Reject`** to cancel execution and return an explicit rejection error to the agent.
+
+---
+
+## 🔒 PII Sanitization & Audit Logging
+
+The router features automated payload redaction (`PiiSanitizer`) paired with stored procedure audit logging (`sp_InsertAuditLog`):
+* **Automatic Redaction**: Automatically scrubs Bearer tokens, passwords, API keys, and sensitive tokens from audit logs before writing to the database.
+* **Audit Metadata**: Captures timestamp, client identity, target server, tool name, execution duration (ms), response status code, and sanitized payload parameters.

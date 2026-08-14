@@ -1,36 +1,48 @@
 # 📚 MCP Gateway Router - Official User Guide & Manual
 
-Welcome to the official documentation for the **Model Context Protocol (MCP) Gateway Router**. This router acts as a central control plane and high-performance proxy for aggregating 100+ backend MCP services, standardizing security, managing identity, and optimizing tool calling for AI agents and IDEs.
+Welcome to the official user manual for the **Model Context Protocol (MCP) Gateway Router**. This router acts as a unified control plane, semantic proxy, and security gateway aggregating 100+ backend MCP services, optimizing tool calling for AI agents, and enforcing enterprise RBAC.
 
 ---
 
 ## 🗺️ User Guide Sitemap
 
 1. [**01. Dashboard & Navigation Interface**](01-dashboard-and-navigation.md)
-   - Interface layout, real-time status indicators, server categories, search filters, and statistics cards.
+   - Layout, primary navigation tabs (`Overview`, `App Keys & Security`, `Test Bench`, `Settings`), real-time stats cards, search filters, sorting, category/status grouping, and pagination.
 2. [**02. Server Management & Secret Providers**](02-server-management-and-secrets.md)
-   - Registering backend MCP servers (`http`, `sse`, `stdio`), custom tool JSON definitions, and configuring Secret Providers:
-     - Direct API Keys
-     - Environment Variables (`ENV:KEY`)
-     - HashiCorp Vault (KV v2 engine integration, AppRole, JIT token renewal)
-     - Windows Registry (DPAPI)
-   - *For deep architectural details, encryption-at-rest specs, and Docker recipes, see [**Enterprise Secret Providers Guide**](../secret-providers.md).*
+   - Registering backend MCP servers across transports (`SSE`, `HTTP`, `STDIO`), inspect modal schemas, custom JSON specifications, and configuring secret resolution strategies:
+     - Direct Static Keys
+     - Host Environment Variables (`ENV:KEY`)
+     - HashiCorp Vault (KV v2 engine, AppRole, JIT token renewal)
+     - Windows Registry (DPAPI decryption)
 3. [**03. RBAC, Security & Approvals**](03-rbac-and-security.md)
-   - Fine-grained Access Control (RBAC) rules, Active Directory / OIDC group mappings, OAuth shapes, and the manual tool execution approval queue.
+   - 4-Stage Authorization Pipeline (`Explicit Deny` > `Explicit Allow` > `AppKey Scope` > `Default Policy`), Identity Providers (OIDC headers, Active Directory Windows SIDs, AppKeys, OAuth2), group mappings, and the human-in-the-loop manual approval queue.
 4. [**04. Client Setup & App Key Management**](04-client-setup-and-app-keys.md)
-   - Generating App Keys, configuring scopes, and integration guides for Cursor IDE, Claude Desktop, OpenClaw Agent, and custom SSE/HTTP clients. (See the canonical [**AppKey Scopes & Authorization Guide**](../appkey-scopes.md) for full syntax and evaluation rules).
+   - Generating cryptographically hashed AppKeys, scope grammar (`*`, `category:*`, `server:*`, granular capabilities), dynamic client setup generator, and integration guides for Cursor IDE, Claude Desktop, Antigravity CLI, VS Code Cline, and TypeScript/Python SDKs.
 5. [**05. Interactive Test Bench**](05-interactive-test-bench.md)
-   - Executing tools manually, querying virtual resource URIs (`mcp://...`), rendering prompt templates, testing semantic vector routing (`search_tools`), and live SSE diagnostic logging.
+   - Interactive developer playground: Tool Tester (dynamic JSON schema form builder), Virtual Resource Tester (`mcp://...`), Prompt Template Tester, Semantic Router Simulator (`search_tools`), and live gateway terminal logs.
 6. [**06. System Settings & Vector Embeddings**](06-settings-and-embeddings.md)
-   - Configuring vector embedding engines (Local ONNX `All-MiniLM-L6-v2` vs OpenAI/Ollama API), global approval modes, and OpenIddict OAuth settings.
+   - Multi-tab configuration plane: Vector & Search (Local ONNX `All-MiniLM-L6-v2` vs OpenAI/Ollama API), Security & Approvals, Identity & Auth, Secret Providers, Prompts & Resources File Manager, and Access Control matrices.
 
 ---
 
-## 💡 Key Architectural Concepts
+## 💡 Core Architecture & Concepts
 
-- **Meta-Mode (`/sse`)**: Exposes only `search_tools` and `execute_tool` to AI clients, hiding 100+ backend tools from the context window until dynamically queried.
-- **Namespaced Routing**: Backend tools are automatically namespaced as `<serverId>__<toolName>` (e.g. `docker__restart_container` or `homeassistant__turn_off`).
-- **Pluggable Security**: Supports Active Directory / LDAP Windows Principal resolution, OIDC header authentication (`Remote-User`, `Remote-Groups`), AppKeys, and HashiCorp Vault.
-- **Multi-Database Persistence**: Supports SQLite, Microsoft SQL Server, and MySQL. For dialect specifications and deployment templates, see the [Database Provider Support & Deployment Matrix](../database-providers.md).
-- **Transport Architecture**: Supports `sse` (stateful duplex), `http` (stateless/chunked), `stdio` (sandboxed subprocess with environment-injected secrets), and target proxying (`/{server_id}`). See the [**Transport Capability & Configuration Guide**](../transports.md).
+- **Meta-Mode (`/sse?meta=true`)**: Exposes only 2 bootstrap tools (`search_tools` and `execute_tool`) to prevent context window bloat and tool confusion.
+- **Namespaced Tool Routing**: Backend tools are automatically namespaced as `<serverId>__<toolName>` (e.g. `docker__restart_container` or `homeassistant__turn_off`).
+- **Zero CLI Secret Leakage**: STDIO subprocesses receive credentials strictly via process environment dictionaries, never exposed in command-line arguments.
+- **AES-256-GCM Envelope Encryption**: All sensitive tokens, API keys, and provider secrets are encrypted at rest with authenticated 128-bit GCM tags.
+- **Multi-Database Support**: Seamless operation across SQLite (SQLCipher), Microsoft SQL Server (`Microsoft.Data.SqlClient`), and MySQL (`MySqlConnector`).
 
+---
+
+## 🧭 Related Technical Documentation
+
+For developers, operators, and architects seeking deeper specifications:
+* 🎯 [**Evaluation & Product Overview Guide**](../evaluation-guide.md)
+* 🏛️ [**Comprehensive Enterprise Architecture Guide**](../architecture.md)
+* 🔐 [**Enterprise Secret Providers Guide**](../secret-providers.md)
+* 🔑 [**AppKey Scopes & Authorization Guide**](../appkey-scopes.md)
+* 🚀 [**Transport Capability & Configuration Guide**](../transports.md)
+* 🗄️ [**Database Provider Support & Deployment Matrix**](../database-providers.md)
+* 💻 [**Developer & Contributing Guide**](../developer-guide.md)
+* 🛠️ [**Operations & Production Runbook**](../runbook.md)
