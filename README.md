@@ -94,3 +94,25 @@ Our core modules maintain high code coverage to ensure reliability and secure ex
 | **Routing Engine** | 89.7% | 85.3% | 🟢 Passing |
 | **Controllers** | 94.2% | 91.0% | 🟢 Passing |
 | **Security & Providers** | 98.5% | 95.8% | 🟢 Passing |
+
+---
+
+## 🛠️ Contributor Guide: Formatting & Linting
+
+To maintain consistent formatting and catch potential bugs early, this repository enforces shared style guidelines and static analysis policies.
+
+### C# Backend (Roslyn & .NET Analyzers)
+- **EditorConfig**: Supported globally across C#, TSX, JSON, and YAML. Indentation is 4 spaces for C# and 2 spaces for web files.
+- **Analysis Policy**: Rules are configured via `Directory.Build.props` at the workspace root, applying implicit usings, nullable context, deterministic builds, and latest-recommended Roslyn analyzers.
+- **Verification Command**:
+  ```bash
+  dotnet format McpRouter.slnx --verify-no-changes
+  ```
+
+### TypeScript / React Frontend (ESLint Flat Config)
+- **ESLint v10**: Managed via flat configuration (`frontend/eslint.config.js`) supporting React 19, TypeScript-ESLint, and React Hooks/Refresh checks.
+- **Verification Command**:
+  ```bash
+  cd frontend
+  npm run lint
+  ```

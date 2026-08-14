@@ -1,55 +1,42 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useServerStore } from '../stores/useServerStore';
 
-export const ServerModal: React.FC = () => {
-  const { isAddEditOpen, editingServer, saveServer, closeAddEditModal } = useServerStore();
+interface ServerPayload {
+  id?: string;
+  displayName: string;
+  type: string;
+  categories: string[];
+  url: string;
+  secretProvider: string;
+  secretItemKey: string;
+  authShape: string;
+  customHeaderName: string;
+  apiKey?: string;
+  enabled: boolean;
+  hidden: boolean;
+}
 
-  const [displayName, setDisplayName] = useState('');
-  const [type, setType] = useState('sse');
-  const [category, setCategory] = useState('infrastructure');
-  const [url, setUrl] = useState('');
-  const [secretProvider, setSecretProvider] = useState('None');
-  const [secretKey, setSecretKey] = useState('');
-  const [authShape, setAuthShape] = useState('bearer');
-  const [customHeaderName, setCustomHeaderName] = useState('');
+const ServerModalDialog: React.FC = () => {
+  const { editingServer, saveServer, closeAddEditModal } = useServerStore();
+
+  const [displayName, setDisplayName] = useState(editingServer?.displayName || '');
+  const [type, setType] = useState(editingServer?.type || 'sse');
+  const [category, setCategory] = useState(
+    editingServer?.categories ? editingServer.categories.join(', ') : (editingServer ? 'default' : 'infrastructure')
+  );
+  const [url, setUrl] = useState(editingServer?.url || '');
+  const [secretProvider, setSecretProvider] = useState(editingServer?.secretProvider || 'None');
+  const [secretKey, setSecretKey] = useState(editingServer?.secretItemKey || '');
+  const [authShape, setAuthShape] = useState(editingServer?.authShape || 'bearer');
+  const [customHeaderName, setCustomHeaderName] = useState(editingServer?.customHeaderName || '');
   const [apiKey, setApiKey] = useState('');
-  const [enabled, setEnabled] = useState(true);
-  const [hidden, setHidden] = useState(false);
-
-  useEffect(() => {
-    if (editingServer) {
-      setDisplayName(editingServer.displayName || '');
-      setType(editingServer.type || 'sse');
-      setCategory(editingServer.categories ? editingServer.categories.join(', ') : 'default');
-      setUrl(editingServer.url || '');
-      setSecretProvider(editingServer.secretProvider || 'None');
-      setSecretKey(editingServer.secretItemKey || '');
-      setAuthShape(editingServer.authShape || 'bearer');
-      setCustomHeaderName(editingServer.customHeaderName || '');
-      setApiKey(''); // clear fallback inputs for security
-      setEnabled(editingServer.enabled);
-      setHidden(editingServer.hidden);
-    } else {
-      setDisplayName('');
-      setType('sse');
-      setCategory('infrastructure');
-      setUrl('');
-      setSecretProvider('None');
-      setSecretKey('');
-      setAuthShape('bearer');
-      setCustomHeaderName('');
-      setApiKey('');
-      setEnabled(true);
-      setHidden(false);
-    }
-  }, [editingServer, isAddEditOpen]);
-
-  if (!isAddEditOpen) return null;
+  const [enabled, setEnabled] = useState(editingServer ? editingServer.enabled : true);
+  const [hidden, setHidden] = useState(editingServer ? editingServer.hidden : false);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.error("Submitting ServerModal form...");
-    const serverPayload: any = {
+    console.error('Submitting ServerModal form...');
+    const serverPayload: ServerPayload = {
       displayName,
       type,
       categories: category.split(',').map((s) => s.trim()).filter(Boolean),
@@ -70,7 +57,9 @@ export const ServerModal: React.FC = () => {
 
     try {
       await saveServer(serverPayload);
-    } catch {}
+    } catch {
+      // Error is handled upstream or ignored
+    }
   };
 
   const showCustomHeaderName = authShape === 'custom-header' || authShape === 'query';
@@ -245,4 +234,12 @@ export const ServerModal: React.FC = () => {
       </div>
     </div>
   );
+};
+
+export const ServerModal: React.FC = () => {
+  const { isAddEditOpen, editingServer } = useServerStore();
+
+  if (!isAddEditOpen) return null;
+
+  return <ServerModalDialog key={editingServer?.id || 'new'} />;
 };

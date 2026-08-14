@@ -1,29 +1,15 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 
-export const MappingModal: React.FC = () => {
-  const { isMappingModalOpen, editingMapping, saveMapping, closeMappingModal } = useSettingsStore();
+const MappingModalDialog: React.FC = () => {
+  const { editingMapping, saveMapping, closeMappingModal } = useSettingsStore();
 
-  const [externalId, setExternalId] = useState('');
-  const [internalGroup, setInternalGroup] = useState('');
-
-  useEffect(() => {
-    if (isMappingModalOpen) {
-      if (editingMapping) {
-        setExternalId(editingMapping.externalId || '');
-        setInternalGroup(editingMapping.internalGroup || '');
-      } else {
-        setExternalId('');
-        setInternalGroup('');
-      }
-    }
-  }, [isMappingModalOpen, editingMapping]);
-
-  if (!isMappingModalOpen) return null;
+  const [externalId, setExternalId] = useState(editingMapping?.externalId || '');
+  const [internalGroup, setInternalGroup] = useState(editingMapping?.internalGroup || '');
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: any = {
+    const payload: { id?: string; externalId: string; internalGroup: string } = {
       externalId,
       internalGroup,
     };
@@ -81,4 +67,12 @@ export const MappingModal: React.FC = () => {
       </div>
     </div>
   );
+};
+
+export const MappingModal: React.FC = () => {
+  const { isMappingModalOpen, editingMapping } = useSettingsStore();
+
+  if (!isMappingModalOpen) return null;
+
+  return <MappingModalDialog key={editingMapping?.id || 'new'} />;
 };
