@@ -21,7 +21,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 * **MCP 2026-07-28 Spec Support**: Spec-compliant header annotation; routing is body/path based (`Mcp-Method` & `Mcp-Name`) via `McpDualSpecMiddleware` with legacy JSON body fallback.
 * **Pluggable Identity Providers**: Dual authentication support for **Active Directory** (Kerberos/NTLM Windows SIDs) and **PocketID / TinyAuth OIDC** (`Remote-User`, `Remote-Groups` headers).
 * **Pluggable Secret Retrievers**: Fetch downstream server API keys and tokens dynamically from **HashiCorp Vault (KV v2)**, **Windows Registry (DPAPI)**, or **Environment Variables** per server (`SecretProvider` column).
-* **Multi-Database & Stored Procedure Engine**: Complete stored procedure suites for **MS SQL Server** (`Microsoft.Data.SqlClient`), **MySQL** (`MySqlConnector`), and **SQLite** (`Microsoft.Data.Sqlite`) using Dapper.
+* **Multi-Database & Stored Procedure Engine**: Complete stored procedure suites for **MS SQL Server** (`Microsoft.Data.SqlClient`), **MySQL** (`MySqlConnector`), and **SQLite** (`Microsoft.Data.Sqlite`) using Dapper. See [docs/database-providers.md](docs/database-providers.md).
 * **Observability & PII Audit Logging**: Automatic payload redaction of Bearer tokens, API keys, and passwords (`PiiSanitizer`) paired with stored procedure audit logging (`sp_InsertAuditLog`).
 * **Consolidated Tools Gateway:** Merges 300+ tools from dozens of isolated backend servers into a single endpoint.
 * **Meta-Mode Dynamic Tool Filtering:** 
@@ -47,6 +47,12 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 ## 🏗️ Architecture, Requirements & Connection Flow
 
 For deep technical details on the router's internal design, dependency injection, routing managers, transport layers, and architectural requirements, see [ARCHITECTURE.md](ARCHITECTURE.md) and the [Pairwise Testing Matrix](docs/testing-matrix.md).
+
+---
+
+## 🗄️ Database Provider Support & Deployment Matrix
+
+For detailed dialect specifications (SQLite, Microsoft SQL Server, MySQL), stored procedure contracts, envelope encryption architecture, fail-closed startup validation, and Docker Compose configurations, see [**Database Provider Support & Deployment Matrix**](docs/database-providers.md).
 
 ---
 
