@@ -32,7 +32,7 @@ namespace McpRouter.Controllers
         public async Task<IActionResult> GetClients()
         {
             using var conn = _dbFactory.CreateConnection();
-            var keys = await conn.QueryAsync<dynamic>("SELECT Id, Name, Username, KeyPrefix, ScopesJson FROM AppKeys");
+            var keys = await conn.QueryAsync<dynamic>("SELECT Id, Name, Username, KeyPrefix, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys");
 
             var clients = keys.Select(k => {
                 var scopesJson = Convert.ToString(k.ScopesJson) ?? "[]";
@@ -45,6 +45,8 @@ namespace McpRouter.Controllers
                     ClientId = Convert.ToString(k.Username) ?? Convert.ToString(k.KeyPrefix),
                     DisplayName = Convert.ToString(k.Name) ?? "App Key",
                     Scopes = scopes,
+                    ExpiresAt = k.ExpiresAt != null ? (DateTime?)Convert.ToDateTime(k.ExpiresAt) : null,
+                    CreatedAt = k.CreatedAt != null ? (DateTime?)Convert.ToDateTime(k.CreatedAt) : null,
                     IsDynamic = false
                 };
             }).ToList();
@@ -62,7 +64,6 @@ namespace McpRouter.Controllers
             var scopes = model.Scopes ?? new List<string>();
 
             var username = User?.Identity?.Name ?? "unknown";
-            var ownerSid = "";
 
             try
             {
@@ -73,7 +74,6 @@ namespace McpRouter.Controllers
                     if (identity != null)
                     {
                         username = identity.Username;
-                        ownerSid = identity.AllSids.FirstOrDefault() ?? "";
                     }
                 }
             }
@@ -81,20 +81,23 @@ namespace McpRouter.Controllers
 
             try
             {
+                // CRITICAL SECURITY: Decouple creator SID from client credentials.
+                // Client credentials must NOT inherit administrative privileges or creator's SID.
                 var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
                     model.DisplayName,
                     clientId, // Username/ClientId of the AppKey
-                    ownerSid,
+                    string.Empty, // No administrative SID assigned to machine/client credentials
                     scopes,
-                    null // Registered clients have no expiration by default
+                    model.ExpiresInDays
                 );
 
-                await _auditLogger.LogAdminActionAsync(username, "client.create", clientId, JsonSerializer.Serialize(new { model.DisplayName, Scopes = model.Scopes }), true);
+                await _auditLogger.LogAdminActionAsync(username, "client.create", clientId, JsonSerializer.Serialize(new { model.DisplayName, Scopes = model.Scopes, model.ExpiresInDays }), true);
 
                 return Ok(new {
                     ClientId = clientId,
                     ClientSecret = plaintextKey,
-                    DisplayName = model.DisplayName
+                    DisplayName = model.DisplayName,
+                    ExpiresAt = appKey.ExpiresAt
                 });
             }
             catch (Exception ex)
@@ -145,6 +148,7 @@ namespace McpRouter.Controllers
         {
             public string DisplayName { get; set; } = string.Empty;
             public List<string> Scopes { get; set; } = new();
+            public int? ExpiresInDays { get; set; }
         }
     }
 }

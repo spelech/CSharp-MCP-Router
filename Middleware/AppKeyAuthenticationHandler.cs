@@ -76,8 +76,22 @@ namespace McpRouter.Middleware
 
             try
             {
-                // Prefix is first 16 characters
-                var prefix = token.Length > 16 ? token.Substring(0, 16) : token;
+                // Extract selector prefix: for high-entropy tokens formatted as mcp-{scopeSlug}-{selector}-{secret},
+                // prefix is mcp-{scopeSlug}-{selector}. Fallback safely for backward-compatible/test formats.
+                string prefix;
+                var parts = token.Split('-');
+                if (parts.Length >= 4 && parts[0] == "mcp")
+                {
+                    prefix = $"{parts[0]}-{parts[1]}-{parts[2]}";
+                }
+                else if (parts.Length == 3 && parts[0] == "mcp" && parts[2].Length >= 32)
+                {
+                    prefix = $"{parts[0]}-{parts[1]}-{parts[2].Substring(0, 32)}";
+                }
+                else
+                {
+                    prefix = token.Length > 16 ? token.Substring(0, 16) : token;
+                }
 
                 using var conn = _dbFactory.CreateConnection();
                 AppKey? appKey = null;
