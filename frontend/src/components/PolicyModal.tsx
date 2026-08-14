@@ -1,32 +1,16 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 
-export const PolicyModal: React.FC = () => {
-  const { isPolicyModalOpen, editingPolicy, savePolicy, closePolicyModal } = useSettingsStore();
+const PolicyModalDialog: React.FC = () => {
+  const { editingPolicy, savePolicy, closePolicyModal } = useSettingsStore();
 
-  const [targetId, setTargetId] = useState('');
-  const [requiredGroup, setRequiredGroup] = useState('');
-  const [isAllowed, setIsAllowed] = useState(true);
-
-  useEffect(() => {
-    if (isPolicyModalOpen) {
-      if (editingPolicy) {
-        setTargetId(editingPolicy.targetId || '');
-        setRequiredGroup(editingPolicy.requiredGroup || '');
-        setIsAllowed(editingPolicy.isAllowed);
-      } else {
-        setTargetId('');
-        setRequiredGroup('');
-        setIsAllowed(true);
-      }
-    }
-  }, [isPolicyModalOpen, editingPolicy]);
-
-  if (!isPolicyModalOpen) return null;
+  const [targetId, setTargetId] = useState(editingPolicy?.targetId || '');
+  const [requiredGroup, setRequiredGroup] = useState(editingPolicy?.requiredGroup || '');
+  const [isAllowed, setIsAllowed] = useState(editingPolicy ? editingPolicy.isAllowed : true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const payload: any = {
+    const payload: { id?: string; targetId: string; requiredGroup: string; isAllowed: boolean } = {
       targetId,
       requiredGroup,
       isAllowed,
@@ -101,4 +85,12 @@ export const PolicyModal: React.FC = () => {
       </div>
     </div>
   );
+};
+
+export const PolicyModal: React.FC = () => {
+  const { isPolicyModalOpen, editingPolicy } = useSettingsStore();
+
+  if (!isPolicyModalOpen) return null;
+
+  return <PolicyModalDialog key={editingPolicy?.id || 'new'} />;
 };

@@ -3,16 +3,18 @@ import { useUserStore } from '../stores/useUserStore';
 
 export const Header: React.FC = () => {
   const { user, version, loadUser, loadVersion } = useUserStore();
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    return (typeof window !== 'undefined' && (localStorage.getItem('mcp-theme') as 'light' | 'dark')) || 'dark';
+  });
 
   useEffect(() => {
     loadUser();
     loadVersion();
+  }, [loadUser, loadVersion]);
 
-    const savedTheme = (localStorage.getItem('mcp-theme') as 'light' | 'dark') || 'dark';
-    setTheme(savedTheme);
-    document.documentElement.setAttribute('data-theme', savedTheme);
-  }, []);
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+  }, [theme]);
 
   const toggleTheme = () => {
     const nextTheme = theme === 'light' ? 'dark' : 'light';

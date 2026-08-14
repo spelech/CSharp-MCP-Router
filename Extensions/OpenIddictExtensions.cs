@@ -57,7 +57,7 @@ namespace McpRouter.Extensions
 
                     if (!string.IsNullOrEmpty(certPath) && System.IO.File.Exists(certPath))
                     {
-                        var cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(
+                        var cert = System.Security.Cryptography.X509Certificates.X509CertificateLoader.LoadPkcs12FromFile(
                             certPath, certPass, System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.MachineKeySet);
                         options.AddSigningCertificate(cert).AddEncryptionCertificate(cert);
                     }

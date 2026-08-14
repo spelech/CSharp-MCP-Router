@@ -9,9 +9,10 @@ RUN npm run build
 # Stage 2: Build the C# application
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /source
+ENV CI=true
 
-# Copy csproj and restore dependencies
-COPY mcp-router.csproj ./
+# Copy csproj, props and restore dependencies
+COPY mcp-router.csproj Directory.Build.props ./
 RUN dotnet restore mcp-router.csproj
 
 # Copy source and publish

@@ -76,37 +76,35 @@ export const TestBenchView: React.FC = () => {
   const [consoleResponse, setConsoleResponse] = useState('Waiting for execution...');
 
   useEffect(() => {
-    loadTools();
-    loadPrompts();
-    loadResources();
+    let ignore = false;
+    const fetchInitialData = async () => {
+      try {
+        const [toolsRes, promptsRes, resourcesRes] = await Promise.allSettled([
+          apiRequest<ToolItem[]>('/api/test/tools'),
+          apiRequest<PromptItem[]>('/api/test/prompts'),
+          apiRequest<any>('/api/test/resources'),
+        ]);
+        if (!ignore) {
+          if (toolsRes.status === 'fulfilled') {
+            setTools(toolsRes.value || []);
+          }
+          if (promptsRes.status === 'fulfilled') {
+            setPrompts(promptsRes.value || []);
+          }
+          if (resourcesRes.status === 'fulfilled') {
+            setResourcesData(resourcesRes.value || { resources: [], templates: [] });
+          }
+        }
+      } catch (e) {
+        console.error('Failed to fetch initial test data:', e);
+      }
+    };
+
+    fetchInitialData();
+    return () => {
+      ignore = true;
+    };
   }, []);
-
-  const loadTools = async () => {
-    try {
-      const data = await apiRequest<ToolItem[]>('/api/test/tools');
-      setTools(data || []);
-    } catch (e) {
-      console.error('Failed to load test tools:', e);
-    }
-  };
-
-  const loadPrompts = async () => {
-    try {
-      const data = await apiRequest<PromptItem[]>('/api/test/prompts');
-      setPrompts(data || []);
-    } catch (e) {
-      console.error('Failed to load prompts:', e);
-    }
-  };
-
-  const loadResources = async () => {
-    try {
-      const data = await apiRequest<any>('/api/test/resources');
-      setResourcesData(data || { resources: [], templates: [] });
-    } catch (e) {
-      console.error('Failed to load resources:', e);
-    }
-  };
 
   // Run Tools Call
   const handleToolServerChange = (server: string) => {

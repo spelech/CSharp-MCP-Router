@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { useSettingsStore } from '../stores/useSettingsStore';
 
 interface ArgBuilderItem {
@@ -14,9 +14,52 @@ interface MsgBuilderItem {
   text: string;
 }
 
-export const CustomFileModal: React.FC = () => {
+const initializePromptBuilder = (meta: { type: 'prompts' | 'resources'; name: string } | null, content: string) => {
+  if (meta) {
+    if (meta.type === 'prompts') {
+      try {
+        const parsed = JSON.parse(content);
+        const desc = parsed.description || '';
+        const args: ArgBuilderItem[] = Array.isArray(parsed.arguments)
+          ? parsed.arguments.map((arg: { name?: string; description?: string; required?: boolean }) => ({
+              id: Math.random().toString(),
+              name: arg.name || '',
+              description: arg.description || '',
+              required: !!arg.required,
+            }))
+          : [];
+        const msgs: MsgBuilderItem[] = Array.isArray(parsed.messages)
+          ? parsed.messages.map((msg: { role?: string; content?: string | { text?: string } }) => {
+              const text = msg.content && typeof msg.content === 'object' ? msg.content.text || '' : (msg.content || '');
+              return {
+                id: Math.random().toString(),
+                role: msg.role === 'assistant' ? 'assistant' : 'user',
+                text,
+              };
+            })
+          : [];
+        return { promptDesc: desc, builderArgs: args, builderMsgs: msgs };
+      } catch {
+        return { promptDesc: '', builderArgs: [], builderMsgs: [] };
+      }
+    }
+    return { promptDesc: '', builderArgs: [], builderMsgs: [] };
+  }
+  return {
+    promptDesc: 'My custom prompt description',
+    builderArgs: [{ id: '1', name: 'topic', description: 'Topic to write about', required: true }],
+    builderMsgs: [
+      {
+        id: '1',
+        role: 'user' as const,
+        text: 'Write a short summary about {{topic}}.',
+      },
+    ],
+  };
+};
+
+const CustomFileModalDialog: React.FC = () => {
   const {
-    isCustomFileOpen,
     editingFileMeta,
     editingFileContent,
     activeFileModalTab,
@@ -25,79 +68,14 @@ export const CustomFileModal: React.FC = () => {
     setActiveFileModalTab,
   } = useSettingsStore();
 
-  const [fileType, setFileType] = useState<'prompts' | 'resources'>('prompts');
-  const [fileName, setFileName] = useState('');
-  const [rawContent, setRawContent] = useState('');
+  const [fileType, setFileType] = useState<'prompts' | 'resources'>(editingFileMeta?.type || 'prompts');
+  const [fileName, setFileName] = useState(editingFileMeta?.name || '');
+  const [rawContent, setRawContent] = useState(editingFileContent);
 
-  // Builder States
-  const [promptDesc, setPromptDesc] = useState('');
-  const [builderArgs, setBuilderArgs] = useState<ArgBuilderItem[]>([]);
-  const [builderMsgs, setBuilderMsgs] = useState<MsgBuilderItem[]>([]);
-
-  useEffect(() => {
-    if (isCustomFileOpen) {
-      if (editingFileMeta) {
-        setFileType(editingFileMeta.type);
-        setFileName(editingFileMeta.name);
-        setRawContent(editingFileContent);
-
-        // Try parsing to initialize prompt builder
-        if (editingFileMeta.type === 'prompts') {
-          try {
-            const parsed = JSON.parse(editingFileContent);
-            setPromptDesc(parsed.description || '');
-
-            if (Array.isArray(parsed.arguments)) {
-              setBuilderArgs(
-                parsed.arguments.map((arg: any) => ({
-                  id: Math.random().toString(),
-                  name: arg.name || '',
-                  description: arg.description || '',
-                  required: !!arg.required,
-                }))
-              );
-            } else {
-              setBuilderArgs([]);
-            }
-
-            if (Array.isArray(parsed.messages)) {
-              setBuilderMsgs(
-                parsed.messages.map((msg: any) => {
-                  const text = msg.content && typeof msg.content === 'object' ? (msg.content.text || '') : (msg.content || '');
-                  return {
-                    id: Math.random().toString(),
-                    role: msg.role === 'assistant' ? 'assistant' : 'user',
-                    text,
-                  };
-                })
-              );
-            } else {
-              setBuilderMsgs([]);
-            }
-          } catch {
-            setPromptDesc('');
-            setBuilderArgs([]);
-            setBuilderMsgs([]);
-          }
-        }
-      } else {
-        setFileType('prompts');
-        setFileName('');
-        setRawContent(editingFileContent);
-        setPromptDesc('My custom prompt description');
-        setBuilderArgs([{ id: '1', name: 'topic', description: 'Topic to write about', required: true }]);
-        setBuilderMsgs([
-          {
-            id: '1',
-            role: 'user',
-            text: 'Write a short summary about {{topic}}.',
-          },
-        ]);
-      }
-    }
-  }, [isCustomFileOpen, editingFileMeta, editingFileContent]);
-
-  if (!isCustomFileOpen) return null;
+  const initialPromptData = initializePromptBuilder(editingFileMeta, editingFileContent);
+  const [promptDesc, setPromptDesc] = useState(initialPromptData.promptDesc);
+  const [builderArgs, setBuilderArgs] = useState<ArgBuilderItem[]>(initialPromptData.builderArgs);
+  const [builderMsgs, setBuilderMsgs] = useState<MsgBuilderItem[]>(initialPromptData.builderMsgs);
 
   const compileBuilderToJson = (): string => {
     const promptObj = {
@@ -126,7 +104,7 @@ export const CustomFileModal: React.FC = () => {
         const parsed = JSON.parse(rawContent);
         setPromptDesc(parsed.description || '');
         setBuilderArgs(
-          (parsed.arguments || []).map((arg: any) => ({
+          (parsed.arguments || []).map((arg: { name?: string; description?: string; required?: boolean }) => ({
             id: Math.random().toString(),
             name: arg.name || '',
             description: arg.description || '',
@@ -134,8 +112,8 @@ export const CustomFileModal: React.FC = () => {
           }))
         );
         setBuilderMsgs(
-          (parsed.messages || []).map((msg: any) => {
-            const text = msg.content && typeof msg.content === 'object' ? (msg.content.text || '') : (msg.content || '');
+          (parsed.messages || []).map((msg: { role?: string; content?: string | { text?: string } }) => {
+            const text = msg.content && typeof msg.content === 'object' ? msg.content.text || '' : (msg.content || '');
             return {
               id: Math.random().toString(),
               role: msg.role === 'assistant' ? 'assistant' : 'user',
@@ -144,8 +122,9 @@ export const CustomFileModal: React.FC = () => {
           })
         );
         setActiveFileModalTab('builder');
-      } catch (err: any) {
-        alert(`Invalid JSON format in raw code editor. Please fix syntax errors before switching to Prompt Builder. Details: ${err.message}`);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        alert(`Invalid JSON format in raw code editor. Please fix syntax errors before switching to Prompt Builder. Details: ${message}`);
       }
     } else {
       // compile builder values back into raw json content
@@ -164,7 +143,7 @@ export const CustomFileModal: React.FC = () => {
     setBuilderArgs(builderArgs.filter((arg) => arg.id !== id));
   };
 
-  const handleArgChange = (id: string, field: keyof ArgBuilderItem, val: any) => {
+  const handleArgChange = (id: string, field: keyof ArgBuilderItem, val: string | boolean) => {
     setBuilderArgs(
       builderArgs.map((arg) => (arg.id === id ? { ...arg, [field]: val } : arg))
     );
@@ -178,7 +157,7 @@ export const CustomFileModal: React.FC = () => {
     setBuilderMsgs(builderMsgs.filter((msg) => msg.id !== id));
   };
 
-  const handleMsgChange = (id: string, field: keyof MsgBuilderItem, val: any) => {
+  const handleMsgChange = (id: string, field: keyof MsgBuilderItem, val: string) => {
     setBuilderMsgs(
       builderMsgs.map((msg) => (msg.id === id ? { ...msg, [field]: val } : msg))
     );
@@ -187,24 +166,26 @@ export const CustomFileModal: React.FC = () => {
   const handleTypeChange = (type: 'prompts' | 'resources') => {
     setFileType(type);
     if (type === 'prompts') {
-      const defaultJson = JSON.stringify({
-        description: "My custom prompt description",
-        arguments: [
-          { name: "topic", description: "Topic to write about", required: true }
-        ],
-        messages: [
-          {
-            role: "user",
-            content: {
-              type: "text",
-              text: "Write a short summary about {{topic}}."
-            }
-          }
-        ]
-      }, null, 2);
+      const defaultJson = JSON.stringify(
+        {
+          description: 'My custom prompt description',
+          arguments: [{ name: 'topic', description: 'Topic to write about', required: true }],
+          messages: [
+            {
+              role: 'user',
+              content: {
+                type: 'text',
+                text: 'Write a short summary about {{topic}}.',
+              },
+            },
+          ],
+        },
+        null,
+        2
+      );
       setRawContent(defaultJson);
     } else {
-      setRawContent("# Local Resource File\nEnter markdown content here.");
+      setRawContent('# Local Resource File\nEnter markdown content here.');
     }
   };
 
@@ -218,8 +199,9 @@ export const CustomFileModal: React.FC = () => {
     if (fileType === 'prompts') {
       try {
         JSON.parse(finalContent);
-      } catch (err: any) {
-        alert(`Invalid JSON format: ${err.message}`);
+      } catch (err: unknown) {
+        const message = err instanceof Error ? err.message : String(err);
+        alert(`Invalid JSON format: ${message}`);
         return;
       }
     }
@@ -257,7 +239,7 @@ export const CustomFileModal: React.FC = () => {
               <select
                 id="custom-file-type"
                 value={fileType}
-                onChange={(e) => handleTypeChange(e.target.value as any)}
+                onChange={(e) => handleTypeChange(e.target.value as 'prompts' | 'resources')}
                 disabled={!!editingFileMeta}
                 required
               >
@@ -498,5 +480,17 @@ export const CustomFileModal: React.FC = () => {
         </form>
       </div>
     </div>
+  );
+};
+
+export const CustomFileModal: React.FC = () => {
+  const { isCustomFileOpen, editingFileMeta } = useSettingsStore();
+
+  if (!isCustomFileOpen) return null;
+
+  return (
+    <CustomFileModalDialog
+      key={editingFileMeta ? `${editingFileMeta.type}-${editingFileMeta.name}` : 'new'}
+    />
   );
 };

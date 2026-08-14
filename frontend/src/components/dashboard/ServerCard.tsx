@@ -20,8 +20,8 @@ export const ServerCard: React.FC<ServerCardProps> = ({ server }) => {
         ))
       : null;
 
-  let statusBadge = null;
-  let retryBtn = null;
+  let statusBadge: React.ReactNode;
+  let retryBtn: React.ReactNode = null;
 
   if (server.enabled) {
     const status = server.connectionStatus || 'Disconnected';

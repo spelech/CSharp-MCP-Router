@@ -1,133 +1,18 @@
 import React, { useEffect, useState } from 'react';
-import { useSettingsStore } from '../stores/useSettingsStore';
+import { useSettingsStore, EmbeddingSettings, AuthProviderConfig, SecretProviderConfig } from '../stores/useSettingsStore';
 
-export const SettingsView: React.FC = () => {
-  const [activeSubview, setActiveSubview] = useState<'search' | 'security' | 'identity' | 'secrets' | 'files' | 'permissions'>('search');
+interface VectorSearchTabProps {
+  settings: EmbeddingSettings | null;
+  saveEmbeddingSettings: (settings: EmbeddingSettings) => Promise<boolean>;
+}
 
-  const {
-    embeddingSettings,
-    authProviders,
-    secretProviders,
-    customFiles,
-    policies,
-    mappings,
-    fetchEmbeddingSettings,
-    saveEmbeddingSettings,
-    fetchProviders,
-    saveAuthProvider,
-    saveSecretProvider,
-    fetchCustomFiles,
-    deleteCustomFile,
-    openCustomFileModal,
-    fetchPolicies,
-    deletePolicy,
-    openPolicyModal,
-    fetchMappings,
-    deleteMapping,
-    openMappingModal,
-  } = useSettingsStore();
-
-  // Local Form state for Search
-  const [embProvider, setEmbProvider] = useState('local');
-  const [embModelDir, setEmbModelDir] = useState('data/models');
-  const [embApiUrl, setEmbApiUrl] = useState('');
-  const [embApiModel, setEmbApiModel] = useState('all-MiniLM-L6-v2');
-  const [embApiKey, setEmbApiKey] = useState('');
-  const [requireApproval, setRequireApproval] = useState(false);
-
-  // Local Form state for Identity & Auth
-  const [authAdEnabled, setAuthAdEnabled] = useState(false);
-  const [authOidcEnabled, setAuthOidcEnabled] = useState(false);
-  const [authUserHeader, setAuthUserHeader] = useState('Remote-User');
-  const [authGroupsHeader, setAuthGroupsHeader] = useState('Remote-Groups');
-
-  // Local Form state for Secrets
-  const [secVaultEnabled, setSecVaultEnabled] = useState(false);
-  const [secVaultAddress, setSecVaultAddress] = useState('');
-  const [secVaultToken, setSecVaultToken] = useState('');
-  const [secVaultPath, setSecVaultPath] = useState('');
-
-  const [secWinregEnabled, setSecWinregEnabled] = useState(false);
-  const [secWinregKey, setSecWinregKey] = useState('');
-
-  const [secEnvEnabled, setSecEnvEnabled] = useState(false);
-  const [secEnvPrefix, setSecEnvPrefix] = useState('');
-
+const VectorSearchTab: React.FC<VectorSearchTabProps> = ({ settings, saveEmbeddingSettings }) => {
+  const [embProvider, setEmbProvider] = useState(settings?.embeddingProvider || 'local');
+  const [embModelDir, setEmbModelDir] = useState(settings?.embeddingModelDir || 'data/models');
+  const [embApiUrl, setEmbApiUrl] = useState(settings?.embeddingApiUrl || 'http://litellm:4000/v1/embeddings');
+  const [embApiModel, setEmbApiModel] = useState(settings?.embeddingApiModel || 'all-MiniLM-L6-v2');
+  const [embApiKey, setEmbApiKey] = useState(settings?.embeddingApiKey || '');
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-
-  // Initial load
-  useEffect(() => {
-    fetchEmbeddingSettings();
-    fetchProviders();
-    fetchCustomFiles();
-    fetchPolicies();
-    fetchMappings();
-  }, []);
-
-  // Sync loaded states to local inputs
-  useEffect(() => {
-    if (embeddingSettings) {
-      setEmbProvider(embeddingSettings.embeddingProvider);
-      setEmbModelDir(embeddingSettings.embeddingModelDir);
-      setEmbApiUrl(embeddingSettings.embeddingApiUrl);
-      setEmbApiModel(embeddingSettings.embeddingApiModel);
-      setEmbApiKey(embeddingSettings.embeddingApiKey);
-      setRequireApproval(embeddingSettings.requireManualApproval);
-    }
-  }, [embeddingSettings]);
-
-  useEffect(() => {
-    if (authProviders.length > 0) {
-      const ad = authProviders.find((p) => p.providerName === 'ActiveDirectory');
-      if (ad) setAuthAdEnabled(ad.isEnabled);
-
-      const oidc = authProviders.find((p) => p.providerName === 'PocketID_TinyAuth');
-      if (oidc) {
-        setAuthOidcEnabled(oidc.isEnabled);
-        if (oidc.userHeader) setAuthUserHeader(oidc.userHeader);
-        if (oidc.groupsHeader) setAuthGroupsHeader(oidc.groupsHeader);
-      }
-    }
-  }, [authProviders]);
-
-  useEffect(() => {
-    if (secretProviders.length > 0) {
-      const vault = secretProviders.find((p) => p.providerName === 'Vault');
-      if (vault) {
-        setSecVaultEnabled(vault.isEnabled);
-        if (vault.configJson) {
-          try {
-            const cfg = JSON.parse(vault.configJson);
-            setSecVaultAddress(cfg.address || '');
-            setSecVaultToken(cfg.token || '');
-            setSecVaultPath(cfg.mountPath || '');
-          } catch {}
-        }
-      }
-
-      const winreg = secretProviders.find((p) => p.providerName === 'WindowsRegistry');
-      if (winreg) {
-        setSecWinregEnabled(winreg.isEnabled);
-        if (winreg.configJson) {
-          try {
-            const cfg = JSON.parse(winreg.configJson);
-            setSecWinregKey(cfg.keyPath || '');
-          } catch {}
-        }
-      }
-
-      const env = secretProviders.find((p) => p.providerName === 'Environment');
-      if (env) {
-        setSecEnvEnabled(env.isEnabled);
-        if (env.configJson) {
-          try {
-            const cfg = JSON.parse(env.configJson);
-            setSecEnvPrefix(cfg.prefix || '');
-          } catch {}
-        }
-      }
-    }
-  }, [secretProviders]);
 
   const handleSaveSearchSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -138,21 +23,178 @@ export const SettingsView: React.FC = () => {
       embeddingApiUrl: embApiUrl,
       embeddingApiModel: embApiModel,
       embeddingApiKey: embApiKey,
-      requireManualApproval: requireApproval,
+      requireManualApproval: settings?.requireManualApproval ?? false,
     });
     setSaveStatus(success ? 'saved' : 'error');
     setTimeout(() => setSaveStatus('idle'), 2500);
   };
 
-  const handleToggleApprovalCheckbox = async (checked: boolean) => {
-    setRequireApproval(checked);
-    if (embeddingSettings) {
-      await saveEmbeddingSettings({
-        ...embeddingSettings,
-        requireManualApproval: checked,
-      });
-    }
-  };
+  return (
+    <div id="subview-search" className="settings-subview active">
+      <div className="glass-card settings-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <h2>
+          <i className="fa-solid fa-gear"></i> Semantic Search Settings
+        </h2>
+        <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
+          Configure the embedding model used for matching query intents to tools. Changes are saved securely to the database.
+        </p>
+        <form id="settings-form" onSubmit={handleSaveSearchSettings}>
+          <div className="form-group">
+            <label htmlFor="settings-provider">Embedding Provider</label>
+            <select
+              id="settings-provider"
+              value={embProvider}
+              onChange={(e) => setEmbProvider(e.target.value)}
+              required
+            >
+              <option value="local">Local ONNX Model (In-Process, CPU-Friendly)</option>
+              <option value="api">External Embedding API (LiteLLM, Open WebUI, OpenAI)</option>
+            </select>
+          </div>
+
+          {embProvider === 'local' ? (
+            <div id="settings-local-group">
+              <div className="form-group">
+                <label htmlFor="settings-model-dir">Local Model Directory (inside volume)</label>
+                <input
+                  type="text"
+                  id="settings-model-dir"
+                  placeholder="data/models"
+                  value={embModelDir}
+                  onChange={(e) => setEmbModelDir(e.target.value)}
+                />
+                <small style={{ color: 'var(--text-muted)' }}>
+                  The <code>all-MiniLM-L6-v2</code> ONNX files will be downloaded automatically to this directory on first run.
+                </small>
+              </div>
+            </div>
+          ) : (
+            <div id="settings-api-group">
+              <div className="form-group">
+                <label htmlFor="settings-api-url">Embedding API URL</label>
+                <input
+                  type="text"
+                  id="settings-api-url"
+                  placeholder="http://litellm:4000/v1/embeddings"
+                  value={embApiUrl}
+                  onChange={(e) => setEmbApiUrl(e.target.value)}
+                />
+              </div>
+              <div className="form-row">
+                <div className="form-group">
+                  <label htmlFor="settings-api-model">API Model Name</label>
+                  <input
+                    type="text"
+                    id="settings-api-model"
+                    placeholder="all-MiniLM-L6-v2"
+                    value={embApiModel}
+                    onChange={(e) => setEmbApiModel(e.target.value)}
+                  />
+                </div>
+                <div className="form-group">
+                  <label htmlFor="settings-api-key">API Key (Optional)</label>
+                  <input
+                    type="password"
+                    id="settings-api-key"
+                    placeholder="API password / auth token"
+                    value={embApiKey}
+                    onChange={(e) => setEmbApiKey(e.target.value)}
+                  />
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="settings-actions" style={{ marginTop: '25px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            <button
+              type="submit"
+              className="btn btn-primary"
+              id="btn-save-settings"
+              disabled={saveStatus === 'saving'}
+              style={{
+                backgroundColor: saveStatus === 'saved' ? '#10b981' : saveStatus === 'error' ? '#ef4444' : '',
+              }}
+            >
+              {saveStatus === 'saving' && (
+                <>
+                  <i className="fa-solid fa-spinner fa-spin"></i> Saving...
+                </>
+              )}
+              {saveStatus === 'saved' && (
+                <>
+                  <i className="fa-solid fa-check"></i> Saved!
+                </>
+              )}
+              {saveStatus === 'error' && (
+                <>
+                  <i className="fa-solid fa-triangle-exclamation"></i> Error
+                </>
+              )}
+              {saveStatus === 'idle' && (
+                <>
+                  <i className="fa-solid fa-floppy-disk"></i> Save Settings
+                </>
+              )}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+interface SecurityApprovalsTabProps {
+  requireApproval: boolean;
+  onToggleApproval: (checked: boolean) => void;
+}
+
+const SecurityApprovalsTab: React.FC<SecurityApprovalsTabProps> = ({ requireApproval, onToggleApproval }) => {
+  return (
+    <div id="subview-security" className="settings-subview active">
+      <div className="glass-card settings-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
+        <h2>
+          <i className="fa-solid fa-shield-halved"></i> Security &amp; Safety Controls
+        </h2>
+        <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
+          Enforce human-in-the-loop validation for executing destructive or sensitive tools.
+        </p>
+        <div className="form-group">
+          <div className="checkbox-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <label className="switch">
+              <input
+                type="checkbox"
+                id="settings-require-approval"
+                checked={requireApproval}
+                onChange={(e) => onToggleApproval(e.target.checked)}
+              />
+              <span className="slider"></span>
+            </label>
+            <span className="checkbox-label" style={{ fontWeight: 500 }}>
+              Require Manual Approval for Dangerous Tools
+            </span>
+          </div>
+          <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '5px', marginLeft: '50px' }}>
+            When enabled, tool execution requests targeting databases, docker containers, files, or smart devices will prompt the user in the UI before running.
+          </small>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+interface IdentityAuthTabProps {
+  providers: AuthProviderConfig[];
+  saveAuthProvider: (provider: AuthProviderConfig) => Promise<void>;
+}
+
+const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, saveAuthProvider }) => {
+  const ad = providers.find((p) => p.providerName === 'ActiveDirectory');
+  const oidc = providers.find((p) => p.providerName === 'PocketID_TinyAuth');
+
+  const [authAdEnabled, setAuthAdEnabled] = useState(ad ? ad.isEnabled : false);
+  const [authOidcEnabled, setAuthOidcEnabled] = useState(oidc ? oidc.isEnabled : true);
+  const [authUserHeader, setAuthUserHeader] = useState(oidc?.userHeader || 'Remote-User');
+  const [authGroupsHeader, setAuthGroupsHeader] = useState(oidc?.groupsHeader || 'Remote-Groups');
 
   const handleSaveAuthProviders = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -174,6 +216,139 @@ export const SettingsView: React.FC = () => {
       alert('Failed to save Auth Providers');
     }
   };
+
+  return (
+    <div id="subview-identity" className="settings-subview active">
+      <div className="glass-card settings-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <h2>
+          <i className="fa-solid fa-id-card"></i> Identity &amp; Auth Providers
+        </h2>
+        <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
+          Enable authentication providers for user identity context and group policy authorization.
+        </p>
+        <form id="auth-providers-form" onSubmit={handleSaveAuthProviders}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
+            <div style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h4 style={{ margin: 0 }}>
+                  <i className="fa-solid fa-brands fa-windows"></i> Active Directory
+                </h4>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    id="auth-ad-enabled"
+                    checked={authAdEnabled}
+                    onChange={(e) => setAuthAdEnabled(e.target.checked)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Integrate Kerberos/NTLM Windows SIDs for enterprise group policies.</p>
+            </div>
+
+            <div style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+                <h4 style={{ margin: 0 }}>
+                  <i className="fa-solid fa-key"></i> PocketID / TinyAuth OIDC
+                </h4>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    id="auth-oidc-enabled"
+                    checked={authOidcEnabled}
+                    onChange={(e) => setAuthOidcEnabled(e.target.checked)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Parse Remote-User and Remote-Groups HTTP headers from reverse proxies.</p>
+              <div className="form-group" style={{ marginTop: '10px' }}>
+                <label htmlFor="auth-user-header" style={{ fontSize: '11px' }}>
+                  User Header Name
+                </label>
+                <input
+                  type="text"
+                  id="auth-user-header"
+                  value={authUserHeader}
+                  onChange={(e) => setAuthUserHeader(e.target.value)}
+                  style={{ fontSize: '12px' }}
+                />
+              </div>
+              <div className="form-group" style={{ marginTop: '5px' }}>
+                <label htmlFor="auth-groups-header" style={{ fontSize: '11px' }}>
+                  Groups Header Name
+                </label>
+                <input
+                  type="text"
+                  id="auth-groups-header"
+                  value={authGroupsHeader}
+                  onChange={(e) => setAuthGroupsHeader(e.target.value)}
+                  style={{ fontSize: '12px' }}
+                />
+              </div>
+            </div>
+          </div>
+          <div style={{ marginTop: '15px', textAlign: 'right' }}>
+            <button type="submit" className="btn btn-primary btn-sm">
+              <i className="fa-solid fa-floppy-disk"></i> Save Auth Config
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+interface SecretProvidersTabProps {
+  providers: SecretProviderConfig[];
+  saveSecretProvider: (provider: SecretProviderConfig) => Promise<void>;
+}
+
+const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ providers, saveSecretProvider }) => {
+  const vault = providers.find((p) => p.providerName === 'Vault');
+  const winreg = providers.find((p) => p.providerName === 'WindowsRegistry');
+  const env = providers.find((p) => p.providerName === 'Environment');
+
+  const parsedVault = vault?.configJson
+    ? (() => {
+        try {
+          return JSON.parse(vault.configJson);
+        } catch {
+          return {};
+        }
+      })()
+    : {};
+
+  const parsedWinreg = winreg?.configJson
+    ? (() => {
+        try {
+          return JSON.parse(winreg.configJson);
+        } catch {
+          return {};
+        }
+      })()
+    : {};
+
+  const parsedEnv = env?.configJson
+    ? (() => {
+        try {
+          return JSON.parse(env.configJson);
+        } catch {
+          return {};
+        }
+      })()
+    : {};
+
+  const [secVaultEnabled, setSecVaultEnabled] = useState(vault ? vault.isEnabled : false);
+  const [secVaultAddress, setSecVaultAddress] = useState(parsedVault.address || '');
+  const [secVaultToken, setSecVaultToken] = useState(parsedVault.token || '');
+  const [secVaultPath, setSecVaultPath] = useState(parsedVault.mountPath || '');
+
+  const [secWinregEnabled, setSecWinregEnabled] = useState(winreg ? winreg.isEnabled : false);
+  const [secWinregKey, setSecWinregKey] = useState(parsedWinreg.keyPath || '');
+
+  const [secEnvEnabled, setSecEnvEnabled] = useState(env ? env.isEnabled : false);
+  const [secEnvPrefix, setSecEnvPrefix] = useState(parsedEnv.prefix || '');
 
   const handleSaveSecretProviders = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -213,6 +388,173 @@ export const SettingsView: React.FC = () => {
       alert('Secret Provider configurations saved successfully!');
     } catch {
       alert('Failed to save Secret Providers');
+    }
+  };
+
+  return (
+    <div id="subview-secrets" className="settings-subview active">
+      <div className="glass-card settings-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
+        <h2>
+          <i className="fa-solid fa-vault"></i> Secret Providers
+        </h2>
+        <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
+          Configure external vault and registry secret providers for resolving downstream MCP tokens.
+        </p>
+        <form id="secret-providers-form" onSubmit={handleSaveSecretProviders}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
+            {/* Vault */}
+            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <h4 style={{ margin: 0, fontSize: '13px' }}>
+                  <i className="fa-solid fa-lock"></i> Vault (KV v2)
+                </h4>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={secVaultEnabled}
+                    onChange={(e) => setSecVaultEnabled(e.target.checked)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <span className="badge badge-secondary" style={{ fontSize: '10px', marginBottom: '10px', display: 'inline-block' }}>
+                HashiCorp Vault
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
+                <input
+                  type="text"
+                  placeholder="http://vault:8200"
+                  value={secVaultAddress}
+                  onChange={(e) => setSecVaultAddress(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+                <input
+                  type="password"
+                  placeholder="Vault Token (optional)"
+                  value={secVaultToken}
+                  onChange={(e) => setSecVaultToken(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+                <input
+                  type="text"
+                  placeholder="Mount Path (secret/data/)"
+                  value={secVaultPath}
+                  onChange={(e) => setSecVaultPath(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+              </div>
+            </div>
+
+            {/* Registry */}
+            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <h4 style={{ margin: 0, fontSize: '13px' }}>
+                  <i className="fa-solid fa-database"></i> Win Registry
+                </h4>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={secWinregEnabled}
+                    onChange={(e) => setSecWinregEnabled(e.target.checked)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <span className="badge badge-secondary" style={{ fontSize: '10px', marginBottom: '10px', display: 'inline-block' }}>
+                DPAPI Encrypted
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
+                <input
+                  type="text"
+                  placeholder="HKCU\Software\McpRouter\Secrets"
+                  value={secWinregKey}
+                  onChange={(e) => setSecWinregKey(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+              </div>
+            </div>
+
+            {/* Env */}
+            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <h4 style={{ margin: 0, fontSize: '13px' }}>
+                  <i className="fa-solid fa-terminal"></i> Environment
+                </h4>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    checked={secEnvEnabled}
+                    onChange={(e) => setSecEnvEnabled(e.target.checked)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <span className="badge badge-secondary" style={{ fontSize: '10px', marginBottom: '10px', display: 'inline-block' }}>
+                Container Env
+              </span>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
+                <input
+                  type="text"
+                  placeholder="Prefix (MCP_SECRET_)"
+                  value={secEnvPrefix}
+                  onChange={(e) => setSecEnvPrefix(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+              </div>
+            </div>
+          </div>
+          <div style={{ marginTop: '15px', textAlign: 'right' }}>
+            <button type="submit" className="btn btn-primary btn-sm">
+              <i className="fa-solid fa-floppy-disk"></i> Save Secret Config
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export const SettingsView: React.FC = () => {
+  const [activeSubview, setActiveSubview] = useState<'search' | 'security' | 'identity' | 'secrets' | 'files' | 'permissions'>('search');
+
+  const {
+    embeddingSettings,
+    authProviders,
+    secretProviders,
+    customFiles,
+    policies,
+    mappings,
+    fetchEmbeddingSettings,
+    saveEmbeddingSettings,
+    fetchProviders,
+    saveAuthProvider,
+    saveSecretProvider,
+    fetchCustomFiles,
+    openCustomFileModal,
+    deleteCustomFile,
+    fetchPolicies,
+    openPolicyModal,
+    deletePolicy,
+    fetchMappings,
+    openMappingModal,
+    deleteMapping,
+  } = useSettingsStore();
+
+  // Initial load
+  useEffect(() => {
+    fetchEmbeddingSettings();
+    fetchProviders();
+    fetchCustomFiles();
+    fetchPolicies();
+    fetchMappings();
+  }, [fetchEmbeddingSettings, fetchProviders, fetchCustomFiles, fetchPolicies, fetchMappings]);
+
+  const handleToggleApproval = async (checked: boolean) => {
+    if (embeddingSettings) {
+      await saveEmbeddingSettings({
+        ...embeddingSettings,
+        requireManualApproval: checked,
+      });
     }
   };
 
@@ -277,354 +619,37 @@ export const SettingsView: React.FC = () => {
 
       {/* Subview 1: Vector & Search */}
       {activeSubview === 'search' && (
-        <div id="subview-search" className="settings-subview active">
-          <div className="glass-card settings-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
-            <h2>
-              <i className="fa-solid fa-gear"></i> Semantic Search Settings
-            </h2>
-            <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
-              Configure the embedding model used for matching query intents to tools. Changes are saved securely to the database.
-            </p>
-            <form id="settings-form" onSubmit={handleSaveSearchSettings}>
-              <div className="form-group">
-                <label htmlFor="settings-provider">Embedding Provider</label>
-                <select
-                  id="settings-provider"
-                  value={embProvider}
-                  onChange={(e) => setEmbProvider(e.target.value)}
-                  required
-                >
-                  <option value="local">Local ONNX Model (In-Process, CPU-Friendly)</option>
-                  <option value="api">External Embedding API (LiteLLM, Open WebUI, OpenAI)</option>
-                </select>
-              </div>
-
-              {embProvider === 'local' ? (
-                <div id="settings-local-group">
-                  <div className="form-group">
-                    <label htmlFor="settings-model-dir">Local Model Directory (inside volume)</label>
-                    <input
-                      type="text"
-                      id="settings-model-dir"
-                      placeholder="data/models"
-                      value={embModelDir}
-                      onChange={(e) => setEmbModelDir(e.target.value)}
-                    />
-                    <small style={{ color: 'var(--text-muted)' }}>
-                      The <code>all-MiniLM-L6-v2</code> ONNX files will be downloaded automatically to this directory on first run.
-                    </small>
-                  </div>
-                </div>
-              ) : (
-                <div id="settings-api-group">
-                  <div className="form-group">
-                    <label htmlFor="settings-api-url">Embedding API URL</label>
-                    <input
-                      type="text"
-                      id="settings-api-url"
-                      placeholder="http://litellm:4000/v1/embeddings"
-                      value={embApiUrl}
-                      onChange={(e) => setEmbApiUrl(e.target.value)}
-                    />
-                  </div>
-                  <div className="form-row">
-                    <div className="form-group">
-                      <label htmlFor="settings-api-model">API Model Name</label>
-                      <input
-                        type="text"
-                        id="settings-api-model"
-                        placeholder="all-MiniLM-L6-v2"
-                        value={embApiModel}
-                        onChange={(e) => setEmbApiModel(e.target.value)}
-                      />
-                    </div>
-                    <div className="form-group">
-                      <label htmlFor="settings-api-key">API Key (Optional)</label>
-                      <input
-                        type="password"
-                        id="settings-api-key"
-                        placeholder="API password / auth token"
-                        value={embApiKey}
-                        onChange={(e) => setEmbApiKey(e.target.value)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              <div className="settings-actions" style={{ marginTop: '25px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  id="btn-save-settings"
-                  disabled={saveStatus === 'saving'}
-                  style={{
-                    backgroundColor: saveStatus === 'saved' ? '#10b981' : saveStatus === 'error' ? '#ef4444' : '',
-                  }}
-                >
-                  {saveStatus === 'saving' && (
-                    <>
-                      <i className="fa-solid fa-spinner fa-spin"></i> Saving...
-                    </>
-                  )}
-                  {saveStatus === 'saved' && (
-                    <>
-                      <i className="fa-solid fa-check"></i> Saved!
-                    </>
-                  )}
-                  {saveStatus === 'error' && (
-                    <>
-                      <i className="fa-solid fa-triangle-exclamation"></i> Error
-                    </>
-                  )}
-                  {saveStatus === 'idle' && (
-                    <>
-                      <i className="fa-solid fa-floppy-disk"></i> Save Settings
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <VectorSearchTab
+          key={embeddingSettings ? `${embeddingSettings.embeddingProvider}-${embeddingSettings.embeddingModelDir}-${embeddingSettings.embeddingApiUrl}` : 'loading'}
+          settings={embeddingSettings}
+          saveEmbeddingSettings={saveEmbeddingSettings}
+        />
       )}
 
       {/* Subview 2: Security & Approvals */}
       {activeSubview === 'security' && (
-        <div id="subview-security" className="settings-subview active">
-          <div className="glass-card settings-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
-            <h2>
-              <i className="fa-solid fa-shield-halved"></i> Security &amp; Safety Controls
-            </h2>
-            <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
-              Enforce human-in-the-loop validation for executing destructive or sensitive tools.
-            </p>
-            <div className="form-group">
-              <div className="checkbox-group" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <label className="switch">
-                  <input
-                    type="checkbox"
-                    id="settings-require-approval"
-                    checked={requireApproval}
-                    onChange={(e) => handleToggleApprovalCheckbox(e.target.checked)}
-                  />
-                  <span className="slider"></span>
-                </label>
-                <span className="checkbox-label" style={{ fontWeight: 500 }}>
-                  Require Manual Approval for Dangerous Tools
-                </span>
-              </div>
-              <small style={{ color: 'var(--text-muted)', display: 'block', marginTop: '5px', marginLeft: '50px' }}>
-                When enabled, tool execution requests targeting databases, docker containers, files, or smart devices will prompt the user in the UI before running.
-              </small>
-            </div>
-          </div>
-        </div>
+        <SecurityApprovalsTab
+          requireApproval={embeddingSettings?.requireManualApproval ?? false}
+          onToggleApproval={handleToggleApproval}
+        />
       )}
 
       {/* Subview 3: Identity & Auth */}
       {activeSubview === 'identity' && (
-        <div id="subview-identity" className="settings-subview active">
-          <div className="glass-card settings-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h2>
-              <i className="fa-solid fa-id-card"></i> Identity &amp; Auth Providers
-            </h2>
-            <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
-              Enable authentication providers for user identity context and group policy authorization.
-            </p>
-            <form id="auth-providers-form" onSubmit={handleSaveAuthProviders}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px' }}>
-                <div style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <h4 style={{ margin: 0 }}>
-                      <i className="fa-solid fa-brands fa-windows"></i> Active Directory
-                    </h4>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        id="auth-ad-enabled"
-                        checked={authAdEnabled}
-                        onChange={(e) => setAuthAdEnabled(e.target.checked)}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Integrate Kerberos/NTLM Windows SIDs for enterprise group policies.</p>
-                </div>
-
-                <div style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                    <h4 style={{ margin: 0 }}>
-                      <i className="fa-solid fa-key"></i> PocketID / TinyAuth OIDC
-                    </h4>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        id="auth-oidc-enabled"
-                        checked={authOidcEnabled}
-                        onChange={(e) => setAuthOidcEnabled(e.target.checked)}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-                  <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Parse Remote-User and Remote-Groups HTTP headers from reverse proxies.</p>
-                  <div className="form-group" style={{ marginTop: '10px' }}>
-                    <label htmlFor="auth-user-header" style={{ fontSize: '11px' }}>
-                      User Header Name
-                    </label>
-                    <input
-                      type="text"
-                      id="auth-user-header"
-                      value={authUserHeader}
-                      onChange={(e) => setAuthUserHeader(e.target.value)}
-                      style={{ fontSize: '12px' }}
-                    />
-                  </div>
-                  <div className="form-group" style={{ marginTop: '5px' }}>
-                    <label htmlFor="auth-groups-header" style={{ fontSize: '11px' }}>
-                      Groups Header Name
-                    </label>
-                    <input
-                      type="text"
-                      id="auth-groups-header"
-                      value={authGroupsHeader}
-                      onChange={(e) => setAuthGroupsHeader(e.target.value)}
-                      style={{ fontSize: '12px' }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div style={{ marginTop: '15px', textAlign: 'right' }}>
-                <button type="submit" className="btn btn-primary btn-sm">
-                  <i className="fa-solid fa-floppy-disk"></i> Save Auth Config
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <IdentityAuthTab
+          key={authProviders.map((p) => `${p.providerName}-${p.isEnabled}`).join(',')}
+          providers={authProviders}
+          saveAuthProvider={saveAuthProvider}
+        />
       )}
 
       {/* Subview 4: Secret Providers */}
       {activeSubview === 'secrets' && (
-        <div id="subview-secrets" className="settings-subview active">
-          <div className="glass-card settings-card" style={{ maxWidth: '800px', margin: '0 auto' }}>
-            <h2>
-              <i className="fa-solid fa-vault"></i> Secret Providers
-            </h2>
-            <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
-              Configure external vault and registry secret providers for resolving downstream MCP tokens.
-            </p>
-            <form id="secret-providers-form" onSubmit={handleSaveSecretProviders}>
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-                {/* Vault */}
-                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <h4 style={{ margin: 0, fontSize: '13px' }}>
-                      <i className="fa-solid fa-lock"></i> Vault (KV v2)
-                    </h4>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        checked={secVaultEnabled}
-                        onChange={(e) => setSecVaultEnabled(e.target.checked)}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-                  <span className="badge badge-secondary" style={{ fontSize: '10px', marginBottom: '10px', display: 'inline-block' }}>
-                    HashiCorp Vault
-                  </span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
-                    <input
-                      type="text"
-                      placeholder="http://vault:8200"
-                      value={secVaultAddress}
-                      onChange={(e) => setSecVaultAddress(e.target.value)}
-                      style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
-                    />
-                    <input
-                      type="password"
-                      placeholder="Vault Token (optional)"
-                      value={secVaultToken}
-                      onChange={(e) => setSecVaultToken(e.target.value)}
-                      style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
-                    />
-                    <input
-                      type="text"
-                      placeholder="Mount Path (secret/data/)"
-                      value={secVaultPath}
-                      onChange={(e) => setSecVaultPath(e.target.value)}
-                      style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
-                    />
-                  </div>
-                </div>
-
-                {/* Registry */}
-                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <h4 style={{ margin: 0, fontSize: '13px' }}>
-                      <i className="fa-solid fa-database"></i> Win Registry
-                    </h4>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        checked={secWinregEnabled}
-                        onChange={(e) => setSecWinregEnabled(e.target.checked)}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-                  <span className="badge badge-secondary" style={{ fontSize: '10px', marginBottom: '10px', display: 'inline-block' }}>
-                    DPAPI Encrypted
-                  </span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
-                    <input
-                      type="text"
-                      placeholder="HKCU\Software\McpRouter\Secrets"
-                      value={secWinregKey}
-                      onChange={(e) => setSecWinregKey(e.target.value)}
-                      style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
-                    />
-                  </div>
-                </div>
-
-                {/* Env */}
-                <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                    <h4 style={{ margin: 0, fontSize: '13px' }}>
-                      <i className="fa-solid fa-terminal"></i> Environment
-                    </h4>
-                    <label className="switch">
-                      <input
-                        type="checkbox"
-                        checked={secEnvEnabled}
-                        onChange={(e) => setSecEnvEnabled(e.target.checked)}
-                      />
-                      <span className="slider"></span>
-                    </label>
-                  </div>
-                  <span className="badge badge-secondary" style={{ fontSize: '10px', marginBottom: '10px', display: 'inline-block' }}>
-                    Container Env
-                  </span>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '8px' }}>
-                    <input
-                      type="text"
-                      placeholder="Prefix (MCP_SECRET_)"
-                      value={secEnvPrefix}
-                      onChange={(e) => setSecEnvPrefix(e.target.value)}
-                      style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
-                    />
-                  </div>
-                </div>
-              </div>
-              <div style={{ marginTop: '15px', textAlign: 'right' }}>
-                <button type="submit" className="btn btn-primary btn-sm">
-                  <i className="fa-solid fa-floppy-disk"></i> Save Secret Config
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
+        <SecretProvidersTab
+          key={secretProviders.map((p) => `${p.providerName}-${p.isEnabled}`).join(',')}
+          providers={secretProviders}
+          saveSecretProvider={saveSecretProvider}
+        />
       )}
 
       {/* Subview 5: Prompts & Resources File Manager */}
@@ -743,7 +768,7 @@ export const SettingsView: React.FC = () => {
                   ) : (
                     policies.map((p) => {
                       const badgeLabel = p.isAllowed ? 'ALLOW' : 'DENY';
-                      const badgeStyle = p.isAllowed
+                      const badgeStyle: React.CSSProperties = p.isAllowed
                         ? { background: 'rgba(16, 185, 129, 0.1)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.2)', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: '600' }
                         : { background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444', border: '1px solid rgba(239, 68, 68, 0.2)', padding: '2px 6px', borderRadius: '4px', fontSize: '11px', fontWeight: '600' };
 
@@ -752,7 +777,7 @@ export const SettingsView: React.FC = () => {
                           <td style={{ padding: '12px 10px', fontFamily: 'monospace', fontWeight: 500 }}>{p.targetId}</td>
                           <td style={{ padding: '12px 10px' }}>{p.requiredGroup}</td>
                           <td style={{ padding: '12px 10px' }}>
-                            <span style={badgeStyle as any}>{badgeLabel}</span>
+                            <span style={badgeStyle}>{badgeLabel}</span>
                           </td>
                           <td style={{ padding: '12px 10px', textAlign: 'right' }}>
                             <button
