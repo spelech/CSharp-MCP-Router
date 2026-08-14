@@ -401,7 +401,7 @@ namespace McpRouter.Tests
 
             var authResult = await handler.AuthenticateAsync();
             authResult.Succeeded.Should().BeTrue();
-            httpContext.User = authResult.Principal;
+            httpContext.User = authResult.Principal!;
 
             // Setup a ClientSession mock or directly check how IsUserAuthorizedAsync would behave
             // using the HttpContext.Items populated by our authentication handler.
@@ -411,7 +411,7 @@ namespace McpRouter.Tests
             var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger>();
             var servers = new List<McpServer> { new McpServer { Id = "mcp-github", Enabled = true } };
 
-            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), null, null, loggerMock.Object);
+            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), new Mock<McpRouter.Services.IEmbeddingService>().Object, null, loggerMock.Object);
 
             // Check authorized target (in scope)
             var authorized = await session.IsUserAuthorizedAsync("callTool", "mcp-github__get_repo", httpContext);

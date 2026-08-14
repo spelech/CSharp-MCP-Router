@@ -33,13 +33,16 @@ namespace McpRouter.Core.Database
         public DbConnectionFactory(IConfiguration config)
         {
             _provider = config["DB_PROVIDER"]?.ToLower() ?? "sqlite";
-            _connectionString = config.GetConnectionString("DefaultConnection") ?? "";
+            _connectionString = config.GetConnectionString("DefaultConnection")
+                ?? config.GetConnectionString("Sqlite")
+                ?? config["ConnectionStrings:DefaultConnection"]
+                ?? config["ConnectionStrings:Sqlite"]
+                ?? "";
             
             if (_provider == "sqlite" && string.IsNullOrEmpty(_connectionString))
             {
                 var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");
-                var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(config);
-                _connectionString = $"Data Source={dbPath};Password={encryptionKey}";
+                _connectionString = $"Data Source={dbPath};";
             }
         }
 

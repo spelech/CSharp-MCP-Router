@@ -72,8 +72,8 @@ namespace McpRouter.Tests
             conn.Open();
             var entry = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT * FROM AuditLogs WHERE RequestId = 'req-1';");
             Assert.NotNull(entry);
-            Assert.Equal("steve@local", (string)entry.UserPrincipalName);
-            Assert.Equal("list_containers", (string)entry.ItemName);
+            Assert.Equal("steve@local", (string)entry!.UserPrincipalName);
+            Assert.Equal("list_containers", (string)entry!.ItemName);
         }
 
         [Fact]
@@ -86,9 +86,9 @@ namespace McpRouter.Tests
             conn.Open();
             var entry = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT * FROM AdminAuditLogs WHERE Username = 'steve';");
             Assert.NotNull(entry);
-            Assert.Equal("CreateAppKey", (string)entry.Action);
-            Assert.Equal("key-123", (string)entry.Target);
-            Assert.Equal(1L, (long)entry.Success);
+            Assert.Equal("CreateAppKey", (string)entry!.Action);
+            Assert.Equal("key-123", (string)entry!.Target);
+            Assert.Equal(1L, (long)entry!.Success);
         }
 
         [Fact]

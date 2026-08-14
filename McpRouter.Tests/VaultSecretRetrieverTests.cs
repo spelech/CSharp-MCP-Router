@@ -22,11 +22,11 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        public async Task EnsureVaultClientAsync_ThrowsArgumentException_WhenAddressNotHttps()
+        public async Task EnsureVaultClientAsync_ThrowsArgumentException_WhenAddressInvalidScheme()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
-                { "Vault:Address", "http://vault.local:8200" },
+                { "Vault:Address", "ftp://vault.local:8200" },
                 { "Vault:RoleId", "role-1" },
                 { "Vault:SecretId", "secret-1" }
             }).Build();

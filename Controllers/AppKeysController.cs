@@ -31,6 +31,12 @@ namespace McpRouter.Controllers
             IConfiguration config,
             McpRouter.Core.Logging.IAuditLogger auditLogger,
             ICredentialService credentialService)
+        {
+            _appKeyRepository = appKeyRepository;
+            _settingRepository = settingRepository;
+            _config = config;
+            _auditLogger = auditLogger;
+            _credentialService = credentialService;
         }
 
         private async Task<McpRouter.Core.Identity.UserIdentityContext> GetIdentityAsync()
@@ -172,6 +178,8 @@ namespace McpRouter.Controllers
                         return BadRequest(new { error = $"You have reached your personal app-key limit of {userMax}. Please revoke an existing key first." });
                     }
                 }
+
+                var scopes = model.Scopes ?? new List<string> { "all" };
 
                 var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
                     model.Name,

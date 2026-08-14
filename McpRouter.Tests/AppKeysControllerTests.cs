@@ -9,7 +9,7 @@ using Dapper;
 using McpRouter.Controllers;
 using McpRouter.Core.Database;
 using McpRouter.Core.Identity;
-using McpRouter.Models;
+using McpRouter.Services;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
@@ -26,7 +26,8 @@ namespace McpRouter.Tests
         {
             private readonly IDbConnection _inner;
             public NonDisposingConnection(IDbConnection inner) => _inner = inner;
-            public string ConnectionString { get => _inner.ConnectionString; set => _inner.ConnectionString = value; }
+            [System.Diagnostics.CodeAnalysis.AllowNull]
+            public string ConnectionString { get => _inner.ConnectionString ?? string.Empty; set => _inner.ConnectionString = value ?? string.Empty; }
             public int ConnectionTimeout => _inner.ConnectionTimeout;
             public string Database => _inner.Database;
             public ConnectionState State => _inner.State;
@@ -53,6 +54,7 @@ namespace McpRouter.Tests
                     Id TEXT PRIMARY KEY,
                     Name TEXT,
                     Username TEXT,
+                    OwnerSid TEXT DEFAULT '',
                     KeyPrefix TEXT,
                     EncryptedKey TEXT,
                     ScopesJson TEXT DEFAULT '[]',
@@ -65,7 +67,7 @@ namespace McpRouter.Tests
                     UserMaxKeys INTEGER DEFAULT 5
                 );");
 
-            _rawConnection.Execute("INSERT INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('global', 100, 5);");
+            _rawConnection.Execute("INSERT INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 100, 5);");
 
             var mockFactory = new Mock<IDbConnectionFactory>();
             mockFactory.Setup(f => f.CreateConnection()).Returns(() => new NonDisposingConnection(_rawConnection));
@@ -87,7 +89,9 @@ namespace McpRouter.Tests
 
         private AppKeysController CreateController(string username = "alice", string role = "Admin")
         {
-            var controller = new AppKeysController(_dbFactory, _config, new Mock<McpRouter.Core.Logging.IAuditLogger>().Object);
+            var repo = new DatabaseRepository(_dbFactory);
+            var credSvc = new CredentialService(_dbFactory);
+            var controller = new AppKeysController(repo, repo, _config, new Mock<McpRouter.Core.Logging.IAuditLogger>().Object, credSvc);
 
             var services = new ServiceCollection();
             services.AddSingleton(_config);
@@ -235,7 +239,9 @@ namespace McpRouter.Tests
             failingFactory.Setup(f => f.CreateConnection()).Returns(mockConn.Object);
             failingFactory.Setup(f => f.ProviderName).Returns("sqlite");
 
-            var controller = new AppKeysController(failingFactory.Object, _config, new Mock<McpRouter.Core.Logging.IAuditLogger>().Object);
+            var failingRepo = new DatabaseRepository(failingFactory.Object);
+            var failingCredSvc = new CredentialService(failingFactory.Object);
+            var controller = new AppKeysController(failingRepo, failingRepo, _config, new Mock<McpRouter.Core.Logging.IAuditLogger>().Object, failingCredSvc);
             var services = new ServiceCollection();
             services.AddSingleton(_config);
             services.AddLogging();
