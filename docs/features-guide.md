@@ -142,6 +142,8 @@ The router supports fine-grained, scoped AppKeys and Machine Client credentials 
 - **Dynamic Membership**: Category scopes evaluate server memberships in real time from the database. Adding or removing a category from a server takes effect immediately without needing to re-issue or recreate keys.
 - **Creation Validation**: When creating AppKeys or Client credentials, `category:<name>` scopes are validated against registered server categories. Unknown or empty categories are rejected (400 Bad Request) unless provisioned by an administrator.
 
+For complete scope syntax rules, multi-stage evaluation pipelines, cryptographic hashing, and persona configuration recipes, see the canonical [**AppKey Scopes & Authorization Guide**](appkey-scopes.md).
+
 ### CORS & Cross-Origin Security Configuration
 By default, the gateway restricts cross-origin request access to standard safe localhost development origins (`http://localhost:3000`, `http://localhost:5000`, `https://localhost:5001`) to protect your local environment from cross-site request forgery and malicious third-party websites.
 
