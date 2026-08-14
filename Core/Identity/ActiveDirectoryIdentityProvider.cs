@@ -3,6 +3,7 @@ using System.Linq;
 using System.Security.Claims;
 using System.Security.Principal;
 using System.Threading.Tasks;
+using McpRouter.Core.Database;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
@@ -12,11 +13,18 @@ namespace McpRouter.Core.Identity
     {
         private readonly IConfiguration? _configuration;
         private readonly ILdapService? _ldapService;
+        private readonly IAuthProviderRepository? _authRepo;
 
         public ActiveDirectoryIdentityProvider(IConfiguration? configuration = null, ILdapService? ldapService = null)
+            : this(configuration, ldapService, null)
+        {
+        }
+
+        public ActiveDirectoryIdentityProvider(IConfiguration? configuration, ILdapService? ldapService, IAuthProviderRepository? authRepo)
         {
             _configuration = configuration;
             _ldapService = ldapService;
+            _authRepo = authRepo;
         }
 
         public string ProviderName => "ActiveDirectory";
@@ -25,11 +33,32 @@ namespace McpRouter.Core.Identity
         {
             var config = _configuration ?? (httpContext.RequestServices?.GetService(typeof(IConfiguration)) as IConfiguration);
             var ldapService = _ldapService ?? (httpContext.RequestServices?.GetService(typeof(ILdapService)) as ILdapService);
+            var authRepo = _authRepo ?? (httpContext.RequestServices?.GetService(typeof(IAuthProviderRepository)) as IAuthProviderRepository);
 
             if (!TrustedProxyHelper.IsTrustedProxy(httpContext, config))
             {
                 TrustedProxyHelper.StripUntrustedHeaders(httpContext);
                 return new UserIdentityContext("anonymous", ProviderName, new List<string>());
+            }
+
+            if (authRepo != null)
+            {
+                try
+                {
+                    var dbAuthProviders = await authRepo.GetAuthProvidersAsync();
+                    var adDb = dbAuthProviders?.FirstOrDefault(p =>
+                        string.Equals(p.ProviderName, "ActiveDirectory", System.StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(p.ProviderName, "LDAP", System.StringComparison.OrdinalIgnoreCase));
+
+                    if (adDb != null && !adDb.IsEnabled)
+                    {
+                        return new UserIdentityContext("anonymous", ProviderName, new List<string>());
+                    }
+                }
+                catch
+                {
+                    // Fallback to standard flow
+                }
             }
 
             if (httpContext.User.Identity != null && httpContext.User.Identity.IsAuthenticated)
@@ -74,7 +103,7 @@ namespace McpRouter.Core.Identity
                         if (ldapSids != null && ldapSids.Count > 0)
                         {
                             sids.AddRange(ldapSids);
-                            
+
                             // If primary SID is missing, take the first SID returned by LDAP
                             if (string.IsNullOrEmpty(sid))
                             {

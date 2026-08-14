@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using McpRouter.Models;
 namespace McpRouter.CustomTools
 {
-public static class CustomToolRegistry
+    public static class CustomToolRegistry
     {
         private static readonly Dictionary<string, ICustomTool> _tools = new();
 

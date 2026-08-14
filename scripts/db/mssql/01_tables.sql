@@ -103,7 +103,7 @@ BEGIN
         [DisplayName]         NVARCHAR(100) NOT NULL,
         [UserHeader]          VARCHAR(100) NULL DEFAULT 'Remote-User',
         [GroupsHeader]        VARCHAR(100) NULL DEFAULT 'Remote-Groups',
-        [ConfigJson]          NVARCHAR(MAX) NULL,
+        [EncryptedConfigJson] NVARCHAR(MAX) NULL,
         [IsEnabled]           BIT NOT NULL DEFAULT 1,
         [UpdatedAt]           DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );

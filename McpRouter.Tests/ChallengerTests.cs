@@ -110,7 +110,8 @@ namespace McpRouter.Tests
 
                 try
                 {
-                    _currentChunk = await Task.Run(() => {
+                    _currentChunk = await Task.Run(() =>
+                    {
                         _queue.TryTake(out var chunk, -1);
                         return chunk;
                     }, cancellationToken);
@@ -211,7 +212,7 @@ namespace McpRouter.Tests
             var embeddingMock = new Mock<IEmbeddingService>();
             var session = new ClientSession("session-id", null!, new List<McpServer>(), null!, embeddingMock.Object, loggerMock.Object);
             var methodInfo = typeof(ClientSession).GetMethod("RewriteRequestJson", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-            
+
             // 1. Test batch request rewriting
             var batchJson = "[{\"jsonrpc\":\"2.0\",\"method\":\"tools/call\",\"params\":{\"name\":\"serverId__toolName\"}}]";
             var rewrittenBatch = (string)methodInfo!.Invoke(session, new object[] { batchJson, "name", "toolName" })!;
@@ -235,7 +236,7 @@ namespace McpRouter.Tests
             // if (path.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) && 
             //     !path.StartsWith("/api/register", StringComparison.OrdinalIgnoreCase) && 
             //     !path.StartsWith("/api/me", StringComparison.OrdinalIgnoreCase))
-            
+
             var testPaths = new[] { "/api/clients", "/API/clients", "/Api/clients", "/api/../api/clients" };
             var results = new Dictionary<string, int>();
             var nextCalledResults = new Dictionary<string, bool>();
@@ -244,7 +245,7 @@ namespace McpRouter.Tests
             {
                 var context = new DefaultHttpContext();
                 context.Request.Path = path;
-                
+
                 bool nextCalled = false;
                 RequestDelegate next = (ctx) =>
                 {
@@ -254,8 +255,8 @@ namespace McpRouter.Tests
 
                 // Simulate Middleware logic from Program.cs
                 var p = context.Request.Path.Value ?? string.Empty;
-                if (p.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) && 
-                    !p.StartsWith("/api/register", StringComparison.OrdinalIgnoreCase) && 
+                if (p.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) &&
+                    !p.StartsWith("/api/register", StringComparison.OrdinalIgnoreCase) &&
                     !p.StartsWith("/api/me", StringComparison.OrdinalIgnoreCase))
                 {
                     var user = context.Request.Headers["Remote-User"].ToString();
@@ -280,7 +281,7 @@ namespace McpRouter.Tests
             // Assert: All variations should be blocked (401) and next not called
             results["/api/clients"].Should().Be(401);
             nextCalledResults["/api/clients"].Should().BeFalse();
-            
+
             results["/API/clients"].Should().Be(401);
             nextCalledResults["/API/clients"].Should().BeFalse();
             results["/Api/clients"].Should().Be(401);
@@ -292,14 +293,14 @@ namespace McpRouter.Tests
         {
             // Verify that SendRequestAsync times out cleanly (throws TimeoutException)
             // and removes the pending request from dictionary instead of leaking.
-            var server = new McpServer 
-            { 
-                Id = "backend1", 
-                DisplayName = "Backend 1", 
-                Url = "http://backend1/mcp", 
+            var server = new McpServer
+            {
+                Id = "backend1",
+                DisplayName = "Backend 1",
+                Url = "http://backend1/mcp",
                 Type = "sse", // SSE type uses background reader and TaskCompletionSource
                 SecretProvider = "None",
-                Enabled = true 
+                Enabled = true
             };
 
             var mockHandler = new MockHttpMessageHandler();
@@ -327,8 +328,9 @@ namespace McpRouter.Tests
             // Set RequestTimeout to a short duration for the test to run fast
             conn.RequestTimeout = TimeSpan.FromMilliseconds(200);
             await conn.ConnectAsync();
-            
-            conn.StartReader(async (msg) => {
+
+            conn.StartReader(async (msg) =>
+            {
                 await Task.CompletedTask;
             });
 
@@ -337,7 +339,7 @@ namespace McpRouter.Tests
 
             // Send request - since no response message will be sent, it should time out
             var sendTask = conn.SendRequestAsync("initialize", "{\"jsonrpc\":\"2.0\",\"id\":\"test-id\",\"method\":\"initialize\"}");
-            
+
             // Assert that it throws TimeoutException
             await Assert.ThrowsAsync<TimeoutException>(async () => await sendTask);
 
@@ -350,14 +352,14 @@ namespace McpRouter.Tests
         {
             // Verify that SendRequestAsync succeeds (does not hang) if the response contains a 'method' property,
             // because JsonRpcMessageConverter correctly prioritizes response indicators over 'method'.
-            var server = new McpServer 
-            { 
-                Id = "backend1", 
-                DisplayName = "Backend 1", 
-                Url = "http://backend1/mcp", 
+            var server = new McpServer
+            {
+                Id = "backend1",
+                DisplayName = "Backend 1",
+                Url = "http://backend1/mcp",
                 Type = "sse",
                 SecretProvider = "None",
-                Enabled = true 
+                Enabled = true
             };
 
             var mockHandler = new MockHttpMessageHandler();
@@ -394,7 +396,8 @@ namespace McpRouter.Tests
             await conn.ConnectAsync();
 
             var messageReceivedSource = new TaskCompletionSource<bool>();
-            conn.StartReader(async (msg) => {
+            conn.StartReader(async (msg) =>
+            {
                 if (msg is JsonRpcResponse response && response.Id != null)
                 {
                     var idStr = response.Id.ToString();
@@ -430,14 +433,14 @@ namespace McpRouter.Tests
         public async Task SseBackend_Notification_IsForwardedToClient_WithAllFieldsIntact()
         {
             // Arrange
-            var server = new McpServer 
-            { 
-                Id = "backend_sse", 
-                DisplayName = "SSE Backend", 
-                Url = "http://backend_sse/mcp", 
+            var server = new McpServer
+            {
+                Id = "backend_sse",
+                DisplayName = "SSE Backend",
+                Url = "http://backend_sse/mcp",
                 Type = "sse", // Using Type = sse to trigger StartReader
                 SecretProvider = "None",
-                Enabled = true 
+                Enabled = true
             };
 
             var mockHandler = new MockHttpMessageHandler();
@@ -447,7 +450,7 @@ namespace McpRouter.Tests
             var postReceived = new TaskCompletionSource<bool>();
             // Setup SSE stream that sends an initialize response, and then a notification
             var notificationPayload = "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/logMessage\",\"params\":{\"level\":\"info\",\"logger\":\"test\",\"message\":\"Hello from SSE!\"}}";
-            
+
             mockHandler.Handler = async (req) =>
             {
                 if (req.Method == HttpMethod.Get)
@@ -495,7 +498,7 @@ namespace McpRouter.Tests
             output.Should().Contain("notifications/logMessage");
             output.Should().Contain("\"level\":\"info\"");
             output.Should().Contain("\"message\":\"Hello from SSE!\"");
-            
+
             // Clean up
             session.Close();
         }
@@ -503,14 +506,14 @@ namespace McpRouter.Tests
         [Fact]
         public async Task AsynchronousRouting_HighVolumeAndPolymorphic_DoesNotHang()
         {
-            var server = new McpServer 
-            { 
-                Id = "backend_stress", 
-                DisplayName = "Stress Backend", 
-                Url = "http://backend_stress/mcp", 
+            var server = new McpServer
+            {
+                Id = "backend_stress",
+                DisplayName = "Stress Backend",
+                Url = "http://backend_stress/mcp",
                 Type = "sse",
                 SecretProvider = "None",
-                Enabled = true 
+                Enabled = true
             };
 
             var mockHandler = new MockHttpMessageHandler();
@@ -553,10 +556,10 @@ namespace McpRouter.Tests
                 _ = Task.Run(async () =>
                 {
                     await Task.Delay(10 + (idx % 5));
-                    var responseObj = new JsonRpcResponse 
-                    { 
-                        Id = id, 
-                        Result = JsonSerializer.Deserialize<JsonElement>($"{{\"index\":{idx},\"ok\":true}}") 
+                    var responseObj = new JsonRpcResponse
+                    {
+                        Id = id,
+                        Result = JsonSerializer.Deserialize<JsonElement>($"{{\"index\":{idx},\"ok\":true}}")
                     };
                     var pendingTcs = conn.PendingRequests.Values
                         .FirstOrDefault(t => t is PendingRequestTcs tracked && tracked.OriginalId?.ToString() == id);
@@ -572,7 +575,7 @@ namespace McpRouter.Tests
             var allTasks = Task.WhenAll(tasks);
             var completed = await Task.WhenAny(allTasks, Task.Delay(5000));
             completed.Should().BeSameAs(allTasks, "High volume async requests should not deadlock or hang.");
-            
+
             var results = await allTasks;
             results.Length.Should().Be(100);
         }
@@ -611,12 +614,12 @@ namespace McpRouter.Tests
         public async Task AuthMiddleware_CaseInsensitivity_BypassAndHeader_Check()
         {
             var bypassPaths = new[] { "/api/register", "/API/REGISTER", "/Api/Register", "/api/me", "/API/ME", "/Api/Me" };
-            
+
             foreach (var path in bypassPaths)
             {
                 var context = new DefaultHttpContext();
                 context.Request.Path = path;
-                
+
                 bool nextCalled = false;
                 RequestDelegate next = (ctx) =>
                 {
@@ -625,8 +628,8 @@ namespace McpRouter.Tests
                 };
 
                 var p = context.Request.Path.Value ?? string.Empty;
-                if (p.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) && 
-                    !p.StartsWith("/api/register", StringComparison.OrdinalIgnoreCase) && 
+                if (p.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) &&
+                    !p.StartsWith("/api/register", StringComparison.OrdinalIgnoreCase) &&
                     !p.StartsWith("/api/me", StringComparison.OrdinalIgnoreCase))
                 {
                     var user = context.Request.Headers["Remote-User"].ToString();
@@ -663,8 +666,8 @@ namespace McpRouter.Tests
                 };
 
                 var p = context.Request.Path.Value ?? string.Empty;
-                if (p.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) && 
-                    !p.StartsWith("/api/register", StringComparison.OrdinalIgnoreCase) && 
+                if (p.StartsWith("/api/", StringComparison.OrdinalIgnoreCase) &&
+                    !p.StartsWith("/api/register", StringComparison.OrdinalIgnoreCase) &&
                     !p.StartsWith("/api/me", StringComparison.OrdinalIgnoreCase))
                 {
                     var user = context.Request.Headers["Remote-User"].ToString();

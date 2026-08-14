@@ -132,11 +132,12 @@ DROP PROCEDURE IF EXISTS _temp_migrate_secretproviders_configjson;
 
 DELIMITER //
 
--- 4. Migrate AuthProviderConfigs.ConfigJson
+-- 4. Migrate AuthProviderConfigs.ConfigJson to EncryptedConfigJson
 DROP PROCEDURE IF EXISTS `_temp_migrate_authproviders_configjson` //
 CREATE PROCEDURE `_temp_migrate_authproviders_configjson`()
 BEGIN
     DECLARE v_ap_exists INT DEFAULT 0;
+    DECLARE v_enc_exists INT DEFAULT 0;
     DECLARE v_cfg_exists INT DEFAULT 0;
 
     SELECT COUNT(*) INTO v_ap_exists
@@ -144,12 +145,21 @@ BEGIN
     WHERE table_schema = DATABASE() AND table_name = 'AuthProviderConfigs';
 
     IF v_ap_exists > 0 THEN
-        SELECT COUNT(*) INTO v_cfg_exists
+        SELECT COUNT(*) INTO v_enc_exists
         FROM information_schema.columns
-        WHERE table_schema = DATABASE() AND table_name = 'AuthProviderConfigs' AND column_name = 'ConfigJson';
+        WHERE table_schema = DATABASE() AND table_name = 'AuthProviderConfigs' AND column_name = 'EncryptedConfigJson';
 
-        IF v_cfg_exists = 0 THEN
-            ALTER TABLE `AuthProviderConfigs` ADD COLUMN `ConfigJson` LONGTEXT NULL;
+        IF v_enc_exists = 0 THEN
+            SELECT COUNT(*) INTO v_cfg_exists
+            FROM information_schema.columns
+            WHERE table_schema = DATABASE() AND table_name = 'AuthProviderConfigs' AND column_name = 'ConfigJson';
+
+            IF v_cfg_exists > 0 THEN
+                ALTER TABLE `AuthProviderConfigs` ADD COLUMN `EncryptedConfigJson` LONGTEXT NULL;
+                UPDATE `AuthProviderConfigs` SET `EncryptedConfigJson` = `ConfigJson` WHERE `EncryptedConfigJson` IS NULL;
+            ELSE
+                ALTER TABLE `AuthProviderConfigs` ADD COLUMN `EncryptedConfigJson` LONGTEXT NULL;
+            END IF;
         END IF;
     END IF;
 END //

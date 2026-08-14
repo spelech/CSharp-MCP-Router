@@ -56,7 +56,7 @@ CREATE TABLE IF NOT EXISTS `AuthProviderConfigs` (
     `DisplayName`         VARCHAR(100) NOT NULL,
     `UserHeader`          VARCHAR(100) NULL DEFAULT 'Remote-User',
     `GroupsHeader`        VARCHAR(100) NULL DEFAULT 'Remote-Groups',
-    `ConfigJson`          LONGTEXT NULL,
+    `EncryptedConfigJson` LONGTEXT NULL,
     `IsEnabled`           TINYINT(1) NOT NULL DEFAULT 1,
     `UpdatedAt`           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

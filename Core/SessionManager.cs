@@ -87,11 +87,11 @@ namespace McpRouter
             using var conn = dbFactory.CreateConnection();
             var rawServers = await conn.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
             var servers = rawServers.ToList();
-            
+
             if (!string.IsNullOrWhiteSpace(targetServerId))
             {
-                servers = servers.Where(s => 
-                    s.Id == targetServerId || 
+                servers = servers.Where(s =>
+                    s.Id == targetServerId ||
                     (s.Categories != null && s.Categories.Contains(targetServerId))
                 ).ToList();
             }

@@ -189,7 +189,7 @@ namespace McpRouter.Tests
         public void AppKeys_Sha256Hashing_VerificationWorks()
         {
             var keyString = "mcp-global-randomstring123456789";
-            
+
             // Hash the key using SHA-256
             using var sha256 = System.Security.Cryptography.SHA256.Create();
             var hashBytes = sha256.ComputeHash(System.Text.Encoding.UTF8.GetBytes(keyString));
@@ -216,7 +216,7 @@ namespace McpRouter.Tests
         {
             var brokenFactoryMock = new Mock<IDbConnectionFactory>();
             brokenFactoryMock.Setup(f => f.CreateConnection()).Throws(new InvalidOperationException("Failed to open connection"));
-            
+
             var logger = new McpRouter.Core.Logging.AuditLogger(brokenFactoryMock.Object);
 
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
