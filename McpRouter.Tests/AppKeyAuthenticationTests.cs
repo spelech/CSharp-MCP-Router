@@ -4,17 +4,17 @@ using System.Data;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Core.Database;
-using McpRouter.Core.Secrets;
+using McpRouter.Infrastructure.Persistence;
+using McpRouter.Infrastructure.Secrets;
 using McpRouter.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using Xunit;
-using McpRouter.Core.Logging;
+using McpRouter.Infrastructure.Logging;
 using System.Net.Http;
-using McpRouter.Services;
+using McpRouter.Core.Routing;
 
 namespace McpRouter.Tests
 {
@@ -217,7 +217,7 @@ namespace McpRouter.Tests
             var brokenFactoryMock = new Mock<IDbConnectionFactory>();
             brokenFactoryMock.Setup(f => f.CreateConnection()).Throws(new InvalidOperationException("Failed to open connection"));
 
-            var logger = new McpRouter.Core.Logging.AuditLogger(brokenFactoryMock.Object);
+            var logger = new McpRouter.Infrastructure.Logging.AuditLogger(brokenFactoryMock.Object);
 
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {

@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using McpRouter.Core.Secrets;
+using McpRouter.Infrastructure.Secrets;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 

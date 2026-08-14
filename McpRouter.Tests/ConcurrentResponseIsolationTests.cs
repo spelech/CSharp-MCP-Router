@@ -13,9 +13,9 @@ using Moq;
 using Xunit;
 using FluentAssertions;
 using McpRouter.Models;
-using McpRouter.Services;
+using McpRouter.Core.Routing;
 using McpRouter;
-using McpRouter.Core.Transports;
+using McpRouter.Infrastructure.Transports;
 
 namespace McpRouter.Tests
 {

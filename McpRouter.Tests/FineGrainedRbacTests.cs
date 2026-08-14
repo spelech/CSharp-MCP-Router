@@ -5,10 +5,10 @@ using System.Net.Http;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Core.Database;
-using McpRouter.Core.Identity;
+using McpRouter.Infrastructure.Persistence;
+using McpRouter.Infrastructure.Identity;
 using McpRouter.Models;
-using McpRouter.Services;
+using McpRouter.Core.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
@@ -65,7 +65,7 @@ namespace McpRouter.Tests
             var composite = new CompositeIdentityProvider(new[] { mockProvider.Object });
             services.AddSingleton(composite);
 
-            var mockAuditLogger = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAuditLogger = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             services.AddSingleton(mockAuditLogger.Object);
 
             var realConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {

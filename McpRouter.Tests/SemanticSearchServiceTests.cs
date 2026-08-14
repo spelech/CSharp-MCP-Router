@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using McpRouter.Core.Routing;
-using McpRouter.Services;
+using McpRouter.Core.Routing;
 using Xunit;
 
 namespace McpRouter.Tests

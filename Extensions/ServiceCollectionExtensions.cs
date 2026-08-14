@@ -8,8 +8,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Builder;
 using McpRouter.Models;
-using McpRouter.Services;
-using McpRouter.Core.Security;
+using McpRouter.Infrastructure.Persistence;
+using McpRouter.Infrastructure.Identity;
+using McpRouter.Infrastructure.Secrets;
+using McpRouter.Infrastructure.Logging;
+using McpRouter.Core.Routing;
+using McpRouter.Components.Servers;
+using McpRouter.Components.Clients;
+using McpRouter.Components.Authorization;
 
 namespace McpRouter.Extensions
 {
@@ -17,7 +23,6 @@ namespace McpRouter.Extensions
     {
         public static void AddMcpRouterServices(this WebApplicationBuilder builder)
         {
-
             // Add logging
             builder.Logging.ClearProviders();
             builder.Logging.AddConsole();
@@ -43,14 +48,14 @@ namespace McpRouter.Extensions
                     if (implInstance != null)
                     {
                         var provider = (ILoggerProvider)implInstance;
-                        builder.Services[i] = ServiceDescriptor.Singleton<ILoggerProvider>(sp => new McpRouter.Core.Logging.SanitizingLoggerProvider(provider));
+                        builder.Services[i] = ServiceDescriptor.Singleton<ILoggerProvider>(sp => new SanitizingLoggerProvider(provider));
                     }
                     else if (implType != null)
                     {
                         builder.Services[i] = ServiceDescriptor.Singleton<ILoggerProvider>(sp =>
                         {
                             var original = (ILoggerProvider)ActivatorUtilities.CreateInstance(sp, implType);
-                            return new McpRouter.Core.Logging.SanitizingLoggerProvider(original);
+                            return new SanitizingLoggerProvider(original);
                         });
                     }
                     else if (implFactory != null)
@@ -58,72 +63,72 @@ namespace McpRouter.Extensions
                         builder.Services[i] = ServiceDescriptor.Singleton<ILoggerProvider>(sp =>
                         {
                             var original = (ILoggerProvider)implFactory(sp);
-                            return new McpRouter.Core.Logging.SanitizingLoggerProvider(original);
+                            return new SanitizingLoggerProvider(original);
                         });
                     }
                 }
             }
 
             // Register Multi-Database Provider Factory (Pure Dapper)
-            builder.Services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory, McpRouter.Core.Database.DbConnectionFactory>();
+            builder.Services.AddSingleton<IDbConnectionFactory, DbConnectionFactory>();
 
             // Register Aligned Repositories (ISettingRepository, IServerRepository, IAppKeyRepository, ISecretProviderRepository, IAuthProviderRepository)
-            builder.Services.AddSingleton<McpRouter.Core.Database.DatabaseRepository>(sp =>
-                new McpRouter.Core.Database.DatabaseRepository(
-                    sp.GetRequiredService<McpRouter.Core.Database.IDbConnectionFactory>(),
+            builder.Services.AddSingleton<DatabaseRepository>(sp =>
+                new DatabaseRepository(
+                    sp.GetRequiredService<IDbConnectionFactory>(),
                     sp.GetService<IConfiguration>()
                 ));
-            builder.Services.AddSingleton<McpRouter.Core.Database.ISettingRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
-            builder.Services.AddSingleton<McpRouter.Core.Database.IServerRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
-            builder.Services.AddSingleton<McpRouter.Core.Database.IAppKeyRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
-            builder.Services.AddSingleton<McpRouter.Core.Database.ISecretProviderRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
-            builder.Services.AddSingleton<McpRouter.Core.Database.IAuthProviderRepository>(sp => sp.GetRequiredService<McpRouter.Core.Database.DatabaseRepository>());
+            builder.Services.AddSingleton<ISettingRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
+            builder.Services.AddSingleton<IServerRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
+            builder.Services.AddSingleton<IAppKeyRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
+            builder.Services.AddSingleton<ISecretProviderRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
+            builder.Services.AddSingleton<IAuthProviderRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
 
             // Register Credential Service
             builder.Services.AddSingleton<ICredentialService, CredentialService>();
 
             // Register Pluggable Identity Providers (Active Directory & Configurable Header Auth)
-            builder.Services.AddSingleton<McpRouter.Core.Identity.ILdapService>(sp =>
-                new McpRouter.Core.Identity.LdapActiveDirectoryService(
+            builder.Services.AddSingleton<ILdapService>(sp =>
+                new LdapActiveDirectoryService(
                     sp.GetRequiredService<IConfiguration>(),
-                    sp.GetRequiredService<Microsoft.Extensions.Logging.ILogger<McpRouter.Core.Identity.LdapActiveDirectoryService>>(),
+                    sp.GetRequiredService<ILogger<LdapActiveDirectoryService>>(),
                     sp.GetService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
-                    sp.GetService<McpRouter.Core.Database.IAuthProviderRepository>()
+                    sp.GetService<IAuthProviderRepository>()
                 ));
             // App-key requests carry no AD/OIDC headers; resolve their owner+SID first so audit rows are attributable.
-            builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider, McpRouter.Core.Identity.AppKeyIdentityProvider>();
-            builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider>(sp =>
-                new McpRouter.Core.Identity.ActiveDirectoryIdentityProvider(
+            builder.Services.AddSingleton<IIdentityProvider, AppKeyIdentityProvider>();
+            builder.Services.AddSingleton<IIdentityProvider>(sp =>
+                new ActiveDirectoryIdentityProvider(
                     sp.GetService<IConfiguration>(),
-                    sp.GetService<McpRouter.Core.Identity.ILdapService>(),
-                    sp.GetService<McpRouter.Core.Database.IAuthProviderRepository>()
+                    sp.GetService<ILdapService>(),
+                    sp.GetService<IAuthProviderRepository>()
                 ));
-            builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider>(sp =>
-                new McpRouter.Core.Identity.HeaderIdentityProvider(
+            builder.Services.AddSingleton<IIdentityProvider>(sp =>
+                new HeaderIdentityProvider(
                     sp.GetService<IConfiguration>(),
-                    sp.GetService<McpRouter.Core.Database.IAuthProviderRepository>()
+                    sp.GetService<IAuthProviderRepository>()
                 ));
-            builder.Services.AddSingleton<McpRouter.Core.Identity.IIdentityProvider>(sp =>
-                new McpRouter.Core.Identity.OidcIdentityProvider(
+            builder.Services.AddSingleton<IIdentityProvider>(sp =>
+                new OidcIdentityProvider(
                     sp.GetService<IConfiguration>(),
-                    sp.GetService<McpRouter.Core.Database.IAuthProviderRepository>()
+                    sp.GetService<IAuthProviderRepository>()
                 ));
-            builder.Services.AddSingleton<McpRouter.Core.Identity.CompositeIdentityProvider>();
+            builder.Services.AddSingleton<CompositeIdentityProvider>();
 
             // Register Secret Retrievers (HashiCorp Vault, Windows Registry & Environment)
             builder.Services.AddMemoryCache();
-            builder.Services.AddSingleton<McpRouter.Core.Secrets.ISecretRetriever>(sp =>
-                new McpRouter.Core.Secrets.VaultSecretRetriever(
+            builder.Services.AddSingleton<ISecretRetriever>(sp =>
+                new VaultSecretRetriever(
                     sp.GetRequiredService<IConfiguration>(),
                     sp.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
-                    sp.GetService<McpRouter.Core.Database.ISecretProviderRepository>()
+                    sp.GetService<ISecretProviderRepository>()
                 ));
-            builder.Services.AddSingleton<McpRouter.Core.Secrets.ISecretRetriever, McpRouter.Core.Secrets.WindowsRegistrySecretRetriever>();
-            builder.Services.AddSingleton<McpRouter.Core.Secrets.ISecretRetriever, McpRouter.Core.Secrets.EnvironmentSecretRetriever>();
-            builder.Services.AddSingleton<McpRouter.Core.Secrets.CompositeSecretRetriever>();
+            builder.Services.AddSingleton<ISecretRetriever, WindowsRegistrySecretRetriever>();
+            builder.Services.AddSingleton<ISecretRetriever, EnvironmentSecretRetriever>();
+            builder.Services.AddSingleton<CompositeSecretRetriever>();
 
             // Register Observability & Audit Logger
-            builder.Services.AddSingleton<McpRouter.Core.Logging.IAuditLogger, McpRouter.Core.Logging.AuditLogger>();
+            builder.Services.AddSingleton<IAuditLogger, AuditLogger>();
 
             // Register OpenIddict & Controllers
             builder.Services.AddMcpOpenIddict(builder.Environment, builder.Configuration);
@@ -193,7 +198,6 @@ namespace McpRouter.Extensions
                     }
                 });
             });
-
         }
     }
 }

@@ -1,9 +1,12 @@
 using System;
 using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Controllers;
-using McpRouter.Core.Database;
-using McpRouter.Core.Logging;
+using McpRouter.Components.Clients;
+using McpRouter.Components.AppKeys;
+using McpRouter.Components.Providers;
+using McpRouter.Components.Authorization;
+using McpRouter.Infrastructure.Persistence;
+using McpRouter.Infrastructure.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Moq;

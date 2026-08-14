@@ -14,10 +14,10 @@ using Moq;
 using Xunit;
 using FluentAssertions;
 using McpRouter.Models;
-using McpRouter.Services;
-using McpRouter.Core.Logging;
-using McpRouter.Core.Identity;
-using McpRouter.Core.Database;
+using McpRouter.Core.Routing;
+using McpRouter.Infrastructure.Logging;
+using McpRouter.Infrastructure.Identity;
+using McpRouter.Infrastructure.Persistence;
 using Dapper;
 using Microsoft.Extensions.DependencyInjection;
 using McpRouter;
@@ -92,7 +92,7 @@ namespace McpRouter.Tests
                     b.PrimaryHandler = new SocketsHttpHandler
                     {
                         AllowAutoRedirect = false,
-                        ConnectCallback = McpRouter.Core.Security.SecurityValidationHelper.ValidatingConnectCallback
+                        ConnectCallback = McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback
                     };
                 });
             });
@@ -1034,7 +1034,7 @@ namespace McpRouter.Tests
                 { "DB_ENCRYPTION_KEY", "TestKey" }
             }).Build();
             services.AddSingleton<IConfiguration>(realConfig);
-            services.AddSingleton<McpRouter.Core.Database.IDbConnectionFactory>(_dbFactory);
+            services.AddSingleton<McpRouter.Infrastructure.Persistence.IDbConnectionFactory>(_dbFactory);
             context.RequestServices = services.BuildServiceProvider();
 
             var session = new ClientSession("test-session", context.Response, servers, httpClient, new Mock<IEmbeddingService>().Object, sessionManager, logger);

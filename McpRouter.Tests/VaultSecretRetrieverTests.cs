@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Security;
 using System.Threading.Tasks;
-using McpRouter.Core.Secrets;
+using McpRouter.Infrastructure.Secrets;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Moq;

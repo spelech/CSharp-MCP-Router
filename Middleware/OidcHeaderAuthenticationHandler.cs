@@ -10,7 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using McpRouter.Core.Identity;
+using McpRouter.Infrastructure.Identity;
 
 namespace McpRouter.Middleware
 {

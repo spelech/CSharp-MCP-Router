@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading.Tasks;
-using McpRouter.Core.Identity;
+using McpRouter.Infrastructure.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -160,10 +160,10 @@ namespace McpRouter.Tests
             handshakeContext.RequestServices = sp;
             handshakeContext.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
 
-            var servers = new List<McpRouter.Models.McpServer>();
+            var servers = new List<McpServer>();
             var httpClient = new System.Net.Http.HttpClient();
             var loggerMock = new Moq.Mock<Microsoft.Extensions.Logging.ILogger>();
-            var embeddingMock = new Moq.Mock<McpRouter.Services.IEmbeddingService>();
+            var embeddingMock = new Moq.Mock<IEmbeddingService>();
 
             var session = new ClientSession("test-sse-session", handshakeContext.Response, servers, httpClient, embeddingMock.Object, loggerMock.Object);
 
@@ -234,8 +234,8 @@ namespace McpRouter.Tests
             var adminIdentity = new UserIdentityContext("admin_user", "Test", new List<string> { "Administrators" }, Sid: "", Sids: new List<string> { "S-1-5-32-544" });
             var nonAdminIdentity = new UserIdentityContext("admin", "Test", new List<string> { "Administrators", "full_admin" }, Sid: "", Sids: new List<string>());
 
-            Assert.True(McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(adminIdentity, config));
-            Assert.False(McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(nonAdminIdentity, config));
+            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(adminIdentity, config));
+            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(nonAdminIdentity, config));
         }
 
         [Fact]
@@ -257,7 +257,7 @@ namespace McpRouter.Tests
 
             Assert.Equal("admin", identity.Username);
             Assert.Empty(identity.AllSids);
-            Assert.False(McpRouter.Core.Security.SecurityValidationHelper.IsAdmin(identity, config));
+            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
         }
 
         [Fact]
@@ -364,7 +364,7 @@ namespace McpRouter.Tests
         public async Task ConnectAndInitializeBackendAsync_WithVaultServer_ResolvesRetrieverFromRootServices_WhenHttpContextIsNull()
         {
             // Arrange
-            var server = new McpRouter.Models.McpServer
+            var server = new McpServer
             {
                 Id = "vault-server",
                 Enabled = true,
@@ -373,12 +373,12 @@ namespace McpRouter.Tests
                 SecretProvider = "Vault"
             };
 
-            var mockInnerRetriever = new Mock<McpRouter.Core.Secrets.ISecretRetriever>();
+            var mockInnerRetriever = new Mock<ISecretRetriever>();
             mockInnerRetriever.Setup(r => r.ProviderName).Returns("Vault");
             mockInnerRetriever.Setup(r => r.GetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
                 .ReturnsAsync("dummy-secret-value");
 
-            var realComposite = new McpRouter.Core.Secrets.CompositeSecretRetriever(new List<McpRouter.Core.Secrets.ISecretRetriever> { mockInnerRetriever.Object }, null);
+            var realComposite = new CompositeSecretRetriever(new List<ISecretRetriever> { mockInnerRetriever.Object }, null);
 
             var services = new ServiceCollection();
             services.AddSingleton(realComposite);
@@ -388,9 +388,9 @@ namespace McpRouter.Tests
             var session = new ClientSession(
                 "session-id",
                 null!, // clientResponse is null
-                new List<McpRouter.Models.McpServer> { server },
+                new List<McpServer> { server },
                 new HttpClient(),
-                new Mock<McpRouter.Services.IEmbeddingService>().Object,
+                new Mock<IEmbeddingService>().Object,
                 null,
                 new Mock<Microsoft.Extensions.Logging.ILogger<ClientSession>>().Object,
                 rootServices

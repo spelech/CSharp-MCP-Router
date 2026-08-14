@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using McpRouter.Core.Identity;
+using McpRouter.Infrastructure.Identity;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moq;
