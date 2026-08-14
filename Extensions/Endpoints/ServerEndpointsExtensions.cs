@@ -126,6 +126,7 @@ namespace McpRouter.Extensions
                 if (!string.IsNullOrEmpty(update.DisplayName)) server.DisplayName = update.DisplayName;
 
                 var allowedTypes = new[] { "sse", "http", "streamable", "stdio", "custom" };
+                var targetType = (server.Type ?? "sse").ToLowerInvariant();
                 if (!string.IsNullOrEmpty(update.Type))
                 {
                     var lowerType = update.Type.ToLowerInvariant();
@@ -135,26 +136,30 @@ namespace McpRouter.Extensions
                         _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, typeErr);
                         return Results.BadRequest(new { error = typeErr });
                     }
-                    server.Type = lowerType;
+                    targetType = lowerType;
                 }
 
-                if (!string.IsNullOrEmpty(update.Url))
+                var targetUrl = !string.IsNullOrEmpty(update.Url) ? update.Url : server.Url;
+
+                if (targetType == "stdio")
                 {
-                    if (server.Type == "stdio")
-                    {
-                        if (!IsValidStdioCommand(update.Url, out var err))
-                        {
-                            _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, err);
-                            return Results.BadRequest(new { error = err });
-                        }
-                    }
-                    else if (server.Type != "custom" && !IsValidServerUrl(update.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
+                    if (!IsValidStdioCommand(targetUrl, out var err))
                     {
                         _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, err);
                         return Results.BadRequest(new { error = err });
                     }
-                    server.Url = update.Url;
                 }
+                else if (targetType != "custom")
+                {
+                    if (!IsValidServerUrl(targetUrl, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
+                    {
+                        _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, err);
+                        return Results.BadRequest(new { error = err });
+                    }
+                }
+
+                server.Type = targetType;
+                server.Url = targetUrl;
                 if (update.SecretProvider != null) server.SecretProvider = update.SecretProvider;
                 if (update.SecretItemKey != null) server.SecretItemKey = update.SecretItemKey;
                 if (!string.IsNullOrEmpty(update.AuthShape)) server.AuthShape = update.AuthShape;
@@ -338,6 +343,14 @@ namespace McpRouter.Extensions
                 return false;
             }
 
+            var trimmed = commandLine.Trim();
+            if (trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                errorMessage = "STDIO command cannot be an HTTP or HTTPS URL.";
+                return false;
+            }
+
             var parsed = McpRouter.Core.Transports.StdioTransport.ParseCommandLine(commandLine);
             if (parsed.Count == 0)
             {
@@ -347,9 +360,9 @@ namespace McpRouter.Extensions
 
             var executable = parsed[0];
             char[] unsafeChars = { ';', '&', '|', '<', '>', '\n', '\r', '`', '$', '*' };
-            if (executable.Any(c => unsafeChars.Contains(c)))
+            if (executable.Any(c => unsafeChars.Contains(c)) || parsed.Any(p => p.Any(c => unsafeChars.Contains(c))))
             {
-                errorMessage = $"Command executable contains disallowed unsafe characters.";
+                errorMessage = $"Command contains disallowed unsafe characters.";
                 return false;
             }
 

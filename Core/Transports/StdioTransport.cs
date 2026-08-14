@@ -27,6 +27,8 @@ namespace McpRouter.Core.Transports
         private Task? _readerTask;
         private Task? _stderrTask;
         private int _exitHandled = 0;
+        private bool _disposed = false;
+        private string? _resolvedSecret;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -94,28 +96,19 @@ namespace McpRouter.Core.Transports
             return secret;
         }
 
-        private string ExpandVariables(string input, string? resolvedToken, string? secretItemKey)
+        private string SanitizeLogOutput(string? text)
         {
-            if (string.IsNullOrEmpty(input)) return input;
-
-            if (!string.IsNullOrEmpty(secretItemKey) && !string.IsNullOrEmpty(resolvedToken))
+            if (string.IsNullOrEmpty(text)) return text ?? string.Empty;
+            var sanitized = McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(text);
+            if (!string.IsNullOrEmpty(_resolvedSecret) && _resolvedSecret.Length > 2)
             {
-                input = input.Replace($"%{secretItemKey}%", resolvedToken, StringComparison.OrdinalIgnoreCase);
-                input = input.Replace($"${secretItemKey}", resolvedToken, StringComparison.OrdinalIgnoreCase);
+                sanitized = sanitized.Replace(_resolvedSecret, "[REDACTED]");
             }
-
-            foreach (System.Collections.DictionaryEntry de in Environment.GetEnvironmentVariables())
+            if (!string.IsNullOrEmpty(_server.ApiKey) && _server.ApiKey.Length > 2)
             {
-                var key = de.Key?.ToString();
-                var val = de.Value?.ToString();
-                if (!string.IsNullOrEmpty(key) && val != null)
-                {
-                    input = input.Replace($"%{key}%", val, StringComparison.OrdinalIgnoreCase);
-                    input = input.Replace($"${key}", val, StringComparison.OrdinalIgnoreCase);
-                }
+                sanitized = sanitized.Replace(_server.ApiKey, "[REDACTED]");
             }
-
-            return input;
+            return sanitized;
         }
 
         public static List<string> ParseCommandLine(string commandLine)
@@ -170,17 +163,22 @@ namespace McpRouter.Core.Transports
             return args;
         }
 
-        private void ValidateSecurityPolicy(string executable)
+        private void ValidateSecurityPolicy(string executable, IEnumerable<string> arguments)
         {
             if (string.IsNullOrWhiteSpace(executable))
             {
                 throw new System.Security.SecurityException("Command/executable is empty or invalid.");
             }
 
-            char[] unsafeChars = { ';', '&', '|', '<', '>', '\n', '\r', '`', '$', '*' };
-            if (executable.Any(c => unsafeChars.Contains(c)))
+            if (executable.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || executable.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
             {
-                throw new System.Security.SecurityException($"Command '{executable}' contains disallowed unsafe characters.");
+                throw new System.Security.SecurityException("STDIO command cannot be an HTTP or HTTPS URL.");
+            }
+
+            char[] unsafeChars = { ';', '&', '|', '<', '>', '\n', '\r', '`', '$', '*' };
+            if (executable.Any(c => unsafeChars.Contains(c)) || arguments.Any(arg => arg.Any(c => unsafeChars.Contains(c))))
+            {
+                throw new System.Security.SecurityException($"Command contains disallowed unsafe characters.");
             }
 
             var lowerExec = Path.GetFileNameWithoutExtension(executable).ToLowerInvariant();
@@ -193,26 +191,17 @@ namespace McpRouter.Core.Transports
 
         public async Task ConnectAsync()
         {
-            string? token = null;
-            try
-            {
-                token = await ResolveTokenAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Failed to resolve secret token for STDIO backend {ServerId}", _server.Id);
-            }
+            // Fail closed on secret resolution error - do not catch and proceed without credentials
+            _resolvedSecret = await ResolveTokenAsync();
 
-            var expandedCommandLine = ExpandVariables(_server.Url, token, _server.SecretItemKey);
-
-            var parsed = ParseCommandLine(expandedCommandLine);
+            var parsed = ParseCommandLine(_server.Url);
             if (parsed.Count == 0)
             {
                 throw new InvalidOperationException("STDIO backend command line is empty.");
             }
 
             var executable = parsed[0];
-            ValidateSecurityPolicy(executable);
+            ValidateSecurityPolicy(executable, parsed.Skip(1));
 
             var startInfo = new System.Diagnostics.ProcessStartInfo
             {
@@ -230,9 +219,12 @@ namespace McpRouter.Core.Transports
                 startInfo.ArgumentList.Add(parsed[i]);
             }
 
-            if (!string.IsNullOrEmpty(_server.SecretItemKey) && !string.IsNullOrEmpty(token))
+            // Secrets are securely passed via environment variables (never in CLI args)
+            if (!string.IsNullOrEmpty(_resolvedSecret))
             {
-                startInfo.Environment[_server.SecretItemKey] = token;
+                var envKey = !string.IsNullOrWhiteSpace(_server.SecretItemKey) ? _server.SecretItemKey : "API_KEY";
+                startInfo.Environment[envKey] = _resolvedSecret;
+                startInfo.Environment["MCP_API_KEY"] = _resolvedSecret;
             }
 
             _logger.LogInformation("Launching STDIO backend process {ServerId}: {Executable}...", _server.Id, executable);
@@ -249,12 +241,17 @@ namespace McpRouter.Core.Transports
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Failed to start STDIO backend process {ServerId} (Command: {Command})", _server.Id, executable);
+                _process?.Dispose();
+                _process = null;
                 throw new InvalidOperationException($"Failed to launch STDIO backend process: {ex.Message}", ex);
             }
 
             if (_process.HasExited)
             {
-                throw new InvalidOperationException($"STDIO backend process exited immediately with code {_process.ExitCode}");
+                var exitCode = _process.ExitCode;
+                _process.Dispose();
+                _process = null;
+                throw new InvalidOperationException($"STDIO backend process exited immediately with code {exitCode}");
             }
         }
 
@@ -264,12 +261,26 @@ namespace McpRouter.Core.Transports
             {
                 try
                 {
-                    while (!_cts.Token.IsCancellationRequested && _process != null && !_process.HasExited)
+                    // Read standard output until EOF (do not break early on HasExited to drain all output)
+                    while (!_cts.Token.IsCancellationRequested && _process != null)
                     {
-                        string? line = await _process.StandardOutput.ReadLineAsync(_cts.Token);
+                        string? line;
+                        try
+                        {
+                            line = await _process.StandardOutput.ReadLineAsync(_cts.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+                        catch (Exception)
+                        {
+                            break;
+                        }
+
                         if (line == null)
                         {
-                            break; // EOF
+                            break; // EOF reached
                         }
 
                         if (string.IsNullOrWhiteSpace(line)) continue;
@@ -290,14 +301,14 @@ namespace McpRouter.Core.Transports
 
                                 if (message is not JsonRpcResponse)
                                 {
-                                    _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(line));
+                                    _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, SanitizeLogOutput(line));
                                 }
                                 await onMessageReceived(message);
                             }
                         }
                         catch (Exception ex)
                         {
-                            _logger.LogError(ex, "Failed to parse STDIO message data: {Data}", line);
+                            _logger.LogError(ex, "Failed to parse STDIO message data: {Data}", SanitizeLogOutput(line));
                         }
                     }
                 }
@@ -319,17 +330,31 @@ namespace McpRouter.Core.Transports
             {
                 try
                 {
-                    while (!_cts.Token.IsCancellationRequested && _process != null && !_process.HasExited)
+                    // Read standard error until EOF (do not break early on HasExited to drain all output)
+                    while (!_cts.Token.IsCancellationRequested && _process != null)
                     {
-                        string? line = await _process.StandardError.ReadLineAsync(_cts.Token);
+                        string? line;
+                        try
+                        {
+                            line = await _process.StandardError.ReadLineAsync(_cts.Token);
+                        }
+                        catch (OperationCanceledException)
+                        {
+                            break;
+                        }
+                        catch (Exception)
+                        {
+                            break;
+                        }
+
                         if (line == null)
                         {
-                            break; // EOF
+                            break; // EOF reached
                         }
 
                         if (!string.IsNullOrWhiteSpace(line))
                         {
-                            _logger.LogWarning("[STDIO Backend {ServerId} Stderr] {Message}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(line));
+                            _logger.LogWarning("[STDIO Backend {ServerId} Stderr] {Message}", _server.Id, SanitizeLogOutput(line));
                         }
                     }
                 }
@@ -374,7 +399,7 @@ namespace McpRouter.Core.Transports
 
             try
             {
-                _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(modifiedBody));
+                _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, SanitizeLogOutput(modifiedBody));
 
                 await _writeLock.WaitAsync(_cts.Token);
                 try
@@ -389,7 +414,7 @@ namespace McpRouter.Core.Transports
 
                 var response = await tcs.Task.WaitAsync(RequestTimeout, _cts.Token);
                 var responseJson = JsonSerializer.Serialize(response, _jsonOptions);
-                _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(responseJson));
+                _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, SanitizeLogOutput(responseJson));
                 return response;
             }
             catch (Exception ex)
@@ -414,7 +439,7 @@ namespace McpRouter.Core.Transports
         {
             if (_process == null || _process.HasExited) return;
 
-            _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] [Notification] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(bodyJson));
+            _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] [Notification] {Payload}", _server.Id, SanitizeLogOutput(bodyJson));
 
             await _writeLock.WaitAsync(_cts.Token);
             try
@@ -432,7 +457,7 @@ namespace McpRouter.Core.Transports
         {
             if (_process == null || _process.HasExited) return;
 
-            _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] [Response] {Payload}", _server.Id, McpRouter.Core.Logging.PiiSanitizer.SanitizePayload(responseJson));
+            _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] [Response] {Payload}", _server.Id, SanitizeLogOutput(responseJson));
 
             await _writeLock.WaitAsync(_cts.Token);
             try
@@ -459,17 +484,17 @@ namespace McpRouter.Core.Transports
                         if (!_process.HasExited)
                         {
                             _logger.LogInformation("Stopping STDIO backend process {ServerId}...", _server.Id);
-                            _process.StandardInput.Close();
+                            try
+                            {
+                                _process.StandardInput.Close();
+                            }
+                            catch { }
 
-                            if (!_process.WaitForExit(3000))
+                            if (!_process.WaitForExit(1000))
                             {
                                 _logger.LogWarning("STDIO backend process {ServerId} did not exit gracefully. Killing process tree...", _server.Id);
                                 _process.Kill(entireProcessTree: true);
                             }
-                        }
-                        else
-                        {
-                            _logger.LogWarning("STDIO backend process {ServerId} exited unexpectedly with code {ExitCode}.", _server.Id, _process.ExitCode);
                         }
                     }
                     catch (Exception ex)
@@ -482,10 +507,48 @@ namespace McpRouter.Core.Transports
 
         public void Dispose()
         {
-            _cts.Cancel();
+            if (_disposed) return;
+            _disposed = true;
+
+            try
+            {
+                _cts.Cancel();
+            }
+            catch { }
+
             HandleProcessExit();
-            _writeLock.Dispose();
-            _cts.Dispose();
+
+            // Wait for reader tasks to drain/complete
+            var readerTasks = new List<Task>();
+            if (_readerTask != null) readerTasks.Add(_readerTask);
+            if (_stderrTask != null) readerTasks.Add(_stderrTask);
+
+            if (readerTasks.Count > 0)
+            {
+                try
+                {
+                    Task.WhenAll(readerTasks).Wait(TimeSpan.FromMilliseconds(1500));
+                }
+                catch { }
+            }
+
+            if (_process != null)
+            {
+                try
+                {
+                    if (!_process.HasExited)
+                    {
+                        _process.Kill(entireProcessTree: true);
+                    }
+                    _process.Dispose();
+                }
+                catch { }
+                _process = null;
+            }
+
+            try { _writeLock.Dispose(); } catch { }
+            try { _cts.Dispose(); } catch { }
         }
     }
 }
+

@@ -237,6 +237,7 @@ namespace McpRouter.Tests
             var logger = new CapturingLogger();
             var stateManager = new JsonRpcStateManager();
             System.Diagnostics.Process proc;
+            int pid;
             using (var transport = new StdioTransport(server, logger, stateManager))
             {
                 await transport.ConnectAsync();
@@ -248,11 +249,20 @@ namespace McpRouter.Tests
                 proc = (System.Diagnostics.Process)procField.GetValue(transport)!;
                 Assert.NotNull(proc);
                 Assert.False(proc.HasExited);
+                pid = proc.Id;
             }
 
-            // After disposing, the process should be killed/terminated
+            // After disposing, the process should be killed/terminated and the instance disposed
             await Task.Delay(500);
-            Assert.True(proc.HasExited);
+            try
+            {
+                var p = System.Diagnostics.Process.GetProcessById(pid);
+                Assert.True(p.HasExited);
+            }
+            catch (ArgumentException)
+            {
+                // Process no longer exists in OS
+            }
         }
 
         [Fact]
@@ -300,6 +310,154 @@ namespace McpRouter.Tests
             Assert.Equal("/path to/script.js", parsed[1]);
             Assert.Equal("--arg=val", parsed[2]);
             Assert.Equal("plain_arg", parsed[3]);
+        }
+
+        [Fact]
+        public async Task StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine()
+        {
+            var scriptPath = GetMockScriptPath();
+            var testSecret = "my_super_secret_env_token_998877";
+            var server = new McpServer
+            {
+                Id = "stdio-env-test",
+                Url = $"node \"{scriptPath}\"",
+                Type = "stdio",
+                Enabled = true,
+                ApiKey = testSecret,
+                SecretItemKey = "TEST_API_KEY"
+            };
+
+            var logger = new CapturingLogger();
+            var stateManager = new JsonRpcStateManager();
+            using var transport = new StdioTransport(server, logger, stateManager);
+
+            await transport.ConnectAsync();
+            transport.StartReader(msg => Task.CompletedTask);
+
+            // Initialize
+            var initReq = "{\"jsonrpc\":\"2.0\",\"id\":\"init-1\",\"method\":\"initialize\",\"params\":{}}";
+            await transport.SendRequestAsync("initialize", initReq);
+
+            // Ask mock script for environment variable TEST_API_KEY
+            var callReq = "{\"jsonrpc\":\"2.0\",\"id\":\"call-env\",\"method\":\"tools/call\",\"params\":{\"name\":\"get_env\",\"arguments\":{\"key\":\"TEST_API_KEY\"}}}";
+            var callResp = await transport.SendRequestAsync("tools/call", callReq);
+            Assert.NotNull(callResp);
+            Assert.Null(callResp.Error);
+            Assert.NotNull(callResp.Result);
+
+            var resultStr = callResp.Result.ToString();
+            Assert.Contains(testSecret, resultStr);
+
+            // Verify process startInfo command arguments do NOT contain the secret
+            var procField = typeof(StdioTransport).GetField("_process", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var proc = (System.Diagnostics.Process)procField!.GetValue(transport)!;
+            Assert.DoesNotContain(testSecret, proc.StartInfo.Arguments);
+            foreach (var arg in proc.StartInfo.ArgumentList)
+            {
+                Assert.DoesNotContain(testSecret, arg);
+            }
+        }
+
+        [Fact]
+        public async Task StdioTransport_ShouldFailClosed_WhenSecretResolutionFails()
+        {
+            var scriptPath = GetMockScriptPath();
+            var server = new McpServer
+            {
+                Id = "stdio-failclosed-test",
+                Url = $"node \"{scriptPath}\"",
+                Type = "stdio",
+                Enabled = true,
+                SecretProvider = "Vault",
+                SecretPath = "secret/data/mcp",
+                SecretField = "api_key"
+            };
+
+            var mockRetriever = new Mock<ISecretRetriever>();
+            mockRetriever.Setup(r => r.GetSecretAsync(It.IsAny<string>(), It.IsAny<string>()))
+                .ThrowsAsync(new System.Security.SecurityException("Vault authentication failed"));
+
+            var logger = new CapturingLogger();
+            var stateManager = new JsonRpcStateManager();
+            using var transport = new StdioTransport(server, logger, stateManager, mockRetriever.Object);
+
+            // ConnectAsync must throw and fail closed without starting the subprocess
+            await Assert.ThrowsAsync<System.Security.SecurityException>(() => transport.ConnectAsync());
+
+            var procField = typeof(StdioTransport).GetField("_process", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            var proc = procField!.GetValue(transport);
+            Assert.Null(proc);
+        }
+
+        [Fact]
+        public async Task StdioTransport_ShouldSanitizeAndMaskSecretsInLogs()
+        {
+            var scriptPath = GetMockScriptPath();
+            var sensitiveKey = "super_secret_token_value_12345";
+            var server = new McpServer
+            {
+                Id = "stdio-mask-test",
+                Url = $"node \"{scriptPath}\"",
+                Type = "stdio",
+                Enabled = true,
+                ApiKey = sensitiveKey,
+                SecretItemKey = "TEST_SECRET"
+            };
+
+            var logger = new CapturingLogger();
+            var stateManager = new JsonRpcStateManager();
+            using var transport = new StdioTransport(server, logger, stateManager);
+
+            await transport.ConnectAsync();
+            transport.StartReader(msg => Task.CompletedTask);
+
+            var initReq = "{\"jsonrpc\":\"2.0\",\"id\":\"init-1\",\"method\":\"initialize\",\"params\":{}}";
+            await transport.SendRequestAsync("initialize", initReq);
+
+            // Call tool that outputs the secret to stderr and stdout
+            var callReq = "{\"jsonrpc\":\"2.0\",\"id\":\"call-leak\",\"method\":\"tools/call\",\"params\":{\"name\":\"leak_secret_tool\"}}";
+            var resp = await transport.SendRequestAsync("tools/call", callReq);
+            Assert.NotNull(resp);
+
+            await Task.Delay(500);
+
+            // Ensure the raw secret does not appear anywhere in the captured logs
+            foreach (var logMsg in logger.LoggedMessages)
+            {
+                Assert.DoesNotContain(sensitiveKey, logMsg);
+            }
+        }
+
+        [Fact]
+        public async Task StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately()
+        {
+            var scriptPath = GetMockScriptPath();
+            var server = new McpServer
+            {
+                Id = "stdio-eof-test",
+                Url = $"node \"{scriptPath}\"",
+                Type = "stdio",
+                Enabled = true
+            };
+
+            var logger = new CapturingLogger();
+            var stateManager = new JsonRpcStateManager();
+            using var transport = new StdioTransport(server, logger, stateManager);
+
+            await transport.ConnectAsync();
+            transport.StartReader(msg => Task.CompletedTask);
+
+            var initReq = "{\"jsonrpc\":\"2.0\",\"id\":\"init-1\",\"method\":\"initialize\",\"params\":{}}";
+            await transport.SendRequestAsync("initialize", initReq);
+
+            // Call exit_after_tool which writes response and exits after 10ms
+            var callReq = "{\"jsonrpc\":\"2.0\",\"id\":\"call-exit\",\"method\":\"tools/call\",\"params\":{\"name\":\"exit_after_tool\"}}";
+            var resp = await transport.SendRequestAsync("tools/call", callReq);
+
+            Assert.NotNull(resp);
+            Assert.Null(resp.Error);
+            Assert.NotNull(resp.Result);
+            Assert.Contains("drained_before_exit", resp.Result.ToString());
         }
     }
 }
