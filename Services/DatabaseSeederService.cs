@@ -145,6 +145,10 @@ namespace McpRouter.Services
                     try { conn.Execute("ALTER TABLE AppKeys ADD COLUMN OwnerSid TEXT DEFAULT ''"); }
                     catch (Exception exOwnerSid) { logger.LogDebug(exOwnerSid, "AppKeys.OwnerSid DDL notice: {Message}", exOwnerSid.Message); }
 
+                    // Idempotent migration: unique index on KeyPrefix
+                    try { conn.Execute("CREATE UNIQUE INDEX IF NOT EXISTS UX_AppKeys_KeyPrefix ON AppKeys (KeyPrefix);"); }
+                    catch (Exception exIndex) { logger.LogDebug(exIndex, "AppKeys.KeyPrefix index notice: {Message}", exIndex.Message); }
+
                     var colDefs = new (string Name, string Ddl)[]
                     {
                         ("SecretProvider", "ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None'"),

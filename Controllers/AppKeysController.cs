@@ -78,9 +78,17 @@ namespace McpRouter.Controllers
                         keys = await conn.QueryAsync<AppKey>(sql, new { Username = currentUser });
                     }
                 }
+                else if (_dbFactory.ProviderName == "mysql")
+                {
+                    keys = await conn.QueryAsync<AppKey>(
+                        "sp_GetAppKeys",
+                        new { p_Username = isAdmin ? usernameFilter : currentUser },
+                        commandType: CommandType.StoredProcedure
+                    );
+                }
                 else
                 {
-                    // Use Stored Procedure for MS SQL & MySQL
+                    // Use Stored Procedure for MS SQL
                     var parameters = new { Username = isAdmin ? usernameFilter : currentUser };
                     keys = await conn.QueryAsync<AppKey>(
                         "sp_GetAppKeys",
@@ -163,6 +171,7 @@ namespace McpRouter.Controllers
 
             if (!targetUser.Equals(currentUser, StringComparison.OrdinalIgnoreCase))
             {
+                ownerSid = ""; // Decouple admin's SID from target user's key
                 var ldapService = HttpContext.RequestServices.GetService<McpRouter.Core.Identity.ILdapService>();
                 if (ldapService != null)
                 {

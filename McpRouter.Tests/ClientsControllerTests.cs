@@ -6,6 +6,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
@@ -419,6 +420,219 @@ namespace McpRouter.Tests
             // Check unauthorized target (out of scope)
             var unauthorized = await session.IsUserAuthorizedAsync("callTool", "mcp-docker__list_containers", httpContext);
             unauthorized.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task CreateClient_AdminCreator_DoesNotInheritAdminSid_AndCannotAccessAdminPolicy()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var credentialService = new CredentialService(dbFactory);
+            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+
+            // Simulate creating admin user with Admin SID
+            var adminSid = "S-1-5-32-544";
+            var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, "steve_admin"),
+                new Claim("Sid", adminSid)
+            };
+            var adminPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, "OidcHeader"));
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.User = adminPrincipal;
+            controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
+
+            // Create client
+            var createModel = new ClientsController.CreateClientModel
+            {
+                DisplayName = "Machine Client App",
+                Scopes = new List<string> { "all" }
+            };
+            var createResult = await controller.CreateClient(createModel);
+            var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
+            var responseValue = okResult.Value;
+            var clientId = responseValue!.GetType().GetProperty("ClientId")?.GetValue(responseValue, null) as string;
+            var clientSecret = responseValue!.GetType().GetProperty("ClientSecret")?.GetValue(responseValue, null) as string;
+
+            // 1. Verify DB record has EMPTY OwnerSid, NOT admin's SID
+            var storedKey = conn.QueryFirstOrDefault<AppKey>("SELECT * FROM AppKeys WHERE Username = @Username;", new { Username = clientId });
+            storedKey.Should().NotBeNull();
+            storedKey!.OwnerSid.Should().BeEmpty();
+
+            // 2. Authenticate with the generated client secret
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Admin:GroupSid"] = adminSid
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var services = new ServiceCollection();
+            services.AddSingleton(dbFactory);
+            services.AddSingleton<IConfiguration>(config);
+            services.AddLogging();
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("AdminPolicy", policy =>
+                {
+                    policy.RequireAuthenticatedUser()
+                          .RequireAssertion(ctx =>
+                          {
+                              var hc = ctx.Resource as HttpContext;
+                              var cfg = hc?.RequestServices?.GetService<IConfiguration>();
+                              var targetSid = cfg?["Admin:GroupSid"] ?? "S-1-5-32-544";
+                              return ctx.User.HasClaim("Sid", targetSid);
+                          });
+                });
+            });
+
+            var sp = services.BuildServiceProvider();
+            var authService = sp.GetRequiredService<IAuthorizationService>();
+
+            var handler = CreateAuthenticationHandler(dbFactory, config);
+            var clientContext = new DefaultHttpContext();
+            clientContext.RequestServices = sp;
+            clientContext.Request.Headers["Authorization"] = $"Bearer {clientSecret}";
+
+            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
+            await handler.InitializeAsync(scheme, clientContext);
+
+            var authResult = await handler.AuthenticateAsync();
+            authResult.Succeeded.Should().BeTrue();
+            authResult.Principal.Should().NotBeNull();
+
+            // The client principal must NOT have the admin's SID claim
+            authResult.Principal!.HasClaim("Sid", adminSid).Should().BeFalse();
+
+            // The client principal MUST be denied access to AdminPolicy
+            var authPolicyResult = await authService.AuthorizeAsync(authResult.Principal!, clientContext, "AdminPolicy");
+            authPolicyResult.Succeeded.Should().BeFalse("Machine client credentials must NOT inherit administrative privileges!");
+        }
+
+        [Fact]
+        public async Task CreateClient_WithExpiresInDays_SetsExpiration_AndEnforcesExpiredAuthentication()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var credentialService = new CredentialService(dbFactory);
+            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+
+            // 1. Create client with 30-day expiration
+            var createModel = new ClientsController.CreateClientModel
+            {
+                DisplayName = "Expiring App",
+                Scopes = new List<string> { "all" },
+                ExpiresInDays = 30
+            };
+            var createResult = await controller.CreateClient(createModel);
+            var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
+            var responseValue = okResult.Value;
+            var expiresAt = responseValue!.GetType().GetProperty("ExpiresAt")?.GetValue(responseValue, null) as DateTime?;
+
+            expiresAt.Should().NotBeNull();
+            expiresAt.Value.Should().BeAfter(DateTime.UtcNow.AddDays(29));
+
+            // 2. Create client with expired duration (-1 days)
+            var expiredModel = new ClientsController.CreateClientModel
+            {
+                DisplayName = "Already Expired App",
+                Scopes = new List<string> { "all" },
+                ExpiresInDays = -1
+            };
+            var expiredResult = await controller.CreateClient(expiredModel);
+            var expiredOk = expiredResult.Should().BeOfType<OkObjectResult>().Subject;
+            var expiredValue = expiredOk.Value;
+            var expiredSecret = expiredValue!.GetType().GetProperty("ClientSecret")?.GetValue(expiredValue, null) as string;
+
+            // Authenticate with expired client secret
+            var configMock = new Mock<IConfiguration>();
+            var handler = CreateAuthenticationHandler(dbFactory, configMock.Object);
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers["Authorization"] = $"Bearer {expiredSecret}";
+
+            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
+            await handler.InitializeAsync(scheme, httpContext);
+
+            var authResult = await handler.AuthenticateAsync();
+            authResult.Succeeded.Should().BeFalse();
+            authResult.Failure!.Message.Should().Be("App Key has expired.");
+        }
+
+        [Fact]
+        public async Task GetClients_NeverLeaksRawBearerSecretOrEncryptedKey()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var credentialService = new CredentialService(dbFactory);
+            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+
+            // Create client
+            var createModel = new ClientsController.CreateClientModel
+            {
+                DisplayName = "Leak Prevention App",
+                Scopes = new List<string> { "all" }
+            };
+            var createResult = await controller.CreateClient(createModel);
+            var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
+            var rawSecret = okResult.Value!.GetType().GetProperty("ClientSecret")?.GetValue(okResult.Value, null) as string;
+
+            // Query GetClients
+            var listResult = await controller.GetClients();
+            var listOk = listResult.Should().BeOfType<OkObjectResult>().Subject;
+            var list = (listOk.Value as IEnumerable<object>)?.ToList();
+
+            list.Should().NotBeNull();
+            list.Should().HaveCount(1);
+
+            var item = list![0];
+            var json = JsonSerializer.Serialize(item);
+
+            // Ensure json never contains raw secret or encrypted hash
+            json.Should().NotContain(rawSecret!);
+            json.Should().NotContain("EncryptedKey");
+            json.Should().NotContain("PlaintextKey");
+            json.Should().NotContain("ClientSecret");
+        }
+
+        [Fact]
+        public async Task RevokeCredential_HandlesSqlServerNoCount_AndReturnsAccurateStatus()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var credentialService = new CredentialService(dbFactory);
+
+            var (appKey, plaintext) = await credentialService.CreateCredentialAsync(
+                "Test Key", "test-user", "", new List<string> { "all" }, null
+            );
+
+            // Revoking existing credential returns true
+            var revoked = await credentialService.RevokeCredentialAsync(appKey.Id);
+            revoked.Should().BeTrue();
+
+            // Revoking already revoked or non-existent credential returns false
+            var revokedAgain = await credentialService.RevokeCredentialAsync(appKey.Id);
+            revokedAgain.Should().BeFalse();
+
+            var nonExistentRevoked = await credentialService.RevokeCredentialAsync("does-not-exist");
+            nonExistentRevoked.Should().BeFalse();
+        }
+
+        [Fact]
+        public async Task CredentialService_GeneratesHighEntropySelectorPrefix()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var credentialService = new CredentialService(dbFactory);
+
+            var (appKey, plaintextKey) = await credentialService.CreateCredentialAsync(
+                "High Entropy App", "client-high-entropy", "", new List<string> { "all" }, null
+            );
+
+            // Prefix format: mcp-global-{32 hex chars} (length: 11 + 32 = 43)
+            appKey.KeyPrefix.Should().StartWith("mcp-global-");
+            appKey.KeyPrefix.Length.Should().Be(43);
+
+            // Plaintext format: mcp-global-{32 hex chars}-{64 hex chars}
+            plaintextKey.Should().StartWith(appKey.KeyPrefix + "-");
+            plaintextKey.Length.Should().Be(43 + 1 + 64); // 108 characters
         }
     }
 }

@@ -126,7 +126,8 @@ CREATE TABLE IF NOT EXISTS `AppKeys` (
     `ScopesJson`   LONGTEXT NOT NULL,
     `ExpiresAt`    DATETIME NULL,
     `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `OwnerSid`     VARCHAR(200) NOT NULL DEFAULT ''
+    `OwnerSid`     VARCHAR(200) NOT NULL DEFAULT '',
+    UNIQUE KEY `UQ_AppKeys_KeyPrefix` (`KeyPrefix`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 8. Admin Audit Logging Table
