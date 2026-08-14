@@ -74,9 +74,15 @@ For deep technical walkthroughs, setup configuration examples, connection guidel
 
 ---
 
+<<<<<<< HEAD
 ## 🔑 AppKey Scopes & Authorization Guide
 
 For complete scope syntax grammar (`*`, `server:*`, `category:*`, `tool:*`, `prompt:*`, `resource:*`), multi-stage pipeline evaluation rules, the capability authorization matrix, cryptographic token hashing, and least-privilege persona recipes, see the canonical [**AppKey Scopes & Authorization Guide**](docs/appkey-scopes.md).
+=======
+## 🔐 Enterprise Secret Providers & Key Management Guide
+
+For detailed documentation on supported secret providers (HashiCorp Vault KV v2 with JIT renewal, Windows Registry DPAPI, Environment Variables), AES-256-GCM encryption at rest, dynamic runtime reloading, audit safety, and Docker Compose setup snippets, see [**docs/secret-providers.md**](docs/secret-providers.md).
+>>>>>>> feat/issue-56-secret-provider-guide
 
 ---
 
