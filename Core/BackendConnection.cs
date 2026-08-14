@@ -44,7 +44,7 @@ namespace McpRouter
             await _transport.ConnectAsync();
         }
 
-        public bool TryCompleteRequest(string id, JsonRpcResponse response)
+        public bool TryCompleteRequest(string id, JsonRpcResponse? response)
         {
             return _stateManager.TryCompleteRequest(id, response);
         }
@@ -55,7 +55,9 @@ namespace McpRouter
             {
                 if (message is JsonRpcResponse response && response.Id != null)
                 {
-                    var idStr = response.Id.ToString();
+                    var idStr = response.Id is JsonElement je
+                        ? (je.ValueKind == JsonValueKind.String ? je.GetString() : je.GetRawText())
+                        : response.Id?.ToString();
                     if (idStr != null)
                     {
                         if (_stateManager.TryCompleteRequest(idStr, response))

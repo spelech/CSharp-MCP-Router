@@ -253,6 +253,7 @@ namespace McpRouter.Core.Transports
                                     }
                                     _messageUrl = url;
                                     _endpointTcs.TrySetResult(url);
+                                    _stateManager.MarkConnected();
                                 }
                                 else if (currentEvent == "message")
                                 {
@@ -280,13 +281,15 @@ namespace McpRouter.Core.Transports
                             }
                         }
                         _logger.LogWarning("Disconnected from backend {ServerId} (clean EOF). Reconnecting in 5s...", _server.Id);
-                        _stateManager.CancelAll();
+                        _messageUrl = null;
+                        _stateManager.MarkDisconnected();
                         await Task.Delay(5000, _cts.Token);
                     }
                     catch (Exception ex)
                     {
                         _logger.LogWarning("Disconnected from backend {ServerId}. Reconnecting in 5s... Error: {Msg}", _server.Id, ex.Message);
-                        _stateManager.CancelAll();
+                        _messageUrl = null;
+                        _stateManager.MarkDisconnected();
                         await Task.Delay(5000, _cts.Token);
                     }
                 }
@@ -441,7 +444,7 @@ namespace McpRouter.Core.Transports
             }
             finally
             {
-                _stateManager.TryCompleteRequest(upstreamRequestId, null!);
+                _stateManager.TryRemoveRequest(upstreamRequestId);
             }
         }
 
@@ -495,7 +498,7 @@ namespace McpRouter.Core.Transports
             }
             finally
             {
-                _stateManager.TryCompleteRequest(upstreamRequestId, null!);
+                _stateManager.TryRemoveRequest(upstreamRequestId);
             }
         }
 
@@ -511,6 +514,7 @@ namespace McpRouter.Core.Transports
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
             
             using var res = await _httpClient.SendAsync(req, _cts.Token);
+            res.EnsureSuccessStatusCode();
         }
 
         public async Task SendResponseAsync(string responseJson)
@@ -531,6 +535,7 @@ namespace McpRouter.Core.Transports
         public void Dispose()
         {
             _cts.Cancel();
+            _stateManager.MarkDisconnected();
             _cts.Dispose();
         }
     }

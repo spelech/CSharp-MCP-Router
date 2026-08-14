@@ -128,7 +128,7 @@ namespace McpRouter
 
                 var contextToUse = httpContext ?? _clientResponse?.HttpContext;
                 var abortToken = contextToUse?.RequestAborted ?? CancellationToken.None;
-                string? requestId = null;
+                string? cancellationKey = null;
                 using (var cts = CancellationTokenSource.CreateLinkedTokenSource(abortToken, _cts.Token))
                 {
                     try
@@ -137,18 +137,27 @@ namespace McpRouter
                         var root = doc.RootElement;
                         if (root.TryGetProperty("id", out var idProp))
                         {
-                            requestId = idProp.ValueKind == JsonValueKind.String ? idProp.GetString() : idProp.GetRawText();
-
-                            var scopeId = _sessionId;
-                            if (_sessionId == "global-stateless-session" && httpContext != null)
+                            var rawId = idProp.ValueKind switch
                             {
-                                scopeId = $"{_sessionId}:{httpContext.TraceIdentifier}";
-                            }
-                            var cancellationKey = $"{scopeId}:{requestId}";
+                                JsonValueKind.String => idProp.GetString(),
+                                JsonValueKind.Number => idProp.GetRawText(),
+                                JsonValueKind.Null => null,
+                                _ => idProp.GetRawText()
+                            };
 
-                            if (!_activeRequestCancellationTokens.TryAdd(cancellationKey, cts))
+                            if (rawId != null)
                             {
-                                throw new InvalidOperationException($"Duplicate request ID '{requestId}' detected in session '{scopeId}'. Silent overwrite prevented.");
+                                var scopeId = _sessionId;
+                                if (_sessionId == "global-stateless-session" && httpContext != null)
+                                {
+                                    scopeId = $"{_sessionId}:{httpContext.TraceIdentifier}";
+                                }
+                                cancellationKey = $"{scopeId}:{rawId}";
+
+                                if (!_activeRequestCancellationTokens.TryAdd(cancellationKey, cts))
+                                {
+                                    throw new InvalidOperationException($"Duplicate request ID '{rawId}' detected in session '{scopeId}'. Silent overwrite prevented.");
+                                }
                             }
                         }
                     }
@@ -172,9 +181,9 @@ namespace McpRouter
                     }
                     finally
                     {
-                        if (requestId != null)
+                        if (cancellationKey != null)
                         {
-                            _activeRequestCancellationTokens.TryRemove(requestId, out _);
+                            _activeRequestCancellationTokens.TryRemove(cancellationKey, out _);
                         }
                     }
                 }
