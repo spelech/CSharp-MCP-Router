@@ -1,59 +1,46 @@
 import { create } from 'zustand';
-import { apiRequest } from '../utils/api';
 import { showToast } from './useToastStore';
+import {
+  EmbeddingSettings,
+  AuthProviderConfig,
+  SecretProviderConfig,
+  CustomFileMeta,
+  AccessPolicy,
+  GroupMapping,
+  PendingApproval,
+} from '../shared/types';
+import {
+  fetchEmbeddingSettingsApi,
+  saveEmbeddingSettingsApi,
+  fetchAuthProvidersApi,
+  saveAuthProviderApi,
+  fetchSecretProvidersApi,
+  saveSecretProviderApi,
+  fetchCustomFilesApi,
+  fetchCustomFileContentApi,
+  saveCustomFileApi,
+  deleteCustomFileApi,
+  fetchPendingApprovalsApi,
+  actionApprovalApi,
+} from '../api/settingsApi';
+import {
+  fetchPoliciesApi,
+  savePolicyApi,
+  deletePolicyApi,
+  fetchMappingsApi,
+  saveMappingApi,
+  deleteMappingApi,
+} from '../api/securityApi';
 
-export interface EmbeddingSettings {
-  embeddingProvider: string;
-  embeddingModelDir: string;
-  embeddingApiUrl: string;
-  embeddingApiModel: string;
-  embeddingApiKey: string;
-  requireManualApproval: boolean;
-}
-
-export interface AuthProviderConfig {
-  id?: string;
-  providerName: string;
-  displayName: string;
-  isEnabled: boolean;
-  userHeader?: string;
-  groupsHeader?: string;
-}
-
-export interface SecretProviderConfig {
-  id?: string;
-  providerName: string;
-  displayName: string;
-  isEnabled: boolean;
-  configJson: string;
-}
-
-export interface CustomFileMeta {
-  type: 'prompts' | 'resources';
-  name: string;
-  sizeBytes: number;
-  lastModified: string;
-}
-
-export interface AccessPolicy {
-  id?: string;
-  targetId: string;
-  requiredGroup: string;
-  isAllowed: boolean;
-}
-
-export interface GroupMapping {
-  id?: string;
-  externalId: string;
-  internalGroup: string;
-}
-
-export interface PendingApproval {
-  id: string;
-  toolName: string;
-  arguments: string;
-  sessionId: string;
-}
+export type {
+  EmbeddingSettings,
+  AuthProviderConfig,
+  SecretProviderConfig,
+  CustomFileMeta,
+  AccessPolicy,
+  GroupMapping,
+  PendingApproval,
+};
 
 interface SettingsStore {
   embeddingSettings: EmbeddingSettings | null;
@@ -144,18 +131,9 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   fetchEmbeddingSettings: async () => {
     set({ isLoadingSettings: true });
     try {
-      const settings = await apiRequest<any>('/api/settings');
+      const settings = await fetchEmbeddingSettingsApi();
       if (settings) {
-        set({
-          embeddingSettings: {
-            embeddingProvider: settings.embeddingProvider || 'local',
-            embeddingModelDir: settings.embeddingModelDir || 'data/models',
-            embeddingApiUrl: settings.embeddingApiUrl || '',
-            embeddingApiModel: settings.embeddingApiModel || 'all-MiniLM-L6-v2',
-            embeddingApiKey: settings.embeddingApiKey || '',
-            requireManualApproval: settings.requireManualApproval || false,
-          }
-        });
+        set({ embeddingSettings: settings });
       }
     } catch (e) {
       console.error('Failed to load settings:', e);
@@ -167,19 +145,8 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   saveEmbeddingSettings: async (settings) => {
     set({ isSavingSettings: true });
     try {
-      const payload = {
-        embeddingProvider: settings.embeddingProvider,
-        embeddingModelDir: settings.embeddingModelDir,
-        embeddingApiUrl: settings.embeddingApiUrl,
-        embeddingApiModel: settings.embeddingApiModel,
-        embeddingApiKey: settings.embeddingApiKey,
-        requireManualApproval: settings.requireManualApproval
-      };
-      const result = await apiRequest<{ success: boolean }>('/api/settings', {
-        method: 'POST',
-        body: payload
-      });
-      if (result && result.success) {
+      const success = await saveEmbeddingSettingsApi(settings);
+      if (success) {
         set({ embeddingSettings: settings });
         showToast('Settings saved successfully', 'success');
         return true;
@@ -196,8 +163,8 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   fetchProviders: async () => {
     try {
-      const auth = await apiRequest<AuthProviderConfig[]>('/api/providers/auth');
-      const secrets = await apiRequest<SecretProviderConfig[]>('/api/providers/secrets');
+      const auth = await fetchAuthProvidersApi();
+      const secrets = await fetchSecretProvidersApi();
       set({
         authProviders: auth || [],
         secretProviders: secrets || []
@@ -209,10 +176,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   saveAuthProvider: async (provider) => {
     try {
-      await apiRequest('/api/providers/auth', {
-        method: 'POST',
-        body: provider
-      });
+      await saveAuthProviderApi(provider);
       get().fetchProviders();
     } catch (e: any) {
       showToast(`Failed to save Auth Provider: ${e.message}`, 'error');
@@ -222,10 +186,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   saveSecretProvider: async (provider) => {
     try {
-      await apiRequest('/api/providers/secrets', {
-        method: 'POST',
-        body: provider
-      });
+      await saveSecretProviderApi(provider);
       get().fetchProviders();
     } catch (e: any) {
       showToast(`Failed to save Secret Provider: ${e.message}`, 'error');
@@ -235,7 +196,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   fetchApprovals: async () => {
     try {
-      const approvals = await apiRequest<PendingApproval[]>('/api/approvals');
+      const approvals = await fetchPendingApprovalsApi();
       set({ pendingApprovals: approvals || [] });
     } catch (e) {
       console.error('Failed to fetch approvals:', e);
@@ -244,10 +205,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   actionApproval: async (id, approved) => {
     try {
-      await apiRequest(`/api/approvals/${id}/action`, {
-        method: 'POST',
-        body: { approved }
-      });
+      await actionApprovalApi(id, approved);
       showToast(approved ? 'Request approved' : 'Request denied', 'info');
       get().fetchApprovals();
     } catch (e: any) {
@@ -257,7 +215,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   fetchCustomFiles: async () => {
     try {
-      const files = await apiRequest<CustomFileMeta[]>('/api/custom-files');
+      const files = await fetchCustomFilesApi();
       set({ customFiles: files || [] });
     } catch (err) {
       console.error('Failed to fetch custom files:', err);
@@ -266,8 +224,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   fetchCustomFileContent: async (type, name) => {
     try {
-      const res = await apiRequest<{ content: string }>(`/api/custom-files/${type}/${name}`);
-      return res?.content || '';
+      return await fetchCustomFileContentApi(type, name);
     } catch (err) {
       console.error('Failed to fetch custom file content:', err);
       return '';
@@ -276,11 +233,8 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   saveCustomFile: async (type, name, content) => {
     try {
-      const result = await apiRequest<{ success: boolean }>(`/api/custom-files/${type}/${name}`, {
-        method: 'POST',
-        body: { content }
-      });
-      if (result && result.success) {
+      const success = await saveCustomFileApi(type, name, content);
+      if (success) {
         showToast('File saved successfully', 'success');
         get().fetchCustomFiles();
         return true;
@@ -297,10 +251,8 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       return;
     }
     try {
-      const result = await apiRequest<{ success: boolean }>(`/api/custom-files/${type}/${name}`, {
-        method: 'DELETE'
-      });
-      if (result && result.success) {
+      const success = await deleteCustomFileApi(type, name);
+      if (success) {
         showToast('File deleted successfully', 'success');
         get().fetchCustomFiles();
       }
@@ -311,7 +263,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   fetchPolicies: async () => {
     try {
-      const policies = await apiRequest<AccessPolicy[]>('/api/permissions/policies');
+      const policies = await fetchPoliciesApi();
       set({ policies: policies || [] });
     } catch (err) {
       console.error('Failed to load policies:', err);
@@ -320,10 +272,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   savePolicy: async (policy) => {
     try {
-      await apiRequest('/api/permissions/policies', {
-        method: 'POST',
-        body: policy
-      });
+      await savePolicyApi(policy);
       showToast('Policy saved successfully', 'success');
       set({ isPolicyModalOpen: false, editingPolicy: null });
       get().fetchPolicies();
@@ -335,7 +284,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   deletePolicy: async (id) => {
     if (!window.confirm('Are you sure you want to delete this access policy?')) return;
     try {
-      await apiRequest(`/api/permissions/policies/${id}`, { method: 'DELETE' });
+      await deletePolicyApi(id);
       showToast('Policy deleted successfully', 'success');
       get().fetchPolicies();
     } catch (err: any) {
@@ -345,7 +294,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   fetchMappings: async () => {
     try {
-      const mappings = await apiRequest<GroupMapping[]>('/api/permissions/mappings');
+      const mappings = await fetchMappingsApi();
       set({ mappings: mappings || [] });
     } catch (err) {
       console.error('Failed to load mappings:', err);
@@ -354,10 +303,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
 
   saveMapping: async (mapping) => {
     try {
-      await apiRequest('/api/permissions/mappings', {
-        method: 'POST',
-        body: mapping
-      });
+      await saveMappingApi(mapping);
       showToast('Mapping saved successfully', 'success');
       set({ isMappingModalOpen: false, editingMapping: null });
       get().fetchMappings();
@@ -369,7 +315,7 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   deleteMapping: async (id) => {
     if (!window.confirm('Are you sure you want to delete this group mapping?')) return;
     try {
-      await apiRequest(`/api/permissions/mappings/${id}`, { method: 'DELETE' });
+      await deleteMappingApi(id);
       showToast('Mapping deleted successfully', 'success');
       get().fetchMappings();
     } catch (err: any) {

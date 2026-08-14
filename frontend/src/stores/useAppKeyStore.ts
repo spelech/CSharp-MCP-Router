@@ -1,35 +1,14 @@
 import { create } from 'zustand';
-import { apiRequest } from '../utils/api';
 import { showToast } from './useToastStore';
+import { AppKeyItem, AppKeyLimits, NewAppKeyResult, CreateAppKeyPayload } from '../shared/types';
+import {
+  fetchAppKeysApi,
+  fetchAppKeyLimitsApi,
+  createAppKeyApi,
+  revokeAppKeyApi
+} from '../api/appKeyApi';
 
-export interface AppKeyItem {
-  id: string;
-  name: string;
-  username: string;
-  keyPrefix: string;
-  scopes: string[];
-  expiresAt?: string;
-  createdAt: string;
-}
-
-export interface AppKeyLimits {
-  globalMax: number;
-  userMax: number;
-  totalActiveKeys: number;
-  userActiveKeys: number;
-  isLimitReached: boolean;
-}
-
-export interface NewAppKeyResult {
-  id: string;
-  name: string;
-  username: string;
-  keyPrefix: string;
-  plaintextKey: string;
-  scopes: string[];
-  expiresAt?: string;
-  createdAt: string;
-}
+export type { AppKeyItem, AppKeyLimits, NewAppKeyResult, CreateAppKeyPayload };
 
 interface AppKeyStore {
   appKeys: AppKeyItem[];
@@ -40,7 +19,7 @@ interface AppKeyStore {
 
   fetchAppKeys: () => Promise<void>;
   fetchLimits: () => Promise<void>;
-  createAppKey: (payload: { name: string; username?: string; scopes: string[]; expiresInDays?: number }) => Promise<void>;
+  createAppKey: (payload: CreateAppKeyPayload) => Promise<void>;
   revokeAppKey: (id: string, name: string) => Promise<void>;
   openModal: () => void;
   closeModal: () => void;
@@ -56,7 +35,7 @@ export const useAppKeyStore = create<AppKeyStore>((set, get) => ({
   fetchAppKeys: async () => {
     set({ isLoading: true });
     try {
-      const data = await apiRequest<AppKeyItem[]>('/api/appkeys');
+      const data = await fetchAppKeysApi();
       set({ appKeys: data || [], isLoading: false });
     } catch (e: any) {
       console.error('Error fetching app keys:', e);
@@ -66,7 +45,7 @@ export const useAppKeyStore = create<AppKeyStore>((set, get) => ({
 
   fetchLimits: async () => {
     try {
-      const data = await apiRequest<AppKeyLimits>('/api/appkeys/limits');
+      const data = await fetchAppKeyLimitsApi();
       set({ limits: data });
     } catch (e: any) {
       console.error('Error fetching app key limits:', e);
@@ -75,10 +54,7 @@ export const useAppKeyStore = create<AppKeyStore>((set, get) => ({
 
   createAppKey: async (payload) => {
     try {
-      const result = await apiRequest<NewAppKeyResult>('/api/appkeys', {
-        method: 'POST',
-        body: payload
-      });
+      const result = await createAppKeyApi(payload);
       set({ createdResult: result });
       showToast('App Key created successfully', 'success');
       get().fetchAppKeys();
@@ -92,7 +68,7 @@ export const useAppKeyStore = create<AppKeyStore>((set, get) => ({
   revokeAppKey: async (id, name) => {
     if (!window.confirm(`Are you sure you want to revoke the App Key '${name}'?`)) return;
     try {
-      await apiRequest(`/api/appkeys/${id}`, { method: 'DELETE' });
+      await revokeAppKeyApi(id);
       showToast('App Key revoked successfully', 'success');
       get().fetchAppKeys();
       get().fetchLimits();
