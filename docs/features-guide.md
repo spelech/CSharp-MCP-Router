@@ -188,4 +188,4 @@ The Web Dashboard features a robust developer environment to debug, simulate, an
 
 ## 🗄️ 7. Database Engine Support & Deployment
 
-For complete dialect specifications across SQLite, Microsoft SQL Server, and MySQL, stored procedure catalogs, AES-256-GCM envelope encryption architecture, and production Docker Compose configurations, see [**Database Provider Support & Deployment Matrix**](database-providers.md).
+For complete dialect specifications across SQLite, Microsoft SQL Server, and MySQL, the complete 12-table [**Entity-Relationship Diagram (ERD)**](database-providers.md#unified-database-entity-relationship-diagram-erd), stored procedure catalogs, AES-256-GCM envelope encryption architecture, and production Docker Compose configurations, see [**Database Provider Support & Deployment Matrix**](database-providers.md).

@@ -43,7 +43,7 @@ AppKeys grant external clients secure, authenticated access to the router withou
 ## 🎯 AppKey Scope Grammar & Examples
 
 > [!TIP]
-> For the complete formal grammar specification, evaluation order, and least-privilege persona recipes, refer to the [**AppKey Scopes & Authorization Guide**](../appkey-scopes.md).
+> For the complete formal grammar specification, evaluation order, and least-privilege persona recipes, refer to the [**AppKey Scopes & Authorization Guide**](../appkey-scopes.md). For the underlying database schema and hash storage model (`AppKeys`), see the [**Database Entity-Relationship Diagram**](../database-providers.md#unified-database-entity-relationship-diagram-erd).
 
 | Scope Pattern | Description | Example |
 | :--- | :--- | :--- |

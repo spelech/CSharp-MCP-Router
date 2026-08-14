@@ -172,3 +172,5 @@ To safeguard production environments from unintended or destructive AI agent act
 The router features automated payload redaction (`PiiSanitizer`) paired with stored procedure audit logging (`sp_InsertAuditLog`):
 * **Automatic Redaction**: Automatically scrubs Bearer tokens, passwords, API keys, and sensitive tokens from audit logs before writing to the database.
 * **Audit Metadata**: Captures timestamp, client identity, target server, tool name, execution duration (ms), response status code, and sanitized payload parameters.
+
+For the underlying database schema definitions of security policies and audit tables (`AccessPolicies`, `ToolAccessPolicies`, `AdGroups`, `AuditLogs`), see the [**Database Entity-Relationship Diagram**](../database-providers.md#unified-database-entity-relationship-diagram-erd).
