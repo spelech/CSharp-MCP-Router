@@ -6,10 +6,13 @@ using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Controllers;
-using McpRouter.Core.Database;
-using McpRouter.Core.Identity;
-using McpRouter.Services;
+using McpRouter.Components.Clients;
+using McpRouter.Components.AppKeys;
+using McpRouter.Components.Providers;
+using McpRouter.Components.Authorization;
+using McpRouter.Infrastructure.Persistence;
+using McpRouter.Infrastructure.Identity;
+using McpRouter.Core.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
@@ -91,7 +94,7 @@ namespace McpRouter.Tests
         {
             var repo = new DatabaseRepository(_dbFactory);
             var credSvc = new CredentialService(_dbFactory);
-            var controller = new AppKeysController(repo, repo, _config, new Mock<McpRouter.Core.Logging.IAuditLogger>().Object, credSvc);
+            var controller = new AppKeysController(repo, repo, _config, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object, credSvc);
 
             var services = new ServiceCollection();
             services.AddSingleton(_config);
@@ -241,7 +244,7 @@ namespace McpRouter.Tests
 
             var failingRepo = new DatabaseRepository(failingFactory.Object);
             var failingCredSvc = new CredentialService(failingFactory.Object);
-            var controller = new AppKeysController(failingRepo, failingRepo, _config, new Mock<McpRouter.Core.Logging.IAuditLogger>().Object, failingCredSvc);
+            var controller = new AppKeysController(failingRepo, failingRepo, _config, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object, failingCredSvc);
             var services = new ServiceCollection();
             services.AddSingleton(_config);
             services.AddLogging();

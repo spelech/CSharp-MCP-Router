@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 using System.Net;
-using McpRouter.Core.Security;
+using McpRouter.Components.Authorization;
 using Xunit;
 
 namespace McpRouter.Tests

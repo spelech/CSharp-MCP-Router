@@ -7,12 +7,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.DependencyInjection;
-using McpRouter.Core.Database;
-using Dapper;
 using Microsoft.Extensions.Logging;
-using McpRouter.Models;
-using McpRouter.Services;
-using McpRouter.Core.Logging;
+using McpRouter.Infrastructure.Persistence;
+using McpRouter.Infrastructure.Logging;
+using McpRouter.Components.Servers;
+using McpRouter.Components.Clients;
+using McpRouter.Components.AppKeys;
+using McpRouter.Components.Providers;
+using McpRouter.Components.Authorization;
+using McpRouter.Components.Capabilities;
 
 namespace McpRouter.Extensions
 {
@@ -20,10 +23,6 @@ namespace McpRouter.Extensions
     {
         private static readonly string AppVersion =
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.6";
-
-
-
-
 
         public static void ConfigureMcpRouterPipeline(this WebApplication app)
         {
@@ -70,8 +69,8 @@ namespace McpRouter.Extensions
             // Request logging middleware (metadata only — never headers/body/query, which carry credentials)
             app.Use(async (context, next) =>
             {
-                var logger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-                logger.LogInformation("Incoming request: {Method} {Path} from {Ip}",
+                var reqLogger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                reqLogger.LogInformation("Incoming request: {Method} {Path} from {Ip}",
                     context.Request.Method, context.Request.Path, context.Connection.RemoteIpAddress);
                 await next();
             });
@@ -86,8 +85,6 @@ namespace McpRouter.Extensions
                     ctx.Context.Response.Headers.Append("Expires", "0");
                 }
             }); // Serves dashboard files from wwwroot with no-cache headers
-
-
 
             app.SeedDatabase();
 
@@ -156,44 +153,25 @@ namespace McpRouter.Extensions
                 });
             });
 
-
+            // Feature-focused endpoint composition
             app.MapProxyEndpoints();
+            app.MapCapabilityEndpoints();
             app.MapServerEndpoints();
-            app.MapAdminEndpoints();
-
-            app.Run();
-
+            app.MapClientEndpoints();
+            app.MapAppKeyEndpoints();
+            app.MapProviderEndpoints();
+            app.MapPolicyEndpoints();
         }
-    }
 
-    public class TestToolCallModel
-    {
-        public string ServerId { get; set; } = string.Empty;
-        public string ToolName { get; set; } = string.Empty;
-        public JsonElement Arguments { get; set; }
-    }
-
-    public class TestCallModel
-    {
-        public string ServerId { get; set; } = string.Empty;
-        public string ToolName { get; set; } = string.Empty;
-        public JsonElement Arguments { get; set; }
-    }
-
-    public class TestPromptGetModel
-    {
-        public string ServerId { get; set; } = string.Empty;
-        public string PromptName { get; set; } = string.Empty;
-        public JsonElement Arguments { get; set; }
-    }
-
-    public class TestResourceReadModel
-    {
-        public string Uri { get; set; } = string.Empty;
-    }
-
-    public class SearchModel
-    {
-        public string Query { get; set; } = string.Empty;
+        // Backwards compatibility endpoint forwarder
+        public static void MapAdminEndpoints(this WebApplication app)
+        {
+            app.MapCapabilityEndpoints();
+            app.MapServerEndpoints();
+            app.MapClientEndpoints();
+            app.MapAppKeyEndpoints();
+            app.MapProviderEndpoints();
+            app.MapPolicyEndpoints();
+        }
     }
 }

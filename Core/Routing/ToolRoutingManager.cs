@@ -8,7 +8,9 @@ using System.Threading.Tasks;
 using System.Net.Http;
 using Microsoft.Extensions.Logging;
 using McpRouter.Models;
-using McpRouter.Services;
+using McpRouter.Core.Protocol;
+using McpRouter.Components.Servers;
+using McpRouter.Infrastructure.Persistence;
 using Dapper;
 
 namespace McpRouter.Core.Routing
@@ -193,7 +195,7 @@ namespace McpRouter.Core.Routing
         public async Task<object> CallToolAsync(
             string toolName,
             string body,
-            McpRouter.Core.Database.IDbConnectionFactory dbFactory,
+            IDbConnectionFactory dbFactory,
             ConcurrentDictionary<string, BackendConnection> backendConnections,
             IEnumerable<McpServer> servers,
             ILogger logger,
@@ -230,7 +232,7 @@ namespace McpRouter.Core.Routing
         private async Task<object> CallToolInternalAsync(
             string toolName,
             string body,
-            McpRouter.Core.Database.IDbConnectionFactory dbFactory,
+            IDbConnectionFactory dbFactory,
             ConcurrentDictionary<string, BackendConnection> backendConnections,
             IEnumerable<McpServer> servers,
             ILogger logger,
@@ -316,7 +318,7 @@ namespace McpRouter.Core.Routing
                 }
 
                 var activeServerIds = servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
-                if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateToolOrPromptName(targetName, activeServerIds))
+                if (!SecurityValidationHelper.ValidateToolOrPromptName(targetName, activeServerIds))
                 {
                     return new
                     {
@@ -368,7 +370,7 @@ namespace McpRouter.Core.Routing
         private async Task<object> ExecuteTargetToolAsync(
             string toolName,
             string body,
-            McpRouter.Core.Database.IDbConnectionFactory dbFactory,
+            IDbConnectionFactory dbFactory,
             ConcurrentDictionary<string, BackendConnection> backendConnections,
             IEnumerable<McpServer> servers,
             ILogger logger,

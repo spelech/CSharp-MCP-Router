@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
-using McpRouter.Core.Logging;
+using McpRouter.Infrastructure.Logging;
 using Moq;
 using Xunit;
 

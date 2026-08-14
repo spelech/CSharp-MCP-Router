@@ -1,0 +1,79 @@
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using Microsoft.Extensions.Logging;
+
+namespace McpRouter.Infrastructure.Logging
+{
+    public class LogEntry
+    {
+        public string Id { get; set; } = Guid.NewGuid().ToString("N");
+        public DateTime Timestamp { get; set; } = DateTime.UtcNow;
+        public LogLevel Level { get; set; }
+        public string Category { get; set; } = string.Empty;
+        public string Message { get; set; } = string.Empty;
+        public string? Exception { get; set; }
+    }
+
+    public static class LogBuffer
+    {
+        private static readonly ConcurrentQueue<LogEntry> _queue = new();
+        private const int MaxLogs = 200;
+
+        public static void Add(LogLevel level, string category, string message, Exception? exception)
+        {
+            var sanitizedMessage = PiiSanitizer.SanitizePayload(message);
+            var exceptionStr = exception?.ToString();
+            var sanitizedException = string.IsNullOrEmpty(exceptionStr) ? null : PiiSanitizer.SanitizePayload(exceptionStr);
+
+            _queue.Enqueue(new LogEntry
+            {
+                Level = level,
+                Category = category,
+                Message = sanitizedMessage,
+                Exception = sanitizedException
+            });
+
+            while (_queue.Count > MaxLogs)
+            {
+                _queue.TryDequeue(out _);
+            }
+        }
+
+        public static List<LogEntry> GetLogs()
+        {
+            return new List<LogEntry>(_queue);
+        }
+
+        public static void Clear()
+        {
+            while (_queue.TryDequeue(out _)) { }
+        }
+    }
+
+    public class InMemoryLogger : ILogger
+    {
+        private readonly string _categoryName;
+
+        public InMemoryLogger(string categoryName)
+        {
+            _categoryName = categoryName;
+        }
+
+        public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
+
+        public bool IsEnabled(LogLevel logLevel) => true;
+
+        public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter)
+        {
+            var message = formatter(state, exception);
+            LogBuffer.Add(logLevel, _categoryName, message, exception);
+        }
+    }
+
+    public class InMemoryLoggerProvider : ILoggerProvider
+    {
+        public ILogger CreateLogger(string categoryName) => new InMemoryLogger(categoryName);
+        public void Dispose() { }
+    }
+}
