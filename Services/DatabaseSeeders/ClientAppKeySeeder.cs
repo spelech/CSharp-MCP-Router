@@ -1,4 +1,5 @@
 using System;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -16,6 +17,22 @@ namespace McpRouter.Services.DatabaseSeeders
     {
         public static void SeedDefaultClientsAndKeys(IDbConnectionFactory dbFactory, ILogger logger, IConfiguration configuration)
         {
+            // Explicitly delete/invalidate any unusable 'mcp_' client credentials and log a warning/info message
+            try
+            {
+                using var conn = dbFactory.CreateConnection();
+                var count = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM AppKeys WHERE KeyPrefix LIKE 'mcp!_%' ESCAPE '!' OR EncryptedKey LIKE 'mcp!_%' ESCAPE '!';");
+                if (count > 0)
+                {
+                    conn.Execute("DELETE FROM AppKeys WHERE KeyPrefix LIKE 'mcp!_%' ESCAPE '!' OR EncryptedKey LIKE 'mcp!_%' ESCAPE '!';");
+                    logger.LogWarning($"Deleted {count} invalid legacy 'mcp_' client credential records from AppKeys table which were stored in plaintext and unusable.");
+                }
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to clean up legacy invalid 'mcp_' client credentials.");
+            }
+
             // AppKey Hashing Migration: migrate legacy AES-CBC encrypted AppKeys to SHA-256 hashes (gated by RUN_KEY_MIGRATION flag)
             try
             {
@@ -98,7 +115,6 @@ namespace McpRouter.Services.DatabaseSeeders
                             p_Username = defaultKey.Username,
                             p_KeyPrefix = defaultKey.KeyPrefix,
                             p_EncryptedKey = defaultKey.EncryptedKey,
-                            p_ScopesJson = defaultKey.ScopesJson,
                             p_OwnerSid = defaultKey.OwnerSid ?? "",
                             p_ExpiresAt = defaultKey.ExpiresAt
                         }, commandType: System.Data.CommandType.StoredProcedure);
