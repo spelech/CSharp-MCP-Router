@@ -24,8 +24,6 @@ export default tseslint.config(
         'warn',
         { allowConstantExport: true },
       ],
-      'react-hooks/set-state-in-effect': 'error',
-      'react-hooks/exhaustive-deps': 'off',
       '@typescript-eslint/no-explicit-any': 'off',
       '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_' }],
     },
