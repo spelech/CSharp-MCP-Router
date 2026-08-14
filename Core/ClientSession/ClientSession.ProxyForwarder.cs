@@ -17,16 +17,44 @@ namespace McpRouter
         /// Cancels an active request by triggering its registered cancellation token source.
         /// </summary>
         /// <param name="requestId">The unique request ID to cancel.</param>
-        public void CancelRequest(string requestId)
+        /// <param name="traceIdentifier">Optional HTTP trace identifier for scoping stateless requests.</param>
+        public void CancelRequest(string requestId, string? traceIdentifier = null)
         {
-            if (_activeRequestCancellationTokens.TryRemove(requestId, out var cts))
+            if (!string.IsNullOrEmpty(traceIdentifier))
             {
-                try
+                var targetKey = $"{_sessionId}:{traceIdentifier}:{requestId}";
+                if (_activeRequestCancellationTokens.TryRemove(targetKey, out var ctsTrace))
                 {
-                    cts.Cancel();
-                    _logger.LogInformation("Cancelled active request: {RequestId}", requestId);
+                    try
+                    {
+                        ctsTrace.Cancel();
+                        _logger.LogInformation("Cancelled active request: {Key}", targetKey);
+                    }
+                    catch (ObjectDisposedException) { }
+                    return;
                 }
-                catch (ObjectDisposedException) { }
+            }
+
+            var keysToCancel = new List<string>();
+            foreach (var key in _activeRequestCancellationTokens.Keys)
+            {
+                if (key == requestId || key == $"{_sessionId}:{requestId}" || key.EndsWith($":{requestId}"))
+                {
+                    keysToCancel.Add(key);
+                }
+            }
+
+            foreach (var key in keysToCancel)
+            {
+                if (_activeRequestCancellationTokens.TryRemove(key, out var cts))
+                {
+                    try
+                    {
+                        cts.Cancel();
+                        _logger.LogInformation("Cancelled active request: {Key}", key);
+                    }
+                    catch (ObjectDisposedException) { }
+                }
             }
         }
 
@@ -58,7 +86,10 @@ namespace McpRouter
             var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             var requestId = request.Id?.ToString() ?? Guid.NewGuid().ToString("N");
             
-            _clientPendingRequests[requestId] = tcs;
+            if (!_clientPendingRequests.TryAdd(requestId, tcs))
+            {
+                throw new InvalidOperationException($"A client pending request with ID '{requestId}' already exists. Cannot overwrite silently.");
+            }
 
             var clientRequest = new {
                 jsonrpc = "2.0",
