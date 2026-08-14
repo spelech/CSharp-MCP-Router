@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.12.2-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.12.3-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-515%20passing-2ea44f?style=for-the-badge)
@@ -44,11 +44,40 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 ---
 
+## 🎯 Evaluation & Product Overview Guide
+
+To understand how MCP Router solves LLM context window bloat, eliminates CLI secret leakage in STDIO subprocesses, enforces 4-stage authorization, and compares against direct connections and generic reverse proxies, see:
+* [**Evaluation & Product Overview Guide**](docs/evaluation-guide.md)
+
+---
+
 ## 🏛️ Comprehensive Architecture & Specification Guide
 
 For exhaustive architectural specifications, Mermaid sequence diagrams, component boundary models, entity-relationship diagrams (ERDs), 4-stage authorization flows, transport lifecycles, and AES-256-GCM envelope encryption pipelines, see:
 * [**Comprehensive Enterprise Architecture Guide**](docs/architecture.md)
 * [**Executive Architecture Overview**](ARCHITECTURE.md)
+
+---
+
+## 📖 Official User Guide & Manual
+
+For step-by-step UI guides, server registration, secret provider configuration (Env, HashiCorp Vault, Registry), RBAC group policies, client setup snippets, and interactive test bench operations, see the complete user guide suite:
+* [**Official User Guide Suite**](docs/user-guide/README.md)
+  * [01. Dashboard & Navigation Interface](docs/user-guide/01-dashboard-and-navigation.md)
+  * [02. Server Management & Secret Providers](docs/user-guide/02-server-management-and-secrets.md)
+  * [03. RBAC, Security & Approvals](docs/user-guide/03-rbac-and-security.md)
+  * [04. Client Setup & App Key Management](docs/user-guide/04-client-setup-and-app-keys.md)
+  * [05. Interactive Test Bench](docs/user-guide/05-interactive-test-bench.md)
+  * [06. System Settings & Vector Embeddings](docs/user-guide/06-settings-and-embeddings.md)
+
+---
+
+## 💻 Developer & Operations Guides
+
+For environment prerequisites, local setup, testing workflows, production deployments, Caddy/NGINX configs, database backup/restore, observability, and disaster recovery:
+* [**Developer Guide & Local Setup**](docs/developer-guide.md)
+* [**Operations & Production Runbook**](docs/runbook.md)
+* [**Contributing Guide**](CONTRIBUTING.md)
 
 ---
 
@@ -76,12 +105,6 @@ For detailed dialect specifications (SQLite, Microsoft SQL Server, MySQL), store
 
 ---
 
-## 📖 Official User Guide & Manual
-
-For step-by-step UI guides, server registration, secret provider configuration (Env, HashiCorp Vault, Registry), RBAC group policies, client setup snippets, and interactive test bench operations, see the [**Official User Guide Suite**](docs/user-guide/README.md).
-
----
-
 ## 📡 Features & Usage Guide
 
 For deep technical walkthroughs, setup configuration examples, connection guidelines, secret retrievers, and usage instructions for the Web UI/Test Bench, see [docs/features-guide.md](docs/features-guide.md).
@@ -104,12 +127,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.12.3`** | 2026-08-14 | docs: complete product, user, developer, and operations documentation journey (#58) |
 | **`v4.12.2`** | 2026-08-14 | docs: comprehensive enterprise architecture guide with system context, component models, sequence diagrams, 4-stage authorization, transports, database ERD, and envelope encryption (#57) |
 | **`v4.12.1`** | 2026-08-14 | docs: complete Stage 1 documentation — database-provider support matrix (#53), canonical AppKey scope and authorization guide (#54), transport capability & STDIO lifecycle guide (#55), and secret-provider security reference (#56) |
 | **`v4.12.0`** | 2026-08-14 | refactor(architecture): complete Sprint 4 merge — modularize backend into `Components/` and `Infrastructure/` domain boundaries with decomposed endpoint mappers (#51), and refactor frontend into domain `components/` with typed API layer and modular settings tabs (#52) |
 | **`v4.11.0`** | 2026-08-14 | feat(testing): complete Sprint 3 merge — frontend unit/component test suite (#48), pull-request CI quality gates & security scanning (#49), and pairwise integration matrix with multi-user E2E fixtures (#50) |
-| **`v4.10.0`** | 2026-08-14 | feat(core): complete Sprint 2 merge — provider settings encryption & dynamic reload (#44), unified MCP capability authorization (#45), and category-scoped AppKeys (#46) |
-| **`v4.9.0`** | 2026-08-14 | feat(core): complete Sprint 1 merge — database schema alignment, STDIO transport, AppKey security hardening, SSE concurrency isolation, and lint/build baseline |
 
 ---
 
