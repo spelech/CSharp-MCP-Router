@@ -129,9 +129,15 @@ Our core modules maintain high code coverage and automated CI quality gates on p
 
 ---
 
-## 🛠️ Contributor Guide: Formatting & Linting
+## 🛠️ Contributor & Developer Guide
 
-To maintain consistent formatting and catch potential bugs early, this repository enforces shared style guidelines and static analysis policies.
+For complete developer onboarding, environment setup, testing protocols, and release verification, see [**docs/developer-guide.md**](docs/developer-guide.md).
+
+### Quick Quality & Release Verification
+Run the unified verification engine locally before creating pull requests:
+```bash
+./scripts/verify-release.sh
+```
 
 ### C# Backend (Roslyn & .NET Analyzers)
 - **EditorConfig**: Supported globally across C#, TSX, JSON, and YAML. Indentation is 4 spaces for C# and 2 spaces for web files.
