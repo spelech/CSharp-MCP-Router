@@ -183,6 +183,8 @@ server {
 
 ## 🗄️ Database Operations: Backup, Restore & Maintenance
 
+The router persistence tier manages 12 core tables across SQLite, MS SQL Server, and MySQL. For schema contracts and the complete Entity-Relationship Diagram, see [**Database Provider Support & Deployment Matrix (`docs/database-providers.md`)**](database-providers.md#unified-database-entity-relationship-diagram-erd).
+
 ### 1. SQLite Provider (`Data Source=/data/mcp-router.db`)
 
 #### Safe Online Backup (Zero Downtime)

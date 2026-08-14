@@ -101,7 +101,7 @@ For detailed documentation on supported secret providers (HashiCorp Vault KV v2 
 
 ## 🗄️ Database Provider Support & Deployment Matrix
 
-For detailed dialect specifications (SQLite, Microsoft SQL Server, MySQL), stored procedure contracts, envelope encryption architecture, fail-closed startup validation, and Docker Compose configurations, see [**Database Provider Support & Deployment Matrix**](docs/database-providers.md).
+For complete dialect specifications across **SQLite**, **Microsoft SQL Server**, and **MySQL**, the complete 12-table [**Entity-Relationship Diagram (ERD)**](docs/database-providers.md#unified-database-entity-relationship-diagram-erd), stored procedure suites (`sp_*`), AES-256-GCM envelope encryption, and Docker Compose deployment recipes, see [**Database Provider Support & Deployment Matrix**](docs/database-providers.md).
 
 ---
 

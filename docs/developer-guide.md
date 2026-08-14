@@ -57,7 +57,7 @@ The codebase is organized into clean domain boundaries across backend, frontend,
 ├── Infrastructure/             # Persistence, secrets, identity, and logging adapters
 │   ├── Identity/               # Active Directory (LDAP), OIDC, and AppKey providers
 │   ├── Logging/                # PII sanitization, structured audit logging, ring buffers
-│   ├── Persistence/            # DbConnectionFactory (SQLite/MSSQL/MySQL) & Repositories
+│   ├── Persistence/            # DbConnectionFactory & Repositories (see [Database ERD](database-providers.md#unified-database-entity-relationship-diagram-erd))
 │   ├── Secrets/                # Vault KV v2, DPAPI, Environment, and AES-256-GCM crypto
 │   └── Transports/             # SseTransport, HttpTransport, and StdioTransport
 ├── frontend/                   # React 19 + Vite + TypeScript glassmorphic SPA
