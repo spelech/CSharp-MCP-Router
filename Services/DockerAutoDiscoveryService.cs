@@ -77,7 +77,7 @@ namespace McpRouter.Services
 
             using var httpClient = new HttpClient(handler);
             var response = await httpClient.GetStringAsync("http://localhost/containers/json", stoppingToken);
-            
+
             using var doc = JsonDocument.Parse(response);
             using var configScope = _serviceProvider.CreateScope();
             var config = configScope.ServiceProvider.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
@@ -106,7 +106,7 @@ namespace McpRouter.Services
 
                 // Check if mcp.enabled is true
                 bool mcpEnabled = false;
-                if (labelsProp.TryGetProperty("mcp.enabled", out var enabledProp) && 
+                if (labelsProp.TryGetProperty("mcp.enabled", out var enabledProp) &&
                     enabledProp.GetString()?.Equals("true", StringComparison.OrdinalIgnoreCase) == true)
                 {
                     mcpEnabled = true;

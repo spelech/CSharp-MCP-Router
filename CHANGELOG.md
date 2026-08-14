@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.10.0`** | 2026-08-14 | feat(auth): implement category-scoped AppKeys (`category:<name>`, `group:<name>`) with dynamic membership evaluation and scope validation (#46) |
 | **`v4.9.0`** | 2026-08-14 | feat(core): complete Sprint 1 merge — database schema alignment, STDIO transport, AppKey security hardening, SSE concurrency isolation, and lint/build baseline |
 | **`v4.7.0`** | 2026-08-12 | feat(diagnostics): add diagnostics API and soak test suite |
 | **`v4.6.0`** | 2026-08-12 | feat(identity): implement cross-platform Active Directory SID resolution via LDAP |

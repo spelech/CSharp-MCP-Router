@@ -709,7 +709,7 @@ namespace McpRouter.Services
 
                 foreach (var (_, ddl) in colDefs)
                 {
-                    try { conn.Execute(ddl); } catch {}
+                    try { conn.Execute(ddl); } catch { }
                 }
             }
             else if (provider == "mssql")

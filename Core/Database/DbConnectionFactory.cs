@@ -38,7 +38,7 @@ namespace McpRouter.Core.Database
                 ?? config["ConnectionStrings:DefaultConnection"]
                 ?? config["ConnectionStrings:Sqlite"]
                 ?? "";
-            
+
             if (_provider == "sqlite" && string.IsNullOrEmpty(_connectionString))
             {
                 var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");

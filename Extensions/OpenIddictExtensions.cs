@@ -13,7 +13,7 @@ namespace McpRouter.Extensions
     public static class OpenIddictExtensions
     {
         public static IServiceCollection AddMcpOpenIddict(
-            this IServiceCollection services, 
+            this IServiceCollection services,
             Microsoft.Extensions.Hosting.IHostEnvironment env,
             Microsoft.Extensions.Configuration.IConfiguration config)
         {
@@ -51,7 +51,7 @@ namespace McpRouter.Extensions
                 {
                     options.SetTokenEndpointUris("/connect/token", "/oauth/token");
                     options.AllowClientCredentialsFlow();
-                    
+
                     var certPath = config["OpenIddict:CertificatePath"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PATH");
                     var certPass = config["OpenIddict:CertificatePassword"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD");
 

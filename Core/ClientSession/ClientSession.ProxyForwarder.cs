@@ -85,19 +85,20 @@ namespace McpRouter
         {
             var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             var requestId = request.Id?.ToString() ?? Guid.NewGuid().ToString("N");
-            
+
             if (!_clientPendingRequests.TryAdd(requestId, tcs))
             {
                 throw new InvalidOperationException($"A client pending request with ID '{requestId}' already exists. Cannot overwrite silently.");
             }
 
-            var clientRequest = new {
+            var clientRequest = new
+            {
                 jsonrpc = "2.0",
                 method = request.Method,
                 id = requestId,
                 @params = request.Params
             };
-            
+
             await WriteMessageAsync(clientRequest);
 
             using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(60));
@@ -108,7 +109,8 @@ namespace McpRouter
             }
             catch (TaskCanceledException)
             {
-                return new JsonRpcResponse {
+                return new JsonRpcResponse
+                {
                     Id = requestId,
                     Error = new JsonRpcError { Code = -32000, Message = "Sampling request timed out or cancelled by client." }
                 };

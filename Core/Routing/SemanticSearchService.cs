@@ -33,7 +33,8 @@ namespace McpRouter.Core.Routing
                 return tools.Take(15).ToList();
             }
 
-            var toolItems = tools.Select(tool => {
+            var toolItems = tools.Select(tool =>
+            {
                 string name = "";
                 string description = "";
 
@@ -50,9 +51,9 @@ namespace McpRouter.Core.Routing
                 else
                 {
                     var type = tool.GetType();
-                    name = type.GetProperty("name")?.GetValue(tool)?.ToString() ?? 
+                    name = type.GetProperty("name")?.GetValue(tool)?.ToString() ??
                            type.GetProperty("Name")?.GetValue(tool)?.ToString() ?? "";
-                    description = type.GetProperty("description")?.GetValue(tool)?.ToString() ?? 
+                    description = type.GetProperty("description")?.GetValue(tool)?.ToString() ??
                                   type.GetProperty("Description")?.GetValue(tool)?.ToString() ?? "";
                 }
 
@@ -62,7 +63,8 @@ namespace McpRouter.Core.Routing
             var uncachedTexts = toolItems.Select(t => t.TextToEmbed).Where(t => !_embeddingsCache.ContainsKey(t)).Distinct().ToList();
             if (uncachedTexts.Count > 0)
             {
-                await Task.WhenAll(uncachedTexts.Select(async text => {
+                await Task.WhenAll(uncachedTexts.Select(async text =>
+                {
                     try
                     {
                         var vec = await embeddingService.GetEmbeddingAsync(text);
@@ -185,9 +187,9 @@ namespace McpRouter.Core.Routing
                 else
                 {
                     var type = tool.GetType();
-                    name = type.GetProperty("name")?.GetValue(tool)?.ToString() ?? 
+                    name = type.GetProperty("name")?.GetValue(tool)?.ToString() ??
                            type.GetProperty("Name")?.GetValue(tool)?.ToString() ?? "";
-                    description = type.GetProperty("description")?.GetValue(tool)?.ToString() ?? 
+                    description = type.GetProperty("description")?.GetValue(tool)?.ToString() ??
                                   type.GetProperty("Description")?.GetValue(tool)?.ToString() ?? "";
                 }
 

@@ -51,7 +51,7 @@ namespace McpRouter
         };
 
         private readonly SessionManager? _sessionManager;
- 
+
         public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, SessionManager? sessionManager, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
         {
             _sessionId = sessionId;
@@ -93,7 +93,8 @@ namespace McpRouter
                 {
                     statusCode = 403;
                     errorMessage = $"Security Error: Invalid or spoofed namespaced identifier: '{toolName}'.";
-                    var errResult = new {
+                    var errResult = new
+                    {
                         isError = true,
                         content = new[] {
                             new {
@@ -113,7 +114,8 @@ namespace McpRouter
                     var identity = await ResolveUserIdentityAsync(httpContext);
                     statusCode = 403;
                     errorMessage = $"Security Error: User '{identity.Username}' does not have permission to execute tool '{toolName}'.";
-                    var errResult = new {
+                    var errResult = new
+                    {
                         isError = true,
                         content = new[] {
                             new {
@@ -124,6 +126,47 @@ namespace McpRouter
                     };
                     responsePayload = JsonSerializer.Serialize(errResult);
                     return errResult;
+                }
+
+                if (toolName == "execute_tool")
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(body);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("params", out var paramsProp) &&
+                            paramsProp.TryGetProperty("arguments", out var argsProp) &&
+                            argsProp.TryGetProperty("name", out var targetNameProp))
+                        {
+                            var targetName = targetNameProp.GetString();
+                            if (!string.IsNullOrEmpty(targetName))
+                            {
+                                var isTargetAuth = await IsUserAuthorizedAsync("tools/call", targetName, httpContext);
+                                if (!isTargetAuth)
+                                {
+                                    var identity = await ResolveUserIdentityAsync(httpContext);
+                                    statusCode = 403;
+                                    errorMessage = $"Security Error: User '{identity.Username}' does not have permission to execute tool '{targetName}'.";
+                                    var errResult = new
+                                    {
+                                        isError = true,
+                                        content = new[] {
+                                            new {
+                                                type = "text",
+                                                text = errorMessage
+                                            }
+                                        }
+                                    };
+                                    responsePayload = JsonSerializer.Serialize(errResult);
+                                    return errResult;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception exExecAuth)
+                    {
+                        _logger.LogDebug(exExecAuth, "Failed to parse inner target tool name from execute_tool body");
+                    }
                 }
 
                 var contextToUse = httpContext ?? _clientResponse?.HttpContext;
@@ -169,7 +212,8 @@ namespace McpRouter
 
                     try
                     {
-                        var res = await _toolRoutingManager.CallToolAsync(toolName, body, dbFactory, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager, _sessionId);
+                        var res = await _toolRoutingManager.CallToolAsync(toolName, body, dbFactory, _backendConnections, _servers, _logger, _httpClient, _embeddingService, EnsureBackendsInitializedAsync, RewriteRequestJson, cts.Token, _sessionManager, _sessionId,
+                            filterAuthorizedToolsAsync: async (tools) => await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext));
                         responsePayload = res != null ? JsonSerializer.Serialize(res) : null;
                         return res;
                     }
@@ -213,7 +257,7 @@ namespace McpRouter
             {
                 _cts.Cancel();
             }
-            catch {}
+            catch { }
             foreach (var conn in _backendConnections.Values)
             {
                 conn.Dispose();
@@ -276,13 +320,13 @@ namespace McpRouter
             }
         }
 
-        public async Task<List<object>> ListResourceTemplatesAsync(string body)
+        public async Task<List<object>> ListResourceTemplatesAsync(string body, HttpContext? httpContext = null)
         {
             var templates = await _resourceRoutingManager.ListResourceTemplatesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager);
-            return templates;
+            return await FilterAuthorizedAsync(templates, "resources/templates/list", "uriTemplate", httpContext);
         }
 
-        public async Task<object> CompleteAsync(string body)
+        public async Task<object> CompleteAsync(string body, HttpContext? httpContext = null)
         {
             try
             {
@@ -311,13 +355,19 @@ namespace McpRouter
                                         argVal = valProp.GetString() ?? string.Empty;
                                     }
                                     var serverIds = _servers.Select(s => s.Id).ToList();
-                                    var matching = serverIds
-                                        .Where(id => id.StartsWith(argVal, StringComparison.OrdinalIgnoreCase))
-                                        .Take(10)
-                                        .ToList();
+                                    var matching = new List<string>();
+                                    foreach (var sid in serverIds)
+                                    {
+                                        if (sid.StartsWith(argVal, StringComparison.OrdinalIgnoreCase) &&
+                                            await IsUserAuthorizedAsync("completion/complete", sid, httpContext))
+                                        {
+                                            matching.Add(sid);
+                                            if (matching.Count >= 10) break;
+                                        }
+                                    }
                                     return new { completion = new { values = matching, hasMore = false } };
                                 }
-                                
+
                                 if (uriTemplate.StartsWith("mcp://"))
                                 {
                                     var parts = uriTemplate.Substring("mcp://".Length).Split('/', 2);
@@ -325,7 +375,8 @@ namespace McpRouter
                                     {
                                         var serverId = parts[0];
                                         var backendTemplate = parts[1];
-                                        if (_backendConnections.TryGetValue(serverId, out var conn))
+                                        if (await IsUserAuthorizedAsync("completion/complete", uriTemplate, httpContext) &&
+                                            _backendConnections.TryGetValue(serverId, out var conn))
                                         {
                                             var rewrittenBody = RewriteRequestJson(body, "uriTemplate", backendTemplate);
                                             var resp = await conn.SendRequestAsync("completion/complete", rewrittenBody);
@@ -345,7 +396,8 @@ namespace McpRouter
                                 {
                                     var serverId = parts[0];
                                     var rawName = parts[1];
-                                    if (_backendConnections.TryGetValue(serverId, out var conn))
+                                    if (await IsUserAuthorizedAsync("completion/complete", promptName, httpContext) &&
+                                        _backendConnections.TryGetValue(serverId, out var conn))
                                     {
                                         var rewrittenBody = RewriteRequestJson(body, "name", rawName);
                                         var resp = await conn.SendRequestAsync("completion/complete", rewrittenBody);
