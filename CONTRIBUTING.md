@@ -8,13 +8,13 @@ Please take a moment to review this document to ensure a smooth, efficient devel
 
 ## 📋 Table of Contents
 
-1. [Code of Conduct](#-code-of-conduct)
-2. [Development Environment Setup](#-development-environment-setup)
-3. [Branching & Git Workflow](#-branching--git-workflow)
-4. [Commit Conventions](#-commit-conventions)
-5. [Mandatory Versioning Rule](#-mandatory-versioning-rule)
-6. [CI Quality Gates & Verification](#-ci-quality-gates--verification)
-7. [Screenshots & Documentation Standards](#-screenshots--documentation-standards)
+1. [Code of Conduct](#code-of-conduct)
+2. [Development Environment Setup](#development-environment-setup)
+3. [Branching & Git Workflow](#branching--git-workflow)
+4. [Commit Conventions](#commit-conventions)
+5. [Mandatory Versioning Rule](#mandatory-versioning-rule)
+6. [CI Quality Gates & Verification](#ci-quality-gates--verification)
+7. [Screenshots & Documentation Standards](#screenshots--documentation-standards)
 
 ---
 
