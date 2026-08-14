@@ -7,24 +7,24 @@ This guide details the supported secret providers, the AES-256-GCM encryption-at
 ---
 
 ## 📑 Table of Contents
-- [Architecture Overview](#-architecture-overview)
-- [Supported Secret Providers](#-supported-secret-providers)
+- [Architecture Overview](#architecture-overview)
+- [Supported Secret Providers](#supported-secret-providers)
   - [1. HashiCorp Vault (KV v2)](#1-hashicorp-vault-kv-v2)
   - [2. Windows Registry (DPAPI)](#2-windows-registry-dpapi)
   - [3. Environment Variables](#3-environment-variables)
-- [Encryption at Rest & Key Derivation](#-encryption-at-rest--key-derivation)
+- [Encryption at Rest & Key Derivation](#encryption-at-rest--key-derivation)
   - [AES-256-GCM Envelope Encryption](#aes-256-gcm-envelope-encryption)
   - [Master Key Derivation (PBKDF2)](#master-key-derivation-pbkdf2)
-- [Dynamic Runtime Reloading](#-dynamic-runtime-reloading)
-- [Secret Redaction & Audit Safety](#-secret-redaction--audit-safety)
+- [Dynamic Runtime Reloading](#dynamic-runtime-reloading)
+- [Secret Redaction & Audit Safety](#secret-redaction--audit-safety)
   - [Masking & Mask-Preserving Updates](#masking--mask-preserving-updates)
   - [Audit Trail Sanitization](#audit-trail-sanitization)
   - [Fail-Closed Security Validation](#fail-closed-security-validation)
-- [Copy-Pasteable Configuration Examples](#-copy-pasteable-configuration-examples)
+- [Copy-Pasteable Configuration Examples](#copy-pasteable-configuration-examples)
   - [Docker Compose with HashiCorp Vault](#docker-compose-with-hashicorp-vault)
   - [Vault KV v2 & AppRole Setup Commands](#vault-kv-v2--approle-setup-commands)
   - [Registering Backend MCP Servers with Secrets](#registering-backend-mcp-servers-with-secrets)
-- [Troubleshooting & Operational Guide](#-troubleshooting--operational-guide)
+- [Troubleshooting & Operational Guide](#troubleshooting--operational-guide)
 
 ---
 
@@ -416,6 +416,6 @@ echo "Vault Secret ID: $SECRET_ID"
 ## 🔗 Related Documentation & Links
 
 - [Official User Guide: Server Management & Secrets](user-guide/02-server-management-and-secrets.md)
-- [Architecture & Domain Model](ARCHITECTURE.md)
+- [Architecture & Domain Model](architecture.md)
 - [Features & Usage Guide](features-guide.md)
 - [Security & Access Control (RBAC)](user-guide/03-rbac-and-security.md)

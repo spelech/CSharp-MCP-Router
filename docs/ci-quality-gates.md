@@ -55,7 +55,8 @@ The primary CI pipeline runs on pull requests and pushes to `main`. It uses conc
 
 | Job | Description | Validation Command |
 | :--- | :--- | :--- |
-| **`backend`** | Compiles the C# codebase on .NET 10 (`Release`), runs 400+ xUnit integration & unit tests, and captures coverage data. | `CI=true dotnet test McpRouter.slnx --configuration Release --verbosity normal --collect:"XPlat Code Coverage"` |
+| **`release-verification`** | Enforces version synchronization across C# project metadata, React store defaults, CHANGELOG, and README, while validating 100% of internal documentation links and anchors. | `python3 scripts/verify_release.py --skip-tests --ci` |
+| **`backend`** | Compiles the C# codebase on .NET 10 (`Release`), runs 500+ xUnit integration & unit tests, and captures coverage data. | `CI=true dotnet test McpRouter.slnx --configuration Release --verbosity normal --collect:"XPlat Code Coverage"` |
 | **`frontend`** | Sets up Node.js 22 LTS, enforces strict zero-warning ESLint checks, compiles the Vite TypeScript React 19 SPA, and executes Vitest test suites. | `cd frontend && npm ci && npm run lint && npm run build && npm test` |
 | **`integration-smoke`** | Boots the compiled Release binary on an ephemeral Kestrel port with an isolated SQLite test database, verifying `GET /health`, authenticated admin API access, AppKey generation/authentication, and MCP SSE protocol tool discovery. Logs are uploaded automatically on failure. | Runs smoke test probe suite against live local instance. |
 | **`docker-check`** | Validates the multi-stage `Dockerfile` build integrity via Docker Buildx in dry-run mode (`push: false`) without publishing. | `docker build -t mcp-router:ci-check .` |
@@ -105,6 +106,7 @@ To enforce quality gates on the repository, configure branch protection rules fo
 
 1. **Require a pull request before merging**.
 2. **Require status checks to pass before merging**:
+   - `Release & Version Consistency Gate (Python 3.12)`
    - `Backend Build & Test (.NET 10)`
    - `Frontend Quality & Tests (Node.js 22 LTS)`
    - `Integration Smoke Test`
@@ -118,9 +120,24 @@ To enforce quality gates on the repository, configure branch protection rules fo
 
 ---
 
-## 💻 Local Pre-Flight Verification
+## 💻 Local Pre-Flight & Release Verification
 
-Before opening a pull request or pushing commits, contributors and agents can run the local validation suite:
+Before opening a pull request or creating release commits, contributors and AI agents can execute the all-in-one verification engine:
+
+```bash
+# 🚀 Run complete release verification (versions, markdown links, tests, builds)
+./scripts/verify-release.sh
+
+# ⚡ Quick validation (version sync and link integrity only, skipping tests)
+./scripts/verify-release.sh --skip-tests
+
+# 🔍 Targeted validations
+python3 scripts/verify_release.py --check-versions-only
+python3 scripts/verify_release.py --check-links-only
+python3 scripts/verify_release.py --check-tests-only
+```
+
+Individual sub-system validations can also be run directly:
 
 ```bash
 # 1. Run backend tests
