@@ -194,6 +194,109 @@ namespace McpRouter.Tests
             Assert.False(sessionManager.BackendStatuses.ContainsKey("s3"));
         }
 
+        [Fact]
+        public async Task ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var server = new McpServer
+            {
+                Id = "stdio-valid",
+                DisplayName = "Valid STDIO Server",
+                Url = "node /app/server.js --arg=1",
+                Type = "stdio",
+                Enabled = true
+            };
+
+            // HTTP handler that should never be called for stdio servers
+            bool httpCalled = false;
+            var handler = new MockHttpMessageHandler(req =>
+            {
+                httpCalled = true;
+                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
+            });
+            var client = new HttpClient(handler);
+
+            var services = new ServiceCollection();
+            services.AddSingleton(dbFactory);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpClientFactory = new MockHttpClientFactory(client);
+            var sessionManager = new SessionManager(serviceProvider, httpClientFactory, NullLogger<SessionManager>.Instance);
+            var logger = NullLogger<BackendHealthCheckService>.Instance;
+
+            var healthService = new BackendHealthCheckService(serviceProvider, httpClientFactory, sessionManager, logger);
+
+            await healthService.ProbeServerAsync(server);
+
+            Assert.False(httpCalled);
+            var status = sessionManager.BackendStatuses["stdio-valid"];
+            Assert.Equal("Connected", status.Status);
+            Assert.Equal(1, status.Attempts);
+            Assert.Empty(status.Error);
+        }
+
+        [Fact]
+        public async Task ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var server = new McpServer
+            {
+                Id = "stdio-invalid",
+                DisplayName = "Invalid STDIO Server",
+                Url = "bash evil_script.sh",
+                Type = "stdio",
+                Enabled = true
+            };
+
+            var services = new ServiceCollection();
+            services.AddSingleton(dbFactory);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpClientFactory = new MockHttpClientFactory(new HttpClient());
+            var sessionManager = new SessionManager(serviceProvider, httpClientFactory, NullLogger<SessionManager>.Instance);
+            var logger = NullLogger<BackendHealthCheckService>.Instance;
+
+            var healthService = new BackendHealthCheckService(serviceProvider, httpClientFactory, sessionManager, logger);
+
+            await healthService.ProbeServerAsync(server);
+
+            var status = sessionManager.BackendStatuses["stdio-invalid"];
+            Assert.Equal("Failed", status.Status);
+            Assert.Equal(1, status.Attempts);
+            Assert.Contains("blocked under the security policy", status.Error);
+        }
+
+        [Fact]
+        public async Task ProbeServerAsync_Sets_Connected_For_Custom_Server()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var server = new McpServer
+            {
+                Id = "custom-server",
+                DisplayName = "Custom Native Tool Server",
+                Url = "",
+                Type = "custom",
+                Enabled = true
+            };
+
+            var services = new ServiceCollection();
+            services.AddSingleton(dbFactory);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpClientFactory = new MockHttpClientFactory(new HttpClient());
+            var sessionManager = new SessionManager(serviceProvider, httpClientFactory, NullLogger<SessionManager>.Instance);
+            var logger = NullLogger<BackendHealthCheckService>.Instance;
+
+            var healthService = new BackendHealthCheckService(serviceProvider, httpClientFactory, sessionManager, logger);
+
+            await healthService.ProbeServerAsync(server);
+
+            var status = sessionManager.BackendStatuses["custom-server"];
+            Assert.Equal("Connected", status.Status);
+            Assert.Equal(1, status.Attempts);
+            Assert.Empty(status.Error);
+        }
+
         private class MockHttpClientFactory : IHttpClientFactory
         {
             private readonly HttpClient _client;
