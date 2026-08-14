@@ -74,7 +74,7 @@ namespace McpRouter.Core.Identity
                         if (ldapSids != null && ldapSids.Count > 0)
                         {
                             sids.AddRange(ldapSids);
-                            
+
                             // If primary SID is missing, take the first SID returned by LDAP
                             if (string.IsNullOrEmpty(sid))
                             {

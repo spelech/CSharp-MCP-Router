@@ -23,7 +23,7 @@ namespace McpRouter.Core.Transports
         private readonly JsonRpcStateManager _stateManager;
         private readonly ISecretRetriever? _secretRetriever;
         private readonly CancellationTokenSource _cts = new();
-        
+
         private string? _messageUrl;
         private TaskCompletionSource<string> _endpointTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private string _sessionId = Guid.NewGuid().ToString("N");
@@ -67,8 +67,8 @@ namespace McpRouter.Core.Transports
             {
                 path = $"{_server.SecretMount}:{path}";
             }
-            else if (provider.Equals("Vault", StringComparison.OrdinalIgnoreCase) && 
-                     string.IsNullOrWhiteSpace(_server.SecretPath) && 
+            else if (provider.Equals("Vault", StringComparison.OrdinalIgnoreCase) &&
+                     string.IsNullOrWhiteSpace(_server.SecretPath) &&
                      !string.IsNullOrWhiteSpace(_server.SecretItemKey))
             {
                 // Frontend passes 'mount:path:field' inside SecretItemKey
@@ -187,9 +187,9 @@ namespace McpRouter.Core.Transports
                         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
                         request.Headers.Add("Mcp-Session-Id", _sessionId);
-                        
+
                         await ApplyAuthAndCustomHeadersAsync(request);
-                        
+
                         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cts.Token);
                         response.EnsureSuccessStatusCode();
 
@@ -206,8 +206,10 @@ namespace McpRouter.Core.Transports
                         if (sessionValues != null)
                         {
                             _sessionId = sessionValues.FirstOrDefault() ?? string.Empty;
-                            _ = Task.Delay(1500, _cts.Token).ContinueWith(t => {
-                                if (!t.IsCanceled && _messageUrl == null) {
+                            _ = Task.Delay(1500, _cts.Token).ContinueWith(t =>
+                            {
+                                if (!t.IsCanceled && _messageUrl == null)
+                                {
                                     _messageUrl = _server.Url;
                                     _endpointTcs.TrySetResult(_server.Url);
                                 }
@@ -215,23 +217,25 @@ namespace McpRouter.Core.Transports
                         }
                         else if (response.Content.Headers.ContentType?.MediaType == "text/event-stream")
                         {
-                            _ = Task.Delay(1500, _cts.Token).ContinueWith(t => {
-                                if (!t.IsCanceled && _messageUrl == null) {
+                            _ = Task.Delay(1500, _cts.Token).ContinueWith(t =>
+                            {
+                                if (!t.IsCanceled && _messageUrl == null)
+                                {
                                     _messageUrl = _server.Url;
                                     _endpointTcs.TrySetResult(_server.Url);
                                 }
                             });
                         }
-                        
+
                         using var stream = await response.Content.ReadAsStreamAsync(_cts.Token);
                         using var reader = new StreamReader(stream);
-                        
+
                         string? currentEvent = null;
                         while (!_cts.Token.IsCancellationRequested)
                         {
                             var line = await reader.ReadLineAsync(_cts.Token);
                             if (line == null) break;
-                            
+
                             if (line.StartsWith("event:"))
                             {
                                 currentEvent = line.Substring(6).Trim();
@@ -420,7 +424,7 @@ namespace McpRouter.Core.Transports
             {
                 var content = new StringContent(modifiedBody, Encoding.UTF8, "application/json");
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                
+
                 using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
                 req.Headers.Host = "localhost";
                 req.Headers.Accept.Clear();
@@ -478,7 +482,7 @@ namespace McpRouter.Core.Transports
             {
                 var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
-                
+
                 using var postReq = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
                 postReq.Headers.Host = "localhost";
                 postReq.Headers.Accept.Clear();
@@ -488,7 +492,7 @@ namespace McpRouter.Core.Transports
                 {
                     postReq.Headers.Add("Mcp-Session-Id", _sessionId);
                 }
-                
+
                 await ApplyAuthAndCustomHeadersAsync(postReq);
 
                 using var res = await _httpClient.SendAsync(postReq, _cts.Token);
@@ -512,7 +516,7 @@ namespace McpRouter.Core.Transports
             await ApplyAuthAndCustomHeadersAsync(req);
             if (!string.IsNullOrEmpty(_sessionId))
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
-            
+
             using var res = await _httpClient.SendAsync(req, _cts.Token);
             res.EnsureSuccessStatusCode();
         }
@@ -527,7 +531,7 @@ namespace McpRouter.Core.Transports
             await ApplyAuthAndCustomHeadersAsync(req);
             if (!string.IsNullOrEmpty(_sessionId))
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
-            
+
             using var res = await _httpClient.SendAsync(req, _cts.Token);
             res.EnsureSuccessStatusCode();
         }

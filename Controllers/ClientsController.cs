@@ -34,13 +34,15 @@ namespace McpRouter.Controllers
             using var conn = _dbFactory.CreateConnection();
             var keys = await conn.QueryAsync<dynamic>("SELECT Id, Name, Username, KeyPrefix, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys");
 
-            var clients = keys.Select(k => {
+            var clients = keys.Select(k =>
+            {
                 var scopesJson = Convert.ToString(k.ScopesJson) ?? "[]";
                 List<string> scopes;
                 try { scopes = JsonSerializer.Deserialize<List<string>>(scopesJson) ?? new List<string>(); }
                 catch { scopes = new List<string>(); }
 
-                return new {
+                return new
+                {
                     Id = Convert.ToString(k.Id),
                     ClientId = Convert.ToString(k.Username) ?? Convert.ToString(k.KeyPrefix),
                     DisplayName = Convert.ToString(k.Name) ?? "App Key",
@@ -93,7 +95,8 @@ namespace McpRouter.Controllers
 
                 await _auditLogger.LogAdminActionAsync(username, "client.create", clientId, JsonSerializer.Serialize(new { model.DisplayName, Scopes = model.Scopes, model.ExpiresInDays }), true);
 
-                return Ok(new {
+                return Ok(new
+                {
                     ClientId = clientId,
                     ClientSecret = plaintextKey,
                     DisplayName = model.DisplayName,
@@ -106,7 +109,7 @@ namespace McpRouter.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
-        
+
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteClient(string id)
         {

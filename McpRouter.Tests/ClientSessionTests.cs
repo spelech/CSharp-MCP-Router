@@ -43,7 +43,7 @@ namespace McpRouter.Tests
             var services = new ServiceCollection();
             services.AddSingleton<IAuditLogger, NullAuditLogger>();
             services.AddSingleton(dbFactory);
-            
+
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" },

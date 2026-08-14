@@ -15,12 +15,12 @@ namespace McpRouter
         private readonly McpServer _server;
         private readonly ITransport _transport;
         private readonly JsonRpcStateManager _stateManager;
-        
+
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
             Converters = { new JsonRpcMessageConverter() }
         };
-        
+
         public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests => _stateManager.PendingRequests;
         public TimeSpan RequestTimeout { get => _transport.RequestTimeout; set => _transport.RequestTimeout = value; }
 
@@ -59,7 +59,7 @@ namespace McpRouter
 
         public void StartReader(Func<JsonRpcMessage, Task> onMessageReceived)
         {
-            _transport.StartReader(async (message) => 
+            _transport.StartReader(async (message) =>
             {
                 if (message is JsonRpcResponse response && response.Id != null)
                 {
@@ -74,7 +74,7 @@ namespace McpRouter
                         }
                     }
                 }
-                
+
                 await onMessageReceived(message);
             });
         }
@@ -92,7 +92,7 @@ namespace McpRouter
                 return await http.CallMethodAsync(method, parameters, overrideId);
             else if (_transport is StdioTransport stdio)
                 return await stdio.CallMethodAsync(method, parameters, overrideId);
-                
+
             throw new NotSupportedException();
         }
 
