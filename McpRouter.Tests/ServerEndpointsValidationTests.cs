@@ -7,8 +7,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using McpRouter.Core;
-using McpRouter.Core.Database;
-using McpRouter.Core.Logging;
+using McpRouter.Infrastructure.Persistence;
+using McpRouter.Infrastructure.Logging;
 using McpRouter.Extensions;
 using McpRouter.Models;
 using Moq;
@@ -31,7 +31,7 @@ namespace McpRouter.Tests
         [InlineData("cat `whoami`", false)]
         public void IsValidStdioCommand_ValidatesExecutableAndDisallowsUnsafeCommands(string command, bool expectedValid)
         {
-            var valid = ServerEndpointsExtensions.IsValidStdioCommand(command, out var err);
+            var valid = ServerValidationHelper.IsValidStdioCommand(command, out var err);
             Assert.Equal(expectedValid, valid);
             if (!expectedValid)
             {
@@ -43,7 +43,7 @@ namespace McpRouter.Tests
         public void IsValidServerUrl_Rejects_Invalid_Http_Urls()
         {
             var config = new ConfigurationBuilder().Build();
-            var valid = ServerEndpointsExtensions.IsValidServerUrl("not-a-valid-url", config, out var err);
+            var valid = ServerValidationHelper.IsValidServerUrl("not-a-valid-url", config, out var err);
             Assert.False(valid);
             Assert.Contains("must be a valid HTTP or HTTPS URI", err);
         }
@@ -57,7 +57,7 @@ namespace McpRouter.Tests
                     ["Security:AllowedIpRanges:0"] = "127.0.0.1/32"
                 })
                 .Build();
-            var valid = ServerEndpointsExtensions.IsValidServerUrl("http://127.0.0.1:8080/sse", config, out var err);
+            var valid = ServerValidationHelper.IsValidServerUrl("http://127.0.0.1:8080/sse", config, out var err);
             Assert.True(valid);
             Assert.Null(err);
         }
@@ -69,13 +69,13 @@ namespace McpRouter.Tests
 
             // Scenario 1: Existing SSE server with HTTP URL updated to 'stdio' without changing URL
             var httpUrl = "http://api.example.com/sse";
-            var stdioValid = ServerEndpointsExtensions.IsValidStdioCommand(httpUrl, out var stdioErr);
+            var stdioValid = ServerValidationHelper.IsValidStdioCommand(httpUrl, out var stdioErr);
             Assert.False(stdioValid);
             Assert.NotNull(stdioErr);
 
             // Scenario 2: Existing STDIO server with command updated to 'sse' without changing URL
             var stdioCommand = "node /app/server.js";
-            var sseValid = ServerEndpointsExtensions.IsValidServerUrl(stdioCommand, config, out var sseErr);
+            var sseValid = ServerValidationHelper.IsValidServerUrl(stdioCommand, config, out var sseErr);
             Assert.False(sseValid);
             Assert.NotNull(sseErr);
         }

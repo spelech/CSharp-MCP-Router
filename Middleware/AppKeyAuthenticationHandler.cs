@@ -8,9 +8,9 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Microsoft.Extensions.Configuration;
 using McpRouter.Models;
-using McpRouter.Core.Secrets;
+using McpRouter.Infrastructure.Persistence;
+using McpRouter.Infrastructure.Secrets;
 using Dapper;
-using McpRouter.Core.Database;
 
 namespace McpRouter.Middleware
 {

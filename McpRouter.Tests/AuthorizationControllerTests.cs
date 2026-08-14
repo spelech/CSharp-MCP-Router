@@ -1,7 +1,10 @@
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
-using McpRouter.Controllers;
+using McpRouter.Components.Clients;
+using McpRouter.Components.AppKeys;
+using McpRouter.Components.Providers;
+using McpRouter.Components.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
@@ -16,7 +19,7 @@ namespace McpRouter.Tests
         public async Task Exchange_ThrowsInvalidOperationException_WhenRequestNull()
         {
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var controller = new AuthorizationController(mockAppManager.Object, mockAudit.Object)
             {
                 ControllerContext = new ControllerContext
@@ -34,7 +37,7 @@ namespace McpRouter.Tests
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
             mockAppManager.Setup(m => m.CreateAsync(It.IsAny<OpenIddictApplicationDescriptor>(), default))
                           .ReturnsAsync(new object());
-            var mockAudit = new Mock<McpRouter.Core.Logging.IAuditLogger>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
 
             var controller = new AuthorizationController(mockAppManager.Object, mockAudit.Object);
             var json = JsonDocument.Parse("{\"client_name\":\"IntegrationTestApp\"}").RootElement;

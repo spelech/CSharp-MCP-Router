@@ -47,6 +47,29 @@ graph TD
     Audit --> DbFactory
 ```
 
+### 📦 Modular Domain & Infrastructure Boundaries
+
+The backend is organized into clear bounded modules across domain components, infrastructure, and core routing logic:
+
+```text
+├── Components/
+│   ├── Servers/         # Upstream server models, validation, health checks, discovery & MapServerEndpoints
+│   ├── Clients/         # Client models, credential services, OAuth & MapClientEndpoints
+│   ├── AppKeys/         # AppKey models, authorization keys, hashing & MapAppKeyEndpoints
+│   ├── Providers/       # Auth/secret provider settings, crypto redaction & MapProviderEndpoints
+│   ├── Authorization/   # Access policies, group mappings, RBAC evaluation & MapPolicyEndpoints
+│   └── Capabilities/    # Native tools, proxy execution, tool/prompt/resource handlers & MapCapabilityEndpoints
+├── Infrastructure/
+│   ├── Persistence/     # Dapper repositories, database connection factory, migrations & seeders
+│   ├── Transports/      # SSE, HTTP, STDIO, state manager & target proxy
+│   ├── Identity/        # Active Directory, OIDC, AppKey identity providers & LDAP service
+│   ├── Secrets/         # Vault, Windows Registry, Environment secret retrievers & encryption
+│   └── Logging/         # Audit logger, PII sanitization & in-memory log providers
+└── Core/
+    ├── Protocol/        # JSON-RPC protocol models & Polymorphic converter
+    └── Routing/         # ClientSession, SessionManager, BackendConnection & Semantic Search
+```
+
 ---
 
 ## 📡 Message & Connection Flows
