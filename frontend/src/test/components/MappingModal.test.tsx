@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { MappingModal } from '../../components/MappingModal';
+import { MappingModal } from '../../components/security/MappingModal';
 import { useSettingsStore, GroupMapping } from '../../stores/useSettingsStore';
 
 describe('MappingModal component', () => {

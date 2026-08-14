@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { AppKeyModal } from '../../components/AppKeyModal';
+import { AppKeyModal } from '../../components/clients/AppKeyModal';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
 
 describe('AppKeyModal component', () => {

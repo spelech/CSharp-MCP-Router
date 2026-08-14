@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { ServerModal } from '../../components/ServerModal';
+import { ServerModal } from '../../components/servers/ServerModal';
 import { useServerStore, McpServer } from '../../stores/useServerStore';
 
 describe('ServerModal component', () => {
