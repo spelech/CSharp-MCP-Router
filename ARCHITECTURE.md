@@ -1,6 +1,8 @@
-# MCP Router Architecture
+# 🏛️ MCP Router Architecture
 
-This document outlines the internal architecture, security mechanisms, design requirements, and key flow diagrams of the C# MCP Router. The codebase is designed around standard enterprise design patterns to guarantee high throughput, strict security, and clear separation of concerns.
+This document provides an executive summary of the internal architecture, security mechanisms, design requirements, and key subsystem flows of the **Model Context Protocol (MCP) Router Gateway & Semantic Proxy**.
+
+> 📖 **Definitive Specification**: For exhaustive architectural details, comprehensive Mermaid sequence diagrams, component models, entity-relationship diagrams (ERDs), and cryptographic specifications, see the [**Complete Enterprise Architecture Guide**](docs/architecture.md).
 
 ---
 
@@ -8,34 +10,35 @@ This document outlines the internal architecture, security mechanisms, design re
 
 ### 1. Performance & Latency Requirements
 - **Sub-millisecond Routing Decision**: The gateway annotates request metadata based on headers (`Mcp-Method` and `Mcp-Name` compliant with the MCP 2026-07-28 Spec) without having to read or buffer the request body if present, enabling downstream components to inspect annotated metadata. Routing is ultimately body/path based.
-- **Concurrent Request Handling**: Highly thread-safe design. The router must manage simultaneous SSE client channels, background health probes, and on-demand semantic search requests using thread-safe state wrappers (`ConcurrentDictionary` and thread-safe locks).
-- **Background Startup Warming**: Embedding models, backend connection channels, and configuration caches must be preloaded asynchronously during server initialization. This prevents first-request latency spikes (cold starts).
+- **Concurrent Request Handling**: Highly thread-safe design. The router manages simultaneous SSE client channels, background health probes, and on-demand semantic search requests using thread-safe state wrappers (`ConcurrentDictionary` and thread-safe locks).
+- **Background Startup Warming**: Embedding models, backend connection channels, and configuration caches are preloaded asynchronously during server initialization (`ClientSession.BackendInitializer.cs`). This prevents first-request latency spikes (cold starts).
 
 ### 2. Security & Identity Requirements
-- **Dual Authenticated Identities**: Must support enterprise-grade Windows/Kerberos environments via Active Directory SIDs as well as modern containerized reverse-proxy identities via OIDC headers.
-- **Strict Role-Based Access Control (RBAC)**: All target servers and backend tools must check caller groups using virtual mapping databases via optimized Stored Procedures.
-- **Compliant Error Handling & WWW-Authenticate Headers**: In accordance with the MCP 2026-07-28 Authorization specification, the gateway must emit strict `WWW-Authenticate` challenge headers during `401 Unauthorized` and `403 Forbidden` states.
-- **Data Redaction (PII)**: Any bearer tokens, credentials, API keys, or database passwords parsed in standard JSON-RPC communication must be filtered and redacted before being logged or stored.
+- **Dual Authenticated Identities**: Supports enterprise-grade Windows/Kerberos environments via Active Directory SIDs (`LdapActiveDirectoryService.cs`) as well as modern containerized reverse-proxy identities via OIDC headers (`Remote-User`, `Remote-Groups`).
+- **Granular AppKey Authorization**: Machine callers and autonomous agents authenticate via high-entropy AppKeys (`mcp-*-*-*`) with scope enforcement (`*`, `server:*`, `category:*`, `tool:*`).
+- **Strict Role-Based Access Control (RBAC)**: Target servers and backend tools verify caller groups using database-backed stored procedures (`sp_EvaluateUserAccess`).
+- **Compliant Error Handling & WWW-Authenticate Headers**: In accordance with the MCP 2026-07-28 Authorization specification, the gateway emits strict `WWW-Authenticate` challenge headers during `401 Unauthorized` and `403 Forbidden` states.
+- **Data Redaction (PII)**: Any bearer tokens, credentials, API keys, or database passwords parsed in standard JSON-RPC communication are filtered and redacted (`PiiSanitizer.cs`) before being logged or stored.
 
 ### 3. Reliability & Resilience Requirements
-- **Pluggable & Extensible Design**: Downstream transports, identity providers, and secret managers must be structured under clean strategy patterns (`ITransport`, `IIdentityProvider`, `ISecretRetriever`) to enable easy customization without touching core routing logic.
-- **Robust Stateless Buffering**: When communicating with stateless streamable HTTP backends, the router must read events line-by-line using a streaming buffer. It must support fast-breaking response parsing to prevent connections from hanging indefinitely.
-- **Safe Resource Cleanup**: Active SSE client sessions must handle connection terminations cleanly (preventing thread leakage) and capture disposal/cancellation exceptions gracefully.
+- **Pluggable & Extensible Design**: Downstream transports (`ITransport`), identity providers (`IIdentityProvider`), secret managers (`ISecretRetriever`), and database providers (`IDbConnectionFactory`) are structured under clean strategy patterns.
+- **Robust In-Flight Concurrency**: Uses `JsonRpcStateManager` with unique upstream GUID request rewriting and `PendingRequestTcs` to guarantee that out-of-order responses from multiplexed upstream servers are cleanly routed back to the exact requesting thread with their original client ID preserved.
+- **Safe Resource Cleanup**: Active SSE client sessions handle connection terminations cleanly and capture cancellation tokens gracefully (`notifications/cancelled`).
 
 ---
 
-## 🏛️ System Component Overview
+## 🏛️ System Architecture Overview
 
 ```mermaid
 graph TD
-    Client["Client App / LLM Agent"]
-    Middleware["McpDualSpecMiddleware<br>(2026 Spec Headers & Body Fallback)"]
-    Identity["CompositeIdentityProvider<br>(Active Directory & PocketID/TinyAuth OIDC)"]
+    Client["Client App / LLM Agent (Cursor, Claude, Antigravity, OpenClaw)"]
+    Middleware["McpDualSpecMiddleware<br>(2026-07-28 Spec Headers & Body Fallback)"]
+    Identity["CompositeIdentityProvider<br>(Active Directory LDAP & TinyAuth/PocketID OIDC)"]
     AuthEvaluator["sp_EvaluateUserAccess<br>(Provider-Specific Group SIDs / Roles)"]
-    Secrets["CompositeSecretRetriever<br>(Vault, Windows Registry DPAPI, Env)"]
+    Secrets["CompositeSecretRetriever<br>(Vault KV v2, Windows Registry DPAPI, Env)"]
     Audit["AuditLogger & PiiSanitizer<br>(sp_InsertAuditLog)"]
-    DbFactory["DbConnectionFactory<br>(MS SQL / MySQL / SQLite)"]
-    Downstream["Downstream MCP Backend Servers"]
+    DbFactory["DbConnectionFactory<br>(MS SQL / MySQL / SQLite WAL)"]
+    Downstream["Downstream MCP Backend Fleet (SSE, HTTP, STDIO, Native)"]
 
     Client -->|Mcp-Method & Mcp-Name| Middleware
     Middleware --> Identity
@@ -55,29 +58,27 @@ The backend is organized into clear bounded modules across domain components, in
 ├── Components/
 │   ├── Servers/         # Upstream server models, validation, health checks, discovery & MapServerEndpoints
 │   ├── Clients/         # Client models, credential services, OAuth & MapClientEndpoints
-│   ├── AppKeys/         # AppKey models, authorization keys, hashing & MapAppKeyEndpoints
-│   ├── Providers/       # Auth/secret provider settings, crypto redaction & MapProviderEndpoints
+│   ├── AppKeys/         # AppKey models, authorization keys, hashing, scope validation & MapAppKeyEndpoints
+│   ├── Providers/       # Auth/secret provider settings, AES-256-GCM crypto & MapProviderEndpoints
 │   ├── Authorization/   # Access policies, group mappings, RBAC evaluation & MapPolicyEndpoints
 │   └── Capabilities/    # Native tools, proxy execution, tool/prompt/resource handlers & MapCapabilityEndpoints
 ├── Infrastructure/
 │   ├── Persistence/     # Dapper repositories, database connection factory, migrations & seeders
-│   ├── Transports/      # SSE, HTTP, STDIO, state manager & target proxy
+│   ├── Transports/      # SSE, HTTP, STDIO, JSON-RPC state manager & target proxy
 │   ├── Identity/        # Active Directory, OIDC, AppKey identity providers & LDAP service
 │   ├── Secrets/         # Vault, Windows Registry, Environment secret retrievers & encryption
 │   └── Logging/         # Audit logger, PII sanitization & in-memory log providers
 └── Core/
     ├── Protocol/        # JSON-RPC protocol models & Polymorphic converter
-    └── Routing/         # ClientSession, SessionManager, BackendConnection & Semantic Search
+    └── Routing/         # ClientSession (partial classes), SessionManager, BackendConnection & Semantic Search
 ```
-
-> For deep architectural details and configuration guidelines regarding downstream transport implementations (`sse`, `http`, `stdio`), see the [**Transport Capability & Configuration Guide**](docs/transports.md).
 
 ---
 
-## 📡 Message & Connection Flows
+## 📡 Key Message & Connection Flows
 
-### 1. SSE Client Connection Lifecycle
-When an MCP client initiates a connection to the gateway:
+### 1. SSE Client Connection & Meta-Mode Tool Discovery
+When an MCP client initiates a connection to `/sse`:
 
 ```mermaid
 sequenceDiagram
@@ -103,7 +104,7 @@ sequenceDiagram
 ---
 
 ### 2. Request Routing and Execution Flow (Meta-Mode)
-When an agent client attempts to search for and execute a capability:
+When an agent client searches for and executes a capability:
 
 ```mermaid
 sequenceDiagram
@@ -111,7 +112,7 @@ sequenceDiagram
     actor Client as LLM / Agent
     participant Router as MCP Router
     participant SemanticSvc as SemanticSearchService
-    participant DB as SQLCipher Database
+    participant DB as SQL Database
     participant BackendConn as BackendConnection
     participant Downstream as MCP Backend
 
@@ -135,111 +136,56 @@ sequenceDiagram
 
 ---
 
-## 🛠️ Core Codebase Organization
+## 🔒 4-Stage Authorization Pipeline
 
-The codebase is organized in directories mirroring its sub-system boundaries:
+Every request entering the router passes through four concentric security boundaries:
 
-- **`/Core/`**:
-  - `ClientSession.cs`: Controls client connections, tracks execution threads, and rewrites JSON payloads.
-  - `BackendConnection.cs`: Represents connection tunnels to upstream servers.
-  - `SessionManager.cs`: Monitors all active connections and handles cleanup.
-  - `ToolRoutingManager.cs` & `CustomToolRegistry.cs`: Direct semantic tool searching, registration, and routing workflows.
-- **`/Middleware/`**:
-  - `McpAuthorizationSpecMiddleware.cs`: Appends standard-compliant authorization challenges (`WWW-Authenticate`).
-  - `McpDualSpecMiddleware.cs`: Core request interception for specification headers.
-- **`/Services/`**:
-  - `SemanticSearchService.cs`: Merges vector embeddings and hybrid keyword matches.
-  - `BackendHealthCheckService.cs`: Periodically checks the health of downstream targets.
-- **`/Extensions/`**:
-  - Minimal-API handlers in `ProxyEndpointsExtensions.cs` & `ServerEndpointsExtensions.cs`: Expose SSE tunnels, server listing, inspection, and routing routes.
-  - `ProvidersController.cs` (in `/Controllers/`): Controls administrative configuration for security providers.
-- **`/data/`**:
-  - Persistent volume holding configurations, local ONNX files, and SQLite databases.
+```
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ 1. AppKey Scope Boundary (Fast-Path Key Filtering)                          │
+│    Does the caller's AppKey allow the target server, category, or tool?     │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │ Pass
+┌──────────────────────────────────────▼──────────────────────────────────────┐
+│ 2. Identity Resolution & Group Mapping                                      │
+│    Resolve username, external SIDs, and map them to internal groups         │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                                       │
+┌──────────────────────────────────────▼──────────────────────────────────────┐
+│ 3. Administrative Bypass Check                                              │
+│    Does the caller possess the Admin SID (S-1-5-32-544 / full_admin)?       │
+└──────────────────────────────────────┬──────────────────────────────────────┘
+                   │ No                                   │ Yes (Admin Bypass)
+┌──────────────────▼───────────────────┐        ┌─────────▼───────────────────┐
+│ 4. RBAC Policy Evaluation            │        │ Authorized (200 OK)         │
+│    - Explicit Deny overrides Allow   │        │ Invocation Audit Logged     │
+│    - Category & Server inheritance   │        └─────────────────────────────┘
+│    - Fail-Closed Default (DENY)      │
+└──────────────────┬───────────────────┘
+                   │ Allowed
+┌──────────────────▼───────────────────┐
+│ Authorized (200 OK)                  │
+│ Invocation Audit Logged              │
+└──────────────────────────────────────┘
+```
 
 ---
 
-## 🧩 Class Architecture & Separation of Concerns
+## 📚 Architectural Guides & Specifications
 
-### 1. Client Session & Modular Partial Class Architecture
-```mermaid
-classDiagram
-    class ClientSession {
-        <<partial>>
-    }
-    class Authorization {
-        <<partial ClientSession>>
-    }
-    class BackendInitializer {
-        <<partial ClientSession>>
-    }
-    class ProxyForwarder {
-        <<partial ClientSession>>
-    }
-    class NotificationBroadcaster {
-        <<partial ClientSession>>
-    }
-    class JsonRpcRewriter {
-        <<partial ClientSession>>
-    }
-    ClientSession <|-- Authorization
-    ClientSession <|-- BackendInitializer
-    ClientSession <|-- ProxyForwarder
-    ClientSession <|-- NotificationBroadcaster
-    ClientSession <|-- JsonRpcRewriter
-    
-    class SessionManager
-    class BackendConnection
-    SessionManager --> ClientSession : Manages
-    ClientSession --> BackendConnection : Owns multiple
-```
+For comprehensive guides covering each individual subsystem in depth, refer to the technical specification library:
 
-### 2. Pluggable Strategy Interfaces & Security Providers
-```mermaid
-classDiagram
-    class IIdentityProvider {
-        <<interface>>
-    }
-    class ActiveDirectoryIdentityProvider
-    class OidcIdentityProvider
-    IIdentityProvider <|-- ActiveDirectoryIdentityProvider
-    IIdentityProvider <|-- OidcIdentityProvider
+| Specification Document | Focus Area |
+| :--- | :--- |
+| [**`docs/architecture.md`**](docs/architecture.md) | **Master Architectural Specification & Comprehensive Deep-Dive** |
+| [**`docs/transports.md`**](docs/transports.md) | Downstream Transports, Concurrency & Subprocess STDIO Lifecycle |
+| [**`docs/appkey-scopes.md`**](docs/appkey-scopes.md) | AppKey Scopes, Granular Permissions & Multi-Stage Authorization |
+| [**`docs/database-providers.md`**](docs/database-providers.md) | SQLite WAL, MS SQL Server & MySQL Stored Procedure Dialects |
+| [**`docs/secret-providers.md`**](docs/secret-providers.md) | HashiCorp Vault, Windows Registry DPAPI & AES-256-GCM Crypto |
+| [**`docs/ci-quality-gates.md`**](docs/ci-quality-gates.md) | Automated PR Quality Gates, Static Analysis & Testing Contracts |
+| [**`docs/testing-matrix.md`**](docs/testing-matrix.md) | Pairwise Integration Matrix & Multi-User E2E Fixtures |
+| [**`docs/features-guide.md`**](docs/features-guide.md) | Core Features, Discovery & Test Bench Operations |
 
-    class ISecretRetriever {
-        <<interface>>
-    }
-    class VaultSecretRetriever
-    class WindowsRegistrySecretRetriever
-    ISecretRetriever <|-- VaultSecretRetriever
-    ISecretRetriever <|-- WindowsRegistrySecretRetriever
+---
 
-    class ITransport {
-        <<interface>>
-    }
-    class SseTransport
-    class HttpTransport
-    ITransport <|-- SseTransport
-    ITransport <|-- HttpTransport
-
-    class IAuditLogger {
-        <<interface>>
-    }
-    class AuditLogger
-    IAuditLogger <|-- AuditLogger
-```
-
-### 3. Routing Engine Architecture & Helper Separation
-```mermaid
-classDiagram
-    class RoutingEngine
-    class ToolRoutingManager
-    class ResourceRoutingManager
-    class ResourceCatalogManager
-    class ToolApprovalManager
-    class ToolErrorFormatter
-
-    RoutingEngine --> ToolRoutingManager
-    RoutingEngine --> ResourceRoutingManager
-    RoutingEngine --> ResourceCatalogManager
-    ToolRoutingManager --> ToolApprovalManager
-    ToolRoutingManager --> ToolErrorFormatter
-```
+*Last Updated: Release `v4.12.2`*
