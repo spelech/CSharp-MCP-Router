@@ -1,19 +1,9 @@
 import { create } from 'zustand';
-import { apiRequest } from '../utils/api';
 import { showToast } from './useToastStore';
+import { RegisteredClient, NewClientResult } from '../shared/types';
+import { fetchClientsApi, registerClientApi, deleteClientApi } from '../api/clientApi';
 
-export interface RegisteredClient {
-  id: string;
-  clientId: string;
-  displayName: string;
-  isDynamic: boolean;
-  scopes?: string[];
-}
-
-export interface NewClientResult {
-  clientId: string;
-  clientSecret: string;
-}
+export type { RegisteredClient, NewClientResult };
 
 interface ClientStore {
   clients: RegisteredClient[];
@@ -38,7 +28,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
   fetchClients: async () => {
     set({ isLoadingClients: true });
     try {
-      const data = await apiRequest<RegisteredClient[]>('/api/clients');
+      const data = await fetchClientsApi();
       set({ clients: data || [], isLoadingClients: false });
     } catch (e: any) {
       console.error('Error fetching clients:', e);
@@ -48,10 +38,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
 
   registerClient: async (displayName, scopes) => {
     try {
-      const result = await apiRequest<NewClientResult>('/api/clients', {
-        method: 'POST',
-        body: { displayName, scopes }
-      });
+      const result = await registerClientApi(displayName, scopes);
       set({ createdClientResult: result });
       showToast('Client registered successfully', 'success');
       get().fetchClients();
@@ -64,7 +51,7 @@ export const useClientStore = create<ClientStore>((set, get) => ({
   deleteClient: async (id, name) => {
     if (!window.confirm(`Are you sure you want to delete the registered client '${name}'?`)) return;
     try {
-      await apiRequest(`/api/clients/${id}`, { method: 'DELETE' });
+      await deleteClientApi(id);
       showToast('Client deleted successfully', 'success');
       get().fetchClients();
     } catch (e: any) {
