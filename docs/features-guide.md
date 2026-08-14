@@ -155,14 +155,17 @@ For production or custom domain deployments, you can configure the allowed origi
 To avoid storing sensitive downstream API keys and passwords in plaintext database columns, the router dynamically fetches secrets at routing time via pluggable retrievers.
 
 The `CompositeSecretRetriever` dynamically resolves secrets from:
-1. **HashiCorp Vault (KV v2)**: Fetches secrets using path-based configurations (e.g., `/secret/data/mcp/plex`).
-2. **Windows Registry (DPAPI)**: Retrieves DPAPI-secured strings stored in the machine registry hives (`HKLM` or `HKCU`).
-3. **Environment Variables**: Resolves secrets bound as container environment variables on-demand.
+1. **HashiCorp Vault (KV v2)**: Fetches secrets using path-based configurations (e.g., `/secret/data/mcp/plex`) with AppRole/Token auth and JIT token renewal.
+2. **Windows Registry (DPAPI)**: Retrieves DPAPI-secured strings stored in the machine registry hives (`HKLM`).
+3. **Environment Variables**: Resolves secrets bound as container environment variables on-demand (`env:MY_SECRET`).
+
+> [!TIP]
+> For complete configuration recipes, AppRole policies, AES-256-GCM encryption-at-rest key derivation, and troubleshooting guide, see [**docs/secret-providers.md**](secret-providers.md).
 
 ### Configuration
 1. Register the secret location in your secret store (e.g., standard Environment Variable `DOCKER_API_KEY=my-super-secret`).
 2. In the Add/Edit Server modal, select `Environment` for the **Secret Provider** column and specify `DOCKER_API_KEY` in the **SecretItemKey** field.
-3. The gateway fetches, decrypts, and caches (using `IMemoryCache` with short rolling TTL to support rotation) the token at execution time without leaking it in database backups.
+3. The gateway fetches, decrypts, and caches (using `IMemoryCache` with rolling TTL to support rotation) the token at execution time without leaking it in database backups.
 
 ---
 

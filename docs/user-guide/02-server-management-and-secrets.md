@@ -22,28 +22,36 @@ Click the **`+ Add Server`** button in the dashboard toolbar to open the Server 
 
 ## 🔐 Secret Providers Guide
 
-To prevent hardcoding sensitive API keys or passwords in the database, the router supports 4 secret resolution providers:
+To prevent hardcoding sensitive API keys or passwords in the database, the router supports 3 pluggable secret resolution providers in addition to direct static keys:
+
+> [!TIP]
+> For an exhaustive architectural deep-dive, Vault KV v2 policies, AppRole setup commands, AES-256-GCM encryption-at-rest specs, and Docker recipes, see the comprehensive [**Enterprise Secret Providers Guide**](../secret-providers.md).
 
 ### 1. Direct API Key (`None`)
-- Store an static secret token directly in the server configuration.
-- Best for local testing or un-isolated environments.
+- Store a static secret token directly in the server configuration.
+- Best for local testing or un-isolated development environments.
 
-### 2. Environment Variable (`Env`)
+### 2. Environment Variable (`Environment` / `Env`)
 - Resolves secrets at runtime from environment variables on the host container.
-- **Item Key**: Name of the environment variable (e.g. `HOME_ASSISTANT_TOKEN` or `ACTUAL_API_KEY`).
-- Format: `ENV:VARIABLE_NAME`.
+- **Item Key / Path**: Name of the environment variable (e.g. `HOME_ASSISTANT_TOKEN`, `ACTUAL_API_KEY`, or `env:MY_SECRET`).
+- Supports direct variable name lookups without storing credentials in the database.
 
-### 3. HashiCorp Vault (`Vault`)
-- Integrates dynamically with HashiCorp Vault Key-Value (KV v1 or v2) secrets engines.
+### 3. HashiCorp Vault (`Vault` / `HashiCorpVault`)
+- Integrates dynamically with HashiCorp Vault Key-Value Version 2 (`kv-v2`) secrets engines.
+- **Supported Auth**: AppRole (`roleId` + `secretId`), Token auth, and `VAULT_TOKEN` environment fallback.
 - **Parameters**:
-  - **Secret Mount**: Secret engine mount path (e.g. `secret` or `homelab`).
-  - **Secret Path**: Path to the secret secret entry (e.g. `services/radarr` or `media/api-keys`).
+  - **Secret Mount**: Secret engine mount path (default: `secret`).
+  - **Secret Path**: Path to the secret entry (e.g. `services/radarr` or `services/docker`).
   - **Secret Field**: Field name inside the secret payload (e.g. `api_key` or `password`).
-- The router fetches the secret at runtime via `VaultSecretRetriever`, applying automatic token caching and lease renewal.
+- The router fetches the secret at runtime via `VaultSecretRetriever`, applying automatic JIT token TTL inspection (< 5 min remaining), automatic re-authentication, and 10-minute in-memory caching.
 
-### 4. File / Windows Registry (`Registry`)
-- Resolves secrets from local disk paths (e.g. `/etc/mcp-secrets/docker.key` or `/run/secrets/api_token`) or Windows Registry keys.
-- **Item Key**: Absolute path or registry path key.
+### 4. Windows Registry (`WindowsRegistry` / `Registry`)
+- Resolves secrets from Windows Registry `HKLM` hives (`RegistryHive.LocalMachine`).
+- Automatically unprotects Windows DPAPI encrypted blobs (`byte[]`) or reads plaintext strings.
+- **Requirements**: Windows host OS only (safely returns `null` on Linux/Docker containers).
+- **Parameters**:
+  - **Secret Path**: Subkey path (e.g. `SOFTWARE\Homelab\McpSecrets`).
+  - **Secret Field**: Value name (e.g. `PlexToken`).
 
 ---
 
