@@ -1,11 +1,9 @@
 using System;
 using System.Collections.Generic;
-using System.Data;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text.Json;
 using System.Threading.Tasks;
-using Dapper;
 using McpRouter.Core.Database;
 using McpRouter.Core.Secrets;
 using McpRouter.Models;
@@ -20,13 +18,19 @@ namespace McpRouter.Controllers
     [Authorize(Policy = "AdminPolicy")]
     public class AppKeysController : ControllerBase
     {
-        private readonly IDbConnectionFactory _dbFactory;
+        private readonly IAppKeyRepository _appKeyRepository;
+        private readonly ISettingRepository _settingRepository;
         private readonly IConfiguration _config;
         private readonly McpRouter.Core.Logging.IAuditLogger _auditLogger;
 
-        public AppKeysController(IDbConnectionFactory dbFactory, IConfiguration config, McpRouter.Core.Logging.IAuditLogger auditLogger)
+        public AppKeysController(
+            IAppKeyRepository appKeyRepository,
+            ISettingRepository settingRepository,
+            IConfiguration config,
+            McpRouter.Core.Logging.IAuditLogger auditLogger)
         {
-            _dbFactory = dbFactory;
+            _appKeyRepository = appKeyRepository;
+            _settingRepository = settingRepository;
             _config = config;
             _auditLogger = auditLogger;
         }
@@ -48,43 +52,10 @@ namespace McpRouter.Controllers
             var identity = await GetIdentityAsync();
             var currentUser = identity.Username;
             var isAdmin = IsAdmin(identity);
-            using var conn = _dbFactory.CreateConnection();
 
             try
             {
-                IEnumerable<AppKey> keys;
-
-                if (_dbFactory.ProviderName == "sqlite")
-                {
-                    if (isAdmin)
-                    {
-                        if (!string.IsNullOrEmpty(usernameFilter))
-                        {
-                            const string sql = "SELECT * FROM AppKeys WHERE Username = @Username ORDER BY CreatedAt DESC;";
-                            keys = await conn.QueryAsync<AppKey>(sql, new { Username = usernameFilter });
-                        }
-                        else
-                        {
-                            const string sql = "SELECT * FROM AppKeys ORDER BY CreatedAt DESC;";
-                            keys = await conn.QueryAsync<AppKey>(sql);
-                        }
-                    }
-                    else
-                    {
-                        const string sql = "SELECT * FROM AppKeys WHERE Username = @Username ORDER BY CreatedAt DESC;";
-                        keys = await conn.QueryAsync<AppKey>(sql, new { Username = currentUser });
-                    }
-                }
-                else
-                {
-                    // Use Stored Procedure for MS SQL & MySQL
-                    var parameters = new { Username = isAdmin ? usernameFilter : currentUser };
-                    keys = await conn.QueryAsync<AppKey>(
-                        "sp_GetAppKeys",
-                        parameters,
-                        commandType: CommandType.StoredProcedure
-                    );
-                }
+                var keys = await _appKeyRepository.GetAppKeysAsync(usernameFilter, isAdmin, currentUser);
 
                 // Return sanitized keys (do not return the EncryptedKey string to prevent exposing DB cipher blocks)
                 var result = keys.Select(k => new
@@ -112,7 +83,6 @@ namespace McpRouter.Controllers
             var identity = await GetIdentityAsync();
             var currentUser = identity.Username;
             var isAdmin = IsAdmin(identity);
-            using var conn = _dbFactory.CreateConnection();
 
             try
             {
@@ -120,17 +90,15 @@ namespace McpRouter.Controllers
                 int userMax = 5;
 
                 // Load active settings
-                const string settingsSql = "SELECT GlobalMaxKeys, UserMaxKeys FROM Settings LIMIT 1;";
-                var settings = await conn.QueryFirstOrDefaultAsync<dynamic>(settingsSql);
+                var settings = await _settingRepository.GetSettingsAsync();
                 if (settings != null)
                 {
-                    var dict = (IDictionary<string, object>)settings;
-                    if (dict.TryGetValue("GlobalMaxKeys", out var g) && g != null) globalMax = Convert.ToInt32(g);
-                    if (dict.TryGetValue("UserMaxKeys", out var u) && u != null) userMax = Convert.ToInt32(u);
+                    globalMax = settings.GlobalMaxKeys;
+                    userMax = settings.UserMaxKeys;
                 }
 
-                int totalActiveKeys = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppKeys;");
-                int userActiveKeys = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppKeys WHERE Username = @Username;", new { Username = currentUser });
+                int totalActiveKeys = await _appKeyRepository.GetTotalActiveKeysAsync();
+                int userActiveKeys = await _appKeyRepository.GetUserActiveKeysAsync(currentUser);
 
                 return Ok(new
                 {
@@ -177,33 +145,29 @@ namespace McpRouter.Controllers
                 return BadRequest(new { error = "Name is required." });
             }
 
-            using var conn = _dbFactory.CreateConnection();
-
             try
             {
                 // Retrieve max key limits
                 int globalMax = 100;
                 int userMax = 5;
 
-                const string settingsSql = "SELECT GlobalMaxKeys, UserMaxKeys FROM Settings LIMIT 1;";
-                var settings = await conn.QueryFirstOrDefaultAsync<dynamic>(settingsSql);
+                var settings = await _settingRepository.GetSettingsAsync();
                 if (settings != null)
                 {
-                    var dict = (IDictionary<string, object>)settings;
-                    if (dict.TryGetValue("GlobalMaxKeys", out var g) && g != null) globalMax = Convert.ToInt32(g);
-                    if (dict.TryGetValue("UserMaxKeys", out var u) && u != null) userMax = Convert.ToInt32(u);
+                    globalMax = settings.GlobalMaxKeys;
+                    userMax = settings.UserMaxKeys;
                 }
 
                 // Check limits (admins bypass limits)
                 if (!isAdmin)
                 {
-                    int totalActiveKeys = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppKeys;");
+                    int totalActiveKeys = await _appKeyRepository.GetTotalActiveKeysAsync();
                     if (totalActiveKeys >= globalMax)
                     {
                         return BadRequest(new { error = $"Global app-key limit of {globalMax} has been reached. Please contact an administrator." });
                     }
 
-                    int userActiveKeys = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppKeys WHERE Username = @Username;", new { Username = targetUser });
+                    int userActiveKeys = await _appKeyRepository.GetUserActiveKeysAsync(targetUser);
                     if (userActiveKeys >= userMax)
                     {
                         return BadRequest(new { error = $"You have reached your personal app-key limit of {userMax}. Please revoke an existing key first." });
@@ -256,32 +220,7 @@ namespace McpRouter.Controllers
                     CreatedAt = DateTime.UtcNow
                 };
 
-                if (_dbFactory.ProviderName == "sqlite")
-                {
-                    const string insertSql = @"
-                        INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
-                        VALUES (@Id, @Name, @Username, @OwnerSid, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
-                    await conn.ExecuteAsync(insertSql, appKey);
-                }
-                else
-                {
-                    // Call MS SQL / MySQL stored procedure
-                    await conn.ExecuteAsync(
-                        "sp_SaveAppKey",
-                        new
-                        {
-                            appKey.Id,
-                            appKey.Name,
-                            appKey.Username,
-                            appKey.OwnerSid,
-                            appKey.KeyPrefix,
-                            appKey.EncryptedKey,
-                            appKey.ScopesJson,
-                            appKey.ExpiresAt
-                        },
-                        commandType: CommandType.StoredProcedure
-                    );
-                }
+                await _appKeyRepository.SaveAppKeyAsync(appKey);
 
                 await _auditLogger.LogAdminActionAsync(
                     identity.Username, "appkey.create", appKey.Id,
@@ -312,14 +251,10 @@ namespace McpRouter.Controllers
             var identity = await GetIdentityAsync();
             var currentUser = identity.Username;
             var isAdmin = IsAdmin(identity);
-            using var conn = _dbFactory.CreateConnection();
 
             try
             {
-                // Look up key to verify ownership or admin rights
-                AppKey? appKey = null;
-                const string selectSql = "SELECT * FROM AppKeys WHERE Id = @Id;";
-                appKey = await conn.QueryFirstOrDefaultAsync<AppKey>(selectSql, new { Id = id });
+                var appKey = await _appKeyRepository.GetAppKeyByIdAsync(id);
 
                 if (appKey == null)
                 {
@@ -331,19 +266,7 @@ namespace McpRouter.Controllers
                     return Forbid();
                 }
 
-                if (_dbFactory.ProviderName == "sqlite")
-                {
-                    const string deleteSql = "DELETE FROM AppKeys WHERE Id = @Id;";
-                    await conn.ExecuteAsync(deleteSql, new { Id = id });
-                }
-                else
-                {
-                    await conn.ExecuteAsync(
-                        "sp_DeleteAppKey",
-                        new { Id = id },
-                        commandType: CommandType.StoredProcedure
-                    );
-                }
+                await _appKeyRepository.DeleteAppKeyAsync(id);
 
                 await _auditLogger.LogAdminActionAsync(
                     identity.Username, "appkey.revoke", id,

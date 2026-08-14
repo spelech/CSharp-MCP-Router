@@ -6,7 +6,7 @@ USE `McpEnterpriseDb`;
 
 DELIMITER //
 
--- 1. Procedure: Evaluate User Access
+-- 1. Procedure: Evaluate User Access for a specific Tool/Item and Group SIDs/Names
 DROP PROCEDURE IF EXISTS `sp_EvaluateUserAccess` //
 CREATE PROCEDURE `sp_EvaluateUserAccess`(
     IN p_GroupNames TEXT,
@@ -15,53 +15,77 @@ CREATE PROCEDURE `sp_EvaluateUserAccess`(
 )
 BEGIN
     DECLARE v_ServerId VARCHAR(100);
-    DECLARE v_PolicyCount INT;
-    DECLARE v_DenyCount INT;
-    DECLARE v_AllowCount INT;
+    DECLARE v_HasPolicies INT;
+    DECLARE v_HasDeny INT;
+    DECLARE v_HasAllow INT;
 
     SET v_ServerId = p_ItemName;
-    IF INSTR(p_ItemName, '__') > 0 THEN
-        SET v_ServerId = SUBSTRING_INDEX(p_ItemName, '__', 1);
+    IF LOCATE('__', p_ItemName) > 0 THEN
+        SET v_ServerId = SUBSTRING(p_ItemName, 1, LOCATE('__', p_ItemName) - 1);
     END IF;
 
-    -- Create temporary table for target keys
-    CREATE TEMPORARY TABLE IF NOT EXISTS `_temp_target_keys` (
-        `TargetId` VARCHAR(250) NOT NULL
-    );
-    TRUNCATE TABLE `_temp_target_keys`;
+    -- Create temporary table for targets
+    CREATE TEMPORARY TABLE IF NOT EXISTS temp_targets (TargetId VARCHAR(250));
+    DELETE FROM temp_targets;
 
-    INSERT INTO `_temp_target_keys` VALUES
+    INSERT INTO temp_targets VALUES
         (CONCAT('tool:', p_ItemName)),
         (CONCAT('prompt:', p_ItemName)),
         (CONCAT('resource:', p_ItemName)),
         (CONCAT('server:', v_ServerId));
 
-    -- Count total policies
-    SELECT COUNT(*) INTO v_PolicyCount
-    FROM `AccessPolicies`
-    WHERE `TargetId` IN (SELECT `TargetId` FROM `_temp_target_keys`);
+    -- Create temporary table for groups
+    CREATE TEMPORARY TABLE IF NOT EXISTS temp_groups (GroupName VARCHAR(256));
+    DELETE FROM temp_groups;
 
-    IF v_PolicyCount = 0 THEN
+    -- Custom split loop for CSV group names
+    BEGIN
+        DECLARE idx INT DEFAULT 1;
+        DECLARE val TEXT;
+        DECLARE comma_pos INT;
+
+        split_loop: LOOP
+            SET comma_pos = LOCATE(',', p_GroupNames, idx);
+            IF comma_pos > 0 THEN
+                SET val = SUBSTRING(p_GroupNames, idx, comma_pos - idx);
+                INSERT INTO temp_groups VALUES (TRIM(val));
+                SET idx = comma_pos + 1;
+            ELSE
+                SET val = SUBSTRING(p_GroupNames, idx);
+                IF TRIM(val) != '' THEN
+                    INSERT INTO temp_groups VALUES (TRIM(val));
+                END IF;
+                LEAVE split_loop;
+            END IF;
+        END LOOP split_loop;
+    END;
+
+    -- Check if any policies configured
+    SELECT COUNT(*) INTO v_HasPolicies
+    FROM `AccessPolicies`
+    WHERE `TargetId` IN (SELECT TargetId FROM temp_targets);
+
+    IF v_HasPolicies = 0 THEN
         SELECT 0 AS IsAllowed;
     ELSE
-        -- Check deny policies
-        SELECT COUNT(*) INTO v_DenyCount
-        FROM `AccessPolicies` ap
-        WHERE ap.`TargetId` IN (SELECT `TargetId` FROM `_temp_target_keys`)
-          AND FIND_IN_SET(ap.`RequiredGroup`, p_GroupNames) > 0
-          AND ap.`IsAllowed` = 0;
+        -- Check explicit deny
+        SELECT COUNT(*) INTO v_HasDeny
+        FROM `AccessPolicies`
+        WHERE `TargetId` IN (SELECT TargetId FROM temp_targets)
+          AND `RequiredGroup` IN (SELECT GroupName FROM temp_groups)
+          AND `IsAllowed` = 0;
 
-        IF v_DenyCount > 0 THEN
+        IF v_HasDeny > 0 THEN
             SELECT 0 AS IsAllowed;
         ELSE
-            -- Check allow policies
-            SELECT COUNT(*) INTO v_AllowCount
-            FROM `AccessPolicies` ap
-            WHERE ap.`TargetId` IN (SELECT `TargetId` FROM `_temp_target_keys`)
-              AND FIND_IN_SET(ap.`RequiredGroup`, p_GroupNames) > 0
-              AND ap.`IsAllowed` = 1;
+            -- Check explicit allow
+            SELECT COUNT(*) INTO v_HasAllow
+            FROM `AccessPolicies`
+            WHERE `TargetId` IN (SELECT TargetId FROM temp_targets)
+              AND `RequiredGroup` IN (SELECT GroupName FROM temp_groups)
+              AND `IsAllowed` = 1;
 
-            IF v_AllowCount > 0 THEN
+            IF v_HasAllow > 0 THEN
                 SELECT 1 AS IsAllowed;
             ELSE
                 SELECT 0 AS IsAllowed;
@@ -76,21 +100,45 @@ CREATE PROCEDURE `sp_GetAllowedItemsForGroups`(
     IN p_GroupNames TEXT
 )
 BEGIN
+    CREATE TEMPORARY TABLE IF NOT EXISTS temp_allowed_groups (GroupName VARCHAR(256));
+    DELETE FROM temp_allowed_groups;
+
+    BEGIN
+        DECLARE idx INT DEFAULT 1;
+        DECLARE val TEXT;
+        DECLARE comma_pos INT;
+
+        split_loop: LOOP
+            SET comma_pos = LOCATE(',', p_GroupNames, idx);
+            IF comma_pos > 0 THEN
+                SET val = SUBSTRING(p_GroupNames, idx, comma_pos - idx);
+                INSERT INTO temp_allowed_groups VALUES (TRIM(val));
+                SET idx = comma_pos + 1;
+            ELSE
+                SET val = SUBSTRING(p_GroupNames, idx);
+                IF TRIM(val) != '' THEN
+                    INSERT INTO temp_allowed_groups VALUES (TRIM(val));
+                END IF;
+                LEAVE split_loop;
+            END IF;
+        END LOOP split_loop;
+    END;
+
     SELECT DISTINCT 
         t.`ToolId`, 
         t.`ServerId`, 
-        s.`CodeName` AS ServerCodeName, 
+        s.`Id` AS ServerCodeName,
         t.`ToolName`, 
         t.`VaultSecretPath`,
         t.`SecretProvider`
     FROM `Tools` t
-    INNER JOIN `McpServers` s ON t.`ServerId` = s.`ServerId`
+    INNER JOIN `Servers` s ON t.`ServerId` = s.`Id`
     INNER JOIN `ToolAccessPolicies` tap ON t.`ToolId` = tap.`ToolId`
     INNER JOIN `AdGroups` g ON tap.`GroupId` = g.`GroupId`
-    WHERE FIND_IN_SET(g.`GroupName`, p_GroupNames) > 0
+    WHERE g.`GroupName` IN (SELECT GroupName FROM temp_allowed_groups)
       AND tap.`IsAllowed` = 1
       AND t.`IsEnabled` = 1
-      AND s.`IsActive` = 1;
+      AND s.`Enabled` = 1;
 END //
 
 -- 3. Procedure: Get Secret Path and Explicit SecretProvider for a Server
@@ -100,16 +148,16 @@ CREATE PROCEDURE `sp_GetServerSecrets`(
 )
 BEGIN
     SELECT 
-        s.`ServerId`,
-        s.`CodeName`,
+        s.`Id` AS ServerId,
+        s.`Id` AS CodeName,
         s.`SecretProvider` AS ServerSecretProvider,
         t.`ToolName`,
         t.`VaultSecretPath`,
         t.`SecretProvider` AS ToolSecretProvider
-    FROM `McpServers` s
-    LEFT JOIN `Tools` t ON s.`ServerId` = t.`ServerId`
-    WHERE s.`CodeName` = p_ServerCodeName
-      AND s.`IsActive` = 1;
+    FROM `Servers` s
+    LEFT JOIN `Tools` t ON s.`Id` = t.`ServerId`
+    WHERE s.`Id` = p_ServerCodeName
+      AND s.`Enabled` = 1;
 END //
 
 -- 4. Procedure: Save or Update Secret Provider Configuration
@@ -136,15 +184,17 @@ CREATE PROCEDURE `sp_SaveAuthProvider`(
     IN p_DisplayName VARCHAR(100),
     IN p_UserHeader VARCHAR(100),
     IN p_GroupsHeader VARCHAR(100),
+    IN p_ConfigJson LONGTEXT,
     IN p_IsEnabled TINYINT(1)
 )
 BEGIN
-    INSERT INTO `AuthProviderConfigs` (`ProviderName`, `DisplayName`, `UserHeader`, `GroupsHeader`, `IsEnabled`)
-    VALUES (p_ProviderName, p_DisplayName, p_UserHeader, p_GroupsHeader, p_IsEnabled)
+    INSERT INTO `AuthProviderConfigs` (`ProviderName`, `DisplayName`, `UserHeader`, `GroupsHeader`, `ConfigJson`, `IsEnabled`)
+    VALUES (p_ProviderName, p_DisplayName, p_UserHeader, p_GroupsHeader, p_ConfigJson, p_IsEnabled)
     ON DUPLICATE KEY UPDATE
         `DisplayName` = p_DisplayName,
         `UserHeader` = p_UserHeader,
         `GroupsHeader` = p_GroupsHeader,
+        `ConfigJson` = p_ConfigJson,
         `IsEnabled` = p_IsEnabled;
 END //
 
@@ -190,11 +240,11 @@ CREATE PROCEDURE `sp_SaveAppKey`(
 )
 BEGIN
     INSERT INTO `AppKeys` (`Id`, `Name`, `Username`, `OwnerSid`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`)
-    VALUES (p_Id, p_Name, p_Username, p_OwnerSid, p_KeyPrefix, p_EncryptedKey, p_ScopesJson, p_ExpiresAt, NOW())
+    VALUES (p_Id, p_Name, p_Username, IFNULL(p_OwnerSid, ''), p_KeyPrefix, p_EncryptedKey, p_ScopesJson, p_ExpiresAt, NOW())
     ON DUPLICATE KEY UPDATE
         `Name` = p_Name,
         `Username` = p_Username,
-        `OwnerSid` = p_OwnerSid,
+        `OwnerSid` = IFNULL(p_OwnerSid, ''),
         `KeyPrefix` = p_KeyPrefix,
         `EncryptedKey` = p_EncryptedKey,
         `ScopesJson` = p_ScopesJson,
@@ -216,10 +266,11 @@ CREATE PROCEDURE `sp_GetAppKeys`(
     IN p_Username VARCHAR(256)
 )
 BEGIN
-    IF p_Username IS NULL OR p_Username = '' THEN
+    IF p_Username IS NULL THEN
         SELECT `Id`, `Name`, `Username`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`
         FROM `AppKeys`;
-    ELSE
+    END IF;
+    IF p_Username IS NOT NULL THEN
         SELECT `Id`, `Name`, `Username`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`
         FROM `AppKeys`
         WHERE `Username` = p_Username;
