@@ -432,17 +432,8 @@ namespace McpRouter
 
                     targetItem = uriString;
 
-                    if (uriString == "logs://{server_name}/today" || uriString.StartsWith("logs://"))
+                    if (uriString == "logs://{server_name}/today")
                     {
-                        var isAuth = await IsUserAuthorizedAsync("completion/complete", uriString, httpContext);
-                        if (!isAuth)
-                        {
-                            var identity = await ResolveUserIdentityAsync(httpContext);
-                            statusCode = 403;
-                            errorMessage = $"Security Error: User '{identity.Username}' does not have permission to complete resource '{uriString}'.";
-                            throw new UnauthorizedAccessException(errorMessage);
-                        }
-
                         var argVal = string.Empty;
                         if (paramsProp.TryGetProperty("argument", out var argObj) && argObj.TryGetProperty("value", out var vProp))
                         {
@@ -457,7 +448,8 @@ namespace McpRouter
                         var matching = new List<string>();
                         foreach (var s in serverIds.Where(id => id.StartsWith(argVal, StringComparison.OrdinalIgnoreCase)))
                         {
-                            if (await IsUserAuthorizedAsync("resources/read", $"logs://{s}/today", httpContext))
+                            if (await IsUserAuthorizedAsync("resources/read", $"logs://{s}/today", httpContext) ||
+                                await IsUserAuthorizedAsync("completion/complete", s, httpContext))
                             {
                                 matching.Add(s);
                             }
