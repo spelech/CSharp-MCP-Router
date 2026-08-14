@@ -76,11 +76,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.8.1`** | 2026-08-14 | fix(stdio): secure process disposal, env secret isolation, log masking, and EOF reader draining |
 | **`v4.8.0`** | 2026-08-14 | feat(transports): implement robust process-backed STDIO backend transport and custom CLI validations |
 | **`v4.7.0`** | 2026-08-12 | feat(diagnostics): add diagnostics API and soak test suite |
 | **`v4.6.0`** | 2026-08-12 | feat(identity): implement cross-platform Active Directory SID resolution via LDAP |
 | **`v4.5.9`** | 2026-08-12 | fix(keys): target user SID resolution for admin-minted app keys |
-| **`v4.5.8`** | 2026-08-12 | fix(vault): support VAULT_TOKEN fallback for dev testing and init test secrets via docker-compose |
 | **`v4.5.7`** | 2026-08-12 | fix(vault): support VAULT_TOKEN fallback for dev testing and init test secrets via docker-compose |
 
 ---

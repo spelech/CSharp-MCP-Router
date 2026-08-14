@@ -103,6 +103,24 @@ namespace McpRouter.Services
                 return;
             }
 
+            if (server.Type == "custom")
+            {
+                _sessionManager.UpdateBackendStatus(server.Id, "Connected", 1, "");
+                return;
+            }
+
+            if (server.Type == "stdio")
+            {
+                if (!McpRouter.Extensions.ServerEndpointsExtensions.IsValidStdioCommand(server.Url, out var stdioErr))
+                {
+                    _sessionManager.UpdateBackendStatus(server.Id, "Failed", 1, stdioErr ?? "Invalid STDIO command");
+                    return;
+                }
+
+                _sessionManager.UpdateBackendStatus(server.Id, "Connected", 1, "");
+                return;
+            }
+
             try
             {
                 var client = _httpClientFactory.CreateClient("McpClient");

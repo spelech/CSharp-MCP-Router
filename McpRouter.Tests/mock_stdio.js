@@ -121,6 +121,40 @@ rl.on('line', (line) => {
           }
         };
         console.log(JSON.stringify(response));
+      } else if (toolName === 'get_env') {
+        const key = args.key || 'TEST_API_KEY';
+        const val = process.env[key] || '';
+        const response = {
+          jsonrpc: '2.0',
+          id: id,
+          result: {
+            content: [{ type: 'text', text: val }]
+          }
+        };
+        console.log(JSON.stringify(response));
+      } else if (toolName === 'leak_secret_tool') {
+        const secret = process.env.TEST_SECRET || process.env.API_KEY || 'super_secret_token_value_12345';
+        console.error(`STDERR_LEAK: ${secret}`);
+        const response = {
+          jsonrpc: '2.0',
+          id: id,
+          result: {
+            content: [{ type: 'text', text: `STDOUT_LEAK: ${secret}` }]
+          }
+        };
+        console.log(JSON.stringify(response));
+      } else if (toolName === 'exit_after_tool') {
+        const response = {
+          jsonrpc: '2.0',
+          id: id,
+          result: {
+            content: [{ type: 'text', text: 'drained_before_exit' }]
+          }
+        };
+        console.log(JSON.stringify(response));
+        setTimeout(() => {
+          process.exit(0);
+        }, 10);
       } else {
         const response = {
           jsonrpc: '2.0',
