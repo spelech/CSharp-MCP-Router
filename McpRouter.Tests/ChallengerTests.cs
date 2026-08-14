@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System.Net;
 using McpRouter.Extensions;
 using McpRouter.Core.Security;
+using McpRouter.Core.Transports;
 
 namespace McpRouter.Tests
 {
@@ -61,6 +62,75 @@ namespace McpRouter.Tests
             // Block indefinitely to simulate no more messages
             await _tcs.Task;
             return 0;
+        }
+
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+    }
+
+    public class DynamicSseStream : Stream
+    {
+        private readonly System.Collections.Concurrent.BlockingCollection<byte[]> _queue = new();
+        private byte[]? _currentChunk;
+        private int _chunkPosition;
+
+        public void PushMessage(string text)
+        {
+            var bytes = System.Text.Encoding.UTF8.GetBytes(text);
+            _queue.Add(bytes);
+        }
+
+        public void Complete()
+        {
+            _queue.CompleteAdding();
+        }
+
+        public override bool CanRead => true;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+
+        public override void Flush() { }
+
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            return ReadAsync(buffer, offset, count, default).GetAwaiter().GetResult();
+        }
+
+        public override async Task<int> ReadAsync(byte[] buffer, int offset, int count, CancellationToken cancellationToken)
+        {
+            while (_currentChunk == null || _chunkPosition >= _currentChunk.Length)
+            {
+                if (_queue.IsCompleted && _queue.Count == 0)
+                {
+                    return 0; // EOF
+                }
+
+                try
+                {
+                    _currentChunk = await Task.Run(() => {
+                        _queue.TryTake(out var chunk, -1);
+                        return chunk;
+                    }, cancellationToken);
+                }
+                catch (OperationCanceledException)
+                {
+                    return 0;
+                }
+
+                if (_currentChunk == null)
+                {
+                    return 0;
+                }
+                _chunkPosition = 0;
+            }
+
+            int toRead = Math.Min(count, _currentChunk.Length - _chunkPosition);
+            Array.Copy(_currentChunk, _chunkPosition, buffer, offset, toRead);
+            _chunkPosition += toRead;
+            return toRead;
         }
 
         public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
@@ -294,25 +364,27 @@ namespace McpRouter.Tests
             var httpClient = new HttpClient(mockHandler);
             var loggerMock = new Mock<ILogger>();
 
-            var postReceived = new TaskCompletionSource<bool>();
-            var responsePayload = "{\"jsonrpc\":\"2.0\",\"id\":\"test-id\",\"result\":{\"ok\":true},\"method\":\"dummy-method\"}";
+            var sseStream = new DynamicSseStream();
+            sseStream.PushMessage("event: endpoint\ndata: http://backend1/mcp/message\n\n");
 
             mockHandler.Handler = async (req) =>
             {
                 if (req.Method == HttpMethod.Get)
                 {
-                    var stream = new DelayedSseMockStream(
-                        "event: endpoint\ndata: http://backend1/mcp/message\n\n",
-                        "event: message\ndata: " + responsePayload + "\n\n",
-                        postReceived.Task
-                    );
-                    var streamContent = new StreamContent(stream);
+                    var streamContent = new StreamContent(sseStream);
                     streamContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("text/event-stream");
                     return new HttpResponseMessage(System.Net.HttpStatusCode.OK) { Content = streamContent };
                 }
                 else if (req.Method == HttpMethod.Post)
                 {
-                    postReceived.TrySetResult(true);
+                    var body = await req.Content!.ReadAsStringAsync();
+                    using var doc = JsonDocument.Parse(body);
+                    var root = doc.RootElement;
+                    var upstreamId = root.GetProperty("id").GetString()!;
+
+                    var responsePayload = $"{{\"jsonrpc\":\"2.0\",\"id\":\"{upstreamId}\",\"result\":{{\"ok\":true}},\"method\":\"dummy-method\"}}";
+                    sseStream.PushMessage($"event: message\ndata: {responsePayload}\n\n");
+
                     return new HttpResponseMessage(System.Net.HttpStatusCode.Accepted);
                 }
                 return new HttpResponseMessage(System.Net.HttpStatusCode.BadRequest);
@@ -323,13 +395,11 @@ namespace McpRouter.Tests
 
             var messageReceivedSource = new TaskCompletionSource<bool>();
             conn.StartReader(async (msg) => {
-                // If it is treated as a response, complete the TaskCompletionSource
                 if (msg is JsonRpcResponse response && response.Id != null)
                 {
                     var idStr = response.Id.ToString();
-                    if (idStr != null && conn.PendingRequests.TryRemove(idStr, out var tcs))
+                    if (idStr != null && conn.TryCompleteRequest(idStr, response))
                     {
-                        tcs.SetResult(response);
                         return;
                     }
                 }
@@ -488,9 +558,11 @@ namespace McpRouter.Tests
                         Id = id, 
                         Result = JsonSerializer.Deserialize<JsonElement>($"{{\"index\":{idx},\"ok\":true}}") 
                     };
-                    if (conn.PendingRequests.TryRemove(id, out var pendingTcs))
+                    var pendingTcs = conn.PendingRequests.Values
+                        .FirstOrDefault(t => t is PendingRequestTcs tracked && tracked.OriginalId?.ToString() == id);
+                    if (pendingTcs != null)
                     {
-                        pendingTcs.SetResult(responseObj);
+                        conn.TryCompleteRequest(((PendingRequestTcs)pendingTcs).UpstreamId, responseObj);
                     }
                 });
 
