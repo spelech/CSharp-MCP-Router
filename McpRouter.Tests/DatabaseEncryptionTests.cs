@@ -48,11 +48,11 @@ namespace McpRouter.Tests
                         cmd.CommandText = "SELECT * FROM Test;";
                         // This should fail because it cannot read/decrypt the database file!
                         var exception = Assert.Throws<SqliteException>(() => cmd.ExecuteNonQuery());
-                        
+
                         // SQLCipher returns error code 26 (SQLITE_NOTADB) or throws when reading encrypted database without key
                         Assert.True(
-                            exception.SqliteErrorCode == 26 || 
-                            exception.Message.Contains("file is not a database") || 
+                            exception.SqliteErrorCode == 26 ||
+                            exception.Message.Contains("file is not a database") ||
                             exception.Message.Contains("encrypted") ||
                             exception.SqliteExtendedErrorCode == 26
                         );
@@ -63,7 +63,7 @@ namespace McpRouter.Tests
             {
                 if (File.Exists(tempDbFile))
                 {
-                    try { File.Delete(tempDbFile); } catch {}
+                    try { File.Delete(tempDbFile); } catch { }
                 }
             }
         }

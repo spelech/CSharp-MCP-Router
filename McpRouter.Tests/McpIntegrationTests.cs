@@ -198,16 +198,16 @@ namespace McpRouter.Tests
         {
             httpHandler = new MockHttpMessageHandler();
             var httpClient = new HttpClient(httpHandler);
-            
+
             var context = new DefaultHttpContext();
-            var claims = new[] { 
+            var claims = new[] {
                 new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "admin"),
                 new System.Security.Claims.Claim("GroupSid", "S-1-5-32-544"),
                 new System.Security.Claims.Claim("Sid", "S-1-5-32-544")
             };
             context.User = new System.Security.Claims.ClaimsPrincipal(new System.Security.Claims.ClaimsIdentity(claims, "AppKey"));
             var response = context.Response;
-            
+
             var services = new ServiceCollection();
             var mockAuditLogger = new Mock<IAuditLogger>();
             services.AddSingleton<IAuditLogger>(mockAuditLogger.Object);
@@ -219,9 +219,10 @@ namespace McpRouter.Tests
 
             var loggerMock = new Mock<ILogger>();
             var embeddingMock = new Mock<IEmbeddingService>();
-            
+
             embeddingMock.Setup(x => x.GetEmbeddingAsync(It.IsAny<string>()))
-                .ReturnsAsync((string txt) => {
+                .ReturnsAsync((string txt) =>
+                {
                     if (txt.Contains("Excel", StringComparison.OrdinalIgnoreCase) || txt.Contains("read_excel", StringComparison.OrdinalIgnoreCase))
                     {
                         return new float[] { 1f, 0f, 0f };
@@ -238,11 +239,13 @@ namespace McpRouter.Tests
                 });
 
             embeddingMock.Setup(x => x.CosineSimilarity(It.IsAny<float[]>(), It.IsAny<float[]>()))
-                .Returns((float[] v1, float[] v2) => {
+                .Returns((float[] v1, float[] v2) =>
+                {
                     double dot = 0.0;
                     double n1 = 0.0;
                     double n2 = 0.0;
-                    for (int i = 0; i < v1.Length; i++) {
+                    for (int i = 0; i < v1.Length; i++)
+                    {
                         dot += v1[i] * v2[i];
                         n1 += v1[i] * v1[i];
                         n2 += v2[i] * v2[i];
@@ -252,7 +255,7 @@ namespace McpRouter.Tests
                 });
 
 
-            
+
             foreach (var s in servers)
             {
                 if (s.SecretProvider == "Vault" && string.IsNullOrEmpty(s.SecretPath) && string.IsNullOrEmpty(s.SecretMount))
@@ -311,11 +314,11 @@ namespace McpRouter.Tests
             };
 
             var plainJson = "{\"jsonrpc\":\"2.0\"}";
-            
+
             // Act & Assert
             var action = () => JsonSerializer.Deserialize<JsonRpcMessage>(plainJson, options);
             action.Should().NotThrow();
-            
+
             var msg = JsonSerializer.Deserialize<JsonRpcMessage>(plainJson, options);
             msg.Should().NotBeNull();
             msg.Should().BeOfType<JsonRpcMessage>();
@@ -347,7 +350,7 @@ namespace McpRouter.Tests
             var mockHandler = new MockHttpMessageHandler();
             var httpClient = new HttpClient(mockHandler);
             var loggerMock = new Mock<ILogger>();
-            
+
             mockHandler.Handler = async (req) =>
             {
                 return CreateJsonResponse(new
@@ -887,7 +890,7 @@ namespace McpRouter.Tests
             var getBody = "{\"jsonrpc\":\"2.0\",\"id\":\"get-1\",\"method\":\"prompts/get\",\"params\":{\"name\":\"router__diagnose_failure\",\"arguments\":{\"tool_name\":\"excel-read\",\"error_message\":\"File locked\"}}}";
             var result = await session.GetPromptAsync("router__diagnose_failure", getBody);
             result.Should().NotBeNull();
-            
+
             var json = JsonSerializer.Serialize(result);
             json.Should().Contain("excel-read");
             json.Should().Contain("File locked");
@@ -977,7 +980,8 @@ namespace McpRouter.Tests
             cancelJson.Should().Contain("cancelled");
 
             // Act 3: Bidirectional Client Response / Sampling
-            var sampleRequest = new JsonRpcRequest {
+            var sampleRequest = new JsonRpcRequest
+            {
                 Method = "sampling/createMessage",
                 Id = "sample-request-1",
                 Params = JsonDocument.Parse("{\"prompt\":\"Hello\"}").RootElement
@@ -1086,7 +1090,7 @@ namespace McpRouter.Tests
             await session.ListToolsAsync("{\"jsonrpc\":\"2.0\",\"id\":1}");
 
             var nonAdminContext = new DefaultHttpContext { RequestServices = context.RequestServices };
-            var nonAdminClaims = new[] { 
+            var nonAdminClaims = new[] {
                 new System.Security.Claims.Claim(System.Security.Claims.ClaimTypes.Name, "alice"),
                 new System.Security.Claims.Claim("GroupSid", "S-1-5-32-545"),
                 new System.Security.Claims.Claim("Sid", "S-1-5-32-545")
@@ -1197,11 +1201,11 @@ namespace McpRouter.Tests
         public void CustomFilesSanitization_PreventsDirectoryTraversal()
         {
             string maliciousName = "../../../etc/passwd";
-            
+
             // Mirror sanitization logic used in ApplicationBuilderExtensions.cs
             var invalidChars = Path.GetInvalidFileNameChars();
             string sanitized = new string(maliciousName.Where(c => !invalidChars.Contains(c) && c != '/' && c != '\\').ToArray());
-            
+
             sanitized.Should().NotContain("/");
             sanitized.Should().NotContain("\\");
             sanitized.Should().Be("......etcpasswd");

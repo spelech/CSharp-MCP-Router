@@ -51,7 +51,7 @@ namespace McpRouter
         };
 
         private readonly SessionManager? _sessionManager;
- 
+
         public ClientSession(string sessionId, HttpResponse clientResponse, List<McpServer> servers, HttpClient httpClient, IEmbeddingService embeddingService, SessionManager? sessionManager, Microsoft.Extensions.Logging.ILogger logger, IServiceProvider? rootServices = null)
         {
             _sessionId = sessionId;
@@ -93,7 +93,8 @@ namespace McpRouter
                 {
                     statusCode = 403;
                     errorMessage = $"Security Error: Invalid or spoofed namespaced identifier: '{toolName}'.";
-                    var errResult = new {
+                    var errResult = new
+                    {
                         isError = true,
                         content = new[] {
                             new {
@@ -113,7 +114,8 @@ namespace McpRouter
                     var identity = await ResolveUserIdentityAsync(httpContext);
                     statusCode = 403;
                     errorMessage = $"Security Error: User '{identity.Username}' does not have permission to execute tool '{toolName}'.";
-                    var errResult = new {
+                    var errResult = new
+                    {
                         isError = true,
                         content = new[] {
                             new {
@@ -213,7 +215,7 @@ namespace McpRouter
             {
                 _cts.Cancel();
             }
-            catch {}
+            catch { }
             foreach (var conn in _backendConnections.Values)
             {
                 conn.Dispose();
@@ -317,7 +319,7 @@ namespace McpRouter
                                         .ToList();
                                     return new { completion = new { values = matching, hasMore = false } };
                                 }
-                                
+
                                 if (uriTemplate.StartsWith("mcp://"))
                                 {
                                     var parts = uriTemplate.Substring("mcp://".Length).Split('/', 2);

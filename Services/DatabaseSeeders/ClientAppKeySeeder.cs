@@ -109,7 +109,8 @@ namespace McpRouter.Services.DatabaseSeeders
                     }
                     else if (dbFactory.ProviderName == "mysql")
                     {
-                        conn.Execute("sp_SaveAppKey", new {
+                        conn.Execute("sp_SaveAppKey", new
+                        {
                             p_Id = defaultKey.Id,
                             p_Name = defaultKey.Name,
                             p_Username = defaultKey.Username,
@@ -121,7 +122,8 @@ namespace McpRouter.Services.DatabaseSeeders
                     }
                     else
                     {
-                        conn.Execute("sp_SaveAppKey", new {
+                        conn.Execute("sp_SaveAppKey", new
+                        {
                             defaultKey.Id,
                             defaultKey.Name,
                             defaultKey.Username,

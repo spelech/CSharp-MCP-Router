@@ -154,7 +154,7 @@ CREATE OR ALTER PROCEDURE [dbo].[sp_SaveAuthProvider]
     @DisplayName NVARCHAR(100),
     @UserHeader VARCHAR(100),
     @GroupsHeader VARCHAR(100),
-    @ConfigJson NVARCHAR(MAX) = NULL,
+    @EncryptedConfigJson NVARCHAR(MAX) = NULL,
     @IsEnabled BIT
 AS
 BEGIN
@@ -166,15 +166,15 @@ BEGIN
         SET [DisplayName] = @DisplayName,
             [UserHeader] = @UserHeader,
             [GroupsHeader] = @GroupsHeader,
-            [ConfigJson] = @ConfigJson,
+            [EncryptedConfigJson] = @EncryptedConfigJson,
             [IsEnabled] = @IsEnabled,
             [UpdatedAt] = SYSUTCDATETIME()
         WHERE [ProviderName] = @ProviderName;
     END
     ELSE
     BEGIN
-        INSERT INTO [dbo].[AuthProviderConfigs] ([ProviderName], [DisplayName], [UserHeader], [GroupsHeader], [ConfigJson], [IsEnabled])
-        VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @ConfigJson, @IsEnabled);
+        INSERT INTO [dbo].[AuthProviderConfigs] ([ProviderName], [DisplayName], [UserHeader], [GroupsHeader], [EncryptedConfigJson], [IsEnabled])
+        VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @EncryptedConfigJson, @IsEnabled);
     END
 END;
 GO

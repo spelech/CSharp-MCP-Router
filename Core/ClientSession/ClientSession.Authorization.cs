@@ -217,12 +217,14 @@ namespace McpRouter
                     // Call stored procedure with mapped groups!
                     var groupNamesCsv = string.Join(",", allUserGroups);
                     object parameters = dbFactory.ProviderName == "mysql"
-                        ? new {
+                        ? new
+                        {
                             p_GroupNames = groupNamesCsv,
                             p_ItemName = targetId,
                             p_RequestMethod = requestMethod
                         }
-                        : new {
+                        : new
+                        {
                             GroupNames = groupNamesCsv,
                             ItemName = targetId,
                             RequestMethod = requestMethod
@@ -288,7 +290,7 @@ namespace McpRouter
             try
             {
                 var identity = await ResolveUserIdentityAsync(httpContext);
-                
+
                 string serverId;
                 if (itemName.StartsWith("mcp://"))
                 {

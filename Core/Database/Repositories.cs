@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using Dapper;
 using McpRouter.Models;
 using McpRouter.Controllers;
+using McpRouter.Core.Secrets;
+using Microsoft.Extensions.Configuration;
 
 namespace McpRouter.Core.Database
 {
@@ -54,10 +56,12 @@ namespace McpRouter.Core.Database
         IAuthProviderRepository
     {
         private readonly IDbConnectionFactory _dbFactory;
+        private readonly IConfiguration? _config;
 
-        public DatabaseRepository(IDbConnectionFactory dbFactory)
+        public DatabaseRepository(IDbConnectionFactory dbFactory, IConfiguration? config = null)
         {
             _dbFactory = dbFactory;
+            _config = config;
         }
 
         // ==========================================
@@ -323,7 +327,18 @@ namespace McpRouter.Core.Database
         public async Task<IEnumerable<SecretProviderDto>> GetSecretProvidersAsync()
         {
             using var conn = _dbFactory.CreateConnection();
-            return await conn.QueryAsync<SecretProviderDto>("SELECT ProviderName, DisplayName, EncryptedConfigJson AS ConfigJson, IsEnabled FROM SecretProviders;");
+            var list = (await conn.QueryAsync<SecretProviderDto>("SELECT ProviderName, DisplayName, EncryptedConfigJson AS ConfigJson, IsEnabled FROM SecretProviders;")).ToList();
+            if (_config != null)
+            {
+                foreach (var item in list)
+                {
+                    if (!string.IsNullOrEmpty(item.ConfigJson))
+                    {
+                        item.ConfigJson = SymmetricEncryptionHelper.Decrypt(item.ConfigJson, _config);
+                    }
+                }
+            }
+            return list;
         }
 
         public async Task SaveSecretProviderAsync(SecretProviderDto dto)
@@ -331,29 +346,45 @@ namespace McpRouter.Core.Database
             using var conn = _dbFactory.CreateConnection();
             var provider = _dbFactory.ProviderName.ToLower();
 
+            var configToSave = dto.ConfigJson;
+            if (!string.IsNullOrEmpty(configToSave) && _config != null)
+            {
+                configToSave = SymmetricEncryptionHelper.Encrypt(configToSave, _config);
+            }
+
+            var param = new
+            {
+                dto.ProviderName,
+                dto.DisplayName,
+                ConfigJson = configToSave,
+                dto.IsEnabled
+            };
+
             if (provider == "sqlite")
             {
                 const string sql = @"
                     INSERT INTO SecretProviders (ProviderName, DisplayName, EncryptedConfigJson, IsEnabled)
                     VALUES (@ProviderName, @DisplayName, @ConfigJson, @IsEnabled)
                     ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, EncryptedConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
-                await conn.ExecuteAsync(sql, dto);
+                await conn.ExecuteAsync(sql, param);
             }
             else if (provider == "mysql")
             {
-                await conn.ExecuteAsync("sp_SaveSecretProvider", new {
+                await conn.ExecuteAsync("sp_SaveSecretProvider", new
+                {
                     p_ProviderName = dto.ProviderName,
                     p_DisplayName = dto.DisplayName,
-                    p_EncryptedConfigJson = dto.ConfigJson,
+                    p_EncryptedConfigJson = configToSave,
                     p_IsEnabled = dto.IsEnabled ? 1 : 0
                 }, commandType: CommandType.StoredProcedure);
             }
             else
             {
-                await conn.ExecuteAsync("sp_SaveSecretProvider", new {
+                await conn.ExecuteAsync("sp_SaveSecretProvider", new
+                {
                     dto.ProviderName,
                     dto.DisplayName,
-                    EncryptedConfigJson = dto.ConfigJson,
+                    EncryptedConfigJson = configToSave,
                     dto.IsEnabled
                 }, commandType: CommandType.StoredProcedure);
             }
@@ -365,7 +396,18 @@ namespace McpRouter.Core.Database
         public async Task<IEnumerable<AuthProviderDto>> GetAuthProvidersAsync()
         {
             using var conn = _dbFactory.CreateConnection();
-            return await conn.QueryAsync<AuthProviderDto>("SELECT ProviderName, DisplayName, UserHeader, GroupsHeader, ConfigJson, IsEnabled FROM AuthProviderConfigs;");
+            var list = (await conn.QueryAsync<AuthProviderDto>("SELECT ProviderName, DisplayName, UserHeader, GroupsHeader, EncryptedConfigJson AS ConfigJson, IsEnabled FROM AuthProviderConfigs;")).ToList();
+            if (_config != null)
+            {
+                foreach (var item in list)
+                {
+                    if (!string.IsNullOrEmpty(item.ConfigJson))
+                    {
+                        item.ConfigJson = SymmetricEncryptionHelper.Decrypt(item.ConfigJson, _config);
+                    }
+                }
+            }
+            return list;
         }
 
         public async Task SaveAuthProviderAsync(AuthProviderDto dto)
@@ -373,33 +415,51 @@ namespace McpRouter.Core.Database
             using var conn = _dbFactory.CreateConnection();
             var provider = _dbFactory.ProviderName.ToLower();
 
+            var configToSave = dto.ConfigJson;
+            if (!string.IsNullOrEmpty(configToSave) && _config != null)
+            {
+                configToSave = SymmetricEncryptionHelper.Encrypt(configToSave, _config);
+            }
+
+            var param = new
+            {
+                dto.ProviderName,
+                dto.DisplayName,
+                dto.UserHeader,
+                dto.GroupsHeader,
+                ConfigJson = configToSave,
+                dto.IsEnabled
+            };
+
             if (provider == "sqlite")
             {
                 const string sql = @"
-                    INSERT INTO AuthProviderConfigs (ProviderName, DisplayName, UserHeader, GroupsHeader, ConfigJson, IsEnabled)
+                    INSERT INTO AuthProviderConfigs (ProviderName, DisplayName, UserHeader, GroupsHeader, EncryptedConfigJson, IsEnabled)
                     VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @ConfigJson, @IsEnabled)
-                    ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, UserHeader = @UserHeader, GroupsHeader = @GroupsHeader, ConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
-                await conn.ExecuteAsync(sql, dto);
+                    ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, UserHeader = @UserHeader, GroupsHeader = @GroupsHeader, EncryptedConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
+                await conn.ExecuteAsync(sql, param);
             }
             else if (provider == "mysql")
             {
-                await conn.ExecuteAsync("sp_SaveAuthProvider", new {
+                await conn.ExecuteAsync("sp_SaveAuthProvider", new
+                {
                     p_ProviderName = dto.ProviderName,
                     p_DisplayName = dto.DisplayName,
                     p_UserHeader = dto.UserHeader,
                     p_GroupsHeader = dto.GroupsHeader,
-                    p_ConfigJson = dto.ConfigJson,
+                    p_EncryptedConfigJson = configToSave,
                     p_IsEnabled = dto.IsEnabled ? 1 : 0
                 }, commandType: CommandType.StoredProcedure);
             }
             else
             {
-                await conn.ExecuteAsync("sp_SaveAuthProvider", new {
+                await conn.ExecuteAsync("sp_SaveAuthProvider", new
+                {
                     dto.ProviderName,
                     dto.DisplayName,
                     dto.UserHeader,
                     dto.GroupsHeader,
-                    ConfigJson = dto.ConfigJson,
+                    EncryptedConfigJson = configToSave,
                     dto.IsEnabled
                 }, commandType: CommandType.StoredProcedure);
             }

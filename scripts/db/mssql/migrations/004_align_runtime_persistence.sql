@@ -114,12 +114,20 @@ BEGIN
 END;
 GO
 
--- 4. Migrate AuthProviderConfigs.ConfigJson
+-- 4. Migrate AuthProviderConfigs.ConfigJson to EncryptedConfigJson
 IF OBJECT_ID('dbo.AuthProviderConfigs', 'U') IS NOT NULL
 BEGIN
-    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.AuthProviderConfigs') AND name = 'ConfigJson')
+    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.AuthProviderConfigs') AND name = 'EncryptedConfigJson')
     BEGIN
-        ALTER TABLE [dbo].[AuthProviderConfigs] ADD [ConfigJson] NVARCHAR(MAX) NULL;
+        IF EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.AuthProviderConfigs') AND name = 'ConfigJson')
+        BEGIN
+            ALTER TABLE [dbo].[AuthProviderConfigs] ADD [EncryptedConfigJson] NVARCHAR(MAX) NULL;
+            EXEC(N'UPDATE [dbo].[AuthProviderConfigs] SET [EncryptedConfigJson] = [ConfigJson] WHERE [EncryptedConfigJson] IS NULL');
+        END
+        ELSE
+        BEGIN
+            ALTER TABLE [dbo].[AuthProviderConfigs] ADD [EncryptedConfigJson] NVARCHAR(MAX) NULL;
+        END;
     END;
 END;
 GO

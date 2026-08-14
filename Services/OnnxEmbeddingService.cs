@@ -49,7 +49,7 @@ namespace McpRouter.Services
             _modelDir = Path.IsPathRooted(_settings.EmbeddingModelDir)
                 ? _settings.EmbeddingModelDir
                 : Path.Combine(baseDir, _settings.EmbeddingModelDir);
-                
+
             _modelPath = Path.Combine(_modelDir, "model.onnx");
             _vocabPath = Path.Combine(_modelDir, "vocab.txt");
         }
@@ -101,12 +101,12 @@ namespace McpRouter.Services
         public async Task<float[]> GetEmbeddingAsync(string text)
         {
             await EnsureInitializedAsync();
- 
+
             var tokens = _tokenizer!.EncodeToIds(text);
- 
+
             int seqLength = tokens.Count;
             if (seqLength == 0) return new float[384];
- 
+
             if (seqLength <= 512)
             {
                 return await GetEmbeddingForChunkAsync(tokens, 0, seqLength);
@@ -133,7 +133,7 @@ namespace McpRouter.Services
                 averageVector[i] /= chunkCount;
                 sumSquare += Math.Pow(averageVector[i], 2);
             }
-            
+
             double magnitude = Math.Sqrt(sumSquare);
             if (magnitude > 0)
             {
@@ -160,7 +160,7 @@ namespace McpRouter.Services
             }
 
             var inputDimensions = new[] { 1, count };
-            
+
             var inputIdsTensor = new DenseTensor<long>(inputIds, inputDimensions);
             var attentionMaskTensor = new DenseTensor<long>(attentionMask, inputDimensions);
             var tokenTypeIdsTensor = new DenseTensor<long>(tokenTypeIds, inputDimensions);
