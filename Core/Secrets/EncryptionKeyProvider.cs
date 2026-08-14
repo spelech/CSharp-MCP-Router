@@ -8,7 +8,6 @@ namespace McpRouter.Core.Secrets
 {
     public static class EncryptionKeyProvider
     {
-        private static string? _cachedDbKey;
         private static string? _cachedRouterSecret;
 
         public static string GetDbEncryptionKey(IConfiguration config)
@@ -33,7 +32,6 @@ namespace McpRouter.Core.Secrets
 
         public static void ResetCache()
         {
-            _cachedDbKey = null;
             _cachedRouterSecret = null;
         }
     }

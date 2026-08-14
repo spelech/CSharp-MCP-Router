@@ -35,7 +35,7 @@ export const DashboardView: React.FC = () => {
       clearInterval(serverPoll);
       clearInterval(approvalPoll);
     };
-  }, []);
+  }, [fetchServers, fetchApprovals]);
 
   // Filter & Sort
   const filtered = servers.filter((s) => {

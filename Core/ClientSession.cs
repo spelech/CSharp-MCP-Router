@@ -78,7 +78,7 @@ namespace McpRouter
             return await FilterAuthorizedAsync(tools, "tools/list", "name", httpContext);
         }
 
-        public async Task<object> CallToolAsync(string toolName, string body, McpRouter.Core.Database.IDbConnectionFactory dbFactory, HttpContext? httpContext = null)
+        public async Task<object?> CallToolAsync(string toolName, string body, McpRouter.Core.Database.IDbConnectionFactory dbFactory, HttpContext? httpContext = null)
         {
             var stopwatch = System.Diagnostics.Stopwatch.StartNew();
             int statusCode = 200;
