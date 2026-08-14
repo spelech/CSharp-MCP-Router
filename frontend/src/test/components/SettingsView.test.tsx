@@ -1,6 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { SettingsView } from '../../components/SettingsView';
+import { SettingsView } from '../../components/settings/SettingsView';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 import { mockApiResponse } from '../setup';
 

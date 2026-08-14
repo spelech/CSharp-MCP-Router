@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
-import { PolicyModal } from '../../components/PolicyModal';
+import { PolicyModal } from '../../components/security/PolicyModal';
 import { useSettingsStore, AccessPolicy } from '../../stores/useSettingsStore';
 
 describe('PolicyModal component', () => {
