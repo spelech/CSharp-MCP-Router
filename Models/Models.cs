@@ -37,15 +37,6 @@ namespace McpRouter.Models
         public bool AutoDiscovered { get; set; } = false;
     }
 
-    public class OAuthClient
-    {
-        public string ClientId { get; set; } = string.Empty;
-        public string ClientSecret { get; set; } = string.Empty;
-        public string ClientName { get; set; } = string.Empty;
-        public string RedirectUrisJson { get; set; } = "[]"; // JSON array of redirect URIs
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
-    }
-
     public class McpAccessPolicy
     {
         public string Id { get; set; } = string.Empty;

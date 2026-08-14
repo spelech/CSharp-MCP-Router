@@ -1023,10 +1023,7 @@ namespace McpRouter.Services
 
             foreach (var table in tablesToCheck)
             {
-                try
-                {
                     conn.Execute(table.Value);
-                }
                 catch (Exception ex)
                 {
                     var errorMsg = $"Database schema compatibility check failed on table '{table.Key}'. Required column(s) may be missing, mismatched, or the table is defined using a legacy schema (e.g. McpServers instead of Servers). Please apply the migration scripts located in 'scripts/db/{provider}/' or recreate the table. Error detail: {ex.Message}";

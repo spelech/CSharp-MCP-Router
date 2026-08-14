@@ -75,6 +75,11 @@ IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE Name = N'OwnerSid' AND Object_ID 
     ALTER TABLE [dbo].[AppKeys] ADD [OwnerSid] NVARCHAR(200) NOT NULL DEFAULT '';
 GO
 
+-- Idempotent: add unique index on KeyPrefix for high-entropy lookup and collision prevention
+IF NOT EXISTS (SELECT 1 FROM sys.indexes WHERE Name = N'UQ_AppKeys_KeyPrefix' AND Object_ID = Object_ID(N'dbo.AppKeys'))
+    CREATE UNIQUE NONCLUSTERED INDEX [UQ_AppKeys_KeyPrefix] ON [dbo].[AppKeys] ([KeyPrefix]);
+GO
+
 -- 3. Secret Providers Configuration Table
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'SecretProviders')
 BEGIN
