@@ -150,26 +150,28 @@ def main():
         print(f"Warning: {readme_path} not found.")
 
     # 5. Update useUserStore.ts
-    user_store_path = os.path.join(repo_root, "frontend", "src", "stores", "useUserStore.ts")
-    if os.path.exists(user_store_path):
-        with open(user_store_path, "r", encoding="utf-8") as f:
-            store_content = f.read()
-        
-        # Replace: version: 'X.Y.Z', // fallback default
-        updated_store = re.sub(
-            r"(version:\s*['\"]).*?('\s*,\s*//\s*fallback\s*default)",
-            fr"\g<1>{new_version}\g<2>",
-            store_content
-        )
-        
-        with open(user_store_path, "w", encoding="utf-8", newline="\n") as f:
-            f.write(updated_store)
-        print(f"Updated {user_store_path}")
-    else:
-        print(f"Warning: {user_store_path} not found.")
+    user_store_paths = [
+        os.path.join(repo_root, "frontend", "src", "shared", "stores", "useUserStore.ts"),
+        os.path.join(repo_root, "frontend", "src", "stores", "useUserStore.ts")
+    ]
+    for user_store_path in user_store_paths:
+        if os.path.exists(user_store_path):
+            with open(user_store_path, "r", encoding="utf-8") as f:
+                store_content = f.read()
+            
+            # Replace: version: 'X.Y.Z', // fallback default
+            updated_store = re.sub(
+                r"(version:\s*['\"]).*?('\s*,\s*//\s*fallback\s*default)",
+                fr"\g<1>{new_version}\g<2>",
+                store_content
+            )
+            
+            with open(user_store_path, "w", encoding="utf-8", newline="\n") as f:
+                f.write(updated_store)
+            print(f"Updated {user_store_path}")
 
     # 6. Stage files using git add
-    paths_to_stage = [csproj_path, html_path, readme_path, changelog_path, user_store_path]
+    paths_to_stage = [csproj_path, html_path, readme_path, changelog_path] + user_store_paths
     existing_paths = [p for p in paths_to_stage if os.path.exists(p)]
     os.system(f"git add {' '.join(existing_paths)}")
     print("Staged updated versioning files.")
