@@ -44,7 +44,7 @@ namespace McpRouter.Services
         {
             return new List<LogEntry>(_queue);
         }
-        
+
         public static void Clear()
         {
             while (_queue.TryDequeue(out _)) { }

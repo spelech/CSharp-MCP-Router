@@ -31,8 +31,9 @@ namespace McpRouter.Extensions
                     using var conn = dbFactory.CreateConnection();
                     var rawServers = (await conn.QueryAsync(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson FROM Servers")).ToList();
                     var statuses = sessionManager.BackendStatuses;
-                    
-                    var sanitized = rawServers.Select(s => {
+
+                    var sanitized = rawServers.Select(s =>
+                    {
                         var idStr = Convert.ToString(s.Id) ?? string.Empty;
                         bool isEnabled = false;
                         if (s.Enabled is long longEnabled) isEnabled = longEnabled != 0L;
@@ -53,7 +54,8 @@ namespace McpRouter.Extensions
                         {
                             statuses.TryGetValue(idStr, out status);
                         }
-                        return new {
+                        return new
+                        {
                             Id = idStr,
                             DisplayName = (string)s.DisplayName,
                             Url = (string)s.Url,
@@ -91,7 +93,7 @@ namespace McpRouter.Extensions
                 }
 
                 logger.LogInformation("Triggering manual reconnect request for backend {ServerId} ({DisplayName})", id, server.DisplayName);
-                
+
                 await healthCheckSvc.ProbeServerAsync(server);
 
                 var activeSessions = sessionManager.GetActiveSessions();
@@ -108,7 +110,7 @@ namespace McpRouter.Extensions
                 await healthCheckSvc.ProbeAllServersAsync();
                 return Results.Ok(new { success = true });
             });
-            
+
             api.MapPut("/api/servers/{id}", async (string id, [FromBody] McpServer update, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
@@ -119,10 +121,10 @@ namespace McpRouter.Extensions
                     _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, "Server not found");
                     return Results.NotFound();
                 }
-            
+
                 server.Enabled = update.Enabled;
                 server.Hidden = update.Hidden;
-                
+
                 if (!string.IsNullOrEmpty(update.DisplayName)) server.DisplayName = update.DisplayName;
 
                 var allowedTypes = new[] { "sse", "http", "streamable", "stdio", "custom" };
@@ -167,31 +169,42 @@ namespace McpRouter.Extensions
                 if (update.Categories != null) server.Categories = update.Categories;
                 if (!string.IsNullOrWhiteSpace(update.ApiKey)) server.ApiKey = update.ApiKey;
                 if (update.HeadersJson != null) server.HeadersJson = update.HeadersJson;
-                
+
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 await conn.ExecuteAsync(@"UPDATE Servers SET DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                     SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, AuthShape = @AuthShape, CustomHeaderName = @CustomHeaderName,
                     Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson WHERE Id = @Id",
-                    new {
-                        server.DisplayName, server.Url, Enabled = server.Enabled ? 1 : 0, Hidden = server.Hidden ? 1 : 0, server.Type,
-                        server.SecretProvider, server.SecretItemKey, server.AuthShape, server.CustomHeaderName,
-                        Categories = catJson, server.ApiKey, server.HeadersJson, server.Id
+                    new
+                    {
+                        server.DisplayName,
+                        server.Url,
+                        Enabled = server.Enabled ? 1 : 0,
+                        Hidden = server.Hidden ? 1 : 0,
+                        server.Type,
+                        server.SecretProvider,
+                        server.SecretItemKey,
+                        server.AuthShape,
+                        server.CustomHeaderName,
+                        Categories = catJson,
+                        server.ApiKey,
+                        server.HeadersJson,
+                        server.Id
                     });
-                
+
                 sessionManager.RemoveServerCache(id);
                 sessionManager.ResetAll();
-            
+
                 _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), true);
 
                 return Results.Ok(server);
             });
-            
+
             api.MapPost("/api/servers", async ([FromBody] McpServer server, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger, ILogger<Program> logger) =>
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
                 logger.LogInformation("POST /api/servers started for {url}", server.Url);
-                
+
                 var allowedTypes = new[] { "sse", "http", "streamable", "stdio", "custom" };
                 var lowerType = (server.Type ?? "sse").ToLowerInvariant();
                 if (!allowedTypes.Contains(lowerType))
@@ -222,19 +235,30 @@ namespace McpRouter.Extensions
                 {
                     server.Id = Guid.NewGuid().ToString("N").Substring(0, 8);
                 }
-                
+
                 using var conn = dbFactory.CreateConnection();
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 var dbStart = sw.ElapsedMilliseconds;
                 await conn.ExecuteAsync(@"INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson)
                     VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson)",
-                    new {
-                        server.Id, server.DisplayName, server.Url, Enabled = server.Enabled ? 1 : 0, Hidden = server.Hidden ? 1 : 0, Type = server.Type ?? "sse",
-                        SecretProvider = server.SecretProvider ?? "None", server.SecretItemKey, AuthShape = server.AuthShape ?? "bearer", server.CustomHeaderName,
-                        Categories = catJson, server.ApiKey, server.HeadersJson
+                    new
+                    {
+                        server.Id,
+                        server.DisplayName,
+                        server.Url,
+                        Enabled = server.Enabled ? 1 : 0,
+                        Hidden = server.Hidden ? 1 : 0,
+                        Type = server.Type ?? "sse",
+                        SecretProvider = server.SecretProvider ?? "None",
+                        server.SecretItemKey,
+                        AuthShape = server.AuthShape ?? "bearer",
+                        server.CustomHeaderName,
+                        Categories = catJson,
+                        server.ApiKey,
+                        server.HeadersJson
                     });
                 logger.LogInformation("DB Insert finished after {ms}ms", sw.ElapsedMilliseconds - dbStart);
-                
+
                 var resetStart = sw.ElapsedMilliseconds;
                 sessionManager.ResetAll();
                 logger.LogInformation("ResetAll finished after {ms}ms", sw.ElapsedMilliseconds - resetStart);
@@ -243,7 +267,7 @@ namespace McpRouter.Extensions
 
                 return Results.Ok(server);
             });
-            
+
             api.MapDelete("/api/servers/{id}", async (string id, [FromServices] IDbConnectionFactory dbFactory, [FromServices] SessionManager sessionManager, HttpContext httpContext, [FromServices] IAuditLogger auditLogger) =>
             {
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
@@ -254,9 +278,9 @@ namespace McpRouter.Extensions
                     _ = auditLogger.LogAdminActionAsync(username, "DeleteServer", id, "", false, "Server not found");
                     return Results.NotFound();
                 }
-                
+
                 await conn.ExecuteAsync("DELETE FROM Servers WHERE Id = @id", new { id });
-                
+
                 sessionManager.RemoveServerCache(id);
                 sessionManager.ResetAll();
 

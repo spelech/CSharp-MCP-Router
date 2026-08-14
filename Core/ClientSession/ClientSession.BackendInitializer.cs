@@ -44,7 +44,7 @@ namespace McpRouter
                 await Task.WhenAll(pending);
             }
         }
- 
+
         public void StartInitialization(string initializeRequest)
         {
             lock (_initLock)
@@ -60,7 +60,7 @@ namespace McpRouter
                 }
             }
         }
- 
+
         public async Task InitializeBackendsAsync(string initializeRequest)
         {
             _lastInitializeRequest = initializeRequest;
@@ -115,7 +115,7 @@ namespace McpRouter
                         using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
                         await conn.ConnectAsync().WaitAsync(ctsTimeout.Token);
                     }
-                    
+
                     // Start background reader
                     conn.StartReader(async (message) =>
                     {
@@ -149,7 +149,7 @@ namespace McpRouter
                                 _sessionManager?.RemoveServerPromptsCache(server.Id);
                             }
                         }
-                        
+
                         // Otherwise, it is a notification (e.g. logMessage, resourceUpdated) - forward to client
                         var serialized = JsonSerializer.Serialize(message, message.GetType(), _jsonOptions);
                         using var doc = JsonDocument.Parse(serialized);
@@ -168,7 +168,7 @@ namespace McpRouter
                             throw new Exception($"Initialize failed: {resp.Error.Message}");
                         }
                     }
-                    
+
                     // Send initialized notification to this backend
                     await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
 
@@ -184,9 +184,9 @@ namespace McpRouter
                 catch (Exception ex)
                 {
                     conn?.Dispose();
-                    _logger.LogError("Failed to connect to backend {ServerId} at {Url} (attempt {Attempt}/{MaxAttempts}). Error: {Error}", 
+                    _logger.LogError("Failed to connect to backend {ServerId} at {Url} (attempt {Attempt}/{MaxAttempts}). Error: {Error}",
                         server.Id, server.Url, attempt, maxAttempts, ex.Message);
-                    
+
                     _sessionManager?.UpdateBackendStatus(server.Id, attempt >= maxAttempts ? "Failed" : "Retrying", attempt, ex.Message);
 
                     if (attempt >= maxAttempts)

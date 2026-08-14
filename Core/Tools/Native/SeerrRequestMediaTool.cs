@@ -31,7 +31,7 @@ namespace McpRouter.CustomTools
         {
             var mediaType = parameters.GetProperty("mediaType").GetString();
             var mediaId = parameters.GetProperty("mediaId").GetInt32();
-            
+
             using var conn = dbFactory.CreateConnection();
             var seerr = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = 'seerr'");
             if (seerr == null || !seerr.Enabled)
@@ -81,12 +81,12 @@ namespace McpRouter.CustomTools
 
             var resp = await httpClient.SendAsync(req);
             var content = await resp.Content.ReadAsStringAsync();
-            
+
             if (!resp.IsSuccessStatusCode)
             {
                 return new { error = $"Request failed with status {resp.StatusCode}: {content}" };
             }
-            
+
             return JsonSerializer.Deserialize<object>(content) ?? new { success = true };
         }
     }

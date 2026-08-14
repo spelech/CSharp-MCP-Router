@@ -13,7 +13,7 @@ namespace McpRouter.Tests
         public void CalculateCosineSimilarity_ComputesSimilarity()
         {
             var service = new ApiEmbeddingService(new HttpClient(), new RouterSettings());
-            
+
             float[] vecA = new float[] { 1.0f, 0.0f };
             float[] vecB = new float[] { 1.0f, 0.0f };
 

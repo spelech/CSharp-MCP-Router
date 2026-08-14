@@ -33,7 +33,7 @@ namespace McpRouter.Core.Routing
         {
             var allResources = new List<object>();
             var tasks = new List<Task<(string ServerId, JsonElement Resources)>>();
-            
+
             await ensureBackendsInitializedAsync();
 
             foreach (var entry in backendConnections)
@@ -71,9 +71,9 @@ namespace McpRouter.Core.Routing
                         {
                             var rawUri = uriProp.GetString() ?? string.Empty;
                             var exposedUri = $"mcp://{item.ServerId}/{Uri.EscapeDataString(rawUri)}";
-                            
+
                             _resourceRoutingTable[exposedUri] = item.ServerId;
-                            
+
                             var resourceDict = JsonSerializer.Deserialize<Dictionary<string, object>>(resource.GetRawText());
                             if (resourceDict != null)
                             {
@@ -151,7 +151,7 @@ namespace McpRouter.Core.Routing
         public async Task<List<object>> ListResourceTemplatesAsync(string body, IEnumerable<KeyValuePair<string, BackendConnection>> backendConnections, ILogger logger, Func<Task> ensureBackendsInitializedAsync, SessionManager? sessionManager = null)
         {
             var allTemplates = new List<object>();
-            
+
             // Add built-in templates
             allTemplates.Add(new Dictionary<string, object> {
                 { "uriTemplate", "logs://{server_name}/today" },
@@ -202,7 +202,7 @@ namespace McpRouter.Core.Routing
                         {
                             var rawTemplate = uriTemplateProp.GetString() ?? string.Empty;
                             var exposedTemplate = $"mcp://{item.ServerId}/{rawTemplate}";
-                            
+
                             var templateDict = JsonSerializer.Deserialize<Dictionary<string, object>>(template.GetRawText());
                             if (templateDict != null)
                             {
@@ -272,7 +272,8 @@ namespace McpRouter.Core.Routing
                         else if (ext == ".html") mimeType = "text/html";
 
                         var text = File.ReadAllText(filePath);
-                        return new {
+                        return new
+                        {
                             contents = new[] {
                                 new {
                                     uri = uri,
@@ -284,7 +285,8 @@ namespace McpRouter.Core.Routing
                     }
                     catch (Exception ex)
                     {
-                        return new {
+                        return new
+                        {
                             contents = new[] {
                                 new {
                                     uri = uri,
@@ -301,7 +303,8 @@ namespace McpRouter.Core.Routing
             string jsonText = "{}";
             if (uri == "router://status")
             {
-                var statusObj = new {
+                var statusObj = new
+                {
                     status = "online",
                     activeSessions = sessionManager?.ActiveSessionsCount ?? 0,
                     backendCount = backendConnections.Count,
@@ -317,7 +320,8 @@ namespace McpRouter.Core.Routing
                 {
                     foreach (var entry in statuses)
                     {
-                        serversList.Add(new {
+                        serversList.Add(new
+                        {
                             id = entry.Key,
                             status = entry.Value.Status,
                             attempts = entry.Value.Attempts,
@@ -329,7 +333,8 @@ namespace McpRouter.Core.Routing
             }
             else if (uri == "router://metrics")
             {
-                var metricsObj = new {
+                var metricsObj = new
+                {
                     totalRequests = sessionManager?.TotalRequests ?? 0,
                     activeConnections = sessionManager?.ActiveSessionsCount ?? 0,
                     memoryUsageBytes = GC.GetTotalMemory(false),
@@ -337,14 +342,15 @@ namespace McpRouter.Core.Routing
                     totalInputTokens = sessionManager?.TotalInputTokens ?? 0,
                     totalOutputTokens = sessionManager?.TotalOutputTokens ?? 0,
                     totalDurationMs = sessionManager?.TotalDurationMs ?? 0,
-                    averageLatencyMs = (sessionManager?.TotalRequests ?? 0) > 0 
-                        ? (sessionManager!.TotalDurationMs / (double)sessionManager.TotalRequests) 
+                    averageLatencyMs = (sessionManager?.TotalRequests ?? 0) > 0
+                        ? (sessionManager!.TotalDurationMs / (double)sessionManager.TotalRequests)
                         : 0
                 };
                 jsonText = JsonSerializer.Serialize(metricsObj);
             }
 
-            return new {
+            return new
+            {
                 contents = new[] {
                     new {
                         uri = uri,
@@ -361,9 +367,9 @@ namespace McpRouter.Core.Routing
             if (_catalogManager.TryMatchLogsTemplate(uri, out var serverId))
             {
                 var filteredLogs = LogBuffer.GetLogs()
-                    .Where(l => l.Message.Contains($"backend {serverId}", StringComparison.OrdinalIgnoreCase) || 
-                                l.Message.Contains($"backend server: {serverId}", StringComparison.OrdinalIgnoreCase) || 
-                                l.Message.Contains($"connect to backend {serverId}", StringComparison.OrdinalIgnoreCase) || 
+                    .Where(l => l.Message.Contains($"backend {serverId}", StringComparison.OrdinalIgnoreCase) ||
+                                l.Message.Contains($"backend server: {serverId}", StringComparison.OrdinalIgnoreCase) ||
+                                l.Message.Contains($"connect to backend {serverId}", StringComparison.OrdinalIgnoreCase) ||
                                 l.Message.Contains(serverId, StringComparison.OrdinalIgnoreCase))
                     .Take(100) // limit to 100 log lines to avoid payload bloat
                     .Select(l => $"[{l.Timestamp:yyyy-MM-dd HH:mm:ss}] [{l.Level}] {l.Message}")
@@ -374,7 +380,8 @@ namespace McpRouter.Core.Routing
                 }
             }
 
-            return new {
+            return new
+            {
                 contents = new[] {
                     new {
                         uri = uri,

@@ -393,7 +393,8 @@ namespace McpRouter.Core.Transports
                     dict["id"] = requestId;
                     modifiedBody = JsonSerializer.Serialize(dict);
                 }
-            } catch { }
+            }
+            catch { }
 
             var tcs = _stateManager.CreateRequest(requestId);
 
