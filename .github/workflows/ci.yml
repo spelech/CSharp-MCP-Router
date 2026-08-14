@@ -1,0 +1,247 @@
+name: CI Quality Gates
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend Build & Test (.NET 10)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore McpRouter.slnx
+
+      - name: Build backend (Release)
+        run: dotnet build McpRouter.slnx --configuration Release --no-restore
+
+      - name: Run unit & integration tests with coverage
+        env:
+          CI: "true"
+        run: dotnet test McpRouter.slnx --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults --logger "trx;LogFileName=test_results.trx"
+
+      - name: Publish test results & coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: |
+            TestResults/**/*.trx
+            TestResults/**/coverage.cobertura.xml
+
+  frontend:
+    name: Frontend Quality & Tests (Node.js 22 LTS)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: |
+          cd frontend
+          npm ci
+
+      - name: Run ESLint
+        run: |
+          cd frontend
+          npm run lint
+
+      - name: Build frontend SPA
+        run: |
+          cd frontend
+          npm run build
+
+      - name: Run frontend tests with coverage
+        run: |
+          cd frontend
+          npm run test:coverage
+
+      - name: Publish frontend coverage
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-coverage
+          path: frontend/coverage
+
+  integration-smoke:
+    name: Integration Smoke Test
+    runs-on: ubuntu-latest
+    needs: [backend, frontend]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET 10
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Set up Node.js 22 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Build frontend assets
+        run: |
+          cd frontend
+          npm ci
+          npm run build
+
+      - name: Build backend application
+        run: dotnet build McpRouter.slnx --configuration Release
+
+      - name: Start MCP Router & execute integration smoke checks
+        run: |
+          mkdir -p ./smoke-run
+          ASPNETCORE_ENVIRONMENT=Development \
+          ASPNETCORE_URLS="http://127.0.0.1:5199" \
+          ROUTER_DATABASE_PATH="./smoke-run/smoke.db" \
+          dotnet bin/Release/net10.0/mcp-router.dll > ./smoke-run/server.log 2>&1 &
+          APP_PID=$!
+          echo "APP_PID=$APP_PID" >> $GITHUB_ENV
+
+          # 1. Health check probe
+          echo "Probing /health endpoint..."
+          READY=0
+          for i in {1..30}; do
+            if curl -s -f http://127.0.0.1:5199/health > /dev/null; then
+              READY=1
+              echo "Health check passed on attempt $i!"
+              break
+            fi
+            sleep 0.5
+          done
+
+          if [ $READY -ne 1 ]; then
+            echo "Health check probe timed out or failed"
+            exit 1
+          fi
+
+          # 2. Authenticated API Check (Server registry endpoint)
+          echo "Verifying authenticated API access..."
+          curl -s -f -H "Remote-User: admin" -H "Remote-Groups: full_admin" -H "Remote-User-Sid: S-1-5-32-544" http://127.0.0.1:5199/api/servers > /dev/null
+
+          # 3. Create AppKey and verify Bearer token authentication
+          echo "Creating AppKey..."
+          KEY_RESP=$(curl -s -f -X POST http://127.0.0.1:5199/api/appkeys \
+            -H "Content-Type: application/json" \
+            -H "Remote-User: admin" \
+            -H "Remote-Groups: full_admin" \
+            -H "Remote-User-Sid: S-1-5-32-544" \
+            -d '{"name":"SmokeKey","username":"admin","scopes":["mcp:read","mcp:write"]}')
+          PLAIN_KEY=$(echo "$KEY_RESP" | grep -o '"plaintextKey":"[^"]*' | cut -d'"' -f4)
+          if [ -z "$PLAIN_KEY" ]; then
+            echo "Failed to retrieve plaintextKey from AppKey response"
+            exit 1
+          fi
+          echo "Verifying Bearer auth with minted AppKey..."
+          curl -s -f -H "Authorization: Bearer $PLAIN_KEY" http://127.0.0.1:5199/api/me > /dev/null
+
+          # 4. Authenticated MCP Tool Discovery Check
+          echo "Testing MCP initialization and tool discovery..."
+          node -e '
+          const http = require("http");
+          const headers = {
+            "Content-Type": "application/json",
+            "Remote-User": "admin",
+            "Remote-Groups": "full_admin",
+            "Remote-User-Sid": "S-1-5-32-544"
+          };
+          const req = http.request("http://127.0.0.1:5199/mcp", { method: "POST", headers });
+          let sessionId = null;
+          req.on("response", (res) => {
+            res.on("data", (chunk) => {
+              const text = chunk.toString();
+              const match = text.match(/sessionId=([a-f0-9]+)/);
+              if (match && !sessionId) {
+                sessionId = match[1];
+                console.log("MCP session active:", sessionId);
+                const listReq = http.request(`http://127.0.0.1:5199/mcp/message?sessionId=${sessionId}`, {
+                  method: "POST",
+                  headers
+                }, (listRes) => {
+                  if (listRes.statusCode === 200 || listRes.statusCode === 202) {
+                    console.log("MCP discovery check PASSED (status " + listRes.statusCode + ")");
+                    process.exit(0);
+                  } else {
+                    console.error("MCP discovery check FAILED with status " + listRes.statusCode);
+                    process.exit(1);
+                  }
+                });
+                listReq.on("error", (err) => { console.error(err); process.exit(1); });
+                listReq.write(JSON.stringify({ jsonrpc: "2.0", id: 2, method: "tools/list" }));
+                listReq.end();
+              }
+            });
+          });
+          req.on("error", (err) => { console.error(err); process.exit(1); });
+          req.write(JSON.stringify({
+            jsonrpc: "2.0",
+            id: 1,
+            method: "initialize",
+            params: {
+              protocolVersion: "2024-11-05",
+              capabilities: {},
+              clientInfo: { name: "smoke-tester", version: "1.0" }
+            }
+          }));
+          req.end();
+          '
+
+      - name: Stop application
+        if: always()
+        run: |
+          if [ -n "$APP_PID" ]; then
+            kill $APP_PID 2>/dev/null || true
+          fi
+
+      - name: Upload server logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: integration-smoke-logs
+          path: ./smoke-run/server.log
+
+  docker-check:
+    name: Docker Build Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build Docker image (dry-run without publish)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          tags: mcp-router:ci-check
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
