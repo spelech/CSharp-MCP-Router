@@ -1,9 +1,9 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.10.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.11.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-361%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-410%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -76,17 +76,19 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.11.0`** | 2026-08-14 | feat(ci): add PR quality gates, CodeQL SAST, and security workflows (#49) |
 | **`v4.10.0`** | 2026-08-14 | feat(core): complete Sprint 2 merge — provider settings encryption & dynamic reload (#44), unified MCP capability authorization (#45), and category-scoped AppKeys (#46) |
 | **`v4.9.0`** | 2026-08-14 | feat(core): complete Sprint 1 merge — database schema alignment, STDIO transport, AppKey security hardening, SSE concurrency isolation, and lint/build baseline |
 | **`v4.7.0`** | 2026-08-12 | feat(diagnostics): add diagnostics API and soak test suite |
 | **`v4.6.0`** | 2026-08-12 | feat(identity): implement cross-platform Active Directory SID resolution via LDAP |
-| **`v4.5.9`** | 2026-08-12 | fix(keys): target user SID resolution for admin-minted app keys |
 
 ---
 
-## 🧪 Code Coverage & Quality Gate
+## 🧪 Code Coverage & Quality Gates
 
-Our core modules maintain high code coverage to ensure reliability and secure execution. For the full breakdown and module-specific metrics, please see the [Detailed Coverage Report](docs/coverage-report.md).
+Our core modules maintain high code coverage and automated CI quality gates on pull requests and pushes to `main`. For the complete breakdown and documentation, see:
+- [CI Quality Gates & Security Scanning Guide](docs/ci-quality-gates.md)
+- [Detailed Code Coverage Report](docs/coverage-report.md)
 
 | Module | Line Coverage | Branch Coverage | Status |
 | :--- | :--- | :--- | :--- |
@@ -94,6 +96,7 @@ Our core modules maintain high code coverage to ensure reliability and secure ex
 | **Routing Engine** | 89.7% | 85.3% | 🟢 Passing |
 | **Controllers** | 94.2% | 91.0% | 🟢 Passing |
 | **Security & Providers** | 98.5% | 95.8% | 🟢 Passing |
+| **CI Quality Gates** | 100% | 100% | 🟢 Passing |
 
 ---
 
