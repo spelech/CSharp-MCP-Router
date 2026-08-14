@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.12.1-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.12.2-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-515%20passing-2ea44f?style=for-the-badge)
@@ -44,15 +44,29 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 ---
 
+## 🏛️ Comprehensive Architecture & Specification Guide
+
+For exhaustive architectural specifications, Mermaid sequence diagrams, component boundary models, entity-relationship diagrams (ERDs), 4-stage authorization flows, transport lifecycles, and AES-256-GCM envelope encryption pipelines, see:
+* [**Comprehensive Enterprise Architecture Guide**](docs/architecture.md)
+* [**Executive Architecture Overview**](ARCHITECTURE.md)
+
+---
+
 ## 🚀 Transport Capability & Configuration Guide
 
 For an in-depth breakdown of downstream transports (`sse`, `http`/`streamable`, `stdio`, target proxying `/{targetServerId}`), subprocess STDIO security policies, environment variable secret injection, process tree lifecycle management, SSE concurrency/ID isolation, configuration examples, and troubleshooting procedures, see [**docs/transports.md**](docs/transports.md).
 
 ---
 
-## 🏗️ Architecture, Requirements & Connection Flow
+## 🔑 AppKey Scopes & Authorization Guide
 
-For deep technical details on the router's internal design, dependency injection, routing managers, transport layers, and architectural requirements, see [ARCHITECTURE.md](ARCHITECTURE.md) and the [Pairwise Testing Matrix](docs/testing-matrix.md).
+For complete scope syntax grammar (`*`, `server:*`, `category:*`, `tool:*`, `prompt:*`, `resource:*`), multi-stage pipeline evaluation rules, the capability authorization matrix, cryptographic token hashing, and least-privilege persona recipes, see the canonical [**AppKey Scopes & Authorization Guide**](docs/appkey-scopes.md).
+
+---
+
+## 🔐 Enterprise Secret Providers & Key Management Guide
+
+For detailed documentation on supported secret providers (HashiCorp Vault KV v2 with JIT renewal, Windows Registry DPAPI, Environment Variables), AES-256-GCM encryption at rest, dynamic runtime reloading, audit safety, and Docker Compose setup snippets, see [**docs/secret-providers.md**](docs/secret-providers.md).
 
 ---
 
@@ -74,18 +88,6 @@ For deep technical walkthroughs, setup configuration examples, connection guidel
 
 ---
 
-<<<<<<< HEAD
-## 🔑 AppKey Scopes & Authorization Guide
-
-For complete scope syntax grammar (`*`, `server:*`, `category:*`, `tool:*`, `prompt:*`, `resource:*`), multi-stage pipeline evaluation rules, the capability authorization matrix, cryptographic token hashing, and least-privilege persona recipes, see the canonical [**AppKey Scopes & Authorization Guide**](docs/appkey-scopes.md).
-=======
-## 🔐 Enterprise Secret Providers & Key Management Guide
-
-For detailed documentation on supported secret providers (HashiCorp Vault KV v2 with JIT renewal, Windows Registry DPAPI, Environment Variables), AES-256-GCM encryption at rest, dynamic runtime reloading, audit safety, and Docker Compose setup snippets, see [**docs/secret-providers.md**](docs/secret-providers.md).
->>>>>>> feat/issue-56-secret-provider-guide
-
----
-
 ## 🤖 Client Agent Integration Guidelines
 
 When using agentic coding assistants (such as Antigravity/AGY) connected to this gateway, the agent should follow these core patterns:
@@ -94,12 +96,15 @@ When using agentic coding assistants (such as Antigravity/AGY) connected to this
 2. **Namespaced Execution**: After `search_tools` returns matching namespaced tools (e.g. `docker__restart_container`), the agent must invoke it via `execute_tool(name, arguments)`.
 3. **Semantic Knowledge Retrieval (`notes-rag`)**: AI agents **MUST** query the `notes-rag` service first (using the `search_notes` tool) for system architecture or setup questions before attempting to grep the filesystem. This leverages the local SilverBullet/Obsidian notes database.
 
+---
+
 ## 📜 Release Changelog
 
 For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.12.2`** | 2026-08-14 | docs: comprehensive enterprise architecture guide with system context, component models, sequence diagrams, 4-stage authorization, transports, database ERD, and envelope encryption (#57) |
 | **`v4.12.1`** | 2026-08-14 | docs: complete Stage 1 documentation — database-provider support matrix (#53), canonical AppKey scope and authorization guide (#54), transport capability & STDIO lifecycle guide (#55), and secret-provider security reference (#56) |
 | **`v4.12.0`** | 2026-08-14 | refactor(architecture): complete Sprint 4 merge — modularize backend into `Components/` and `Infrastructure/` domain boundaries with decomposed endpoint mappers (#51), and refactor frontend into domain `components/` with typed API layer and modular settings tabs (#52) |
 | **`v4.11.0`** | 2026-08-14 | feat(testing): complete Sprint 3 merge — frontend unit/component test suite (#48), pull-request CI quality gates & security scanning (#49), and pairwise integration matrix with multi-user E2E fixtures (#50) |
