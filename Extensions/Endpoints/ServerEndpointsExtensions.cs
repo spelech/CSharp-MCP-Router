@@ -124,17 +124,42 @@ namespace McpRouter.Extensions
                 server.Hidden = update.Hidden;
                 
                 if (!string.IsNullOrEmpty(update.DisplayName)) server.DisplayName = update.DisplayName;
-                if (!string.IsNullOrEmpty(update.Type)) server.Type = update.Type;
-                if (!string.IsNullOrEmpty(update.Url))
+
+                var allowedTypes = new[] { "sse", "http", "streamable", "stdio", "custom" };
+                var targetType = (server.Type ?? "sse").ToLowerInvariant();
+                if (!string.IsNullOrEmpty(update.Type))
                 {
-                    if (server.Type != "stdio" && !IsValidServerUrl(update.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
+                    var lowerType = update.Type.ToLowerInvariant();
+                    if (!allowedTypes.Contains(lowerType))
+                    {
+                        var typeErr = $"Transport type '{update.Type}' is not supported.";
+                        _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, typeErr);
+                        return Results.BadRequest(new { error = typeErr });
+                    }
+                    targetType = lowerType;
+                }
+
+                var targetUrl = !string.IsNullOrEmpty(update.Url) ? update.Url : server.Url;
+
+                if (targetType == "stdio")
+                {
+                    if (!IsValidStdioCommand(targetUrl, out var err))
                     {
                         _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, err);
                         return Results.BadRequest(new { error = err });
                     }
-                    server.Url = update.Url;
                 }
-                if (!string.IsNullOrEmpty(update.Type)) server.Type = update.Type;
+                else if (targetType != "custom")
+                {
+                    if (!IsValidServerUrl(targetUrl, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
+                    {
+                        _ = auditLogger.LogAdminActionAsync(username, "UpdateServer", id, JsonSerializer.Serialize(update), false, err);
+                        return Results.BadRequest(new { error = err });
+                    }
+                }
+
+                server.Type = targetType;
+                server.Url = targetUrl;
                 if (update.SecretProvider != null) server.SecretProvider = update.SecretProvider;
                 if (update.SecretItemKey != null) server.SecretItemKey = update.SecretItemKey;
                 if (!string.IsNullOrEmpty(update.AuthShape)) server.AuthShape = update.AuthShape;
@@ -167,7 +192,25 @@ namespace McpRouter.Extensions
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
                 logger.LogInformation("POST /api/servers started for {url}", server.Url);
                 
-                if (server.Type != "stdio" && !IsValidServerUrl(server.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
+                var allowedTypes = new[] { "sse", "http", "streamable", "stdio", "custom" };
+                var lowerType = (server.Type ?? "sse").ToLowerInvariant();
+                if (!allowedTypes.Contains(lowerType))
+                {
+                    var typeErr = $"Transport type '{server.Type}' is not supported.";
+                    _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id ?? "unknown", JsonSerializer.Serialize(server), false, typeErr);
+                    return Results.BadRequest(new { error = typeErr });
+                }
+                server.Type = lowerType;
+
+                if (server.Type == "stdio")
+                {
+                    if (!IsValidStdioCommand(server.Url, out var err))
+                    {
+                        _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id ?? "unknown", JsonSerializer.Serialize(server), false, err);
+                        return Results.BadRequest(new { error = err });
+                    }
+                }
+                else if (server.Type != "custom" && !IsValidServerUrl(server.Url, httpContext.RequestServices.GetRequiredService<IConfiguration>(), out var err))
                 {
                     logger.LogInformation("IsValidServerUrl failed after {ms}ms", sw.ElapsedMilliseconds);
                     _ = auditLogger.LogAdminActionAsync(username, "CreateServer", server.Id ?? "unknown", JsonSerializer.Serialize(server), false, err);
@@ -289,6 +332,49 @@ namespace McpRouter.Extensions
                     sessionManager.CloseSession(sessionId);
                 }
             });
+        }
+
+        public static bool IsValidStdioCommand(string? commandLine, out string? errorMessage)
+        {
+            errorMessage = null;
+            if (string.IsNullOrWhiteSpace(commandLine))
+            {
+                errorMessage = "Command line cannot be empty.";
+                return false;
+            }
+
+            var trimmed = commandLine.Trim();
+            if (trimmed.StartsWith("http://", StringComparison.OrdinalIgnoreCase) ||
+                trimmed.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            {
+                errorMessage = "STDIO command cannot be an HTTP or HTTPS URL.";
+                return false;
+            }
+
+            var parsed = McpRouter.Core.Transports.StdioTransport.ParseCommandLine(commandLine);
+            if (parsed.Count == 0)
+            {
+                errorMessage = "Command line must contain a valid executable.";
+                return false;
+            }
+
+            var executable = parsed[0];
+            char[] unsafeChars = { ';', '&', '|', '<', '>', '\n', '\r', '`', '$', '*' };
+            if (executable.Any(c => unsafeChars.Contains(c)) || parsed.Any(p => p.Any(c => unsafeChars.Contains(c))))
+            {
+                errorMessage = $"Command contains disallowed unsafe characters.";
+                return false;
+            }
+
+            var lowerExec = Path.GetFileNameWithoutExtension(executable).ToLowerInvariant();
+            string[] blockedExecutables = { "sh", "bash", "cmd", "powershell", "pwsh", "zsh" };
+            if (blockedExecutables.Contains(lowerExec))
+            {
+                errorMessage = $"Direct invocation of shell '{executable}' is blocked under the security policy.";
+                return false;
+            }
+
+            return true;
         }
 
         public static bool IsValidServerUrl(string? url, IConfiguration config, out string? errorMessage)

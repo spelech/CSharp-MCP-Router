@@ -8,7 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.8.0`** | 2026-08-14 | feat(core): align database schemas & migrations across SQLite/MSSQL/MySQL, harden AppKey security & SID isolation, and fix SSE concurrency |
+| **`v4.9.0`** | 2026-08-14 | feat(core): complete Sprint 1 merge — database schema alignment, STDIO transport, AppKey security hardening, SSE concurrency isolation, and lint/build baseline |
 | **`v4.7.0`** | 2026-08-12 | feat(diagnostics): add diagnostics API and soak test suite |
 | **`v4.6.0`** | 2026-08-12 | feat(identity): implement cross-platform Active Directory SID resolution via LDAP |
 | **`v4.5.9`** | 2026-08-12 | fix(keys): target user SID resolution for admin-minted app keys |

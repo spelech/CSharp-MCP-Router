@@ -101,6 +101,7 @@ namespace McpRouter
             while (!_cts.Token.IsCancellationRequested && attempt < maxAttempts)
             {
                 attempt++;
+                BackendConnection? conn = null;
                 try
                 {
                     _logger.LogInformation("Attempting to connect to backend {ServerId} (attempt {Attempt}/{MaxAttempts}) at {Url}...", server.Id, attempt, maxAttempts, server.Url);
@@ -108,7 +109,7 @@ namespace McpRouter
 
                     var retriever = _rootServices?.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>()
                         ?? _clientResponse?.HttpContext?.RequestServices?.GetService<McpRouter.Core.Secrets.CompositeSecretRetriever>();
-                    var conn = new BackendConnection(server, _httpClient, _logger, retriever);
+                    conn = new BackendConnection(server, _httpClient, _logger, retriever);
                     if (server.Type != "http" && server.Type != "streamable")
                     {
                         using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
@@ -171,6 +172,10 @@ namespace McpRouter
                     // Send initialized notification to this backend
                     await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
 
+                    if (_backendConnections.TryRemove(server.Id, out var prevConn))
+                    {
+                        prevConn.Dispose();
+                    }
                     _backendConnections[server.Id] = conn;
                     _logger.LogInformation("Successfully connected and initialized backend server: {ServerId}", server.Id);
                     _sessionManager?.UpdateBackendStatus(server.Id, "Connected", attempt, "");
@@ -178,6 +183,7 @@ namespace McpRouter
                 }
                 catch (Exception ex)
                 {
+                    conn?.Dispose();
                     _logger.LogError("Failed to connect to backend {ServerId} at {Url} (attempt {Attempt}/{MaxAttempts}). Error: {Error}", 
                         server.Id, server.Url, attempt, maxAttempts, ex.Message);
                     

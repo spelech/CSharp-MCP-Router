@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.8.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.9.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-145%20passing-2ea44f?style=for-the-badge)
@@ -76,7 +76,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.8.0`** | 2026-08-14 | feat(core): align database schemas & migrations across SQLite/MSSQL/MySQL, harden AppKey security & SID isolation, and fix SSE concurrency |
+| **`v4.9.0`** | 2026-08-14 | feat(core): complete Sprint 1 merge — database schema alignment, STDIO transport, AppKey security hardening, SSE concurrency isolation, and lint/build baseline |
 | **`v4.7.0`** | 2026-08-12 | feat(diagnostics): add diagnostics API and soak test suite |
 | **`v4.6.0`** | 2026-08-12 | feat(identity): implement cross-platform Active Directory SID resolution via LDAP |
 | **`v4.5.9`** | 2026-08-12 | fix(keys): target user SID resolution for admin-minted app keys |
