@@ -70,6 +70,8 @@ The backend is organized into clear bounded modules across domain components, in
     └── Routing/         # ClientSession, SessionManager, BackendConnection & Semantic Search
 ```
 
+> For deep architectural details and configuration guidelines regarding downstream transport implementations (`sse`, `http`, `stdio`), see the [**Transport Capability & Configuration Guide**](docs/transports.md).
+
 ---
 
 ## 📡 Message & Connection Flows
