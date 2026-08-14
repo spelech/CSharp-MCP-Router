@@ -17,7 +17,7 @@ Welcome to the official documentation for the **Model Context Protocol (MCP) Gat
 3. [**03. RBAC, Security & Approvals**](03-rbac-and-security.md)
    - Fine-grained Access Control (RBAC) rules, Active Directory / OIDC group mappings, OAuth shapes, and the manual tool execution approval queue.
 4. [**04. Client Setup & App Key Management**](04-client-setup-and-app-keys.md)
-   - Generating App Keys, configuring scopes, and integration guides for Cursor IDE, Claude Desktop, OpenClaw Agent, and custom SSE/HTTP clients.
+   - Generating App Keys, configuring scopes, and integration guides for Cursor IDE, Claude Desktop, OpenClaw Agent, and custom SSE/HTTP clients. (See the canonical [**AppKey Scopes & Authorization Guide**](../appkey-scopes.md) for full syntax and evaluation rules).
 5. [**05. Interactive Test Bench**](05-interactive-test-bench.md)
    - Executing tools manually, querying virtual resource URIs (`mcp://...`), rendering prompt templates, testing semantic vector routing (`search_tools`), and live SSE diagnostic logging.
 6. [**06. System Settings & Vector Embeddings**](06-settings-and-embeddings.md)
