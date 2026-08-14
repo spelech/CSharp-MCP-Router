@@ -76,11 +76,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.10.0`** | 2026-08-14 | feat(auth): apply unified authorization pipeline across all MCP capabilities (tools, prompts, resources, resource templates, completions), with fail-closed defaults, discovery filtering, and request context resolution (Issue #45) |
 | **`v4.9.0`** | 2026-08-14 | feat(core): complete Sprint 1 merge — database schema alignment, STDIO transport, AppKey security hardening, SSE concurrency isolation, and lint/build baseline |
 | **`v4.7.0`** | 2026-08-12 | feat(diagnostics): add diagnostics API and soak test suite |
 | **`v4.6.0`** | 2026-08-12 | feat(identity): implement cross-platform Active Directory SID resolution via LDAP |
 | **`v4.5.9`** | 2026-08-12 | fix(keys): target user SID resolution for admin-minted app keys |
-| **`v4.5.8`** | 2026-08-12 | fix(vault): support VAULT_TOKEN fallback for dev testing and init test secrets via docker-compose |
 
 ---
 

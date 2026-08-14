@@ -278,93 +278,217 @@ namespace McpRouter
             }
         }
 
-        public async Task<List<object>> ListResourceTemplatesAsync(string body)
+        public async Task<List<object>> ListResourceTemplatesAsync(string body, HttpContext? httpContext = null)
         {
             var templates = await _resourceRoutingManager.ListResourceTemplatesAsync(body, _backendConnections, _logger, EnsureBackendsInitializedAsync, _sessionManager);
-            return templates;
+            return await FilterAuthorizedAsync(templates, "resources/templates/list", "uriTemplate", httpContext);
         }
 
-        public async Task<object> CompleteAsync(string body)
+        public async Task<object> CompleteAsync(string body, HttpContext? httpContext = null)
         {
+            var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+            int statusCode = 200;
+            string? errorMessage = null;
+            string? responsePayload = null;
+            string targetItem = "unknown";
+
             try
             {
                 using var doc = JsonDocument.Parse(body);
                 var root = doc.RootElement;
-                if (!root.TryGetProperty("params", out var paramsProp))
+                if (!root.TryGetProperty("params", out var paramsProp) || !paramsProp.TryGetProperty("ref", out var refProp))
                 {
-                    return new { completion = new { values = Array.Empty<string>(), hasMore = false } };
+                    statusCode = 403;
+                    errorMessage = "Security Error: Missing required completion parameters or reference.";
+                    throw new UnauthorizedAccessException(errorMessage);
                 }
 
-                if (paramsProp.TryGetProperty("ref", out var refProp))
+                if (!refProp.TryGetProperty("type", out var typeProp))
                 {
-                    if (refProp.TryGetProperty("type", out var typeProp))
-                    {
-                        var refType = typeProp.GetString();
-                        if (refType == "ref/resource")
-                        {
-                            if (refProp.TryGetProperty("uriTemplate", out var templateProp))
-                            {
-                                var uriTemplate = templateProp.GetString() ?? string.Empty;
-                                if (uriTemplate == "logs://{server_name}/today")
-                                {
-                                    var argVal = string.Empty;
-                                    if (paramsProp.TryGetProperty("value", out var valProp))
-                                    {
-                                        argVal = valProp.GetString() ?? string.Empty;
-                                    }
-                                    var serverIds = _servers.Select(s => s.Id).ToList();
-                                    var matching = serverIds
-                                        .Where(id => id.StartsWith(argVal, StringComparison.OrdinalIgnoreCase))
-                                        .Take(10)
-                                        .ToList();
-                                    return new { completion = new { values = matching, hasMore = false } };
-                                }
+                    statusCode = 403;
+                    errorMessage = "Security Error: Missing completion reference type.";
+                    throw new UnauthorizedAccessException(errorMessage);
+                }
 
-                                if (uriTemplate.StartsWith("mcp://"))
-                                {
-                                    var parts = uriTemplate.Substring("mcp://".Length).Split('/', 2);
-                                    if (parts.Length == 2)
-                                    {
-                                        var serverId = parts[0];
-                                        var backendTemplate = parts[1];
-                                        if (_backendConnections.TryGetValue(serverId, out var conn))
-                                        {
-                                            var rewrittenBody = RewriteRequestJson(body, "uriTemplate", backendTemplate);
-                                            var resp = await conn.SendRequestAsync("completion/complete", rewrittenBody);
-                                            if (resp.Result != null) return resp.Result.Value;
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        else if (refType == "ref/prompt")
-                        {
-                            if (refProp.TryGetProperty("name", out var nameProp))
-                            {
-                                var promptName = nameProp.GetString() ?? string.Empty;
-                                var parts = promptName.Split("__", 2);
-                                if (parts.Length == 2)
-                                {
-                                    var serverId = parts[0];
-                                    var rawName = parts[1];
-                                    if (_backendConnections.TryGetValue(serverId, out var conn))
-                                    {
-                                        var rewrittenBody = RewriteRequestJson(body, "name", rawName);
-                                        var resp = await conn.SendRequestAsync("completion/complete", rewrittenBody);
-                                        if (resp.Result != null) return resp.Result.Value;
-                                    }
-                                }
-                            }
-                        }
+                var refType = typeProp.GetString();
+                if (refType == "ref/prompt")
+                {
+                    if (!refProp.TryGetProperty("name", out var nameProp))
+                    {
+                        statusCode = 403;
+                        errorMessage = "Security Error: Missing prompt name in completion reference.";
+                        throw new UnauthorizedAccessException(errorMessage);
                     }
+
+                    var promptName = nameProp.GetString() ?? string.Empty;
+                    targetItem = promptName;
+
+                    var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                    if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateToolOrPromptName(promptName, activeServerIds))
+                    {
+                        statusCode = 403;
+                        errorMessage = $"Security Error: Invalid or unknown prompt identifier: '{promptName}'.";
+                        throw new UnauthorizedAccessException(errorMessage);
+                    }
+
+                    var isAuth = await IsUserAuthorizedAsync("completion/complete", promptName, httpContext);
+                    if (!isAuth)
+                    {
+                        var identity = await ResolveUserIdentityAsync(httpContext);
+                        statusCode = 403;
+                        errorMessage = $"Security Error: User '{identity.Username}' does not have permission to complete prompt '{promptName}'.";
+                        throw new UnauthorizedAccessException(errorMessage);
+                    }
+
+                    var parts = promptName.Split("__", 2);
+                    if (parts.Length != 2)
+                    {
+                        statusCode = 403;
+                        errorMessage = $"Security Error: Unresolved target backend for prompt '{promptName}'.";
+                        throw new UnauthorizedAccessException(errorMessage);
+                    }
+
+                    var serverId = parts[0];
+                    var rawName = parts[1];
+
+                    await EnsureBackendsInitializedAsync();
+
+                    if (!_backendConnections.TryGetValue(serverId, out var conn))
+                    {
+                        statusCode = 403;
+                        errorMessage = $"Security Error: Target backend server '{serverId}' is not available for prompt '{promptName}'.";
+                        throw new UnauthorizedAccessException(errorMessage);
+                    }
+
+                    var rewrittenBody = RewriteRequestJson(body, "name", rawName);
+                    var resp = await conn.SendRequestAsync("completion/complete", rewrittenBody);
+                    object result = resp.Result != null ? resp.Result.Value : new { completion = new { values = Array.Empty<string>(), hasMore = false } };
+                    responsePayload = JsonSerializer.Serialize(result);
+                    return result;
+                }
+                else if (refType == "ref/resource")
+                {
+                    string uriString = string.Empty;
+                    string propName = "uriTemplate";
+                    if (refProp.TryGetProperty("uriTemplate", out var templateProp))
+                    {
+                        uriString = templateProp.GetString() ?? string.Empty;
+                        propName = "uriTemplate";
+                    }
+                    else if (refProp.TryGetProperty("uri", out var uriProp))
+                    {
+                        uriString = uriProp.GetString() ?? string.Empty;
+                        propName = "uri";
+                    }
+
+                    if (string.IsNullOrWhiteSpace(uriString))
+                    {
+                        statusCode = 403;
+                        errorMessage = "Security Error: Missing uri or uriTemplate in resource completion reference.";
+                        throw new UnauthorizedAccessException(errorMessage);
+                    }
+
+                    targetItem = uriString;
+
+                    if (uriString == "logs://{server_name}/today" || uriString.StartsWith("logs://"))
+                    {
+                        var isAuth = await IsUserAuthorizedAsync("completion/complete", uriString, httpContext);
+                        if (!isAuth)
+                        {
+                            var identity = await ResolveUserIdentityAsync(httpContext);
+                            statusCode = 403;
+                            errorMessage = $"Security Error: User '{identity.Username}' does not have permission to complete resource '{uriString}'.";
+                            throw new UnauthorizedAccessException(errorMessage);
+                        }
+
+                        var argVal = string.Empty;
+                        if (paramsProp.TryGetProperty("argument", out var argObj) && argObj.TryGetProperty("value", out var vProp))
+                        {
+                            argVal = vProp.GetString() ?? string.Empty;
+                        }
+                        else if (paramsProp.TryGetProperty("value", out var valProp))
+                        {
+                            argVal = valProp.GetString() ?? string.Empty;
+                        }
+
+                        var serverIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                        var matching = new List<string>();
+                        foreach (var s in serverIds.Where(id => id.StartsWith(argVal, StringComparison.OrdinalIgnoreCase)))
+                        {
+                            if (await IsUserAuthorizedAsync("resources/read", $"logs://{s}/today", httpContext))
+                            {
+                                matching.Add(s);
+                            }
+                        }
+                        var res = new { completion = new { values = matching.Take(10).ToList(), hasMore = false } };
+                        responsePayload = JsonSerializer.Serialize(res);
+                        return res;
+                    }
+
+                    var activeServerIds = _servers.Where(s => s.Enabled).Select(s => s.Id).ToList();
+                    if (!McpRouter.Core.Security.SecurityValidationHelper.ValidateResourceUri(uriString, activeServerIds))
+                    {
+                        statusCode = 403;
+                        errorMessage = $"Security Error: Invalid or spoofed resource URI namespace: '{uriString}'.";
+                        throw new UnauthorizedAccessException(errorMessage);
+                    }
+
+                    var isResourceAuth = await IsUserAuthorizedAsync("completion/complete", uriString, httpContext);
+                    if (!isResourceAuth)
+                    {
+                        var identity = await ResolveUserIdentityAsync(httpContext);
+                        statusCode = 403;
+                        errorMessage = $"Security Error: User '{identity.Username}' does not have permission to complete resource '{uriString}'.";
+                        throw new UnauthorizedAccessException(errorMessage);
+                    }
+
+                    var parts = uriString.Substring("mcp://".Length).Split('/', 2);
+                    if (parts.Length != 2)
+                    {
+                        statusCode = 403;
+                        errorMessage = $"Security Error: Unresolved target backend for resource '{uriString}'.";
+                        throw new UnauthorizedAccessException(errorMessage);
+                    }
+
+                    var serverId = parts[0];
+                    var backendTemplate = parts[1];
+
+                    await EnsureBackendsInitializedAsync();
+
+                    if (!_backendConnections.TryGetValue(serverId, out var conn))
+                    {
+                        statusCode = 403;
+                        errorMessage = $"Security Error: Target backend server '{serverId}' is not available for resource '{uriString}'.";
+                        throw new UnauthorizedAccessException(errorMessage);
+                    }
+
+                    var rewrittenBody = RewriteRequestJson(body, propName, backendTemplate);
+                    var resp = await conn.SendRequestAsync("completion/complete", rewrittenBody);
+                    object result = resp.Result != null ? resp.Result.Value : new { completion = new { values = Array.Empty<string>(), hasMore = false } };
+                    responsePayload = JsonSerializer.Serialize(result);
+                    return result;
+                }
+                else
+                {
+                    statusCode = 403;
+                    errorMessage = $"Security Error: Unsupported or unknown completion reference type: '{refType}'.";
+                    throw new UnauthorizedAccessException(errorMessage);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error handling completion/complete request");
+                if (statusCode == 200)
+                {
+                    statusCode = 500;
+                    errorMessage = ex.Message;
+                }
+                throw;
             }
-
-            return new { completion = new { values = Array.Empty<string>(), hasMore = false } };
+            finally
+            {
+                stopwatch.Stop();
+                await AuditInvocationAsync("completion/complete", targetItem, body, statusCode, stopwatch.ElapsedMilliseconds, responsePayload, errorMessage, httpContext);
+            }
         }
 
         public async Task<List<object>> ListPromptsAsync(string body, HttpContext? httpContext = null)
