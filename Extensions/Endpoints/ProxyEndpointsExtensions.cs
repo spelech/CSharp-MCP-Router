@@ -186,7 +186,7 @@ namespace McpRouter.Extensions
                         }
                         else if (method == "resources/templates/list")
                         {
-                            var templates = await activeSession.ListResourceTemplatesAsync(requestBody);
+                            var templates = await activeSession.ListResourceTemplatesAsync(requestBody, httpContext);
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -254,7 +254,7 @@ namespace McpRouter.Extensions
                         }
                         else if (method == "completion/complete")
                         {
-                            var res = await activeSession.CompleteAsync(requestBody);
+                            var res = await activeSession.CompleteAsync(requestBody, httpContext);
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -837,7 +837,7 @@ namespace McpRouter.Extensions
                     }
                     else if (method == "resources/templates/list")
                     {
-                        var templates = await session.ListResourceTemplatesAsync(body);
+                        var templates = await session.ListResourceTemplatesAsync(body, httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -849,7 +849,7 @@ namespace McpRouter.Extensions
                     }
                     else if (method == "completion/complete")
                     {
-                        var res = await session.CompleteAsync(body);
+                        var res = await session.CompleteAsync(body, httpContext);
                         var response = new
                         {
                             jsonrpc = "2.0",

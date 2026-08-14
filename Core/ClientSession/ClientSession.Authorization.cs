@@ -85,7 +85,42 @@ namespace McpRouter
 
         public async Task<bool> IsUserAuthorizedAsync(string requestMethod, string targetId, HttpContext? httpContext = null)
         {
+            if (string.IsNullOrWhiteSpace(targetId))
+            {
+                return false;
+            }
+
             var contextToUse = httpContext ?? _clientResponse?.HttpContext;
+
+            // Extract serverId across all URI and namespaced formats
+            string serverId;
+            if (targetId.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
+            {
+                if (Uri.TryCreate(targetId, UriKind.Absolute, out var parsedUri))
+                    serverId = parsedUri.Host;
+                else
+                    serverId = targetId.Substring("mcp://".Length).Split('/')[0];
+            }
+            else if (targetId.StartsWith("logs://", StringComparison.OrdinalIgnoreCase))
+            {
+                if (Uri.TryCreate(targetId, UriKind.Absolute, out var parsedUri))
+                    serverId = parsedUri.Host;
+                else
+                    serverId = targetId.Substring("logs://".Length).Split('/')[0];
+            }
+            else if (targetId.StartsWith("router://", StringComparison.OrdinalIgnoreCase))
+            {
+                serverId = "router";
+            }
+            else if (targetId.Contains("__"))
+            {
+                serverId = targetId.Split("__", 2)[0];
+            }
+            else
+            {
+                serverId = targetId;
+            }
+
             // If authenticated via AppKey, check key-level scopes first
             if (contextToUse?.Items.TryGetValue("AppKeyUsed", out var appKeyUsedObj) == true && appKeyUsedObj is bool appKeyUsed && appKeyUsed)
             {
@@ -97,7 +132,6 @@ namespace McpRouter
                         var scopes = JsonSerializer.Deserialize<List<string>>(scopesJson);
                         if (scopes != null)
                         {
-                            var serverId = targetId.Contains("__") ? targetId.Split("__", 2)[0] : targetId;
                             foreach (var s in scopes)
                             {
                                 var cleanScope = s.Trim().ToLowerInvariant();
@@ -106,16 +140,19 @@ namespace McpRouter
                                     scopeAllowed = true;
                                     break;
                                 }
-                                if (cleanScope == $"server:{serverId}".ToLowerInvariant())
+                                if (cleanScope == $"server:{serverId}".ToLowerInvariant() ||
+                                    cleanScope == $"server:{targetId}".ToLowerInvariant())
                                 {
                                     scopeAllowed = true;
                                     break;
                                 }
-                                if (cleanScope == $"tool:{targetId}".ToLowerInvariant() ||
+                                if (cleanScope == targetId.ToLowerInvariant() ||
+                                    cleanScope == $"tool:{targetId}".ToLowerInvariant() ||
                                     cleanScope == $"prompt:{targetId}".ToLowerInvariant() ||
                                     cleanScope == $"resource:{targetId}".ToLowerInvariant() ||
-                                    cleanScope == $"server:{targetId}".ToLowerInvariant() ||
-                                    cleanScope == targetId.ToLowerInvariant())
+                                    cleanScope == $"resource_template:{targetId}".ToLowerInvariant() ||
+                                    cleanScope == $"template:{targetId}".ToLowerInvariant() ||
+                                    cleanScope == $"completion:{targetId}".ToLowerInvariant())
                                 {
                                     scopeAllowed = true;
                                     break;
@@ -161,17 +198,17 @@ namespace McpRouter
 
                 using var conn = dbFactory.CreateConnection();
 
-                var targetKeys = new List<string> { $"tool:{targetId}", $"prompt:{targetId}", $"resource:{targetId}" };
-                string serverId;
-                if (targetId.StartsWith("mcp://"))
+                var targetKeys = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
                 {
-                    serverId = Uri.TryCreate(targetId, UriKind.Absolute, out var parsedUri) ? parsedUri.Host : targetId;
-                }
-                else
-                {
-                    serverId = targetId.Contains("__") ? targetId.Split("__", 2)[0] : targetId;
-                }
-                targetKeys.Add($"server:{serverId}");
+                    targetId,
+                    $"tool:{targetId}",
+                    $"prompt:{targetId}",
+                    $"resource:{targetId}",
+                    $"resource_template:{targetId}",
+                    $"template:{targetId}",
+                    $"completion:{targetId}",
+                    $"server:{serverId}"
+                };
 
                 var externalIds = identity.GroupNames.Concat(identity.AllSids).Distinct().ToList();
                 if (!string.IsNullOrEmpty(identity.Username) && !externalIds.Contains(identity.Username)) externalIds.Add(identity.Username);
@@ -187,7 +224,13 @@ namespace McpRouter
                     _logger.LogWarning(exMap, "Failed to query GroupMappings, assuming empty");
                 }
 
-                var allUserGroups = identity.GroupNames.Concat(identity.AllSids).Concat(mappedGroups).Where(g => !string.IsNullOrEmpty(g)).Distinct().ToList();
+                var allUserGroups = identity.GroupNames
+                    .Concat(identity.AllSids)
+                    .Concat(mappedGroups)
+                    .Concat(!string.IsNullOrEmpty(identity.Username) ? new[] { identity.Username } : Array.Empty<string>())
+                    .Where(g => !string.IsNullOrEmpty(g))
+                    .Distinct()
+                    .ToList();
 
                 if (dbFactory.ProviderName == "sqlite")
                 {
@@ -292,13 +335,31 @@ namespace McpRouter
                 var identity = await ResolveUserIdentityAsync(httpContext);
 
                 string serverId;
-                if (itemName.StartsWith("mcp://"))
+                if (itemName.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
                 {
-                    serverId = Uri.TryCreate(itemName, UriKind.Absolute, out var parsedUri) ? parsedUri.Host : itemName;
+                    if (Uri.TryCreate(itemName, UriKind.Absolute, out var parsedUri))
+                        serverId = parsedUri.Host;
+                    else
+                        serverId = itemName.Substring("mcp://".Length).Split('/')[0];
+                }
+                else if (itemName.StartsWith("logs://", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (Uri.TryCreate(itemName, UriKind.Absolute, out var parsedUri))
+                        serverId = parsedUri.Host;
+                    else
+                        serverId = itemName.Substring("logs://".Length).Split('/')[0];
+                }
+                else if (itemName.StartsWith("router://", StringComparison.OrdinalIgnoreCase))
+                {
+                    serverId = "router";
+                }
+                else if (itemName.Contains("__"))
+                {
+                    serverId = itemName.Split("__", 2)[0];
                 }
                 else
                 {
-                    serverId = itemName.Contains("__") ? itemName.Split("__", 2)[0] : itemName;
+                    serverId = itemName;
                 }
 
                 // Try to extract requestId from request payload
