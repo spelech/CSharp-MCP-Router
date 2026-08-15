@@ -10,7 +10,9 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
-    "test:e2e": "playwright test"
+    "test:e2e": "playwright test",
+    "docs:catalog": "dotnet run --project ../scripts/CatalogGenerator",
+    "docs:catalog:verify": "dotnet run --project ../scripts/CatalogGenerator -- --verify-only"
   },
   "dependencies": {
     "react": "^19.0.0",

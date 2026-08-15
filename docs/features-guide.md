@@ -225,3 +225,12 @@ The Web Dashboard features a robust developer environment to debug, simulate, an
 ## 🗄️ 7. Database Engine Support & Deployment
 
 For complete dialect specifications across SQLite, Microsoft SQL Server, and MySQL, the complete 12-table [**Entity-Relationship Diagram (ERD)**](database-providers.md#unified-database-entity-relationship-diagram-erd), stored procedure catalogs, AES-256-GCM envelope encryption architecture, and production Docker Compose configurations, see [**Database Provider Support & Deployment Matrix**](database-providers.md).
+
+---
+
+## 📋 8. Software Requirements Specification & Automated Test Catalog
+
+For automated requirements traceability, positive feature proofs, safety guardrails, and verified failure invariants across the backend and frontend test suites, see:
+* [**Software Requirements Specification (SRS) & Test Verification Catalog**](software-requirements-and-test-catalog.md)
+* [**Test Catalog & Annotation Developer Guide**](test-catalog-guide.md)
+
