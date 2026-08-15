@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Security.Principal;
 using System.Threading.Tasks;
 using McpRouter.Infrastructure.Identity;
+using McpRouter.Tests.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -223,22 +224,86 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-01", "SecurityValidationHelper authorizes principals via Admin Group SID", Type = RequirementType.Positive, Category = "AUTH")]
         public void SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid()
         {
             var configDict = new Dictionary<string, string?>
             {
-                ["Admin:GroupSid"] = "S-1-5-32-544"
+                ["Admin:GroupSid"] = "S-1-5-32-544",
+                ["Admin:GroupName"] = "custom_admin_only"
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
 
-            var adminIdentity = new UserIdentityContext("admin_user", "Test", new List<string> { "Administrators" }, Sid: "", Sids: new List<string> { "S-1-5-32-544" });
-            var nonAdminIdentity = new UserIdentityContext("admin", "Test", new List<string> { "Administrators", "full_admin" }, Sid: "", Sids: new List<string>());
+            var adminIdentity = new UserIdentityContext("admin_user", "Test", new List<string> { "regular_users" }, Sid: "", Sids: new List<string> { "S-1-5-32-544" });
+            var nonAdminIdentity = new UserIdentityContext("user", "Test", new List<string> { "regular_users" }, Sid: "", Sids: new List<string> { "S-1-5-21-999" });
 
             Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(adminIdentity, config));
             Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(nonAdminIdentity, config));
         }
 
         [Fact]
+        [Requirement("AUTH-01", "SecurityValidationHelper authorizes principals via Admin Group Name", Type = RequirementType.Positive, Category = "AUTH")]
+        public void SecurityValidationHelper_IsAdmin_AllowsAdminGroupName()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                { "Admin:GroupName", "full_admin" }
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var identity = new UserIdentityContext("steve", "HeaderAuth", new List<string> { "full_admin", "house_member" });
+            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
+        }
+
+        [Fact]
+        [Requirement("AUTH-01", "SecurityValidationHelper rejects non-admin groups and guest identities", Type = RequirementType.Negative, Category = "AUTH")]
+        public void SecurityValidationHelper_IsAdmin_RejectsNonAdminGroups()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                { "Admin:GroupName", "full_admin" }
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var identity = new UserIdentityContext("alice", "HeaderAuth", new List<string> { "house_member" });
+            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
+
+            var guestIdentity = new UserIdentityContext("guest", "HeaderAuth", new List<string> { "full_admin" });
+            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(guestIdentity, config));
+        }
+
+        [Fact]
+        [Requirement("AUTH-01", "SecurityValidationHelper authorizes principals via custom configured Admin:Groups array", Type = RequirementType.Positive, Category = "AUTH")]
+        public void SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                { "Admin:Groups:0", "DevOps_Admins" },
+                { "Admin:Groups:1", "Cloud_Architects" }
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var identity = new UserIdentityContext("bob", "HeaderAuth", new List<string> { "DevOps_Admins", "developers" });
+            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
+        }
+
+        [Fact]
+        [Requirement("AUTH-01", "SecurityValidationHelper authorizes principals via mappedGroups database resolution", Type = RequirementType.Positive, Category = "AUTH")]
+        public void SecurityValidationHelper_IsAdmin_AllowsMappedGroups()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                { "Admin:GroupName", "full_admin" }
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var identity = new UserIdentityContext("charlie", "HeaderAuth", new List<string> { "PocketID_Admins" });
+            var mappedGroups = new List<string> { "full_admin" };
+            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config, mappedGroups));
+        }
+
+        [Fact]
+        [Requirement("AUTH-01", "OidcIdentityProvider preserves group names without synthesizing Windows SIDs", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames()
         {
             var context = new DefaultHttpContext();
@@ -257,7 +322,7 @@ namespace McpRouter.Tests
 
             Assert.Equal("admin", identity.Username);
             Assert.Empty(identity.AllSids);
-            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
+            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
         }
 
         [Fact]

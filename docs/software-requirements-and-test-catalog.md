@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **21 Requirements Verified** across **81 Test Proofs** (16 Functional Capabilities, 5 Safety Guardrails).
+> **Catalog Statistics:** **21 Requirements Verified** across **87 Test Proofs** (16 Functional Capabilities, 5 Safety Guardrails).
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **3** | 2 | 1 | 18 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **3** | 2 | 1 | 24 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **4** | 0 | 4 | 21 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **2** | 2 | 0 | 3 proofs |
@@ -91,8 +91,8 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L301`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L301) (`TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L360`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L360) (`TrustedProxyHelper_ConfiguredProxyTrusted_CIDR`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L366`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L366) (`TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L425`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L425) (`TrustedProxyHelper_ConfiguredProxyTrusted_CIDR`)
 
 ### `[TRANS-01]` SSE transport resolves static plaintext API keys when provider is None
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -167,10 +167,16 @@
 ### `[AUTH-01]` AdminPolicy must require explicit Admin SID claim and reject role-only principals
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (4):**
+* **Verification Proofs (10):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L20`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L20) (`AdminPolicy_Denies_AdministratorOrFullAdminRoles_Without_AdminSid`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L72`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L72) (`AdminPolicy_Allows_Principal_With_AdminSid`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L273`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L273) (`AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L226`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L226) (`SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L244`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L244) (`SecurityValidationHelper_IsAdmin_AllowsAdminGroupName`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L258`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L258) (`SecurityValidationHelper_IsAdmin_RejectsNonAdminGroups`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L275`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L275) (`SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L290`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L290) (`SecurityValidationHelper_IsAdmin_AllowsMappedGroups`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L305`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L305) (`OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L5) (`Admin Context: renders full administrator view and privileged controls`)
 
 ### `[GUARD-01]` Null or empty capability targets must immediately fail closed and return unauthorized
@@ -233,7 +239,7 @@
 | `MCP-02` | Positive | `MCP` | All MCP protocol capabilities enforce caller role authorizations consistently | [`PairwiseIntegrationMatrixTests.cs:L397`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L397) | Backend xUnit |
 | `SEC-01` | Positive | `SEC` | VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials | [`VaultAppRoleAndRenewalTests.cs:L23`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L23) | Backend xUnit |
 | `SEC-02` | Positive | `SEC` | STDIO transport securely injects secret credentials via environment variables rather than command-line arguments | [`StdioTransportTests.cs:L354`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L354) | Backend xUnit |
-| `SEC-03` | Positive | `SEC` | Ensure TrustedProxyHelper supports CIDR ranges in XFF validation | [`IdentityProviderTests.cs:L301`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L301) | Backend xUnit |
+| `SEC-03` | Positive | `SEC` | Ensure TrustedProxyHelper supports CIDR ranges in XFF validation | [`IdentityProviderTests.cs:L366`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L366) | Backend xUnit |
 | `TRANS-01` | Positive | `TRANS` | SSE transport resolves static plaintext API keys when provider is None | [`SseTransportTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L18) | Backend xUnit |
 | `TRANS-02` | Positive | `TRANS` | HTTP stateless transport resolves static API keys when secret provider is None | [`HttpTransportTests.cs:L19`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L19) | Backend xUnit |
 | `TRANS-03` | Positive | `TRANS` | STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls | [`StdioTransportTests.cs:L59`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L59) | Backend xUnit |
