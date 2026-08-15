@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-15T06:29:56.4882022Z",
+    "generatedAt": "2026-08-15T13:40:52.4254642Z",
     "totalRequirements": 21,
     "positiveCount": 16,
     "guardrailCount": 5,
-    "totalProofs": 81
+    "totalProofs": 87
   },
   "requirements": [
     {
@@ -12,7 +12,7 @@
       "category": "AUTH",
       "type": "Negative",
       "description": "AdminPolicy must require explicit Admin SID claim and reject role-only principals",
-      "proofCount": 4,
+      "proofCount": 10,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -34,6 +34,48 @@
           "lineNumber": 273,
           "testName": "AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds",
           "details": "Verifies that admin callers can create forward-looking AppKeys for unconfigured categories."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 226,
+          "testName": "SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 244,
+          "testName": "SecurityValidationHelper_IsAdmin_AllowsAdminGroupName",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 258,
+          "testName": "SecurityValidationHelper_IsAdmin_RejectsNonAdminGroups",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 275,
+          "testName": "SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 290,
+          "testName": "SecurityValidationHelper_IsAdmin_AllowsMappedGroups",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 305,
+          "testName": "OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames",
+          "details": null
         },
         {
           "suite": "Playwright E2E",
@@ -491,14 +533,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
-          "lineNumber": 301,
+          "lineNumber": 366,
           "testName": "TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
-          "lineNumber": 360,
+          "lineNumber": 425,
           "testName": "TrustedProxyHelper_ConfiguredProxyTrusted_CIDR",
           "details": null
         }

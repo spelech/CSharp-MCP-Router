@@ -302,13 +302,54 @@ namespace McpRouter.Components.Authorization
         }
 
         /// <summary>
-        /// Single SID-based admin decision point.
+        /// Single decision point for administrative authorization supporting both SIDs and configured Group Names.
         /// </summary>
-        public static bool IsAdmin(UserIdentityContext? identity, IConfiguration? config)
+        public static bool IsAdmin(UserIdentityContext? identity, IConfiguration? config, IEnumerable<string>? mappedGroups = null)
         {
-            if (identity == null) return false;
+            if (identity == null || string.IsNullOrWhiteSpace(identity.Username) || identity.Username.Equals("guest", StringComparison.OrdinalIgnoreCase) || identity.Username.Equals("anonymous", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
             var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
-            return identity.AllSids.Contains(adminGroupSid, StringComparer.OrdinalIgnoreCase);
+            if (identity.AllSids.Contains(adminGroupSid, StringComparer.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+
+            var configuredAdminGroups = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            var singleGroupName = config?["Admin:GroupName"];
+            if (!string.IsNullOrWhiteSpace(singleGroupName))
+            {
+                configuredAdminGroups.Add(singleGroupName.Trim());
+            }
+            else
+            {
+                configuredAdminGroups.Add("full_admin");
+                configuredAdminGroups.Add("Administrator");
+                configuredAdminGroups.Add("Administrators");
+            }
+
+            var adminGroupsSection = config?.GetSection("Admin:Groups")?.Get<string[]>();
+            if (adminGroupsSection != null)
+            {
+                foreach (var g in adminGroupsSection)
+                {
+                    if (!string.IsNullOrWhiteSpace(g)) configuredAdminGroups.Add(g.Trim());
+                }
+            }
+
+            if (identity.GroupNames.Any(g => configuredAdminGroups.Contains(g)))
+            {
+                return true;
+            }
+
+            if (mappedGroups != null && mappedGroups.Any(mg => configuredAdminGroups.Contains(mg) || string.Equals(mg, adminGroupSid, StringComparison.OrdinalIgnoreCase)))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         public static ValueTask<System.IO.Stream> ValidatingConnectCallback(SocketsHttpConnectionContext context, CancellationToken cancellationToken)
