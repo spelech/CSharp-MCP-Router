@@ -1,8 +1,8 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-15T05:59:47.6377642Z",
-    "totalRequirements": 22,
-    "positiveCount": 17,
+    "generatedAt": "2026-08-15T06:29:56.4882022Z",
+    "totalRequirements": 21,
+    "positiveCount": 16,
     "guardrailCount": 5,
     "totalProofs": 81
   },
@@ -429,38 +429,6 @@
       ]
     },
     {
-      "id": "REQ-SEC-CIDR-001",
-      "category": "SEC",
-      "type": "Positive",
-      "description": "Ensure TrustedProxyHelper supports CIDR ranges",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
-          "lineNumber": 360,
-          "testName": "TrustedProxyHelper_ConfiguredProxyTrusted_CIDR",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "REQ-SEC-CIDR-002",
-      "category": "SEC",
-      "type": "Positive",
-      "description": "Ensure TrustedProxyHelper supports CIDR ranges in XFF validation",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
-          "lineNumber": 301,
-          "testName": "TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted",
-          "details": null
-        }
-      ]
-    },
-    {
       "id": "SEC-01",
       "category": "SEC",
       "type": "Positive",
@@ -510,6 +478,29 @@
           "lineNumber": 439,
           "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
           "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
+        }
+      ]
+    },
+    {
+      "id": "SEC-03",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Ensure TrustedProxyHelper supports CIDR ranges in XFF validation",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 301,
+          "testName": "TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 360,
+          "testName": "TrustedProxyHelper_ConfiguredProxyTrusted_CIDR",
+          "details": null
         }
       ]
     },
