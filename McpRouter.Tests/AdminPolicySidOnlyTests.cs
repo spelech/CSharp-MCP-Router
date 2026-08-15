@@ -14,7 +14,11 @@ namespace McpRouter.Tests
 {
     public class AdminPolicySidOnlyTests
     {
+        /// <summary>
+        /// Verifies that users with role names but lacking explicit Admin SID claim are denied by AdminPolicy.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-01", "AdminPolicy must require explicit Admin SID claim and reject role-only principals", Type = RequirementType.Negative, Category = "AUTH")]
         public async Task AdminPolicy_Denies_AdministratorOrFullAdminRoles_Without_AdminSid()
         {
             // Arrange
@@ -62,7 +66,11 @@ namespace McpRouter.Tests
             Assert.False(resultFullAdminRole.Succeeded);
         }
 
+        /// <summary>
+        /// Verifies that principals with the configured Admin SID are granted administrative policy access.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-01", "Admin SID authorizes administrative access across all protected router endpoints", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task AdminPolicy_Allows_Principal_With_AdminSid()
         {
             // Arrange

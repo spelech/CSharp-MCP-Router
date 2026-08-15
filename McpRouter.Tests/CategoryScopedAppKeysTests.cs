@@ -206,7 +206,11 @@ namespace McpRouter.Tests
 
         #region Scope Validation Tests (AppKeysController & ClientsController)
 
+        /// <summary>
+        /// Verifies that AppKeys can be created with valid category scopes.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-02", "AppKeys can be created with category-level scopes for downstream tool filtering", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task AppKeysController_CreateAppKey_ValidCategory_Succeeds()
         {
             var controller = CreateAppKeysController("user1", "User");
@@ -225,7 +229,11 @@ namespace McpRouter.Tests
             Assert.Equal(200, okResult.StatusCode);
         }
 
+        /// <summary>
+        /// Ensures non-admin callers cannot create AppKeys with unconfigured categories.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-01", "Non-admin callers cannot create AppKeys with unconfigured categories", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest()
         {
             var controller = CreateAppKeysController("user1", "User");
@@ -240,7 +248,11 @@ namespace McpRouter.Tests
             Assert.Equal(400, badReq.StatusCode);
         }
 
+        /// <summary>
+        /// Ensures AppKey creation with empty or whitespace category fails closed with BadRequest.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-01", "AppKey creation with empty or whitespace category must fail closed with BadRequest", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest()
         {
             var controller = CreateAppKeysController("admin1", "Admin");
@@ -255,7 +267,11 @@ namespace McpRouter.Tests
             Assert.Equal(400, badReq.StatusCode);
         }
 
+        /// <summary>
+        /// Verifies that admin callers can create forward-looking AppKeys for unconfigured categories.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-01", "Admin callers can create forward-looking AppKeys for unconfigured categories", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds()
         {
             var controller = CreateAppKeysController("admin1", "Admin");
@@ -274,7 +290,11 @@ namespace McpRouter.Tests
             Assert.Equal(200, okResult.StatusCode);
         }
 
+        /// <summary>
+        /// Verifies that OAuth client credentials can be created with category-scoped access rules.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-02", "OAuth client credentials can be created with category-scoped access rules", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task ClientsController_CreateClient_ValidCategory_Succeeds()
         {
             var controller = CreateClientsController("admin1", "Admin");
@@ -293,7 +313,11 @@ namespace McpRouter.Tests
             Assert.Equal(200, okResult.StatusCode);
         }
 
+        /// <summary>
+        /// Ensures client creation with empty category scope fails closed with BadRequest.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-01", "Client creation with empty category scope must fail closed with BadRequest", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest()
         {
             var controller = CreateClientsController("admin1", "Admin");
@@ -349,7 +373,11 @@ namespace McpRouter.Tests
             return session;
         }
 
+        /// <summary>
+        /// Verifies that category-scoped AppKey authorizes access exclusively to servers belonging to the permitted category.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-02", "Category-scoped AppKey authorizes access exclusively to servers belonging to the permitted category", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task ClientSession_CategoryScope_AuthorizesMatchingServerTools_AndDeniesOthers()
         {
             var servers = new List<McpServer>
@@ -369,7 +397,11 @@ namespace McpRouter.Tests
             Assert.False(plexAuth);
         }
 
+        /// <summary>
+        /// Verifies that group-alias scopes evaluate identically to category scopes during tool authorization.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-02", "Group-alias scopes evaluate identically to category scopes during tool authorization", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task ClientSession_GroupAliasScope_AuthorizesIdenticallyToCategory()
         {
             var servers = new List<McpServer>
@@ -387,7 +419,11 @@ namespace McpRouter.Tests
             Assert.False(plexAuth);
         }
 
+        /// <summary>
+        /// Verifies that category scope matching is case-insensitive across server categories.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-02", "Category scope matching is case-insensitive across server categories", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task ClientSession_CategoryScope_IsCaseInsensitive()
         {
             var servers = new List<McpServer>
@@ -401,7 +437,11 @@ namespace McpRouter.Tests
             Assert.True(isAuth);
         }
 
+        /// <summary>
+        /// Verifies that router meta-mode execute_tool validates and enforces category scopes on target tool calls.
+        /// </summary>
         [Fact]
+        [Requirement("MCP-01", "Router meta-mode execute_tool validates and enforces category scopes on target tool calls", Type = RequirementType.Positive, Category = "MCP")]
         public async Task ClientSession_ExecuteTool_EnforcesCategoryScopeOnInnerTarget()
         {
             var servers = new List<McpServer>
@@ -429,7 +469,11 @@ namespace McpRouter.Tests
             Assert.Contains("does not have permission", plexJson);
         }
 
+        /// <summary>
+        /// Verifies that resources and templates are filtered according to category-scoped AppKey permissions.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-02", "Resources and resource templates are filtered according to category-scoped AppKey permissions", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task ClientSession_ResourcesAndTemplates_FilteredByCategoryScope()
         {
             var servers = new List<McpServer>
@@ -453,7 +497,11 @@ namespace McpRouter.Tests
             Assert.False(plexTemplateAuth);
         }
 
+        /// <summary>
+        /// Verifies that dynamic updates to server categories immediately update tool access without re-authenticating.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-02", "Dynamic updates to server categories immediately update tool access without re-authenticating", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task ClientSession_DynamicServerMembership_UpdatesAccessDynamically()
         {
             // Initial state in DB: server1 has category 'dev', server2 has category 'prod'
@@ -485,7 +533,11 @@ namespace McpRouter.Tests
             Assert.False(await session.IsUserAuthorizedAsync("tools/call", "server1__tool1", httpContext));
         }
 
+        /// <summary>
+        /// Verifies that AppKeys can combine category scopes and granular tool-level scopes additively.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-02", "AppKeys can combine category scopes and granular tool-level scopes additively", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes()
         {
             var servers = new List<McpServer>
@@ -508,7 +560,11 @@ namespace McpRouter.Tests
             Assert.False(await session.IsUserAuthorizedAsync("tools/call", "docker__restart", httpContext));
         }
 
+        /// <summary>
+        /// Verifies that autocomplete and completion requests filter suggestions to servers within category scopes.
+        /// </summary>
         [Fact]
+        [Requirement("AUTH-02", "Autocomplete and completion requests filter suggestions to servers within category scopes", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task ClientSession_Complete_FiltersServerNamesByCategoryScope()
         {
             var servers = new List<McpServer>

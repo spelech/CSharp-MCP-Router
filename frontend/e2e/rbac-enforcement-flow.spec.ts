@@ -1,6 +1,12 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('RBAC Policy and Group/SID Mapping Lifecycle Flow', () => {
+  /**
+   * @id AUTH-03
+   * @category AUTH
+   * @type positive
+   * @description RBAC and SID mapping administration UI allows configuring role policies and SID associations
+   */
   test('should create, verify, and delete RBAC policy and SID mapping', async ({ page }) => {
     await page.goto('/');
 

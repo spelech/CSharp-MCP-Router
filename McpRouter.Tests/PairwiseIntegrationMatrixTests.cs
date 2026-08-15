@@ -248,7 +248,11 @@ namespace McpRouter.Tests
 
         #region Theory 1: AppKey Scopes vs Capabilities & Target Matrix
 
+        /// <summary>
+        /// Verifies pairwise combination of AppKey scopes across all MCP capabilities and backend targets.
+        /// </summary>
         [Theory]
+        [Requirement("AUTH-02", "AppKey scopes restrict access precisely across all MCP capabilities and backend targets", Type = RequirementType.Positive, Category = "AUTH")]
         // Wildcard Scopes -> Grants all capabilities across all servers
         [InlineData("*", "tools/call", "ha__turn_on", true)]
         [InlineData("all", "prompts/get", "ha__summary", true)]
@@ -321,7 +325,11 @@ namespace McpRouter.Tests
 
         #region Theory 2: SSO Identity & Group Mappings Pairwise Verification
 
+        /// <summary>
+        /// Verifies pairwise combination of SSO identities, SIDs, and group mappings across all targets.
+        /// </summary>
         [Theory]
+        [Requirement("AUTH-03", "SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles", Type = RequirementType.Positive, Category = "AUTH")]
         // Administrator bypass via well-known Admin SID
         [InlineData("admin_sid", null, "S-1-5-32-544", "tools/call", "ha__turn_on", true)]
         [InlineData("admin_sid", null, "S-1-5-32-544", "tools/call", "docker__restart", true)]
@@ -383,7 +391,11 @@ namespace McpRouter.Tests
 
         #region Theory 3: All 5 Capability Methods under Admin vs Permitted vs Denied vs Anonymous
 
+        /// <summary>
+        /// Verifies that all 5 MCP capability methods enforce caller role authorizations consistently.
+        /// </summary>
         [Theory]
+        [Requirement("MCP-02", "All MCP protocol capabilities enforce caller role authorizations consistently", Type = RequirementType.Positive, Category = "MCP")]
         // tools/call
         [InlineData("tools/call", "ha__turn_on", "Admin", true)]
         [InlineData("tools/call", "ha__turn_on", "Permitted", true)]
@@ -462,7 +474,11 @@ namespace McpRouter.Tests
 
         #region Theory 4: Fail-Closed Boundary & Malformed Inputs
 
+        /// <summary>
+        /// Ensures null or whitespace capability targets fail closed immediately.
+        /// </summary>
         [Theory]
+        [Requirement("GUARD-01", "Null or empty capability targets must immediately fail closed and return unauthorized", Type = RequirementType.Negative, Category = "GUARD")]
         [InlineData(null)]
         [InlineData("")]
         [InlineData(" ")]
@@ -480,7 +496,11 @@ namespace McpRouter.Tests
             result.Should().BeFalse("Null or whitespace target must immediately return false");
         }
 
+        /// <summary>
+        /// Ensures corrupted AppKey scopes JSON fails closed safely and rejects execution.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-01", "Corrupted AppKey scopes JSON must fail closed and reject execution", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse()
         {
             // Arrange - AppKey with unparseable corrupt JSON string in items
@@ -494,7 +514,11 @@ namespace McpRouter.Tests
             result.Should().BeFalse("Corrupted scopes JSON must fail closed");
         }
 
+        /// <summary>
+        /// Ensures malformed completion payloads or unmapped backends throw or fail closed.
+        /// </summary>
         [Theory]
+        [Requirement("GUARD-04", "Malformed completion payloads or unmapped backends must fail closed safely", Type = RequirementType.Negative, Category = "GUARD")]
         [InlineData("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"completion/complete\",\"params\":{}}")]
         [InlineData("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"completion/complete\",\"params\":{\"ref\":null}}")]
         [InlineData("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"completion/complete\",\"params\":{\"ref\":{\"type\":\"unknown/type\"}}}")]
@@ -513,7 +537,11 @@ namespace McpRouter.Tests
             });
         }
 
+        /// <summary>
+        /// Ensures database disconnection or failure fails closed safely without leaking access.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-04", "Database disconnection or internal faults must fail closed safely without leaking access", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task Pairwise_DatabaseDisconnection_FailsClosedSafely()
         {
             // Arrange - Mock DB Factory that throws an exception when connecting
@@ -545,7 +573,11 @@ namespace McpRouter.Tests
 
         #region Theory 5: Meta-Mode Search & Execute Routing Contract
 
+        /// <summary>
+        /// Verifies that router meta-mode execute_tool strictly enforces target tool authorization policies.
+        /// </summary>
         [Theory]
+        [Requirement("MCP-01", "Meta-mode execute_tool strictly enforces target tool authorization policies", Type = RequirementType.Positive, Category = "MCP")]
         [InlineData("ha__turn_on", true)]
         [InlineData("docker__restart", false)]
         public async Task Pairwise_MetaMode_ExecuteTool_EnforcesTargetAuthorization(string targetToolName, bool expectedAuthorized)

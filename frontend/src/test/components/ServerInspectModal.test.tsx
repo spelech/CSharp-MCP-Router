@@ -43,12 +43,24 @@ describe('ServerInspectModal Component', () => {
     ],
   };
 
+  /**
+   * @id UI-02
+   * @category UI
+   * @type positive
+   * @description Modal remains hidden when isInspectOpen is false
+   */
   it('renders nothing when isInspectOpen is false', () => {
     useServerStore.setState({ isInspectOpen: false, inspectServer: null });
     const { container } = render(<ServerInspectModal />);
     expect(container).toBeEmptyDOMElement();
   });
 
+  /**
+   * @id UI-02
+   * @category UI
+   * @type positive
+   * @description Inspect modal displays spinner loading state while querying server capabilities
+   */
   it('renders loading state when inspectLoading is true', () => {
     useServerStore.setState({
       isInspectOpen: true,
@@ -61,6 +73,12 @@ describe('ServerInspectModal Component', () => {
     expect(screen.getByText(/Querying backend capabilities.../i)).toBeInTheDocument();
   });
 
+  /**
+   * @id UI-02
+   * @category UI
+   * @type positive
+   * @description Inspect modal renders tool schemas and handles tab navigation across resources and prompts
+   */
   it('renders tools tab with schema and handles tab switching', () => {
     useServerStore.setState({
       isInspectOpen: true,
@@ -92,6 +110,12 @@ describe('ServerInspectModal Component', () => {
     expect(useServerStore.getState().inspectActiveTab).toBe('prompts');
   });
 
+  /**
+   * @id UI-02
+   * @category UI
+   * @type positive
+   * @description Resources tab lists server resources and filters items by text search query
+   */
   it('renders resources tab items and handles search filtering', () => {
     useServerStore.setState({
       isInspectOpen: true,
@@ -114,6 +138,12 @@ describe('ServerInspectModal Component', () => {
     expect(useServerStore.getState().inspectSearchQuery).toBe('nonexistent');
   });
 
+  /**
+   * @id UI-02
+   * @category UI
+   * @type positive
+   * @description Prompts tab displays prompt templates and parameter requirements
+   */
   it('renders prompts tab with arguments and empty state when filtered out', () => {
     useServerStore.setState({
       isInspectOpen: true,
@@ -130,6 +160,12 @@ describe('ServerInspectModal Component', () => {
     expect(screen.getByText(/container_id \*/)).toBeInTheDocument();
   });
 
+  /**
+   * @id UI-02
+   * @category UI
+   * @type positive
+   * @description Tabs display clean empty states when inspected server exposes no capabilities
+   */
   it('renders empty states for tabs when data is empty', () => {
     useServerStore.setState({
       isInspectOpen: true,
@@ -152,6 +188,12 @@ describe('ServerInspectModal Component', () => {
     expect(screen.getByText('No prompts found.')).toBeInTheDocument();
   });
 
+  /**
+   * @id UI-02
+   * @category UI
+   * @type positive
+   * @description Clicking close button dismisses inspect modal
+   */
   it('closes modal when close button is clicked', () => {
     const closeSpy = vi.spyOn(useServerStore.getState(), 'closeInspectModal');
     useServerStore.setState({
