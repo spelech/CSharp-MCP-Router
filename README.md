@@ -19,6 +19,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 ## 🌟 Key Features
 
 * **MCP 2026-07-28 Spec Support**: Spec-compliant header annotation; routing is body/path based (`Mcp-Method` & `Mcp-Name`) via `McpDualSpecMiddleware` with legacy JSON body fallback.
+* **Dynamic Docker Auto-Discovery**: Mounts `/var/run/docker.sock` to automatically discover and register backend MCP containers labeled with `mcp.enabled=true`, `mcp.id`, `mcp.port`, and `mcp.categories` (see [docs/features-guide.md](docs/features-guide.md#method-d-dynamic-docker-label-auto-discovery-mcp-labels)).
 * **Pluggable Identity Providers**: Dual authentication support for **Active Directory** (Kerberos/NTLM Windows SIDs) and **PocketID / TinyAuth OIDC** (`Remote-User`, `Remote-Groups` headers).
 * **Pluggable Secret Retrievers**: Fetch downstream server API keys and tokens dynamically from **HashiCorp Vault (KV v2)**, **Windows Registry (DPAPI)**, or **Environment Variables** per server (`SecretProvider` column).
 * **Multi-Database & Stored Procedure Engine**: Complete stored procedure suites for **MS SQL Server** (`Microsoft.Data.SqlClient`), **MySQL** (`MySqlConnector`), and **SQLite** (`Microsoft.Data.Sqlite`) using Dapper. See [docs/database-providers.md](docs/database-providers.md).
