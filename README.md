@@ -77,6 +77,8 @@ For step-by-step UI guides, server registration, secret provider configuration (
 
 For environment prerequisites, local setup, testing workflows, production deployments, Caddy/NGINX configs, database backup/restore, observability, and disaster recovery:
 * [**Developer Guide & Local Setup**](docs/developer-guide.md)
+* [**Software Requirements Specification (SRS) & Test Catalog**](docs/software-requirements-and-test-catalog.md)
+* [**Test Catalog & Annotation Developer Guide**](docs/test-catalog-guide.md)
 * [**Operations & Production Runbook**](docs/runbook.md)
 * [**Contributing Guide**](CONTRIBUTING.md)
 
@@ -142,6 +144,8 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 ## 🧪 Code Coverage & Quality Gates
 
 Our core modules maintain high code coverage and automated CI quality gates on pull requests and pushes to `main`. For the complete breakdown and documentation, see:
+- [Software Requirements Specification & Test Verification Catalog](docs/software-requirements-and-test-catalog.md)
+- [Test Catalog Developer & Annotation Guide](docs/test-catalog-guide.md)
 - [CI Quality Gates & Security Scanning Guide](docs/ci-quality-gates.md)
 - [Detailed Code Coverage Report](docs/coverage-report.md)
 
