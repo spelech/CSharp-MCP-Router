@@ -61,15 +61,47 @@ namespace CatalogGenerator.Parsers
                     var positionalArgs = attr.ArgumentList.Arguments.Where(a => a.NameEquals == null).ToList();
                     if (positionalArgs.Count == 0) continue;
 
-                    var idArg = positionalArgs[0].Expression.ToString().Trim('"');
+                    var idArg = ExtractStringValue(positionalArgs[0].Expression);
                     if (string.IsNullOrWhiteSpace(idArg)) continue;
-
-                    var descArg = positionalArgs.Count > 1 
-                        ? positionalArgs[1].Expression.ToString().Trim('"') 
-                        : (xmlSummary ?? methodName);
 
                     var type = RequirementType.Positive;
                     var category = idArg.Contains('-') ? idArg.Substring(0, idArg.IndexOf('-')) : "GENERAL";
+                    string? descArg = null;
+
+                    if (positionalArgs.Count == 1)
+                    {
+                        descArg = xmlSummary ?? methodName;
+                    }
+                    else if (positionalArgs.Count == 2)
+                    {
+                        descArg = ExtractStringValue(positionalArgs[1].Expression);
+                    }
+                    else if (positionalArgs.Count == 3)
+                    {
+                        var secondArgStr = positionalArgs[1].Expression.ToString();
+                        if (IsRequirementTypeExpression(secondArgStr))
+                        {
+                            type = ParseRequirementType(secondArgStr);
+                            descArg = ExtractStringValue(positionalArgs[2].Expression);
+                        }
+                        else
+                        {
+                            category = ExtractStringValue(positionalArgs[1].Expression);
+                            descArg = ExtractStringValue(positionalArgs[2].Expression);
+                        }
+                    }
+                    else if (positionalArgs.Count >= 4)
+                    {
+                        category = ExtractStringValue(positionalArgs[1].Expression);
+                        var typeArgStr = positionalArgs[2].Expression.ToString();
+                        type = ParseRequirementType(typeArgStr);
+                        descArg = ExtractStringValue(positionalArgs[3].Expression);
+                    }
+
+                    if (string.IsNullOrWhiteSpace(descArg))
+                    {
+                        descArg = xmlSummary ?? methodName;
+                    }
 
                     foreach (var namedArg in attr.ArgumentList.Arguments.Where(a => a.NameEquals != null))
                     {
@@ -78,14 +110,15 @@ namespace CatalogGenerator.Parsers
 
                         if (name == "Type")
                         {
-                            if (val.Contains("Negative") || val.Contains("Guardrail"))
-                                type = RequirementType.Negative;
-                            else
-                                type = RequirementType.Positive;
+                            type = ParseRequirementType(val);
                         }
                         else if (name == "Category")
                         {
-                            category = val.Trim('"');
+                            category = ExtractStringValue(namedArg.Expression);
+                        }
+                        else if (name == "Description")
+                        {
+                            descArg = ExtractStringValue(namedArg.Expression);
                         }
                     }
 
@@ -124,6 +157,27 @@ namespace CatalogGenerator.Parsers
             {
                 return null;
             }
+        }
+
+        private static string ExtractStringValue(ExpressionSyntax expression)
+        {
+            if (expression is LiteralExpressionSyntax literal && literal.IsKind(SyntaxKind.StringLiteralExpression))
+            {
+                return literal.Token.ValueText;
+            }
+            return expression.ToString().Trim('"');
+        }
+
+        private static bool IsRequirementTypeExpression(string text)
+        {
+            return text.Contains("RequirementType") || text.Contains("Positive") || text.Contains("Negative") || text.Contains("Guardrail");
+        }
+
+        private static RequirementType ParseRequirementType(string text)
+        {
+            if (text.Contains("Negative") || text.Contains("Guardrail"))
+                return RequirementType.Negative;
+            return RequirementType.Positive;
         }
     }
 }

@@ -22,6 +22,20 @@ namespace CatalogGenerator.Tests
             Assert.Equal("Admin SID bypass", attr.Description);
             Assert.Equal(McpRouter.Tests.Attributes.RequirementType.Positive, attr.Type);
             Assert.Equal("AUTH", attr.Category);
+
+            // Test 4-argument constructor overload
+            var attr4 = new RequirementAttribute("GUARD-02", "GUARD", McpRouter.Tests.Attributes.RequirementType.Negative, "Guardrail description");
+            Assert.Equal("GUARD-02", attr4.Id);
+            Assert.Equal("GUARD", attr4.Category);
+            Assert.Equal(McpRouter.Tests.Attributes.RequirementType.Negative, attr4.Type);
+            Assert.Equal("Guardrail description", attr4.Description);
+
+            // Test 3-argument constructor overload (Id, Type, Description) with inferred category
+            var attr3 = new RequirementAttribute("TRANS-05", McpRouter.Tests.Attributes.RequirementType.Positive, "Transport description");
+            Assert.Equal("TRANS-05", attr3.Id);
+            Assert.Equal("TRANS", attr3.Category);
+            Assert.Equal(McpRouter.Tests.Attributes.RequirementType.Positive, attr3.Type);
+            Assert.Equal("Transport description", attr3.Description);
         }
 
         [Fact]

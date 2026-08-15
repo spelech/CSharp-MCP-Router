@@ -118,5 +118,52 @@ it(""ignored"", () => {});
                 }
             }
         }
+        [Fact]
+        public void ParseTypeScript_AcceptsRequirementAndReqTags_WithVariousTypeFormats()
+        {
+            var source = @"
+describe('NewTagFeatures', () => {
+  /**
+   * @requirement UI-05
+   * @category UI
+   * @type PositiveFeature
+   * @description Dynamic form generation validates and casts schema input values
+   */
+  it('renders and validates form controls', () => {
+    expect(true).toBe(true);
+  });
+
+  /**
+   * @req GUARD-09
+   * @category GUARD
+   * @type FailClosedGuardrail
+   * @desc API tokens never leak to unauthorized callers
+   */
+  test('fails closed on token access', async () => {
+    expect(true).toBe(true);
+  });
+});
+";
+
+            var index = new CatalogIndex();
+            var parser = new TypeScriptTestParser();
+            parser.ParseSource("frontend/src/test/components/NewTags.test.tsx", source, index, "Frontend Unit Tests");
+
+            Assert.Equal(2, index.Requirements.Count);
+
+            var ui05 = index.Requirements["UI-05"];
+            Assert.Equal("UI", ui05.Category);
+            Assert.Equal(RequirementType.Positive, ui05.Type);
+            Assert.Equal("Dynamic form generation validates and casts schema input values", ui05.Description);
+            Assert.Single(ui05.Proofs);
+            Assert.Equal("renders and validates form controls", ui05.Proofs[0].TestName);
+
+            var guard09 = index.Requirements["GUARD-09"];
+            Assert.Equal("GUARD", guard09.Category);
+            Assert.Equal(RequirementType.Negative, guard09.Type);
+            Assert.Equal("API tokens never leak to unauthorized callers", guard09.Description);
+            Assert.Single(guard09.Proofs);
+            Assert.Equal("fails closed on token access", guard09.Proofs[0].TestName);
+        }
     }
 }

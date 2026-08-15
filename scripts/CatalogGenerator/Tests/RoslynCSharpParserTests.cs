@@ -144,5 +144,60 @@ namespace McpRouter.Tests {
                 }
             }
         }
+        [Fact]
+        public void ParseSource_ParsesAllConstructorOverloadPermutations()
+        {
+            var source = @"
+using Xunit;
+using McpRouter.Tests.Attributes;
+
+namespace McpRouter.Tests
+{
+    public class OverloadTests
+    {
+        [Fact]
+        [Requirement(""AUTH-01"", ""AUTH"", RequirementType.Positive, ""Positional 4 args"")]
+        public void Test_Positional4() {}
+
+        [Fact]
+        [Requirement(""GUARD-02"", RequirementType.Negative, ""Positional 3 args with type"")]
+        public void Test_Positional3Type() {}
+
+        [Fact]
+        [Requirement(""TRANS-03"", ""Positional 2 args default positive"")]
+        public void Test_Positional2() {}
+
+        [Fact]
+        [Requirement(""SEC-04"", ""Positional 2 with named overrides"", Type = RequirementType.Negative, Category = ""SECURITY"")]
+        public void Test_NamedOverrides() {}
+    }
+}";
+
+            var index = new CatalogIndex();
+            var parser = new RoslynCSharpParser();
+            parser.ParseSource("McpRouter.Tests/OverloadTests.cs", source, index);
+
+            Assert.Equal(4, index.Requirements.Count);
+
+            var r1 = index.Requirements["AUTH-01"];
+            Assert.Equal("AUTH", r1.Category);
+            Assert.Equal(RequirementType.Positive, r1.Type);
+            Assert.Equal("Positional 4 args", r1.Description);
+
+            var r2 = index.Requirements["GUARD-02"];
+            Assert.Equal("GUARD", r2.Category);
+            Assert.Equal(RequirementType.Negative, r2.Type);
+            Assert.Equal("Positional 3 args with type", r2.Description);
+
+            var r3 = index.Requirements["TRANS-03"];
+            Assert.Equal("TRANS", r3.Category);
+            Assert.Equal(RequirementType.Positive, r3.Type);
+            Assert.Equal("Positional 2 args default positive", r3.Description);
+
+            var r4 = index.Requirements["SEC-04"];
+            Assert.Equal("SECURITY", r4.Category);
+            Assert.Equal(RequirementType.Negative, r4.Type);
+            Assert.Equal("Positional 2 with named overrides", r4.Description);
+        }
     }
 }
