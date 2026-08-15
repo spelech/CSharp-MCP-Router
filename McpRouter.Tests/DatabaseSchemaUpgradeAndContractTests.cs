@@ -37,7 +37,11 @@ namespace McpRouter.Tests
             return (masterConn, mockDbFactory.Object);
         }
 
+        /// <summary>
+        /// Verifies that SQLite upgrade migration from legacy schema preserves data, encrypts configs, and passes schema validation.
+        /// </summary>
         [Fact]
+        [Requirement("DB-01", "SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data", Type = RequirementType.Positive, Category = "DB")]
         public async Task Sqlite_UpgradeMigration_FromLegacySchema_PreservesDataAndPassesValidation()
         {
             var (conn, factory) = CreateDbFactory();
@@ -162,7 +166,11 @@ namespace McpRouter.Tests
             DatabaseSeederService.ValidateSchemaCompatibility(conn, "sqlite", NullLogger.Instance);
         }
 
+        /// <summary>
+        /// Ensures database schema validation fails closed when required columns or tables are missing.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-04", "Database schema validation fails closed when required columns or tables are missing", Type = RequirementType.Negative, Category = "GUARD")]
         public void SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing()
         {
             var (conn, _) = CreateDbFactory();
@@ -184,7 +192,11 @@ namespace McpRouter.Tests
             });
         }
 
+        /// <summary>
+        /// Verifies that MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly.
+        /// </summary>
         [Fact]
+        [Requirement("DB-02", "MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly", Type = RequirementType.Positive, Category = "DB")]
         public void Mssql_Scripts_DeclareAllProceduresAndExpectedParameters()
         {
             var mssqlProceduresSqlPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "scripts", "db", "mssql", "02_procedures.sql");
@@ -225,7 +237,11 @@ namespace McpRouter.Tests
             Assert.Contains("@OwnerSid", paramBlock);
         }
 
+        /// <summary>
+        /// Verifies that MySQL stored procedure scripts declare all required procedures with p_ parameter conventions.
+        /// </summary>
         [Fact]
+        [Requirement("DB-02", "MySQL stored procedure scripts declare all required procedures with p_ parameter conventions", Type = RequirementType.Positive, Category = "DB")]
         public void MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters()
         {
             var mysqlProceduresSqlPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "scripts", "db", "mysql", "02_procedures.sql");
@@ -271,7 +287,11 @@ namespace McpRouter.Tests
             Assert.DoesNotContain("p_CreatedAt", paramBlock, StringComparison.OrdinalIgnoreCase);
         }
 
+        /// <summary>
+        /// Verifies that Dapper repository mappings for MySQL correctly bind stored procedure p_ parameters.
+        /// </summary>
         [Fact]
+        [Requirement("DB-02", "Dapper repository mappings for MySQL correctly bind stored procedure p_ parameters", Type = RequirementType.Positive, Category = "DB")]
         public async Task Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters()
         {
             var mockFactory = new Mock<IDbConnectionFactory>();

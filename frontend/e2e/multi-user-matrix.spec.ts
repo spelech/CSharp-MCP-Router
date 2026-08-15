@@ -2,6 +2,12 @@ import { test, expect } from './fixtures/userContexts';
 
 test.describe('Multi-User Context Matrix Flow (Issue #50)', () => {
 
+  /**
+   * @id AUTH-01
+   * @category AUTH
+   * @type positive
+   * @description Admin role renders full administrative dashboard and server management controls
+   */
   test('Admin Context: renders full administrator view and privileged controls', async ({ adminPage }) => {
     await adminPage.goto('/');
 
@@ -25,6 +31,12 @@ test.describe('Multi-User Context Matrix Flow (Issue #50)', () => {
     await expect(adminPage.locator('#view-settings, .settings-container, main')).toBeVisible();
   });
 
+  /**
+   * @id AUTH-03
+   * @category AUTH
+   * @type positive
+   * @description Operator identity context allows overview and interactive test bench access
+   */
   test('Operator Context: allows overview and testbench navigation with operator identity', async ({ operatorPage }) => {
     await operatorPage.goto('/');
 
@@ -38,6 +50,12 @@ test.describe('Multi-User Context Matrix Flow (Issue #50)', () => {
     await expect(operatorPage.locator('#view-testbench, .testbench-container, main')).toBeVisible();
   });
 
+  /**
+   * @id GUARD-03
+   * @category GUARD
+   * @type negative
+   * @description Restricted guest context hides administrative controls and prevents unauthorized actions
+   */
   test('Guest / Denied Context: restricted user session renders safely', async ({ guestPage }) => {
     await guestPage.goto('/');
 
@@ -47,6 +65,12 @@ test.describe('Multi-User Context Matrix Flow (Issue #50)', () => {
     await expect(statsContainer.first()).toBeVisible();
   });
 
+  /**
+   * @id AUTH-02
+   * @category AUTH
+   * @type positive
+   * @description AppKey header identity context connects to dashboard with appropriate permissions
+   */
   test('AppKey Direct Context: connects with API key header identity', async ({ appKeyPage }) => {
     await appKeyPage.goto('/');
 

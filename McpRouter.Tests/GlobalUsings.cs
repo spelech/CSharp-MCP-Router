@@ -13,3 +13,4 @@ global using McpRouter.Infrastructure.Logging;
 global using McpRouter.Core.Protocol;
 global using McpRouter.Core.Routing;
 global using McpRouter.Models;
+global using McpRouter.Tests.Attributes;

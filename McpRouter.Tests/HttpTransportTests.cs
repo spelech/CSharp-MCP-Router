@@ -13,7 +13,11 @@ namespace McpRouter.Tests
 {
     public class HttpTransportTests
     {
+        /// <summary>
+        /// Verifies that HTTP transport resolves plaintext API key when secret provider is None.
+        /// </summary>
         [Fact]
+        [Requirement("TRANS-02", "HTTP stateless transport resolves static API keys when secret provider is None", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task ResolveTokenAsync_ReturnsApiKey_WhenProviderNone()
         {
             var server = new McpServer
@@ -29,7 +33,11 @@ namespace McpRouter.Tests
             Assert.Equal("plaintext-api-key", token);
         }
 
+        /// <summary>
+        /// Ensures HTTP transport fails closed with SecurityException when secret retriever fails.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-02", "HTTP stateless transport fails closed with SecurityException when secret resolution fails", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails()
         {
             var server = new McpServer
@@ -48,7 +56,11 @@ namespace McpRouter.Tests
             await Assert.ThrowsAsync<SecurityException>(() => transport.ResolveTokenAsync());
         }
 
+        /// <summary>
+        /// Ensures HTTP transport fails closed when no secret retriever is registered.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-02", "HTTP stateless transport fails closed with InvalidOperationException when no secret retriever is configured", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered()
         {
             var server = new McpServer

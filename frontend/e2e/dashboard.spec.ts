@@ -2,6 +2,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Dashboard & Navigation Flow', () => {
 
+  /**
+   * @id UI-01
+   * @category UI
+   * @type positive
+   * @description Renders main dashboard navigation tabs and layout headers
+   */
   test('should render the dashboard layout and header components', async ({ page }) => {
     await page.goto('/');
 
@@ -12,6 +18,12 @@ test.describe('Dashboard & Navigation Flow', () => {
     await expect(page.locator('button:has-text("App Keys & Security")')).toBeVisible();
   });
 
+  /**
+   * @id UI-01
+   * @category UI
+   * @type positive
+   * @description Displays aggregate system metrics and health status cards
+   */
   test('should display aggregate statistics cards', async ({ page }) => {
     await page.goto('/');
 
@@ -20,6 +32,12 @@ test.describe('Dashboard & Navigation Flow', () => {
     await expect(statsContainer.first()).toBeVisible();
   });
 
+  /**
+   * @id UI-01
+   * @category UI
+   * @type positive
+   * @description Filters backend MCP server catalog via dashboard search input
+   */
   test('should filter servers using search input', async ({ page }) => {
     await page.goto('/');
 

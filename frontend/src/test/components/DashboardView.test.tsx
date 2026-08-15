@@ -33,6 +33,12 @@ describe('DashboardView Component', () => {
     },
   ];
 
+  /**
+   * @id UI-01
+   * @category UI
+   * @type positive
+   * @description Dashboard renders stats card, connected server list, and setup instructions
+   */
   it('renders stats card, server list, and client setup guide', () => {
     useServerStore.setState({
       servers: mockServers,
@@ -50,6 +56,12 @@ describe('DashboardView Component', () => {
     expect(screen.getByText('Media Server')).toBeInTheDocument();
   });
 
+  /**
+   * @id UI-03
+   * @category UI
+   * @type positive
+   * @description Grouped server view renders category sections and supports collapsible groups
+   */
   it('renders grouped server view by category and allows collapsing', () => {
     useServerStore.setState({
       servers: mockServers,
@@ -71,6 +83,12 @@ describe('DashboardView Component', () => {
     }
   });
 
+  /**
+   * @id UI-03
+   * @category UI
+   * @type positive
+   * @description Grouped server view partitions servers by connection status and transport type
+   */
   it('renders grouped server view by status and type', () => {
     useServerStore.setState({
       servers: mockServers,
@@ -90,6 +108,12 @@ describe('DashboardView Component', () => {
     expect(screen.getAllByText('HTTP').length).toBeGreaterThan(0);
   });
 
+  /**
+   * @id UI-01
+   * @category UI
+   * @type positive
+   * @description Dashboard shows empty filter state when no servers match search term
+   */
   it('renders empty state when no servers match search', () => {
     useServerStore.setState({
       servers: mockServers,

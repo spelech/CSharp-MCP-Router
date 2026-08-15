@@ -53,7 +53,11 @@ namespace McpRouter.Tests
             throw new FileNotFoundException("Could not find mock_stdio.js");
         }
 
+        /// <summary>
+        /// Verifies that STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls.
+        /// </summary>
         [Fact]
+        [Requirement("TRANS-03", "STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task StdioTransport_ShouldInitializeAndCallToolSuccessfully()
         {
             var scriptPath = GetMockScriptPath();
@@ -104,7 +108,11 @@ namespace McpRouter.Tests
             Assert.Contains("hello stdio", resultStr);
         }
 
+        /// <summary>
+        /// Ensures STDIO transport rejects commands with shell metacharacters or dangerous commands.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-03", "STDIO transport rejects commands with shell metacharacters or dangerous commands", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task StdioTransport_ShouldThrowSecurityExceptionForUnsafeExecutable()
         {
             var server = new McpServer
@@ -122,7 +130,11 @@ namespace McpRouter.Tests
             await Assert.ThrowsAsync<System.Security.SecurityException>(() => transport.ConnectAsync());
         }
 
+        /// <summary>
+        /// Ensures STDIO transport rejects shell wrappers and script interpreters lacking explicit safe paths.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-03", "STDIO transport rejects shell wrappers and script interpreters lacking explicit safe paths", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task StdioTransport_ShouldThrowSecurityExceptionForShellExecutable()
         {
             var server = new McpServer
@@ -140,7 +152,11 @@ namespace McpRouter.Tests
             await Assert.ThrowsAsync<System.Security.SecurityException>(() => transport.ConnectAsync());
         }
 
+        /// <summary>
+        /// Ensures STDIO transport fails cleanly with InvalidOperationException when target binary is not found.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-03", "STDIO transport fails cleanly with InvalidOperationException when target binary is not found", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task StdioTransport_ShouldThrowOnInvalidExecutable()
         {
             var server = new McpServer
@@ -158,7 +174,11 @@ namespace McpRouter.Tests
             await Assert.ThrowsAsync<InvalidOperationException>(() => transport.ConnectAsync());
         }
 
+        /// <summary>
+        /// Verifies that STDIO transport streams subprocess stderr asynchronously to logs.
+        /// </summary>
         [Fact]
+        [Requirement("TRANS-03", "STDIO transport streams subprocess stderr asynchronously to structured router diagnostic logs", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task StdioTransport_ShouldRouteStderrToLogs()
         {
             var scriptPath = GetMockScriptPath();
@@ -194,7 +214,11 @@ namespace McpRouter.Tests
             Assert.Contains(warnings, w => w.Contains("LOG_FROM_STDERR_TOOL"));
         }
 
+        /// <summary>
+        /// Ensures STDIO transport times out requests exceeding configured execution duration limits.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-03", "STDIO transport cancels and times out requests exceeding configured execution duration limits", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task StdioTransport_ShouldTimeoutOnSlowRequests()
         {
             var scriptPath = GetMockScriptPath();
@@ -222,7 +246,11 @@ namespace McpRouter.Tests
             await Assert.ThrowsAsync<TimeoutException>(() => transport.SendRequestAsync("tools/call", callReq));
         }
 
+        /// <summary>
+        /// Verifies that STDIO transport terminates subprocess tree cleanly upon disposal or cancellation.
+        /// </summary>
         [Fact]
+        [Requirement("TRANS-03", "STDIO transport terminates subprocess tree cleanly upon disposal or cancellation", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task StdioTransport_ShouldSupportCancellationAndProcessTreeTermination()
         {
             var scriptPath = GetMockScriptPath();
@@ -265,7 +293,11 @@ namespace McpRouter.Tests
             }
         }
 
+        /// <summary>
+        /// Ensures STDIO transport clears pending requests and fails closed upon unexpected child process termination.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-03", "STDIO transport clears pending requests and fails closed upon unexpected child process termination", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task StdioTransport_ShouldHandleUnexpectedExit()
         {
             var scriptPath = GetMockScriptPath();
@@ -299,7 +331,11 @@ namespace McpRouter.Tests
             Assert.True(tcs.Task.IsCanceled || tcs.Task.IsFaulted || tcs.Task.IsCompleted);
         }
 
+        /// <summary>
+        /// Verifies that STDIO command-line tokenizer preserves quoted arguments and space escaping.
+        /// </summary>
         [Fact]
+        [Requirement("TRANS-03", "STDIO command-line tokenizer preserves quoted arguments and space escaping", Type = RequirementType.Positive, Category = "TRANS")]
         public void StdioTransport_ParseCommandLine_Handles_Quotes_And_Spaces()
         {
             var cmd = "node \"/path to/script.js\" --arg='val' plain_arg";
@@ -312,7 +348,11 @@ namespace McpRouter.Tests
             Assert.Equal("plain_arg", parsed[3]);
         }
 
+        /// <summary>
+        /// Verifies that STDIO transport securely injects secret credentials via environment variables rather than command-line arguments.
+        /// </summary>
         [Fact]
+        [Requirement("SEC-02", "STDIO transport securely injects secret credentials via environment variables rather than command-line arguments", Type = RequirementType.Positive, Category = "SEC")]
         public async Task StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine()
         {
             var scriptPath = GetMockScriptPath();
@@ -358,7 +398,11 @@ namespace McpRouter.Tests
             }
         }
 
+        /// <summary>
+        /// Ensures STDIO transport fails closed without spawning subprocess if secret resolution fails.
+        /// </summary>
         [Fact]
+        [Requirement("GUARD-02", "STDIO transport fails closed without spawning subprocess if secret resolution fails", Type = RequirementType.Negative, Category = "GUARD")]
         public async Task StdioTransport_ShouldFailClosed_WhenSecretResolutionFails()
         {
             var scriptPath = GetMockScriptPath();
@@ -389,7 +433,11 @@ namespace McpRouter.Tests
             Assert.Null(proc);
         }
 
+        /// <summary>
+        /// Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials.
+        /// </summary>
         [Fact]
+        [Requirement("SEC-02", "Subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials", Type = RequirementType.Positive, Category = "SEC")]
         public async Task StdioTransport_ShouldSanitizeAndMaskSecretsInLogs()
         {
             var scriptPath = GetMockScriptPath();
@@ -428,7 +476,11 @@ namespace McpRouter.Tests
             }
         }
 
+        /// <summary>
+        /// Verifies that STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly.
+        /// </summary>
         [Fact]
+        [Requirement("TRANS-03", "STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately()
         {
             var scriptPath = GetMockScriptPath();
