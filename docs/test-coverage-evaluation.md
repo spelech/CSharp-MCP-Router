@@ -35,8 +35,11 @@ Following the comprehensive coverage elevation cycle, the test suite across the 
 3. **Media Tools Decoupling & Docker Auto-Discovery**:
    - Native Plex & Overseerr tools were extracted from the router codebase into an independent, containerized service [`csharp-media-mcp`](file:///containers/dev/csharp-media-mcp) with its own **28 passing unit & integration tests** (`MediaMcp.Tests`), registered in `/containers/mcp/docker-compose.yaml`.
    - Documented dynamic Docker label auto-discovery (`mcp.enabled=true`, `mcp.id`, `mcp.port`, `mcp.displayName`, etc.) in `README.md` and `docs/features-guide.md`.
-4. **Clean Canonical Version Alignment**:
-   - Version `v4.14.0` aligned across `.csproj`, `package.json`, `useUserStore.ts`, `CHANGELOG.md`, and `README.md`.
+4. **Living SRS & Test Verification Catalog**:
+   - Implemented automated Roslyn C# and TypeScript AST extraction tool (`scripts/CatalogGenerator`) to generate living requirements documentation ([`software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)) mapping all test proofs to formal requirements and fail-closed safety guardrails.
+5. **Clean Canonical Version Alignment**:
+   - Version `v4.15.0` aligned across `.csproj`, `package.json`, `useUserStore.ts`, `CHANGELOG.md`, and `README.md`.
+
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐

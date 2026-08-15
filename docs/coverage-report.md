@@ -65,6 +65,9 @@ reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coveragereport"
 
 ## 3. Related Documentation
 
+- Living SRS & Test Verification Catalog: [`docs/software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)
+- Test Catalog & Annotation Guide: [`docs/test-catalog-guide.md`](test-catalog-guide.md)
 - Detailed Evaluation & Methodology: [`docs/test-coverage-evaluation.md`](test-coverage-evaluation.md)
 - Integration Matrix & Requirements: [`docs/testing-matrix.md`](testing-matrix.md)
 - CI Quality Gate Pipeline: [`docs/ci-quality-gates.md`](ci-quality-gates.md)
+

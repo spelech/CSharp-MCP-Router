@@ -154,6 +154,22 @@ cd frontend
 npx playwright test
 ```
 
+### Living Software Requirements Specification (SRS) & Test Catalog
+
+Requirements and safety guardrails are annotated directly in test code across C# and TypeScript. To regenerate or verify the living catalog:
+
+```bash
+# Generate human-readable Markdown and machine JSON matrix
+dotnet run --project scripts/CatalogGenerator
+
+# Verify zero-drift in CI quality gates
+dotnet run --project scripts/CatalogGenerator -- --verify-only
+```
+
+* **Living SRS Document:** [`docs/software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)
+* **Test Catalog & Annotation Guide:** [`docs/test-catalog-guide.md`](test-catalog-guide.md)
+
+
 ---
 
 ## 🎨 Formatting, Linting & Static Analysis
