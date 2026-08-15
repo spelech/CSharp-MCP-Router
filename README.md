@@ -3,7 +3,7 @@
 ![Version](https://img.shields.io/badge/version-v4.16.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-515%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-543%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -132,7 +132,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.16.0`** | 2026-08-15 | feat(auth): add support for CIDR ranges in trusted proxies configuration (Oidc:TrustedProxies) |
+| **`v4.16.0`** | 2026-08-15 | feat(auth): enable hybrid OIDC & Active Directory admin authorization with multi-group support, fallback resolution, and CIDR-aware trusted proxy parsing |
 | **`v4.15.0`** | 2026-08-15 | feat(testing): implement automated Living Software Requirements Specification (SRS) & Test Catalog generator with bidirectional test-to-requirement traceability and CI verification quality gate |
 | **`v4.14.0`** | 2026-08-14 | refactor(router): decouple media tools to standalone server, decommission approvals, and add Windows test abstractions |
 | **`v4.13.0`** | 2026-08-14 | feat(release): complete Stage 3 — unified product, user, developer, and operations documentation journey (#58), and automated release verification engine with CI version consistency quality gate (#59) |

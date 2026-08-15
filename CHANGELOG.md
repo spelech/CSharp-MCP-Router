@@ -8,7 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.16.0`** | 2026-08-15 | feat(auth): add support for CIDR ranges in trusted proxies configuration (Oidc:TrustedProxies) |
+| **`v4.16.0`** | 2026-08-15 | feat(auth): enable hybrid OIDC & Active Directory admin authorization with multi-group support, fallback resolution, and CIDR-aware trusted proxy parsing |
 | **`v4.15.0`** | 2026-08-15 | feat(testing): implement automated Living Software Requirements Specification (SRS) & Test Catalog generator with bidirectional test-to-requirement traceability and CI verification quality gate |
 | **`v4.14.0`** | 2026-08-14 | refactor(router): decouple media tools to standalone server, decommission approvals, and add Windows test abstractions |
 | **`v4.13.0`** | 2026-08-14 | feat(release): complete Stage 3 — unified product, user, developer, and operations documentation journey (#58), and automated release verification engine with CI version consistency quality gate (#59) |
