@@ -299,6 +299,26 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+        [McpRouter.Tests.Attributes.Requirement("REQ-SEC-CIDR-002", "Ensure TrustedProxyHelper supports CIDR ranges in XFF validation", Type = McpRouter.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
+        public void TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted()
+        {
+            var context = new DefaultHttpContext();
+            context.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.10");
+            // XFF chain: Cloudflare IP -> Local Gateway -> Nginx (direct connection)
+            context.Request.Headers["X-Forwarded-For"] = "203.0.113.195, 172.16.0.5, 10.0.0.10";
+
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Oidc:RequireTrustedProxy"] = "true",
+                ["Oidc:TrustedProxies"] = "10.0.0.0/8, 172.16.0.0/12"
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            bool isTrusted = TrustedProxyHelper.IsTrustedProxy(context, config);
+            Assert.True(isTrusted);
+        }
+
+        [Fact]
         public void TrustedProxyHelper_Unconfigured_LoopbackTrusted_LANNotTrusted()
         {
             // Unconfigured (TrustedProxies empty)
@@ -334,6 +354,33 @@ namespace McpRouter.Tests
 
             var otherCtx = new DefaultHttpContext();
             otherCtx.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.51");
+            Assert.False(TrustedProxyHelper.IsTrustedProxy(otherCtx, config));
+        }
+
+        [Fact]
+        [McpRouter.Tests.Attributes.Requirement("REQ-SEC-CIDR-001", "Ensure TrustedProxyHelper supports CIDR ranges", Type = McpRouter.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
+        public void TrustedProxyHelper_ConfiguredProxyTrusted_CIDR()
+        {
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Oidc:TrustedProxies"] = "192.168.1.0/24, 10.0.0.0/8, 172.16.0.5"
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var proxyCtx = new DefaultHttpContext();
+            proxyCtx.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("192.168.1.15");
+            Assert.True(TrustedProxyHelper.IsTrustedProxy(proxyCtx, config));
+
+            var proxyCtx2 = new DefaultHttpContext();
+            proxyCtx2.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.5.5.5");
+            Assert.True(TrustedProxyHelper.IsTrustedProxy(proxyCtx2, config));
+            
+            var proxyCtx3 = new DefaultHttpContext();
+            proxyCtx3.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("172.16.0.5");
+            Assert.True(TrustedProxyHelper.IsTrustedProxy(proxyCtx3, config));
+
+            var otherCtx = new DefaultHttpContext();
+            otherCtx.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("192.168.2.15");
             Assert.False(TrustedProxyHelper.IsTrustedProxy(otherCtx, config));
         }
 

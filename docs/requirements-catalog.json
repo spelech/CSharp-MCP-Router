@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-15T05:18:54.7306362Z",
-    "totalRequirements": 20,
-    "positiveCount": 15,
+    "generatedAt": "2026-08-15T05:59:47.6377642Z",
+    "totalRequirements": 22,
+    "positiveCount": 17,
     "guardrailCount": 5,
-    "totalProofs": 79
+    "totalProofs": 81
   },
   "requirements": [
     {
@@ -425,6 +425,38 @@
           "lineNumber": 397,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
+        }
+      ]
+    },
+    {
+      "id": "REQ-SEC-CIDR-001",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Ensure TrustedProxyHelper supports CIDR ranges",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 360,
+          "testName": "TrustedProxyHelper_ConfiguredProxyTrusted_CIDR",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-SEC-CIDR-002",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Ensure TrustedProxyHelper supports CIDR ranges in XFF validation",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs",
+          "lineNumber": 301,
+          "testName": "TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted",
+          "details": null
         }
       ]
     },
