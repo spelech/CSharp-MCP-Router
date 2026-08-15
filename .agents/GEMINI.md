@@ -84,3 +84,40 @@ Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) o
 **MANDATORY ATOMIC COMMIT AND DOCS UPDATING PROCESS**:
 * Whenever an AI agent implements a bugfix or feature, they **MUST** update the documentation (e.g., `README.md`, `ARCHITECTURE.md`, or the `docs/` folder) to reflect those changes.
 * Agents **MUST** use clean, logical atomic commits. Code changes and documentation updates should be committed in grouped, logical chunks.
+
+---
+
+## 🧪 6. Mandatory Test Requirement Annotations Rule
+
+**ALL NEW AND MODIFIED TESTS MUST BE ANNOTATED WITH FORMAL REQUIREMENT METADATA.**
+Every test proof across backend C# xUnit suites, frontend Vitest component suites, and Playwright E2E suites must trace directly to a requirement definition:
+
+* **C# Tests (`McpRouter.Tests`)**:
+  Must use the `[Requirement]` attribute from `McpRouter.Tests.Attributes`:
+  ```csharp
+  [Fact]
+  [Requirement("REQ-ID", RequirementCategory.Category, RequirementType.Type, "Description statement.")]
+  public async Task Test_Name() { ... }
+  ```
+* **Frontend Vitest & Playwright Tests (`frontend/src/test`, `frontend/e2e`)**:
+  Must include structured JSDoc `@requirement` blocks immediately preceding the test/it block:
+  ```typescript
+  /**
+   * @requirement REQ-ID
+   * @category CATEGORY
+   * @type PositiveFeature | FailClosedGuardrail
+   * @description Detailed requirement specification.
+   */
+  test('description', () => { ... });
+  ```
+
+* **Living Catalog Generation & Verification**:
+  Whenever tests are added, modified, or deleted, agents **MUST** regenerate the SRS test catalog and verify zero-drift:
+  ```bash
+  dotnet run --project scripts/CatalogGenerator
+  dotnet run --project scripts/CatalogGenerator -- --verify-only
+  ```
+  Generated artifacts:
+  - Human/agent SRS: [`docs/software-requirements-and-test-catalog.md`](file:///containers/dev/csharp-mcp-router/docs/software-requirements-and-test-catalog.md)
+  - Machine JSON matrix: [`docs/requirements-catalog.json`](file:///containers/dev/csharp-mcp-router/docs/requirements-catalog.json)
+  - Full developer guide: [`docs/test-catalog-guide.md`](file:///containers/dev/csharp-mcp-router/docs/test-catalog-guide.md)

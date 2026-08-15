@@ -36,6 +36,24 @@ Run tests via `dotnet test McpRouter.slnx`.
 - **MANDATORY DOCUMENTATION & ATOMIC COMMIT RULE**: **EVERY FEATURE OR CHANGE MUST INCLUDE UP-TO-DATE DOCUMENTATION.**
   - When working on a feature branch, AI agents **MUST** ensure relevant guides (`README.md`, `ARCHITECTURE.md`, `docs/features-guide.md`, etc.) are updated to reflect the design or functionality changes.
   - Agents **MUST** use logical, atomic commits for changes. Commit code and documentation separately or in cleanly grouped atomic commits.
+- **MANDATORY TEST REQUIREMENT ANNOTATIONS RULE**: **ALL NEW AND MODIFIED TESTS MUST BE ANNOTATED WITH REQUIREMENTS.**
+  - Every test proof in C# (`McpRouter.Tests`), Vitest (`frontend/src/test`), and Playwright (`frontend/e2e`) **MUST** include requirement metadata:
+    - **C#**: `[Requirement("REQ-ID", RequirementCategory.Category, RequirementType.Type, "Description")]`
+    - **TypeScript / JSDoc**:
+      ```typescript
+      /**
+       * @requirement REQ-ID
+       * @category CATEGORY
+       * @type PositiveFeature | FailClosedGuardrail
+       * @description Detailed specification statement.
+       */
+      ```
+  - When tests are added, updated, or deleted, agents **MUST** regenerate and verify the requirements catalog:
+    ```bash
+    dotnet run --project scripts/CatalogGenerator
+    dotnet run --project scripts/CatalogGenerator -- --verify-only
+    ```
+  - For full taxonomy, category codes (`AUTH`, `DB`, `GUARD`, `MCP`, `SEC`, `TRANS`, `UI`), and conventions, refer to [`docs/test-catalog-guide.md`](file:///containers/dev/csharp-mcp-router/docs/test-catalog-guide.md).
 - Do not use string manipulation (`string.Replace`) for JSON payloads. Use `JsonNode` (see `ClientSession.RewriteRequestJson`).
 - Do not commit mockups to `docs/assets/`. Use actual UI screenshots.
 - Ensure that you use atomic commits for logical changes.
