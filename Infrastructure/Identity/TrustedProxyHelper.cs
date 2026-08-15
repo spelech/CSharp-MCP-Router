@@ -33,7 +33,7 @@ namespace McpRouter.Infrastructure.Identity
             }
 
             var trustedProxies = proxiesStrVal.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-            if (!trustedProxies.Contains(effectiveIp.ToString()))
+            if (!IsIpTrusted(effectiveIp, trustedProxies))
             {
                 return false;
             }
@@ -51,7 +51,7 @@ namespace McpRouter.Infrastructure.Identity
                         var normHop = hopIp.IsIPv4MappedToIPv6 ? hopIp.MapToIPv4() : hopIp;
                         if (trustedProxies.Count > 0)
                         {
-                            if (!trustedProxies.Contains(normHop.ToString()))
+                            if (!IsIpTrusted(normHop, trustedProxies))
                             {
                                 return false;
                             }
@@ -72,6 +72,29 @@ namespace McpRouter.Infrastructure.Identity
             }
 
             return true;
+        }
+
+        private static bool IsIpTrusted(IPAddress ip, List<string> trustedProxies)
+        {
+            foreach (var proxy in trustedProxies)
+            {
+                if (proxy.Contains('/'))
+                {
+                    if (IPNetwork.TryParse(proxy, out var network) && network.Contains(ip))
+                    {
+                        return true;
+                    }
+                }
+                else
+                {
+                    if (proxy.Equals(ip.ToString(), StringComparison.OrdinalIgnoreCase) || 
+                        (IPAddress.TryParse(proxy, out var parsedIp) && parsedIp.Equals(ip)))
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
 
         public static void StripUntrustedHeaders(HttpContext context)
