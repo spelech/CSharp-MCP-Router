@@ -5,6 +5,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <RootNamespace>CatalogGenerator</RootNamespace>
+    <GenerateProgramFile>false</GenerateProgramFile>
+    <StartupObject>CatalogGenerator.Program</StartupObject>
     <NoWarn>$(NoWarn);NU1903</NoWarn>
   </PropertyGroup>
 
