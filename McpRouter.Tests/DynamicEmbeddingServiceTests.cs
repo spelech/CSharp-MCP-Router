@@ -92,6 +92,45 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+        public void PrivateOrLoopback_Blocked_When_AllowPrivateIps_False()
+        {
+            Environment.SetEnvironmentVariable("ALLOW_PRIVATE_IPS", "false");
+            try
+            {
+                var (provider, conn) = CreateServiceProvider();
+                var service = new DynamicEmbeddingService(new HttpClient(), NullLoggerFactory.Instance, provider);
+
+                var settings = new RouterSettings
+                {
+                    EmbeddingProvider = "api",
+                    EmbeddingApiUrl = "http://127.0.0.1:5000/v1/embeddings"
+                };
+
+                Assert.Throws<ArgumentException>(() => service.SaveSettings(settings));
+            }
+            finally
+            {
+                Environment.SetEnvironmentVariable("ALLOW_PRIVATE_IPS", "true");
+            }
+        }
+
+        [Fact]
+        public void ReloadSettings_UpdatesSettingsAndActiveService()
+        {
+            var (provider, conn) = CreateServiceProvider();
+            var service = new DynamicEmbeddingService(new HttpClient(), NullLoggerFactory.Instance, provider);
+
+            var newSettings = new RouterSettings
+            {
+                EmbeddingProvider = "api",
+                EmbeddingApiUrl = "https://embeddings.remote.io/v1"
+            };
+
+            service.ReloadSettings(newSettings);
+            Assert.Equal("api", service.GetSettings().EmbeddingProvider);
+        }
+
+        [Fact]
         public async Task DynamicEmbeddingService_GetEmbeddingAsync_Uses_ApiProvider_When_Configured()
         {
             var (provider, conn) = CreateServiceProvider();
@@ -129,6 +168,12 @@ namespace McpRouter.Tests
 
             Assert.Equal(1.0, simIdentical, 3);
             Assert.Equal(0.0, simOrthogonal, 3);
+
+            // Null and empty edge cases
+            Assert.Equal(0.0, service.CosineSimilarity(null!, v2));
+            Assert.Equal(0.0, service.CosineSimilarity(v1, null!));
+            Assert.Equal(0.0, service.CosineSimilarity(Array.Empty<float>(), Array.Empty<float>()));
+            Assert.Equal(0.0, service.CosineSimilarity(new float[] { 1f }, new float[] { 1f, 2f }));
         }
 
         [Fact]
@@ -149,5 +194,27 @@ namespace McpRouter.Tests
 
             await service.PreWarmAsync();
         }
+
+        [Fact]
+        public async Task GenerateEmbeddingAsync_Uses_UnderlyingProvider()
+        {
+            var (provider, conn) = CreateServiceProvider();
+            var handler = new MockHttpMessageHandler(req =>
+            {
+                var json = "{\"data\":[{\"embedding\":[0.5, 0.5]}]}";
+                return new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(json) };
+            });
+
+            var service = new DynamicEmbeddingService(new HttpClient(handler), NullLoggerFactory.Instance, provider);
+            var settings = service.GetSettings();
+            settings.EmbeddingProvider = "API";
+            settings.EmbeddingApiUrl = "http://localhost:5000/v1/embeddings";
+            service.SaveSettings(settings);
+
+            var emb = await service.GenerateEmbeddingAsync("testing alias");
+            Assert.Equal(2, emb.Length);
+            Assert.Equal(0.5F, emb[0]);
+        }
     }
 }
+

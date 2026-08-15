@@ -637,5 +637,68 @@ namespace McpRouter.Tests
             plaintextKey.Should().StartWith(appKey.KeyPrefix + "-");
             plaintextKey.Length.Should().Be(43 + 1 + 64); // 108 characters
         }
+
+        [Fact]
+        public async Task CreateClient_ReturnsBadRequest_WhenDisplayNameMissing()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+            var credentialService = new CredentialService(dbFactory);
+            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+
+            var model = new ClientsController.CreateClientModel { DisplayName = "" };
+            var result = await controller.CreateClient(model);
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public async Task CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+            var credentialService = new CredentialService(dbFactory);
+            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+
+            var model = new ClientsController.CreateClientModel
+            {
+                DisplayName = "Invalid Category App",
+                Scopes = new List<string> { "category:" }
+            };
+            var result = await controller.CreateClient(model);
+            result.Should().BeOfType<BadRequestObjectResult>();
+        }
+
+        [Fact]
+        public async Task CreateClient_Returns500_WhenCredentialServiceThrows()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+            var mockCredService = new Mock<ICredentialService>();
+            mockCredService.Setup(c => c.CreateCredentialAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<int?>()
+            )).ThrowsAsync(new Exception("Database disk full"));
+
+            var controller = new ClientsController(dbFactory, mockAudit.Object, mockCredService.Object);
+            var model = new ClientsController.CreateClientModel { DisplayName = "Faulty App" };
+            var result = await controller.CreateClient(model);
+            var statusResult = result.Should().BeOfType<ObjectResult>().Subject;
+            statusResult.StatusCode.Should().Be(500);
+        }
+
+        [Fact]
+        public async Task DeleteClient_Returns500_WhenCredentialServiceThrows()
+        {
+            var (conn, dbFactory) = CreateDbFactory();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+            var mockCredService = new Mock<ICredentialService>();
+            mockCredService.Setup(c => c.RevokeCredentialAsync(It.IsAny<string>()))
+                .ThrowsAsync(new Exception("Database locked"));
+
+            var controller = new ClientsController(dbFactory, mockAudit.Object, mockCredService.Object);
+            var result = await controller.DeleteClient("client-123");
+            var statusResult = result.Should().BeOfType<ObjectResult>().Subject;
+            statusResult.StatusCode.Should().Be(500);
+        }
     }
 }
+
