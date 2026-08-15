@@ -7,7 +7,6 @@ import {
   CustomFileMeta,
   AccessPolicy,
   GroupMapping,
-  PendingApproval,
 } from '../shared/types';
 import {
   fetchEmbeddingSettingsApi,
@@ -20,8 +19,6 @@ import {
   fetchCustomFileContentApi,
   saveCustomFileApi,
   deleteCustomFileApi,
-  fetchPendingApprovalsApi,
-  actionApprovalApi,
 } from '../api/settingsApi';
 import {
   fetchPoliciesApi,
@@ -39,7 +36,6 @@ export type {
   CustomFileMeta,
   AccessPolicy,
   GroupMapping,
-  PendingApproval,
 };
 
 interface SettingsStore {
@@ -49,7 +45,6 @@ interface SettingsStore {
   customFiles: CustomFileMeta[];
   policies: AccessPolicy[];
   mappings: GroupMapping[];
-  pendingApprovals: PendingApproval[];
 
   isLoadingSettings: boolean;
   isSavingSettings: boolean;
@@ -75,9 +70,6 @@ interface SettingsStore {
   fetchProviders: () => Promise<void>;
   saveAuthProvider: (provider: AuthProviderConfig) => Promise<void>;
   saveSecretProvider: (provider: SecretProviderConfig) => Promise<void>;
-
-  fetchApprovals: () => Promise<void>;
-  actionApproval: (id: string, approved: boolean) => Promise<void>;
 
   fetchCustomFiles: () => Promise<void>;
   fetchCustomFileContent: (type: 'prompts' | 'resources', name: string) => Promise<string>;
@@ -112,7 +104,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   customFiles: [],
   policies: [],
   mappings: [],
-  pendingApprovals: [],
 
   isLoadingSettings: false,
   isSavingSettings: false,
@@ -191,25 +182,6 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
     } catch (e: any) {
       showToast(`Failed to save Secret Provider: ${e.message}`, 'error');
       throw e;
-    }
-  },
-
-  fetchApprovals: async () => {
-    try {
-      const approvals = await fetchPendingApprovalsApi();
-      set({ pendingApprovals: approvals || [] });
-    } catch (e) {
-      console.error('Failed to fetch approvals:', e);
-    }
-  },
-
-  actionApproval: async (id, approved) => {
-    try {
-      await actionApprovalApi(id, approved);
-      showToast(approved ? 'Request approved' : 'Request denied', 'info');
-      get().fetchApprovals();
-    } catch (e: any) {
-      showToast(`Approval action failed: ${e.message}`, 'error');
     }
   },
 

@@ -1,5 +1,4 @@
 export * from './GeneralTab';
-export * from './SecurityTab';
 export * from './IdentityAuthTab';
 export * from './SecretProvidersTab';
 export * from './ProvidersTab';
@@ -7,5 +6,4 @@ export * from './CustomFilesTab';
 export * from './AccessControlTab';
 export * from './BackupsTab';
 export * from './CustomFileModal';
-export * from './ApprovalsCard';
 export * from './SettingsView';

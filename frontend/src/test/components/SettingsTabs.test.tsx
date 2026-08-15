@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { GeneralTab } from '../../components/settings/GeneralTab';
-import { SecurityTab } from '../../components/settings/SecurityTab';
 import { ProvidersTab } from '../../components/settings/ProvidersTab';
 import { CustomFilesTab } from '../../components/settings/CustomFilesTab';
 import { AccessControlTab } from '../../components/settings/AccessControlTab';
@@ -18,7 +17,6 @@ describe('Modular Settings Tab Components', () => {
           embeddingApiUrl: '',
           embeddingApiModel: 'all-MiniLM-L6-v2',
           embeddingApiKey: '',
-          requireManualApproval: false,
         }}
         saveEmbeddingSettings={saveSpy}
       />
@@ -30,16 +28,6 @@ describe('Modular Settings Tab Components', () => {
       fireEvent.click(saveBtn);
     });
     expect(saveSpy).toHaveBeenCalled();
-  });
-
-  it('renders SecurityTab and toggles approvals', () => {
-    const toggleSpy = vi.fn();
-    render(<SecurityTab requireApproval={false} onToggleApproval={toggleSpy} />);
-
-    expect(screen.getByText('Security & Safety Controls')).toBeInTheDocument();
-    const checkbox = document.getElementById('settings-require-approval') as HTMLInputElement;
-    fireEvent.click(checkbox);
-    expect(toggleSpy).toHaveBeenCalledWith(true);
   });
 
   it('renders IdentityAuthTab and SecretProvidersTab inside ProvidersTab', () => {

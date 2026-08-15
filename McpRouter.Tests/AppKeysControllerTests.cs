@@ -49,7 +49,7 @@ namespace McpRouter.Tests
 
         public AppKeysControllerTests()
         {
-            _rawConnection = new SqliteConnection("DataSource=:memory:;Mode=Memory;Cache=Shared");
+            _rawConnection = new SqliteConnection($"DataSource=file:mem_{Guid.NewGuid():N}?mode=memory&cache=shared");
             _rawConnection.Open();
 
             _rawConnection.Execute(@"
@@ -70,7 +70,7 @@ namespace McpRouter.Tests
                     UserMaxKeys INTEGER DEFAULT 5
                 );");
 
-            _rawConnection.Execute("INSERT INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 100, 5);");
+            _rawConnection.Execute("INSERT OR REPLACE INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 100, 5);");
 
             var mockFactory = new Mock<IDbConnectionFactory>();
             mockFactory.Setup(f => f.CreateConnection()).Returns(() => new NonDisposingConnection(_rawConnection));

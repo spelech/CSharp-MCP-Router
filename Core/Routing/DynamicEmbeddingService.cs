@@ -68,13 +68,13 @@ namespace McpRouter.Core.Routing
                     var exists = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM Settings WHERE Id = 'default'");
                     if (exists == 0)
                     {
-                        conn.Execute(@"INSERT INTO Settings (Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, RequireManualApproval, GlobalMaxKeys, UserMaxKeys)
-                            VALUES ('default', @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @RequireManualApproval, @GlobalMaxKeys, @UserMaxKeys)", _settings);
+                        conn.Execute(@"INSERT INTO Settings (Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys)
+                            VALUES ('default', @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys)", _settings);
                     }
                     else
                     {
                         conn.Execute(@"UPDATE Settings SET EmbeddingProvider = @EmbeddingProvider, EmbeddingApiUrl = @EmbeddingApiUrl, EmbeddingApiKey = @EmbeddingApiKey,
-                            EmbeddingApiModel = @EmbeddingApiModel, EmbeddingModelDir = @EmbeddingModelDir, RequireManualApproval = @RequireManualApproval,
+                            EmbeddingApiModel = @EmbeddingApiModel, EmbeddingModelDir = @EmbeddingModelDir,
                             GlobalMaxKeys = @GlobalMaxKeys, UserMaxKeys = @UserMaxKeys WHERE Id = 'default'", _settings);
                     }
                 }

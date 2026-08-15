@@ -12,23 +12,12 @@ using McpRouter.Components.Servers;
 
 namespace McpRouter.Core.Routing
 {
-    public class PendingApproval
-    {
-        public string Id { get; set; } = Guid.NewGuid().ToString("N");
-        public string ToolName { get; set; } = string.Empty;
-        public string Arguments { get; set; } = string.Empty;
-        public string SessionId { get; set; } = string.Empty;
-        public TaskCompletionSource<bool> Tcs { get; } = new(TaskCreationOptions.RunContinuationsAsynchronously);
-    }
-
     public class SessionManager
     {
         private readonly ConcurrentDictionary<string, ClientSession> _sessions = new();
         private readonly IServiceProvider _serviceProvider;
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<SessionManager> _logger;
-
-        public ConcurrentDictionary<string, PendingApproval> PendingApprovals { get; } = new();
 
         public DateTime StartTime { get; } = DateTime.UtcNow;
         private long _totalRequests = 0;
@@ -123,15 +112,6 @@ namespace McpRouter.Core.Routing
             if (_sessions.TryRemove(sessionId, out var session))
             {
                 session.Close();
-                // Sweep pending approvals for this session
-                var toRemove = PendingApprovals.Values.Where(a => a.SessionId == sessionId).ToList();
-                foreach (var approval in toRemove)
-                {
-                    if (PendingApprovals.TryRemove(approval.Id, out var removed))
-                    {
-                        removed.Tcs.TrySetCanceled();
-                    }
-                }
             }
         }
 

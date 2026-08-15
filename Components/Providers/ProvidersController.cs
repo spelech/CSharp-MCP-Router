@@ -13,7 +13,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace McpRouter.Components.Providers
 {
-
     [ApiController]
     [Route("api/[controller]")]
     [Authorize(Policy = "AdminPolicy")]
@@ -134,6 +133,48 @@ namespace McpRouter.Components.Providers
             }
         }
 
+        [HttpPost("secrets/test-vault")]
+        [HttpPost("/api/settings/secrets/test-vault")]
+        public async Task<IActionResult> TestVaultConnection([FromBody] TestVaultRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Address))
+            {
+                return BadRequest(new { success = false, error = "Vault Address is required." });
+            }
+
+            try
+            {
+                VaultSharp.V1.AuthMethods.IAuthMethodInfo authMethod;
+                if (string.Equals(request.AuthMethod, "approle", StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrEmpty(request.RoleId) && !string.IsNullOrEmpty(request.SecretId)))
+                {
+                    if (string.IsNullOrEmpty(request.RoleId) || string.IsNullOrEmpty(request.SecretId))
+                    {
+                        return BadRequest(new { success = false, error = "Vault AppRole requires both RoleId and SecretId." });
+                    }
+                    authMethod = new VaultSharp.V1.AuthMethods.AppRole.AppRoleAuthMethodInfo(request.RoleId, request.SecretId);
+                }
+                else
+                {
+                    if (string.IsNullOrEmpty(request.Token))
+                    {
+                        return BadRequest(new { success = false, error = "Vault Token is required for token authentication." });
+                    }
+                    authMethod = new VaultSharp.V1.AuthMethods.Token.TokenAuthMethodInfo(request.Token);
+                }
+
+                var settings = new VaultSharp.VaultClientSettings(request.Address, authMethod);
+                var client = new VaultSharp.VaultClient(settings);
+                var tokenInfo = await client.V1.Auth.Token.LookupSelfAsync();
+
+                return Ok(new { success = true, message = $"Vault authentication successful. Token TTL: {tokenInfo?.Data?.TimeToLive ?? 0}s." });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, error = $"Vault connection failed: {ex.Message}" });
+            }
+        }
+
         [HttpGet("auth")]
         public async Task<IActionResult> GetAuthProviders()
         {
@@ -203,6 +244,45 @@ namespace McpRouter.Components.Providers
                 var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
                 _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
                 return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPost("auth/test-ad")]
+        [HttpPost("/api/settings/auth/test-ad")]
+        public async Task<IActionResult> TestLdapConnection([FromBody] TestLdapRequest request)
+        {
+            if (string.IsNullOrWhiteSpace(request.Server))
+            {
+                return BadRequest(new { success = false, error = "LDAP Server is required." });
+            }
+
+            int port = request.Port ?? 636;
+            bool useSsl = request.UseSsl ?? (port == 636);
+
+            if (port == 389 && !useSsl)
+            {
+                return BadRequest(new { success = false, error = "LDAP over plaintext (port 389) is disabled for security. Use LDAPS port 636 or set useSsl=true." });
+            }
+
+            try
+            {
+                var identifier = new System.DirectoryServices.Protocols.LdapDirectoryIdentifier(request.Server, port);
+                System.Net.NetworkCredential? credential = null;
+                if (!string.IsNullOrEmpty(request.BindDn) && !string.IsNullOrEmpty(request.BindPassword))
+                {
+                    credential = new System.Net.NetworkCredential(request.BindDn, request.BindPassword);
+                }
+
+                using var connection = new System.DirectoryServices.Protocols.LdapConnection(identifier, credential, System.DirectoryServices.Protocols.AuthType.Basic);
+                connection.SessionOptions.ProtocolVersion = 3;
+                connection.SessionOptions.SecureSocketLayer = useSsl;
+                connection.Bind();
+
+                return Ok(new { success = true, message = $"LDAP bind successful to '{request.Server}:{port}'." });
+            }
+            catch (Exception ex)
+            {
+                return Ok(new { success = false, error = $"LDAP connection/bind failed: {ex.Message}" });
             }
         }
     }

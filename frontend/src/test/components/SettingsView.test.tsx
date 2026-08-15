@@ -99,7 +99,6 @@ describe('SettingsView component', () => {
     });
 
     expect(screen.getByRole('button', { name: /vector & search/i })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /security & approvals/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /identity & auth/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /secret providers/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /prompts & resources/i })).toBeInTheDocument();
@@ -107,12 +106,6 @@ describe('SettingsView component', () => {
 
     // Default active subview is search
     expect(screen.getByRole('heading', { name: /semantic search settings/i })).toBeInTheDocument();
-
-    // Switch to Security subview
-    await act(async () => {
-      fireEvent.click(screen.getByRole('button', { name: /security & approvals/i }));
-    });
-    expect(screen.getByRole('heading', { name: /security & safety controls/i })).toBeInTheDocument();
 
     // Switch to Identity subview
     await act(async () => {
@@ -168,38 +161,6 @@ describe('SettingsView component', () => {
       expect(postedSettings).toMatchObject({
         embeddingProvider: 'api',
         embeddingApiUrl: 'http://custom-embeddings:8000/v1'
-      });
-    });
-  });
-
-  describe('Security & Approvals Subview', () => {
-    it('toggles require manual approval checkbox and saves', async () => {
-      let postedSettings: any = null;
-      mockApiResponse('/api/settings', (_url, options) => {
-        if (options?.method === 'POST') {
-          postedSettings = JSON.parse(options.body as string);
-          return { success: true };
-        }
-        return testSettings;
-      });
-
-      await act(async () => {
-        render(<SettingsView />);
-      });
-
-      await act(async () => {
-        fireEvent.click(screen.getByRole('button', { name: /security & approvals/i }));
-      });
-
-      const approvalCheckbox = document.getElementById('settings-require-approval') as HTMLInputElement;
-      expect(approvalCheckbox).not.toBeChecked();
-
-      await act(async () => {
-        fireEvent.click(approvalCheckbox);
-      });
-
-      expect(postedSettings).toMatchObject({
-        requireManualApproval: true
       });
     });
   });

@@ -61,6 +61,7 @@ namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
                 InsertServer(conn, "mcp-arr-hd", "Arr Services (HD)", "http://mcp-arr-hd:3000/mcp", "http", new List<string> { "media" });
                 InsertServer(conn, "mcp-arr-4k", "Arr Services (4K)", "http://mcp-arr-4k:3000/mcp", "http", new List<string> { "media4k" });
                 InsertServer(conn, "docker", "Docker Containers", "http://docker-mcp:8000/sse", "sse", new List<string> { "infrastructure" });
+                InsertServer(conn, "media", "Media (Plex & Overseerr)", "http://media-mcp:8080/sse", "sse", new List<string> { "media" });
 
                 logger.LogInformation("Database migration completed successfully.");
             }
