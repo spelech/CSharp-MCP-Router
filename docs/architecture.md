@@ -1158,6 +1158,8 @@ For complete setup guides, AppRole configuration commands, and DPAPI registry re
 | **Vault, DPAPI & AES-256-GCM Encryption** | [**Enterprise Secret Providers & Key Management Guide**](secret-providers.md) |
 | **CI Quality Gates, Static Analysis & Testing** | [**CI Quality Gates & Verification Guide**](ci-quality-gates.md) |
 | **Pairwise Integration Matrix & E2E Tests** | [**Testing Matrix & Integration Guide**](testing-matrix.md) |
+| **Living Software Requirements (SRS) & Test Catalog** | [**Software Requirements & Test Verification Catalog**](software-requirements-and-test-catalog.md) |
+| **Test Catalog Architecture & Annotation Guide** | [**Test Catalog & Annotation Guide**](test-catalog-guide.md) |
 | **End-User Guides & Interactive UI Manual** | [**Official User Guide Suite**](user-guide/README.md) |
 | **Developer Environment & Coding Guidelines** | [**Developer Guide & Local Setup**](developer-guide.md) |
 | **Operations, Deployment & Disaster Recovery** | [**Operations & Production Runbook**](runbook.md) |

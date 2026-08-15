@@ -128,6 +128,23 @@ cd ..
 ```
 * Zero ESLint warnings or TypeScript errors permitted.
 
+### 4. Living Requirements Catalog Verification
+```bash
+dotnet run --project scripts/CatalogGenerator -- --verify-only
+```
+* Ensures documentation in [`docs/software-requirements-and-test-catalog.md`](docs/software-requirements-and-test-catalog.md) has zero drift against test code annotations.
+
+---
+
+## 🧪 Test Requirement Annotations Rule
+
+All new or modified tests in C# (`McpRouter.Tests`), Vitest (`frontend/src/test`), and Playwright (`frontend/e2e`) **MUST** include structured requirement annotations:
+- **C#**: `[Requirement("REQ-ID", "Category", RequirementType.Positive, "Description")]`
+- **TypeScript**: JSDoc `@requirement REQ-ID` block
+
+For full conventions, category taxonomy (`AUTH`, `DB`, `GUARD`, `MCP`, `SEC`, `TRANS`, `UI`), and CLI usage, see the [**Software Requirements & Test Catalog Guide**](docs/test-catalog-guide.md).
+
+
 For comprehensive details on pipeline jobs, CodeQL SAST scanning, and integration smoke tests, see [**CI Quality Gates & Security Workflows**](docs/ci-quality-gates.md).
 
 ---
