@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **21 Requirements Verified** across **87 Test Proofs** (16 Functional Capabilities, 5 Safety Guardrails).
+> **Catalog Statistics:** **21 Requirements Verified** across **91 Test Proofs** (16 Functional Capabilities, 5 Safety Guardrails).
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **3** | 2 | 1 | 24 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **3** | 2 | 1 | 28 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **4** | 0 | 4 | 21 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **2** | 2 | 0 | 3 proofs |
@@ -164,12 +164,16 @@
 > [!IMPORTANT]
 > The following guardrails define strict security boundaries, fail-closed fault invariants, and forbidden application states.
 
-### `[AUTH-01]` AdminPolicy must require explicit Admin SID claim and reject role-only principals
+### `[AUTH-01]` AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (10):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L20`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L20) (`AdminPolicy_Denies_AdministratorOrFullAdminRoles_Without_AdminSid`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L72`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L72) (`AdminPolicy_Allows_Principal_With_AdminSid`)
+* **Verification Proofs (14):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L18) (`AdminPolicy_Allows_Principal_With_AdminGroupName`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L52`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L52) (`AdminPolicy_Allows_Principal_With_AdminSid`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L86`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L86) (`AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L121`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L121) (`AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L21`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L21) (`AdminPolicy_Denies_StandardRole_Without_AdminSid`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L63`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L63) (`AdminPolicy_Allows_Principal_With_AdminSid`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L273`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L273) (`AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L226`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L226) (`SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L244`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L244) (`SecurityValidationHelper_IsAdmin_AllowsAdminGroupName`)
@@ -226,7 +230,7 @@
 
 | Requirement ID | Type | Category | Description | Primary Proof | Suite |
 | :--- | :---: | :--- | :--- | :--- | :--- |
-| `AUTH-01` | **Guardrail** | `AUTH` | AdminPolicy must require explicit Admin SID claim and reject role-only principals | [`AdminPolicySidOnlyTests.cs:L20`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs#L20) | Backend xUnit |
+| `AUTH-01` | **Guardrail** | `AUTH` | AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin) | [`AdminPolicyHybridAuthTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L18) | Backend xUnit |
 | `AUTH-02` | Positive | `AUTH` | AppKey scopes restrict access precisely across all MCP capabilities and backend targets | [`PairwiseIntegrationMatrixTests.cs:L254`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L254) | Backend xUnit |
 | `AUTH-03` | Positive | `AUTH` | SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles | [`PairwiseIntegrationMatrixTests.cs:L331`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L331) | Backend xUnit |
 | `DB-01` | Positive | `DB` | SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data | [`DatabaseSchemaUpgradeAndContractTests.cs:L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L43) | Backend xUnit |

@@ -1,30 +1,58 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-15T13:40:52.4254642Z",
+    "generatedAt": "2026-08-15T13:48:05.2300896Z",
     "totalRequirements": 21,
     "positiveCount": 16,
     "guardrailCount": 5,
-    "totalProofs": 87
+    "totalProofs": 91
   },
   "requirements": [
     {
       "id": "AUTH-01",
       "category": "AUTH",
       "type": "Negative",
-      "description": "AdminPolicy must require explicit Admin SID claim and reject role-only principals",
-      "proofCount": 10,
+      "description": "AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)",
+      "proofCount": 14,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
-          "lineNumber": 20,
-          "testName": "AdminPolicy_Denies_AdministratorOrFullAdminRoles_Without_AdminSid",
-          "details": "Verifies that users with role names but lacking explicit Admin SID claim are denied by AdminPolicy."
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "lineNumber": 18,
+          "testName": "AdminPolicy_Allows_Principal_With_AdminGroupName",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "lineNumber": 52,
+          "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "lineNumber": 86,
+          "testName": "AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "lineNumber": 121,
+          "testName": "AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup",
+          "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
-          "lineNumber": 72,
+          "lineNumber": 21,
+          "testName": "AdminPolicy_Denies_StandardRole_Without_AdminSid",
+          "details": "Verifies that users with standard/unconfigured role names lacking explicit Admin SID claim or Admin Group are denied by AdminPolicy."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
+          "lineNumber": 63,
           "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
           "details": "Verifies that principals with the configured Admin SID are granted administrative policy access."
         },
