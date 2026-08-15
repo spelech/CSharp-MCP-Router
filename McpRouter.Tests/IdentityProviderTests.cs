@@ -299,7 +299,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [McpRouter.Tests.Attributes.Requirement("REQ-SEC-CIDR-002", "Ensure TrustedProxyHelper supports CIDR ranges in XFF validation", Type = McpRouter.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
+        [McpRouter.Tests.Attributes.Requirement("SEC-03", "Ensure TrustedProxyHelper supports CIDR ranges in XFF validation", Type = McpRouter.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
         public void TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted()
         {
             var context = new DefaultHttpContext();
@@ -358,7 +358,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [McpRouter.Tests.Attributes.Requirement("REQ-SEC-CIDR-001", "Ensure TrustedProxyHelper supports CIDR ranges", Type = McpRouter.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
+        [McpRouter.Tests.Attributes.Requirement("SEC-03", "Ensure TrustedProxyHelper supports CIDR ranges for proxy validation", Type = McpRouter.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
         public void TrustedProxyHelper_ConfiguredProxyTrusted_CIDR()
         {
             var configDict = new Dictionary<string, string?>
