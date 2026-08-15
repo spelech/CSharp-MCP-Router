@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.14.0`** | 2026-08-14 | refactor(router): decouple media tools to standalone server, decommission approvals, and add Windows test abstractions |
 | **`v4.13.0`** | 2026-08-14 | feat(release): complete Stage 3 — unified product, user, developer, and operations documentation journey (#58), and automated release verification engine with CI version consistency quality gate (#59) |
 | **`v4.12.2`** | 2026-08-14 | docs: comprehensive enterprise architecture guide with system context, component models, sequence diagrams, 4-stage authorization, transports, database ERD, and envelope encryption (#57) |
 | **`v4.12.1`** | 2026-08-14 | docs: complete Stage 1 documentation — database-provider support matrix (#53), canonical AppKey scope and authorization guide (#54), transport capability & STDIO lifecycle guide (#55), and secret-provider security reference (#56) |
