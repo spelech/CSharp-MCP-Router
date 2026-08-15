@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using McpRouter.Infrastructure.Identity;
+using McpRouter.Components.Authorization;
 
 namespace McpRouter.Middleware
 {
@@ -49,9 +50,10 @@ namespace McpRouter.Middleware
                 new Claim(ClaimTypes.NameIdentifier, username)
             };
 
-            if (identityContext.AllSids.Contains(adminGroupSid, StringComparer.OrdinalIgnoreCase))
+            if (SecurityValidationHelper.IsAdmin(identityContext, config))
             {
                 claims.Add(new Claim("Sid", adminGroupSid));
+                claims.Add(new Claim(ClaimTypes.Role, "Administrator"));
             }
 
             foreach (var group in identityContext.GroupNames)
