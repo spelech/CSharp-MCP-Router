@@ -1,7 +1,11 @@
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
 using McpRouter.Core.Routing;
+using McpRouter.Core.Protocol;
+using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
 namespace McpRouter.Tests
@@ -37,6 +41,56 @@ namespace McpRouter.Tests
 
             var plexResults = await manager.SearchResourcesAsync("plex", resources);
             Assert.Single(plexResults);
+        }
+
+        [Fact]
+        public async Task ReadResourceAsync_LocalBuiltInResources_ReturnCorrectJson()
+        {
+            var manager = new ResourceRoutingManager();
+            var backendConnections = new ConcurrentDictionary<string, BackendConnection>();
+            Func<Task> ensureInitialized = () => Task.CompletedTask;
+            Func<string, string, string, string> rewriteJson = (body, key, val) => body;
+
+            // 1. router://status
+            var statusRes = await manager.ReadResourceAsync("router://status", "{}", backendConnections, ensureInitialized, rewriteJson);
+            Assert.NotNull(statusRes);
+
+            // 2. router://active-servers
+            var serversRes = await manager.ReadResourceAsync("router://active-servers", "{}", backendConnections, ensureInitialized, rewriteJson);
+            Assert.NotNull(serversRes);
+
+            // 3. router://metrics
+            var metricsRes = await manager.ReadResourceAsync("router://metrics", "{}", backendConnections, ensureInitialized, rewriteJson);
+            Assert.NotNull(metricsRes);
+
+            // 4. logs://docker/today
+            var logsRes = await manager.ReadResourceAsync("logs://docker/today", "{}", backendConnections, ensureInitialized, rewriteJson);
+            Assert.NotNull(logsRes);
+        }
+
+        [Fact]
+        public async Task ReadResourceAsync_ThrowsKeyNotFound_WhenResourceNotRegistered()
+        {
+            var manager = new ResourceRoutingManager();
+            var backendConnections = new ConcurrentDictionary<string, BackendConnection>();
+            Func<Task> ensureInitialized = () => Task.CompletedTask;
+            Func<string, string, string, string> rewriteJson = (body, key, val) => body;
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
+            {
+                await manager.ReadResourceAsync("mcp://unknown-server/unregistered-resource", "{}", backendConnections, ensureInitialized, rewriteJson);
+            });
+        }
+
+        [Fact]
+        public async Task ListResourceTemplatesAsync_ReturnsBuiltInTemplates()
+        {
+            var manager = new ResourceRoutingManager();
+            var backendConnections = new Dictionary<string, BackendConnection>();
+            Func<Task> ensureInitialized = () => Task.CompletedTask;
+
+            var templates = await manager.ListResourceTemplatesAsync("{}", backendConnections, NullLogger.Instance, ensureInitialized);
+            Assert.NotEmpty(templates);
         }
     }
 }

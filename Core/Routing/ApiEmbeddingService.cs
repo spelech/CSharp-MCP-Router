@@ -75,7 +75,7 @@ namespace McpRouter.Core.Routing
 
         public static double CalculateCosineSimilarity(float[] v1, float[] v2)
         {
-            if (v1.Length != v2.Length) return 0;
+            if (v1 == null || v2 == null || v1.Length != v2.Length || v1.Length == 0) return 0;
             double dotProduct = 0.0;
             double normA = 0.0;
             double normB = 0.0;
@@ -90,5 +90,6 @@ namespace McpRouter.Core.Routing
         }
     }
 }
+
 
 

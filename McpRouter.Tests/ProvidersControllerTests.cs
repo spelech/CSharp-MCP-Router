@@ -60,6 +60,30 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+        public async Task GetAllProviders_ReturnsOkWithSecretAndAuthProviders()
+        {
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
+            var result = await controller.GetAllProviders() as OkObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(200, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task GetAllProviders_Returns500_OnDbException()
+        {
+            var mockFailingFactory = new Mock<IDbConnectionFactory>();
+            mockFailingFactory.Setup(f => f.CreateConnection()).Throws(new Exception("DB Connection Failed"));
+
+            var failingRepo = new DatabaseRepository(mockFailingFactory.Object);
+            var controller = new ProvidersController(failingRepo, failingRepo);
+            var result = await controller.GetAllProviders() as ObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(500, result.StatusCode);
+        }
+
+        [Fact]
         public async Task GetSecretProviders_ReturnsOkWithList()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -117,6 +141,26 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+        public async Task SaveSecretProvider_Returns500_WhenRepositoryThrows()
+        {
+            var mockFailingFactory = new Mock<IDbConnectionFactory>();
+            mockFailingFactory.Setup(f => f.CreateConnection()).Throws(new Exception("DB write crash"));
+
+            var mockAudit = new Mock<IAuditLogger>();
+            var failingRepo = new DatabaseRepository(mockFailingFactory.Object);
+            var controller = new ProvidersController(failingRepo, failingRepo);
+            var dto = new SecretProviderDto
+            {
+                ProviderName = "Vault",
+                ConfigJson = "{\"url\":\"https://vault.local:8200\"}"
+            };
+
+            var result = await controller.SaveSecretProvider(dto, mockAudit.Object) as ObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(500, result.StatusCode);
+        }
+
+        [Fact]
         public async Task GetAuthProviders_ReturnsOkWithList()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -159,6 +203,26 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+        public async Task SaveAuthProvider_Returns500_WhenRepositoryThrows()
+        {
+            var mockFailingFactory = new Mock<IDbConnectionFactory>();
+            mockFailingFactory.Setup(f => f.CreateConnection()).Throws(new Exception("DB write crash"));
+
+            var mockAudit = new Mock<IAuditLogger>();
+            var failingRepo = new DatabaseRepository(mockFailingFactory.Object);
+            var controller = new ProvidersController(failingRepo, failingRepo);
+            var dto = new AuthProviderDto
+            {
+                ProviderName = "PocketID",
+                ConfigJson = "{\"authority\":\"https://sso.local\"}"
+            };
+
+            var result = await controller.SaveAuthProvider(dto, mockAudit.Object) as ObjectResult;
+            Assert.NotNull(result);
+            Assert.Equal(500, result.StatusCode);
+        }
+
+        [Fact]
         public async Task GetSecretProviders_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -184,6 +248,77 @@ namespace McpRouter.Tests
 
             Assert.NotNull(result);
             Assert.Equal(500, result.StatusCode);
+        }
+
+        [Fact]
+        public async Task TestVaultConnection_ValidatesInputAndHandlesFailureGracefully()
+        {
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
+
+            // 1. Missing address
+            var badReq1 = await controller.TestVaultConnection(new TestVaultRequest { Address = "" }) as BadRequestObjectResult;
+            Assert.NotNull(badReq1);
+            Assert.Equal(400, badReq1.StatusCode);
+
+            // 2. AppRole missing secretId
+            var badReq2 = await controller.TestVaultConnection(new TestVaultRequest
+            {
+                Address = "https://vault.local:8200",
+                AuthMethod = "approle",
+                RoleId = "some-role"
+            }) as BadRequestObjectResult;
+            Assert.NotNull(badReq2);
+            Assert.Equal(400, badReq2.StatusCode);
+
+            // 3. Token auth missing token
+            var badReq3 = await controller.TestVaultConnection(new TestVaultRequest
+            {
+                Address = "https://vault.local:8200",
+                AuthMethod = "token",
+                Token = ""
+            }) as BadRequestObjectResult;
+            Assert.NotNull(badReq3);
+            Assert.Equal(400, badReq3.StatusCode);
+
+            // 4. Invalid/Unreachable vault address returns Ok(success = false)
+            var failResult = await controller.TestVaultConnection(new TestVaultRequest
+            {
+                Address = "https://127.0.0.1:19999",
+                Token = "test-token"
+            }) as OkObjectResult;
+            Assert.NotNull(failResult);
+            Assert.Equal(200, failResult.StatusCode);
+        }
+
+        [Fact]
+        public async Task TestLdapConnection_ValidatesInputAndHandlesFailureGracefully()
+        {
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
+
+            // 1. Missing Server
+            var badReq1 = await controller.TestLdapConnection(new TestLdapRequest { Server = "" }) as BadRequestObjectResult;
+            Assert.NotNull(badReq1);
+            Assert.Equal(400, badReq1.StatusCode);
+
+            // 2. Plaintext port 389 with useSsl = false rejected
+            var badReq2 = await controller.TestLdapConnection(new TestLdapRequest
+            {
+                Server = "ad.local",
+                Port = 389,
+                UseSsl = false
+            }) as BadRequestObjectResult;
+            Assert.NotNull(badReq2);
+            Assert.Equal(400, badReq2.StatusCode);
+
+            // 3. Unreachable host on port 636 returns Ok(success = false)
+            var failResult = await controller.TestLdapConnection(new TestLdapRequest
+            {
+                Server = "127.0.0.1",
+                Port = 19998,
+                UseSsl = true
+            }) as OkObjectResult;
+            Assert.NotNull(failResult);
+            Assert.Equal(200, failResult.StatusCode);
         }
     }
 }
