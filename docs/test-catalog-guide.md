@@ -85,6 +85,7 @@ public class StdioTransportTests
     [Requirement(
         "TRANS-03",
         "TRANS",
+        RequirementType.Positive,
         "STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls")]
     public async Task StdioTransport_ShouldInitializeAndCallToolSuccessfully()
     {
@@ -96,8 +97,8 @@ public class StdioTransportTests
     [Requirement(
         "GUARD-03",
         "GUARD",
-        "STDIO transport rejects commands with shell metacharacters or dangerous commands",
-        isGuardrail: true)]
+        RequirementType.Negative,
+        "STDIO transport rejects commands with shell metacharacters or dangerous commands")]
     public async Task StdioTransport_ShouldThrowSecurityExceptionForShellExecutable()
     {
         // Test implementation verifying security exception thrown
@@ -105,13 +106,21 @@ public class StdioTransportTests
 }
 ```
 
+*Note:* You can also use named property syntax:
+```csharp
+[Requirement("AUTH-01", "Admin SID bypasses explicit deny policies", Type = RequirementType.Positive, Category = "AUTH")]
+```
+
 ### 4.2 Frontend Component Tests (Vitest / React Testing Library)
 
-Use JSDoc block comments immediately preceding the `it(...)` or `test(...)` declaration:
+Use structured JSDoc block comments immediately preceding the `it(...)` or `test(...)` declaration (accepts `@requirement`, `@id`, or `@req`):
 
 ```typescript
 /**
- * @requirement UI-01 UI Dashboard renders stats card, connected server list, and setup instructions
+ * @requirement UI-01
+ * @category UI
+ * @type PositiveFeature
+ * @description Dynamic form generation validates and casts schema input values
  */
 it('renders stats card, server list, and client setup guide', () => {
   render(<DashboardView />);
@@ -119,7 +128,10 @@ it('renders stats card, server list, and client setup guide', () => {
 });
 
 /**
- * @guardrail GUARD-01 GUARD Null or empty capability targets must immediately fail closed
+ * @requirement GUARD-01
+ * @category GUARD
+ * @type FailClosedGuardrail
+ * @description Null or empty capability targets must immediately fail closed
  */
 it('handles empty server list gracefully without crashing', () => {
   // Test implementation
@@ -128,11 +140,14 @@ it('handles empty server list gracefully without crashing', () => {
 
 ### 4.3 End-to-End Tests (Playwright)
 
-Use JSDoc block comments preceding `test(...)` declarations in `frontend/e2e/*.spec.ts`:
+Use structured JSDoc block comments preceding `test(...)` declarations in `frontend/e2e/*.spec.ts`:
 
 ```typescript
 /**
- * @requirement AUTH-03 AUTH SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles
+ * @requirement AUTH-03
+ * @category AUTH
+ * @type PositiveFeature
+ * @description SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles
  */
 test('Operator Context: allows overview and testbench navigation with operator identity', async ({ page }) => {
   // E2E test steps

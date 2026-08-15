@@ -96,11 +96,12 @@ Every test proof across backend C# xUnit suites, frontend Vitest component suite
   Must use the `[Requirement]` attribute from `McpRouter.Tests.Attributes`:
   ```csharp
   [Fact]
-  [Requirement("REQ-ID", RequirementCategory.Category, RequirementType.Type, "Description statement.")]
+  [Requirement("REQ-ID", "Category", RequirementType.Positive, "Description statement.")]
   public async Task Test_Name() { ... }
   ```
+  *(Or with named properties: `[Requirement("REQ-ID", "Description", Type = RequirementType.Positive, Category = "Category")]`)*
 * **Frontend Vitest & Playwright Tests (`frontend/src/test`, `frontend/e2e`)**:
-  Must include structured JSDoc `@requirement` blocks immediately preceding the test/it block:
+  Must include structured JSDoc `@requirement` (or `@id` / `@req`) blocks immediately preceding the test/it block:
   ```typescript
   /**
    * @requirement REQ-ID

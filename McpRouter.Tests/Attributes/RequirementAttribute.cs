@@ -26,5 +26,24 @@ namespace McpRouter.Tests.Attributes
                 Category = id.Substring(0, id.IndexOf('-'));
             }
         }
+
+        public RequirementAttribute(string id, string category, RequirementType type, string description)
+        {
+            Id = id;
+            Category = category;
+            Type = type;
+            Description = description;
+        }
+
+        public RequirementAttribute(string id, RequirementType type, string description)
+        {
+            Id = id;
+            Type = type;
+            Description = description;
+            if (string.IsNullOrEmpty(Category) && id.Contains('-'))
+            {
+                Category = id.Substring(0, id.IndexOf('-'));
+            }
+        }
     }
 }

@@ -38,19 +38,19 @@ namespace CatalogGenerator.Parsers
                 var jsdoc = match.Groups["jsdoc"].Value;
                 var testName = match.Groups["name"].Value.Trim();
 
-                var idMatch = Regex.Match(jsdoc, @"@id\s+([A-Za-z0-9\-_]+)");
+                var idMatch = Regex.Match(jsdoc, @"@(?:id|requirement|req)\s+([A-Za-z0-9\-_]+)", RegexOptions.IgnoreCase);
                 if (!idMatch.Success) continue;
 
                 var id = idMatch.Groups[1].Value.Trim();
 
-                var catMatch = Regex.Match(jsdoc, @"@category\s+([A-Za-z0-9\-_]+)");
+                var catMatch = Regex.Match(jsdoc, @"@category\s+([A-Za-z0-9\-_]+)", RegexOptions.IgnoreCase);
                 var category = catMatch.Success ? catMatch.Groups[1].Value.Trim() : (id.Contains('-') ? id.Substring(0, id.IndexOf('-')) : "UI");
 
-                var typeMatch = Regex.Match(jsdoc, @"@type\s+([A-Za-z0-9\-_/]+)");
+                var typeMatch = Regex.Match(jsdoc, @"@type\s+([A-Za-z0-9\-_/]+)", RegexOptions.IgnoreCase);
                 var typeStr = typeMatch.Success ? typeMatch.Groups[1].Value.ToLowerInvariant() : "positive";
                 var type = (typeStr.Contains("neg") || typeStr.Contains("guard")) ? RequirementType.Negative : RequirementType.Positive;
 
-                var descMatch = Regex.Match(jsdoc, @"@desc(?:ription)?\s+([^\r\n]+)");
+                var descMatch = Regex.Match(jsdoc, @"@desc(?:ription)?\s+([^\r\n]+)", RegexOptions.IgnoreCase);
                 var desc = descMatch.Success ? descMatch.Groups[1].Value.Trim().TrimEnd('*', '/').Trim() : testName;
 
                 // Find line number where JSDoc begins

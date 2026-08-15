@@ -38,7 +38,7 @@ Run tests via `dotnet test McpRouter.slnx`.
   - Agents **MUST** use logical, atomic commits for changes. Commit code and documentation separately or in cleanly grouped atomic commits.
 - **MANDATORY TEST REQUIREMENT ANNOTATIONS RULE**: **ALL NEW AND MODIFIED TESTS MUST BE ANNOTATED WITH REQUIREMENTS.**
   - Every test proof in C# (`McpRouter.Tests`), Vitest (`frontend/src/test`), and Playwright (`frontend/e2e`) **MUST** include requirement metadata:
-    - **C#**: `[Requirement("REQ-ID", RequirementCategory.Category, RequirementType.Type, "Description")]`
+    - **C#**: `[Requirement("REQ-ID", "Category", RequirementType.Positive, "Description")]` (or with named properties `[Requirement("REQ-ID", "Description", Type = RequirementType.Positive, Category = "Category")]`)
     - **TypeScript / JSDoc**:
       ```typescript
       /**
