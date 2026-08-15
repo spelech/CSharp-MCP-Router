@@ -16,6 +16,10 @@
     <Content Remove="McpRouter.Tests\**" />
     <EmbeddedResource Remove="McpRouter.Tests\**" />
     <None Remove="McpRouter.Tests\**" />
+    <Compile Remove="scripts\**" />
+    <Content Remove="scripts\**" />
+    <EmbeddedResource Remove="scripts\**" />
+    <None Remove="scripts\**" />
   </ItemGroup>
   
   <ItemGroup>
