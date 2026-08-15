@@ -47,6 +47,42 @@ For GitOps, declarative configurations, or automated environments:
 ### Method C: Environment Seed Migration
 The gateway auto-seeds common homelab services on its first run if they are specified in the environment (e.g., `HOMEASSISTANT_TOKEN`, `PLEX_TOKEN`, `SEERR_API_KEY`). See `Program.cs` for details.
 
+### Method D: Dynamic Docker Label Auto-Discovery (`mcp.*` labels)
+When the router container has access to the host Docker daemon (`/var/run/docker.sock:/var/run/docker.sock`), it dynamically discovers, registers, and routes to backend containers labeled with `mcp.enabled=true`.
+
+```yaml
+services:
+  my-service-mcp:
+    image: ghcr.io/org/my-service-mcp:latest
+    container_name: my-service-mcp
+    restart: unless-stopped
+    networks:
+      - net_mcp
+    labels:
+      - mcp.enabled=true
+      - mcp.id=myservice
+      - mcp.displayName=My Custom Service
+      - mcp.port=8080
+      - mcp.type=sse
+      - mcp.path=/sse
+      - mcp.categories=infrastructure,custom
+```
+
+#### Supported Docker Labels
+
+| Label | Required | Default | Description |
+| :--- | :--- | :--- | :--- |
+| `mcp.enabled` | **Yes** | `false` | Enables router auto-discovery for this container. Must be `"true"`. |
+| `mcp.id` | **Yes** | — | Unique server slug identifier (used for namespacing and direct endpoints, e.g., `/myservice`). |
+| `mcp.port` | **Yes** | — | Internal container listening port on the shared network (e.g., `8080`, `3000`). |
+| `mcp.displayName`| No | Value of `mcp.id` | Friendly name shown in dashboard cards and tool descriptions. |
+| `mcp.type` | No | `sse` | Transport type (`sse`, `http`, or `stdio`). |
+| `mcp.path` | No | `/sse` (or `/mcp`) | Message dispatching path on the container. |
+| `mcp.categories` | No | `general` | Comma-separated categories for RBAC scoping and dashboard grouping. |
+| `mcp.authType` | No | `none` | Downstream authentication header shape (`bearer`, `x-api-key`, `custom-header`). |
+| `mcp.secretProvider`| No | `none` | Dynamic secret retriever backend (`vault`, `env`, `none`). |
+| `mcp.secretKey` | No | — | Vault path or environment variable containing the server's API key/token. |
+
 ---
 
 ## 📡 2. Routing Modes
