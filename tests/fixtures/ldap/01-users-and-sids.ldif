@@ -1,0 +1,74 @@
+# Root Organizational Units
+dn: ou=users,dc=corp,dc=local
+objectClass: organizationalUnit
+ou: users
+
+dn: ou=groups,dc=corp,dc=local
+objectClass: organizationalUnit
+ou: groups
+
+# User: Admin (Administrator)
+dn: cn=Administrator,ou=users,dc=corp,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Administrator
+sn: Admin
+givenName: System
+mail: admin@corp.local
+userPassword: AdminPassword2026!
+description: S-1-5-32-544
+telephoneNumber: S-1-5-32-544
+
+# User: Alice Developer
+dn: cn=Alice Developer,ou=users,dc=corp,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Alice Developer
+sn: Developer
+givenName: Alice
+mail: alice@corp.local
+userPassword: AlicePassword2026!
+description: S-1-5-21-1001
+telephoneNumber: S-1-5-21-1001
+
+# User: Bob Operator
+dn: cn=Bob Operator,ou=users,dc=corp,dc=local
+objectClass: top
+objectClass: person
+objectClass: organizationalPerson
+objectClass: inetOrgPerson
+cn: Bob Operator
+sn: Operator
+givenName: Bob
+mail: bob@corp.local
+userPassword: BobPassword2026!
+description: S-1-5-21-1002
+telephoneNumber: S-1-5-21-1002
+
+# Group: MCP Administrators
+dn: cn=MCP Administrators,ou=groups,dc=corp,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: MCP Administrators
+member: cn=Administrator,ou=users,dc=corp,dc=local
+description: S-1-5-32-544
+
+# Group: MCP Developers
+dn: cn=MCP Developers,ou=groups,dc=corp,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: MCP Developers
+member: cn=Alice Developer,ou=users,dc=corp,dc=local
+description: S-1-5-21-2001
+
+# Group: MCP Operators
+dn: cn=MCP Operators,ou=groups,dc=corp,dc=local
+objectClass: top
+objectClass: groupOfNames
+cn: MCP Operators
+member: cn=Bob Operator,ou=users,dc=corp,dc=local
+description: S-1-5-21-2002

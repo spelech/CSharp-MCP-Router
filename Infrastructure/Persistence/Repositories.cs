@@ -82,8 +82,8 @@ namespace McpRouter.Infrastructure.Persistence
             if (exists == 0)
             {
                 const string insertSql = @"
-                    INSERT INTO Settings (Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, RequireManualApproval, GlobalMaxKeys, UserMaxKeys)
-                    VALUES ('default', @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @RequireManualApproval, @GlobalMaxKeys, @UserMaxKeys);";
+                    INSERT INTO Settings (Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys)
+                    VALUES ('default', @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys);";
                 await conn.ExecuteAsync(insertSql, settings);
             }
             else
@@ -95,7 +95,6 @@ namespace McpRouter.Infrastructure.Persistence
                         EmbeddingApiKey = @EmbeddingApiKey,
                         EmbeddingApiModel = @EmbeddingApiModel,
                         EmbeddingModelDir = @EmbeddingModelDir,
-                        RequireManualApproval = @RequireManualApproval,
                         GlobalMaxKeys = @GlobalMaxKeys,
                         UserMaxKeys = @UserMaxKeys
                     WHERE Id = 'default';";

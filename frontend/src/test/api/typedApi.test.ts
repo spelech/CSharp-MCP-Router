@@ -24,8 +24,6 @@ import {
   fetchCustomFileContentApi,
   saveCustomFileApi,
   deleteCustomFileApi,
-  fetchPendingApprovalsApi,
-  actionApprovalApi,
 } from '../../api/settingsApi';
 import { fetchTestToolsApi, fetchTestPromptsApi, fetchTestResourcesApi, fetchLogsApi, clearLogsApi } from '../../api/testbenchApi';
 
@@ -122,7 +120,6 @@ describe('Typed API Client Layer', () => {
         embeddingApiUrl: '',
         embeddingApiModel: 'all-MiniLM-L6-v2',
         embeddingApiKey: '',
-        requireManualApproval: false
       });
       expect(saveSettingsRes).toBe(true);
 
@@ -141,10 +138,6 @@ describe('Typed API Client Layer', () => {
 
       await saveCustomFileApi('prompts', 'test.json', '{}');
       await deleteCustomFileApi('prompts', 'test.json');
-
-      const approvals = await fetchPendingApprovalsApi();
-      expect(approvals).toEqual([]);
-      await actionApprovalApi('app-1', true);
     });
   });
 

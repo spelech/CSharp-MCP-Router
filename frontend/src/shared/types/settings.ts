@@ -4,7 +4,6 @@ export interface EmbeddingSettings {
   embeddingApiUrl: string;
   embeddingApiModel: string;
   embeddingApiKey: string;
-  requireManualApproval: boolean;
 }
 
 export interface AuthProviderConfig {
@@ -14,6 +13,7 @@ export interface AuthProviderConfig {
   isEnabled: boolean;
   userHeader?: string;
   groupsHeader?: string;
+  configJson?: string;
 }
 
 export interface SecretProviderConfig {
@@ -29,11 +29,4 @@ export interface CustomFileMeta {
   name: string;
   sizeBytes: number;
   lastModified: string;
-}
-
-export interface PendingApproval {
-  id: string;
-  toolName: string;
-  arguments: string;
-  sessionId: string;
 }

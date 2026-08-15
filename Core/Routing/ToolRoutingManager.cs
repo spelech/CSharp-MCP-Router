@@ -97,25 +97,6 @@ namespace McpRouter.Core.Routing
         {
             var allTools = new List<object>();
 
-            foreach (var customTool in McpRouter.CustomTools.CustomToolRegistry.GetAll())
-            {
-                bool includeTool = false;
-                if (customTool.Name.StartsWith("seerr_") && servers.Any(s => s.Id == "seerr"))
-                    includeTool = true;
-                else if (customTool.Name.StartsWith("plex_") && servers.Any(s => s.Id == "plex"))
-                    includeTool = true;
-
-                if (includeTool)
-                {
-                    allTools.Add(new
-                    {
-                        name = customTool.Name,
-                        description = customTool.Description,
-                        inputSchema = customTool.InputSchema
-                    });
-                }
-            }
-
             var tasks = new List<Task<(string ServerId, JsonElement Tools)>>();
 
             foreach (var entry in backendConnections)
@@ -381,45 +362,6 @@ namespace McpRouter.Core.Routing
             SessionManager? sessionManager,
             string? clientSessionId)
         {
-            var customTool = McpRouter.CustomTools.CustomToolRegistry.Get(toolName);
-            if (customTool != null)
-            {
-                logger.LogInformation("Executing custom native C# tool '{ToolName}'", toolName);
-                using var doc = JsonDocument.Parse(body);
-                var root = doc.RootElement;
-                var parameters = root.TryGetProperty("params", out var paramsProp) && paramsProp.TryGetProperty("arguments", out var argsProp)
-                    ? argsProp
-                    : JsonDocument.Parse("{}").RootElement;
-
-                try
-                {
-                    var result = await customTool.ExecuteAsync(parameters, httpClient, dbFactory);
-                    return new
-                    {
-                        content = new[] {
-                            new {
-                                type = "text",
-                                text = JsonSerializer.Serialize(result, new JsonSerializerOptions { WriteIndented = true })
-                            }
-                        }
-                    };
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Error executing custom tool {ToolName}", toolName);
-                    return new
-                    {
-                        isError = true,
-                        content = new[] {
-                            new {
-                                type = "text",
-                                text = $"Error executing custom tool {toolName}: {ex.Message}"
-                            }
-                        }
-                    };
-                }
-            }
-
             if (!_toolRoutingTable.ContainsKey(toolName))
             {
                 logger.LogInformation("Tool '{ToolName}' not found in routing table. Refreshing tools cache...", toolName);
@@ -436,26 +378,6 @@ namespace McpRouter.Core.Routing
             if (_toolRoutingTable.TryGetValue(toolName, out var serverId) && backendConnections.TryGetValue(serverId, out var conn))
             {
                 logger.LogInformation("Routing tool call '{ToolName}' to server '{ServerId}'", toolName, serverId);
-
-                using var dbConn = dbFactory.CreateConnection();
-                var settings = dbConn.QueryFirstOrDefault<RouterSettings>("SELECT * FROM Settings");
-                if (settings != null && settings.RequireManualApproval && ToolApprovalManager.IsSensitiveTool(toolName))
-                {
-                    var approved = await ToolApprovalManager.RequestManualApprovalAsync(toolName, body, sessionManager, serverId, logger, cancellationToken, clientSessionId);
-                    if (!approved)
-                    {
-                        return new
-                        {
-                            isError = true,
-                            content = new[] {
-                                new {
-                                    type = "text",
-                                    text = "Error: tool execution denied by security policy (Requires Manual Approval)."
-                                }
-                            }
-                        };
-                    }
-                }
 
                 string routingBody = body;
                 var prefix = serverId + "__";

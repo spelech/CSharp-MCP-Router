@@ -3,8 +3,7 @@ import {
   EmbeddingSettings,
   AuthProviderConfig,
   SecretProviderConfig,
-  CustomFileMeta,
-  PendingApproval
+  CustomFileMeta
 } from '../shared/types';
 
 export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | null> {
@@ -16,7 +15,6 @@ export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | n
     embeddingApiUrl: settings.embeddingApiUrl || '',
     embeddingApiModel: settings.embeddingApiModel || 'all-MiniLM-L6-v2',
     embeddingApiKey: settings.embeddingApiKey || '',
-    requireManualApproval: settings.requireManualApproval || false,
   };
 }
 
@@ -27,7 +25,6 @@ export async function saveEmbeddingSettingsApi(settings: EmbeddingSettings): Pro
     embeddingApiUrl: settings.embeddingApiUrl,
     embeddingApiModel: settings.embeddingApiModel,
     embeddingApiKey: settings.embeddingApiKey,
-    requireManualApproval: settings.requireManualApproval
   };
   const result = await apiRequest<{ success: boolean }>('/api/settings', {
     method: 'POST',
@@ -48,6 +45,22 @@ export async function saveAuthProviderApi(provider: AuthProviderConfig): Promise
   });
 }
 
+export async function testLdapConnectionApi(config: {
+  server: string;
+  port?: number;
+  useSsl?: boolean;
+  domain?: string;
+  baseDn?: string;
+  bindDn?: string;
+  bindPassword?: string;
+}): Promise<{ success: boolean; message?: string; error?: string }> {
+  const res = await apiRequest<{ success: boolean; message?: string; error?: string }>('/api/providers/auth/test-ad', {
+    method: 'POST',
+    body: config
+  });
+  return res || { success: false, error: 'Network error communicating with server.' };
+}
+
 export async function fetchSecretProvidersApi(): Promise<SecretProviderConfig[]> {
   const data = await apiRequest<SecretProviderConfig[]>('/api/providers/secrets');
   return data || [];
@@ -58,6 +71,21 @@ export async function saveSecretProviderApi(provider: SecretProviderConfig): Pro
     method: 'POST',
     body: provider
   });
+}
+
+export async function testVaultConnectionApi(config: {
+  address: string;
+  authMethod?: string;
+  token?: string;
+  roleId?: string;
+  secretId?: string;
+  mountPath?: string;
+}): Promise<{ success: boolean; message?: string; error?: string }> {
+  const res = await apiRequest<{ success: boolean; message?: string; error?: string }>('/api/providers/secrets/test-vault', {
+    method: 'POST',
+    body: config
+  });
+  return res || { success: false, error: 'Network error communicating with server.' };
 }
 
 export async function fetchCustomFilesApi(): Promise<CustomFileMeta[]> {
@@ -83,16 +111,4 @@ export async function deleteCustomFileApi(type: 'prompts' | 'resources', name: s
     method: 'DELETE'
   });
   return !!(result && result.success);
-}
-
-export async function fetchPendingApprovalsApi(): Promise<PendingApproval[]> {
-  const data = await apiRequest<PendingApproval[]>('/api/approvals');
-  return data || [];
-}
-
-export async function actionApprovalApi(id: string, approved: boolean): Promise<void> {
-  await apiRequest(`/api/approvals/${id}/action`, {
-    method: 'POST',
-    body: { approved }
-  });
 }

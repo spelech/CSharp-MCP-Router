@@ -2,14 +2,13 @@ import React, { useEffect, useState } from 'react';
 import { useSettingsStore } from '../../stores/useSettingsStore';
 
 import { GeneralTab } from './GeneralTab';
-import { SecurityTab } from './SecurityTab';
 import { IdentityAuthTab } from './IdentityAuthTab';
 import { SecretProvidersTab } from './SecretProvidersTab';
 import { CustomFilesTab } from './CustomFilesTab';
 import { AccessControlTab } from './AccessControlTab';
 
 export const SettingsView: React.FC = () => {
-  const [activeSubview, setActiveSubview] = useState<'search' | 'security' | 'identity' | 'secrets' | 'files' | 'permissions'>('search');
+  const [activeSubview, setActiveSubview] = useState<'search' | 'identity' | 'secrets' | 'files' | 'permissions'>('search');
 
   const {
     embeddingSettings,
@@ -43,15 +42,6 @@ export const SettingsView: React.FC = () => {
     fetchMappings();
   }, [fetchEmbeddingSettings, fetchProviders, fetchCustomFiles, fetchPolicies, fetchMappings]);
 
-  const handleToggleApproval = async (checked: boolean) => {
-    if (embeddingSettings) {
-      await saveEmbeddingSettings({
-        ...embeddingSettings,
-        requireManualApproval: checked,
-      });
-    }
-  };
-
   return (
     <div id="view-settings" className="view-panel active">
       <div
@@ -73,13 +63,6 @@ export const SettingsView: React.FC = () => {
           onClick={() => setActiveSubview('search')}
         >
           <i className="fa-solid fa-brain"></i> Vector &amp; Search
-        </button>
-        <button
-          type="button"
-          className={`tester-tab-btn settings-tab-btn ${activeSubview === 'security' ? 'active' : ''}`}
-          onClick={() => setActiveSubview('security')}
-        >
-          <i className="fa-solid fa-shield-halved"></i> Security &amp; Approvals
         </button>
         <button
           type="button"
@@ -120,15 +103,7 @@ export const SettingsView: React.FC = () => {
         />
       )}
 
-      {/* Subview 2: Security & Approvals */}
-      {activeSubview === 'security' && (
-        <SecurityTab
-          requireApproval={embeddingSettings?.requireManualApproval ?? false}
-          onToggleApproval={handleToggleApproval}
-        />
-      )}
-
-      {/* Subview 3: Identity & Auth */}
+      {/* Subview 2: Identity & Auth */}
       {activeSubview === 'identity' && (
         <IdentityAuthTab
           key={authProviders.map((p) => `${p.providerName}-${p.isEnabled}`).join(',')}
@@ -137,7 +112,7 @@ export const SettingsView: React.FC = () => {
         />
       )}
 
-      {/* Subview 4: Secret Providers */}
+      {/* Subview 3: Secret Providers */}
       {activeSubview === 'secrets' && (
         <SecretProvidersTab
           key={secretProviders.map((p) => `${p.providerName}-${p.isEnabled}`).join(',')}
@@ -146,7 +121,7 @@ export const SettingsView: React.FC = () => {
         />
       )}
 
-      {/* Subview 5: Prompts & Resources File Manager */}
+      {/* Subview 4: Prompts & Resources File Manager */}
       {activeSubview === 'files' && (
         <CustomFilesTab
           customFiles={customFiles}
@@ -155,7 +130,7 @@ export const SettingsView: React.FC = () => {
         />
       )}
 
-      {/* Subview 6: Access Control Policies */}
+      {/* Subview 5: Access Control Policies */}
       {activeSubview === 'permissions' && (
         <AccessControlTab
           policies={policies}

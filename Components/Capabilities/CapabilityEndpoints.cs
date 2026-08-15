@@ -9,7 +9,6 @@ using System.Threading.Tasks;
 using Dapper;
 using McpRouter.Components.Servers;
 using McpRouter.Core.Routing;
-using McpRouter.CustomTools;
 using McpRouter.Infrastructure.Identity;
 using McpRouter.Infrastructure.Logging;
 using McpRouter.Infrastructure.Persistence;
@@ -111,18 +110,6 @@ namespace McpRouter.Components.Capabilities
                 }
             });
 
-            api.MapGet("/api/approvals", ([FromServices] SessionManager sessionManager) =>
-            {
-                var approvals = sessionManager.PendingApprovals.Values.Select(a => new
-                {
-                    id = a.Id,
-                    toolName = a.ToolName,
-                    arguments = a.Arguments,
-                    sessionId = a.SessionId
-                }).ToList();
-                return Results.Ok(approvals);
-            });
-
             api.MapGet("/api/diagnostics", ([FromServices] SessionManager sessionManager) =>
             {
                 var proc = System.Diagnostics.Process.GetCurrentProcess();
@@ -140,37 +127,10 @@ namespace McpRouter.Components.Capabilities
                 return Results.Ok(new
                 {
                     activeSessions = sessionManager.ActiveSessionsCount,
-                    pendingApprovals = sessionManager.PendingApprovals.Count,
                     workingSet64 = proc.WorkingSet64,
                     handleCount = fdCount > 0 ? fdCount : proc.HandleCount
                 });
             }).AllowAnonymous();
-
-            api.MapPost("/api/approvals/{id}/action", async ([FromRoute] string id, [FromBody] JsonElement body, [FromServices] SessionManager sessionManager, HttpContext httpContext) =>
-            {
-                if (sessionManager.PendingApprovals.TryRemove(id, out var approval))
-                {
-                    bool approved = false;
-                    if (body.TryGetProperty("approved", out var appProp))
-                    {
-                        approved = appProp.GetBoolean();
-                    }
-                    approval.Tcs.SetResult(approved);
-
-                    var audit = httpContext.RequestServices.GetService<IAuditLogger>();
-                    if (audit != null)
-                    {
-                        var username = httpContext.User?.Identity?.Name ?? "unknown";
-                        var action = approved ? "approval.grant" : "approval.deny";
-                        var target = approval.ToolName ?? "unknown";
-                        var details = JsonSerializer.Serialize(new { id, arguments = approval.Arguments, sessionId = approval.SessionId });
-                        await audit.LogAdminActionAsync(username, action, target, details, true);
-                    }
-
-                    return Results.Ok(new { success = true });
-                }
-                return Results.NotFound(new { error = "Approval request not found." });
-            });
 
             api.MapGet("/api/test/tools", async (string? serverId, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
@@ -188,26 +148,6 @@ namespace McpRouter.Components.Capabilities
                 }
                 var allTools = new List<object>();
                 var missingServers = new List<McpServer>();
-
-                // Add custom tools from the registry
-                foreach (var customTool in CustomToolRegistry.GetAll())
-                {
-                    bool includeTool = false;
-                    if (customTool.Name.StartsWith("seerr_") && servers.Any(s => s.Id == "seerr"))
-                        includeTool = true;
-                    else if (customTool.Name.StartsWith("plex_") && servers.Any(s => s.Id == "plex"))
-                        includeTool = true;
-
-                    if (includeTool)
-                    {
-                        allTools.Add(new
-                        {
-                            name = customTool.Name,
-                            description = customTool.Description,
-                            inputSchema = customTool.InputSchema
-                        });
-                    }
-                }
 
                 foreach (var server in servers)
                 {
@@ -304,33 +244,6 @@ namespace McpRouter.Components.Capabilities
                     return Results.NotFound(msg);
                 }
 
-                // If executing a custom native tool
-                var customTool = CustomToolRegistry.Get(model.ToolName);
-                if (customTool != null)
-                {
-                    try
-                    {
-                        var args = model.Arguments.ValueKind == JsonValueKind.Undefined ? JsonDocument.Parse("{}").RootElement : model.Arguments;
-                        var res = await customTool.ExecuteAsync(args, httpClient, dbFactory);
-
-                        var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
-                        await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, true);
-
-                        return Results.Ok(new
-                        {
-                            content = new[] {
-                                new { type = "text", text = JsonSerializer.Serialize(res, new JsonSerializerOptions { WriteIndented = true }) }
-                            }
-                        });
-                    }
-                    catch (Exception ex)
-                    {
-                        var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
-                        await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, false, ex.Message);
-                        return Results.Problem(ex.Message);
-                    }
-                }
-
                 if (server == null)
                 {
                     var msg = "Server not found";
@@ -390,26 +303,6 @@ namespace McpRouter.Components.Capabilities
                 var servers = rawServers.ToList();
                 var allTools = new List<object>();
                 var missingServers = new List<McpServer>();
-
-                // Add custom tools
-                foreach (var customTool in CustomToolRegistry.GetAll())
-                {
-                    bool includeTool = false;
-                    if (customTool.Name.StartsWith("seerr_") && servers.Any(s => s.Id == "seerr"))
-                        includeTool = true;
-                    else if (customTool.Name.StartsWith("plex_") && servers.Any(s => s.Id == "plex"))
-                        includeTool = true;
-
-                    if (includeTool)
-                    {
-                        allTools.Add(new
-                        {
-                            name = customTool.Name,
-                            description = customTool.Description,
-                            inputSchema = customTool.InputSchema
-                        });
-                    }
-                }
 
                 foreach (var server in servers)
                 {

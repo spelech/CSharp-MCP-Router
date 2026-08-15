@@ -351,7 +351,6 @@ export function resetAllStores() {
     customFiles: [],
     policies: [],
     mappings: [],
-    pendingApprovals: [],
     isLoadingSettings: false,
     isSavingSettings: false,
     isCustomFileOpen: false,

@@ -1,9 +1,7 @@
 import React, { useEffect } from 'react';
 import { useServerStore, McpServer } from '../../stores/useServerStore';
-import { useSettingsStore } from '../../stores/useSettingsStore';
 
 import { StatsCard } from './StatsCard';
-import { ApprovalsCard } from '../settings/ApprovalsCard';
 import { ClientSetupGuide } from '../clients/ClientSetupGuide';
 import { ServerControlsToolbar } from './ServerControlsToolbar';
 import { ServerCard } from './ServerCard';
@@ -24,20 +22,14 @@ export const DashboardView: React.FC = () => {
     toggleGroupCollapse,
   } = useServerStore();
 
-  const { fetchApprovals } = useSettingsStore();
-
   useEffect(() => {
     fetchServers();
-    fetchApprovals();
-
     const serverPoll = setInterval(() => fetchServers(), 10000);
-    const approvalPoll = setInterval(() => fetchApprovals(), 2000);
 
     return () => {
       clearInterval(serverPoll);
-      clearInterval(approvalPoll);
     };
-  }, [fetchServers, fetchApprovals]);
+  }, [fetchServers]);
 
   // Filter & Sort
   const filtered = servers.filter((s) => {
@@ -159,7 +151,6 @@ export const DashboardView: React.FC = () => {
   return (
     <div id="view-dashboard" className="view-panel active">
       <StatsCard />
-      <ApprovalsCard />
 
       <div className="glass-card" style={{ marginTop: '20px' }}>
         <h2>

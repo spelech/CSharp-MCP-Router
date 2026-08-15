@@ -1,7 +1,7 @@
 version: '3.8'
 
 services:
-  # 1. HashiCorp Vault in dev mode pre-populated with test KV secrets
+  # 1. HashiCorp Vault in dev mode pre-populated with test KV secrets and AppRole
   vault-test:
     image: hashicorp/vault:latest
     container_name: mcp-vault-test
@@ -9,6 +9,8 @@ services:
       VAULT_DEV_ROOT_TOKEN_ID: "root-test-token"
       VAULT_DEV_LISTEN_ADDRESS: "0.0.0.0:8200"
       VAULT_ADDR: "http://127.0.0.1:8200"
+    ports:
+      - "8200:8200"
     healthcheck:
       test: ["CMD", "vault", "status"]
       interval: 5s
@@ -26,13 +28,85 @@ services:
       VAULT_TOKEN: "root-test-token"
     command: >
       sh -c '
-        echo "Populating vault secrets..." &&
+        echo "Populating vault KV secrets..." &&
         vault kv put secret/services/vault-test token=test-vault-token-123 &&
+        echo "Enabling AppRole auth..." &&
+        vault auth enable approle || true &&
+        vault policy write test-policy - <<EOF
+        path "secret/*" {
+          capabilities = ["read", "list"]
+        }
+        EOF
+        vault write auth/approle/role/test-role \
+          secret_id_ttl=10m \
+          token_num_uses=10 \
+          token_ttl=20m \
+          token_max_ttl=30m \
+          secret_id_num_uses=40 \
+          policies="test-policy" || true &&
+        vault write auth/approle/role/test-role/role-id role_id=test-role-id || true &&
+        vault write auth/approle/role/test-role/custom-secret-id secret_id=test-secret-id || true &&
         echo "Vault populated."
       '
 
+  # 2. OpenLDAP Test Container (LDAPS Port 636 + Port 389)
+  ldap-test:
+    image: osixia/openldap:latest
+    container_name: mcp-ldap-test
+    environment:
+      LDAP_ORGANISATION: "Corp Local"
+      LDAP_DOMAIN: "corp.local"
+      LDAP_ADMIN_PASSWORD: "adminpassword"
+      LDAP_TLS: "true"
+      LDAP_TLS_VERIFY_CLIENT: "never"
+    volumes:
+      - ./tests/fixtures/ldap:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
+    ports:
+      - "3389:389"
+      - "6636:636"
+    healthcheck:
+      test: ["CMD", "ldapsearch", "-x", "-H", "ldap://localhost", "-b", "dc=corp,dc=local", "-s", "base"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
 
-  # 2. Mock HTTP/SSE MCP Backend Server
+  # 3. MySQL 8.0 Test Database
+  mysql-test:
+    image: mysql:8.0
+    container_name: mcp-mysql-test
+    environment:
+      MYSQL_DATABASE: "mcp_router_test"
+      MYSQL_USER: "mcp_user"
+      MYSQL_PASSWORD: "mcp_password"
+      MYSQL_ROOT_PASSWORD: "root_password"
+    volumes:
+      - ./tests/fixtures/sql/mysql-init.sql:/docker-entrypoint-initdb.d/mysql-init.sql:ro
+    ports:
+      - "33066:3306"
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # 4. Microsoft SQL Server 2022 (Optional profile for full multi-db parity)
+  mssql-test:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: mcp-mssql-test
+    profiles: ["mssql", "full"]
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "McpRouterMSSQL2026!"
+      MSSQL_PID: "Developer"
+    ports:
+      - "14333:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P McpRouterMSSQL2026! -C -Q 'SELECT 1' || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # 5. Mock HTTP/SSE MCP Backend Server
   mock-mcp-server:
     image: node:20-alpine
     container_name: mock-mcp-server
@@ -119,7 +193,7 @@ services:
     ports:
       - "8090:8090"
 
-  # 3. Router Gateway test container instance
+  # 6. Router Gateway test container instance
   mcp-router-e2e:
     build:
       context: .
@@ -132,9 +206,20 @@ services:
       - DB_ENCRYPTION_KEY=SecurePassphraseForMcpDb2026!
       - VAULT_ADDR=http://vault-test:8200
       - VAULT_TOKEN=root-test-token
+      - Ldap__Server=ldap-test
+      - Ldap__Port=636
+      - Ldap__UseSsl=true
+      - Ldap__Domain=corp.local
+      - Ldap__BaseDn=dc=corp,dc=local
+      - Ldap__BindDn=cn=admin,dc=corp,dc=local
+      - Ldap__BindPassword=adminpassword
       - Oidc__RequireTrustedProxy=false
     depends_on:
       vault-test:
+        condition: service_healthy
+      ldap-test:
+        condition: service_healthy
+      mysql-test:
         condition: service_healthy
       mock-mcp-server:
         condition: service_started

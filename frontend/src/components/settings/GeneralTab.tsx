@@ -23,7 +23,6 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
       embeddingApiUrl: embApiUrl,
       embeddingApiModel: embApiModel,
       embeddingApiKey: embApiKey,
-      requireManualApproval: settings?.requireManualApproval ?? false,
     });
     setSaveStatus(success ? 'saved' : 'error');
     setTimeout(() => setSaveStatus('idle'), 2500);

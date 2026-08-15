@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
-using System.Security.Principal;
 using System.Threading.Tasks;
 using McpRouter.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Http;
@@ -15,17 +14,18 @@ namespace McpRouter.Infrastructure.Identity
         private readonly IConfiguration? _configuration;
         private readonly ILdapService? _ldapService;
         private readonly IAuthProviderRepository? _authRepo;
+        private readonly IWindowsIdentityAccessor _windowsIdentityAccessor;
 
-        public ActiveDirectoryIdentityProvider(IConfiguration? configuration = null, ILdapService? ldapService = null)
-            : this(configuration, ldapService, null)
-        {
-        }
-
-        public ActiveDirectoryIdentityProvider(IConfiguration? configuration, ILdapService? ldapService, IAuthProviderRepository? authRepo)
+        public ActiveDirectoryIdentityProvider(
+            IConfiguration? configuration = null,
+            ILdapService? ldapService = null,
+            IAuthProviderRepository? authRepo = null,
+            IWindowsIdentityAccessor? windowsIdentityAccessor = null)
         {
             _configuration = configuration;
             _ldapService = ldapService;
             _authRepo = authRepo;
+            _windowsIdentityAccessor = windowsIdentityAccessor ?? new WindowsIdentityAccessor();
         }
 
         public string ProviderName => "ActiveDirectory";
@@ -68,14 +68,10 @@ namespace McpRouter.Infrastructure.Identity
                 string sid = "";
                 var groups = new List<string>();
 
-                if (httpContext.User.Identity is WindowsIdentity winIdentity)
+                if (_windowsIdentityAccessor.TryGetWindowsIdentityDetails(httpContext.User.Identity, out var winSid, out var winGroups))
                 {
-#pragma warning disable CA1416
-                    sid = winIdentity.User?.Value ?? "";
-                    groups = winIdentity.Groups?
-                        .Select(g => g.Value)
-                        .ToList() ?? new List<string>();
-#pragma warning restore CA1416
+                    sid = winSid ?? "";
+                    groups = winGroups;
                 }
                 else if (httpContext.User.Identity is ClaimsIdentity claimsIdentity)
                 {

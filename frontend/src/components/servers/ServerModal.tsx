@@ -21,7 +21,7 @@ const ServerModalDialog: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.error('Submitting ServerModal form...');
+
     const serverPayload: ServerPayload = {
       displayName,
       type,
@@ -135,7 +135,7 @@ const ServerModalDialog: React.FC = () => {
               <input
                 type="text"
                 id="server-secret-key"
-                placeholder="e.g. slack/bot-token or HOMEASSISTANT_TOKEN"
+                placeholder={secretProvider === 'Vault' ? 'e.g. secret:services/my-service:token' : 'e.g. NOTES_API_KEY'}
                 value={secretKey}
                 onChange={(e) => setSecretKey(e.target.value)}
               />
