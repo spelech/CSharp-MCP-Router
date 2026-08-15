@@ -28,19 +28,22 @@ The `OidcHeaderAuthenticationHandler` takes the `UserIdentityContext` resolved b
 
 - **Role Claims:** Elements in `GroupNames` are added as `ClaimTypes.Role` claims.
 - **GroupSid Claims:** Elements in `AllSids` are added as `ClaimTypes.GroupSid` claims.
-- **The Admin SID Claim:** A special claim of type `"Sid"` is ONLY added if the user's `AllSids` collection contains the designated Admin SID (configured via `Admin:GroupSid`, default `S-1-5-32-544`). 
+- **Hybrid Admin Resolution:** If the user's `AllSids` collection contains the designated Admin SID (configured via `Admin:GroupSid`, default `S-1-5-32-544`) **OR** the user's `GroupNames` match any configured admin group names (`Admin:GroupName`, `Admin:Groups`, or default `full_admin`, `Administrator`, `Administrators`), the principal is assigned both:
+  - `Claim("Sid", adminSid)`
+  - `Claim(ClaimTypes.Role, "Administrator")`
 
 ## 3. Policy Enforcement (The "Access")
 
 ### `AdminPolicy`
 All management plane API endpoints (`/api/*`, including Settings, AppKeys, and Providers) are protected by the `AdminPolicy`.
 
-- **Requirement:** `AdminPolicy` explicitly requires the principal to possess the `"Sid"` claim matching the `Admin:GroupSid`.
-- **Consequence of Separation:** Because of the strict separation between `GroupNames` and `Sids`, an OIDC user providing `Remote-Groups: Administrators` or `Remote-Groups: S-1-5-32-544` will **NOT** be granted access to `/api/*`. The string goes into `GroupNames` (Roles), not `Sids`.
-- **To Grant Admin via Proxy:** The upstream proxy MUST send the SID via a designated SID header (e.g., `Remote-User-Sid: S-1-5-32-544`).
+- **Requirement:** `AdminPolicy` grants access if the principal possesses the `"Sid"` claim matching `Admin:GroupSid`, possesses the `Administrator` role claim, or possesses a role claim matching any configured group in `Admin:GroupName` or `Admin:Groups`.
+- **Hybrid Access:** Both Windows Active Directory users (possessing the Admin SID) and upstream OIDC / Reverse Proxy users (belonging to designated admin groups such as `full_admin` or configured in `Admin:GroupName`/`Admin:Groups`) are seamlessly authorized.
+- **Fallback Resolution:** Single-line string group headers (e.g. `sso_groups: "full_admin"`) or array-based headers (`Remote-Groups: ["full_admin", "house_member"]`) are parsed into `GroupNames` and mapped into admin roles.
 
 ## Summary
 
-The current architecture successfully achieves the goal of keeping AD SIDs completely separate from OIDC provider headers. 
+The hybrid architecture bridges enterprise Active Directory environments and cloud-native OIDC/Reverse Proxy architectures:
+- **Active Directory:** Enterprise environments rely on native Windows authentication and LDAP group SIDs (`Admin:GroupSid`).
+- **OIDC / Reverse Proxy:** SSO environments (such as PocketID, TinyAuth, Authelia, Authentik) pass group names (`Admin:GroupName`, `Admin:Groups`), granting authorized administrative access across all endpoints without requiring synthetic SID headers.
 
-If a user relies purely on `Remote-User` and `Remote-Groups` (OIDC), they will receive standard Role claims but will be explicitly denied from the Gateway's internal management APIs (`AdminPolicy`) which are strictly guarded by SID claims.

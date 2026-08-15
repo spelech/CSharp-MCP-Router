@@ -17,7 +17,13 @@
     "CertificatePassword": "MySecretCertPassword123!"
   },
   "Admin": {
-    "GroupSid": "S-1-5-32-544"
+    "GroupSid": "S-1-5-32-544",
+    "GroupName": "Domain Admins",
+    "Groups": [
+      "Domain Admins",
+      "full_admin",
+      "Administrators"
+    ]
   },
   "Oidc": {
     "TrustedProxies": "10.0.5.10,172.17.0.1",
