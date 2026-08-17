@@ -35,6 +35,13 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Set, Tuple
 
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+        sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
 
 # Terminal Colors & Styling
 class Colors:
@@ -438,7 +445,8 @@ class ReleaseVerifier:
                 env=exec_env,
                 capture_output=True,
                 text=True,
-                check=False
+                check=False,
+                shell=(sys.platform == "win32")
             )
             if result.returncode == 0:
                 self.record_check("Build & Tests", name, True, f"Command exited cleanly: {cmd_str}")
