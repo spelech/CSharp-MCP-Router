@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ namespace McpRouter.Tests
     public class ResourceRoutingTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task SearchResourcesAsync_FiltersResourcesCorrectly()
         {
             var manager = new ResourceRoutingManager();

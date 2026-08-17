@@ -8,12 +8,6 @@ test.describe('Multi-User Context Matrix Flow (Issue #50)', () => {
    * @type positive
    * @description Admin role renders full administrative dashboard and server management controls
    */
-  /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type PositiveFeature
-   * @description Resolves MCP tool calls from client to appropriate backend server
-   */
   test('Admin Context: renders full administrator view and privileged controls', async ({ adminPage }) => {
     await adminPage.goto('/');
 
@@ -43,12 +37,6 @@ test.describe('Multi-User Context Matrix Flow (Issue #50)', () => {
    * @type positive
    * @description Operator identity context allows overview and interactive test bench access
    */
-  /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type PositiveFeature
-   * @description Resolves MCP tool calls from client to appropriate backend server
-   */
   test('Operator Context: allows overview and testbench navigation with operator identity', async ({ operatorPage }) => {
     await operatorPage.goto('/');
 
@@ -68,12 +56,6 @@ test.describe('Multi-User Context Matrix Flow (Issue #50)', () => {
    * @type negative
    * @description Restricted guest context hides administrative controls and prevents unauthorized actions
    */
-  /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type PositiveFeature
-   * @description Resolves MCP tool calls from client to appropriate backend server
-   */
   test('Guest / Denied Context: restricted user session renders safely', async ({ guestPage }) => {
     await guestPage.goto('/');
 
@@ -88,12 +70,6 @@ test.describe('Multi-User Context Matrix Flow (Issue #50)', () => {
    * @category AUTH
    * @type positive
    * @description AppKey header identity context connects to dashboard with appropriate permissions
-   */
-  /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type PositiveFeature
-   * @description Resolves MCP tool calls from client to appropriate backend server
    */
   test('AppKey Direct Context: connects with API key header identity', async ({ appKeyPage }) => {
     await appKeyPage.goto('/');

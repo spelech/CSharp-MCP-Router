@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,7 +13,6 @@ namespace McpRouter.Tests
     public class ResourceRoutingManagerTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task SearchResourcesAsync_ReturnsAll_WhenQueryIsEmpty()
         {
             var manager = new ResourceRoutingManager();
@@ -29,8 +27,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task SearchResourcesAsync_FiltersByQuery_MatchingNameOrDescription()
         {
             var manager = new ResourceRoutingManager();
@@ -48,8 +44,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ReadResourceAsync_LocalBuiltInResources_ReturnCorrectJson()
         {
             var manager = new ResourceRoutingManager();
@@ -75,8 +69,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ReadResourceAsync_ThrowsKeyNotFound_WhenResourceNotRegistered()
         {
             var manager = new ResourceRoutingManager();
@@ -91,8 +83,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ListResourceTemplatesAsync_ReturnsBuiltInTemplates()
         {
             var manager = new ResourceRoutingManager();

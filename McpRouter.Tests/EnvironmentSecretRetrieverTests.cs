@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Threading.Tasks;
 using McpRouter.Infrastructure.Secrets;
@@ -9,7 +8,6 @@ namespace McpRouter.Tests
     public class EnvironmentSecretRetrieverTests
     {
         [Fact]
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task EnvironmentSecretRetriever_RetrievesSecret_FromEnvironmentVariables()
         {
             var retriever = new EnvironmentSecretRetriever();

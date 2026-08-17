@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Security;
@@ -16,7 +15,6 @@ namespace McpRouter.Tests
     public class VaultSecretRetrieverTests
     {
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public void ProviderName_ReturnsHashiCorpVault()
         {
             var retriever = new VaultSecretRetriever(new ConfigurationBuilder().Build(), new MemoryCache(new MemoryCacheOptions()));
@@ -24,8 +22,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task EnsureVaultClientAsync_ThrowsArgumentException_WhenAddressInvalidScheme()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -42,8 +38,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task EnsureVaultClientAsync_ReturnsNull_WhenCredentialsMissing()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -63,8 +57,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task EnsureVaultClientAsync_CreatesClient_WhenValidConfig()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -86,8 +78,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetSecretAsync_ReturnsCachedValue_WhenPresent()
         {
             var config = new ConfigurationBuilder().Build();
@@ -101,8 +91,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetSecretAsync_ReturnsNull_WhenClientIsNull()
         {
             var config = new ConfigurationBuilder().Build();
@@ -114,8 +102,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetSecretAsync_UsesCustomVaultClientFactory()
         {
             var config = new ConfigurationBuilder().Build();

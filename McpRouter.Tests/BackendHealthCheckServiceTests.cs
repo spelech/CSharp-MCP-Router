@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -67,8 +66,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ProbeServerAsync_Sets_Connected_When_Endpoint_Responds_200()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -108,8 +105,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ProbeServerAsync_Sets_Failed_When_Endpoint_Throws_Exception()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -144,8 +139,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -174,8 +167,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ProbeAllServersAsync_Probes_All_Enabled_Servers()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -204,8 +195,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -247,8 +236,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -280,8 +267,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ProbeServerAsync_Sets_Connected_For_Custom_Server()
         {
             var (conn, dbFactory) = CreateDbFactory();

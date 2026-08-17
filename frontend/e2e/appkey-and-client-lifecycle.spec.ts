@@ -1,12 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('AppKey and Client Lifecycle Flow', () => {
-  /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type PositiveFeature
-   * @description Resolves MCP tool calls from client to appropriate backend server
-   */
   test('should create client application and generate AppKey with scope constraints', async ({ page }) => {
     await page.goto('/');
 

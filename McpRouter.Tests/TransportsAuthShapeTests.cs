@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -24,8 +23,6 @@ namespace McpRouter.Tests
         }
 
         [Theory]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         [InlineData("bearer", "secret123", "Authorization", "Bearer secret123")]
         [InlineData("basic", "secret123", "Authorization", "Basic secret123")]
         [InlineData("raw", "secret123", "Authorization", "secret123")]
@@ -53,8 +50,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SseTransport_ApplyAuthAndCustomHeaders_Formats_CustomHeader()
         {
             var server = new McpServer
@@ -76,8 +71,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SseTransport_ApplyAuthAndCustomHeaders_Appends_QueryParameter()
         {
             var server = new McpServer
@@ -100,8 +93,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task HttpTransport_ApplyAuthAndCustomHeaders_Formats_CustomHeader()
         {
             var server = new McpServer
@@ -123,8 +114,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SseTransport_ApplyAuthAndCustomHeaders_Parses_HeadersJson()
         {
             var server = new McpServer
@@ -146,8 +135,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SseTransport_ResolveTokenAsync_Uses_Custom_Path_Field_And_Mount()
         {
             var server = new McpServer
@@ -173,8 +160,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task HttpTransport_ResolveTokenAsync_Defaults_To_Url_And_ApiKey_When_Not_Configured()
         {
             var server = new McpServer
@@ -198,8 +183,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SseTransport_ResolveTokenAsync_FailsClosed_WhenVaultResolvesNull()
         {
             var server = new McpServer

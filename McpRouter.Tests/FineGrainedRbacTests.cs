@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -93,8 +92,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task RBAC_DefaultsToDenied_WhenNoPoliciesConfigured()
         {
             var session = CreateSession("bob", new List<string> { "Users" });
@@ -104,8 +101,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task RBAC_AllowsUser_WhenPolicyMatchesRequiredGroup()
         {
             SeedPolicy("p1", "tool:ha__turn_on", "SmartHomeAdmins", true);
@@ -117,8 +112,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task RBAC_RejectsUser_WhenPolicyRequiresDifferentGroup()
         {
             SeedPolicy("p1", "tool:ha__turn_on", "SmartHomeAdmins", true);
@@ -130,8 +123,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task RBAC_RejectsUser_OnExplicitDeny()
         {
             SeedPolicy("p1", "tool:ha__turn_on", "Users", false);
@@ -143,8 +134,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task CallToolAsync_ReturnsError_WhenUnauthorized()
         {
             SeedPolicy("p1", "tool:ha__turn_on", "SmartHomeAdmins", true);
@@ -159,8 +148,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetPromptAsync_ThrowsUnauthorized_WhenUnauthorized()
         {
             SeedPolicy("p1", "prompt:secure_prompt", "Admins", true);
@@ -174,8 +161,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ReadResourceAsync_ThrowsUnauthorized_WhenUnauthorized()
         {
             SeedPolicy("p1", "resource:router://status", "Admins", true);
@@ -189,8 +174,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task RBAC_DefaultsToDenied_WhenDbExceptionThrown()
         {
             var context = new DefaultHttpContext();
@@ -217,8 +200,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ToolsList_FiltersByAuthorization()
         {
             var context = new DefaultHttpContext();

@@ -22,18 +22,6 @@ describe('CustomFileModal Component', () => {
     });
   });
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders CustomFileModal in create mode and displays visual builder tabs', () => {
     render(<CustomFileModal />);
 
@@ -42,18 +30,6 @@ describe('CustomFileModal Component', () => {
     expect(screen.getByText('Visual Prompt Builder')).toBeInTheDocument();
     expect(screen.getByText('Prompt Description')).toBeInTheDocument();
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('allows adding and removing arguments in visual builder', async () => {
     const { container } = render(<CustomFileModal />);
@@ -76,18 +52,6 @@ describe('CustomFileModal Component', () => {
     expect(remainingVarInputs.length).toBe(varInputs.length - 1);
   });
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('allows adding and removing messages in visual builder', async () => {
     const { container } = render(<CustomFileModal />);
 
@@ -109,18 +73,6 @@ describe('CustomFileModal Component', () => {
     expect(remainingMsgAreas.length).toBe(msgAreas.length - 1);
   });
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('switches between Raw JSON Editor and Visual Prompt Builder with synchronization', async () => {
     render(<CustomFileModal />);
 
@@ -131,18 +83,6 @@ describe('CustomFileModal Component', () => {
 
     expect(useSettingsStore.getState().activeFileModalTab).toBe('editor');
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('alerts when switching from invalid JSON to Visual Prompt Builder', async () => {
     useSettingsStore.setState({ activeFileModalTab: 'editor' });
@@ -159,18 +99,6 @@ describe('CustomFileModal Component', () => {
     expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Cannot switch to Visual Builder'));
   });
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('changes file type to resources and adjusts extension', async () => {
     render(<CustomFileModal />);
 
@@ -181,18 +109,6 @@ describe('CustomFileModal Component', () => {
 
     expect(screen.getByPlaceholderText('e.g. guide.md')).toBeInTheDocument();
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('submits form and calls saveCustomFile', async () => {
     const saveSpy = vi.fn().mockResolvedValue(true);
@@ -216,18 +132,6 @@ describe('CustomFileModal Component', () => {
     expect(closeSpy).toHaveBeenCalled();
   });
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders in edit mode when editingFileMeta is set', () => {
     useSettingsStore.setState({
       editingFileMeta: {
@@ -243,18 +147,6 @@ describe('CustomFileModal Component', () => {
 
     expect(screen.getByText('Edit test-doc.md')).toBeInTheDocument();
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('allows adding assistant messages, modifying argument required checkbox, and rendering empty arguments state', async () => {
     useSettingsStore.setState({

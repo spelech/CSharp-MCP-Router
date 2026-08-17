@@ -2,18 +2,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Server Inspector Modal Flow', () => {
 
-  /**
-
-   * @requirement MCP-01
-
-   * @category MCP
-
-   * @type PositiveFeature
-
-   * @description Resolves MCP tool calls from client to appropriate backend server
-
-   */
-
   test('should open Server Inspect Modal if servers are present on dashboard', async ({ page }) => {
     await page.goto('/');
 

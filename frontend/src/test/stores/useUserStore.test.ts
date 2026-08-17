@@ -3,12 +3,6 @@ import { useUserStore } from '../../stores/useUserStore';
 import { mockApiResponse } from '../setup';
 
 describe('useUserStore', () => {
-  /**
-   * @requirement UI-01
-   * @category UI
-   * @type PositiveFeature
-   * @description Renders the dashboard and visualizes MCP server states
-   */
   it('should initialize with default values', () => {
     const state = useUserStore.getState();
     expect(state.user).toBeNull();
@@ -17,12 +11,6 @@ describe('useUserStore', () => {
   });
 
   describe('loadUser', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('successfully loads user profile from /api/me', async () => {
       const mockUser = {
         authenticated: true,
@@ -44,18 +32,6 @@ describe('useUserStore', () => {
       expect(state.user?.groups).toContain('full_admin');
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('handles error response gracefully and sets unauthenticated user state', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/me', 'Unauthorized', 401, 'Unauthorized');
@@ -68,18 +44,6 @@ describe('useUserStore', () => {
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('handles network failure gracefully', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -94,18 +58,6 @@ describe('useUserStore', () => {
       expect(state.user).toEqual({ authenticated: false });
       consoleSpy.mockRestore();
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('correctly handles non-admin user role extraction', async () => {
       const standardUser = {
@@ -125,12 +77,6 @@ describe('useUserStore', () => {
   });
 
   describe('loadVersion', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('successfully updates version from /health endpoint', async () => {
       mockApiResponse('/health', { version: '4.10.2', status: 'healthy' });
 
@@ -138,18 +84,6 @@ describe('useUserStore', () => {
 
       expect(useUserStore.getState().version).toBe('4.10.2');
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('keeps existing fallback version on error', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});

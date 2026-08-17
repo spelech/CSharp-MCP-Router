@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System.Collections.Generic;
 using System.Net;
 using McpRouter.Components.Authorization;
@@ -9,7 +8,6 @@ namespace McpRouter.Tests
     public class SecurityValidationHelperTests
     {
         [Fact]
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public void IsBlockedIp_ValidatesSpecialIpRanges()
         {
             Assert.True(SecurityValidationHelper.IsBlockedIp(null!, null));
@@ -33,8 +31,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public void IsInSubnet_HandlesSpecialCases()
         {
             Assert.False(SecurityValidationHelper.IsInSubnet(null!, "10.0.0.0/8"));
@@ -47,8 +43,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public void ValidateToolOrPromptName_ValidatesNames()
         {
             var validServers = new List<string> { "docker", "plex" };
@@ -65,8 +59,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public void ValidateResourceUri_ValidatesUris()
         {
             var validServers = new List<string> { "docker", "plex" };

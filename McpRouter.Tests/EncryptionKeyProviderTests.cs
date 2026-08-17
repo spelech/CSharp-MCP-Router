@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +11,6 @@ namespace McpRouter.Tests
     public class EncryptionKeyProviderTests
     {
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public void GetDbEncryptionKey_UsesConfig_WhenProvided()
         {
             DbKeyHelper.ResetCache();
@@ -28,8 +26,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public void GetDbEncryptionKey_ThrowsInvalidOperation_WhenNotConfigured()
         {
             DbKeyHelper.ResetCache();
@@ -41,8 +37,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public void GetRouterSecret_UsesConfig_WhenProvided()
         {
             DbKeyHelper.ResetCache();
@@ -58,8 +52,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public void GetRouterSecret_FallsBackToDbEncryptionKey_WhenDbEncryptionKeyProvided()
         {
             DbKeyHelper.ResetCache();

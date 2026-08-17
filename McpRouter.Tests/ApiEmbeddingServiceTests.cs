@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ namespace McpRouter.Tests
     public class ApiEmbeddingServiceTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void CalculateCosineSimilarity_ComputesSimilarity()
         {
             var service = new ApiEmbeddingService(new HttpClient(), new RouterSettings());
@@ -23,8 +21,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void ReloadSettings_UpdatesSettings()
         {
             var service = new ApiEmbeddingService(new HttpClient(), new RouterSettings());

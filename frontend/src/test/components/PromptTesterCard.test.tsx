@@ -19,18 +19,6 @@ describe('PromptTesterCard Component', () => {
     },
   ];
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders prompt dropdown and filters by selected server', () => {
     const onServerChange = vi.fn();
     const onPromptChange = vi.fn();
@@ -53,18 +41,6 @@ describe('PromptTesterCard Component', () => {
     expect(screen.getByText('Interactive Prompt Tester')).toBeInTheDocument();
     expect(screen.getByText('Text to summarize')).toBeInTheDocument();
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('triggers arg change and form submit', () => {
     const onServerChange = vi.fn();

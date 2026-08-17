@@ -29,12 +29,6 @@ import { fetchTestToolsApi, fetchTestPromptsApi, fetchTestResourcesApi, fetchLog
 
 describe('Typed API Client Layer', () => {
   describe('serverApi', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('calls server endpoints correctly', async () => {
       mockApiResponse('/api/servers', [{ id: 's1', displayName: 'Server 1' }]);
       mockApiResponse('/api/servers/reconnect-all', { success: true });
@@ -57,12 +51,6 @@ describe('Typed API Client Layer', () => {
   });
 
   describe('clientApi and appKeyApi', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('calls client and appkey endpoints correctly', async () => {
       mockApiResponse('/api/clients', [{ id: 'c1', clientId: 'client-1', displayName: 'Client 1', isDynamic: false }]);
       mockApiResponse('/api/clients/c1', { success: true });
@@ -88,12 +76,6 @@ describe('Typed API Client Layer', () => {
   });
 
   describe('securityApi', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('calls policies and mappings endpoints correctly', async () => {
       mockApiResponse('/api/permissions/policies', [{ id: 'p1', targetId: 'server:ha', requiredGroup: 'admins', isAllowed: true }]);
       mockApiResponse(/\/api\/permissions\/policies\/p1/, { success: true });
@@ -115,12 +97,6 @@ describe('Typed API Client Layer', () => {
   });
 
   describe('settingsApi', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('calls settings, providers, custom files, approvals endpoints correctly', async () => {
       mockApiResponse('/api/settings', (_url, options) => {
         if (options?.method === 'POST') {
@@ -166,12 +142,6 @@ describe('Typed API Client Layer', () => {
   });
 
   describe('testbenchApi', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('calls testbench tool, prompt, resource, log endpoints correctly', async () => {
       mockApiResponse('/api/test/tools', [{ name: 'tool1', description: 'desc' }]);
       mockApiResponse('/api/test/prompts', [{ name: 'prompt1', description: 'desc' }]);

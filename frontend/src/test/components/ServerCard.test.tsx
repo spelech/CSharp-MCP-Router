@@ -18,18 +18,6 @@ describe('ServerCard Component', () => {
     connectionError: '',
   };
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders connected server details with badges and triggers actions', () => {
     const toggleSpy = vi.spyOn(useServerStore.getState(), 'toggleServerEnabled').mockImplementation(vi.fn());
     const editSpy = vi.spyOn(useServerStore.getState(), 'openEditModal').mockImplementation(vi.fn());
@@ -66,18 +54,6 @@ describe('ServerCard Component', () => {
     expect(toggleSpy).toHaveBeenCalledWith('docker', false);
   });
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders connecting/retrying state', () => {
     const connectingServer: McpServer = {
       ...baseServer,
@@ -88,18 +64,6 @@ describe('ServerCard Component', () => {
     render(<ServerCard server={connectingServer} />);
     expect(screen.getByText(/Connecting \(2\/5\)/i)).toBeInTheDocument();
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('renders failed state with retry button', () => {
     const reconnectSpy = vi.spyOn(useServerStore.getState(), 'reconnectServer').mockImplementation(vi.fn());
@@ -118,18 +82,6 @@ describe('ServerCard Component', () => {
     expect(reconnectSpy).toHaveBeenCalledWith('docker');
   });
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders disconnected state with connect button and hidden badge', () => {
     const reconnectSpy = vi.spyOn(useServerStore.getState(), 'reconnectServer').mockImplementation(vi.fn());
     const disconnectedServer: McpServer = {
@@ -146,18 +98,6 @@ describe('ServerCard Component', () => {
     fireEvent.click(connectBtn);
     expect(reconnectSpy).toHaveBeenCalledWith('docker');
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('renders disabled state', () => {
     const disabledServer: McpServer = {

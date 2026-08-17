@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -85,8 +84,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task SaveSecretProvider_EncryptsConfigJson_AtRestInDatabase()
         {
             var plainConfig = "{\"address\":\"https://vault.corp.local:8200\",\"token\":\"s.SuperSecretVaultToken12345\"}";
@@ -115,8 +112,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task SaveAuthProvider_EncryptsConfigJson_AtRestInDatabase()
         {
             var plainConfig = "{\"server\":\"ldaps.corp.local\",\"bindPassword\":\"P@ssw0rdServiceAccount999!\",\"useSsl\":true}";
@@ -147,8 +142,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task ProvidersController_GetEndpoints_RedactSensitiveSecrets()
         {
             var secretDto = new SecretProviderDto
@@ -203,8 +196,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task ProvidersController_SaveEndpoints_RedactAuditLogPayloads()
         {
             var loggedActions = new List<(string Action, string Target, string Details, bool Success)>();
@@ -237,8 +228,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task ProvidersController_MaskPreserving_PreservesExistingDecryptedSecret_WhenMaskSubmitted()
         {
             // Seed initial config
@@ -276,8 +265,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task FailClosedValidation_RejectsInvalidJson_AndInsecureUrls()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -315,8 +302,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task VaultSecretRetriever_DynamicallyLoadsAndAppliesDbConfig_WithReload()
         {
             var cache = new MemoryCache(new MemoryCacheOptions());
@@ -352,8 +337,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task HeaderIdentityProvider_DynamicallyLoadsAndAppliesDbConfig()
         {
             var headerProvider = new HeaderIdentityProvider(new ConfigurationBuilder().Build(), _repo);
@@ -388,8 +371,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public async Task LdapActiveDirectoryService_RespectsDisabledStatusInDatabase()
         {
             var authDto = new AuthProviderDto

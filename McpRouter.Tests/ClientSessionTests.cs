@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
@@ -69,8 +68,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ClientSession_InitializationAndLifecycle_ExecutesSuccessfully()
         {
             var (conn, dbFactory) = CreateDbFactory();

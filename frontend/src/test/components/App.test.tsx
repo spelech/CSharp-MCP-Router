@@ -3,12 +3,6 @@ import { render, screen, fireEvent, act } from '@testing-library/react';
 import App from '../../App';
 
 describe('App component', () => {
-  /**
-   * @requirement UI-01
-   * @category UI
-   * @type PositiveFeature
-   * @description Renders the dashboard and visualizes MCP server states
-   */
   it('renders header, navigation tabs, and default overview dashboard', async () => {
     await act(async () => {
       render(<App />);
@@ -20,18 +14,6 @@ describe('App component', () => {
     // Footer is rendered
     expect(screen.getByText(/Protected by OIDC \/ Reverse Proxy Auth/i)).toBeInTheDocument();
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('switches between tabs on navigation click', async () => {
     await act(async () => {

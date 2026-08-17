@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -21,7 +20,6 @@ namespace McpRouter.Tests
     public class AuditSidAttributionTests
     {
         [Fact]
-        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task HeaderIdentityProvider_Extracts_RemoteUserSid_And_Populates_Sid()
         {
             var context = new DefaultHttpContext();
@@ -44,8 +42,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task AppKeyAuthenticationHandler_Emits_Sid_Claim_When_OwnerSid_Present()
         {
             var services = new ServiceCollection();
@@ -80,8 +76,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task AppKeyIdentityProvider_ResolvesOwnerAndSid_FromHttpContextItems()
         {
             // Simulates what AppKeyAuthenticationHandler stashes after validating a key.
@@ -99,8 +93,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task AppKeyIdentityProvider_ReturnsAnonymous_WhenNoAppKey()
         {
             var context = new DefaultHttpContext();

@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -16,7 +15,6 @@ namespace McpRouter.Tests
     public class LdapActiveDirectoryServiceTests
     {
         [Theory]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         [InlineData("user*name", "user\\2aname")]
         [InlineData("user(name)", "user\\28name\\29")]
         [InlineData("user\\name", "user\\5cname")]
@@ -29,8 +27,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void ConvertSidBytesToString_FormatsValidBinarySid()
         {
             // Binary representation of S-1-5-32-544 (Builtin Administrators)
@@ -41,8 +37,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void ConvertSidBytesToString_ReturnsEmpty_OnInvalidBytes()
         {
             Assert.Equal(string.Empty, LdapActiveDirectoryService.ConvertSidBytesToString(null!));
@@ -50,8 +44,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ResolveUserSidsAsync_ReturnsEmpty_WhenUsernameEmpty()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
@@ -62,8 +54,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ResolveUserSidsAsync_ReturnsEmpty_WhenServerNotConfigured()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
@@ -74,8 +64,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ResolveUserSidsAsync_ThrowsInvalidOperation_WhenPlaintextLdapConfigured()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -90,8 +78,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ActiveDirectoryIdentityProvider_ReturnsAnonymous_WhenUntrustedProxy()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -108,8 +94,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ActiveDirectoryIdentityProvider_ReturnsAnonymous_WhenNotWindowsAuth()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -125,8 +109,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ActiveDirectoryIdentityProvider_ResolvesLdapSids_WhenLdapServiceProvided()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

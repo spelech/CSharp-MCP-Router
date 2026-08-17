@@ -1,12 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('LDAP and Active Directory Identity Flow', () => {
-  /**
-   * @requirement AUTH-01
-   * @category AUTH
-   * @type Negative
-   * @description AdminPolicy allows principal with configured Admin Group Name
-   */
   test('should configure LDAP identity provider, test connection, and save settings', async ({ page }) => {
     // Navigate to Settings
     await page.goto('/');

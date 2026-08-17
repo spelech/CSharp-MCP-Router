@@ -11,35 +11,11 @@ describe('PolicyModal component', () => {
     isAllowed: true
   };
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders nothing when isPolicyModalOpen is false', () => {
     useSettingsStore.setState({ isPolicyModalOpen: false, editingPolicy: null });
     const { container } = render(<PolicyModal />);
     expect(container.firstChild).toBeNull();
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('renders create policy form with default inputs', () => {
     useSettingsStore.setState({ isPolicyModalOpen: true, editingPolicy: null });
@@ -51,18 +27,6 @@ describe('PolicyModal component', () => {
     expect(screen.getByLabelText('Policy Mode')).toHaveValue('true');
   });
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders edit policy form pre-filled with policy data', () => {
     useSettingsStore.setState({ isPolicyModalOpen: true, editingPolicy: existingPolicy });
     render(<PolicyModal />);
@@ -72,18 +36,6 @@ describe('PolicyModal component', () => {
     expect(screen.getByLabelText('Required Group / Internal Group')).toHaveValue('docker_admins');
     expect(screen.getByLabelText('Policy Mode')).toHaveValue('true');
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('submits form with constructed payload for DENY policy', async () => {
     const saveSpy = vi.fn().mockResolvedValue(undefined);
@@ -105,18 +57,6 @@ describe('PolicyModal component', () => {
       isAllowed: false
     });
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('closes modal on cancel click', () => {
     const closeSpy = vi.fn();
