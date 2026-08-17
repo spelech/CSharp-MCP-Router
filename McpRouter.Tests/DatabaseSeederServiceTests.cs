@@ -102,7 +102,6 @@ namespace McpRouter.Tests
                         EmbeddingApiKey TEXT,
                         EmbeddingApiModel TEXT,
                         EmbeddingModelDir TEXT,
-                        RequireManualApproval INTEGER DEFAULT 0,
                         GlobalMaxKeys INTEGER DEFAULT 100,
                         UserMaxKeys INTEGER DEFAULT 5
                     );";

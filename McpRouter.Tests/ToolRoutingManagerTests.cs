@@ -29,13 +29,13 @@ namespace McpRouter.Tests
             connection.Execute(@"
                 CREATE TABLE IF NOT EXISTS Settings (
                     Id TEXT PRIMARY KEY,
-                    RequireManualApproval INTEGER DEFAULT 0
+                    INTEGER DEFAULT 0
                 );
             ");
 
             if (requireManualApproval)
             {
-                connection.Execute("INSERT INTO Settings (Id, RequireManualApproval) VALUES ('default', 1)");
+                connection.Execute("INSERT INTO Settings (Id) VALUES ('default')");
             }
 
             var mockDbFactory = new Mock<IDbConnectionFactory>();
@@ -178,3 +178,4 @@ namespace McpRouter.Tests
         }
     }
 }
+
