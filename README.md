@@ -1,9 +1,9 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.17.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.17.5-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-543%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-544%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -134,11 +134,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.17.5`** | 2026-08-17 | chore(release): bump version to 4.17.5 and align verification badges |
 | **`v4.17.4`** | 2026-08-17 | test(coverage): close frontend unit, Playwright E2E, and live MySQL repository coverage gaps |
 | **`v4.17.3`** | 2026-08-17 | test(reqs): add formal requirement annotations for SEC-04 DPAPI and AUTH-04 Windows Identity |
 | **`v4.17.2`** | 2026-08-17 | docs(coverage): update test coverage report and evaluation with Windows IIS and DPAPI validation findings |
 | **`v4.17.1`** | 2026-08-17 | fix(windows): resolve IIS ANCM in-process web.config schema, default registry secret path, and deployment scripts |
-| **`v4.17.0`** | 2026-08-16 | feat(windows): add production Windows IIS deployment scripts, Windows Service runner, environment diagnostic validation suite, and comprehensive Windows deployment guide |
 
 ---
 

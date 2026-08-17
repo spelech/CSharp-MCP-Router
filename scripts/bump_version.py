@@ -141,9 +141,17 @@ def main():
                 trimmed_rows = table_rows[:5]
                 lines = lines[:sep_index + 1] + trimmed_rows + lines[end_index:]
 
+            updated_readme = "\n".join(lines) + "\n"
+            # Also update version badge: ![Version](https://img.shields.io/badge/version-vX.Y.Z-orange?style=for-the-badge)
+            updated_readme = re.sub(
+                r'(!\[Version\]\(https://img\.shields\.io/badge/version-v).*?(-orange\?style=for-the-badge\))',
+                fr'\g<1>{new_version}\g<2>',
+                updated_readme
+            )
+
             with open(readme_path, "w", encoding="utf-8", newline="\n") as f:
-                f.write("\n".join(lines) + "\n")
-            print(f"Updated {readme_path} (top-5 preview)")
+                f.write(updated_readme)
+            print(f"Updated {readme_path} (top-5 preview and version badge)")
         else:
             print("Warning: Could not find changelog table header separator in README.md.")
     else:

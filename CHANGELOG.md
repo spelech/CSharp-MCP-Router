@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.17.5`** | 2026-08-17 | chore(release): bump version to 4.17.5 and align verification badges |
 | **`v4.17.4`** | 2026-08-17 | test(coverage): close frontend unit, Playwright E2E, and live MySQL repository coverage gaps |
 | **`v4.17.3`** | 2026-08-17 | test(reqs): add formal requirement annotations for SEC-04 DPAPI and AUTH-04 Windows Identity |
 | **`v4.17.2`** | 2026-08-17 | docs(coverage): update test coverage report and evaluation with Windows IIS and DPAPI validation findings |
