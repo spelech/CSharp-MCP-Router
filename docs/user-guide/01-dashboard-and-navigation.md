@@ -10,7 +10,7 @@ The web interface features a dark-mode glassmorphic design with a fixed top navi
 
 ```
 +---------------------------------------------------------------------------------------------+
-| 🌐 MCP Router Gateway   [Overview]  [App Keys & Security]  [Test Bench]  [Settings]   👤 steve |
+| 🌐 MCP Router Gateway   [Overview]  [App Keys & Security]  [Test Bench]  [Settings]   👤 admin |
 +---------------------------------------------------------------------------------------------+
 ```
 

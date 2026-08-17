@@ -163,7 +163,7 @@ Every request evaluates against the identical authorization pipeline:
 
 ### Dual Identity Providers
 - **Active Directory (Kerberos/NTLM)**: Resolves caller identities using standard Active Directory SIDs (`WindowsIdentity`).
-- **OIDC Header Proxy (PocketID / TinyAuth)**: Extracts SSO-managed HTTP headers (e.g., `Remote-User`, `Remote-Groups`).
+- **OIDC Header Proxy**: Extracts SSO-managed HTTP headers (e.g., `Remote-User`, `Remote-Groups`) from reverse proxies (Authentik, Authelia, PocketID, Keycloak, Traefik, Caddy, Nginx).
 
 ### Group & SID Mapping Policy
 External groups are mapped to virtual internal groups via the database `GroupMappings` table (accessible through the Web Dashboard UI under Settings -> Identity & Auth):

@@ -13,7 +13,7 @@ AppKeys grant external clients secure, authenticated access to the router withou
 | 🔑 Generate New App Key                                                    [X] |
 +-------------------------------------------------------------------------------+
 | Key Label / Description: [ Cursor IDE Workstation                           ] |
-| Assigned User Principal: [ steve                                            ] |
+| Assigned User Principal: [ admin                                            ] |
 |                                                                               |
 | Access Scopes:                                                                |
 |   (•) Global Administrator (*)                                                |

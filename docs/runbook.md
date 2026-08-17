@@ -32,7 +32,7 @@ services:
       - Database__Provider=SQLite
       - Database__ConnectionString=Data Source=/data/mcp-router.db
       - Security__MasterKey=${MCP_ROUTER_MASTER_KEY}
-      - CORS_ALLOWED_ORIGINS=https://mcp.wileyriley.com,http://10.0.0.10:8026
+      - CORS_ALLOWED_ORIGINS=https://mcp.yourdomain.com,http://10.0.0.10:8026
       - EMBEDDING_MODEL_DIR=/data/models
     volumes:
       - /containers/mcp/router/data:/data
@@ -46,7 +46,7 @@ services:
           cpus: "0.2"
           memory: 256M
     labels:
-      - caddy=mcp.wileyriley.com
+      - caddy=mcp.yourdomain.com
       - caddy.import_1=cloudflare
       - caddy.import_2=tinyauth
       - caddy.reverse_proxy={{upstreams 8080}}
@@ -122,9 +122,9 @@ Because the router uses Server-Sent Events (`SSE`) for streaming JSON-RPC respon
 Caddy handles SSE streams out of the box. Forward identity headers from your authentication middleware:
 
 ```caddy
-mcp.wileyriley.com {
+mcp.yourdomain.com {
     import cloudflare
-    import tinyauth
+    import forward_auth
 
     # Pass forward-auth user and group claims
     reverse_proxy mcp-router:8080 {

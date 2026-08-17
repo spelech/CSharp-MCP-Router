@@ -78,7 +78,7 @@ Manages incoming authentication and user identity resolution:
 * Configure Domain Controller endpoints, Base DN, and service account credentials.
 
 ### 2. OIDC / Reverse Proxy Headers Provider
-* Enable or disable header-based identity inspection from reverse proxies (TinyAuth, PocketID, Authelia).
+* Enable or disable header-based identity inspection from reverse proxies (Authentik, Authelia, PocketID, Keycloak, Traefik, Caddy, Nginx, etc.).
 * Custom header field names: `Remote-User`, `Remote-Groups`, `Remote-Email`, `Remote-Name`.
 
 ### 3. OpenIddict OAuth 2.0 Authorization Server

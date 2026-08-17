@@ -33,7 +33,7 @@ This document provides an executive summary of the internal architecture, securi
 graph TD
     Client["Client App / LLM Agent (Cursor, Claude, Antigravity, OpenClaw)"]
     Middleware["McpDualSpecMiddleware<br>(2026-07-28 Spec Headers & Body Fallback)"]
-    Identity["CompositeIdentityProvider<br>(Active Directory LDAP & TinyAuth/PocketID OIDC)"]
+    Identity["CompositeIdentityProvider<br>(Active Directory LDAP & OIDC / Reverse Proxy Headers)"]
     AuthEvaluator["sp_EvaluateUserAccess<br>(Provider-Specific Group SIDs / Roles)"]
     Secrets["CompositeSecretRetriever<br>(Vault KV v2, Windows Registry DPAPI, Env)"]
     Audit["AuditLogger & PiiSanitizer<br>(sp_InsertAuditLog)"]

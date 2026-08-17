@@ -85,10 +85,10 @@ graph TD
 ```
 
 ### 1. Reverse Proxy SSO Headers (`OidcHeader`)
-* Integrates with identity proxies such as **PocketID**, **TinyAuth**, **Authelia**, or **Authentik**.
+* Integrates with identity proxies such as **Authentik**, **Authelia**, **PocketID**, **Keycloak**, or **Traefik/Caddy/Nginx**.
 * Inspects standard forward-auth headers:
-  * `Remote-User`: Username or UPN (e.g. `steve`).
-  * `Remote-Groups`: Comma-delimited list of group claims (e.g. `full_admin, house_member, devops`).
+  * `Remote-User`: Username or UPN (e.g. `admin`).
+  * `Remote-Groups`: Comma-delimited list of group claims (e.g. `full_admin, engineering, devops`).
   * `Remote-Email`: User email address.
   * `Remote-Name`: Full display name.
 
