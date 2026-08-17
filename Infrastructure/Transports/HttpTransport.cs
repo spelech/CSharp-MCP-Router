@@ -17,6 +17,7 @@ namespace McpRouter.Infrastructure.Transports
 {
     public class HttpTransport : ITransport
     {
+        private readonly string? _passThroughToken;
         public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
@@ -25,8 +26,9 @@ namespace McpRouter.Infrastructure.Transports
         private readonly CancellationTokenSource _cts = new();
         private string _sessionId = string.Empty;
 
-        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null)
+        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null)
         {
+            _passThroughToken = passThroughToken;
             _server = server;
             _httpClient = httpClient;
             _logger = logger;
@@ -35,6 +37,11 @@ namespace McpRouter.Infrastructure.Transports
 
         public async Task<string?> ResolveTokenAsync(ISecretRetriever? secretRetriever = null)
         {
+            if (_server.AllowPassThroughAuth && !string.IsNullOrEmpty(_passThroughToken))
+            {
+                return _passThroughToken;
+            }
+
             var provider = _server.SecretProvider ?? "None";
             if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
             {

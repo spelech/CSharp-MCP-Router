@@ -18,6 +18,7 @@ namespace McpRouter.Infrastructure.Transports
 {
     public class SseTransport : ITransport
     {
+        private readonly string? _passThroughToken;
         public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
@@ -37,8 +38,9 @@ namespace McpRouter.Infrastructure.Transports
             Converters = { new JsonRpcMessageConverter() }
         };
 
-        public SseTransport(McpServer server, HttpClient httpClient, ILogger logger, JsonRpcStateManager stateManager, ISecretRetriever? secretRetriever = null)
+        public SseTransport(McpServer server, HttpClient httpClient, ILogger logger, JsonRpcStateManager stateManager, ISecretRetriever? secretRetriever = null, string? passThroughToken = null)
         {
+            _passThroughToken = passThroughToken;
             _server = server;
             _httpClient = httpClient;
             _logger = logger;
@@ -48,6 +50,11 @@ namespace McpRouter.Infrastructure.Transports
 
         public async Task<string?> ResolveTokenAsync(ISecretRetriever? secretRetriever = null)
         {
+            if (_server.AllowPassThroughAuth && !string.IsNullOrEmpty(_passThroughToken))
+            {
+                return _passThroughToken;
+            }
+
             var provider = _server.SecretProvider ?? "None";
             if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
