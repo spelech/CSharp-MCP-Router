@@ -54,10 +54,13 @@ namespace McpRouter.Infrastructure.Identity
                 {
                     var dbAuthProviders = await authRepo.GetAuthProvidersAsync();
                     var oidcDb = dbAuthProviders?.FirstOrDefault(p =>
-                        string.Equals(p.ProviderName, "PocketID_TinyAuth", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(p.ProviderName, "PocketID", StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(p.ProviderName, "HeaderAuth", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(p.ProviderName, "Oidc", StringComparison.OrdinalIgnoreCase));
+                        string.Equals(p.ProviderName, "Oidc", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(p.ProviderName, "OIDC_ReverseProxy", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(p.ProviderName, "OidcHeader", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(p.ProviderName, "SSO", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(p.ProviderName, "PocketID_TinyAuth", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(p.ProviderName, "PocketID", StringComparison.OrdinalIgnoreCase));
 
                     if (oidcDb != null)
                     {

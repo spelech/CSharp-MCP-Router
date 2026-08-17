@@ -80,11 +80,11 @@ namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
             try
             {
                 using var conn = dbFactory.CreateConnection();
-                const string checkPrefix = "mcp-global-steve";
+                const string checkPrefix = "mcp-global-admin";
                 var existingKey = conn.QueryFirstOrDefault<string>("SELECT Id FROM AppKeys WHERE KeyPrefix = @KeyPrefix;", new { KeyPrefix = checkPrefix });
                 if (string.IsNullOrEmpty(existingKey))
                 {
-                    const string defaultPlaintextKey = "mcp-global-steve-default-cli-key-99";
+                    const string defaultPlaintextKey = "mcp-global-admin-default-cli-key-99";
                     using var sha256 = SHA256.Create();
                     var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(defaultPlaintextKey));
                     var hashedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
@@ -93,7 +93,7 @@ namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
                     {
                         Id = Guid.NewGuid().ToString("N"),
                         Name = "CLI Default Admin Key",
-                        Username = "steve",
+                        Username = "admin",
                         KeyPrefix = checkPrefix,
                         EncryptedKey = hashedKey,
                         ScopesJson = "[\"all\"]",
@@ -135,7 +135,7 @@ namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
                             defaultKey.ExpiresAt
                         }, commandType: System.Data.CommandType.StoredProcedure);
                     }
-                    logger.LogInformation("Seeded default CLI Admin AppKey for 'steve'.");
+                    logger.LogInformation("Seeded default CLI Admin AppKey for 'admin'.");
                 }
             }
             catch (Exception exSeedKey)

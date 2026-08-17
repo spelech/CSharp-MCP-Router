@@ -36,7 +36,7 @@ const MappingModalDialog: React.FC = () => {
             <input
               type="text"
               id="mapping-external"
-              placeholder="e.g. S-1-5-21-... or pocketid_admins"
+              placeholder="e.g. S-1-5-21-... or devops_admins"
               value={externalId}
               onChange={(e) => setExternalId(e.target.value)}
               required
