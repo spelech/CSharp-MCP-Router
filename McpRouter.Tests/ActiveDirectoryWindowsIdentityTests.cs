@@ -4,6 +4,7 @@ using System.Security.Principal;
 using System.Threading.Tasks;
 using FluentAssertions;
 using McpRouter.Infrastructure.Identity;
+using McpRouter.Tests.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Moq;
@@ -14,6 +15,7 @@ namespace McpRouter.Tests
     public class ActiveDirectoryWindowsIdentityTests
     {
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP")]
         public async Task ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor()
         {
             var mockWindowsAccessor = new Mock<IWindowsIdentityAccessor>();
@@ -51,6 +53,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP")]
         public async Task ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided()
         {
             var mockWindowsAccessor = new Mock<IWindowsIdentityAccessor>();

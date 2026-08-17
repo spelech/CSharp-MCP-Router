@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **21 Requirements Verified** across **91 Test Proofs** (16 Functional Capabilities, 5 Safety Guardrails).
+> **Catalog Statistics:** **23 Requirements Verified** across **95 Test Proofs** (18 Functional Capabilities, 5 Safety Guardrails).
 
 ---
 
@@ -9,11 +9,11 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **3** | 2 | 1 | 28 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **4** | 3 | 1 | 30 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **4** | 0 | 4 | 21 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **2** | 2 | 0 | 3 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **3** | 3 | 0 | 7 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **4** | 4 | 0 | 9 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 7 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **4** | 4 | 0 | 21 proofs |
 
@@ -44,6 +44,13 @@
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L331`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L331) (`Pairwise_SsoIdentityAndGroupMappings_EvaluateCorrectly`)
   - [Playwright E2E] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/multi-user-matrix.spec.ts#L34`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/multi-user-matrix.spec.ts#L34) (`Operator Context: allows overview and testbench navigation with operator identity`)
   - [Playwright E2E] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/rbac-enforcement-flow.spec.ts#L4`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/rbac-enforcement-flow.spec.ts#L4) (`should create, verify, and delete RBAC policy and SID mapping`)
+
+### `[AUTH-04]` ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L17`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L17) (`ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor`)
+  - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L55`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L55) (`ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided`)
 
 ### `[DB-01]` SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
@@ -93,6 +100,13 @@
 * **Verification Proofs (2):**
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs#L366`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs#L366) (`TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted`)
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs#L425`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs#L425) (`TrustedProxyHelper_ConfiguredProxyTrusted_CIDR`)
+
+### `[SEC-04]` WindowsRegistrySecretRetriever securely decrypts DPAPI LocalMachine machine-level encrypted binary values and retrieves plaintext registry strings
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs#L16`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs#L16) (`GetSecretAsync_ReturnsPlainString_WhenRegistryValueIsString`)
+  - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs#L31`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs#L31) (`GetSecretAsync_DecryptsDpapiBytes_WhenRegistryValueIsByteArray`)
 
 ### `[TRANS-01]` SSE transport resolves static plaintext API keys when provider is None
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -233,6 +247,7 @@
 | `AUTH-01` | **Guardrail** | `AUTH` | AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin) | [`AdminPolicyHybridAuthTests.cs:L18`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L18) | Backend xUnit |
 | `AUTH-02` | Positive | `AUTH` | AppKeys can be created with category-level scopes for downstream tool filtering | [`CategoryScopedAppKeysTests.cs:L212`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L212) | Backend xUnit |
 | `AUTH-03` | Positive | `AUTH` | SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles | [`PairwiseIntegrationMatrixTests.cs:L331`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L331) | Backend xUnit |
+| `AUTH-04` | Positive | `AUTH` | ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP | [`ActiveDirectoryWindowsIdentityTests.cs:L17`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L17) | Backend xUnit |
 | `DB-01` | Positive | `DB` | SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data | [`DatabaseSchemaUpgradeAndContractTests.cs:L43`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L43) | Backend xUnit |
 | `DB-02` | Positive | `DB` | MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly | [`DatabaseSchemaUpgradeAndContractTests.cs:L198`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198) | Backend xUnit |
 | `GUARD-01` | **Guardrail** | `GUARD` | Non-admin callers cannot create AppKeys with unconfigured categories | [`CategoryScopedAppKeysTests.cs:L235`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L235) | Backend xUnit |
@@ -244,6 +259,7 @@
 | `SEC-01` | Positive | `SEC` | VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials | [`VaultAppRoleAndRenewalTests.cs:L23`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L23) | Backend xUnit |
 | `SEC-02` | Positive | `SEC` | STDIO transport securely injects secret credentials via environment variables rather than command-line arguments | [`StdioTransportTests.cs:L354`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs#L354) | Backend xUnit |
 | `SEC-03` | Positive | `SEC` | Ensure TrustedProxyHelper supports CIDR ranges in XFF validation | [`IdentityProviderTests.cs:L366`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs#L366) | Backend xUnit |
+| `SEC-04` | Positive | `SEC` | WindowsRegistrySecretRetriever securely decrypts DPAPI LocalMachine machine-level encrypted binary values and retrieves plaintext registry strings | [`WindowsRegistrySecretRetrieverTests.cs:L16`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs#L16) | Backend xUnit |
 | `TRANS-01` | Positive | `TRANS` | SSE transport resolves static plaintext API keys when provider is None | [`SseTransportTests.cs:L18`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/SseTransportTests.cs#L18) | Backend xUnit |
 | `TRANS-02` | Positive | `TRANS` | HTTP stateless transport resolves static API keys when secret provider is None | [`HttpTransportTests.cs:L19`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/HttpTransportTests.cs#L19) | Backend xUnit |
 | `TRANS-03` | Positive | `TRANS` | STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls | [`StdioTransportTests.cs:L59`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs#L59) | Backend xUnit |
