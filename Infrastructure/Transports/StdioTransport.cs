@@ -16,6 +16,7 @@ namespace McpRouter.Infrastructure.Transports
 {
     public class StdioTransport : ITransport
     {
+        private readonly string? _passThroughToken;
         public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
         private readonly McpServer _server;
         private readonly ILogger _logger;
@@ -36,8 +37,9 @@ namespace McpRouter.Infrastructure.Transports
             Converters = { new JsonRpcMessageConverter() }
         };
 
-        public StdioTransport(McpServer server, ILogger logger, JsonRpcStateManager stateManager, ISecretRetriever? secretRetriever = null)
+        public StdioTransport(McpServer server, ILogger logger, JsonRpcStateManager stateManager, ISecretRetriever? secretRetriever = null, string? passThroughToken = null)
         {
+            _passThroughToken = passThroughToken;
             _server = server;
             _logger = logger;
             _stateManager = stateManager;
@@ -46,6 +48,11 @@ namespace McpRouter.Infrastructure.Transports
 
         public async Task<string?> ResolveTokenAsync(ISecretRetriever? secretRetriever = null)
         {
+            if (_server.AllowPassThroughAuth && !string.IsNullOrEmpty(_passThroughToken))
+            {
+                return _passThroughToken;
+            }
+
             var provider = _server.SecretProvider ?? "None";
             if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
             {

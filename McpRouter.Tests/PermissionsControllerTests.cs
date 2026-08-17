@@ -232,5 +232,17 @@ namespace McpRouter.Tests
             Assert.NotNull(result);
             Assert.Equal(500, result.StatusCode);
         }
+    
+        [Fact]
+        [Requirement("REQ-PERM-GUARD-01", "GUARD", RequirementType.Positive, "Must reject saving a policy with TargetId = '*' and IsAllowed = false.")]
+        public async Task SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy()
+        {
+            var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
+            var policy = new McpAccessPolicy { TargetId = "*", RequiredGroup = "admin", IsAllowed = false };
+            var result = await controller.SavePolicy(policy) as BadRequestObjectResult;
+            
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
+        }
     }
 }

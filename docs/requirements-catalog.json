@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-17T06:13:45.5083223Z",
-    "totalRequirements": 23,
-    "positiveCount": 18,
+    "generatedAt": "2026-08-17T20:05:26.3026785Z",
+    "totalRequirements": 25,
+    "positiveCount": 20,
     "guardrailCount": 5,
-    "totalProofs": 102
+    "totalProofs": 104
   },
   "requirements": [
     {
@@ -16,98 +16,98 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
           "lineNumber": 18,
           "testName": "AdminPolicy_Allows_Principal_With_AdminGroupName",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
           "lineNumber": 52,
           "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
           "lineNumber": 86,
           "testName": "AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
           "lineNumber": 121,
           "testName": "AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
           "lineNumber": 21,
           "testName": "AdminPolicy_Denies_StandardRole_Without_AdminSid",
           "details": "Verifies that users with standard/unconfigured role names lacking explicit Admin SID claim or Admin Group are denied by AdminPolicy."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
           "lineNumber": 63,
           "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
           "details": "Verifies that principals with the configured Admin SID are granted administrative policy access."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 273,
           "testName": "AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds",
           "details": "Verifies that admin callers can create forward-looking AppKeys for unconfigured categories."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 226,
           "testName": "SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 244,
           "testName": "SecurityValidationHelper_IsAdmin_AllowsAdminGroupName",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 258,
           "testName": "SecurityValidationHelper_IsAdmin_RejectsNonAdminGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 275,
           "testName": "SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 290,
           "testName": "SecurityValidationHelper_IsAdmin_AllowsMappedGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 305,
           "testName": "OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 5,
           "testName": "Admin Context: renders full administrator view and privileged controls",
           "details": null
@@ -123,91 +123,91 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 212,
           "testName": "AppKeysController_CreateAppKey_ValidCategory_Succeeds",
           "details": "Verifies that AppKeys can be created with valid category scopes."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 296,
           "testName": "ClientsController_CreateClient_ValidCategory_Succeeds",
           "details": "Verifies that OAuth client credentials can be created with category-scoped access rules."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 379,
           "testName": "ClientSession_CategoryScope_AuthorizesMatchingServerTools_AndDeniesOthers",
           "details": "Verifies that category-scoped AppKey authorizes access exclusively to servers belonging to the permitted category."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 403,
           "testName": "ClientSession_GroupAliasScope_AuthorizesIdenticallyToCategory",
           "details": "Verifies that group-alias scopes evaluate identically to category scopes during tool authorization."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 425,
           "testName": "ClientSession_CategoryScope_IsCaseInsensitive",
           "details": "Verifies that category scope matching is case-insensitive across server categories."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 475,
           "testName": "ClientSession_ResourcesAndTemplates_FilteredByCategoryScope",
           "details": "Verifies that resources and templates are filtered according to category-scoped AppKey permissions."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 503,
           "testName": "ClientSession_DynamicServerMembership_UpdatesAccessDynamically",
           "details": "Verifies that dynamic updates to server categories immediately update tool access without re-authenticating."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 539,
           "testName": "ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes",
           "details": "Verifies that AppKeys can combine category scopes and granular tool-level scopes additively."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 566,
           "testName": "ClientSession_Complete_FiltersServerNamesByCategoryScope",
           "details": "Verifies that autocomplete and completion requests filter suggestions to servers within category scopes."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 254,
           "testName": "Pairwise_AppKeyScopes_RestrictsAccessPrecisely",
           "details": "Verifies pairwise combination of AppKey scopes across all MCP capabilities and backend targets."
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/AppKeysCard.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 20,
           "testName": "renders empty state when no keys exist",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/AppKeysCard.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 44,
           "testName": "renders keys list, copies config snippet, and revokes key",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 68,
           "testName": "AppKey Direct Context: connects with API key header identity",
           "details": null
@@ -223,21 +223,21 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 331,
           "testName": "Pairwise_SsoIdentityAndGroupMappings_EvaluateCorrectly",
           "details": "Verifies pairwise combination of SSO identities, SIDs, and group mappings across all targets."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 34,
           "testName": "Operator Context: allows overview and testbench navigation with operator identity",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/rbac-enforcement-flow.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/rbac-enforcement-flow.spec.ts",
           "lineNumber": 4,
           "testName": "should create, verify, and delete RBAC policy and SID mapping",
           "details": null
@@ -253,16 +253,48 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
           "lineNumber": 17,
           "testName": "ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
           "lineNumber": 55,
           "testName": "ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-PASSTHROUGH-1",
+      "category": "Authentication",
+      "type": "Positive",
+      "description": "McpServer supports AllowPassThroughAuth flag",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/McpServerTests.cs",
+          "lineNumber": 9,
+          "testName": "McpServer_Should_Have_AllowPassThroughAuth",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-PASSTHROUGH-2",
+      "category": "Authentication",
+      "type": "Positive",
+      "description": "Transports use passThroughToken when AllowPassThroughAuth is true",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/TransportsAuthShapeTests.cs",
+          "lineNumber": 208,
+          "testName": "Transports_Use_PassThroughToken_If_Allowed",
           "details": null
         }
       ]
@@ -276,7 +308,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 43,
           "testName": "Sqlite_UpgradeMigration_FromLegacySchema_PreservesDataAndPassesValidation",
           "details": "Verifies that SQLite upgrade migration from legacy schema preserves data, encrypts configs, and passes schema validation."
@@ -292,28 +324,28 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 198,
           "testName": "Mssql_Scripts_DeclareAllProceduresAndExpectedParameters",
           "details": "Verifies that MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 243,
           "testName": "MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters",
           "details": "Verifies that MySQL stored procedure scripts declare all required procedures with p_ parameter conventions."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 293,
           "testName": "Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters",
           "details": "Verifies that Dapper repository mappings for MySQL correctly bind stored procedure p_ parameters."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/MySqlLiveIntegrationTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/MySqlLiveIntegrationTests.cs",
           "lineNumber": 36,
           "testName": "MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds",
           "details": null
@@ -329,35 +361,35 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 235,
           "testName": "AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest",
           "details": "Ensures non-admin callers cannot create AppKeys with unconfigured categories."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 254,
           "testName": "AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest",
           "details": "Ensures AppKey creation with empty or whitespace category fails closed with BadRequest."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 319,
           "testName": "ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest",
           "details": "Ensures client creation with empty category scope fails closed with BadRequest."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 480,
           "testName": "Pairwise_NullOrEmptyTarget_FailsClosed_ReturnsFalse",
           "details": "Ensures null or whitespace capability targets fail closed immediately."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 502,
           "testName": "Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse",
           "details": "Ensures corrupted AppKey scopes JSON fails closed safely and rejects execution."
@@ -373,49 +405,49 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/HttpTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/HttpTransportTests.cs",
           "lineNumber": 39,
           "testName": "ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails",
           "details": "Ensures HTTP transport fails closed with SecurityException when secret retriever fails."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/HttpTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/HttpTransportTests.cs",
           "lineNumber": 62,
           "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
           "details": "Ensures HTTP transport fails closed when no secret retriever is registered."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/SseTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/SseTransportTests.cs",
           "lineNumber": 39,
           "testName": "ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails",
           "details": "Ensures SSE transport fails closed with SecurityException when secret retriever fails."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/SseTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/SseTransportTests.cs",
           "lineNumber": 60,
           "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
           "details": "Ensures SSE transport fails closed when no secret retriever is registered."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 404,
           "testName": "StdioTransport_ShouldFailClosed_WhenSecretResolutionFails",
           "details": "Ensures STDIO transport fails closed without spawning subprocess if secret resolution fails."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 70,
           "testName": "EnsureVaultClientAsync_ReturnsNull_WhenVaultProviderDisabledInRepo",
           "details": "Ensures Vault client returns null when Vault provider is disabled in repository."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 122,
           "testName": "GetSecretAsync_ThrowsSecurityException_OnVaultException",
           "details": "Ensures Vault secret retrieval failures throw SecurityException and fail closed."
@@ -431,42 +463,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 114,
           "testName": "StdioTransport_ShouldThrowSecurityExceptionForUnsafeExecutable",
           "details": "Ensures STDIO transport rejects commands with shell metacharacters or dangerous commands."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 136,
           "testName": "StdioTransport_ShouldThrowSecurityExceptionForShellExecutable",
           "details": "Ensures STDIO transport rejects shell wrappers and script interpreters lacking explicit safe paths."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 158,
           "testName": "StdioTransport_ShouldThrowOnInvalidExecutable",
           "details": "Ensures STDIO transport fails cleanly with InvalidOperationException when target binary is not found."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 220,
           "testName": "StdioTransport_ShouldTimeoutOnSlowRequests",
           "details": "Ensures STDIO transport times out requests exceeding configured execution duration limits."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 299,
           "testName": "StdioTransport_ShouldHandleUnexpectedExit",
           "details": "Ensures STDIO transport clears pending requests and fails closed upon unexpected child process termination."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 53,
           "testName": "Guest / Denied Context: restricted user session renders safely",
           "details": null
@@ -482,21 +514,21 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 172,
           "testName": "SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing",
           "details": "Ensures database schema validation fails closed when required columns or tables are missing."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 520,
           "testName": "Pairwise_CompleteAsync_MalformedOrMissingBackends_ThrowsOrFailsClosed",
           "details": "Ensures malformed completion payloads or unmapped backends throw or fail closed."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 543,
           "testName": "Pairwise_DatabaseDisconnection_FailsClosedSafely",
           "details": "Ensures database disconnection or failure fails closed safely without leaking access."
@@ -512,14 +544,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 443,
           "testName": "ClientSession_ExecuteTool_EnforcesCategoryScopeOnInnerTarget",
           "details": "Verifies that router meta-mode execute_tool validates and enforces category scopes on target tool calls."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 579,
           "testName": "Pairwise_MetaMode_ExecuteTool_EnforcesTargetAuthorization",
           "details": "Verifies that router meta-mode execute_tool strictly enforces target tool authorization policies."
@@ -535,7 +567,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 397,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
@@ -551,35 +583,35 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 23,
           "testName": "EnsureVaultClientAsync_CreatesClient_WithAppRoleCredentials",
           "details": "Verifies that VaultSecretRetriever authenticates with HashiCorp Vault using AppRole credentials."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 44,
           "testName": "EnsureVaultClientAsync_LoadsFromSecretRepo_WhenConfigJsonHasAppRole",
           "details": "Verifies that VaultSecretRetriever loads AppRole credentials dynamically from repository."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 96,
           "testName": "ReloadConfigAsync_ClearsClient_ForcesRecreation",
           "details": "Verifies that reloading config flushes cached Vault client and forces recreation."
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/SecretProvidersTab.test.tsx",
           "lineNumber": 17,
           "testName": "renders provider inputs and submits updated configuration",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/SecretProvidersTab.test.tsx",
           "lineNumber": 60,
           "testName": "handles Test Vault connection button with success and failure responses",
           "details": null
@@ -595,14 +627,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 354,
           "testName": "StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine",
           "details": "Verifies that STDIO transport securely injects secret credentials via environment variables rather than command-line arguments."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 439,
           "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
           "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
@@ -618,14 +650,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 366,
           "testName": "TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 425,
           "testName": "TrustedProxyHelper_ConfiguredProxyTrusted_CIDR",
           "details": null
@@ -641,14 +673,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
           "lineNumber": 16,
           "testName": "GetSecretAsync_ReturnsPlainString_WhenRegistryValueIsString",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
           "lineNumber": 31,
           "testName": "GetSecretAsync_DecryptsDpapiBytes_WhenRegistryValueIsByteArray",
           "details": null
@@ -664,7 +696,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/SseTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/SseTransportTests.cs",
           "lineNumber": 18,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that SSE transport resolves plaintext API key when secret provider is None."
@@ -680,7 +712,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/HttpTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/HttpTransportTests.cs",
           "lineNumber": 19,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that HTTP transport resolves plaintext API key when secret provider is None."
@@ -696,35 +728,35 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 59,
           "testName": "StdioTransport_ShouldInitializeAndCallToolSuccessfully",
           "details": "Verifies that STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 180,
           "testName": "StdioTransport_ShouldRouteStderrToLogs",
           "details": "Verifies that STDIO transport streams subprocess stderr asynchronously to logs."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 252,
           "testName": "StdioTransport_ShouldSupportCancellationAndProcessTreeTermination",
           "details": "Verifies that STDIO transport terminates subprocess tree cleanly upon disposal or cancellation."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 337,
           "testName": "StdioTransport_ParseCommandLine_Handles_Quotes_And_Spaces",
           "details": "Verifies that STDIO command-line tokenizer preserves quoted arguments and space escaping."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 482,
           "testName": "StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately",
           "details": "Verifies that STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly."
@@ -740,42 +772,42 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 36,
           "testName": "renders stats card, server list, and client setup guide",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 111,
           "testName": "renders empty state when no servers match search",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 5,
           "testName": "should render the dashboard layout and header components",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 21,
           "testName": "should display aggregate statistics cards",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 35,
           "testName": "should filter servers using search input",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/prompts-resources-customfiles.spec.ts",
           "lineNumber": 42,
           "testName": "should navigate to Custom Files and Backups in Settings view",
           "details": null
@@ -791,49 +823,49 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 46,
           "testName": "renders nothing when isInspectOpen is false",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 58,
           "testName": "renders loading state when inspectLoading is true",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 76,
           "testName": "renders tools tab with schema and handles tab switching",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 113,
           "testName": "renders resources tab items and handles search filtering",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 141,
           "testName": "renders prompts tab with arguments and empty state when filtered out",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 163,
           "testName": "renders empty states for tabs when data is empty",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 191,
           "testName": "closes modal when close button is clicked",
           "details": null
@@ -849,14 +881,14 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 59,
           "testName": "renders grouped server view by category and allows collapsing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 86,
           "testName": "renders grouped server view by status and type",
           "details": null
@@ -872,56 +904,56 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 41,
           "testName": "renders initial server and tool selection options",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 75,
           "testName": "filters tools by selected server and handles tool change",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 104,
           "testName": "filters custom tools with no namespace prefix when selectedServer is custom",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 129,
           "testName": "renders dynamic fields for boolean, number, string, array, and object types",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 176,
           "testName": "renders empty state when selected tool takes no arguments",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 201,
           "testName": "switches to raw JSON tab and handles raw JSON editing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 240,
           "testName": "handles form submission",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts",
+          "filePath": "C:/Users/Alias/.gemini/antigravity-cli/brain/b9ffdd98-5b3d-4a17-b826-64a1b7a62f3c/.system_generated/worktrees/subagent-Implementer--Auth--self-83bc1c37/frontend/e2e/prompts-resources-customfiles.spec.ts",
           "lineNumber": 5,
           "testName": "should interact with Prompt Tester and Resource Tester cards in Test Bench",
           "details": null
