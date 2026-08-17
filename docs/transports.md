@@ -283,6 +283,28 @@ Network drops and client aborts are handled without leaving orphaned tasks or me
 
 ## 4. Configuration Examples
 
+### Auth Token Pass-Through
+
+The router supports an `AllowPassThroughAuth` flag for backend servers. When this flag is enabled, clients can pass individual user tokens directly to the backend server via the `X-Target-Auth` header. The router will intercept this header and inject it as the authentication token for the downstream connection, overriding any static token configured for the server.
+
+Example `custom_servers.json` configuration:
+```json
+{
+  "id": "user-scoped-service",
+  "displayName": "User Scoped Service",
+  "url": "http://user-service/mcp",
+  "type": "http",
+  "allowPassThroughAuth": true,
+  "authShape": "bearer"
+}
+```
+Client Request Example:
+```http
+POST /sse HTTP/1.1
+X-Target-Auth: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+```
+
+
 ### Backend Server Configuration (JSON & UI)
 
 Backend servers can be configured dynamically via the Web Dashboard or declaratively via `/app/data/custom_servers.json`.
