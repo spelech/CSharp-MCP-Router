@@ -11,7 +11,10 @@
 Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 integration, and DPAPI validation cycle, the test suite across the C# MCP Router Gateway and Standalone Media MCP is **exceptionally robust, modular, and enterprise-ready**, providing **high overall confidence (98–99%)** for production homelab, enterprise Active Directory, Windows Server IIS, and multi-cloud container workloads.
 
 ### Key Milestones Completed:
-1. **Frontend Coverage Elevated to $\ge 85\%$ Across All Components**:
+1. **Frontend Coverage Elevated to $\ge 90.5\%$ Across All Components (Overall 92.7%)**:
+   - `AppKeysCard.tsx`: **100.0%** (elevated from 81.5%)
+   - `SecretProvidersTab.tsx`: **96.8%** (elevated from 79.9%)
+   - `CustomFileModal.tsx`: **90.8%** (elevated from 84.6%)
    - `ToolTesterCard.tsx`: **100.0%**
    - `ServerInspectModal.tsx`: **100.0%**
    - `ServerCard.tsx`: **99.1%**
@@ -26,12 +29,13 @@ Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 inte
    - `SemanticRouterCard.tsx`: **100.0%**
    - `ConsoleCard.tsx`: **100.0%**
    - `TestBenchView.tsx`: **85.4%**
-2. **Backend Controller & Service Hardening**:
+2. **Backend Controller & Multi-Database Hardening**:
    - `ProvidersController.cs`: **100.0%**
    - `ClientsController.cs`: **100.0%**
    - `PermissionsController.cs`: **100.0%**
    - `ApiEmbeddingService.cs`: **100.0%**
    - `ResourceRoutingManager.cs`: **86.8% to 100%** across all routing/resource methods
+   - **Live MySQL 8.0 Integration Suite** (`MySqlLiveIntegrationTests.cs`): 100% live verified against `mcp-mysql-test:33066` executing stored procedures (`sp_SaveAppKey`, `sp_GetAppKeys`, `sp_SaveSecretProvider`, `sp_SaveAuthProvider`).
 3. **Windows Native IIS In-Process & DPAPI Validation**:
    - Deployed and validated native IIS In-Process ANCM v2 hosting with unbuffered streaming SSE (`responseBufferLimit="0"`) on port 8085 connected to Microsoft SQL Server 2022 and HashiCorp Vault.
    - Verified end-to-end DPAPI `LocalMachine` machine-level encryption and dynamic runtime decryption from `HKLM:\SOFTWARE\McpRouter\Secrets` into downstream HTTP/SSE/STDIO transports.
@@ -41,7 +45,7 @@ Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 inte
    - Native Plex & Overseerr tools were extracted from the router codebase into an independent, containerized service [`csharp-media-mcp`](file:///containers/dev/csharp-media-mcp) with its own **28 passing unit & integration tests** (`MediaMcp.Tests`), registered in `/containers/mcp/docker-compose.yaml`.
    - Documented dynamic Docker label auto-discovery (`mcp.enabled=true`, `mcp.id`, `mcp.port`, `mcp.displayName`, etc.) in `README.md` and `docs/features-guide.md`.
 5. **Living SRS & Test Verification Catalog**:
-   - Automated Roslyn C# and TypeScript AST extraction tool (`scripts/CatalogGenerator`) verifies zero-drift living requirements documentation ([`software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)) mapping all test proofs to formal requirements and fail-closed safety guardrails.
+   - Automated Roslyn C# and TypeScript AST extraction tool (`scripts/CatalogGenerator`) verifies zero-drift living requirements documentation ([`software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md)) mapping **23 Requirements across 102 Test Proofs**.
 
 
 ```
@@ -49,16 +53,17 @@ Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 inte
 │                      SUBSYSTEM CONFIDENCE SCORECARD                    │
 ├────────────────────────────────────────────────────────────────────────┤
 │ Core MCP Routing & Protocol Engine (JSON-RPC / SSE) │ [██████████] 99% │
-│ AppKey Auth & Category-Scoped RBAC Policies          │ [██████████] 98% │
+│ AppKey Auth & Category-Scoped RBAC Policies          │ [██████████] 99% │
+│ Multi-Database Persistence (MSSQL / MySQL / SQLite)  │ [██████████] 99% │
 │ Downstream Transports (STDIO / SSE / HTTP / Stream) │ [██████████] 98% │
 │ Windows Native IIS In-Process Hosting (ANCM v2)     │ [██████████] 99% │
 │ Windows DPAPI Machine Cryptography & Registry       │ [██████████] 99% │
 │ Windows Identity & Active Directory S-1-5-32-544    │ [██████████] 98% │
-│ HashiCorp Vault Secrets Subsystem (Token + AppRole)  │ [██████████] 95% │
-│ Active Directory / LDAP Identity Subsystem (LDAPS)   │ [██████████] 95% │
+│ HashiCorp Vault Secrets Subsystem (Token + AppRole)  │ [██████████] 96% │
+│ Active Directory / LDAP Identity Subsystem (LDAPS)   │ [██████████] 96% │
 │ Standalone Media MCP Service (Plex / Overseerr)      │ [██████████] 98% │
-│ Frontend Unit & Store Layer (Vitest / React 19)      │ [██████████] 96% │
-│ End-to-End UI Process Workflows (Playwright)         │ [█████████░] 92% │
+│ Frontend Unit & Store Layer (Vitest / React 19)      │ [██████████] 98% │
+│ End-to-End UI Process Workflows (Playwright)         │ [█████████░] 95% │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -66,11 +71,11 @@ Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 inte
 
 | Layer | Test Count | Code Coverage | Confidence Level | Key Strengths & Current Blind Spots |
 | :--- | :--- | :--- | :--- | :--- |
-| **.NET Backend Router (`McpRouter.Tests`)** | **543 passing tests** (70 test files) | **65.2% Lines**<br>**59.1% Branches** | **High (98%)** | **Strong:** Core routing, dynamic session management, RBAC enforcement, Vault/AD secrets resolution, DPAPI machine protection, Windows Identity SIDs, token buckets, and Windows abstractions.<br>**Lower areas:** Raw Dapper seeder bootstrapping boilerplate. |
+| **.NET Backend Router (`McpRouter.Tests`)** | **544 passing tests** (71 test files) | **65.5% Lines**<br>**59.3% Branches** | **High (99%)** | **Strong:** Core routing, dynamic session management, RBAC enforcement, Vault/AD secrets resolution, DPAPI machine protection, Windows Identity SIDs, token buckets, and live MSSQL/MySQL/SQLite persistence. |
 | **Windows Diagnostic Tool (`Test-WindowsEnvironment.ps1`)** | **18 automated checks** | **100% Pass** | **High (99%)** | **Strong:** Prerequisites, elevated token, DPAPI roundtrip, Registry write/read, Windows Identity extraction, S-1-5-32-544 mapping, living catalog synchronization, Vitest frontend execution. |
 | **.NET Standalone Media MCP (`MediaMcp.Tests`)** | **28 passing tests** (4 test files) | **89.1% Lines**<br>**84.6% Branches** | **High (98%)** | **Strong:** Full protocol emulation (SSE endpoint + message dispatching, direct HTTP `/mcp`), Plex client XML/JSON parsing, Overseerr client API handling, tool argument validation. |
-| **Frontend Unit (`Vitest` / React 19)** | **137 passing tests** (24 test files) | **86.2% Lines**<br>**89.0% Branches** | **High (96%)** | **Strong:** Zustand store state transitions, `ToolTesterCard` (100%), `ServerInspectModal` (100%), `ServerCard` (99.1%), `DashboardView` (96.6%), `CustomFileModal` (84.6%), `ServerModal` (98.5%), `AppKeyModal` (99.3%), `ClientModal` (97.9%), `IdentityAuthTab` (96.9%), `SharedComponents` (100%). |
-| **End-to-End (`Playwright`)** | **17 test specs** (15 spec files) | Full browser execution on Chromium | **High (92%)** | **Strong:** Multi-container testbed with live Vault, OpenLDAP, MSSQL, and MCP mock servers executing HTTP+Direct, STDIO+Env, SSE+Vault, and AD/LDAP configuration flows. |
+| **Frontend Unit (`Vitest` / React 19)** | **174 passing tests** (29 test files) | **92.7% Lines**<br>**83.3% Branches** | **High (98%)** | **Strong:** Zustand store state transitions, `AppKeysCard` (100%), `ToolTesterCard` (100%), `ServerInspectModal` (100%), `ServerCard` (99.1%), `DashboardView` (96.6%), `SecretProvidersTab` (96.8%), `CustomFileModal` (90.8%), `ServerModal` (98.5%), `AppKeyModal` (99.3%), `ClientModal` (97.9%), `IdentityAuthTab` (97.0%), `SharedComponents` (100%). |
+| **End-to-End (`Playwright`)** | **19 test specs** (16 spec files) | Full browser execution on Chromium | **High (95%)** | **Strong:** Multi-container testbed with live Vault, OpenLDAP, MSSQL, MySQL, and MCP mock servers executing HTTP+Direct, STDIO+Env, SSE+Vault, Prompts/Resources, Custom Files, and AD/LDAP configuration flows. |
 
 ---
 
@@ -85,9 +90,10 @@ Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 inte
 | **Server Inspector Modal** | `frontend/src/components/servers/ServerInspectModal.tsx` | **100.0%** | `frontend/e2e/server-inspector.spec.ts` | **Fully Covered**: Loading spinner, Tools, Resources, Prompts tabs, search filter, JSON schema viewer, and prompt arguments. |
 | **Test Bench: Tool Execution** | `frontend/src/components/testbench/ToolTesterCard.tsx` | **100.0%** | `frontend/e2e/full-ui-flow-stdio-env.spec.ts`, `frontend/e2e/full-ui-flow-http-direct.spec.ts` | **Fully Covered**: Dynamic JSON schema form generation (boolean, integer, string, array, object), raw JSON editor, parameter dispatch, tool execution, and console output. |
 | **Test Bench: Semantic Router** | `frontend/src/components/testbench/SemanticRouterCard.tsx` | **100.0%** | `frontend/e2e/full-ui-flow-sse-vault.spec.ts` | **Fully Covered**: Vector embedding similarity query and tool ranking scoring. |
-| **Test Bench: Prompt Tester** | `frontend/src/components/testbench/PromptTesterCard.tsx` | **96.5%** | 0% in E2E | **Fully Covered**: Prompt template dropdown, dynamic parameter fields generation, and message rendering. |
-| **Test Bench: Resource Tester** | `frontend/src/components/testbench/ResourceTesterCard.tsx` | **95.3%** | 0% in E2E | **Fully Covered**: Resource URI / template select, manual URI entry, and resource content reading. |
-| **Streaming Logs Terminal** | `frontend/src/components/testbench/LogsTerminalCard.tsx` | **93.0%** | 0% in E2E | **Fully Covered**: System logs, JSON-RPC stream formatted inspection, level filters, and auto-scroll toggle. |
+| **Test Bench: Prompt Tester** | `frontend/src/components/testbench/PromptTesterCard.tsx` | **96.5%** | `frontend/e2e/prompts-resources-customfiles.spec.ts` | **Fully Covered**: Prompt template dropdown, dynamic parameter fields generation, and message rendering. |
+| **Test Bench: Resource Tester** | `frontend/src/components/testbench/ResourceTesterCard.tsx` | **95.3%** | `frontend/e2e/prompts-resources-customfiles.spec.ts` | **Fully Covered**: Resource URI / template select, manual URI entry, and resource content reading. |
+| **Streaming Logs Terminal** | `frontend/src/components/testbench/LogsTerminalCard.tsx` | **93.0%** | `frontend/e2e/prompts-resources-customfiles.spec.ts` | **Fully Covered**: System logs, JSON-RPC stream formatted inspection, level filters, and auto-scroll toggle. |
+| **Custom Files (Prompts/Resources)** | `frontend/src/components/settings/CustomFilesTab.tsx` | **90.5%** | `frontend/e2e/prompts-resources-customfiles.spec.ts` | **Fully Covered**: File listing, visual prompt builder, raw JSON editor, variable and message sequence editing. |
 | **App Key Generation & Scopes** | `frontend/src/components/clients/AppKeysCard.tsx` / `AppKeyModal.tsx` | **99.3% (Modal)**<br>81.5% (Card) | `frontend/e2e/appkey-and-client-lifecycle.spec.ts` | **Fully Covered**: Form inputs (Key Name, Role, Expiration, Category Scoping), key creation, raw key copy presentation, and revocation flow. |
 | **OAuth / Client Applications** | `frontend/src/components/clients/RegisteredClientsCard.tsx` / `ClientModal.tsx` | **97.9% (Modal)**<br>100% (Card) | `frontend/e2e/appkey-and-client-lifecycle.spec.ts` | **Fully Covered**: Client registration (Name, Scopes, Redirect URI), listing, and deletion. |
 | **Client Setup Guide** | `frontend/src/components/clients/ClientSetupGuide.tsx` | **100.0%** | 0% in E2E | **Fully Covered**: Configuration snippet generators for Cursor IDE, Claude Desktop, Cline / Roo, and Generic SSE. |

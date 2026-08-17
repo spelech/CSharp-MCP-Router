@@ -134,11 +134,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.17.4`** | 2026-08-17 | test(coverage): close frontend unit, Playwright E2E, and live MySQL repository coverage gaps |
 | **`v4.17.3`** | 2026-08-17 | test(reqs): add formal requirement annotations for SEC-04 DPAPI and AUTH-04 Windows Identity |
 | **`v4.17.2`** | 2026-08-17 | docs(coverage): update test coverage report and evaluation with Windows IIS and DPAPI validation findings |
 | **`v4.17.1`** | 2026-08-17 | fix(windows): resolve IIS ANCM in-process web.config schema, default registry secret path, and deployment scripts |
 | **`v4.17.0`** | 2026-08-16 | feat(windows): add production Windows IIS deployment scripts, Windows Service runner, environment diagnostic validation suite, and comprehensive Windows deployment guide |
-| **`v4.16.1`** | 2026-08-16 | refactor(auth): genericize OIDC and SSO identity references, sanitize seed personas, and standardize header provider UI naming |
 
 ---
 

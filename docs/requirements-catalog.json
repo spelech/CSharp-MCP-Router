@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-17T06:06:04.1000663Z",
+    "generatedAt": "2026-08-17T06:13:45.5083223Z",
     "totalRequirements": 23,
     "positiveCount": 18,
     "guardrailCount": 5,
-    "totalProofs": 95
+    "totalProofs": 102
   },
   "requirements": [
     {
@@ -119,7 +119,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "AppKeys can be created with category-level scopes for downstream tool filtering",
-      "proofCount": 11,
+      "proofCount": 13,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -190,6 +190,20 @@
           "lineNumber": 254,
           "testName": "Pairwise_AppKeyScopes_RestrictsAccessPrecisely",
           "details": "Verifies pairwise combination of AppKey scopes across all MCP capabilities and backend targets."
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 20,
+          "testName": "renders empty state when no keys exist",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 44,
+          "testName": "renders keys list, copies config snippet, and revokes key",
+          "details": null
         },
         {
           "suite": "Playwright E2E",
@@ -274,7 +288,7 @@
       "category": "DB",
       "type": "Positive",
       "description": "MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly",
-      "proofCount": 3,
+      "proofCount": 4,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -296,6 +310,13 @@
           "lineNumber": 293,
           "testName": "Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters",
           "details": "Verifies that Dapper repository mappings for MySQL correctly bind stored procedure p_ parameters."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/MySqlLiveIntegrationTests.cs",
+          "lineNumber": 36,
+          "testName": "MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds",
+          "details": null
         }
       ]
     },
@@ -526,7 +547,7 @@
       "category": "SEC",
       "type": "Positive",
       "description": "VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials",
-      "proofCount": 3,
+      "proofCount": 5,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -548,6 +569,20 @@
           "lineNumber": 96,
           "testName": "ReloadConfigAsync_ClearsClient_ForcesRecreation",
           "details": "Verifies that reloading config flushes cached Vault client and forces recreation."
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "lineNumber": 17,
+          "testName": "renders provider inputs and submits updated configuration",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "lineNumber": 60,
+          "testName": "handles Test Vault connection button with success and failure responses",
+          "details": null
         }
       ]
     },
@@ -701,7 +736,7 @@
       "category": "UI",
       "type": "Positive",
       "description": "Dashboard renders stats card, connected server list, and setup instructions",
-      "proofCount": 5,
+      "proofCount": 6,
       "proofs": [
         {
           "suite": "Frontend Vitest",
@@ -736,6 +771,13 @@
           "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 35,
           "testName": "should filter servers using search input",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts",
+          "lineNumber": 42,
+          "testName": "should navigate to Custom Files and Backups in Settings view",
           "details": null
         }
       ]
@@ -826,7 +868,7 @@
       "category": "UI",
       "type": "Positive",
       "description": "Interactive tool tester renders server and tool selection dropdowns",
-      "proofCount": 7,
+      "proofCount": 8,
       "proofs": [
         {
           "suite": "Frontend Vitest",
@@ -875,6 +917,13 @@
           "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 240,
           "testName": "handles form submission",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts",
+          "lineNumber": 5,
+          "testName": "should interact with Prompt Tester and Resource Tester cards in Test Bench",
           "details": null
         }
       ]
