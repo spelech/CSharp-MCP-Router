@@ -335,7 +335,14 @@ namespace McpRouter.Infrastructure.Persistence
                 {
                     if (!string.IsNullOrEmpty(item.ConfigJson))
                     {
-                        item.ConfigJson = SymmetricEncryptionHelper.Decrypt(item.ConfigJson, _config);
+                        if (SymmetricEncryptionHelper.TryDecrypt(item.ConfigJson, _config, out var decrypted))
+                        {
+                            item.ConfigJson = decrypted;
+                        }
+                        else
+                        {
+                            item.IsDecryptionFailed = true;
+                        }
                     }
                 }
             }
@@ -347,10 +354,19 @@ namespace McpRouter.Infrastructure.Persistence
             using var conn = _dbFactory.CreateConnection();
             var provider = _dbFactory.ProviderName.ToLower();
 
-            var configToSave = dto.ConfigJson;
-            if (!string.IsNullOrEmpty(configToSave) && _config != null)
+            string? configToSave;
+            if (dto.IsDecryptionFailed)
             {
-                configToSave = SymmetricEncryptionHelper.Encrypt(configToSave, _config);
+                // Preserve the existing encrypted payload to avoid data loss
+                configToSave = await conn.ExecuteScalarAsync<string>("SELECT EncryptedConfigJson FROM SecretProviders WHERE ProviderName = @ProviderName;", new { dto.ProviderName });
+            }
+            else
+            {
+                configToSave = dto.ConfigJson;
+                if (!string.IsNullOrEmpty(configToSave) && _config != null)
+                {
+                    configToSave = SymmetricEncryptionHelper.Encrypt(configToSave, _config);
+                }
             }
 
             var param = new
@@ -404,7 +420,14 @@ namespace McpRouter.Infrastructure.Persistence
                 {
                     if (!string.IsNullOrEmpty(item.ConfigJson))
                     {
-                        item.ConfigJson = SymmetricEncryptionHelper.Decrypt(item.ConfigJson, _config);
+                        if (SymmetricEncryptionHelper.TryDecrypt(item.ConfigJson, _config, out var decrypted))
+                        {
+                            item.ConfigJson = decrypted;
+                        }
+                        else
+                        {
+                            item.IsDecryptionFailed = true;
+                        }
                     }
                 }
             }
@@ -416,10 +439,19 @@ namespace McpRouter.Infrastructure.Persistence
             using var conn = _dbFactory.CreateConnection();
             var provider = _dbFactory.ProviderName.ToLower();
 
-            var configToSave = dto.ConfigJson;
-            if (!string.IsNullOrEmpty(configToSave) && _config != null)
+            string? configToSave;
+            if (dto.IsDecryptionFailed)
             {
-                configToSave = SymmetricEncryptionHelper.Encrypt(configToSave, _config);
+                // Preserve the existing encrypted payload to avoid data loss
+                configToSave = await conn.ExecuteScalarAsync<string>("SELECT EncryptedConfigJson FROM AuthProviderConfigs WHERE ProviderName = @ProviderName;", new { dto.ProviderName });
+            }
+            else
+            {
+                configToSave = dto.ConfigJson;
+                if (!string.IsNullOrEmpty(configToSave) && _config != null)
+                {
+                    configToSave = SymmetricEncryptionHelper.Encrypt(configToSave, _config);
+                }
             }
 
             var param = new
@@ -467,5 +499,6 @@ namespace McpRouter.Infrastructure.Persistence
         }
     }
 }
+
 
 
