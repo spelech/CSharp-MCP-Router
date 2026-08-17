@@ -14,6 +14,7 @@ export interface AuthProviderConfig {
   userHeader?: string;
   groupsHeader?: string;
   configJson?: string;
+  isDecryptionFailed?: boolean;
 }
 
 export interface SecretProviderConfig {
@@ -22,6 +23,7 @@ export interface SecretProviderConfig {
   displayName: string;
   isEnabled: boolean;
   configJson: string;
+  isDecryptionFailed?: boolean;
 }
 
 export interface CustomFileMeta {
