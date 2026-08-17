@@ -656,7 +656,7 @@ namespace McpRouter.Tests
             {
                 var context = new DefaultHttpContext();
                 context.Request.Path = "/api/clients";
-                context.Request.Headers[headerKey] = "steve";
+                context.Request.Headers[headerKey] = "admin_user";
 
                 bool nextCalled = false;
                 RequestDelegate next = (ctx) =>

@@ -21,8 +21,8 @@ describe('SettingsView component', () => {
       isEnabled: false
     },
     {
-      providerName: 'PocketID_TinyAuth',
-      displayName: 'PocketID / TinyAuth OIDC',
+      providerName: 'HeaderAuth',
+      displayName: 'OIDC / Reverse Proxy Headers',
       isEnabled: true,
       userHeader: 'Remote-User',
       groupsHeader: 'Remote-Groups'
@@ -79,7 +79,7 @@ describe('SettingsView component', () => {
   const testMappings = [
     {
       id: 'map-1',
-      externalId: 'pocketid_admins',
+      externalId: 'oidc_admins',
       internalGroup: 'Administrators'
     }
   ];
@@ -206,8 +206,8 @@ describe('SettingsView component', () => {
 
       expect(savedProviders).toContainEqual(
         expect.objectContaining({
-          providerName: 'PocketID_TinyAuth',
-          displayName: 'PocketID / TinyAuth OIDC',
+          providerName: 'HeaderAuth',
+          displayName: 'OIDC / Reverse Proxy Headers',
           userHeader: 'X-Forwarded-User',
           groupsHeader: 'Remote-Groups',
           isEnabled: true
@@ -344,7 +344,7 @@ describe('SettingsView component', () => {
       expect(openPolicySpy).toHaveBeenCalled();
 
       // Mappings table
-      expect(screen.getByText('pocketid_admins')).toBeInTheDocument();
+      expect(screen.getByText('oidc_admins')).toBeInTheDocument();
       expect(screen.getByText('Administrators')).toBeInTheDocument();
 
       const createMappingBtn = screen.getByRole('button', { name: /create mapping/i });

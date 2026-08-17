@@ -127,7 +127,7 @@ namespace McpRouter.Tests
             _config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "Admin:GroupSid", "S-1-5-32-544" },
-                { "Admin:Username", "steve" },
+                { "Admin:Username", "admin_user" },
                 { "Audit:FailClosed", "false" }
             }).Build();
 
@@ -337,8 +337,8 @@ namespace McpRouter.Tests
         [InlineData("admin_sid", null, "S-1-5-32-544", "resources/read", "mcp://ha/states", true)]
         [InlineData("admin_sid", null, "S-1-5-32-544", "completion/complete", "ha__summary", true)]
         // Admin with full_admin group AND Admin SID
-        [InlineData("steve", "full_admin", "S-1-5-32-544", "tools/call", "ha__turn_on", true)]
-        [InlineData("steve", "full_admin", "S-1-5-32-544", "tools/call", "docker__restart", true)]
+        [InlineData("admin_user", "full_admin", "S-1-5-32-544", "tools/call", "ha__turn_on", true)]
+        [InlineData("admin_user", "full_admin", "S-1-5-32-544", "tools/call", "docker__restart", true)]
         // Direct group membership
         [InlineData("operator1", "SmartHomeOperators", null, "tools/call", "ha__turn_on", true)]
         [InlineData("operator1", "SmartHomeOperators", null, "prompts/get", "ha__summary", true)]

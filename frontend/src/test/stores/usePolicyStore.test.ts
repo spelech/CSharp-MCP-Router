@@ -130,12 +130,12 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       useSettingsStore.setState({ isMappingModalOpen: true });
 
       await useSettingsStore.getState().saveMapping({
-        externalId: 'pocketid_ops',
+        externalId: 'oidc_ops',
         internalGroup: 'devops_team'
       });
 
       expect(postBody).toEqual({
-        externalId: 'pocketid_ops',
+        externalId: 'oidc_ops',
         internalGroup: 'devops_team'
       });
       expect(useSettingsStore.getState().isMappingModalOpen).toBe(false);

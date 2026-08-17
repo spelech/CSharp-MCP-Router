@@ -10,7 +10,7 @@ describe('IdentityAuthTab Component', () => {
       <IdentityAuthTab
         providers={[
           { providerName: 'ActiveDirectory', displayName: 'Active Directory', isEnabled: false },
-          { providerName: 'PocketID_TinyAuth', displayName: 'PocketID / TinyAuth OIDC', isEnabled: true },
+          { providerName: 'HeaderAuth', displayName: 'OIDC / Reverse Proxy Headers', isEnabled: true },
         ]}
         saveAuthProvider={saveSpy}
       />

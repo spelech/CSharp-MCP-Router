@@ -54,7 +54,7 @@ describe('Typed API Client Layer', () => {
     it('calls client and appkey endpoints correctly', async () => {
       mockApiResponse('/api/clients', [{ id: 'c1', clientId: 'client-1', displayName: 'Client 1', isDynamic: false }]);
       mockApiResponse('/api/clients/c1', { success: true });
-      mockApiResponse('/api/appkeys', [{ id: 'k1', name: 'Key 1', username: 'steve', keyPrefix: 'mcp_live_123', scopes: ['all'], createdAt: '' }]);
+      mockApiResponse('/api/appkeys', [{ id: 'k1', name: 'Key 1', username: 'admin', keyPrefix: 'mcp_live_123', scopes: ['all'], createdAt: '' }]);
       mockApiResponse('/api/appkeys/limits', { globalMax: 50, userMax: 10, totalActiveKeys: 1, userActiveKeys: 1, isLimitReached: false });
       mockApiResponse(/\/api\/appkeys\/k1/, { success: true });
 

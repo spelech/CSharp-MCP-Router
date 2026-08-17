@@ -122,10 +122,10 @@ namespace McpRouter.Tests
         public async Task GroupMapping_AllowsUser_WhenOidcGroupMapsToAllowedInternalGroup()
         {
             SeedPolicy("pol-2", "tool:ha__write", "smarthome_writers", true);
-            SeedMapping("map-2", "pocketid_admins", "smarthome_writers");
+            SeedMapping("map-2", "oidc_admins", "smarthome_writers");
 
-            // User has raw OIDC group pocketid_admins
-            var session = CreateSession("charlie", new List<string> { "pocketid_admins" });
+            // User has raw OIDC group oidc_admins
+            var session = CreateSession("charlie", new List<string> { "oidc_admins" });
 
             var authorized = await session.IsUserAuthorizedAsync("tools/call", "ha__write");
             Assert.True(authorized);
@@ -136,8 +136,8 @@ namespace McpRouter.Tests
         {
             SeedPolicy("pol-3", "tool:ha__write", "smarthome_writers", true);
 
-            // Charlie has raw OIDC group pocketid_guests which is NOT mapped
-            var session = CreateSession("charlie", new List<string> { "pocketid_guests" });
+            // Charlie has raw OIDC group oidc_guests which is NOT mapped
+            var session = CreateSession("charlie", new List<string> { "oidc_guests" });
 
             var authorized = await session.IsUserAuthorizedAsync("tools/call", "ha__write");
             Assert.False(authorized);

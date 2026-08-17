@@ -48,7 +48,7 @@ namespace McpRouter.Tests
         {
             var client = _factory.CreateClient();
             client.DefaultRequestHeaders.Add("X-Forwarded-For", "127.0.0.1");
-            client.DefaultRequestHeaders.Add("Remote-User", "steve");
+            client.DefaultRequestHeaders.Add("Remote-User", "admin_user");
             client.DefaultRequestHeaders.Add("Remote-Groups", "full_admin");
             return client;
         }

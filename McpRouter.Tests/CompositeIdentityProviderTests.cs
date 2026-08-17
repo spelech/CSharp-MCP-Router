@@ -27,14 +27,14 @@ namespace McpRouter.Tests
 
             var p2 = new Mock<IIdentityProvider>();
             p2.Setup(p => p.ResolveIdentityAsync(It.IsAny<HttpContext>()))
-              .ReturnsAsync(new UserIdentityContext("steve", "P2", new List<string> { "full_admin" }));
+              .ReturnsAsync(new UserIdentityContext("admin_user", "P2", new List<string> { "full_admin" }));
 
             var composite = new CompositeIdentityProvider(new[] { p1.Object, p2.Object });
             var httpContext = new DefaultHttpContext();
 
             var result = await composite.ResolveIdentityAsync(httpContext);
 
-            Assert.Equal("steve", result.Username);
+            Assert.Equal("admin_user", result.Username);
             Assert.Equal("P2", result.AuthenticationType);
         }
 

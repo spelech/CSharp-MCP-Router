@@ -656,7 +656,7 @@ namespace McpRouter.Tests
             // Arrange
             var context = new DefaultHttpContext();
             context.Request.Path = "/api/servers";
-            context.Request.Headers["Remote-User"] = "steve";
+            context.Request.Headers["Remote-User"] = "admin_user";
             bool nextCalled = false;
             RequestDelegate next = (ctx) =>
             {

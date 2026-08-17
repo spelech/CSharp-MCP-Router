@@ -437,7 +437,7 @@ namespace McpRouter.Tests
             var adminSid = "S-1-5-32-544";
             var claims = new List<Claim>
             {
-                new Claim(ClaimTypes.Name, "steve_admin"),
+                new Claim(ClaimTypes.Name, "admin_user"),
                 new Claim("Sid", adminSid)
             };
             var adminPrincipal = new ClaimsPrincipal(new ClaimsIdentity(claims, "OidcHeader"));

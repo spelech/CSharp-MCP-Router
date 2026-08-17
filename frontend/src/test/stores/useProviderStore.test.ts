@@ -5,8 +5,8 @@ import { mockApiResponse, defaultMockData } from '../setup';
 
 describe('useProviderStore (useSettingsStore provider actions)', () => {
   const sampleAuthProvider: AuthProviderConfig = {
-    providerName: 'PocketID_TinyAuth',
-    displayName: 'PocketID / TinyAuth OIDC',
+    providerName: 'HeaderAuth',
+    displayName: 'OIDC / Reverse Proxy Headers',
     isEnabled: true,
     userHeader: 'Remote-User',
     groupsHeader: 'Remote-Groups'
@@ -38,7 +38,7 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
 
       const state = useSettingsStore.getState();
       expect(state.authProviders).toHaveLength(1);
-      expect(state.authProviders[0].providerName).toBe('PocketID_TinyAuth');
+      expect(state.authProviders[0].providerName).toBe('HeaderAuth');
       expect(state.secretProviders).toHaveLength(1);
       expect(state.secretProviders[0].providerName).toBe('Vault');
     });

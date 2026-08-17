@@ -22,10 +22,10 @@ const routeHandlers: Map<string | RegExp, MockHandler> = new Map();
 export const defaultMockData = {
   me: {
     authenticated: true,
-    username: 'steve',
-    name: 'Steve Pelech',
-    email: 'steve@wileyriley.com',
-    groups: ['full_admin', 'house_member']
+    username: 'admin',
+    name: 'Admin User',
+    email: 'admin@example.com',
+    groups: ['full_admin', 'engineering']
   },
   health: {
     status: 'healthy',
@@ -63,7 +63,7 @@ export const defaultMockData = {
     {
       id: 'key-1',
       name: 'OpenClaw Agent',
-      username: 'steve',
+      username: 'admin',
       keyPrefix: 'mcp_live_a1b2',
       scopes: ['all'],
       createdAt: '2026-08-14T00:00:00Z'
@@ -91,8 +91,8 @@ export const defaultMockData = {
       isEnabled: false
     },
     {
-      providerName: 'PocketID_TinyAuth',
-      displayName: 'PocketID / TinyAuth OIDC',
+      providerName: 'HeaderAuth',
+      displayName: 'OIDC / Reverse Proxy Headers',
       isEnabled: true,
       userHeader: 'Remote-User',
       groupsHeader: 'Remote-Groups'
@@ -236,7 +236,7 @@ function setupDefaultRoutes() {
       return {
         id: 'new-key-id-999',
         name: body?.name || 'New App Key',
-        username: body?.username || 'steve',
+        username: body?.username || 'admin',
         keyPrefix: 'mcp_live_9999',
         plaintextKey: 'mcp_live_9999_secret_plaintext_token_example',
         scopes: body?.scopes || ['all'],

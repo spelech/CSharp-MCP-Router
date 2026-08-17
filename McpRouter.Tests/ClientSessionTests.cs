@@ -58,7 +58,7 @@ namespace McpRouter.Tests
 
             var claims = new[]
             {
-                new Claim(ClaimTypes.Name, "steve"),
+                new Claim(ClaimTypes.Name, "admin_user"),
                 new Claim("Sid", "full_admin"),
                 new Claim(ClaimTypes.Role, "full_admin")
             };
