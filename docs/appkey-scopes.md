@@ -1,6 +1,6 @@
 # AppKey Scopes & Authorization Guide
 
-This document is the canonical reference for the **AppKey Scoping and Authorization Engine** in the `CSharp-MCP-Router`. It details scope grammar, normalization rules, the multi-stage authorization pipeline, capability enforcement matrices, cryptographic key lifecycle management, and least-privilege persona configuration recipes.
+This document details the **AppKey Scoping and Authorization Engine** in the `CSharp-MCP-Router`, covering scope grammar, normalization rules, the multi-stage authorization pipeline, capability enforcement matrices, cryptographic key lifecycle management, and least-privilege configuration recipes.
 
 ---
 

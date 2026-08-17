@@ -1,6 +1,6 @@
 # 🗄️ Database Provider Support & Deployment Matrix
 
-This document provides the definitive architectural specification, schema contracts, encryption model, and deployment configurations for all database engines supported by the **Model Context Protocol (MCP) Router Gateway**.
+This document details the architectural specification, schema contracts, encryption model, and deployment configurations for database engines supported by the **Model Context Protocol (MCP) Router Gateway**.
 
 ---
 

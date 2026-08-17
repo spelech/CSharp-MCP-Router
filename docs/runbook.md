@@ -115,7 +115,7 @@ sudo systemctl status mcp-router
 
 ### 3. Windows Server Deployment (IIS In-Process & Windows Service)
 
-For enterprise Windows Server hosting and validation, the repository provides end-to-end automation scripts and complete operational documentation:
+For Windows Server hosting and validation, the repository provides automation scripts and operational documentation:
 
 - **Comprehensive Guide**: [**Windows Deployment, Enterprise Hosting & Validation Guide (`docs/windows-deployment-and-validation-guide.md`)**](windows-deployment-and-validation-guide.md)
 - **IIS In-Process Automation**: [`scripts/windows/Deploy-IIS.ps1`](../scripts/windows/Deploy-IIS.ps1) (configures `No Managed Code`, `AlwaysRunning`, unbuffered SSE streaming with `responseBufferLimit="0"`, and Windows Authentication).

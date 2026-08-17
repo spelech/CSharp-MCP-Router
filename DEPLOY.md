@@ -22,18 +22,18 @@ Production environments must be locked down to prevent spoofing, unauthorized ac
 
 ---
 
-## ⚠️ Key Deploy-Time Behavior Change
+## ⚠️ Deploy-Time Behavior Change
 
-In previous releases, the default trusted-proxy fallback automatically trusted all IP addresses in standard container/homelab subnets (`10.0.0.0/8`, `172.16.0.0/12`).
-**Starting in version 4.5.5, the unconfigured default has been locked down to loopback-only (`127.0.0.1` and `::1`).**
+In previous releases, the trusted-proxy fallback trusted IPs in standard container subnets (`10.0.0.0/8`, `172.16.0.0/12`).
+**Starting in version 4.5.5, the unconfigured default is loopback-only (`127.0.0.1` and `::1`).**
 
-> 💡 **Important Deployment Action:** If your reverse proxy (e.g., Caddy, Nginx, Traefik, or IIS) runs on a bridge network (e.g., `172.17.x.x` or `10.x.x.x`), you **MUST** configure `Oidc:TrustedProxies` (or `OIDC__TRUSTEDPROXIES`) explicitly with the proxy's IP address. If left unset, proxy-passed SSO headers (e.g., `Remote-User`) from any remote/LAN hosts will be stripped, degrading authentication to guest access.
+> 💡 **Important Deployment Action:** If your reverse proxy (e.g., Caddy, Nginx, Traefik, IIS) runs on a bridge network, you **MUST** configure `Oidc:TrustedProxies` with the proxy's IP address. If left unset, proxy-passed SSO headers from remote hosts will be stripped, degrading authentication to guest access.
 
 ---
 
 ## 🟢 Quick Start — SQLite (Default Provider)
 
-SQLite is the default and requires **no manual schema steps**: on first start the gateway creates every table and applies all column migrations (including `AppKeys.OwnerSid`) automatically and idempotently via the built-in seeder. This is the recommended path for a single-node internal deployment.
+SQLite requires **no manual schema steps**: on first start the gateway creates tables and applies migrations automatically via the built-in seeder. This is the recommended path for single-node deployments.
 
 ### Prerequisites
 * **.NET 10 runtime** on the host (or use the container image).

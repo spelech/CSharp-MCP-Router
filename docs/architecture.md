@@ -1,8 +1,8 @@
 # 🏛️ MCP Router Enterprise Architecture Guide & System Specification
 
-The **Model Context Protocol (MCP) Router Gateway & Semantic Proxy** is an enterprise-grade C# ASP.NET Core gateway, OAuth 2.0 provider, and high-performance protocol multiplexer. It consolidates hundreds of heterogeneous downstream MCP servers (Docker, Home Assistant, Plex, Actual Budget, SQL databases, filesystem tools, cloud APIs, and local CLI scripts) into a unified, secure, and semantic entry point for LLMs, IDEs, and autonomous coding agents.
+The **Model Context Protocol (MCP) Router Gateway & Semantic Proxy** is a C# ASP.NET Core gateway, OAuth 2.0 provider, and protocol multiplexer. It consolidates downstream MCP servers (e.g., Docker, Home Assistant, SQL databases, cloud APIs) into a unified, secure entry point for LLMs, IDEs, and autonomous agents.
 
-This document serves as the **definitive architectural specification**, detailing the end-to-end system context, component boundaries, frontend design, protocol multiplexing, multi-stage authorization, subprocess lifecycles, database persistence models, cryptographic envelope pipelines, and operational characteristics.
+This document is the **architectural specification**, detailing system context, component boundaries, frontend design, protocol multiplexing, authorization, subprocess lifecycles, database persistence, cryptographic pipelines, and operations.
 
 ---
 
@@ -54,11 +54,11 @@ This document serves as the **definitive architectural specification**, detailin
 
 ## 1. Executive Summary & Architectural Tenets
 
-The MCP Router Gateway is engineered to solve the **Context Explosion & Security Fragmentation Problem** inherent in large-scale Model Context Protocol deployments. When an AI agent connects directly to dozens of independent MCP servers, several critical bottlenecks occur:
-1. **Context Window Saturation**: Loading tool schemas for 300+ tools exhausts tens of thousands of tokens before user input begins.
-2. **Tool Selection Confusion**: Overlapping tool names across independent backends lead to hallucinations and execution errors.
-3. **Security & Credential Sprawl**: Plaintext API keys and database credentials scattered across client configurations create severe vulnerability vectors.
-4. **Lack of Centralized Audit & Governance**: Enterprise compliance requires unified invocation auditing, caller identity attribution, PII redaction, and fine-grained access control.
+The MCP Router Gateway solves the **Context Explosion & Security Fragmentation Problem** in large-scale MCP deployments. Connecting directly to many independent MCP servers causes:
+1. **Context Window Saturation**: Loading schemas for 300+ tools exhausts tokens.
+2. **Tool Selection Confusion**: Overlapping tool names cause hallucinations and errors.
+3. **Security & Credential Sprawl**: Plaintext credentials across client configurations are vulnerabilities.
+4. **Lack of Centralized Audit & Governance**: Enterprise compliance requires unified auditing, identity attribution, PII redaction, and access control.
 
 To address these challenges, the MCP Router enforces seven **core architectural tenets**:
 
@@ -102,7 +102,7 @@ To address these challenges, the MCP Router enforces seven **core architectural 
 
 ### Client Ecosystem & Ingress
 
-The MCP Router supports a wide array of AI developer tools, autonomous coding agents, and custom clients:
+The MCP Router supports:
 
 * **Cursor IDE**: Connects over Server-Sent Events (`/sse`) or target proxy routes (`/{serverId}`) using MCP extension settings.
 * **Claude Desktop**: Configured via `claude_desktop_config.json` connecting to SSE or local CLI bridges.
@@ -113,7 +113,7 @@ The MCP Router supports a wide array of AI developer tools, autonomous coding ag
 
 ### 7-Layer Gateway Architecture
 
-The router architecture is partitioned into seven distinct, cohesive layers:
+The router architecture is partitioned into seven layers:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
@@ -246,7 +246,7 @@ graph TD
 
 ## 3. Backend Component & Boundary Model
 
-The C# codebase is strictly partitioned into modular bounded contexts: [`Components/`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-57/Components), [`Infrastructure/`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-57/Infrastructure), and [`Core/`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-57/Core).
+The C# codebase is partitioned into three bounded contexts: [`Components/`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-57/Components), [`Infrastructure/`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-57/Infrastructure), and [`Core/`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-57/Core).
 
 ```
 ├── Components/
@@ -474,7 +474,7 @@ classDiagram
 
 ### React 19 & Vite SPA Architecture
 
-The web dashboard is built using **React 19**, **TypeScript**, **Vite**, and **Zustand** for state management. It features a responsive dark-mode glassmorphic interface styled with CSS variables (`variables.css`, `layout.css`, `dashboard.css`, `tester.css`).
+The web dashboard uses **React 19**, **TypeScript**, **Vite**, and **Zustand**. It features a dark-mode interface styled with CSS variables (`variables.css`, `layout.css`, `dashboard.css`, `tester.css`).
 
 ### Domain Component Decomposition
 
@@ -511,11 +511,11 @@ frontend/src/
 
 ### Typed API Layer & Zustand State Stores
 
-The frontend maintains complete decoupling between UI rendering, API communication, and state management:
-* **`useServerStore`**: Manages server inventory, active search/category filtering, inspect modal state, and health check refresh intervals.
-* **`useAppKeyStore`**: Handles key creation workflows, reveals the unmasked high-entropy raw secret once upon creation, and manages scope assignments.
-* **`useSettingsStore`**: Coordinates secret and identity provider forms, dynamically toggling password masking and encrypting configuration JSON payloads.
-* **`useLogStore`**: Receives streaming gateway logs into an in-memory ring buffer, enabling live regex filtering and log-level toggling in the Test Bench.
+The frontend decouples UI rendering, API communication, and state management:
+* **`useServerStore`**: Manages server inventory, search/category filtering, inspect modal state, and health check refresh intervals.
+* **`useAppKeyStore`**: Handles key creation, reveals the raw secret once upon creation, and manages scope assignments.
+* **`useSettingsStore`**: Coordinates secret and identity provider forms, toggles password masking, and encrypts configuration payloads.
+* **`useLogStore`**: Receives streaming logs into an in-memory ring buffer for live filtering in the Test Bench.
 
 ### Frontend Architecture & State Flow Diagram
 
@@ -597,7 +597,7 @@ graph TD
 
 ### Meta-Mode Dynamic Capability Hiding (`/sse` & `/message`)
 
-When hundreds of tools are registered in the gateway, exposing all tool definitions during the initial `tools/list` handshake overwhelms LLM context windows.
+Exposing all tool definitions during the `tools/list` handshake overwhelms LLM context windows.
 
 **Meta-Mode Architecture**:
 1. **Bootstrap Initialization**: When a client connects to `/sse` with Meta-Mode enabled (the default), the router returns only two native gateway bootstrap tools:
@@ -616,14 +616,14 @@ When hundreds of tools are registered in the gateway, exposing all tool definiti
 
 ### Target-Specific Virtual Proxying (`/{targetServerId}`)
 
-For clients requiring direct, un-namespaced interaction with a specific backend (e.g. Cursor configured to talk directly to `docker` or `plex`):
-* The client connects directly to `/{targetServerId}` (e.g. `/docker` or `/plex`).
+For clients requiring direct interaction with a specific backend:
+* The client connects to `/{targetServerId}`.
 * The gateway validates AppKey scopes (`server:{targetServerId}`, `category:{cat}`, or `*`).
-* Capabilities are proxied directly without Meta-Mode filtering. All tool names remain in their native un-namespaced form.
+* Capabilities are proxied directly without Meta-Mode filtering; tool names remain un-namespaced.
 
 ### JSON-RPC 2.0 In-Flight Multiplexing & ID Preservation
 
-The router multiplexes concurrent client requests across shared or isolated backend connections while ensuring complete response isolation:
+The router multiplexes client requests across backend connections while ensuring response isolation:
 
 1. **Polymorphic Serialization**: [`JsonRpcMessageConverter.cs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-57/Core/Protocol/ProtocolModels.cs) handles bidirectional serialization of `JsonRpcRequest`, `JsonRpcResponse`, `JsonRpcNotification`, and `JsonRpcError`.
 2. **Client ID Preservation**: The client's original ID (whether an integer `1`, string `"req-123"`, or GUID) is captured in [`PendingRequestTcs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-57/Infrastructure/Transports/JsonRpcStateManager.cs).
@@ -733,7 +733,7 @@ sequenceDiagram
 
 ### 4-Stage Hierarchical Decision Flow
 
-Every request entering the router passes through four concentric security gates:
+Requests pass through four security stages:
 
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐

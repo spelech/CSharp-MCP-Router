@@ -1,6 +1,6 @@
 # Developer & Contributor Guide
 
-Welcome to the **MCP Router Gateway & Semantic Proxy** developer guide. This document provides setup instructions, architectural conventions, coding guidelines, testing protocols, version management rules, and release verification workflows for developers and AI coding agents.
+This document defines setup instructions, architectural conventions, coding guidelines, testing protocols, version management rules, and release verification workflows for the **MCP Router Gateway & Semantic Proxy**.
 
 ---
 
@@ -27,7 +27,7 @@ Welcome to the **MCP Router Gateway & Semantic Proxy** developer guide. This doc
 
 ## 🛠️ Prerequisites & Development Environment
 
-To build, test, and contribute to the MCP Router, ensure the following toolchains are installed:
+Ensure the following toolchains are installed:
 
 | Tool / Runtime | Minimum Version | Purpose |
 | :--- | :--- | :--- |
@@ -41,7 +41,7 @@ To build, test, and contribute to the MCP Router, ensure the following toolchain
 
 ## 🏛️ Repository Structure & Architecture Conventions
 
-The codebase is organized into clean domain boundaries across backend, frontend, and tests:
+The repository uses the following domain boundaries:
 
 ```
 ├── Components/                 # Decomposed domain modules & Minimal API mappers
@@ -121,7 +121,7 @@ The codebase is organized into clean domain boundaries across backend, frontend,
 
 ### Backend Test Suite
 
-The C# test suite contains 500+ unit, integration, and security contract tests:
+The C# suite includes 500+ unit, integration, and security contract tests:
 
 ```bash
 # Run all backend tests
@@ -133,7 +133,7 @@ CI=true dotnet test McpRouter.slnx --configuration Release --collect:"XPlat Code
 
 ### Frontend Vitest Suite
 
-The frontend test suite covers all Zustand stores, typed API handlers, and React components:
+The frontend suite covers Zustand stores, typed API handlers, and React components:
 
 ```bash
 cd frontend
@@ -147,7 +147,7 @@ npm run test:coverage
 
 ### End-to-End Testing (Playwright)
 
-For full UI workflows across multi-user security matrices:
+Execute UI workflows across multi-user security matrices:
 
 ```bash
 cd frontend
@@ -156,7 +156,7 @@ npx playwright test
 
 ### Living Software Requirements Specification (SRS) & Test Catalog
 
-Requirements and safety guardrails are annotated directly in test code across C# and TypeScript. To regenerate or verify the living catalog:
+Requirements and safety guardrails are annotated in C# and TypeScript tests. To regenerate or verify the catalog:
 
 ```bash
 # Generate human-readable Markdown and machine JSON matrix
@@ -173,8 +173,6 @@ dotnet run --project scripts/CatalogGenerator -- --verify-only
 ---
 
 ## 🎨 Formatting, Linting & Static Analysis
-
-To ensure codebase hygiene and prevent regressions:
 
 1. **C# Backend Formatting & Roslyn Analyzers**:
    ```bash
@@ -195,7 +193,7 @@ To ensure codebase hygiene and prevent regressions:
 
 ### Mandatory Version Synchronization Contract
 
-Every release, pull request, and commit to `main` must keep the version number strictly synchronized across **four mandatory locations**:
+Every release, pull request, and commit to `main` must synchronize the version number across **four mandatory locations**:
 
 1. **`mcp-router.csproj`**:
    - `<Version>X.Y.Z</Version>`
@@ -211,7 +209,7 @@ Every release, pull request, and commit to `main` must keep the version number s
 
 ### Release Verification Script (`verify-release.sh`)
 
-The repository includes a comprehensive release and quality verification engine located at [`scripts/verify_release.py`](../scripts/verify_release.py) with a bash wrapper [`scripts/verify-release.sh`](../scripts/verify-release.sh).
+The release verification engine is located at [`scripts/verify_release.py`](../scripts/verify_release.py) with a bash wrapper [`scripts/verify-release.sh`](../scripts/verify-release.sh).
 
 ```bash
 # 🛡️ Run full verification suite (versions, links, tests, builds)
@@ -262,7 +260,7 @@ The repository includes a comprehensive release and quality verification engine 
 
 ### CLI Flags & Options Reference
 
-The verification engine provides flexible flags for development and CI:
+Available flags:
 
 | Flag | Purpose | Example |
 | :--- | :--- | :--- |
@@ -277,13 +275,13 @@ The verification engine provides flexible flags for development and CI:
 
 ### Automated Version Bumping & Atomic Commits
 
-To bump the version and commit atomically:
+Bump the version and commit atomically:
 
 ```bash
 ./commit.sh "feat(auth): add fine-grained category scopes"
 ```
 
-The script automatically:
+The script executes the following:
 1. Validates the .NET project build.
 2. Invokes [`scripts/bump_version.py`](../scripts/bump_version.py) to increment the version (minor for `feat:`/breaking changes, patch for `fix:`/`docs:`).
 3. Synchronizes all version references (`.csproj`, `useUserStore.ts`, `CHANGELOG.md`, `README.md`).
@@ -293,7 +291,7 @@ The script automatically:
 
 ## 🔒 Continuous Integration & Quality Gates
 
-Every pull request to `main` executes the quality gates defined in `.github/workflows/ci.yml`:
+Pull requests to `main` execute the quality gates defined in `.github/workflows/ci.yml`:
 
 1. **`release-verification`**: Validates version synchronization and ensures 0 broken markdown links/anchors.
 2. **`backend`**: Runs `dotnet build` (`Release`) and the full 500+ xUnit test suite with coverage collection.

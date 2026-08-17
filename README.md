@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.17.5-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.17.6-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-544%20passing-2ea44f?style=for-the-badge)
@@ -8,9 +8,9 @@
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
 
-An enterprise-ready, high-performance C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the **Model Context Protocol (MCP)**. 
+A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the **Model Context Protocol (MCP)**. 
 
-The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex, Home Assistant, Actual Budget, Excel, etc.) and presents them to client LLMs, IDEs, and agents as a single unified connection.
+`mcp-router` aggregates backend MCP servers (Docker, Plex, Home Assistant, Actual Budget, Excel) and proxies them to clients via a single unified connection.
 
 ![MCP Router Gateway Dashboard](docs/assets/dashboard.jpg)
 
@@ -48,14 +48,14 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 ## 🎯 Evaluation & Product Overview Guide
 
-To understand how MCP Router solves LLM context window bloat, eliminates CLI secret leakage in STDIO subprocesses, enforces 4-stage authorization, and compares against direct connections and generic reverse proxies, see:
+For details on context window management, STDIO secret security, authorization, and reverse proxy comparisons, see:
 * [**Evaluation & Product Overview Guide**](docs/evaluation-guide.md)
 
 ---
 
 ## 🏛️ Comprehensive Architecture & Specification Guide
 
-For exhaustive architectural specifications, Mermaid sequence diagrams, component boundary models, entity-relationship diagrams (ERDs), 4-stage authorization flows, transport lifecycles, and AES-256-GCM envelope encryption pipelines, see:
+For architectural specifications, Mermaid sequence diagrams, component models, ERDs, authorization flows, transport lifecycles, and AES-256-GCM encryption pipelines, see:
 * [**Comprehensive Enterprise Architecture Guide**](docs/architecture.md)
 * [**Executive Architecture Overview**](ARCHITECTURE.md)
 
@@ -63,7 +63,7 @@ For exhaustive architectural specifications, Mermaid sequence diagrams, componen
 
 ## 📖 Official User Guide & Manual
 
-For step-by-step UI guides, server registration, secret provider configuration (Env, HashiCorp Vault, Registry), RBAC group policies, client setup snippets, and interactive test bench operations, see the complete user guide suite:
+For UI guides, server registration, secret provider configuration, RBAC, client setup, and test bench operations, see:
 * [**Official User Guide Suite**](docs/user-guide/README.md)
   * [01. Dashboard & Navigation Interface](docs/user-guide/01-dashboard-and-navigation.md)
   * [02. Server Management & Secret Providers](docs/user-guide/02-server-management-and-secrets.md)
@@ -76,7 +76,7 @@ For step-by-step UI guides, server registration, secret provider configuration (
 
 ## 💻 Developer & Operations Guides
 
-For environment prerequisites, local setup, testing workflows, production deployments, Caddy/NGINX configs, database backup/restore, observability, and disaster recovery:
+For setup, testing, production deployment, database management, observability, and disaster recovery:
 * [**Developer Guide & Local Setup**](docs/developer-guide.md)
 * [**Windows Deployment & Validation Guide**](docs/windows-deployment-and-validation-guide.md)
 * [**Software Requirements Specification (SRS) & Test Catalog**](docs/software-requirements-and-test-catalog.md)
@@ -134,6 +134,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.17.6`** | 2026-08-17 | docs(refactor): refine documentation for conciseness and add pitch deck |
 | **`v4.17.5`** | 2026-08-17 | chore(release): bump version to 4.17.5 and align verification badges |
 | **`v4.17.4`** | 2026-08-17 | test(coverage): close frontend unit, Playwright E2E, and live MySQL repository coverage gaps |
 | **`v4.17.3`** | 2026-08-17 | test(reqs): add formal requirement annotations for SEC-04 DPAPI and AUTH-04 Windows Identity |

@@ -1,8 +1,8 @@
 # 🔐 Enterprise Secret Providers & Key Management Guide
 
-The **MCP Router Gateway & Semantic Proxy** provides an enterprise-grade, pluggable secrets management subsystem (`ISecretRetriever`). It eliminates the risk of storing sensitive downstream MCP server credentials (such as API keys, bearer tokens, passwords, and service account keys) in plaintext in database columns, configuration files, or container environments.
+The **MCP Router Gateway & Semantic Proxy** provides a pluggable secrets management subsystem (`ISecretRetriever`). It prevents plaintext storage of downstream MCP server credentials (API keys, bearer tokens, passwords, service account keys) in database columns, configuration files, or container environments.
 
-This guide details the supported secret providers, the AES-256-GCM encryption-at-rest architecture, dynamic runtime reloading, audit safety mechanisms, copy-pasteable Docker configurations, and operational troubleshooting recipes.
+This guide details supported secret providers, AES-256-GCM encryption-at-rest architecture, dynamic runtime reloading, audit safety mechanisms, Docker configurations, and troubleshooting.
 
 ---
 

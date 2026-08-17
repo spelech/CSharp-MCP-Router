@@ -2,7 +2,7 @@
 
 The **Model Context Protocol (MCP) Gateway Router** supports multiple downstream transport mechanisms to communicate with backend tools, services, and local processes, as well as multiple upstream client connectivity models.
 
-This guide provides an exhaustive technical specification of all supported transports, security policies, concurrency architectures, configuration parameters, and troubleshooting procedures.
+This guide details supported transports, security policies, concurrency architectures, configuration parameters, and troubleshooting procedures.
 
 ---
 
