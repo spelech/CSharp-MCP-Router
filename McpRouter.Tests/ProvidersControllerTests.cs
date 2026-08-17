@@ -320,5 +320,24 @@ namespace McpRouter.Tests
             Assert.NotNull(failResult);
             Assert.Equal(200, failResult.StatusCode);
         }
+    
+        [Fact]
+        [Requirement("REQ-AUTH-BATCH-GUARD", "GUARD", RequirementType.Positive, "Must reject batch save if all auth providers are disabled.")]
+        public async Task SaveAuthProvidersBatch_ReturnsBadRequest_WhenAllProvidersDisabled()
+        {
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
+            
+            var dtos = new System.Collections.Generic.List<AuthProviderDto>
+            {
+                new AuthProviderDto { ProviderName = "ad", IsEnabled = false },
+                new AuthProviderDto { ProviderName = "oidc", IsEnabled = false }
+            };
+
+            var result = await controller.SaveAuthProvidersBatch(dtos, mockAudit.Object) as BadRequestObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
+        }
     }
 }
