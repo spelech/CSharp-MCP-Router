@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.16.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.16.1-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-543%20passing-2ea44f?style=for-the-badge)
@@ -20,7 +20,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 
 * **MCP 2026-07-28 Spec Support**: Spec-compliant header annotation; routing is body/path based (`Mcp-Method` & `Mcp-Name`) via `McpDualSpecMiddleware` with legacy JSON body fallback.
 * **Dynamic Docker Auto-Discovery**: Mounts `/var/run/docker.sock` to automatically discover and register backend MCP containers labeled with `mcp.enabled=true`, `mcp.id`, `mcp.port`, and `mcp.categories` (see [docs/features-guide.md](docs/features-guide.md#method-d-dynamic-docker-label-auto-discovery-mcp-labels)).
-* **Pluggable Identity Providers**: Dual authentication support for **Active Directory** (Kerberos/NTLM Windows SIDs) and **PocketID / TinyAuth OIDC** (`Remote-User`, `Remote-Groups` headers).
+* **Pluggable Identity Providers**: Dual authentication support for **Active Directory** (Kerberos/NTLM Windows SIDs) and **OIDC / Reverse Proxy Headers** (`Remote-User`, `Remote-Groups` headers from Authentik, Authelia, PocketID, Keycloak, etc.).
 * **Pluggable Secret Retrievers**: Fetch downstream server API keys and tokens dynamically from **HashiCorp Vault (KV v2)**, **Windows Registry (DPAPI)**, or **Environment Variables** per server (`SecretProvider` column).
 * **Multi-Database & Stored Procedure Engine**: Complete stored procedure suites for **MS SQL Server** (`Microsoft.Data.SqlClient`), **MySQL** (`MySqlConnector`), and **SQLite** (`Microsoft.Data.Sqlite`) using Dapper. See [docs/database-providers.md](docs/database-providers.md).
 * **Observability & PII Audit Logging**: Automatic payload redaction of Bearer tokens, API keys, and passwords (`PiiSanitizer`) paired with stored procedure audit logging (`sp_InsertAuditLog`).
@@ -132,12 +132,12 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.16.1`** | 2026-08-16 | refactor(auth): genericize OIDC and SSO identity references, sanitize seed personas, and standardize header provider UI naming |
 | **`v4.16.0`** | 2026-08-15 | feat(auth): enable hybrid OIDC & Active Directory admin authorization with multi-group support, fallback resolution, and CIDR-aware trusted proxy parsing |
 | **`v4.15.0`** | 2026-08-15 | feat(testing): implement automated Living Software Requirements Specification (SRS) & Test Catalog generator with bidirectional test-to-requirement traceability and CI verification quality gate |
 | **`v4.14.0`** | 2026-08-14 | refactor(router): decouple media tools to standalone server, decommission approvals, and add Windows test abstractions |
 | **`v4.13.0`** | 2026-08-14 | feat(release): complete Stage 3 — unified product, user, developer, and operations documentation journey (#58), and automated release verification engine with CI version consistency quality gate (#59) |
 | **`v4.12.2`** | 2026-08-14 | docs: comprehensive enterprise architecture guide with system context, component models, sequence diagrams, 4-stage authorization, transports, database ERD, and envelope encryption (#57) |
-| **`v4.12.0`** | 2026-08-14 | refactor(architecture): complete Sprint 4 merge — modularize backend into `Components/` and `Infrastructure/` domain boundaries with decomposed endpoint mappers (#51), and refactor frontend into domain `components/` with typed API layer and modular settings tabs (#52) |
 
 ---
 
