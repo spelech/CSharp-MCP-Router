@@ -370,6 +370,7 @@ Encryption keys are resolved during bootstrap via [`DbKeyHelper.ResolveDbEncrypt
 3. **Thread-Safe Caching**: Key resolution uses double-checked locking to cache the resolved string in memory, minimizing configuration lookups.
 
 ### 2. Symmetric Encryption Engine (`SymmetricEncryptionHelper.cs`)
+* **Data Loss Prevention**: If decryption fails (e.g., due to key loss or corruption), the system tracks this state (`IsDecryptionFailed`) to prevent the frontend or API from accidentally overwriting the encrypted ciphertext with an empty string during generic configuration updates.
 * **Key Derivation**: Derives a 256-bit symmetric encryption key using `Rfc2898DeriveBytes.Pbkdf2` with **SHA-256**, **600,000 iterations**, and a domain-isolated salt (`{secretString}_McpRouter_Salt_v2`).
 * **Authenticated Encryption**: Uses **AES-256-GCM** (`System.Security.Cryptography.AesGcm`) providing confidentiality, integrity, and authenticity.
 * **Payload Structure**: Packed binary payload containing `[ 12-byte Nonce | 16-byte Auth Tag | N-byte Ciphertext ]`, encoded as Base64.
