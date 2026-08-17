@@ -13,18 +13,6 @@ describe('ResourceTesterCard Component', () => {
     ],
   };
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders resource tester with servers and resources', () => {
     const onServerChange = vi.fn();
     const onSelectChange = vi.fn();
@@ -47,18 +35,6 @@ describe('ResourceTesterCard Component', () => {
     expect(screen.getByText('Interactive Resource Tester')).toBeInTheDocument();
     expect(screen.getByDisplayValue('router://catalog')).toBeInTheDocument();
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('handles custom URI input and submit', () => {
     const onServerChange = vi.fn();

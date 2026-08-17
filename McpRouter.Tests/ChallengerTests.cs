@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -207,7 +206,6 @@ namespace McpRouter.Tests
     public class ChallengerTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void JsonNode_Rewrite_HandlesBatchCommentsAndCommas()
         {
             var loggerMock = new Mock<ILogger>();
@@ -232,8 +230,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task AuthMiddleware_CaseInsensitivity_Bypass_Check()
         {
             // Simulate the middleware routing check from Program.cs:
@@ -293,8 +289,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task SendRequestAsync_TimesOutCleanly_AndDoesNotLeak()
         {
             // Verify that SendRequestAsync times out cleanly (throws TimeoutException)
@@ -354,8 +348,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task SendRequestAsync_Succeeds_When_Response_Has_Method_Property()
         {
             // Verify that SendRequestAsync succeeds (does not hang) if the response contains a 'method' property,
@@ -438,8 +430,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task SseBackend_Notification_IsForwardedToClient_WithAllFieldsIntact()
         {
             // Arrange
@@ -514,8 +504,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task AsynchronousRouting_HighVolumeAndPolymorphic_DoesNotHang()
         {
             var server = new McpServer
@@ -593,8 +581,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void JsonNode_Rewrite_HandlesAdversarialEdgeCases()
         {
             var loggerMock = new Mock<ILogger>();
@@ -625,8 +611,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task AuthMiddleware_CaseInsensitivity_BypassAndHeader_Check()
         {
             var bypassPaths = new[] { "/api/register", "/API/REGISTER", "/Api/Register", "/api/me", "/API/ME", "/Api/Me" };
@@ -707,8 +691,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void PlainJsonRpcMessages_DoNotCauseStackOverflow_PolymorphicVariants()
         {
             var options = new JsonSerializerOptions
@@ -736,8 +718,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Connect_BlocksPrivateOrLoopbackIPs_AtSocketLevel()
         {
             // 1. Without allowed IP ranges, connecting to 127.0.0.1 must throw HttpRequestException with SSRF protection message.
@@ -769,8 +749,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void SecurityValidationHelper_IsBlockedIp_ValidatesAllBlockedAndAllowedRanges()
         {
             // IPv4 Loopback

@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -17,7 +16,6 @@ namespace McpRouter.Tests
     public class OpenIddictProductionTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Production_WithNoCert_Throws_InvalidOperationException()
         {
             var services = new ServiceCollection();
@@ -35,8 +33,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Development_WithNoCert_BootsOnDevCerts()
         {
             var services = new ServiceCollection();
@@ -52,8 +48,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Production_WithValidPfx_Boots()
         {
             var tempPfxPath = Path.Combine(Path.GetTempPath(), $"test_cert_{Guid.NewGuid():N}.pfx");

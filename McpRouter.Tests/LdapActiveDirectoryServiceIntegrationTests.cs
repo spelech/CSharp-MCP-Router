@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Security;
@@ -17,7 +16,6 @@ namespace McpRouter.Tests
     public class LdapActiveDirectoryServiceIntegrationTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ResolveUserSidsAsync_ReturnsEmpty_WhenLdapProviderDisabledInDb()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -43,8 +41,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ResolveUserSidsAsync_ThrowsInvalidOperation_WhenDbConfigSpecifiesPlaintextLdap()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
@@ -66,8 +62,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ResolveUserSidsAsync_UsesCache_WhenCachedSidsExist()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -86,8 +80,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ResolveUserSidsAsync_FailsClosedWithSecurityException_OnUnreachableServer()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

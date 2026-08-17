@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Net.Http;
 using McpRouter;
@@ -12,7 +11,6 @@ namespace McpRouter.Tests
     public class SessionManagerTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void PerformanceMetrics_And_TotalRequests_IncrementCorrectly()
         {
             var services = new ServiceCollection().BuildServiceProvider();
@@ -36,8 +34,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void UpdateBackendStatus_TracksBackendHealth()
         {
             var services = new ServiceCollection().BuildServiceProvider();

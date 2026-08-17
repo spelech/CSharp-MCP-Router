@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -64,8 +63,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void DatabaseSeeder_SeedsDefaultData_Successfully()
         {
             using var freshConn = new SqliteConnection("Data Source=FreshSeederDb;Mode=Memory;Cache=Shared");
@@ -95,8 +92,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task DockerAutoDiscovery_ScanContainers_HandlesMissingSocketGracefully()
         {
             var (sp, factory) = CreateServiceProvider();
@@ -113,8 +108,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task SemanticSearchService_Fallback_With_DummyEmbeddings()
         {
             var toolsList = new List<object>

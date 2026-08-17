@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Threading.Tasks;
 using McpRouter.Infrastructure.Secrets;
@@ -9,7 +8,6 @@ namespace McpRouter.Tests
     public class SecretRetrieverTests
     {
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task EnvironmentSecretRetriever_ReturnsEnvVariable_WhenExists()
         {
             const string envKey = "TEST_MCP_ROUTER_SECRET_VAR";
@@ -29,8 +27,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task EnvironmentSecretRetriever_ReturnsNull_WhenVariableDoesNotExist()
         {
             var retriever = new EnvironmentSecretRetriever();
@@ -39,8 +35,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task WindowsRegistrySecretRetriever_HandlesNonWindowsGracefully()
         {
             var retriever = new WindowsRegistrySecretRetriever();

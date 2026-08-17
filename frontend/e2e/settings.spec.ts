@@ -2,18 +2,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Settings View Flow', () => {
 
-  /**
-
-   * @requirement MCP-01
-
-   * @category MCP
-
-   * @type PositiveFeature
-
-   * @description Resolves MCP tool calls from client to appropriate backend server
-
-   */
-
   test('should navigate to Settings view and configure vector embedding options', async ({ page }) => {
     await page.goto('/');
 

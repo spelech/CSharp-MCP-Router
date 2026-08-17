@@ -19,18 +19,6 @@ describe('useServerStore', () => {
     connectionError: ''
   };
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('initializes with default state', () => {
     const state = useServerStore.getState();
     expect(state.servers).toEqual([]);
@@ -47,12 +35,6 @@ describe('useServerStore', () => {
   });
 
   describe('fetchServers', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('successfully loads servers and updates state', async () => {
       mockApiResponse('/api/servers', [sampleServer]);
 
@@ -65,18 +47,6 @@ describe('useServerStore', () => {
       expect(useServerStore.getState().servers).toHaveLength(1);
       expect(useServerStore.getState().servers[0].id).toBe('docker-mcp');
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('triggers batch reconnect when refreshAll is true', async () => {
       let reconnectCalled = false;
@@ -92,18 +62,6 @@ describe('useServerStore', () => {
       expect(useServerStore.getState().servers).toHaveLength(1);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('handles server fetch errors gracefully and shows error toast', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/servers', 'Internal Server Error', 500, 'Internal Server Error');
@@ -118,12 +76,6 @@ describe('useServerStore', () => {
   });
 
   describe('saveServer', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('creates a new server via POST when no id is present', async () => {
       let postPayload: any = null;
       mockApiResponse('/api/servers', (_url, options) => {
@@ -155,18 +107,6 @@ describe('useServerStore', () => {
       expect(toasts.some((t) => t.message.includes('added successfully'))).toBe(true);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('updates an existing server via PUT when id is present', async () => {
       let putPayload: any = null;
       let targetUrl = '';
@@ -195,18 +135,6 @@ describe('useServerStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('updated successfully'))).toBe(true);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('shows error toast when save fails', async () => {
       mockApiResponse('/api/servers', 'Failed to save', 500, 'Server Error');
 
@@ -219,12 +147,6 @@ describe('useServerStore', () => {
   });
 
   describe('toggleServerEnabled', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('sends PUT request to update server enabled state and refreshes', async () => {
       let toggleBody: any = null;
       mockApiResponse(/\/api\/servers\/docker-mcp/, (_url, options) => {
@@ -241,18 +163,6 @@ describe('useServerStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('disabled successfully'))).toBe(true);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('handles toggle failure with error toast', async () => {
       mockApiResponse(/\/api\/servers\/docker-mcp/, 'Error', 500, 'Error');
 
@@ -263,12 +173,6 @@ describe('useServerStore', () => {
   });
 
   describe('reconnectServer', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('sends reconnect POST request and shows info toast', async () => {
       useServerStore.setState({ servers: [sampleServer] });
       let reconnectCalled = false;
@@ -283,18 +187,6 @@ describe('useServerStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.type === 'info')).toBe(true);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('handles reconnect failure with error toast', async () => {
       useServerStore.setState({ servers: [sampleServer] });
       mockApiResponse('/api/servers/docker-mcp/reconnect', 'Reconnect failed', 500);
@@ -306,12 +198,6 @@ describe('useServerStore', () => {
   });
 
   describe('deleteServer', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('prompts window.confirm and deletes server when confirmed', async () => {
       window.confirm = vi.fn(() => true);
       let deleteCalled = false;
@@ -329,18 +215,6 @@ describe('useServerStore', () => {
       expect(deleteCalled).toBe(true);
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('deleted successfully'))).toBe(true);
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('does not send delete request when confirm is cancelled', async () => {
       window.confirm = vi.fn(() => false);
@@ -361,30 +235,12 @@ describe('useServerStore', () => {
   });
 
   describe('UI state mutations', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('updates search query and resets page to 1', () => {
       useServerStore.setState({ currentPage: 3 });
       useServerStore.getState().setSearchQuery('notes');
       expect(useServerStore.getState().searchQuery).toBe('notes');
       expect(useServerStore.getState().currentPage).toBe(1);
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('updates sortBy and groupBy', () => {
       useServerStore.getState().setSortBy('name-asc');
@@ -393,18 +249,6 @@ describe('useServerStore', () => {
       useServerStore.getState().setGroupBy('category');
       expect(useServerStore.getState().groupBy).toBe('category');
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('updates page and pageSize', () => {
       useServerStore.getState().setCurrentPage(2);
@@ -415,18 +259,6 @@ describe('useServerStore', () => {
       expect(useServerStore.getState().currentPage).toBe(1);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('toggles group collapse state', () => {
       useServerStore.getState().toggleGroupCollapse('group-media');
       expect(useServerStore.getState().collapsedGroups).toContain('group-media');
@@ -434,18 +266,6 @@ describe('useServerStore', () => {
       useServerStore.getState().toggleGroupCollapse('group-media');
       expect(useServerStore.getState().collapsedGroups).not.toContain('group-media');
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('manages modal open/close actions', () => {
       useServerStore.getState().openAddModal();
@@ -463,12 +283,6 @@ describe('useServerStore', () => {
   });
 
   describe('Inspect Modal', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('opens inspect modal and loads server inspection data', async () => {
       const inspectData = {
         tools: [{ name: 'docker__list', description: 'List docker containers' }],
@@ -488,18 +302,6 @@ describe('useServerStore', () => {
       expect(state.inspectData.prompts).toHaveLength(1);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('handles inspect failure with error toast', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/servers/docker-mcp/inspect', 'Inspect error', 500);
@@ -510,18 +312,6 @@ describe('useServerStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.type === 'error')).toBe(true);
       consoleSpy.mockRestore();
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('sets inspect active tab and search query', () => {
       useServerStore.getState().setInspectActiveTab('resources');

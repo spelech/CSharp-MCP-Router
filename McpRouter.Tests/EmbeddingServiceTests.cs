@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -72,8 +71,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ApiEmbeddingService_GetEmbeddingAsync_Returns_Vector_From_OpenAI_Response()
         {
             var (conn, dbFactory, settings) = CreateDbFactory();
@@ -95,8 +92,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error()
         {
             var (conn, dbFactory, settings) = CreateDbFactory();

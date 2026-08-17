@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,8 +49,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task GetServers_Returns_Server_List()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -64,8 +61,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Post_Put_Delete_Server_Lifecycle_Works()
         {
             var (conn, dbFactory) = CreateDbFactory();

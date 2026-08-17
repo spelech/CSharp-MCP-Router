@@ -3,12 +3,6 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { ClientSetupGuide } from '../../components/clients/ClientSetupGuide';
 
 describe('ClientSetupGuide Component', () => {
-  /**
-   * @requirement UI-01
-   * @category UI
-   * @type PositiveFeature
-   * @description Renders the dashboard and visualizes MCP server states
-   */
   it('renders Cursor setup by default and switches between clients', () => {
     render(<ClientSetupGuide />);
 

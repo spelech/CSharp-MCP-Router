@@ -10,35 +10,11 @@ describe('MappingModal component', () => {
     internalGroup: 'Domain Admins'
   };
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders nothing when isMappingModalOpen is false', () => {
     useSettingsStore.setState({ isMappingModalOpen: false, editingMapping: null });
     const { container } = render(<MappingModal />);
     expect(container.firstChild).toBeNull();
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('renders create mapping form with empty inputs', () => {
     useSettingsStore.setState({ isMappingModalOpen: true, editingMapping: null });
@@ -49,18 +25,6 @@ describe('MappingModal component', () => {
     expect(screen.getByLabelText('Internal Group Name')).toHaveValue('');
   });
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('renders edit mapping form pre-filled with mapping data', () => {
     useSettingsStore.setState({ isMappingModalOpen: true, editingMapping: existingMapping });
     render(<MappingModal />);
@@ -69,18 +33,6 @@ describe('MappingModal component', () => {
     expect(screen.getByLabelText('External AD SID or OIDC Group')).toHaveValue('S-1-5-21-99999-500');
     expect(screen.getByLabelText('Internal Group Name')).toHaveValue('Domain Admins');
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('submits form with externalId and internalGroup', async () => {
     const saveSpy = vi.fn().mockResolvedValue(undefined);
@@ -100,18 +52,6 @@ describe('MappingModal component', () => {
       internalGroup: 'Developers'
     });
   });
-
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
 
   it('closes modal on cancel click', () => {
     const closeSpy = vi.fn();

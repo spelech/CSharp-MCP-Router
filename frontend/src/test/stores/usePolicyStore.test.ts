@@ -17,18 +17,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     internalGroup: 'Administrators'
   };
 
-  /**
-
-   * @requirement UI-01
-
-   * @category UI
-
-   * @type PositiveFeature
-
-   * @description Renders the dashboard and visualizes MCP server states
-
-   */
-
   it('initializes with empty policies and mappings', () => {
     const state = useSettingsStore.getState();
     expect(state.policies).toEqual([]);
@@ -40,12 +28,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
   });
 
   describe('policies management', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('fetches access policies and updates store', async () => {
       mockApiResponse('/api/permissions/policies', [samplePolicy]);
 
@@ -54,18 +36,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useSettingsStore.getState().policies).toHaveLength(1);
       expect(useSettingsStore.getState().policies[0].targetId).toBe('server:ha');
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('creates/saves a policy (ALLOW rule) and closes modal', async () => {
       let postBody: any = null;
@@ -94,18 +64,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('Policy saved successfully'))).toBe(true);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('handles policy save failure with error toast', async () => {
       mockApiResponse('/api/permissions/policies', 'Save policy failed', 500);
 
@@ -113,18 +71,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
 
       expect(useToastStore.getState().toasts.some((t) => t.type === 'error')).toBe(true);
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('deletes a policy when confirmed', async () => {
       window.confirm = vi.fn(() => true);
@@ -144,18 +90,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('Policy deleted successfully'))).toBe(true);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('does not delete policy when confirm is cancelled', async () => {
       window.confirm = vi.fn(() => false);
       let deleteCalled = false;
@@ -174,12 +108,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
   });
 
   describe('mappings management', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('fetches group mappings and updates store', async () => {
       mockApiResponse('/api/permissions/mappings', [sampleMapping]);
 
@@ -188,18 +116,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useSettingsStore.getState().mappings).toHaveLength(1);
       expect(useSettingsStore.getState().mappings[0].internalGroup).toBe('Administrators');
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('saves a group mapping and closes mapping modal', async () => {
       let postBody: any = null;
@@ -226,18 +142,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('Mapping saved successfully'))).toBe(true);
     });
 
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
-
     it('deletes a group mapping when confirmed', async () => {
       window.confirm = vi.fn(() => true);
       let deleteCalled = false;
@@ -258,12 +162,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
   });
 
   describe('modals state', () => {
-    /**
-     * @requirement UI-01
-     * @category UI
-     * @type PositiveFeature
-     * @description Renders the dashboard and visualizes MCP server states
-     */
     it('handles policy modal open and close', () => {
       useSettingsStore.getState().openPolicyModal(samplePolicy);
       expect(useSettingsStore.getState().isPolicyModalOpen).toBe(true);
@@ -273,18 +171,6 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useSettingsStore.getState().isPolicyModalOpen).toBe(false);
       expect(useSettingsStore.getState().editingPolicy).toBeNull();
     });
-
-    /**
-
-     * @requirement UI-01
-
-     * @category UI
-
-     * @type PositiveFeature
-
-     * @description Renders the dashboard and visualizes MCP server states
-
-     */
 
     it('handles mapping modal open and close', () => {
       useSettingsStore.getState().openMappingModal(sampleMapping);

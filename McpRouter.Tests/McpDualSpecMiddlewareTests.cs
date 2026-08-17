@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +10,6 @@ namespace McpRouter.Tests
     public class McpDualSpecMiddlewareTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Middleware_Parses_2026_Spec_Headers()
         {
             var context = new DefaultHttpContext();
@@ -37,8 +35,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Middleware_Falls_Back_To_Json_Body_When_Headers_Missing()
         {
             var context = new DefaultHttpContext();

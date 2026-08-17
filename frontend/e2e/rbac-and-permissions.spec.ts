@@ -2,18 +2,6 @@ import { test, expect } from '@playwright/test';
 
 test.describe('RBAC Access Control & Policy Modal Flow', () => {
 
-  /**
-
-   * @requirement MCP-01
-
-   * @category MCP
-
-   * @type PositiveFeature
-
-   * @description Resolves MCP tool calls from client to appropriate backend server
-
-   */
-
   test('should navigate to settings permissions tab and open policy configuration modal', async ({ page }) => {
     await page.goto('/');
 

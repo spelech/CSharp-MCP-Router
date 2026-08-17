@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -12,7 +11,6 @@ namespace McpRouter.Tests
     public class CompositeSecretRetrieverTests
     {
         [Fact]
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetSecretForProviderAsync_ReturnsNull_WhenProviderIsNone()
         {
             var retriever = new CompositeSecretRetriever(new List<ISecretRetriever>());
@@ -21,8 +19,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetSecretForProviderAsync_ThrowsInvalidOperationException_WhenProviderNotRegistered()
         {
             var retriever = new CompositeSecretRetriever(new List<ISecretRetriever>());
@@ -31,8 +27,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetSecretForProviderAsync_RoutesToTargetProvider_AndCachesValue()
         {
             var mockRetriever = new Mock<ISecretRetriever>();
@@ -54,8 +48,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetSecretForProviderAsync_MatchesVaultAliasNames()
         {
             var mockVaultRetriever = new Mock<ISecretRetriever>();

@@ -8,12 +8,6 @@ test.describe('Dashboard & Navigation Flow', () => {
    * @type positive
    * @description Renders main dashboard navigation tabs and layout headers
    */
-  /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type PositiveFeature
-   * @description Resolves MCP tool calls from client to appropriate backend server
-   */
   test('should render the dashboard layout and header components', async ({ page }) => {
     await page.goto('/');
 
@@ -30,12 +24,6 @@ test.describe('Dashboard & Navigation Flow', () => {
    * @type positive
    * @description Displays aggregate system metrics and health status cards
    */
-  /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type PositiveFeature
-   * @description Resolves MCP tool calls from client to appropriate backend server
-   */
   test('should display aggregate statistics cards', async ({ page }) => {
     await page.goto('/');
 
@@ -49,12 +37,6 @@ test.describe('Dashboard & Navigation Flow', () => {
    * @category UI
    * @type positive
    * @description Filters backend MCP server catalog via dashboard search input
-   */
-  /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type PositiveFeature
-   * @description Resolves MCP tool calls from client to appropriate backend server
    */
   test('should filter servers using search input', async ({ page }) => {
     await page.goto('/');

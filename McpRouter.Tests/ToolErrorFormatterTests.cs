@@ -1,4 +1,3 @@
-using McpRouter.Tests.Attributes;
 using System;
 using System.Text.Json;
 using McpRouter.Core.Routing;
@@ -10,7 +9,6 @@ namespace McpRouter.Tests
     public class ToolErrorFormatterTests
     {
         [Fact]
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void TransformError_FormatsJsonRpcErrorWithRemediation()
         {
             var err = new JsonRpcError
@@ -30,8 +28,6 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void TransformException_FormatsExceptionWithRemediation()
         {
             var ex = new Exception("Connection refused by target socket");
@@ -46,8 +42,6 @@ namespace McpRouter.Tests
         }
 
         [Theory]
-
-        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         [InlineData("Unauthorized access token", "auth")]
         [InlineData("Request timed out", "timeout")]
         [InlineData("Connection refused by server", "connection")]

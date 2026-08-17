@@ -1,12 +1,6 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Vault AppRole Configuration Flow', () => {
-  /**
-   * @requirement MCP-01
-   * @category MCP
-   * @type PositiveFeature
-   * @description Resolves MCP tool calls from client to appropriate backend server
-   */
   test('should configure Vault AppRole credentials and test connection in settings', async ({ page }) => {
     await page.goto('/');
 
