@@ -1,12 +1,12 @@
 # MCP Gateway Router: Evaluation & Product Overview Guide
 
-An enterprise-ready, high-performance C# ASP.NET Core gateway router, semantic proxy, and authorization control plane for the **Model Context Protocol (MCP)**.
+C# ASP.NET Core gateway router, semantic proxy, and authorization control plane for the **Model Context Protocol (MCP)**.
 
 ---
 
 ## 🎯 Executive Summary & Problem Statement
 
-As organizations and homelabs scale their adoption of LLMs, IDE coding assistants (Cursor, VS Code, Windsurf), and autonomous agent frameworks (Antigravity, Claude Desktop, OpenClaw), connecting agents to internal services introduces critical operational, architectural, and security bottlenecks:
+Connecting LLMs, IDE coding assistants (Cursor, VS Code, Windsurf), and autonomous agent frameworks (Antigravity, Claude Desktop, OpenClaw) to internal services introduces operational, architectural, and security bottlenecks:
 
 ```
                                  THE FRAGMENTATION PROBLEM
@@ -32,30 +32,30 @@ As organizations and homelabs scale their adoption of LLMs, IDE coding assistant
 ```
 
 ### 1. Context Window Bloat & Tool Confusion
-Connecting an LLM directly to 10–20 MCP servers exposes 100–300+ tool JSON schemas simultaneously.
-* **Token Overhead**: Tool schemas consume 30,000–60,000+ tokens *on every single interaction*, significantly increasing inference latency and API billing.
-* **Model Confusion & Hallucination**: Large tool catalogs exceed LLM attention spans, causing the model to pick incorrect tools, misunderstand schema arguments, or fail completely.
+Directly connecting an LLM to 10–20 MCP servers exposes 100–300+ tool JSON schemas simultaneously.
+* **Token Overhead**: Tool schemas consume 30,000–60,000+ tokens per interaction, increasing inference latency and API costs.
+* **Model Confusion & Hallucination**: Large tool catalogs exceed LLM attention spans, resulting in incorrect tool selection or schema validation failures.
 
 ### 2. Absence of Centralized RBAC & Least-Privilege Access
 Individual MCP backends lack standardized authentication or authorization:
-* Backend servers either offer no authentication or rely on a single shared administrative token.
-* Heterogeneous environments have no way to enforce Active Directory (AD) security groups, OIDC group claims (`Remote-Groups`), or category-scoped permissions (`category:smarthome`).
+* Backends often provide no authentication or use a single shared token.
+* Environments cannot enforce Active Directory (AD) security groups, OIDC group claims (`Remote-Groups`), or category-scoped permissions (`category:smarthome`).
 
 ### 3. Secret Leakage & Command-Line Exposure
-Connecting directly to local STDIO MCP servers often requires passing sensitive API tokens as command-line arguments:
-* Tokens become visible to any user or monitoring daemon on the host via `ps aux`, `/proc/<pid>/cmdline`, and process audit trees.
-* Database passwords and API keys stored in plaintext configuration files risk accidental source control leakage.
+Local STDIO MCP servers often require passing API tokens as command-line arguments:
+* Tokens are visible via `ps aux`, `/proc/<pid>/cmdline`, and process audit trees.
+* Passwords and API keys in plaintext configuration files risk source control leakage.
 
 ### 4. Operational & Transport Fragmentation
-Clients must manage complex mixes of local subprocesses (`stdio`), Server-Sent Events streams (`sse`), and stateless HTTP endpoints (`http`).
-* Subprocesses crash silently without health checks, auto-restart, or connection pooling.
-* No centralized audit trail records which user, agent, or client invoked which tool.
+Clients manage mixes of local subprocesses (`stdio`), Server-Sent Events streams (`sse`), and stateless HTTP endpoints (`http`).
+* Subprocesses crash without health checks, auto-restart, or connection pooling.
+* No centralized audit trail exists for tool invocations.
 
 ---
 
 ## 🚀 The Solution: MCP Gateway Router
 
-The **MCP Gateway Router** solves these challenges by acting as a single, hardened intermediary proxy between all client applications and backend MCP services.
+The **MCP Gateway Router** provides a single, hardened proxy between client applications and backend MCP services.
 
 ```
                               UNIFIED CONTROL PLANE
@@ -108,9 +108,9 @@ The **MCP Gateway Router** solves these challenges by acting as a single, harden
 ## 🔍 Deep-Dive: Key Product Pillars
 
 ### 1. Meta-Mode & In-Process Semantic Discovery
-Instead of returning 100+ tools when a client calls `tools/list`, the router returns only two dynamic tools:
-* `search_tools(query)`: Performs vector similarity search across all registered backend tools and returns the top matching tool schemas with similarity scores.
-* `execute_tool(name, arguments)`: Routes the invocation to the specific backend server, enforcing RBAC, un-namespacing the tool, and logging the execution.
+Instead of returning 100+ tools via `tools/list`, the router returns two dynamic tools:
+* `search_tools(query)`: Performs vector similarity search across registered backend tools, returning top matching tool schemas with similarity scores.
+* `execute_tool(name, arguments)`: Routes invocation to the backend server, enforcing RBAC, un-namespacing the tool, and logging execution.
 
 ```mermaid
 sequenceDiagram
@@ -139,21 +139,21 @@ sequenceDiagram
 ```
 
 ### 2. Zero CLI Secret Leakage for STDIO Transports
-When spawning local subprocesses (e.g. `npx -y @modelcontextprotocol/server-filesystem` or internal CLI tools):
-* Arguments are strictly validated and separated from the executable path.
-* All sensitive credentials resolved from Vault, Registry, or Environment are placed exclusively in `ProcessStartInfo.Environment` before process launch.
-* Process arguments in OS process tables (`/proc`, `ps`, Windows Task Manager) remain completely free of secrets.
+For local subprocesses (e.g., `npx -y @modelcontextprotocol/server-filesystem`):
+* Arguments are validated and separated from the executable path.
+* Credentials resolved from Vault, Registry, or Environment are placed in `ProcessStartInfo.Environment` before process launch.
+* Process arguments in OS tables (`/proc`, `ps`, Task Manager) remain free of secrets.
 
 ### 3. Authenticated AES-256-GCM Envelope Encryption
-All sensitive data (Vault credentials, API keys, database settings, provider secrets) is encrypted at rest using AES-256-GCM:
+Sensitive data (Vault credentials, API keys, database settings) is encrypted at rest using AES-256-GCM:
 * **Algorithm**: 256-bit AES in Galois/Counter Mode (GCM).
-* **Cryptographic Integrity**: 128-bit authentication tag ensures encrypted data cannot be tampered with or corrupted.
-* **Initialization Vector**: Unique, cryptographically secure 96-bit IV generated per encryption operation.
-* **Payload Structure**: Persisted as a self-contained base64 string: `base64(iv[12] + ciphertext[N] + tag[16])`.
+* **Cryptographic Integrity**: 128-bit authentication tag ensures data integrity.
+* **Initialization Vector**: Unique 96-bit IV generated per encryption operation.
+* **Payload Structure**: Persisted as a base64 string: `base64(iv[12] + ciphertext[N] + tag[16])`.
 
 ### 4. Multi-Stage Authorization & Scoped AppKeys
-Incoming requests undergo rigorous 4-stage pipeline evaluation:
-1. **Explicit Deny Rules**: If any user group matches a Deny rule on the target server, request is immediately rejected (`403 Forbidden`).
+Incoming requests undergo a 4-stage evaluation pipeline:
+1. **Explicit Deny Rules**: If any user group matches a Deny rule on the target server, the request is rejected (`403 Forbidden`).
 2. **Explicit Allow Rules**: If user groups match an Allow policy, authorization proceeds.
 3. **AppKey Scope Verification**: Validates whether the caller's AppKey permits the action (`*`, `category:smarthome`, `server:docker`, `tool:docker__ps`).
 4. **Default Policy Fallback**: Evaluates global default fallback policy (Allow or Deny).
@@ -179,23 +179,23 @@ Incoming requests undergo rigorous 4-stage pipeline evaluation:
 
 ## 🎯 Target Use Cases & Deployment Personas
 
-### 🏠 1. Homelab & Self-Hosted Power Users
+### 🏠 1. Homelab & Self-Hosted
 * **Scenario**: 15–30 self-hosted containers (Home Assistant, Plex, Radarr, Sonarr, Docker, Pi-hole, Actual Budget).
-* **Benefit**: Connect Cursor IDE and Antigravity agents to your entire infrastructure through one endpoint (`http://10.0.0.10:8026/sse`) with category-scoped AppKeys (`category:media`, `category:smarthome`).
+* **Benefit**: Connect IDEs and agents to infrastructure via a single endpoint with category-scoped AppKeys (`category:media`, `category:smarthome`).
 
 ### 🏢 2. Enterprise Engineering Teams
-* **Scenario**: Centralized internal tool gateway for developers using AI coding assistants.
+* **Scenario**: Centralized internal tool gateway for AI coding assistants.
 * **Benefit**: Active Directory Windows SID integration, HashiCorp Vault credential rotation, zero CLI secret leakage, and MS SQL Server audit compliance.
 
 ### 🛡️ 3. Security & Compliance Operations (SecOps)
 * **Scenario**: Monitoring and controlling AI agent access to production infrastructure.
-* **Benefit**: Enforce manual approvals for destructive tools (`docker__rm`, `kubernetes__delete_pod`), PII sanitization in audit logs, and complete least-privilege AppKey scopes.
+* **Benefit**: Enforce manual approvals for destructive tools, sanitize PII in logs, and enforce least-privilege AppKey scopes.
 
 ---
 
 ## 📚 Next Steps & Deep-Dive Navigation
 
-To explore the architecture, configuration, and implementation guides, proceed to:
+To explore architecture, configuration, and implementation guides, proceed to:
 
 * 🏛️ [**Comprehensive Enterprise Architecture Guide**](architecture.md)
 * 📖 [**Official User Guide Suite**](user-guide/README.md)

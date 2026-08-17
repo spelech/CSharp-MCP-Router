@@ -1,8 +1,8 @@
 # Contributing to MCP Gateway Router
 
-Thank you for your interest in contributing to the **CSharp-MCP-Router** project! We welcome contributions from the community.
+Thank you for your interest in contributing to **CSharp-MCP-Router**.
 
-Please take a moment to review this document to ensure a smooth, efficient development and review process.
+Please review this document to ensure a smooth development and review process.
 
 ---
 

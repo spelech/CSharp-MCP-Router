@@ -1,8 +1,8 @@
 # 🏛️ MCP Router Architecture
 
-This document provides an executive summary of the internal architecture, security mechanisms, design requirements, and key subsystem flows of the **Model Context Protocol (MCP) Router Gateway & Semantic Proxy**.
+This document summarizes the internal architecture, security mechanisms, design requirements, and subsystem flows of the **Model Context Protocol (MCP) Router Gateway**.
 
-> 📖 **Definitive Specification**: For exhaustive architectural details, comprehensive Mermaid sequence diagrams, component models, entity-relationship diagrams (ERDs), and cryptographic specifications, see the [**Complete Enterprise Architecture Guide**](docs/architecture.md).
+> 📖 **Definitive Specification**: For architectural details, Mermaid sequence diagrams, component models, ERDs, and cryptographic specifications, see the [**Complete Enterprise Architecture Guide**](docs/architecture.md).
 
 ---
 
