@@ -6,6 +6,7 @@ namespace McpRouter.Components.Providers
         public string DisplayName { get; set; } = string.Empty;
         public string? ConfigJson { get; set; }
         public bool IsEnabled { get; set; } = true;
+        public bool IsDecryptionFailed { get; set; } = false;
     }
 
     public class AuthProviderDto
@@ -16,6 +17,7 @@ namespace McpRouter.Components.Providers
         public string GroupsHeader { get; set; } = "Remote-Groups";
         public string? ConfigJson { get; set; }
         public bool IsEnabled { get; set; } = true;
+        public bool IsDecryptionFailed { get; set; } = false;
     }
 
     public class TestLdapRequest
@@ -39,3 +41,4 @@ namespace McpRouter.Components.Providers
         public string? MountPath { get; set; } = "secret";
     }
 }
+

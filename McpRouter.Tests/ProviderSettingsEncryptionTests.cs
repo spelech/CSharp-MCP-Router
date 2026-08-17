@@ -392,5 +392,31 @@ namespace McpRouter.Tests
             var sids = await ldapService.ResolveUserSidsAsync("testuser");
             sids.Should().BeEmpty();
         }
+        [Fact]
+        [Requirement("SEC-004", "Data Loss Prevention", RequirementType.Negative, "Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.")]
+        public async Task SaveSecretProvider_WhenDecryptionFailed_DoesNotOverwriteCorruptPayload()
+        {
+            // 1. Save valid config
+            var validDto = new SecretProviderDto { ProviderName = "Vault", DisplayName = "Vault", ConfigJson = "{\"valid\":true}" };
+            await _repo.SaveSecretProviderAsync(validDto);
+
+            // 2. Corrupt DB record
+            using var conn = _dbFactory.CreateConnection();
+            var validEncrypted = await conn.ExecuteScalarAsync<string>("SELECT EncryptedConfigJson FROM SecretProviders WHERE ProviderName = 'Vault';");
+            await conn.ExecuteAsync("UPDATE SecretProviders SET EncryptedConfigJson = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==' WHERE ProviderName = 'Vault';");
+
+            // 3. Read back - should have IsDecryptionFailed = true
+            var retrieved = (await _repo.GetSecretProvidersAsync()).First(p => p.ProviderName == "Vault");
+            retrieved.IsDecryptionFailed.Should().BeTrue();
+            retrieved.ConfigJson.Should().Be("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==");
+
+            // 4. Save with IsDecryptionFailed = true (e.g. user toggled IsEnabled)
+            retrieved.IsEnabled = false;
+            await _repo.SaveSecretProviderAsync(retrieved);
+
+            // 5. Verify corrupt payload is retained
+            var finalEncrypted = await conn.ExecuteScalarAsync<string>("SELECT EncryptedConfigJson FROM SecretProviders WHERE ProviderName = 'Vault';");
+            finalEncrypted.Should().Be("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==");
+        }
     }
 }

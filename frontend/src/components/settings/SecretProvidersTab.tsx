@@ -42,6 +42,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
       })()
     : {};
 
+  const [vaultDecryptionFailed, setVaultDecryptionFailed] = useState(vault?.isDecryptionFailed || false);
   const [secVaultEnabled, setSecVaultEnabled] = useState(vault ? vault.isEnabled : false);
   const [secVaultAddress, setSecVaultAddress] = useState(parsedVault.address || '');
   const [secVaultAuthMethod, setSecVaultAuthMethod] = useState<'token' | 'approle'>(
@@ -112,8 +113,9 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
       await saveSecretProvider({
         providerName: 'Vault',
         displayName: 'HashiCorp Vault (KV v2)',
-        configJson: JSON.stringify(vaultConfig),
+        configJson: vaultDecryptionFailed ? (vault?.configJson || '') : JSON.stringify(vaultConfig),
         isEnabled: secVaultEnabled,
+        isDecryptionFailed: vaultDecryptionFailed,
       });
       await saveSecretProvider({
         providerName: 'WindowsRegistry',
@@ -164,9 +166,17 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                 HashiCorp Vault
               </span>
 
+              {vaultDecryptionFailed && (
+                <div className="alert alert-warning mb-4">
+                  <strong>Decryption Failed:</strong> The configuration for Vault could not be decrypted. 
+                  <button type="button" onClick={() => setVaultDecryptionFailed(false)} className="btn btn-sm btn-outline-danger ms-3">Reset Config</button>
+                </div>
+              )}
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
                 <input
                   type="text"
+                  disabled={vaultDecryptionFailed}
                   placeholder="http://vault:8200"
                   value={secVaultAddress}
                   onChange={(e) => setSecVaultAddress(e.target.value)}
@@ -179,6 +189,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                       type="radio"
                       name="vault-auth-method"
                       value="token"
+                      disabled={vaultDecryptionFailed}
                       checked={secVaultAuthMethod === 'token'}
                       onChange={() => setSecVaultAuthMethod('token')}
                     />
@@ -189,6 +200,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                       type="radio"
                       name="vault-auth-method"
                       value="approle"
+                      disabled={vaultDecryptionFailed}
                       checked={secVaultAuthMethod === 'approle'}
                       onChange={() => setSecVaultAuthMethod('approle')}
                     />
@@ -199,6 +211,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                 {secVaultAuthMethod === 'token' ? (
                   <input
                     type="password"
+                    disabled={vaultDecryptionFailed}
                     placeholder="Vault Token (optional)"
                     value={secVaultToken}
                     onChange={(e) => setSecVaultToken(e.target.value)}
@@ -208,6 +221,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                   <>
                     <input
                       type="text"
+                      disabled={vaultDecryptionFailed}
                       placeholder="Role ID"
                       value={secVaultRoleId}
                       onChange={(e) => setSecVaultRoleId(e.target.value)}
@@ -215,6 +229,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                     />
                     <input
                       type="password"
+                      disabled={vaultDecryptionFailed}
                       placeholder="Secret ID"
                       value={secVaultSecretId}
                       onChange={(e) => setSecVaultSecretId(e.target.value)}
@@ -225,6 +240,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
 
                 <input
                   type="text"
+                  disabled={vaultDecryptionFailed}
                   placeholder="Mount Path (secret/data/)"
                   value={secVaultPath}
                   onChange={(e) => setSecVaultPath(e.target.value)}

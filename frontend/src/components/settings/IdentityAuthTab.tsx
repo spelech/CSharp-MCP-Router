@@ -23,6 +23,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
       })()
     : {};
 
+  const [adDecryptionFailed, setAdDecryptionFailed] = useState(ad?.isDecryptionFailed || false);
   const [authAdEnabled, setAuthAdEnabled] = useState(ad ? ad.isEnabled : false);
   const [authAdServer, setAuthAdServer] = useState(parsedAd.server || '');
   const [authAdPort, setAuthAdPort] = useState(parsedAd.port !== undefined ? String(parsedAd.port) : '636');
@@ -79,9 +80,12 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
 
       await saveAuthProvider({
         providerName: 'ActiveDirectory',
-        displayName: 'Active Directory',
+        displayName: 'Active Directory LDAP',
+        userHeader: 'Remote-User',
+        groupsHeader: 'Remote-Groups',
+        configJson: adDecryptionFailed ? (ad?.configJson || '') : JSON.stringify(adConfig),
         isEnabled: authAdEnabled,
-        configJson: JSON.stringify(adConfig),
+        isDecryptionFailed: adDecryptionFailed,
       });
 
       await saveAuthProvider({
@@ -129,6 +133,13 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                 Query Windows SIDs (`objectSid`, `tokenGroups`) via LDAPS for enterprise role policies.
               </p>
 
+              {adDecryptionFailed && (
+                <div className="alert alert-warning mb-4">
+                  <strong>Decryption Failed:</strong> The configuration for Active Directory could not be decrypted. 
+                  <button type="button" onClick={() => setAdDecryptionFailed(false)} className="btn btn-sm btn-outline-danger ms-3">Reset Config</button>
+                </div>
+              )}
+
               {authAdEnabled && (
                 <div id="ad-config-fields" style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '10px' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '8px' }}>
@@ -137,6 +148,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                       <input
                         type="text"
                         id="ad-server"
+                        disabled={adDecryptionFailed}
                         placeholder="e.g. ldap.corp.local or ldap-test"
                         value={authAdServer}
                         onChange={(e) => setAuthAdServer(e.target.value)}
@@ -148,6 +160,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                       <input
                         type="number"
                         id="ad-port"
+                        disabled={adDecryptionFailed}
                         placeholder="636"
                         value={authAdPort}
                         onChange={(e) => setAuthAdPort(e.target.value)}
@@ -161,6 +174,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                       <input
                         type="checkbox"
                         id="ad-use-ssl"
+                        disabled={adDecryptionFailed}
                         checked={authAdUseSsl}
                         onChange={(e) => setAuthAdUseSsl(e.target.checked)}
                       />
@@ -175,6 +189,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                       <input
                         type="text"
                         id="ad-domain"
+                        disabled={adDecryptionFailed}
                         placeholder="e.g. corp.local"
                         value={authAdDomain}
                         onChange={(e) => setAuthAdDomain(e.target.value)}
@@ -186,6 +201,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                       <input
                         type="text"
                         id="ad-base-dn"
+                        disabled={adDecryptionFailed}
                         placeholder="DC=corp,DC=local"
                         value={authAdBaseDn}
                         onChange={(e) => setAuthAdBaseDn(e.target.value)}
@@ -200,6 +216,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                       <input
                         type="text"
                         id="ad-bind-dn"
+                        disabled={adDecryptionFailed}
                         placeholder="CN=admin,DC=corp,DC=local"
                         value={authAdBindDn}
                         onChange={(e) => setAuthAdBindDn(e.target.value)}
@@ -211,6 +228,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                       <input
                         type="password"
                         id="ad-bind-password"
+                        disabled={adDecryptionFailed}
                         placeholder="Password"
                         value={authAdBindPassword}
                         onChange={(e) => setAuthAdBindPassword(e.target.value)}
