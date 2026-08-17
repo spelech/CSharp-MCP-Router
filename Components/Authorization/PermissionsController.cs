@@ -42,11 +42,16 @@ namespace McpRouter.Components.Authorization
             }
         }
 
-        [HttpPost("policies")]
+                [HttpPost("policies")]
         public async Task<IActionResult> SavePolicy([FromBody] McpAccessPolicy policy)
         {
             if (string.IsNullOrEmpty(policy.TargetId)) return BadRequest(new { error = "TargetId is required" });
             if (string.IsNullOrEmpty(policy.RequiredGroup)) return BadRequest(new { error = "RequiredGroup is required" });
+            
+            if (policy.TargetId == "*" && !policy.IsAllowed)
+            {
+                return BadRequest(new { error = "Cannot save a wildcard deny policy as it will cause a global lockout." });
+            }
 
             if (string.IsNullOrEmpty(policy.Id))
             {
