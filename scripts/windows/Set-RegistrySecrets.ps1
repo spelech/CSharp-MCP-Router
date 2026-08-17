@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Manages DPAPI-encrypted and plaintext secrets in the Windows Registry for C# MCP Router.
 

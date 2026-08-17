@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Windows Service Management Script for C# MCP Router Gateway.
 

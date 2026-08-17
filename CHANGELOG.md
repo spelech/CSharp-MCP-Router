@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.17.1`** | 2026-08-17 | fix(windows): resolve IIS ANCM in-process web.config schema, default registry secret path, and deployment scripts |
 | **`v4.17.0`** | 2026-08-16 | feat(windows): add production Windows IIS deployment scripts, Windows Service runner, environment diagnostic validation suite, and comprehensive Windows deployment guide |
 | **`v4.16.1`** | 2026-08-16 | refactor(auth): genericize OIDC and SSO identity references, sanitize seed personas, and standardize header provider UI naming |
 | **`v4.16.0`** | 2026-08-15 | feat(auth): enable hybrid OIDC & Active Directory admin authorization with multi-group support, fallback resolution, and CIDR-aware trusted proxy parsing |

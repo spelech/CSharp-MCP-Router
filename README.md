@@ -134,12 +134,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.17.1`** | 2026-08-17 | fix(windows): resolve IIS ANCM in-process web.config schema, default registry secret path, and deployment scripts |
 | **`v4.17.0`** | 2026-08-16 | feat(windows): add production Windows IIS deployment scripts, Windows Service runner, environment diagnostic validation suite, and comprehensive Windows deployment guide |
 | **`v4.16.1`** | 2026-08-16 | refactor(auth): genericize OIDC and SSO identity references, sanitize seed personas, and standardize header provider UI naming |
 | **`v4.16.0`** | 2026-08-15 | feat(auth): enable hybrid OIDC & Active Directory admin authorization with multi-group support, fallback resolution, and CIDR-aware trusted proxy parsing |
 | **`v4.15.0`** | 2026-08-15 | feat(testing): implement automated Living Software Requirements Specification (SRS) & Test Catalog generator with bidirectional test-to-requirement traceability and CI verification quality gate |
-| **`v4.14.0`** | 2026-08-14 | refactor(router): decouple media tools to standalone server, decommission approvals, and add Windows test abstractions |
-| **`v4.13.0`** | 2026-08-14 | feat(release): complete Stage 3 — unified product, user, developer, and operations documentation journey (#58), and automated release verification engine with CI version consistency quality gate (#59) |
 
 ---
 

@@ -68,6 +68,11 @@ namespace McpRouter.Infrastructure.Transports
                     field = parts[2];
                 }
             }
+            else if (provider.Equals("WindowsRegistry", StringComparison.OrdinalIgnoreCase) &&
+                     (string.IsNullOrWhiteSpace(_server.SecretPath) || path.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || path.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
+            {
+                path = @"SOFTWARE\McpRouter\Secrets";
+            }
 
             string? secret = null;
             if (retriever is CompositeSecretRetriever composite)

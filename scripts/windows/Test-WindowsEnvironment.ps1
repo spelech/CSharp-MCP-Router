@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Automated Diagnostic and Verification Runner for Windows Hosts (C# MCP Router).
 
@@ -618,7 +618,7 @@ if ($JsonReportPath) {
         [System.IO.File]::WriteAllText($JsonReportPath, $reportJson, [System.Text.Encoding]::UTF8)
         Write-Host " [✓] Diagnostic JSON report exported to: $JsonReportPath" -ForegroundColor Green
     } catch {
-        Write-Host " [!] Failed to write JSON report to $JsonReportPath: $($_.Exception.Message)" -ForegroundColor Red
+        Write-Host " [!] Failed to write JSON report to $($JsonReportPath): $($_.Exception.Message)" -ForegroundColor Red
     }
 }
 
