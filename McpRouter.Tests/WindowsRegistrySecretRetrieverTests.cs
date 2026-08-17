@@ -3,6 +3,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentAssertions;
 using McpRouter.Infrastructure.Secrets;
+using McpRouter.Tests.Attributes;
 using Moq;
 using Xunit;
 
@@ -13,6 +14,7 @@ namespace McpRouter.Tests
     public class WindowsRegistrySecretRetrieverTests
     {
         [Fact]
+        [Requirement("SEC-04", "SEC", RequirementType.Positive, "WindowsRegistrySecretRetriever securely decrypts DPAPI LocalMachine machine-level encrypted binary values and retrieves plaintext registry strings")]
         public async Task GetSecretAsync_ReturnsPlainString_WhenRegistryValueIsString()
         {
             var mockRegistry = new Mock<IRegistryAccessor>();
@@ -27,6 +29,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+        [Requirement("SEC-04", "SEC", RequirementType.Positive, "WindowsRegistrySecretRetriever securely decrypts DPAPI LocalMachine machine-level encrypted binary values and retrieves plaintext registry strings")]
         public async Task GetSecretAsync_DecryptsDpapiBytes_WhenRegistryValueIsByteArray()
         {
             var mockRegistry = new Mock<IRegistryAccessor>();

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-17T05:36:06.6409364Z",
-    "totalRequirements": 21,
-    "positiveCount": 16,
+    "generatedAt": "2026-08-17T06:06:04.1000663Z",
+    "totalRequirements": 23,
+    "positiveCount": 18,
     "guardrailCount": 5,
-    "totalProofs": 91
+    "totalProofs": 95
   },
   "requirements": [
     {
@@ -226,6 +226,29 @@
           "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/rbac-enforcement-flow.spec.ts",
           "lineNumber": 4,
           "testName": "should create, verify, and delete RBAC policy and SID mapping",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-04",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "lineNumber": 17,
+          "testName": "ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "lineNumber": 55,
+          "testName": "ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided",
           "details": null
         }
       ]
@@ -570,6 +593,29 @@
           "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 425,
           "testName": "TrustedProxyHelper_ConfiguredProxyTrusted_CIDR",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-04",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "WindowsRegistrySecretRetriever securely decrypts DPAPI LocalMachine machine-level encrypted binary values and retrieves plaintext registry strings",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
+          "lineNumber": 16,
+          "testName": "GetSecretAsync_ReturnsPlainString_WhenRegistryValueIsString",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
+          "lineNumber": 31,
+          "testName": "GetSecretAsync_DecryptsDpapiBytes_WhenRegistryValueIsByteArray",
           "details": null
         }
       ]
