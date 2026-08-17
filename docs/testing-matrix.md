@@ -128,9 +128,9 @@ graph TD
 ### Context Definitions
 
 1. **Admin Context (`adminUser`)**:
-   - `Remote-User`: `steve`
-   - `Remote-Groups`: `full_admin,house_member`
-   - `Remote-Name`: `Steve Pelech (Admin)`
+   - `Remote-User`: `admin_user`
+   - `Remote-Groups`: `full_admin,devops`
+   - `Remote-Name`: `Admin User`
    - `Remote-User-Sid`: `S-1-5-32-544`
    - Access: Unrestricted dashboard, server creation, RBAC policies, settings, key generation.
 

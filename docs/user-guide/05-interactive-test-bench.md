@@ -154,9 +154,9 @@ Positioned at the bottom of the Test Bench view, the Live Logs Terminal provides
 | 📟 Live Diagnostic Logs & Gateway Activity             [ Clear ] [ Auto-Scroll ]|
 | Filter: [ ALL ▾ ] [ INFO ▾ ] [ WARN ▾ ] [ ERROR ▾ ]                           |
 +-------------------------------------------------------------------------------+
-| [13:45:02.112] [INF] [McpSession:c8b4] Client authenticated as 'steve' via OIDC
+| [13:45:02.112] [INF] [McpSession:c8b4] Client authenticated as 'admin' via OIDC
 | [13:45:02.115] [INF] [McpSession:c8b4] Initialized Meta-Mode stream (2 tools)
-| [13:45:04.220] [INF] [ToolExecution] docker__restart_container invoked by steve
+| [13:45:04.220] [INF] [ToolExecution] docker__restart_container invoked by admin
 | [13:45:04.262] [INF] [ToolExecution] docker__restart_container completed in 42ms
 | [13:45:10.512] [WRN] [HealthCheck] Backend 'plex' responded slowly (1250ms)
 +-------------------------------------------------------------------------------+

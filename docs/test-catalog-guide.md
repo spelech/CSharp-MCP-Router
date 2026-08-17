@@ -47,7 +47,7 @@ Requirements are organized into 7 standard domain categories:
 
 | Category Code | Domain Title | Description & Scope |
 | :--- | :--- | :--- |
-| **`AUTH`** | Authentication, RBAC & Identity | Kerberos/NTLM Windows SID resolution, PocketID/TinyAuth OIDC headers, AppKey granular scopes, and admin policy enforcement. |
+| **`AUTH`** | Authentication, RBAC & Identity | Kerberos/NTLM Windows SID resolution, OIDC / Reverse Proxy SSO headers, AppKey granular scopes, and admin policy enforcement. |
 | **`DB`** | Multi-Database Persistence & Migrations | SQLite schema auto-migrations, AES-256-GCM encrypted column upgrades, MSSQL & MySQL stored procedure suites (`sp_*`). |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | Security invariants, unmapped backend fault handling, malformed JSON-RPC payload rejection, and credential sanitization. |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | MCP 2026-07-28 protocol compliance, Meta-Mode `search_tools` / `execute_tool` isolation, tool discovery, and namespacing. |
