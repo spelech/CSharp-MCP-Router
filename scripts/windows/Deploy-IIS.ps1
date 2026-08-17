@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
     Automated IIS Deployment and Configuration Script for C# MCP Router Gateway.
 
@@ -209,45 +209,7 @@ if (-not $SkipBuild) {
 }
 
 # ---------------------------------------------------------------------------
-# 6. Ensure Required Directories & Permissions
-# ---------------------------------------------------------------------------
-Write-Step "Configuring Directory Permissions & Log Folders..."
-$logsDir = Join-Path $PhysicalPath "logs"
-if (-not (Test-Path $logsDir)) {
-    New-Item -ItemType Directory -Path $logsDir -Force | Out-Null
-}
-
-$appPoolIdentity = "IIS AppPool\$AppPoolName"
-Write-Host "Granting permissions to '$appPoolIdentity' on '$PhysicalPath'..." -ForegroundColor DarkGray
-
-# Use icacls for reliable inheritance configuration on Windows
-& icacls "$PhysicalPath" /grant "${appPoolIdentity}:(OI)(CI)M" /T /Q
-if ($LASTEXITCODE -ne 0) {
-    Write-Warn "icacls exited with code $LASTEXITCODE when setting ACL for $appPoolIdentity. Ensure AppPool exists."
-} else {
-    Write-Success "Directory permissions configured for $appPoolIdentity."
-}
-
-# ---------------------------------------------------------------------------
-# 7. Configure web.config
-# ---------------------------------------------------------------------------
-$destWebConfig = Join-Path $PhysicalPath "web.config"
-$exampleWebConfig = Join-Path $PSScriptRoot "web.config.example"
-
-if (-not (Test-Path $destWebConfig)) {
-    if (Test-Path $exampleWebConfig) {
-        Write-Step "Copying web.config.example to destination web.config..."
-        Copy-Item -Path $exampleWebConfig -Destination $destWebConfig -Force
-        Write-Success "Created $destWebConfig from example."
-    } else {
-        Write-Warn "web.config.example not found at $exampleWebConfig. Please ensure web.config is present in $PhysicalPath."
-    }
-} else {
-    Write-Host "Existing web.config found in $PhysicalPath. Preserving file." -ForegroundColor DarkGray
-}
-
-# ---------------------------------------------------------------------------
-# 8. Configure IIS Application Pool
+# 6. Configure IIS Application Pool
 # ---------------------------------------------------------------------------
 Write-Step "Configuring IIS Application Pool: $AppPoolName..."
 if (-not (Test-Path "IIS:\AppPools\$AppPoolName")) {
@@ -269,6 +231,44 @@ Set-ItemProperty "IIS:\AppPools\$AppPoolName" -Name "processModel.idleTimeout" -
 Write-Success "AppPool '$AppPoolName' configured (No Managed Code, AlwaysRunning, IdleTimeout: 0)."
 
 # ---------------------------------------------------------------------------
+# 7. Ensure Required Directories & Permissions
+# ---------------------------------------------------------------------------
+Write-Step "Configuring Directory Permissions & Log Folders..."
+$logsDir = Join-Path $PhysicalPath "logs"
+if (-not (Test-Path $logsDir)) {
+    New-Item -ItemType Directory -Path $logsDir -Force | Out-Null
+}
+
+$appPoolIdentity = "IIS AppPool\$AppPoolName"
+Write-Host "Granting permissions to '$appPoolIdentity' on '$PhysicalPath'..." -ForegroundColor DarkGray
+
+# Use icacls for reliable inheritance configuration on Windows
+& icacls "$PhysicalPath" /grant "${appPoolIdentity}:(OI)(CI)M" /T /Q
+if ($LASTEXITCODE -ne 0) {
+    Write-Warn "icacls exited with code $LASTEXITCODE when setting ACL for $appPoolIdentity. Ensure AppPool exists."
+} else {
+    Write-Success "Directory permissions configured for $appPoolIdentity."
+}
+
+# ---------------------------------------------------------------------------
+# 8. Configure web.config
+# ---------------------------------------------------------------------------
+$destWebConfig = Join-Path $PhysicalPath "web.config"
+$exampleWebConfig = Join-Path $PSScriptRoot "web.config.example"
+
+if (-not (Test-Path $destWebConfig)) {
+    if (Test-Path $exampleWebConfig) {
+        Write-Step "Copying web.config.example to destination web.config..."
+        Copy-Item -Path $exampleWebConfig -Destination $destWebConfig -Force
+        Write-Success "Created $destWebConfig from example."
+    } else {
+        Write-Warn "web.config.example not found at $exampleWebConfig. Please ensure web.config is present in $PhysicalPath."
+    }
+} else {
+    Write-Host "Existing web.config found in $PhysicalPath. Preserving file." -ForegroundColor DarkGray
+}
+
+# ---------------------------------------------------------------------------
 # 9. Configure IIS Website
 # ---------------------------------------------------------------------------
 Write-Step "Configuring IIS Website: $SiteName..."
@@ -288,10 +288,11 @@ if (-not $existingSite) {
     New-Website @newSiteParams | Out-Null
     Write-Success "IIS Website '$SiteName' created on port $Port."
 } else {
-    Write-Host "Website '$SiteName' exists. Updating physical path and AppPool..." -ForegroundColor DarkGray
+    Write-Host "Website '$SiteName' exists. Updating physical path, port, and AppPool..." -ForegroundColor DarkGray
     Set-ItemProperty "IIS:\Sites\$SiteName" -Name "physicalPath" -Value $PhysicalPath
     Set-ItemProperty "IIS:\Sites\$SiteName" -Name "applicationPool" -Value $AppPoolName
-    Write-Success "IIS Website '$SiteName' updated."
+    Set-ItemProperty "IIS:\Sites\$SiteName" -Name "bindings" -Value @{protocol="http";bindingInformation="*:$($Port):$($HostName)"}
+    Write-Success "IIS Website '$SiteName' updated with port $Port."
 }
 
 # Enable Windows Authentication if requested

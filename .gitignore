@@ -24,4 +24,6 @@ Thumbs.db
 
 # Large model files
 data/models/
+data/.docker/
+diagnostics-report.json
 .worktrees/
