@@ -78,9 +78,12 @@ The router operates across 6 primary orthogonal dimensions:
 | :--- | :--- | :--- | :--- | :--- |
 | **SSE (`/sse`)** | `sse` | `bearer` | Direct Key / DB | `Authorization: Bearer <secret>` |
 | **SSE (`/sse`)** | `http` | `x-api-key` | HashiCorp Vault | `X-API-Key: <vault_retrieved_secret>` |
+| **SSE (`/sse`)** | `http` | `bearer` | Windows Registry (DPAPI) | `Authorization: Bearer <dpapi_decrypted_secret>` |
 | **HTTP (`/mcp`)** | `http` | `custom-header` | Environment Var | `<CustomHeaderName>: <env_secret>` |
+| **HTTP (`/mcp`)** | `http` | `bearer` | Windows Registry (DPAPI) | `Authorization: Bearer <dpapi_decrypted_secret>` |
 | **HTTP (`/mcp`)** | `http` | `query` | Direct Key | `?api_key=<secret>` URL parameter rewrite |
 | **Target Proxy (`/{id}`)**| `sse` / `http` | `basic` | Direct Key | `Authorization: Basic <base64>` header rewrite |
+| **STDIO Subprocess** | `stdio` | Environment args | Windows Registry (DPAPI) | Decrypted DPAPI secret injected into process environment |
 | **STDIO Subprocess** | `stdio` | Environment args | System Environment | Process environment variable injection |
 
 ---
@@ -105,6 +108,18 @@ The router operates across 6 primary orthogonal dimensions:
 | **Corrupted Scope JSON** | `AppKeyScopes = "{invalid json}"` | Log warning, fail closed (deny request) | AppKey rejected safely |
 | **Database Disconnection**| DB factory returns closed/null | Catch exception, fail closed (deny request) | Does not bypass to allow |
 | **Malformed JSON-RPC** | Missing `"id"` or `"method"` | Return standard JSON-RPC 2.0 error object (`-32600`) | Clean error serialization |
+
+---
+
+### 2.6 Windows Native Host & IIS In-Process Matrix
+
+| Test Probe / Target | Mechanism / Subsystem | Expected Behavior | Verification Proof |
+| :--- | :--- | :--- | :--- |
+| **IIS ANCM v2 In-Process** | `aspnetcorev2.dll` inside `w3wp.exe` | High-throughput in-process request pipeline | `Deploy-IIS.ps1`, `GET /health` -> 200 OK |
+| **Unbuffered SSE Streaming**| `<handlerSetting name="responseBufferLimit" value="0" />` | Immediate SSE frame dispatch to LLM client | Live curl `/sse` stream verification |
+| **DPAPI LocalMachine Secrets**| `ProtectedData.Protect` / `Unprotect` | Machine-level AES decryption from `REG_BINARY` | `WindowsRegistrySecretRetrieverTests`, `Set-RegistrySecrets.ps1` |
+| **Windows Caller SID Resolution**| `IWindowsIdentityAccessor` / `ClaimsIdentity` | Extraction of User SID & group token SIDs | `ActiveDirectoryWindowsIdentityTests`, `GET /api/me` |
+| **Admin SID Bypass (`S-1-5-32-544`)**| `ActiveDirectoryIdentityProvider` | Automatic mapping to `Administrator` role | `AdminPolicySidOnlyTests`, `Test-WindowsEnvironment.ps1` |
 
 ---
 

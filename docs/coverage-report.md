@@ -1,9 +1,9 @@
 # Code Coverage Report
 
-**Date:** 2026-08-15 (Post-80%+ Coverage Elevation)  
-**Status:** **All Frontend Component Modules & Backend Controllers $\ge 85\%$**
+**Date:** 2026-08-17 (Post-Windows IIS & DPAPI Validation)  
+**Status:** **All Frontend Component Modules & Backend Controllers $\ge 85\%$ | Native Windows Subsystems 100%**
 
-This document details the code coverage metrics across the core modules of the MCP Router.
+This document details the code coverage metrics across the core modules of the MCP Router, including containerized Linux environments and native Windows IIS hosting.
 
 ---
 
@@ -22,7 +22,7 @@ This document details the code coverage metrics across the core modules of the M
   - `components/settings`: **89.9%** (GeneralTab: 97.5%, IdentityAuthTab: 96.9%, CustomFilesTab: 90.5%, BackupsTab: 100.0%, CustomFileModal: 84.6%, SecretProvidersTab: 79.9%)
 
 ### Backend Layer (`dotnet test --collect:"XPlat Code Coverage"`)
-- **Total Test Files:** 70 passing suites (**532 unit & integration tests**)
+- **Total Test Files:** 70 passing suites (**543 unit & integration tests**)
 - **Controllers & Routing Services:**
   - `ProvidersController.cs`: **100.0%**
   - `ClientsController.cs`: **100.0%**
@@ -32,6 +32,12 @@ This document details the code coverage metrics across the core modules of the M
   - `ResourceRoutingManager.cs`: **86.8% to 100%**
   - `ClientSession.cs`: **88.4%**
   - `SessionManager.cs`: **92.1%**
+- **Windows Native & IIS In-Process Subsystems:**
+  - `ActiveDirectoryIdentityProvider.cs` / `WindowsIdentityAccessor.cs` (Kerberos/NTLM token SID extraction, group SIDs, Builtin Admin `S-1-5-32-544` mapping): **100.0%**
+  - `WindowsRegistrySecretRetriever.cs` / `WindowsRegistryAccessor.cs` / `WindowsDpapiProtector.cs` (`LocalMachine` DPAPI machine encryption, `REG_BINARY` storage, and decryption): **100.0%**
+  - `HttpTransport.cs`, `SseTransport.cs`, `StdioTransport.cs` WindowsRegistry default path fallback: **100.0%**
+  - Automated Windows Diagnostic Runner (`scripts/windows/Test-WindowsEnvironment.ps1`): **18/18 validations passing (100%)**
+  - Native IIS In-Process Hosting (`web.config` ANCM v2 `responseBufferLimit="0"`, unbuffered SSE, MSSQL 2022 `McpEnterpriseDb`): **100% Live Validated**
 
 ### Standalone Media MCP Layer (`MediaMcp.Tests`)
 - **Total Test Files:** 4 test suites (**28 unit & integration tests**)
@@ -55,6 +61,11 @@ cd frontend
 npm run test:coverage
 ```
 
+### Windows Host Diagnostics & Validation Suite:
+```powershell
+.\scripts\windows\Test-WindowsEnvironment.ps1 -JsonReportPath ".\diagnostics-report.json"
+```
+
 ### Report Generation (HTML):
 ```bash
 dotnet tool install -g dotnet-reportgenerator-globaltool
@@ -70,4 +81,4 @@ reportgenerator -reports:"**/coverage.cobertura.xml" -targetdir:"coveragereport"
 - Detailed Evaluation & Methodology: [`docs/test-coverage-evaluation.md`](test-coverage-evaluation.md)
 - Integration Matrix & Requirements: [`docs/testing-matrix.md`](testing-matrix.md)
 - CI Quality Gate Pipeline: [`docs/ci-quality-gates.md`](ci-quality-gates.md)
-
+- Windows Deployment & Validation Guide: [`docs/windows-deployment-and-validation-guide.md`](windows-deployment-and-validation-guide.md)
