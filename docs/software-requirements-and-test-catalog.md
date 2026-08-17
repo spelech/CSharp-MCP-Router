@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **23 Requirements Verified** across **95 Test Proofs** (18 Functional Capabilities, 5 Safety Guardrails).
+> **Catalog Statistics:** **23 Requirements Verified** across **102 Test Proofs** (18 Functional Capabilities, 5 Safety Guardrails).
 
 ---
 
@@ -9,13 +9,13 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **4** | 3 | 1 | 30 proofs |
-| **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 4 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **4** | 3 | 1 | 32 proofs |
+| **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 5 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **4** | 0 | 4 | 21 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **2** | 2 | 0 | 3 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **4** | 4 | 0 | 9 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **4** | 4 | 0 | 11 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 7 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **4** | 4 | 0 | 21 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **4** | 4 | 0 | 23 proofs |
 
 ---
 
@@ -24,7 +24,7 @@
 ### `[AUTH-02]` AppKeys can be created with category-level scopes for downstream tool filtering
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (11):**
+* **Verification Proofs (13):**
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L212`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L212) (`AppKeysController_CreateAppKey_ValidCategory_Succeeds`)
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L296`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L296) (`ClientsController_CreateClient_ValidCategory_Succeeds`)
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L379`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L379) (`ClientSession_CategoryScope_AuthorizesMatchingServerTools_AndDeniesOthers`)
@@ -35,6 +35,8 @@
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L539`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L539) (`ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes`)
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L566`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L566) (`ClientSession_Complete_FiltersServerNamesByCategoryScope`)
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L254`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L254) (`Pairwise_AppKeyScopes_RestrictsAccessPrecisely`)
+  - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/AppKeysCard.test.tsx#L20`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/AppKeysCard.test.tsx#L20) (`renders empty state when no keys exist`)
+  - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/AppKeysCard.test.tsx#L44`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/AppKeysCard.test.tsx#L44) (`renders keys list, copies config snippet, and revokes key`)
   - [Playwright E2E] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/multi-user-matrix.spec.ts#L68`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/multi-user-matrix.spec.ts#L68) (`AppKey Direct Context: connects with API key header identity`)
 
 ### `[AUTH-03]` SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles
@@ -61,10 +63,11 @@
 ### `[DB-02]` MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (3):**
+* **Verification Proofs (4):**
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198) (`Mssql_Scripts_DeclareAllProceduresAndExpectedParameters`)
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L243`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L243) (`MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters`)
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L293`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L293) (`Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters`)
+  - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/MySqlLiveIntegrationTests.cs#L36`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/MySqlLiveIntegrationTests.cs#L36) (`MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds`)
 
 ### `[MCP-01]` Router meta-mode execute_tool validates and enforces category scopes on target tool calls
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -82,10 +85,12 @@
 ### `[SEC-01]` VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (3):**
+* **Verification Proofs (5):**
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L23`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L23) (`EnsureVaultClientAsync_CreatesClient_WithAppRoleCredentials`)
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L44`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L44) (`EnsureVaultClientAsync_LoadsFromSecretRepo_WhenConfigJsonHasAppRole`)
   - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L96`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L96) (`ReloadConfigAsync_ClearsClient_ForcesRecreation`)
+  - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/SecretProvidersTab.test.tsx#L17`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/SecretProvidersTab.test.tsx#L17) (`renders provider inputs and submits updated configuration`)
+  - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/SecretProvidersTab.test.tsx#L60`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/SecretProvidersTab.test.tsx#L60) (`handles Test Vault connection button with success and failure responses`)
 
 ### `[SEC-02]` STDIO transport securely injects secret credentials via environment variables rather than command-line arguments
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -133,12 +138,13 @@
 ### `[UI-01]` Dashboard renders stats card, connected server list, and setup instructions
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (5):**
+* **Verification Proofs (6):**
   - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/DashboardView.test.tsx#L36`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/DashboardView.test.tsx#L36) (`renders stats card, server list, and client setup guide`)
   - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/DashboardView.test.tsx#L111`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/DashboardView.test.tsx#L111) (`renders empty state when no servers match search`)
   - [Playwright E2E] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts#L5`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts#L5) (`should render the dashboard layout and header components`)
   - [Playwright E2E] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts#L21`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts#L21) (`should display aggregate statistics cards`)
   - [Playwright E2E] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts#L35`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/dashboard.spec.ts#L35) (`should filter servers using search input`)
+  - [Playwright E2E] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42) (`should navigate to Custom Files and Backups in Settings view`)
 
 ### `[UI-02]` Modal remains hidden when isInspectOpen is false
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -162,7 +168,7 @@
 ### `[UI-04]` Interactive tool tester renders server and tool selection dropdowns
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (7):**
+* **Verification Proofs (8):**
   - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L41`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L41) (`renders initial server and tool selection options`)
   - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L75`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L75) (`filters tools by selected server and handles tool change`)
   - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L104`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L104) (`filters custom tools with no namespace prefix when selectedServer is custom`)
@@ -170,6 +176,7 @@
   - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L176`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L176) (`renders empty state when selected tool takes no arguments`)
   - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L201`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L201) (`switches to raw JSON tab and handles raw JSON editing`)
   - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L240`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L240) (`handles form submission`)
+  - [Playwright E2E] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts#L5`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts#L5) (`should interact with Prompt Tester and Resource Tester cards in Test Bench`)
 
 ---
 

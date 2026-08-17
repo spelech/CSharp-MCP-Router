@@ -147,4 +147,58 @@ describe('CustomFileModal Component', () => {
 
     expect(screen.getByText('Edit test-doc.md')).toBeInTheDocument();
   });
+
+  it('allows adding assistant messages, modifying argument required checkbox, and rendering empty arguments state', async () => {
+    useSettingsStore.setState({
+      isCustomFileOpen: true,
+      editingFileMeta: {
+        type: 'prompts',
+        name: 'empty-prompt.json',
+        sizeBytes: 50,
+        lastModified: '2026-08-17T00:00:00Z',
+      },
+      editingFileContent: JSON.stringify({
+        description: 'Empty Args Prompt',
+        arguments: [],
+        messages: [{ role: 'user', content: { text: 'Hello' } }],
+      }),
+      activeFileModalTab: 'builder',
+    });
+
+    render(<CustomFileModal />);
+
+    expect(screen.getByText('No arguments defined.')).toBeInTheDocument();
+
+    // Add variable and toggle required checkbox
+    const addVarBtn = screen.getByRole('button', { name: /add variable/i });
+    await act(async () => {
+      fireEvent.click(addVarBtn);
+    });
+    const reqCheckbox = screen.getByRole('checkbox');
+    fireEvent.click(reqCheckbox);
+
+    // Add assistant message
+    const addAssistantBtn = screen.getByRole('button', { name: /assistant message/i });
+    await act(async () => {
+      fireEvent.click(addAssistantBtn);
+    });
+
+    const assistantAreas = screen.getAllByPlaceholderText(/enter assistant message/i);
+    expect(assistantAreas.length).toBe(1);
+
+    // Test changing file type with extension swapping
+    const typeSelect = screen.getByLabelText(/file type/i);
+    const fileNameInput = screen.getByLabelText(/file name/i);
+    fireEvent.change(fileNameInput, { target: { value: 'template.json' } });
+
+    await act(async () => {
+      fireEvent.change(typeSelect, { target: { value: 'resources' } });
+    });
+    expect(fileNameInput).toHaveValue('template.md');
+
+    await act(async () => {
+      fireEvent.change(typeSelect, { target: { value: 'prompts' } });
+    });
+    expect(fileNameInput).toHaveValue('template.json');
+  });
 });
