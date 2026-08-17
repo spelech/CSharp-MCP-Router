@@ -17,11 +17,6 @@ namespace McpRouter.Infrastructure.Persistence
     {
         static DbConnectionFactory()
         {
-            try
-            {
-                Dapper.SqlMapper.AddTypeHandler(new JsonListTypeHandler());
-            }
-            catch { }
         }
 
         private readonly string _provider;

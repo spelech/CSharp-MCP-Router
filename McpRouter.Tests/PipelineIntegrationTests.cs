@@ -179,7 +179,7 @@ namespace McpRouter.Tests
             var setRes = await client.GetAsync("/api/settings");
             Assert.True((int)setRes.StatusCode < 600);
 
-            var postSetRes = await client.PostAsJsonAsync("/api/settings", new { RequireManualApproval = false });
+            var postSetRes = await client.PostAsJsonAsync("/api/settings", new { });
             Assert.True((int)postSetRes.StatusCode < 600);
 
             // /api/approvals
