@@ -66,9 +66,10 @@ namespace McpRouter.Infrastructure.Secrets
             return Convert.ToBase64String(result);
         }
 
-        public static string Decrypt(string ciphertext, IConfiguration config)
+        public static bool TryDecrypt(string ciphertext, IConfiguration config, out string plaintext)
         {
-            if (string.IsNullOrEmpty(ciphertext)) return ciphertext;
+            plaintext = ciphertext;
+            if (string.IsNullOrEmpty(ciphertext)) return true;
 
             byte[] fullCipher;
             try
@@ -77,33 +78,42 @@ namespace McpRouter.Infrastructure.Secrets
             }
             catch
             {
-                return ciphertext; // Not valid base64 -> return raw plaintext
+                return true; // Not valid base64 -> treat as raw plaintext
             }
 
             if (fullCipher.Length < 28) // 12 nonce + 16 tag minimum
             {
-                return ciphertext; // Payload too short for AES-GCM -> return raw plaintext
+                return true; // Payload too short -> treat as raw plaintext
             }
 
             var primaryKey = GetEncryptionKey(config);
-            if (TryDecryptPayload(fullCipher, primaryKey, out var result))
+            if (TryDecryptPayload(fullCipher, primaryKey, out plaintext))
             {
-                return result;
+                return true;
             }
 
-            // Fallback attempt: try legacy DB_ENCRYPTION_KEY if different from ROUTER_SECRET
             var legacySecret = config["DB_ENCRYPTION_KEY"] ?? config["ROUTER_MASTER_KEY"];
             if (!string.IsNullOrEmpty(legacySecret))
             {
                 var legacyKey = DeriveKey(legacySecret);
-                if (TryDecryptPayload(fullCipher, legacyKey, out var legacyResult))
+                if (TryDecryptPayload(fullCipher, legacyKey, out plaintext))
                 {
-                    return legacyResult;
+                    return true;
                 }
             }
 
             System.Console.WriteLine($"[SymmetricEncryptionHelper] WARNING: Decryption failed for payload. Key tag mismatch or payload corrupted.");
-            return string.Empty;
+            plaintext = ciphertext; // preserve original ciphertext
+            return false;
+        }
+
+        public static string Decrypt(string ciphertext, IConfiguration config)
+        {
+            if (TryDecrypt(ciphertext, config, out var plaintext))
+            {
+                return plaintext;
+            }
+            return string.Empty; // match original failure behavior
         }
 
         private static bool TryDecryptPayload(byte[] fullCipher, byte[] keyBytes, out string plaintext)
@@ -133,3 +143,4 @@ namespace McpRouter.Infrastructure.Secrets
         }
     }
 }
+
