@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -12,6 +13,7 @@ namespace McpRouter.Tests
     public class CompositeIdentityProviderTests
     {
         [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public void ProviderName_ReturnsComposite()
         {
             var provider = new CompositeIdentityProvider(new List<IIdentityProvider>());
@@ -19,6 +21,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ResolveIdentityAsync_ReturnsFirstNonAnonymousUser()
         {
             var p1 = new Mock<IIdentityProvider>();
@@ -39,6 +43,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ResolveIdentityAsync_FallsBackToAnonymous_WhenNoUserResolved()
         {
             var p1 = new Mock<IIdentityProvider>();
@@ -55,6 +61,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ResolveIdentityAsync_FallsBackToOidcProvider_WhenAnonymous()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

@@ -29,6 +29,18 @@ describe('LogsTerminalCard Component', () => {
     },
   ];
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('renders system logs and handles level filter', () => {
     useLogStore.setState({
       logs: mockLogs,
@@ -50,6 +62,18 @@ describe('LogsTerminalCard Component', () => {
     expect(useLogStore.getState().levelFilter).toBe('ERROR');
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('renders RPC message stream with formatted JSON', () => {
     useLogStore.setState({
       logs: mockLogs,
@@ -63,6 +87,18 @@ describe('LogsTerminalCard Component', () => {
     expect(screen.getByText('Client -> Gateway')).toBeInTheDocument();
     expect(screen.getByText(/"method": "tools\/list"/i)).toBeInTheDocument();
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('toggles autoscroll and handles clear logs', () => {
     const clearSpy = vi.spyOn(useLogStore.getState(), 'clearLogs');
@@ -84,6 +120,18 @@ describe('LogsTerminalCard Component', () => {
     fireEvent.click(clearBtn);
     expect(clearSpy).toHaveBeenCalled();
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('shows empty state when no logs match filter', () => {
     useLogStore.setState({

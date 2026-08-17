@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace McpRouter.Tests
     public class EndpointAuthorizationTests
     {
         [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task QueryStringTokenMiddleware_Extracts_AccessToken_To_AuthorizationHeader()
         {
             var context = new DefaultHttpContext();
@@ -46,6 +48,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task QueryStringTokenMiddleware_Extracts_Token_To_AuthorizationHeader()
         {
             var context = new DefaultHttpContext();

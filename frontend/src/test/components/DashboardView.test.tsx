@@ -39,6 +39,12 @@ describe('DashboardView Component', () => {
    * @type positive
    * @description Dashboard renders stats card, connected server list, and setup instructions
    */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders stats card, server list, and client setup guide', () => {
     useServerStore.setState({
       servers: mockServers,
@@ -61,6 +67,12 @@ describe('DashboardView Component', () => {
    * @category UI
    * @type positive
    * @description Grouped server view renders category sections and supports collapsible groups
+   */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
    */
   it('renders grouped server view by category and allows collapsing', () => {
     useServerStore.setState({
@@ -89,6 +101,12 @@ describe('DashboardView Component', () => {
    * @type positive
    * @description Grouped server view partitions servers by connection status and transport type
    */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders grouped server view by status and type', () => {
     useServerStore.setState({
       servers: mockServers,
@@ -113,6 +131,12 @@ describe('DashboardView Component', () => {
    * @category UI
    * @type positive
    * @description Dashboard shows empty filter state when no servers match search term
+   */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
    */
   it('renders empty state when no servers match search', () => {
     useServerStore.setState({

@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Threading.Tasks;
 using Dapper;
@@ -55,6 +56,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetPolicies_ReturnsOk()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -64,6 +67,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SavePolicy_ReturnsBadRequest_WhenTargetIdMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -74,6 +79,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SavePolicy_ReturnsBadRequest_WhenRequiredGroupMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -84,6 +91,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SavePolicy_SavesSuccessfully_OnSqlite()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -94,6 +103,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SavePolicy_SavesSuccessfully_OnMySql()
         {
             var mockFactory = new Mock<IDbConnectionFactory>();
@@ -116,6 +127,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task DeletePolicy_DeletesSuccessfully()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -125,6 +138,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task DeletePolicy_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -137,6 +152,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetMappings_ReturnsOk()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -146,6 +163,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetMappings_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -158,6 +177,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveMapping_ReturnsBadRequest_WhenExternalIdMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -168,6 +189,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveMapping_ReturnsBadRequest_WhenInternalGroupMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -178,6 +201,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveMapping_SavesSuccessfully_OnSqlite()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -188,6 +213,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveMapping_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -201,6 +228,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task DeleteMapping_DeletesSuccessfully()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
@@ -210,6 +239,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task DeleteMapping_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -222,6 +253,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetPolicies_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();

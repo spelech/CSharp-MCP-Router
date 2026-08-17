@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using Microsoft.Extensions.Logging;
@@ -10,6 +11,7 @@ namespace McpRouter.Tests
     public class SanitizingLoggerProviderTests
     {
         [Fact]
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public void SanitizingLoggerProvider_RedactsBearerTokensAndKeys()
         {
             // Arrange
@@ -44,6 +46,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public void SanitizingLoggerProvider_LeavesPlainMessagesUnchanged()
         {
             // Arrange
@@ -76,6 +80,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public void SanitizingLoggerProvider_RedactsSecretsInExceptionMessageAndToString()
         {
             // Arrange

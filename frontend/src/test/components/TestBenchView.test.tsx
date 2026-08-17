@@ -37,6 +37,18 @@ describe('TestBenchView Component', () => {
     });
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('renders test bench cards and switches tabs', async () => {
     render(<TestBenchView />);
 
@@ -60,6 +72,18 @@ describe('TestBenchView Component', () => {
     expect(screen.getByText('Interactive Tool Tester')).toBeInTheDocument();
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('handles semantic search queries in SemanticRouterCard', async () => {
     vi.spyOn(api, 'apiRequest').mockResolvedValue([
       { name: 'docker__list_containers', score: 0.95, description: 'List containers' },
@@ -81,6 +105,18 @@ describe('TestBenchView Component', () => {
       expect(api.apiRequest).toHaveBeenCalledWith('/api/test/semantic-search', expect.anything());
     });
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('executes tool and updates console', async () => {
     vi.spyOn(api, 'apiRequest').mockResolvedValue({
@@ -106,6 +142,18 @@ describe('TestBenchView Component', () => {
       expect(api.apiRequest).toHaveBeenCalledWith('/api/test/call-tool', expect.anything());
     });
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('executes prompt get in prompt tester tab', async () => {
     vi.spyOn(api, 'apiRequest').mockResolvedValue({
@@ -134,6 +182,18 @@ describe('TestBenchView Component', () => {
       expect(api.apiRequest).toHaveBeenCalledWith('/api/test/get-prompt', expect.anything());
     });
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('executes resource read in resource inspector tab', async () => {
     vi.spyOn(api, 'apiRequest').mockResolvedValue({

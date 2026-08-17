@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.IO;
 using Microsoft.Extensions.Configuration;
@@ -40,6 +41,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void ResolveDbEncryptionKey_ReturnsConfiguredKey_WhenPresent()
         {
             // Arrange
@@ -55,6 +58,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void ResolveDbEncryptionKey_ThrowsInvalidOperation_WhenMasterKeyAbsent()
         {
             // Arrange

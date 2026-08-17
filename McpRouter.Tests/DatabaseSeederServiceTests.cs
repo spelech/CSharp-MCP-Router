@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,6 +41,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Seeder_Initializes_Default_Settings_And_Providers()
         {
             var (conn, factory) = CreateDbFactory();
@@ -61,6 +64,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void DbEncryptionKey_Warning_Detection_Works_Correctly()
         {
             var testKeys = new[] { "", "short", "SomeSecureRandomKeyValue999!" };
@@ -78,6 +83,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Startup_MigratesLegacyKeysToHashedKeys()
         {
             var (connection, mockDbFactory) = CreateDbFactory();

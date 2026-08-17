@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -122,6 +123,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task GetAppKeys_ReturnsSanitizedKeys_ForAdminAndFiltered()
         {
             await _rawConnection.ExecuteAsync(@"
@@ -140,6 +143,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateAppKey_CreatesNewKey_Successfully_WithDifferentScopeSlugs()
         {
             var controller = CreateController("alice", "User");
@@ -173,6 +178,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateAppKey_ReturnsBadRequest_WhenNameMissing()
         {
             var controller = CreateController("alice", "User");
@@ -184,6 +191,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateAppKey_EnforcesUserLimit_ForNonAdmin()
         {
             // Set UserMaxKeys to 1
@@ -202,6 +211,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task RevokeAppKey_ReturnsNotFound_WhenIdDoesNotExist()
         {
             var controller = CreateController("alice", "Admin");
@@ -210,6 +221,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task RevokeAppKey_ReturnsForbid_WhenUserNotOwnerOrAdmin()
         {
             await _rawConnection.ExecuteAsync(@"
@@ -222,6 +235,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task GetAppKeysLimits_ReturnsLimitsAndCounts()
         {
             var controller = CreateController("alice", "User");
@@ -233,6 +248,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Controllers_HandleDbFailures_Returning500()
         {
             var mockConn = new Mock<IDbConnection>();

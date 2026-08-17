@@ -44,6 +44,12 @@ describe('ToolTesterCard Component', () => {
    * @type positive
    * @description Interactive tool tester renders server and tool selection dropdowns
    */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders initial server and tool selection options', () => {
     const onServerChange = vi.fn();
     const onToolChange = vi.fn();
@@ -78,6 +84,12 @@ describe('ToolTesterCard Component', () => {
    * @type positive
    * @description Tool selector filters available tools by selected backend server
    */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('filters tools by selected server and handles tool change', () => {
     const onToolChange = vi.fn();
 
@@ -107,6 +119,12 @@ describe('ToolTesterCard Component', () => {
    * @type positive
    * @description Custom server mode displays local un-namespaced tools
    */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('filters custom tools with no namespace prefix when selectedServer is custom', () => {
     render(
       <ToolTesterCard
@@ -131,6 +149,12 @@ describe('ToolTesterCard Component', () => {
    * @category UI
    * @type positive
    * @description Dynamic form generator renders type-appropriate input controls with validation
+   */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
    */
   it('renders dynamic fields for boolean, number, string, array, and object types', () => {
     const onArgChange = vi.fn();
@@ -179,6 +203,12 @@ describe('ToolTesterCard Component', () => {
    * @type positive
    * @description Empty argument state displays helpful notice when tool requires no parameters
    */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders empty state when selected tool takes no arguments', () => {
     render(
       <ToolTesterCard
@@ -203,6 +233,12 @@ describe('ToolTesterCard Component', () => {
    * @category UI
    * @type positive
    * @description Tab switcher permits toggling between structured form and raw JSON editor
+   */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
    */
   it('switches to raw JSON tab and handles raw JSON editing', () => {
     const onRawJsonChange = vi.fn();
@@ -242,6 +278,12 @@ describe('ToolTesterCard Component', () => {
    * @category UI
    * @type positive
    * @description Test bench executes tool request upon submission
+   */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
    */
   it('handles form submission', () => {
     const onSubmit = vi.fn((e) => e.preventDefault());

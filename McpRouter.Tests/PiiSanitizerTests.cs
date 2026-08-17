@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using McpRouter.Infrastructure.Logging;
 using McpRouter.Core.Routing;
 using Xunit;
@@ -7,6 +8,7 @@ namespace McpRouter.Tests
     public class PiiSanitizerTests
     {
         [Fact]
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public void SanitizePayload_Redacts_Bearer_Tokens()
         {
             string raw = "{\"headers\": {\"Authorization\": \"Bearer secret_token_xyz_123\"}}";
@@ -17,6 +19,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public void SanitizePayload_Redacts_Api_Keys_And_Passwords()
         {
             string raw = "{\"apiKey\":\"my_secret_key\",\"password\":\"super_secret\"}";
@@ -29,6 +33,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public void SanitizePayload_Redacts_ConnectionString_Passwords()
         {
             string raw = "Data Source=mcp_router.db;Password=MySecretPassword123;Version=3;";
@@ -39,6 +45,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public void LogBuffer_Add_Sanitizes_PII_Payloads()
         {
             LogBuffer.Clear();
@@ -51,6 +59,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public void PiiSanitizer_Redacts_Basic_ApiKey_Cookie_QueryToken_UrlUserInfo()
         {
             string rawToken = "Basic dXNlcjpwYXNz";

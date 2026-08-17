@@ -13,6 +13,18 @@ describe('useClientStore', () => {
     scopes: ['mcp_client']
   };
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('initializes with default state', () => {
     const state = useClientStore.getState();
     expect(state.clients).toEqual([]);
@@ -22,6 +34,12 @@ describe('useClientStore', () => {
   });
 
   describe('fetchClients', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('fetches registered clients and updates state', async () => {
       mockApiResponse('/api/clients', [sampleClient]);
 
@@ -34,6 +52,18 @@ describe('useClientStore', () => {
       expect(useClientStore.getState().clients).toHaveLength(1);
       expect(useClientStore.getState().clients[0].displayName).toBe('Cursor IDE');
     });
+
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
 
     it('handles fetch error gracefully without crashing', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
@@ -48,6 +78,12 @@ describe('useClientStore', () => {
   });
 
   describe('registerClient', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('creates client with one-time secret result and refreshes list', async () => {
       const createdResult = {
         clientId: 'new-client-uuid',
@@ -72,6 +108,18 @@ describe('useClientStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('registered successfully'))).toBe(true);
     });
 
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
+
     it('handles register error with toast and propagates error', async () => {
       mockApiResponse('/api/clients', 'Registration failed', 400);
 
@@ -84,6 +132,12 @@ describe('useClientStore', () => {
   });
 
   describe('deleteClient', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('prompts confirmation and deletes client when confirmed', async () => {
       window.confirm = vi.fn(() => true);
       let deleteCalled = false;
@@ -102,6 +156,18 @@ describe('useClientStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('deleted successfully'))).toBe(true);
     });
 
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
+
     it('cancels deletion when user denies confirmation', async () => {
       window.confirm = vi.fn(() => false);
       let deleteCalled = false;
@@ -119,6 +185,18 @@ describe('useClientStore', () => {
       expect(deleteCalled).toBe(false);
     });
 
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
+
     it('handles delete failure with error toast', async () => {
       window.confirm = vi.fn(() => true);
       mockApiResponse(/\/api\/clients\/c-123/, 'Delete failed', 500);
@@ -130,6 +208,12 @@ describe('useClientStore', () => {
   });
 
   describe('modal state', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('opens and closes add client modal and resets created result', () => {
       useClientStore.setState({ createdClientResult: { clientId: 'c', clientSecret: 's' } });
 
@@ -161,6 +245,18 @@ describe('useAppKeyStore', () => {
     isLimitReached: false
   };
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('initializes with default state', () => {
     const state = useAppKeyStore.getState();
     expect(state.appKeys).toEqual([]);
@@ -171,6 +267,12 @@ describe('useAppKeyStore', () => {
   });
 
   describe('fetchAppKeys and fetchLimits', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('loads app keys and updates store', async () => {
       mockApiResponse('/api/appkeys', [sampleKey]);
 
@@ -183,6 +285,18 @@ describe('useAppKeyStore', () => {
       expect(useAppKeyStore.getState().appKeys).toEqual([sampleKey]);
     });
 
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
+
     it('loads app key limits', async () => {
       mockApiResponse('/api/appkeys/limits', sampleLimits);
 
@@ -193,6 +307,12 @@ describe('useAppKeyStore', () => {
   });
 
   describe('createAppKey', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('creates category-scoped key, captures one-time plaintext key, and refreshes', async () => {
       const createdResult = {
         id: 'new-key-id',
@@ -229,6 +349,18 @@ describe('useAppKeyStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('created successfully'))).toBe(true);
     });
 
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
+
     it('handles create key error with toast and throws', async () => {
       mockApiResponse('/api/appkeys', 'Quota exceeded', 400);
 
@@ -244,6 +376,12 @@ describe('useAppKeyStore', () => {
   });
 
   describe('revokeAppKey', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('confirms and revokes AppKey and refreshes list', async () => {
       window.confirm = vi.fn(() => true);
       let deleteCalled = false;
@@ -261,6 +399,18 @@ describe('useAppKeyStore', () => {
       expect(deleteCalled).toBe(true);
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('revoked successfully'))).toBe(true);
     });
+
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
 
     it('cancels revocation when confirm is rejected', async () => {
       window.confirm = vi.fn(() => false);
@@ -280,6 +430,12 @@ describe('useAppKeyStore', () => {
   });
 
   describe('modal controls', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('opens and closes create modal and clears result', () => {
       useAppKeyStore.setState({ createdResult: { id: 'k', name: 'n', username: 'u', keyPrefix: 'p', plaintextKey: 's', scopes: ['all'], createdAt: '' } });
 

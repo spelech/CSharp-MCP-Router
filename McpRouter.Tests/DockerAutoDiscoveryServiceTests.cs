@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -52,6 +53,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Service_Initializes_With_Valid_Dependencies()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -64,6 +67,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void DockerDiscovery_SkipsContainer_ResolvingToPrivateIp()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -84,6 +89,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ExecuteAsync_SkipsScan_WhenDockerSocketDoesNotExist()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -107,6 +114,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void ParseDiscoveredServers_ParsesValidDockerContainerLabels()
         {
             var json = @"[
@@ -140,6 +149,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers()
         {
             var (conn, dbFactory) = CreateDbFactory();

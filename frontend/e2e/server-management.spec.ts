@@ -2,6 +2,18 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Server Registration & Secret Providers Flow', () => {
 
+  /**
+
+   * @requirement MCP-01
+
+   * @category MCP
+
+   * @type PositiveFeature
+
+   * @description Resolves MCP tool calls from client to appropriate backend server
+
+   */
+
   test('should open Add Server modal and switch secret provider types', async ({ page }) => {
     await page.goto('/');
 

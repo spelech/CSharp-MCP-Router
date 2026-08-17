@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -73,6 +74,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public void SymmetricEncryptionHelper_EncryptsAndDecryptsCorrectly()
         {
             var original = "mcp-global-securekeypartabc123";
@@ -86,6 +89,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task AppKeys_PrefixLookup_WorksCorrectly()
         {
             var keyString = "mcp-global-randomstring123456789";
@@ -121,6 +126,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task AppKeys_KeyExpiration_CheckedCorrectly()
         {
             var expiredKey = new AppKey
@@ -149,6 +156,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task AppKeys_Limits_CheckWorks()
         {
             // Seed 5 keys for Alice (which is the UserMaxKeys limit)
@@ -186,6 +195,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public void AppKeys_Sha256Hashing_VerificationWorks()
         {
             var keyString = "mcp-global-randomstring123456789";
@@ -212,6 +223,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task AuditLogger_ThrowsException_OnDatabaseError()
         {
             var brokenFactoryMock = new Mock<IDbConnectionFactory>();
@@ -235,6 +248,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task CallTool_FailsClosed_WhenAuditLogFails()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
@@ -273,6 +288,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task CallTool_FailsClosed_WhenAuditLoggerUnresolved()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {

@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,6 +25,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Cors_DefaultFallback_Allows_LocalhostOrigins()
         {
             // Arrange
@@ -53,6 +56,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Cors_DefaultFallback_Denies_In_Production()
         {
             // Arrange
@@ -91,6 +96,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Cors_WithConfiguredOrigins_RestrictsToConfigured()
         {
             // Arrange
@@ -119,6 +126,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Cors_WithAllowedOriginsKeyFallback_RestrictsToConfigured()
         {
             // Arrange

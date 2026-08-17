@@ -23,6 +23,18 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
     })
   };
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('initializes with empty providers', () => {
     const state = useSettingsStore.getState();
     expect(state.authProviders).toEqual([]);
@@ -30,6 +42,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
   });
 
   describe('fetchProviders', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('successfully loads auth and secret providers', async () => {
       mockApiResponse('/api/providers/auth', [sampleAuthProvider]);
       mockApiResponse('/api/providers/secrets', [sampleSecretProvider]);
@@ -42,6 +60,18 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
       expect(state.secretProviders).toHaveLength(1);
       expect(state.secretProviders[0].providerName).toBe('Vault');
     });
+
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
 
     it('handles provider fetch warnings gracefully when endpoints are unavailable', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
@@ -57,6 +87,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
   });
 
   describe('saveAuthProvider', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('saves auth provider config and refreshes providers', async () => {
       let postBody: any = null;
       mockApiResponse('/api/providers/auth', (_url, options) => {
@@ -80,6 +116,18 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
       });
     });
 
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
+
     it('handles auth provider save error and displays toast', async () => {
       mockApiResponse('/api/providers/auth', 'Invalid provider config', 400);
 
@@ -96,6 +144,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
   });
 
   describe('saveSecretProvider', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('saves secret provider preserving Vault token and mount path', async () => {
       let postBody: any = null;
       mockApiResponse('/api/providers/secrets', (_url, options) => {
@@ -129,6 +183,18 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
       expect(parsedConfig.mountPath).toBe('homelab/secrets/');
     });
 
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
+
     it('saves Windows Registry and Environment secret providers correctly', async () => {
       const savedProviders: any[] = [];
       mockApiResponse('/api/providers/secrets', (_url, options) => {
@@ -157,6 +223,18 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
       expect(JSON.parse(savedProviders[0].configJson).keyPath).toBe('HKCU\\Software\\Router');
       expect(JSON.parse(savedProviders[1].configJson).prefix).toBe('MCP_ENV_');
     });
+
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
 
     it('handles secret provider save error with toast and throws', async () => {
       mockApiResponse('/api/providers/secrets', 'Failed to connect to Vault', 500);

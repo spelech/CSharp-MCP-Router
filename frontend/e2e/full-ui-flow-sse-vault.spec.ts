@@ -5,6 +5,18 @@ import { TestBenchPage } from './pages/TestBenchPage';
 
 test.describe('Full UI Flow: SSE Transport + HashiCorp Vault Secret Provider', () => {
 
+  /**
+
+   * @requirement MCP-01
+
+   * @category MCP
+
+   * @type PositiveFeature
+
+   * @description Resolves MCP tool calls from client to appropriate backend server
+
+   */
+
   test('should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search', async ({ page }) => {
     test.setTimeout(60000);
     const dashboard = new DashboardPage(page);

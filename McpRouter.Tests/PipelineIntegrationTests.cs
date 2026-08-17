@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -54,6 +55,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_QueryToken_MiddlewareBypass()
         {
             var client = _factory.CreateClient();
@@ -67,6 +70,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_WellKnown_Endpoints_ReturnSuccess()
         {
             var client = CreateAuthenticatedClient();
@@ -84,6 +89,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_POST_Sse_JSONRPC_Full_Protocol_Suite()
         {
             var client = CreateAuthenticatedClient();
@@ -140,6 +147,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_POST_Message_FullProtocolSession_Suite()
         {
             var client = CreateAuthenticatedClient();
@@ -167,6 +176,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_Dashboard_Management_Suite()
         {
             var client = CreateAuthenticatedClient();
@@ -240,6 +251,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_Server_CRUD_Endpoints()
         {
             var client = CreateAuthenticatedClient();
@@ -267,6 +280,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_Permissions_Policy_And_Mapping_CRUD()
         {
             var client = CreateAuthenticatedClient();
@@ -281,6 +296,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_AppKey_Create_And_Revoke()
         {
             var client = CreateAuthenticatedClient();
@@ -291,6 +308,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Version_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -299,6 +318,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Servers_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -307,6 +328,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Clients_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -315,6 +338,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Permissions_Policies_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -323,6 +348,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Permissions_Mappings_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -331,6 +358,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Providers_Secret_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -339,6 +368,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Providers_Auth_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -347,6 +378,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Audit_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -355,6 +388,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_AppKeys_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -363,6 +398,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_AppKeysLimits_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -371,6 +408,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Logs_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -379,6 +418,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Stats_Returns200()
         {
             var client = CreateAuthenticatedClient();
@@ -387,6 +428,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Pipeline_GET_Health_Returns200()
         {
             var client = CreateAuthenticatedClient();

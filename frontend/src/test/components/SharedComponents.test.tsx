@@ -6,6 +6,12 @@ import { PaginationToolbar } from '../../components/shared/PaginationToolbar';
 
 describe('Shared Components Suite', () => {
   describe('Modal Component', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('returns null when isOpen is false', () => {
       const { container } = render(
         <Modal isOpen={false} onClose={vi.fn()} title="Test Modal">
@@ -14,6 +20,18 @@ describe('Shared Components Suite', () => {
       );
       expect(container).toBeEmptyDOMElement();
     });
+
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
 
     it('renders title, children, and handles close button click', () => {
       const onClose = vi.fn();
@@ -33,6 +51,12 @@ describe('Shared Components Suite', () => {
   });
 
   describe('StatusBadge Component', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('renders various statuses correctly with indicators', () => {
       const { rerender } = render(<StatusBadge status="connected" showIndicator={true} />);
       expect(screen.getByText(/connected/i)).toHaveClass('badge-success');
@@ -49,6 +73,12 @@ describe('Shared Components Suite', () => {
   });
 
   describe('PaginationToolbar Component', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type PositiveFeature
+     * @description Renders the dashboard and visualizes MCP server states
+     */
     it('returns null when totalItems is 0', () => {
       const { container } = render(
         <PaginationToolbar
@@ -61,6 +91,18 @@ describe('Shared Components Suite', () => {
       );
       expect(container).toBeEmptyDOMElement();
     });
+
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
 
     it('renders page info and navigation controls', () => {
       const onPageChange = vi.fn();
@@ -94,6 +136,18 @@ describe('Shared Components Suite', () => {
       fireEvent.click(buttons[1]);
       expect(onPageChange).toHaveBeenCalledWith(3);
     });
+
+    /**
+
+     * @requirement UI-01
+
+     * @category UI
+
+     * @type PositiveFeature
+
+     * @description Renders the dashboard and visualizes MCP server states
+
+     */
 
     it('handles pageSize all', () => {
       const onPageSizeChange = vi.fn();

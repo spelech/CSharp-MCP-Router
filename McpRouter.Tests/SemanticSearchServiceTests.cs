@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -37,6 +38,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task SearchToolsSemanticAsync_ScoresAndRanksTools()
         {
             var embeddingService = new TestEmbeddingService();
@@ -55,6 +58,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void SearchTools_KeywordMatching_WorksCorrectly()
         {
             var tools = new List<object>
