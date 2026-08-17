@@ -110,7 +110,15 @@ namespace McpRouter.Core.Routing
 
                     var retriever = _rootServices?.GetService<CompositeSecretRetriever>()
                         ?? _clientResponse?.HttpContext?.RequestServices?.GetService<CompositeSecretRetriever>();
-                    conn = new BackendConnection(server, _httpClient, _logger, retriever);
+                                        string? passThroughToken = null;
+                    if (server.AllowPassThroughAuth && _clientResponse?.HttpContext != null)
+                    {
+                        if (_clientResponse.HttpContext.Request.Headers.TryGetValue("X-Target-Auth", out var tokenVals))
+                        {
+                            passThroughToken = tokenVals.ToString();
+                        }
+                    }
+                    conn = new BackendConnection(server, _httpClient, _logger, retriever, passThroughToken);
                     if (server.Type != "http" && server.Type != "streamable")
                     {
                         using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
