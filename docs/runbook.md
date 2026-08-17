@@ -65,9 +65,9 @@ networks:
 
 ---
 
-### 2. Systemd Service Deployment (Bare-Metal / VM)
+### 2. Systemd Service Deployment (Linux Bare-Metal / VM)
 
-For bare-metal Linux or Windows Server deployments:
+For bare-metal Linux deployments:
 
 Create `/etc/systemd/system/mcp-router.service`:
 ```ini
@@ -109,6 +109,33 @@ Enable and start the service:
 sudo systemctl daemon-reload
 sudo systemctl enable --now mcp-router
 sudo systemctl status mcp-router
+```
+
+---
+
+### 3. Windows Server Deployment (IIS In-Process & Windows Service)
+
+For enterprise Windows Server hosting and validation, the repository provides end-to-end automation scripts and complete operational documentation:
+
+- **Comprehensive Guide**: [**Windows Deployment, Enterprise Hosting & Validation Guide (`docs/windows-deployment-and-validation-guide.md`)**](windows-deployment-and-validation-guide.md)
+- **IIS In-Process Automation**: [`scripts/windows/Deploy-IIS.ps1`](../scripts/windows/Deploy-IIS.ps1) (configures `No Managed Code`, `AlwaysRunning`, unbuffered SSE streaming with `responseBufferLimit="0"`, and Windows Authentication).
+- **Windows Service Automation**: [`scripts/windows/Setup-WindowsService.ps1`](../scripts/windows/Setup-WindowsService.ps1) (registers SCM auto-restart recovery triggers and service lifecycle).
+- **Secret Management**: [`scripts/windows/Set-RegistrySecrets.ps1`](../scripts/windows/Set-RegistrySecrets.ps1) (DPAPI machine encryption for registry keys).
+- **Diagnostic Runner**: [`scripts/windows/Test-WindowsEnvironment.ps1`](../scripts/windows/Test-WindowsEnvironment.ps1) (end-to-end environment validation).
+
+#### Quick IIS Deployment (PowerShell as Administrator):
+```powershell
+# Deploy to IIS with Windows Authentication on Port 8080:
+.\scripts\windows\Deploy-IIS.ps1 -SiteName "McpRouter" -Port 8080 -EnableWindowsAuth
+```
+
+#### Quick Windows Service Lifecycle (PowerShell as Administrator):
+```powershell
+# Install and start Windows Service with auto-recovery on Port 8080:
+.\scripts\windows\Setup-WindowsService.ps1 -Action Install -Port 8080
+
+# Query service status and health:
+.\scripts\windows\Setup-WindowsService.ps1 -Action Status
 ```
 
 ---

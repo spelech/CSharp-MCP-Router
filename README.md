@@ -22,6 +22,7 @@ The `mcp-router` aggregates multiple internal backend MCP servers (Docker, Plex,
 * **Dynamic Docker Auto-Discovery**: Mounts `/var/run/docker.sock` to automatically discover and register backend MCP containers labeled with `mcp.enabled=true`, `mcp.id`, `mcp.port`, and `mcp.categories` (see [docs/features-guide.md](docs/features-guide.md#method-d-dynamic-docker-label-auto-discovery-mcp-labels)).
 * **Pluggable Identity Providers**: Dual authentication support for **Active Directory** (Kerberos/NTLM Windows SIDs) and **OIDC / Reverse Proxy Headers** (`Remote-User`, `Remote-Groups` headers from Authentik, Authelia, PocketID, Keycloak, etc.).
 * **Pluggable Secret Retrievers**: Fetch downstream server API keys and tokens dynamically from **HashiCorp Vault (KV v2)**, **Windows Registry (DPAPI)**, or **Environment Variables** per server (`SecretProvider` column).
+* **Windows Enterprise Hosting & Automation**: First-class support for **IIS In-Process (`AspNetCoreModuleV2`)** with unbuffered SSE streaming (`responseBufferLimit="0"`), **Managed Windows Services** with SCM crash auto-recovery, Windows DPAPI registry secrets, and automated PowerShell deployment toolkits. See [docs/windows-deployment-and-validation-guide.md](docs/windows-deployment-and-validation-guide.md).
 * **Multi-Database & Stored Procedure Engine**: Complete stored procedure suites for **MS SQL Server** (`Microsoft.Data.SqlClient`), **MySQL** (`MySqlConnector`), and **SQLite** (`Microsoft.Data.Sqlite`) using Dapper. See [docs/database-providers.md](docs/database-providers.md).
 * **Observability & PII Audit Logging**: Automatic payload redaction of Bearer tokens, API keys, and passwords (`PiiSanitizer`) paired with stored procedure audit logging (`sp_InsertAuditLog`).
 * **Consolidated Tools Gateway:** Merges 300+ tools from dozens of isolated backend servers into a single endpoint.
@@ -77,6 +78,7 @@ For step-by-step UI guides, server registration, secret provider configuration (
 
 For environment prerequisites, local setup, testing workflows, production deployments, Caddy/NGINX configs, database backup/restore, observability, and disaster recovery:
 * [**Developer Guide & Local Setup**](docs/developer-guide.md)
+* [**Windows Deployment & Validation Guide**](docs/windows-deployment-and-validation-guide.md)
 * [**Software Requirements Specification (SRS) & Test Catalog**](docs/software-requirements-and-test-catalog.md)
 * [**Test Catalog & Annotation Developer Guide**](docs/test-catalog-guide.md)
 * [**Operations & Production Runbook**](docs/runbook.md)
