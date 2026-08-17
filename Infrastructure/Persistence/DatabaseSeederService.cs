@@ -148,7 +148,6 @@ namespace McpRouter.Infrastructure.Persistence
                 if (!cols.Contains("EmbeddingApiKey")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiKey TEXT;");
                 if (!cols.Contains("EmbeddingApiModel")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiModel TEXT;");
                 if (!cols.Contains("EmbeddingModelDir")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingModelDir TEXT;");
-                if (!cols.Contains("RequireManualApproval")) conn.Execute("ALTER TABLE Settings ADD COLUMN RequireManualApproval INTEGER DEFAULT 0;");
                 if (!cols.Contains("GlobalMaxKeys")) conn.Execute("ALTER TABLE Settings ADD COLUMN GlobalMaxKeys INTEGER DEFAULT 100;");
                 if (!cols.Contains("UserMaxKeys")) conn.Execute("ALTER TABLE Settings ADD COLUMN UserMaxKeys INTEGER DEFAULT 5;");
             }
@@ -275,8 +274,6 @@ namespace McpRouter.Infrastructure.Persistence
                         ALTER TABLE [dbo].[Settings] ADD [EmbeddingApiModel] VARCHAR(100) NULL;
                     IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'EmbeddingModelDir')
                         ALTER TABLE [dbo].[Settings] ADD [EmbeddingModelDir] VARCHAR(500) NULL;
-                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'RequireManualApproval')
-                        ALTER TABLE [dbo].[Settings] ADD [RequireManualApproval] BIT NOT NULL DEFAULT 0;
                     IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'GlobalMaxKeys')
                         ALTER TABLE [dbo].[Settings] ADD [GlobalMaxKeys] INT NOT NULL DEFAULT 100;
                     IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'UserMaxKeys')
@@ -486,7 +483,6 @@ namespace McpRouter.Infrastructure.Persistence
                 if (!settingsCols.Contains("EmbeddingApiKey")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiKey` LONGTEXT NULL;");
                 if (!settingsCols.Contains("EmbeddingApiModel")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiModel` VARCHAR(100) NULL;");
                 if (!settingsCols.Contains("EmbeddingModelDir")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingModelDir` VARCHAR(500) NULL;");
-                if (!settingsCols.Contains("RequireManualApproval")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `RequireManualApproval` TINYINT(1) NOT NULL DEFAULT 0;");
                 if (!settingsCols.Contains("GlobalMaxKeys")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `GlobalMaxKeys` INT NOT NULL DEFAULT 100;");
                 if (!settingsCols.Contains("UserMaxKeys")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `UserMaxKeys` INT NOT NULL DEFAULT 5;");
             }
@@ -634,7 +630,6 @@ namespace McpRouter.Infrastructure.Persistence
                         EmbeddingApiKey TEXT,
                         EmbeddingApiModel TEXT,
                         EmbeddingModelDir TEXT,
-                        RequireManualApproval INTEGER DEFAULT 0,
                         GlobalMaxKeys INTEGER DEFAULT 100,
                         UserMaxKeys INTEGER DEFAULT 5
                     );
@@ -978,7 +973,7 @@ namespace McpRouter.Infrastructure.Persistence
             var countSettings = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM Settings;");
             if (countSettings == 0)
             {
-                conn.Execute("INSERT INTO Settings (Id, RequireManualApproval, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 0, 100, 5);");
+                conn.Execute("INSERT INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 100, 5);");
             }
 
             // Populate default SecretProviders safely and provider-agnostically
@@ -1022,7 +1017,7 @@ namespace McpRouter.Infrastructure.Persistence
             var tablesToCheck = new Dictionary<string, string>
             {
                 { "Servers", "SELECT Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered FROM Servers WHERE 1=0" },
-                { "Settings", "SELECT Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, RequireManualApproval, GlobalMaxKeys, UserMaxKeys FROM Settings WHERE 1=0" },
+                { "Settings", "SELECT Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys FROM Settings WHERE 1=0" },
                 { "AppKeys", "SELECT Id, Name, Username, OwnerSid, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys WHERE 1=0" },
                 { "AccessPolicies", "SELECT Id, TargetId, RequiredGroup, IsAllowed FROM AccessPolicies WHERE 1=0" },
                 { "GroupMappings", "SELECT Id, ExternalId, InternalGroup FROM GroupMappings WHERE 1=0" },
@@ -1207,5 +1202,6 @@ namespace McpRouter.Infrastructure.Persistence
         }
     }
 }
+
 
 
