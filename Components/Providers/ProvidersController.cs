@@ -246,6 +246,67 @@ namespace McpRouter.Components.Providers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        [HttpPost("auth/batch")]
+        public async Task<IActionResult> SaveAuthProvidersBatch(
+            [FromBody] IEnumerable<AuthProviderDto> dtos,
+            [FromServices] IAuditLogger auditLogger,
+            [FromServices] IServiceProvider? serviceProvider = null)
+        {
+            var dtoList = dtos.ToList();
+            if (!dtoList.Any()) return BadRequest(new { error = "No providers provided" });
+
+            if (!dtoList.Any(p => p.IsEnabled))
+            {
+                return BadRequest(new { error = "Cannot disable all authentication providers simultaneously. At least one must be enabled." });
+            }
+
+            var username = User?.Identity?.Name ?? "anonymous";
+            try
+            {
+                var existingProviders = (await _authRepo.GetAuthProvidersAsync()).ToList();
+
+                foreach (var dto in dtoList)
+                {
+                    if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
+                    ProviderConfigSecurityHelper.ValidateAuthProviderConfig(dto);
+                    
+                    var existing = existingProviders.FirstOrDefault(p =>
+                        string.Equals(p.ProviderName, dto.ProviderName, StringComparison.OrdinalIgnoreCase));
+                    if (existing != null && !string.IsNullOrEmpty(existing.ConfigJson))
+                    {
+                        dto.ConfigJson = ProviderConfigSecurityHelper.MergeWithExistingConfig(dto.ConfigJson, existing.ConfigJson);
+                    }
+                }
+
+                if (_authRepo is DatabaseRepository dbRepo)
+                {
+                    await dbRepo.SaveAuthProvidersBatchAsync(dtoList);
+                }
+
+                foreach (var dto in dtoList)
+                {
+                    var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
+                    _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvidersBatch", dto.ProviderName, redactedDetails ?? "", true);
+                }
+
+                var sp = serviceProvider ?? HttpContext?.RequestServices;
+                if (sp != null)
+                {
+                    var ldapService = sp.GetService<McpRouter.Infrastructure.Identity.ILdapService>();
+                    if (ldapService is McpRouter.Infrastructure.Identity.LdapActiveDirectoryService ldapAd)
+                    {
+                        ldapAd.Reload();
+                    }
+                }
+
+                return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvidersBatch", "batch", "", false, ex.Message);
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
 
         [HttpPost("auth/test-ad")]
         [HttpPost("/api/settings/auth/test-ad")]
