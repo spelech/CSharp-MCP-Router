@@ -927,6 +927,30 @@
           "details": null
         }
       ]
+    },
+    {
+      "id": "RATE-01",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Rate limiting restricts excessive requests from single IPs or client sessions",
+      "proofCount": 0,
+      "proofs": []
+    },
+    {
+      "id": "GUARD-04",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Config validation rejects missing or malformed configuration schemas at startup",
+      "proofCount": 0,
+      "proofs": []
+    },
+    {
+      "id": "SEC-03",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Audit logging securely records authenticated actions and tool calls",
+      "proofCount": 0,
+      "proofs": []
     }
   ]
 }
