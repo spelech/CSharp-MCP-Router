@@ -403,13 +403,12 @@ namespace McpRouter.Tests
             // 2. Corrupt DB record
             using var conn = _dbFactory.CreateConnection();
             var validEncrypted = await conn.ExecuteScalarAsync<string>("SELECT EncryptedConfigJson FROM SecretProviders WHERE ProviderName = 'Vault';");
-            var corrupted = validEncrypted.Substring(0, validEncrypted.Length - 5) + "aaaa=";
-            await conn.ExecuteAsync("UPDATE SecretProviders SET EncryptedConfigJson = @corrupted WHERE ProviderName = 'Vault';", new { corrupted });
+            await conn.ExecuteAsync("UPDATE SecretProviders SET EncryptedConfigJson = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==' WHERE ProviderName = 'Vault';");
 
             // 3. Read back - should have IsDecryptionFailed = true
             var retrieved = (await _repo.GetSecretProvidersAsync()).First(p => p.ProviderName == "Vault");
             retrieved.IsDecryptionFailed.Should().BeTrue();
-            retrieved.ConfigJson.Should().Be(corrupted);
+            retrieved.ConfigJson.Should().Be("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==");
 
             // 4. Save with IsDecryptionFailed = true (e.g. user toggled IsEnabled)
             retrieved.IsEnabled = false;
@@ -417,7 +416,7 @@ namespace McpRouter.Tests
 
             // 5. Verify corrupt payload is retained
             var finalEncrypted = await conn.ExecuteScalarAsync<string>("SELECT EncryptedConfigJson FROM SecretProviders WHERE ProviderName = 'Vault';");
-            finalEncrypted.Should().Be(corrupted);
+            finalEncrypted.Should().Be("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==");
         }
     }
 }
