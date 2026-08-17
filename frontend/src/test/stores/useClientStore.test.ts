@@ -147,7 +147,7 @@ describe('useAppKeyStore', () => {
   const sampleKey: AppKeyItem = {
     id: 'k-1',
     name: 'Cursor Local',
-    username: 'steve',
+    username: 'admin',
     keyPrefix: 'mcp_live_1234',
     scopes: ['all'],
     createdAt: '2026-08-14T00:00:00Z'
@@ -197,7 +197,7 @@ describe('useAppKeyStore', () => {
       const createdResult = {
         id: 'new-key-id',
         name: 'SmartHome CLI',
-        username: 'steve',
+        username: 'admin',
         keyPrefix: 'mcp_live_5678',
         plaintextKey: 'mcp_live_5678_secret_token_123',
         scopes: ['category:smarthome'],

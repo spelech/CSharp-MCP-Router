@@ -6,9 +6,9 @@ import { test as base, expect, Page } from '@playwright/test';
  */
 export const USER_CONTEXTS = {
   admin: {
-    'Remote-User': 'steve',
-    'Remote-Groups': 'full_admin,house_member',
-    'Remote-Name': 'Steve Pelech',
+    'Remote-User': 'admin_user',
+    'Remote-Groups': 'full_admin,devops',
+    'Remote-Name': 'Admin User',
     'Remote-User-Sid': 'S-1-5-32-544'
   },
   operator: {

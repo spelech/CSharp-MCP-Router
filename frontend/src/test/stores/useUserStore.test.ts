@@ -14,10 +14,10 @@ describe('useUserStore', () => {
     it('successfully loads user profile from /api/me', async () => {
       const mockUser = {
         authenticated: true,
-        username: 'steve',
-        name: 'Steve Pelech',
-        email: 'steve@wileyriley.com',
-        groups: ['full_admin', 'house_member']
+        username: 'admin',
+        name: 'Admin User',
+        email: 'admin@example.com',
+        groups: ['full_admin', 'engineering']
       };
       mockApiResponse('/api/me', mockUser);
 

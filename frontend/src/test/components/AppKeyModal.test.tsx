@@ -113,7 +113,7 @@ describe('AppKeyModal component', () => {
       createdResult: {
         id: 'key-99',
         name: 'CLI Agent',
-        username: 'steve',
+        username: 'admin',
         keyPrefix: 'mcp_live_9999',
         plaintextKey: 'mcp_live_9999_secret_token_123456789',
         scopes: ['all'],

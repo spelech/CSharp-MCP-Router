@@ -18,19 +18,19 @@ namespace McpRouter.Tests
         {
             var context = new DefaultHttpContext();
             context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
-            context.Request.Headers["Remote-User"] = "steve";
-            context.Request.Headers["Remote-Groups"] = "full_admin, house_member";
+            context.Request.Headers["Remote-User"] = "admin_user";
+            context.Request.Headers["Remote-Groups"] = "full_admin, engineering";
 
             var configDict = new Dictionary<string, string?> { ["Oidc:TrustedProxies"] = "127.0.0.1" };
             var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
             var provider = new OidcIdentityProvider(config);
             var identity = await provider.ResolveIdentityAsync(context);
 
-            Assert.Equal("steve", identity.Username);
+            Assert.Equal("admin_user", identity.Username);
             Assert.Equal("HeaderAuth", identity.AuthenticationType);
             Assert.Equal(2, identity.GroupNames.Count);
             Assert.Contains("full_admin", identity.GroupNames);
-            Assert.Contains("house_member", identity.GroupNames);
+            Assert.Contains("engineering", identity.GroupNames);
         }
 
         [Fact]
@@ -79,8 +79,8 @@ namespace McpRouter.Tests
         {
             var context = new DefaultHttpContext();
             context.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.0.0.10");
-            context.Request.Headers["Remote-User"] = "steve";
-            context.Request.Headers["Remote-Groups"] = "house_member";
+            context.Request.Headers["Remote-User"] = "dev_user";
+            context.Request.Headers["Remote-Groups"] = "devops";
 
             var configDict = new Dictionary<string, string?>
             {
@@ -92,8 +92,8 @@ namespace McpRouter.Tests
             var identity = await provider.ResolveIdentityAsync(context);
 
             Assert.True(context.Request.Headers.ContainsKey("Remote-User"));
-            Assert.Equal("steve", identity.Username);
-            Assert.Contains("house_member", identity.GroupNames);
+            Assert.Equal("dev_user", identity.Username);
+            Assert.Contains("devops", identity.GroupNames);
         }
 
         [Fact]
@@ -101,7 +101,7 @@ namespace McpRouter.Tests
         {
             var context = new DefaultHttpContext();
             context.Connection.RemoteIpAddress = System.Net.IPAddress.Loopback;
-            context.Request.Headers["Remote-User"] = "steve";
+            context.Request.Headers["Remote-User"] = "admin_user";
             context.Request.Headers["Remote-Groups"] = "full_admin";
 
             var provider = new OidcIdentityProvider();
@@ -251,7 +251,7 @@ namespace McpRouter.Tests
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
 
-            var identity = new UserIdentityContext("steve", "HeaderAuth", new List<string> { "full_admin", "house_member" });
+            var identity = new UserIdentityContext("admin_user", "HeaderAuth", new List<string> { "full_admin", "devops" });
             Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
         }
 
@@ -297,7 +297,7 @@ namespace McpRouter.Tests
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
 
-            var identity = new UserIdentityContext("charlie", "HeaderAuth", new List<string> { "PocketID_Admins" });
+            var identity = new UserIdentityContext("charlie", "HeaderAuth", new List<string> { "Oidc_Admins" });
             var mappedGroups = new List<string> { "full_admin" };
             Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config, mappedGroups));
         }

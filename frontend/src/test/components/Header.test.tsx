@@ -11,7 +11,7 @@ describe('Header component', () => {
   it('renders title and version badge', async () => {
     mockApiResponse('/api/me', {
       authenticated: true,
-      username: 'steve',
+      username: 'admin',
       groups: ['full_admin']
     });
 
@@ -28,9 +28,9 @@ describe('Header component', () => {
   it('renders admin badge and shield icon for full_admin users', async () => {
     mockApiResponse('/api/me', {
       authenticated: true,
-      name: 'Steve Pelech',
-      username: 'steve',
-      groups: ['full_admin', 'house_member']
+      name: 'Admin User',
+      username: 'admin',
+      groups: ['full_admin', 'engineering']
     });
 
     await act(async () => {
@@ -38,7 +38,7 @@ describe('Header component', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/Steve Pelech \(Admin\)/i)).toBeInTheDocument();
+      expect(screen.getByText(/Admin User \(Admin\)/i)).toBeInTheDocument();
     });
 
     const userStatus = document.getElementById('user-status-item');

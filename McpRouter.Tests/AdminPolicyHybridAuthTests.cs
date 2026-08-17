@@ -40,7 +40,7 @@ namespace McpRouter.Tests
 
             var identity = new ClaimsIdentity(new[]
             {
-                new Claim(ClaimTypes.Name, "steve"),
+                new Claim(ClaimTypes.Name, "admin_user"),
                 new Claim(ClaimTypes.Role, "full_admin")
             }, "OidcHeader");
             var principal = new ClaimsPrincipal(identity);

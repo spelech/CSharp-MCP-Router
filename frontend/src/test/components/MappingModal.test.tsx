@@ -39,7 +39,7 @@ describe('MappingModal component', () => {
     useSettingsStore.setState({ isMappingModalOpen: true, editingMapping: null, saveMapping: saveSpy });
     render(<MappingModal />);
 
-    fireEvent.change(screen.getByLabelText('External AD SID or OIDC Group'), { target: { value: 'pocketid_devs' } });
+    fireEvent.change(screen.getByLabelText('External AD SID or OIDC Group'), { target: { value: 'oidc_devs' } });
     fireEvent.change(screen.getByLabelText('Internal Group Name'), { target: { value: 'Developers' } });
 
     const saveBtn = screen.getByRole('button', { name: /save mapping/i });
@@ -48,7 +48,7 @@ describe('MappingModal component', () => {
     });
 
     expect(saveSpy).toHaveBeenCalledWith({
-      externalId: 'pocketid_devs',
+      externalId: 'oidc_devs',
       internalGroup: 'Developers'
     });
   });

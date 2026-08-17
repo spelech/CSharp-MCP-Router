@@ -66,13 +66,13 @@ namespace McpRouter.Tests
         public async Task LogInvocationAsync_WritesEntryToDatabase()
         {
             var auditLogger = new AuditLogger(_dbFactory);
-            await auditLogger.LogInvocationAsync("req-1", "steve@local", "S-1-5-21", "docker", "list_containers", "tools/call", 15, 200, "{}", "{}");
+            await auditLogger.LogInvocationAsync("req-1", "admin@local", "S-1-5-21", "docker", "list_containers", "tools/call", 15, 200, "{}", "{}");
 
             using var conn = new SqliteConnection(ConnectionString);
             conn.Open();
             var entry = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT * FROM AuditLogs WHERE RequestId = 'req-1';");
             Assert.NotNull(entry);
-            Assert.Equal("steve@local", (string)entry!.UserPrincipalName);
+            Assert.Equal("admin@local", (string)entry!.UserPrincipalName);
             Assert.Equal("list_containers", (string)entry!.ItemName);
         }
 
@@ -80,11 +80,11 @@ namespace McpRouter.Tests
         public async Task LogAdminActionAsync_WritesEntryToDatabase()
         {
             var auditLogger = new AuditLogger(_dbFactory);
-            await auditLogger.LogAdminActionAsync("steve", "CreateAppKey", "key-123", "{\"scopes\":[\"read\"]}", true);
+            await auditLogger.LogAdminActionAsync("admin", "CreateAppKey", "key-123", "{\"scopes\":[\"read\"]}", true);
 
             using var conn = new SqliteConnection(ConnectionString);
             conn.Open();
-            var entry = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT * FROM AdminAuditLogs WHERE Username = 'steve';");
+            var entry = await conn.QueryFirstOrDefaultAsync<dynamic>("SELECT * FROM AdminAuditLogs WHERE Username = 'admin';");
             Assert.NotNull(entry);
             Assert.Equal("CreateAppKey", (string)entry!.Action);
             Assert.Equal("key-123", (string)entry!.Target);
@@ -100,7 +100,7 @@ namespace McpRouter.Tests
 
             var logger = new AuditLogger(failingFactory.Object);
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                logger.LogInvocationAsync("req-2", "steve@local", "S-1", "s1", "item", "method", 10, 200));
+                logger.LogInvocationAsync("req-2", "admin@local", "S-1", "s1", "item", "method", 10, 200));
         }
 
         [Fact]
@@ -112,7 +112,7 @@ namespace McpRouter.Tests
 
             var logger = new AuditLogger(failingFactory.Object);
             await Assert.ThrowsAsync<InvalidOperationException>(() =>
-                logger.LogAdminActionAsync("steve", "DeleteKey", "k1", "{}", false));
+                logger.LogAdminActionAsync("admin", "DeleteKey", "k1", "{}", false));
         }
     }
 }
