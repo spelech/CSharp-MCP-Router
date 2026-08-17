@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Threading.Tasks;
 using Dapper;
@@ -63,6 +64,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task LogInvocationAsync_WritesEntryToDatabase()
         {
             var auditLogger = new AuditLogger(_dbFactory);
@@ -77,6 +80,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task LogAdminActionAsync_WritesEntryToDatabase()
         {
             var auditLogger = new AuditLogger(_dbFactory);
@@ -92,6 +97,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task LogInvocationAsync_ThrowsInvalidOperationException_OnConnectionFailure()
         {
             var failingFactory = new Mock<IDbConnectionFactory>();
@@ -104,6 +111,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task LogAdminActionAsync_ThrowsInvalidOperationException_OnConnectionFailure()
         {
             var failingFactory = new Mock<IDbConnectionFactory>();

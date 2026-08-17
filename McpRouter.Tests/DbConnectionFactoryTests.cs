@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using McpRouter.Infrastructure.Persistence;
@@ -12,6 +13,7 @@ namespace McpRouter.Tests
     public class DbConnectionFactoryTests
     {
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Factory_Creates_Sqlite_Connection_By_Default()
         {
             var inMemoryConfig = new Dictionary<string, string?>
@@ -29,6 +31,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Factory_Creates_MySql_Connection_When_Configured()
         {
             var inMemoryConfig = new Dictionary<string, string?>
@@ -46,6 +50,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Factory_Creates_MsSql_Connection_When_Configured()
         {
             var inMemoryConfig = new Dictionary<string, string?>

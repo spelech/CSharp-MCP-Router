@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.IO;
 using System.Collections.Concurrent;
@@ -80,6 +81,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task McpClient_NamedHttpClient_Applies_SsrfConnectCallback_AndBlocksPrivateIps()
         {
             var services = new ServiceCollection();
@@ -110,6 +113,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task AuditLogger_AuditFailClosed_RefusesInvocation_OnAuditWriteError()
         {
             var mockAuditLogger = new Mock<IAuditLogger>();
@@ -148,6 +153,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task AuditLogger_RecordsPerRequestActor_NotHandshakeActor()
         {
             string? loggedUsername = null;
@@ -274,6 +281,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void PolymorphicDeserialization_Correctly_Deserializes_JsonRpcMessage_Subclasses()
         {
             var options = new JsonSerializerOptions
@@ -306,6 +315,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Deserializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow()
         {
             var options = new JsonSerializerOptions
@@ -326,6 +337,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Serializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow()
         {
             var options = new JsonSerializerOptions
@@ -344,6 +357,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task TestInitializationDiagnostics()
         {
             var server = new McpServer { Id = "backend1", DisplayName = "Backend 1", Url = "http://backend1/mcp", Type = "http", SecretProvider = "None", Enabled = true };
@@ -374,6 +389,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ToolListing_And_Remapping_Works_Correctly()
         {
             // Arrange
@@ -436,6 +453,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ResourceRouting_And_UriTranslation_Works_Correctly()
         {
             // Arrange
@@ -523,6 +542,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task PromptListAggregation_And_Routing_Works_Correctly()
         {
             // Arrange
@@ -614,6 +635,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task AuthMiddleware_Blocks_Unauthorized_Request()
         {
             // Arrange
@@ -651,6 +674,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task AuthMiddleware_Allows_SSO_Session_With_RemoteUser_Header()
         {
             // Arrange
@@ -689,6 +714,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task SemanticToolSearchRanking_Sorts_By_Score()
         {
             // Arrange
@@ -787,6 +814,8 @@ namespace McpRouter.Tests
         // }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task BuiltInResources_Templates_And_Autocompletion_Works_Correctly()
         {
             // Arrange
@@ -872,6 +901,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task MetaPrompts_Works_Correctly()
         {
             // Arrange
@@ -898,6 +929,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ErrorTransformation_Cancellation_And_Sampling_Works_Correctly()
         {
             // Arrange
@@ -994,6 +1027,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CustomUserPrompts_And_Resources_Work_Correctly()
         {
             var baseDir = Directory.GetCurrentDirectory();
@@ -1063,6 +1098,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void CustomFilesSanitization_PreventsDirectoryTraversal()
         {
             string maliciousName = "../../../etc/passwd";
@@ -1077,6 +1114,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void CustomFilesDirectoryHelper_CreatesDirectoriesCorrectly()
         {
             string baseDir = Directory.GetCurrentDirectory();
@@ -1091,6 +1130,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void SessionManager_PerServerCache_WorksCorrectly()
         {
             var logger = new Microsoft.Extensions.Logging.Abstractions.NullLogger<SessionManager>();
@@ -1125,6 +1166,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Mcp_SessionId_IsOpaque_NotBearerToken()
         {
             var token = "secret-bearer-token-1234567890";

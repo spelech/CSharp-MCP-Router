@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -162,6 +163,8 @@ namespace McpRouter.Tests
         }
 
         [Theory]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         [InlineData("tools/call", "ha__turn_on")]
         [InlineData("prompts/get", "ha__summarize")]
         [InlineData("resources/read", "mcp://ha/states")]
@@ -184,6 +187,8 @@ namespace McpRouter.Tests
         }
 
         [Theory]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         [InlineData("tools/call", "ha__turn_on")]
         [InlineData("prompts/get", "ha__summarize")]
         [InlineData("resources/read", "mcp://ha/states")]
@@ -204,6 +209,8 @@ namespace McpRouter.Tests
         }
 
         [Theory]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         [InlineData(null)]
         [InlineData("")]
         [InlineData("   ")]
@@ -217,6 +224,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ServerLevelPolicy_AuthorizesAllCapabilitiesUnderServer()
         {
             // Arrange - Allow all capabilities under server 'ha' for 'SmartHomeOperators'
@@ -239,6 +248,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ExplicitDeny_OverridesGroupAllow()
         {
             // Arrange
@@ -255,6 +266,8 @@ namespace McpRouter.Tests
         }
 
         [Theory]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         [InlineData("all", true, true, true, true)]
         [InlineData("mcp_client", true, true, true, true)]
         [InlineData("*", true, true, true, true)]
@@ -286,6 +299,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ListToolsAsync_FiltersUnauthorizedTools()
         {
             // Arrange
@@ -330,6 +345,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ListPromptsAsync_FiltersUnauthorizedPrompts()
         {
             // Arrange
@@ -372,6 +389,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ListResourcesAsync_FiltersUnauthorizedResources()
         {
             // Arrange
@@ -414,6 +433,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task ListResourceTemplatesAsync_FiltersUnauthorizedTemplates()
         {
             // Arrange
@@ -438,6 +459,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task CompleteAsync_ForPrompt_ForwardsToBackend_WhenAuthorized()
         {
             string? forwardedBody = null;
@@ -495,6 +518,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task CompleteAsync_ForResourceTemplate_ForwardsToBackend_WhenAuthorized()
         {
             string? forwardedBody = null;
@@ -552,6 +577,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task CompleteAsync_LogsTemplate_ReturnsOnlyAuthorizedServers()
         {
             // Arrange - Authorize 'ha' but NOT 'docker' or 'plex'
@@ -575,6 +602,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task CompleteAsync_ForPrompt_ThrowsUnauthorized_WhenCallerDenied()
         {
             // Arrange - Non-admin user with no policy for ha__prompt1
@@ -606,6 +635,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task CompleteAsync_ForResourceTemplate_ThrowsUnauthorized_WhenCallerDenied()
         {
             // Arrange
@@ -637,6 +668,8 @@ namespace McpRouter.Tests
         }
 
         [Theory]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         [InlineData("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"completion/complete\",\"params\":{}}")]
         [InlineData("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"completion/complete\",\"params\":{\"ref\":{\"type\":\"ref/unknown\"}}}")]
         [InlineData("{\"jsonrpc\":\"2.0\",\"id\":1,\"method\":\"completion/complete\",\"params\":{\"ref\":{\"type\":\"ref/prompt\",\"name\":\"nonexistentServer__prompt1\"}}}")]

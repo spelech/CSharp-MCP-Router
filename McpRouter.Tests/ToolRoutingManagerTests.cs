@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -45,6 +46,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ListToolsAsync_ReturnsMetaTools_InMetaMode()
         {
             var manager = new ToolRoutingManager();
@@ -65,6 +68,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void InvalidateCache_ClearsPopulatedState()
         {
             var manager = new ToolRoutingManager();
@@ -73,6 +78,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CallToolAsync_SearchTools_ReturnsSemanticResults()
         {
             var manager = new ToolRoutingManager();
@@ -101,6 +108,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing()
         {
             var manager = new ToolRoutingManager();
@@ -127,6 +136,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CallToolAsync_ReturnsCancellationError_WhenCancelled()
         {
             var manager = new ToolRoutingManager();
@@ -155,6 +166,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable()
         {
             var manager = new ToolRoutingManager();

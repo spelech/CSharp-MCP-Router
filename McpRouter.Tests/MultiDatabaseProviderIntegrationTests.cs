@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -13,6 +14,7 @@ namespace McpRouter.Tests
     public class MultiDatabaseProviderIntegrationTests
     {
         [Theory]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         [InlineData("sqlite")]
         [InlineData("mysql")]
         [InlineData("mssql")]
@@ -32,6 +34,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public void DbConnectionFactory_Throws_OnUnsupportedProvider()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -44,6 +48,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task JsonListTypeHandler_SerializesAndDeserializes_StringLists()
         {
             var conn = new SqliteConnection("Data Source=:memory:;Mode=Memory;Cache=Shared");

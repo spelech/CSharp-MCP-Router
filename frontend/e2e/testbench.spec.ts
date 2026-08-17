@@ -2,6 +2,18 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Test Bench View Flow', () => {
 
+  /**
+
+   * @requirement MCP-01
+
+   * @category MCP
+
+   * @type PositiveFeature
+
+   * @description Resolves MCP tool calls from client to appropriate backend server
+
+   */
+
   test('should navigate to Test Bench view and render tester cards', async ({ page }) => {
     await page.goto('/');
 

@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -22,6 +23,7 @@ namespace McpRouter.Tests
     public class ConcurrentResponseIsolationTests
     {
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ConcurrentResponseIsolation_TwoCallersSameId_SucceedsWithReversedResponseOrder()
         {
             // Arrange
@@ -123,6 +125,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task HighConcurrencyResponseIsolation_RepeatedIdsAcrossCallers()
         {
             // Arrange
@@ -227,6 +231,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task TimeoutAndCancellationCleanup_DoesNotLeavePendingRequests()
         {
             // Arrange
@@ -288,6 +294,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task BackendDisconnectCleanup_ClearsPendingRequests()
         {
             // Arrange
@@ -358,6 +366,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ConcurrentResponseIsolation_ExplicitNullId_Succeeds()
         {
             // Arrange
@@ -432,6 +442,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ConcurrentResponseIsolation_Notification_DoesNotExpectResponse()
         {
             // Arrange
@@ -496,6 +508,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ClientSession_ConcurrentStatelessRequestIsolateCancellation()
         {
             // Arrange
@@ -555,6 +569,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ClientSession_TargetedCancellation_DoesNotCancelOtherClientsReusingId()
         {
             // Arrange
@@ -587,6 +603,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void JsonRpcStateManager_Disconnect_PreventsRegistrationAndCancelsPending()
         {
             var stateManager = new JsonRpcStateManager();
@@ -622,6 +640,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task ConcurrentResponseIsolation_MixedNumericStringNullIds()
         {
             // Arrange

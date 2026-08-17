@@ -4,11 +4,29 @@ import { AppKeyModal } from '../../components/clients/AppKeyModal';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
 
 describe('AppKeyModal component', () => {
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders nothing when isCreateModalOpen is false', () => {
     useAppKeyStore.setState({ isCreateModalOpen: false, createdResult: null });
     const { container } = render(<AppKeyModal />);
     expect(container.firstChild).toBeNull();
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('renders form and handles scope serialization for Full Gateway Access (all)', async () => {
     const createSpy = vi.fn().mockResolvedValue(undefined);
@@ -29,6 +47,18 @@ describe('AppKeyModal component', () => {
       expiresInDays: undefined
     });
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('handles scope serialization for server scope', async () => {
     const createSpy = vi.fn().mockResolvedValue(undefined);
@@ -56,6 +86,18 @@ describe('AppKeyModal component', () => {
       expiresInDays: undefined
     });
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('handles scope serialization for category scope and expiration days', async () => {
     const createSpy = vi.fn().mockResolvedValue(undefined);
@@ -87,6 +129,18 @@ describe('AppKeyModal component', () => {
     });
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('disables submit button when quota limit is reached', () => {
     useAppKeyStore.setState({
       isCreateModalOpen: true,
@@ -105,6 +159,18 @@ describe('AppKeyModal component', () => {
     const submitBtn = screen.getByRole('button', { name: /generate app key/i });
     expect(submitBtn).toBeDisabled();
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('displays one-time secret result and copies plaintext key to clipboard', async () => {
     const closeSpy = vi.fn();

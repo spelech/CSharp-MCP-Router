@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -16,6 +17,7 @@ namespace McpRouter.Tests
     public class AuthorizationControllerTests
     {
         [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task Exchange_ThrowsInvalidOperationException_WhenRequestNull()
         {
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
@@ -32,6 +34,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task RegisterClient_CreatesApplicationAndReturnsOk()
         {
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();

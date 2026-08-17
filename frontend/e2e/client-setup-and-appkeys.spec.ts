@@ -2,6 +2,18 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Client Setup & App Key Management Flow', () => {
 
+  /**
+
+   * @requirement MCP-01
+
+   * @category MCP
+
+   * @type PositiveFeature
+
+   * @description Resolves MCP tool calls from client to appropriate backend server
+
+   */
+
   test('should open App Keys & Security view and display client setup controls', async ({ page }) => {
     await page.goto('/');
 

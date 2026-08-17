@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.IO;
 using System.Net.Http;
@@ -12,6 +13,7 @@ namespace McpRouter.Tests
     public class OnnxEmbeddingServiceTests
     {
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void Service_InitializesAndSetsUpPaths()
         {
             var settings = new RouterSettings
@@ -24,6 +26,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void ReloadSettings_ClearsSessionAndTokenizerState()
         {
             var settings1 = new RouterSettings { EmbeddingModelDir = "models/v1" };
@@ -36,6 +40,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void CosineSimilarity_CalculatesOrthogonalAndIdenticalVectors()
         {
             var settings = new RouterSettings { EmbeddingModelDir = "models/test" };
@@ -53,6 +59,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task GetEmbeddingAsync_ReturnsEmpty384Vector_ForEmptyString()
         {
             var settings = new RouterSettings { EmbeddingModelDir = "models/test" };

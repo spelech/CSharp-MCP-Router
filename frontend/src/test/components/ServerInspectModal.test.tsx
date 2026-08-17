@@ -49,6 +49,12 @@ describe('ServerInspectModal Component', () => {
    * @type positive
    * @description Modal remains hidden when isInspectOpen is false
    */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders nothing when isInspectOpen is false', () => {
     useServerStore.setState({ isInspectOpen: false, inspectServer: null });
     const { container } = render(<ServerInspectModal />);
@@ -60,6 +66,12 @@ describe('ServerInspectModal Component', () => {
    * @category UI
    * @type positive
    * @description Inspect modal displays spinner loading state while querying server capabilities
+   */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
    */
   it('renders loading state when inspectLoading is true', () => {
     useServerStore.setState({
@@ -78,6 +90,12 @@ describe('ServerInspectModal Component', () => {
    * @category UI
    * @type positive
    * @description Inspect modal renders tool schemas and handles tab navigation across resources and prompts
+   */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
    */
   it('renders tools tab with schema and handles tab switching', () => {
     useServerStore.setState({
@@ -116,6 +134,12 @@ describe('ServerInspectModal Component', () => {
    * @type positive
    * @description Resources tab lists server resources and filters items by text search query
    */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders resources tab items and handles search filtering', () => {
     useServerStore.setState({
       isInspectOpen: true,
@@ -144,6 +168,12 @@ describe('ServerInspectModal Component', () => {
    * @type positive
    * @description Prompts tab displays prompt templates and parameter requirements
    */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders prompts tab with arguments and empty state when filtered out', () => {
     useServerStore.setState({
       isInspectOpen: true,
@@ -165,6 +195,12 @@ describe('ServerInspectModal Component', () => {
    * @category UI
    * @type positive
    * @description Tabs display clean empty states when inspected server exposes no capabilities
+   */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
    */
   it('renders empty states for tabs when data is empty', () => {
     useServerStore.setState({
@@ -193,6 +229,12 @@ describe('ServerInspectModal Component', () => {
    * @category UI
    * @type positive
    * @description Clicking close button dismisses inspect modal
+   */
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
    */
   it('closes modal when close button is clicked', () => {
     const closeSpy = vi.spyOn(useServerStore.getState(), 'closeInspectModal');

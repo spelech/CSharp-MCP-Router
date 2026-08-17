@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -72,6 +73,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task AuditQuery_ReturnsFilteredRows_AndLogsAuditAction()
         {
             await _connection.ExecuteAsync(@"
@@ -94,6 +97,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task SavePolicy_WritesAuditAction_OnSuccess()
         {
             var mockAuditLogger = new Mock<IAuditLogger>();
@@ -127,6 +132,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task SaveMapping_WritesAuditAction_OnSuccess()
         {
             var mockAuditLogger = new Mock<IAuditLogger>();
@@ -159,6 +166,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]
         public async Task LogAdminActionAsync_WritesRowToAdminAuditLogs()
         {
             // First ensure table exists in SQLite

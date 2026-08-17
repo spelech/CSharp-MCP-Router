@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Data;
@@ -102,6 +103,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GroupMapping_AllowsUser_WhenMappingResolvesToAllowedInternalGroup()
         {
             // Seed a policy requiring the internal group "database_users"
@@ -119,6 +122,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GroupMapping_AllowsUser_WhenOidcGroupMapsToAllowedInternalGroup()
         {
             SeedPolicy("pol-2", "tool:ha__write", "smarthome_writers", true);
@@ -132,6 +137,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GroupMapping_RejectsUser_WhenNoMappingExistsForRestrictedTarget()
         {
             SeedPolicy("pol-3", "tool:ha__write", "smarthome_writers", true);

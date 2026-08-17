@@ -8,6 +8,18 @@ describe('Header component', () => {
     mockApiResponse('/health', { version: '4.5.6', status: 'healthy' });
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('renders title and version badge', async () => {
     mockApiResponse('/api/me', {
       authenticated: true,
@@ -24,6 +36,18 @@ describe('Header component', () => {
       expect(screen.getByText('v4.5.6')).toBeInTheDocument();
     });
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('renders admin badge and shield icon for full_admin users', async () => {
     mockApiResponse('/api/me', {
@@ -45,6 +69,18 @@ describe('Header component', () => {
     expect(userStatus?.querySelector('.fa-user-shield')).toBeInTheDocument();
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('renders standard user badge for non-admin users', async () => {
     mockApiResponse('/api/me', {
       authenticated: true,
@@ -65,6 +101,18 @@ describe('Header component', () => {
     expect(userStatus?.querySelector('.fa-user-shield')).toBeNull();
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('does not render user status item when unauthenticated', async () => {
     mockApiResponse('/api/me', {
       authenticated: false
@@ -79,6 +127,18 @@ describe('Header component', () => {
     });
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('displays gateway status and SSE endpoint', async () => {
     await act(async () => {
       render(<Header />);
@@ -88,6 +148,18 @@ describe('Header component', () => {
     expect(screen.getByText('Online')).toBeInTheDocument();
     expect(screen.getByText(`${window.location.origin}/sse`)).toBeInTheDocument();
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('toggles light and dark theme on button click and updates document attribute', async () => {
     await act(async () => {

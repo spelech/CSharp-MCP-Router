@@ -4,6 +4,12 @@ import { IdentityAuthTab } from '../../components/settings/IdentityAuthTab';
 import * as settingsApi from '../../api/settingsApi';
 
 describe('IdentityAuthTab Component', () => {
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type PositiveFeature
+   * @description AppKeys can be created with category-level scopes
+   */
   it('renders Active Directory disabled initially, toggles on and exposes fields', async () => {
     const saveSpy = vi.fn().mockResolvedValue(undefined);
     render(
@@ -31,6 +37,18 @@ describe('IdentityAuthTab Component', () => {
     expect(screen.getByLabelText('Port')).toBeInTheDocument();
     expect(screen.getByLabelText('Domain Name')).toBeInTheDocument();
   });
+
+  /**
+
+   * @requirement AUTH-02
+
+   * @category AUTH
+
+   * @type PositiveFeature
+
+   * @description AppKeys can be created with category-level scopes
+
+   */
 
   it('fills LDAP parameters and executes test connection', async () => {
     const testApiSpy = vi.spyOn(settingsApi, 'testLdapConnectionApi').mockResolvedValue({
@@ -78,6 +96,18 @@ describe('IdentityAuthTab Component', () => {
 
     expect(screen.getByText(/LDAP bind successful/i)).toBeInTheDocument();
   });
+
+  /**
+
+   * @requirement AUTH-02
+
+   * @category AUTH
+
+   * @type PositiveFeature
+
+   * @description AppKeys can be created with category-level scopes
+
+   */
 
   it('saves updated Active Directory configuration JSON', async () => {
     const saveSpy = vi.fn().mockResolvedValue(undefined);

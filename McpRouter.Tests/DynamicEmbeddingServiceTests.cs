@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -71,6 +72,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void DynamicEmbeddingService_Gets_And_Saves_Settings()
         {
             var (provider, conn) = CreateServiceProvider();
@@ -92,6 +95,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void PrivateOrLoopback_Blocked_When_AllowPrivateIps_False()
         {
             Environment.SetEnvironmentVariable("ALLOW_PRIVATE_IPS", "false");
@@ -115,6 +120,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void ReloadSettings_UpdatesSettingsAndActiveService()
         {
             var (provider, conn) = CreateServiceProvider();
@@ -131,6 +138,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task DynamicEmbeddingService_GetEmbeddingAsync_Uses_ApiProvider_When_Configured()
         {
             var (provider, conn) = CreateServiceProvider();
@@ -154,6 +163,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void CosineSimilarity_Calculates_Correct_Vector_Distance()
         {
             var (provider, conn) = CreateServiceProvider();
@@ -177,6 +188,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task PreWarmAsync_Executes_Without_Throwing()
         {
             var (provider, conn) = CreateServiceProvider();
@@ -196,6 +209,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task GenerateEmbeddingAsync_Uses_UnderlyingProvider()
         {
             var (provider, conn) = CreateServiceProvider();

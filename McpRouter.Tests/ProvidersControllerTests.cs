@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Threading.Tasks;
 using Dapper;
@@ -60,6 +61,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetAllProviders_ReturnsOkWithSecretAndAuthProviders()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -70,6 +73,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetAllProviders_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -84,6 +89,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetSecretProviders_ReturnsOkWithList()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -94,6 +101,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveSecretProvider_ReturnsBadRequest_WhenProviderNameMissing()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -106,6 +115,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveSecretProvider_ReturnsBadRequest_WhenHttpUrlPassedInConfig()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -123,6 +134,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveSecretProvider_SavesSuccessfully()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -141,6 +154,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveSecretProvider_Returns500_WhenRepositoryThrows()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -161,6 +176,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetAuthProviders_ReturnsOkWithList()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -171,6 +188,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveAuthProvider_ReturnsBadRequest_WhenProviderNameMissing()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -183,6 +202,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveAuthProvider_SavesSuccessfully()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -203,6 +224,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task SaveAuthProvider_Returns500_WhenRepositoryThrows()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -223,6 +246,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetSecretProviders_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -237,6 +262,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task GetAuthProviders_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -251,6 +278,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task TestVaultConnection_ValidatesInputAndHandlesFailureGracefully()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -291,6 +320,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "AdminPolicy allows principal")]
         public async Task TestLdapConnection_ValidatesInputAndHandlesFailureGracefully()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);

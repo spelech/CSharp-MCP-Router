@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,6 +73,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task GetClients_ReturnsOk_WithClientsAndMappedProperties()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -90,6 +93,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateClient_ReturnsOk_WithGeneratedCredentials()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -113,6 +118,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task DeleteClient_ReturnsNoContent_WhenAppExists()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -127,6 +134,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task DeleteClient_ReturnsNotFound_WhenAppDoesNotExist()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -141,6 +150,8 @@ namespace McpRouter.Tests
         // --- NEW COMPREHENSIVE TESTS ---
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateThenAuthenticate_IntegrationTest_Succeeds()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -193,6 +204,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task DatabaseAssertion_PlaintextNotPersisted()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -219,6 +232,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task InvalidPrefix_Test_ReturnsNoResult()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -253,6 +268,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task InvalidHash_Test_Fails()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -288,6 +305,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task Expired_Test_Fails()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -314,6 +333,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task RevokedOrDeleted_Test_Fails()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -356,6 +377,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task OutOfScope_Test_BehavesIdenticallyToAppKeys()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -426,6 +449,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateClient_AdminCreator_DoesNotInheritAdminSid_AndCannotAccessAdminPolicy()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -513,6 +538,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateClient_WithExpiresInDays_SetsExpiration_AndEnforcesExpiredAuthentication()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -562,6 +589,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task GetClients_NeverLeaksRawBearerSecretOrEncryptedKey()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -598,6 +627,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task RevokeCredential_HandlesSqlServerNoCount_AndReturnsAccurateStatus()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -620,6 +651,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CredentialService_GeneratesHighEntropySelectorPrefix()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -639,6 +672,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateClient_ReturnsBadRequest_WhenDisplayNameMissing()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -652,6 +687,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -669,6 +706,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task CreateClient_Returns500_WhenCredentialServiceThrows()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -686,6 +725,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public async Task DeleteClient_Returns500_WhenCredentialServiceThrows()
         {
             var (conn, dbFactory) = CreateDbFactory();

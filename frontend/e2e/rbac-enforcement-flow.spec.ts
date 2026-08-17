@@ -7,6 +7,12 @@ test.describe('RBAC Policy and Group/SID Mapping Lifecycle Flow', () => {
    * @type positive
    * @description RBAC and SID mapping administration UI allows configuring role policies and SID associations
    */
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type PositiveFeature
+   * @description Resolves MCP tool calls from client to appropriate backend server
+   */
   test('should create, verify, and delete RBAC policy and SID mapping', async ({ page }) => {
     await page.goto('/');
 

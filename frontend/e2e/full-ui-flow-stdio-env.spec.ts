@@ -5,6 +5,18 @@ import { TestBenchPage } from './pages/TestBenchPage';
 
 test.describe('Full UI Flow: STDIO Transport + Env Variable Secret Provider', () => {
 
+  /**
+
+   * @requirement MCP-01
+
+   * @category MCP
+
+   * @type PositiveFeature
+
+   * @description Resolves MCP tool calls from client to appropriate backend server
+
+   */
+
   test('should register STDIO server, verify card, and execute echo tool via Test Bench', async ({ page }) => {
     const dashboard = new DashboardPage(page);
     const serverModal = new ServerModalPage(page);

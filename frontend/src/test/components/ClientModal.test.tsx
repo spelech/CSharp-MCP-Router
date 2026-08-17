@@ -4,11 +4,29 @@ import { ClientModal } from '../../components/clients/ClientModal';
 import { useClientStore } from '../../stores/useClientStore';
 
 describe('ClientModal component', () => {
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders nothing when isAddClientOpen is false', () => {
     useClientStore.setState({ isAddClientOpen: false, createdClientResult: null });
     const { container } = render(<ClientModal />);
     expect(container.firstChild).toBeNull();
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('renders client registration form with inputs and cancel button', () => {
     const closeSpy = vi.fn();
@@ -23,6 +41,18 @@ describe('ClientModal component', () => {
     fireEvent.click(cancelBtn);
     expect(closeSpy).toHaveBeenCalled();
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('submits registration form with parsed scopes array', async () => {
     const registerSpy = vi.fn().mockResolvedValue(undefined);
@@ -43,6 +73,18 @@ describe('ClientModal component', () => {
 
     expect(registerSpy).toHaveBeenCalledWith('VSCode Dev Agent', ['mcp_client', 'admin', 'ha_write']);
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('renders one-time secret display result card when createdClientResult is populated', () => {
     const closeSpy = vi.fn();

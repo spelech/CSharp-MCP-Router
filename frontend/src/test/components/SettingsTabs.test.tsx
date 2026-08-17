@@ -7,6 +7,12 @@ import { AccessControlTab } from '../../components/settings/AccessControlTab';
 import { BackupsTab } from '../../components/settings/BackupsTab';
 
 describe('Modular Settings Tab Components', () => {
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders the dashboard and visualizes MCP server states
+   */
   it('renders GeneralTab and triggers save', async () => {
     const saveSpy = vi.fn().mockResolvedValue(true);
     render(
@@ -30,6 +36,18 @@ describe('Modular Settings Tab Components', () => {
     expect(saveSpy).toHaveBeenCalled();
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('renders IdentityAuthTab and SecretProvidersTab inside ProvidersTab', () => {
     const saveAuthSpy = vi.fn().mockResolvedValue(undefined);
     const saveSecretSpy = vi.fn().mockResolvedValue(undefined);
@@ -51,6 +69,18 @@ describe('Modular Settings Tab Components', () => {
     expect(screen.getByText('Identity & Auth Providers')).toBeInTheDocument();
     expect(screen.getByText('Secret Providers')).toBeInTheDocument();
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('renders CustomFilesTab and triggers modal open and delete', async () => {
     const openModalSpy = vi.fn().mockResolvedValue(undefined);
@@ -79,6 +109,18 @@ describe('Modular Settings Tab Components', () => {
     expect(deleteSpy).toHaveBeenCalledWith('prompts', 'test-prompt.json');
   });
 
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
+
   it('renders AccessControlTab with policies and mappings', () => {
     const openPolicySpy = vi.fn();
     const deletePolicySpy = vi.fn().mockResolvedValue(undefined);
@@ -101,6 +143,18 @@ describe('Modular Settings Tab Components', () => {
     expect(screen.getByText('server:ha')).toBeInTheDocument();
     expect(screen.getByText('ext_admin')).toBeInTheDocument();
   });
+
+  /**
+
+   * @requirement UI-01
+
+   * @category UI
+
+   * @type PositiveFeature
+
+   * @description Renders the dashboard and visualizes MCP server states
+
+   */
 
   it('renders BackupsTab', () => {
     render(<BackupsTab />);

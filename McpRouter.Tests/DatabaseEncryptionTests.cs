@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.IO;
 using Microsoft.Data.Sqlite;
@@ -10,6 +11,7 @@ namespace McpRouter.Tests
     public class DatabaseEncryptionTests
     {
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "Router meta-mode execute_tool validates and enforces category scopes")]
         public void SqliteDatabase_IsEncrypted_WithSQLCipher()
         {
             var tempDbFile = Path.Combine(Path.GetTempPath(), $"mcp_test_{Guid.NewGuid():N}.db");

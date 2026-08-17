@@ -1,3 +1,4 @@
+using McpRouter.Tests.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -20,6 +21,7 @@ namespace McpRouter.Tests
     public class ServerEndpointsValidationTests
     {
         [Theory]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         [InlineData("node /path/to/server.js", true)]
         [InlineData("python3 -m mcp_server --arg=val", true)]
         [InlineData("   ", false)]
@@ -40,6 +42,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public void IsValidServerUrl_Rejects_Invalid_Http_Urls()
         {
             var config = new ConfigurationBuilder().Build();
@@ -49,6 +53,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public void IsValidServerUrl_Accepts_Valid_Http_Urls()
         {
             var config = new ConfigurationBuilder()
@@ -63,6 +69,8 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]
         public void Validation_Rejects_TypeOnly_Update_Leaving_Incompatible_Url()
         {
             var config = new ConfigurationBuilder().Build();
