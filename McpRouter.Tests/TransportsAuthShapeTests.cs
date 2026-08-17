@@ -204,5 +204,14 @@ namespace McpRouter.Tests
 
             await Assert.ThrowsAsync<System.Security.SecurityException>(() => transport.ResolveTokenAsync());
         }
+
+    [Fact]
+    [Requirement("REQ-AUTH-PASSTHROUGH-2", "Authentication", RequirementType.Positive, "Transports use passThroughToken when AllowPassThroughAuth is true")]
+    public async Task Transports_Use_PassThroughToken_If_Allowed()
+    {
+        var server = new McpServer { Id = "test", AllowPassThroughAuth = true };
+        var transport = new HttpTransport(server, new HttpClient(), NullLogger<HttpTransport>.Instance, null, "secret-token-123");
+        var token = await transport.ResolveTokenAsync();
+        Assert.Equal("secret-token-123", token);
     }
-}
+}}

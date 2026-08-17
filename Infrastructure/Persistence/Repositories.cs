@@ -465,7 +465,74 @@ namespace McpRouter.Infrastructure.Persistence
                 }, commandType: CommandType.StoredProcedure);
             }
         }
+    
+        public async Task SaveAuthProvidersBatchAsync(IEnumerable<AuthProviderDto> dtos)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            conn.Open();
+            using var tx = conn.BeginTransaction();
+            try
+            {
+                var provider = _dbFactory.ProviderName.ToLower();
+
+                foreach (var dto in dtos)
+                {
+                    var configToSave = dto.ConfigJson;
+                    if (!string.IsNullOrEmpty(configToSave) && _config != null)
+                    {
+                        configToSave = SymmetricEncryptionHelper.Encrypt(configToSave, _config);
+                    }
+
+                    var param = new
+                    {
+                        dto.ProviderName,
+                        dto.DisplayName,
+                        dto.UserHeader,
+                        dto.GroupsHeader,
+                        ConfigJson = configToSave,
+                        dto.IsEnabled
+                    };
+
+                    if (provider == "sqlite")
+                    {
+                        const string sql = @"
+                            INSERT INTO AuthProviderConfigs (ProviderName, DisplayName, UserHeader, GroupsHeader, EncryptedConfigJson, IsEnabled)
+                            VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @ConfigJson, @IsEnabled)
+                            ON CONFLICT(ProviderName) DO UPDATE SET DisplayName = @DisplayName, UserHeader = @UserHeader, GroupsHeader = @GroupsHeader, EncryptedConfigJson = @ConfigJson, IsEnabled = @IsEnabled;";
+                        await conn.ExecuteAsync(sql, param, transaction: tx);
+                    }
+                    else if (provider == "mysql")
+                    {
+                        await conn.ExecuteAsync("sp_SaveAuthProvider", new
+                        {
+                            p_ProviderName = dto.ProviderName,
+                            p_DisplayName = dto.DisplayName,
+                            p_UserHeader = dto.UserHeader,
+                            p_GroupsHeader = dto.GroupsHeader,
+                            p_EncryptedConfigJson = configToSave,
+                            p_IsEnabled = dto.IsEnabled ? 1 : 0
+                        }, commandType: System.Data.CommandType.StoredProcedure, transaction: tx);
+                    }
+                    else
+                    {
+                        await conn.ExecuteAsync("sp_SaveAuthProvider", new
+                        {
+                            dto.ProviderName,
+                            dto.DisplayName,
+                            dto.UserHeader,
+                            dto.GroupsHeader,
+                            EncryptedConfigJson = configToSave,
+                            dto.IsEnabled
+                        }, commandType: System.Data.CommandType.StoredProcedure, transaction: tx);
+                    }
+                }
+                tx.Commit();
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
     }
 }
-
-
