@@ -96,7 +96,7 @@ export const AccessControlTab: React.FC<AccessControlTabProps> = ({
           </button>
         </div>
         <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
-          Map external Active Directory SIDs or OIDC PocketID groups to internal virtual groups for easier access control.
+          Map external Active Directory SIDs or OIDC / SSO groups to internal virtual groups for easier access control.
         </p>
         <div className="table-container" style={{ overflowX: 'auto' }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left', fontSize: '14px' }}>

@@ -9,7 +9,9 @@ export interface IdentityAuthTabProps {
 
 export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, saveAuthProvider }) => {
   const ad = providers.find((p) => p.providerName === 'ActiveDirectory');
-  const oidc = providers.find((p) => p.providerName === 'PocketID_TinyAuth');
+  const oidc = providers.find(
+    (p) => p.providerName === 'HeaderAuth' || p.providerName === 'Oidc' || p.providerName === 'PocketID_TinyAuth' || p.providerName === 'PocketID'
+  );
 
   const parsedAd = ad?.configJson
     ? (() => {
@@ -83,8 +85,8 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
       });
 
       await saveAuthProvider({
-        providerName: 'PocketID_TinyAuth',
-        displayName: 'PocketID / TinyAuth OIDC',
+        providerName: oidc?.providerName || 'HeaderAuth',
+        displayName: 'OIDC / Reverse Proxy Headers',
         userHeader: authUserHeader,
         groupsHeader: authGroupsHeader,
         isEnabled: authOidcEnabled,
@@ -243,11 +245,11 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
               )}
             </div>
 
-            {/* TinyAuth / PocketID OIDC */}
+            {/* OIDC / Reverse Proxy Headers */}
             <div style={{ padding: '15px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px', height: 'fit-content' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
                 <h4 style={{ margin: 0 }}>
-                  <i className="fa-solid fa-key"></i> PocketID / TinyAuth
+                  <i className="fa-solid fa-key"></i> OIDC / Reverse Proxy Headers
                 </h4>
                 <label className="switch">
                   <input
@@ -259,7 +261,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                   <span className="slider"></span>
                 </label>
               </div>
-              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Parse Remote-User and Remote-Groups HTTP headers from reverse proxies.</p>
+              <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Parse user and group headers from SSO reverse proxies (Authentik, Authelia, PocketID, Keycloak, Caddy, Traefik, etc.).</p>
               <div className="form-group" style={{ marginTop: '10px' }}>
                 <label htmlFor="auth-user-header" style={{ fontSize: '11px' }}>
                   User Header Name
