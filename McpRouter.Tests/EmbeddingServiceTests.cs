@@ -50,7 +50,7 @@ namespace McpRouter.Tests
                     EmbeddingProvider TEXT,
                     EmbeddingApiUrl TEXT,
                     EmbeddingApiKey TEXT,
-                    EmbeddingApiModel TEXT
+                    DashboardTitle TEXT DEFAULT 'MCP Gateway', DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired', EmbeddingApiModel TEXT
                 );
             ");
 

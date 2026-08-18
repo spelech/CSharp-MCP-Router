@@ -58,7 +58,7 @@ namespace McpRouter.Tests
                     Id TEXT PRIMARY KEY, DisplayName TEXT, Url TEXT, Enabled INTEGER DEFAULT 1, Hidden INTEGER DEFAULT 0, Type TEXT DEFAULT 'sse', SecretProvider TEXT DEFAULT 'None', SecretItemKey TEXT, AuthShape TEXT DEFAULT 'bearer', CustomHeaderName TEXT, Categories TEXT DEFAULT '[]', ApiKey TEXT, HeadersJson TEXT, AutoDiscovered INTEGER DEFAULT 0
                 );
                 CREATE TABLE IF NOT EXISTS Settings (
-                    Id TEXT PRIMARY KEY, EmbeddingProvider TEXT, EmbeddingApiUrl TEXT, EmbeddingApiKey TEXT, EmbeddingApiModel TEXT, EmbeddingModelDir TEXT, GlobalMaxKeys INTEGER DEFAULT 100, UserMaxKeys INTEGER DEFAULT 5
+                    Id TEXT PRIMARY KEY, EmbeddingProvider TEXT, EmbeddingApiUrl TEXT, EmbeddingApiKey TEXT, EmbeddingApiModel TEXT, EmbeddingModelDir TEXT, DashboardTitle TEXT DEFAULT 'MCP Gateway', DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired', GlobalMaxKeys INTEGER DEFAULT 100, UserMaxKeys INTEGER DEFAULT 5
                 );
                 CREATE TABLE IF NOT EXISTS AppKeys (
                     Id TEXT PRIMARY KEY, Name TEXT, Username TEXT, KeyPrefix TEXT, EncryptedKey TEXT, ScopesJson TEXT DEFAULT '[]', ExpiresAt TEXT, CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP

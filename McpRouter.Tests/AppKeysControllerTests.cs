@@ -66,7 +66,7 @@ namespace McpRouter.Tests
                 );
                 CREATE TABLE IF NOT EXISTS Settings (
                     Id TEXT PRIMARY KEY,
-                    GlobalMaxKeys INTEGER DEFAULT 100,
+                    DashboardTitle TEXT DEFAULT 'MCP Gateway', DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired', GlobalMaxKeys INTEGER DEFAULT 100,
                     UserMaxKeys INTEGER DEFAULT 5
                 );");
 

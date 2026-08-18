@@ -10,6 +10,8 @@ export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | n
   const settings = await apiRequest<any>('/api/settings');
   if (!settings) return null;
   return {
+    dashboardTitle: settings.dashboardTitle || 'MCP Gateway',
+    dashboardIcon: settings.dashboardIcon || 'fa-solid fa-network-wired',
     embeddingProvider: settings.embeddingProvider || 'local',
     embeddingModelDir: settings.embeddingModelDir || 'data/models',
     embeddingApiUrl: settings.embeddingApiUrl || '',
@@ -20,6 +22,8 @@ export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | n
 
 export async function saveEmbeddingSettingsApi(settings: EmbeddingSettings): Promise<boolean> {
   const payload = {
+    dashboardTitle: settings.dashboardTitle,
+    dashboardIcon: settings.dashboardIcon,
     embeddingProvider: settings.embeddingProvider,
     embeddingModelDir: settings.embeddingModelDir,
     embeddingApiUrl: settings.embeddingApiUrl,

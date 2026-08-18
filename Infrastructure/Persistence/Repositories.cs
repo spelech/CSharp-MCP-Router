@@ -82,15 +82,17 @@ namespace McpRouter.Infrastructure.Persistence
             if (exists == 0)
             {
                 const string insertSql = @"
-                    INSERT INTO Settings (Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys)
-                    VALUES ('default', @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys);";
+                    INSERT INTO Settings (Id, DashboardTitle, DashboardIcon, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys)
+                    VALUES ('default', @DashboardTitle, @DashboardIcon, @EmbeddingProvider, @EmbeddingApiUrl, @EmbeddingApiKey, @EmbeddingApiModel, @EmbeddingModelDir, @GlobalMaxKeys, @UserMaxKeys);";
                 await conn.ExecuteAsync(insertSql, settings);
             }
             else
             {
                 const string updateSql = @"
                     UPDATE Settings
-                    SET EmbeddingProvider = @EmbeddingProvider,
+                    SET DashboardTitle = @DashboardTitle,
+                        DashboardIcon = @DashboardIcon,
+                        EmbeddingProvider = @EmbeddingProvider,
                         EmbeddingApiUrl = @EmbeddingApiUrl,
                         EmbeddingApiKey = @EmbeddingApiKey,
                         EmbeddingApiModel = @EmbeddingApiModel,

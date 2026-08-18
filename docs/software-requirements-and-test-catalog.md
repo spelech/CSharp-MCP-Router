@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **28 Requirements Verified** across **107 Test Proofs** (22 Functional Capabilities, 6 Safety Guardrails).
+> **Catalog Statistics:** **29 Requirements Verified** across **108 Test Proofs** (23 Functional Capabilities, 6 Safety Guardrails).
 
 ---
 
@@ -17,7 +17,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **2** | 2 | 0 | 3 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **4** | 4 | 0 | 11 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 7 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **4** | 4 | 0 | 23 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **5** | 5 | 0 | 24 proofs |
 
 ---
 
@@ -204,6 +204,12 @@
   - [Frontend Vitest] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L240`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L240) (`handles form submission`)
   - [Playwright E2E] [`C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts#L5`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts#L5) (`should interact with Prompt Tester and Resource Tester cards in Test Bench`)
 
+### `[UI-BRANDING-01]` Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PipelineIntegrationTests.cs#L242`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PipelineIntegrationTests.cs#L242) (`Pipeline_Settings_Branding_ReadWrite`)
+
 ---
 
 ## 3. Boundary & Guardrail Invariants ("What the Application DOES NOT DO")
@@ -311,3 +317,4 @@
 | `UI-02` | Positive | `UI` | Modal remains hidden when isInspectOpen is false | [`ServerInspectModal.test.tsx:L46`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ServerInspectModal.test.tsx#L46) | Frontend Vitest |
 | `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L59`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/DashboardView.test.tsx#L59) | Frontend Vitest |
 | `UI-04` | Positive | `UI` | Interactive tool tester renders server and tool selection dropdowns | [`ToolTesterCard.test.tsx:L41`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/frontend/src/test/components/ToolTesterCard.test.tsx#L41) | Frontend Vitest |
+| `UI-BRANDING-01` | Positive | `UI` | Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API. | [`PipelineIntegrationTests.cs:L242`](file:///C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PipelineIntegrationTests.cs#L242) | Backend xUnit |

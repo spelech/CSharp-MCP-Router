@@ -9,24 +9,24 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px;
+    margin-bottom: var(--space-3);
     flex-wrap: wrap;
-    gap: 10px;
+    gap: var(--space-2);
 }
 
 .logs-filters {
     display: flex;
-    gap: 10px;
+    gap: var(--space-2);
     align-items: center;
 }
 
 .logs-terminal {
     background: var(--bg-code);
     border: 1px solid var(--border-color);
-    border-radius: 10px;
-    padding: 15px;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    font-family: var(--font-family-code);
+    font-size: var(--font-size-xs);
     overflow-y: auto;
     flex-grow: 1;
     height: 300px;
@@ -37,7 +37,7 @@
 
 .log-line {
     display: flex;
-    gap: 10px;
+    gap: var(--space-2);
     line-height: 1.4;
     word-break: break-all;
 }
@@ -49,8 +49,8 @@
 
 .log-level-badge {
     padding: 1px 6px;
-    border-radius: 4px;
-    font-weight: bold;
+    border-radius: var(--space-1);
+    font-weight: var(--font-weight-bold);
     font-size: 10px;
     text-transform: uppercase;
     display: inline-block;
@@ -59,22 +59,22 @@
 }
 
 .log-level-info {
-    background: rgba(59, 130, 246, 0.15);
-    color: HSL(217, 91%, 75%);
+    background: rgb(var(--color-info-rgb) / 0.15);
+    color: var(--color-info);
 }
 
 .log-level-warning {
-    background: rgba(245, 158, 11, 0.15);
-    color: HSL(38, 92%, 70%);
+    background: rgb(var(--color-warning-rgb) / 0.15);
+    color: var(--color-warning);
 }
 
 .log-level-error {
-    background: rgba(239, 68, 68, 0.15);
-    color: HSL(0, 84%, 75%);
+    background: rgb(var(--color-danger-rgb) / 0.15);
+    color: var(--color-danger);
 }
 
 .log-level-debug {
-    background: rgba(255, 255, 255, 0.08);
+    background: var(--bg-input);
     color: var(--text-muted);
 }
 
@@ -92,13 +92,13 @@
 }
 
 .log-exception {
-    color: HSL(0, 84%, 70%);
-    background: rgba(239, 68, 68, 0.05);
-    padding: 10px;
-    border-radius: 6px;
+    color: var(--color-danger);
+    background: rgb(var(--color-danger-rgb) / 0.05);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
     border-left: 3px solid var(--status-offline);
     margin-top: 5px;
-    font-size: 11px;
+    font-size: var(--font-size-xs);
     white-space: pre-wrap;
     width: 100%;
 }

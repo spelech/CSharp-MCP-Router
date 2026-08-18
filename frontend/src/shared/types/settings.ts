@@ -1,4 +1,6 @@
 export interface EmbeddingSettings {
+  dashboardTitle?: string;
+  dashboardIcon?: string;
   embeddingProvider: string;
   embeddingModelDir: string;
   embeddingApiUrl: string;

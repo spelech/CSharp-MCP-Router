@@ -1,12 +1,12 @@
 /* Toast Container */
 #toast-container {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    z-index: 10000;
+    top: var(--space-5);
+    right: var(--space-5);
+    z-index: var(--z-toast);
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: var(--space-2);
     max-width: 380px;
     width: calc(100% - 40px);
     pointer-events: none;
@@ -14,21 +14,21 @@
 
 /* Toast Card */
 .toast-card {
-    background: rgba(24, 24, 27, 0.95);
+    background: var(--bg-card);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
     border-left: 4px solid var(--accent);
     color: var(--text-main);
     padding: 14px 18px;
-    border-radius: 8px;
-    box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5), 0 8px 10px -6px rgba(0, 0, 0, 0.5);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-md);
     display: flex;
     align-items: center;
     justify-content: space-between;
     pointer-events: auto;
     animation: toast-in 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    transition: all 0.3s ease;
+    transition: all var(--transition-normal);
 }
 
 .toast-card.toast-success {
@@ -46,10 +46,10 @@
 .toast-content {
     display: flex;
     align-items: center;
-    gap: 12px;
-    font-size: 0.92rem;
-    font-family: 'Outfit', sans-serif;
-    font-weight: 500;
+    gap: var(--space-3);
+    font-size: var(--font-size-md);
+    font-family: var(--font-family-base);
+    font-weight: var(--font-weight-medium);
     line-height: 1.4;
 }
 
@@ -74,9 +74,9 @@
     border: none;
     color: var(--text-muted);
     cursor: pointer;
-    font-size: 0.9rem;
-    padding: 0 0 0 12px;
-    transition: color 0.15s ease;
+    font-size: var(--font-size-md);
+    padding: 0 0 0 var(--space-3);
+    transition: color var(--transition-fast);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -88,7 +88,7 @@
 
 /* Slide out animation classes */
 .toast-card.toast-fade-out {
-    animation: toast-out 0.3s ease-in forwards;
+    animation: toast-out var(--transition-normal) forwards;
 }
 
 @keyframes toast-in {

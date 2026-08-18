@@ -38,7 +38,7 @@ namespace McpRouter.Tests
                     EmbeddingApiKey TEXT,
                     EmbeddingApiModel TEXT,
                     EmbeddingModelDir TEXT,
-                    GlobalMaxKeys INTEGER DEFAULT 100,
+                    DashboardTitle TEXT DEFAULT 'MCP Gateway', DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired', GlobalMaxKeys INTEGER DEFAULT 100,
                     UserMaxKeys INTEGER DEFAULT 5
                 );
                 CREATE TABLE IF NOT EXISTS AppKeys (

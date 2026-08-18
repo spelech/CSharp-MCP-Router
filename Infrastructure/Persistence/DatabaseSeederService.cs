@@ -143,6 +143,8 @@ namespace McpRouter.Infrastructure.Persistence
             if (settingsExists)
             {
                 var cols = conn.Query<string>("SELECT name FROM pragma_table_info('Settings');").ToHashSet(StringComparer.OrdinalIgnoreCase);
+                if (!cols.Contains("DashboardTitle")) conn.Execute("ALTER TABLE Settings ADD COLUMN DashboardTitle TEXT DEFAULT 'MCP Gateway';");
+                if (!cols.Contains("DashboardIcon")) conn.Execute("ALTER TABLE Settings ADD COLUMN DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired';");
                 if (!cols.Contains("EmbeddingProvider")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingProvider TEXT;");
                 if (!cols.Contains("EmbeddingApiUrl")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiUrl TEXT;");
                 if (!cols.Contains("EmbeddingApiKey")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiKey TEXT;");
@@ -264,6 +266,10 @@ namespace McpRouter.Infrastructure.Persistence
 
                 IF OBJECT_ID('dbo.Settings', 'U') IS NOT NULL
                 BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'DashboardTitle')
+                        ALTER TABLE [dbo].[Settings] ADD [DashboardTitle] VARCHAR(200) NOT NULL DEFAULT 'MCP Gateway';
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'DashboardIcon')
+                        ALTER TABLE [dbo].[Settings] ADD [DashboardIcon] VARCHAR(100) NOT NULL DEFAULT 'fa-solid fa-network-wired';
                     IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'EmbeddingProvider')
                         ALTER TABLE [dbo].[Settings] ADD [EmbeddingProvider] VARCHAR(50) NULL;
                     IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Settings') AND name = 'EmbeddingApiUrl')
@@ -478,6 +484,8 @@ namespace McpRouter.Infrastructure.Persistence
                     SELECT COLUMN_NAME FROM information_schema.columns 
                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Settings';").ToHashSet(StringComparer.OrdinalIgnoreCase);
 
+                if (!settingsCols.Contains("DashboardTitle")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `DashboardTitle` VARCHAR(200) NOT NULL DEFAULT 'MCP Gateway';");
+                if (!settingsCols.Contains("DashboardIcon")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `DashboardIcon` VARCHAR(100) NOT NULL DEFAULT 'fa-solid fa-network-wired';");
                 if (!settingsCols.Contains("EmbeddingProvider")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingProvider` VARCHAR(50) NULL;");
                 if (!settingsCols.Contains("EmbeddingApiUrl")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiUrl` VARCHAR(500) NULL;");
                 if (!settingsCols.Contains("EmbeddingApiKey")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiKey` LONGTEXT NULL;");
@@ -625,6 +633,8 @@ namespace McpRouter.Infrastructure.Persistence
 
                     CREATE TABLE IF NOT EXISTS Settings (
                         Id TEXT PRIMARY KEY,
+                        DashboardTitle TEXT DEFAULT 'MCP Gateway',
+                        DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired',
                         EmbeddingProvider TEXT,
                         EmbeddingApiUrl TEXT,
                         EmbeddingApiKey TEXT,
@@ -748,6 +758,8 @@ namespace McpRouter.Infrastructure.Persistence
                     BEGIN
                         CREATE TABLE [dbo].[Settings] (
                             [Id]                      VARCHAR(50) PRIMARY KEY,
+                            [DashboardTitle]          VARCHAR(200) NOT NULL DEFAULT 'MCP Gateway',
+                            [DashboardIcon]           VARCHAR(100) NOT NULL DEFAULT 'fa-solid fa-network-wired',
                             [EmbeddingProvider]       VARCHAR(50) NULL,
                             [EmbeddingApiUrl]         VARCHAR(500) NULL,
                             [EmbeddingApiKey]         NVARCHAR(MAX) NULL,
@@ -880,6 +892,8 @@ namespace McpRouter.Infrastructure.Persistence
 
                     CREATE TABLE IF NOT EXISTS `Settings` (
                         `Id`                      VARCHAR(50) PRIMARY KEY,
+                        `DashboardTitle`          VARCHAR(200) NOT NULL DEFAULT 'MCP Gateway',
+                        `DashboardIcon`           VARCHAR(100) NOT NULL DEFAULT 'fa-solid fa-network-wired',
                         `EmbeddingProvider`       VARCHAR(50) NULL,
                         `EmbeddingApiUrl`         VARCHAR(500) NULL,
                         `EmbeddingApiKey`         LONGTEXT NULL,
