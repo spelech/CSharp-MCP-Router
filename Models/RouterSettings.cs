@@ -6,6 +6,8 @@ namespace McpRouter.Models
     {
         [Key]
         public string Id { get; set; } = "default";
+        public string DashboardTitle { get; set; } = "MCP Gateway";
+        public string DashboardIcon { get; set; } = "fa-solid fa-network-wired";
         public string EmbeddingProvider { get; set; } = "local"; // "local" or "api"
         public string EmbeddingApiUrl { get; set; } = "http://litellm:4000/v1/embeddings";
         public string EmbeddingApiKey { get; set; } = "";

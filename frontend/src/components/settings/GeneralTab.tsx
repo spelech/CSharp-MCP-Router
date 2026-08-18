@@ -7,6 +7,8 @@ export interface GeneralTabProps {
 }
 
 export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSettings }) => {
+  const [dashboardTitle, setDashboardTitle] = useState(settings?.dashboardTitle || 'MCP Gateway');
+  const [dashboardIcon, setDashboardIcon] = useState(settings?.dashboardIcon || 'fa-solid fa-network-wired');
   const [embProvider, setEmbProvider] = useState(settings?.embeddingProvider || 'local');
   const [embModelDir, setEmbModelDir] = useState(settings?.embeddingModelDir || 'data/models');
   const [embApiUrl, setEmbApiUrl] = useState(settings?.embeddingApiUrl || 'http://litellm:4000/v1/embeddings');
@@ -18,6 +20,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
     e.preventDefault();
     setSaveStatus('saving');
     const success = await saveEmbeddingSettings({
+      dashboardTitle,
+      dashboardIcon,
       embeddingProvider: embProvider,
       embeddingModelDir: embModelDir,
       embeddingApiUrl: embApiUrl,
@@ -32,12 +36,42 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
     <div id="subview-search" className="settings-subview active">
       <div className="glass-card settings-card" style={{ maxWidth: '600px', margin: '0 auto' }}>
         <h2>
-          <i className="fa-solid fa-gear"></i> Semantic Search Settings
+          <i className="fa-solid fa-gear"></i> General Settings
         </h2>
         <p className="description" style={{ color: 'var(--text-muted)', fontSize: '13px', marginBottom: '20px' }}>
-          Configure the embedding model used for matching query intents to tools. Changes are saved securely to the database.
+          Configure branding and semantic search settings. Changes are saved securely to the database.
         </p>
         <form id="settings-form" onSubmit={handleSaveSearchSettings}>
+          
+          <div className="form-group">
+            <h3 style={{ fontSize: '14px', marginBottom: '10px', marginTop: '10px', color: 'var(--primary)' }}>Dashboard Branding</h3>
+          </div>
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="settings-dashboard-title">Dashboard Title</label>
+              <input
+                type="text"
+                id="settings-dashboard-title"
+                placeholder="MCP Gateway"
+                value={dashboardTitle}
+                onChange={(e) => setDashboardTitle(e.target.value)}
+              />
+            </div>
+            <div className="form-group">
+              <label htmlFor="settings-dashboard-icon">Header Icon (FontAwesome class)</label>
+              <input
+                type="text"
+                id="settings-dashboard-icon"
+                placeholder="fa-solid fa-network-wired"
+                value={dashboardIcon}
+                onChange={(e) => setDashboardIcon(e.target.value)}
+              />
+            </div>
+          </div>
+          
+          <div className="form-group">
+            <h3 style={{ fontSize: '14px', marginBottom: '10px', marginTop: '20px', color: 'var(--primary)' }}>Semantic Search</h3>
+          </div>
           <div className="form-group">
             <label htmlFor="settings-provider">Embedding Provider</label>
             <select

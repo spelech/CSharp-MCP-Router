@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-17T20:20:44.0088609Z",
-    "totalRequirements": 28,
-    "positiveCount": 22,
+    "generatedAt": "2026-08-18T20:57:22.4407289Z",
+    "totalRequirements": 29,
+    "positiveCount": 23,
     "guardrailCount": 6,
-    "totalProofs": 107
+    "totalProofs": 108
   },
   "requirements": [
     {
@@ -1004,6 +1004,22 @@
           "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/frontend/e2e/prompts-resources-customfiles.spec.ts",
           "lineNumber": 5,
           "testName": "should interact with Prompt Tester and Resource Tester cards in Test Bench",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-BRANDING-01",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "C:/Users/Alias/repos/CSharp-MCP-Router/McpRouter.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 242,
+          "testName": "Pipeline_Settings_Branding_ReadWrite",
           "details": null
         }
       ]

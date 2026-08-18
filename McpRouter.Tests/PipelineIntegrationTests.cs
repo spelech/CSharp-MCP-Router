@@ -240,6 +240,28 @@ namespace McpRouter.Tests
         }
 
         [Fact]
+        [Requirement("UI-BRANDING-01", "UI", RequirementType.Positive, "Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API.")]
+        public async Task Pipeline_Settings_Branding_ReadWrite()
+        {
+            var client = CreateAuthenticatedClient();
+
+            // Write custom branding
+            var postSetRes = await client.PostAsJsonAsync("/api/settings", new { 
+                dashboardTitle = "New Dashboard Title",
+                dashboardIcon = "fa-solid fa-star",
+                embeddingProvider = "local"
+            });
+            Assert.True((int)postSetRes.StatusCode < 600);
+
+            // Read back from /api/config/branding
+            var brandRes = await client.GetAsync("/api/config/branding");
+            Assert.Equal(System.Net.HttpStatusCode.OK, brandRes.StatusCode);
+            var brandJson = await brandRes.Content.ReadAsStringAsync();
+            Assert.Contains("New Dashboard Title", brandJson);
+            Assert.Contains("fa-solid fa-star", brandJson);
+        }
+
+        [Fact]
         public async Task Pipeline_Server_CRUD_Endpoints()
         {
             var client = CreateAuthenticatedClient();

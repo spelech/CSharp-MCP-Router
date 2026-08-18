@@ -92,6 +92,13 @@ namespace McpRouter.Extensions
             // SYSTEM/HEALTH ENDPOINTS
             // ----------------------------------------------------
             app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = AppVersion }));
+            app.MapGet("/api/config/branding", async (McpRouter.Infrastructure.Persistence.ISettingRepository settingsRepo) => {
+                var settings = await settingsRepo.GetSettingsAsync() ?? new McpRouter.Models.RouterSettings();
+                return Results.Ok(new {
+                    title = settings.DashboardTitle,
+                    icon = settings.DashboardIcon
+                });
+            });
 
             // ----------------------------------------------------
             // OAUTH & OIDC DISCOVERY ENDPOINTS

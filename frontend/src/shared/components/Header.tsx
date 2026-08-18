@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { useUserStore } from '../stores/useUserStore';
+import { useUserStore } from '../../stores/useUserStore';
+import { useConfigStore } from '../../stores/useConfigStore';
 
 export const Header: React.FC = () => {
   const { user, version, loadUser, loadVersion } = useUserStore();
+  const { branding, loadBranding } = useConfigStore();
   const [theme, setTheme] = useState<'light' | 'dark'>(() => {
     return (typeof window !== 'undefined' && (localStorage.getItem('mcp-theme') as 'light' | 'dark')) || 'dark';
   });
@@ -10,7 +12,8 @@ export const Header: React.FC = () => {
   useEffect(() => {
     loadUser();
     loadVersion();
-  }, [loadUser, loadVersion]);
+    loadBranding();
+  }, [loadUser, loadVersion, loadBranding]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -29,9 +32,9 @@ export const Header: React.FC = () => {
   return (
     <header className="dashboard-header">
       <div className="header-logo">
-        <i className="fa-solid fa-network-wired logo-icon"></i>
+        <i className={`${branding?.icon || 'fa-solid fa-network-wired'} logo-icon`}></i>
         <div className="header-title">
-          <h1>MCP Router Gateway</h1>
+          <h1>{branding?.title || 'MCP Gateway'}</h1>
           <span className="badge badge-primary" id="version-badge">
             v{version}
           </span>
