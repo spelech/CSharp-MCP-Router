@@ -112,20 +112,20 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
 
       await saveSecretProvider({
         providerName: 'Vault',
-        displayName: 'HashiCorp Vault (KV v2)',
+        displayName: vault?.displayName || 'HashiCorp Vault (KV v2)',
         configJson: vaultDecryptionFailed ? (vault?.configJson || '') : JSON.stringify(vaultConfig),
         isEnabled: secVaultEnabled,
         isDecryptionFailed: vaultDecryptionFailed,
       });
       await saveSecretProvider({
         providerName: 'WindowsRegistry',
-        displayName: 'Windows Registry (DPAPI)',
+        displayName: winreg?.displayName || 'Windows Registry (DPAPI)',
         configJson: JSON.stringify(winregConfig),
         isEnabled: secWinregEnabled,
       });
       await saveSecretProvider({
         providerName: 'Environment',
-        displayName: 'Container Environment',
+        displayName: env?.displayName || 'Container Environment',
         configJson: JSON.stringify(envConfig),
         isEnabled: secEnvEnabled,
       });

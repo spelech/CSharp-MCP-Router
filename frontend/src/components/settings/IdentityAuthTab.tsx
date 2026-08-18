@@ -80,7 +80,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
 
       await saveAuthProvider({
         providerName: 'ActiveDirectory',
-        displayName: 'Active Directory LDAP',
+        displayName: ad?.displayName || 'Active Directory LDAP',
         userHeader: 'Remote-User',
         groupsHeader: 'Remote-Groups',
         configJson: adDecryptionFailed ? (ad?.configJson || '') : JSON.stringify(adConfig),
@@ -90,7 +90,7 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
 
       await saveAuthProvider({
         providerName: oidc?.providerName || 'HeaderAuth',
-        displayName: 'OIDC / Reverse Proxy Headers',
+        displayName: oidc?.displayName || 'OIDC / Reverse Proxy Headers',
         userHeader: authUserHeader,
         groupsHeader: authGroupsHeader,
         isEnabled: authOidcEnabled,
