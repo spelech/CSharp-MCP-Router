@@ -19,7 +19,7 @@ describe('Header component', () => {
       render(<Header />);
     });
 
-    expect(screen.getByText('MCP Router Gateway')).toBeInTheDocument();
+    expect(screen.getByText('MCP Gateway')).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText('v4.5.6')).toBeInTheDocument();
     });

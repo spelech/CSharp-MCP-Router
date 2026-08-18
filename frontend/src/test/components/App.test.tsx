@@ -8,7 +8,7 @@ describe('App component', () => {
       render(<App />);
     });
 
-    expect(screen.getByText('MCP Router Gateway')).toBeInTheDocument();
+    expect(screen.getByText('MCP Gateway')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /overview/i })).toHaveClass('active');
 
     // Footer is rendered

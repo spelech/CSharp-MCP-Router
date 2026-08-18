@@ -22,7 +22,8 @@ describe('Modular Settings Tab Components', () => {
       />
     );
 
-    expect(screen.getByText('Semantic Search Settings')).toBeInTheDocument();
+    expect(screen.getByText('General Settings')).toBeInTheDocument();
+    expect(screen.getByText('Semantic Search')).toBeInTheDocument();
     const saveBtn = screen.getByRole('button', { name: /save settings/i });
     await act(async () => {
       fireEvent.click(saveBtn);

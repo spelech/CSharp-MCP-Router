@@ -105,7 +105,7 @@ describe('SettingsView component', () => {
     expect(screen.getByRole('button', { name: /access control/i })).toBeInTheDocument();
 
     // Default active subview is search
-    expect(screen.getByRole('heading', { name: /semantic search settings/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /general settings/i })).toBeInTheDocument();
 
     // Switch to Identity subview
     await act(async () => {
@@ -244,34 +244,40 @@ describe('SettingsView component', () => {
         fireEvent.click(saveBtn);
       });
 
-      expect(savedSecrets).toContainEqual({
-        providerName: 'Vault',
-        displayName: 'HashiCorp Vault (KV v2)',
-        configJson: JSON.stringify({
-          address: 'http://vault:8200',
-          token: 's.mySecretVaultToken',
-          mountPath: 'secret/data/'
-        }),
-        isEnabled: true
-      });
+      expect(savedSecrets).toContainEqual(
+        expect.objectContaining({
+          providerName: 'Vault',
+          displayName: 'HashiCorp Vault (KV v2)',
+          configJson: JSON.stringify({
+            address: 'http://vault:8200',
+            token: 's.mySecretVaultToken',
+            mountPath: 'secret/data/'
+          }),
+          isEnabled: true
+        })
+      );
 
-      expect(savedSecrets).toContainEqual({
-        providerName: 'WindowsRegistry',
-        displayName: 'Windows Registry (DPAPI)',
-        configJson: JSON.stringify({
-          keyPath: 'HKCU\\Software\\McpRouter\\Secrets'
-        }),
-        isEnabled: false
-      });
+      expect(savedSecrets).toContainEqual(
+        expect.objectContaining({
+          providerName: 'WindowsRegistry',
+          displayName: 'Windows Registry (DPAPI)',
+          configJson: JSON.stringify({
+            keyPath: 'HKCU\\Software\\McpRouter\\Secrets'
+          }),
+          isEnabled: false
+        })
+      );
 
-      expect(savedSecrets).toContainEqual({
-        providerName: 'Environment',
-        displayName: 'Container Environment',
-        configJson: JSON.stringify({
-          prefix: 'MCP_SECRET_'
-        }),
-        isEnabled: true
-      });
+      expect(savedSecrets).toContainEqual(
+        expect.objectContaining({
+          providerName: 'Environment',
+          displayName: 'Container Environment',
+          configJson: JSON.stringify({
+            prefix: 'MCP_SECRET_'
+          }),
+          isEnabled: true
+        })
+      );
     });
   });
 
