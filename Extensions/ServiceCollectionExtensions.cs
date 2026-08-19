@@ -162,6 +162,25 @@ namespace McpRouter.Extensions
             builder.Services.AddSingleton<DynamicEmbeddingService>();
             builder.Services.AddSingleton<IEmbeddingService>(sp => sp.GetRequiredService<DynamicEmbeddingService>());
 
+            // Register In-Process Virtual Admin MCP Server
+            builder.Services.AddSingleton<AdminMcpServer>(sp => new AdminMcpServer(
+                sp.GetRequiredService<IServerRepository>(),
+                sp.GetRequiredService<IAppKeyRepository>(),
+                sp.GetRequiredService<ISecretProviderRepository>(),
+                sp.GetRequiredService<IAuthProviderRepository>(),
+                sp.GetRequiredService<ISettingRepository>(),
+                sp.GetRequiredService<IDbConnectionFactory>(),
+                sp.GetRequiredService<IAuditLogger>(),
+                sp.GetRequiredService<ICredentialService>(),
+                sp.GetRequiredService<BackendHealthCheckService>(),
+                sp.GetRequiredService<DynamicEmbeddingService>(),
+                sp.GetRequiredService<SessionManager>(),
+                sp.GetService<ILdapService>(),
+                sp.GetRequiredService<IHttpClientFactory>().CreateClient("McpClient"),
+                sp.GetService<IConfiguration>(),
+                sp.GetService<ILogger<AdminMcpServer>>()
+            ));
+
             // Configure CORS
             builder.Services.AddCors(options =>
             {
