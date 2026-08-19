@@ -234,7 +234,7 @@ namespace McpRouter.Tests
         }
     
         [Fact]
-        [Requirement("REQ-PERM-GUARD-01", "GUARD", RequirementType.Positive, "Must reject saving a policy with TargetId = '*' and IsAllowed = false.")]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "Global deny policies with TargetId '*' and IsAllowed false must fail closed")]
         public async Task SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);

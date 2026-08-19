@@ -393,7 +393,7 @@ namespace McpRouter.Tests
             sids.Should().BeEmpty();
         }
         [Fact]
-        [Requirement("SEC-004", "Data Loss Prevention", RequirementType.Negative, "Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.")]
+        [Requirement("SEC-05", "SEC", RequirementType.Negative, "Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.")]
         public async Task SaveSecretProvider_WhenDecryptionFailed_DoesNotOverwriteCorruptPayload()
         {
             // 1. Save valid config

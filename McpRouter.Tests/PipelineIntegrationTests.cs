@@ -240,7 +240,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [Requirement("UI-BRANDING-01", "UI", RequirementType.Positive, "Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API.")]
+        [Requirement("UI-05", "UI", RequirementType.Positive, "Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API.")]
         public async Task Pipeline_Settings_Branding_ReadWrite()
         {
             var client = CreateAuthenticatedClient();

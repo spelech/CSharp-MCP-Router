@@ -7,7 +7,7 @@ namespace McpRouter.Tests;
 public class McpServerTests
 {
     [Fact]
-    [Requirement("REQ-AUTH-PASSTHROUGH-1", "Authentication", RequirementType.Positive, "McpServer supports AllowPassThroughAuth flag")]
+    [Requirement("AUTH-05", "AUTH", RequirementType.Positive, "McpServer supports AllowPassThroughAuth flag")]
     public void McpServer_Should_Have_AllowPassThroughAuth()
     {
         var server = new McpServer();
