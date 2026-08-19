@@ -1,9 +1,9 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.18.2-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.19.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-544%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-605%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -18,6 +18,7 @@ A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the
 
 ## 🌟 Key Features
 
+* **Admin MCP Server & Control Plane (`/admin`, `/router-admin`)**: In-process virtual MCP server providing 10 consolidated entity management tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`) allowing autonomous AI agents (Claude Desktop, Cursor, Cline, Windsurf) to manage router configuration directly via MCP protocol with hybrid standalone network auth and audit logging.
 * **MCP 2026-07-28 Spec Support**: Spec-compliant header annotation; routing is body/path based (`Mcp-Method` & `Mcp-Name`) via `McpDualSpecMiddleware` with legacy JSON body fallback.
 * **Dynamic Docker Auto-Discovery**: Mounts `/var/run/docker.sock` to automatically discover and register backend MCP containers labeled with `mcp.enabled=true`, `mcp.id`, `mcp.port`, and `mcp.categories` (see [docs/features-guide.md](docs/features-guide.md#method-d-dynamic-docker-label-auto-discovery-mcp-labels)).
 * **Pluggable Identity Providers**: Dual authentication support for **Active Directory** (Kerberos/NTLM Windows SIDs) and **OIDC / Reverse Proxy Headers** (`Remote-User`, `Remote-Groups` headers from Authentik, Authelia, PocketID, Keycloak, etc.).
@@ -120,11 +121,40 @@ For deep technical walkthroughs, setup configuration examples, connection guidel
 
 ## 🤖 Client Agent Integration Guidelines
 
-When using agentic coding assistants (such as Antigravity/AGY) connected to this gateway, the agent should follow these core patterns:
-
+### 1. General Tool Access (Meta-Mode Gateway)
+When using agentic coding assistants connected to the main `/sse` gateway:
 1. **Bootstrap Search (Meta-Mode)**: By default, the gateway hides all underlying tools to prevent context bloat. The agent must first query `search_tools` with a natural language query describing the desired action (e.g., `"restart actual budget container"`).
 2. **Namespaced Execution**: After `search_tools` returns matching namespaced tools (e.g. `docker__restart_container`), the agent must invoke it via `execute_tool(name, arguments)`.
-3. **Semantic Knowledge Retrieval (`notes-rag`)**: AI agents **MUST** query the `notes-rag` service first (using the `search_notes` tool) for system architecture or setup questions before attempting to grep the filesystem. This leverages the local SilverBullet/Obsidian notes database.
+3. **Semantic Knowledge Retrieval (`notes-rag`)**: AI agents **MUST** query the `notes-rag` service first (using the `search_notes` tool) for system architecture or setup questions before attempting to grep the filesystem.
+
+### 2. Autonomous Router Administration (Admin MCP Server)
+Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can directly manage router configuration by connecting to `/admin` or `/router-admin`:
+
+#### Claude Desktop (`claude_desktop_config.json`)
+```json
+{
+  "mcpServers": {
+    "mcp-router-admin": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8026/admin"]
+    }
+  }
+}
+```
+
+#### Cursor (`~/.cursor/mcp.json`) / Windsurf / Cline (`cline_mcp_settings.json`)
+```json
+{
+  "mcpServers": {
+    "mcp-router-admin": {
+      "url": "http://localhost:8026/admin",
+      "headers": {
+        "Authorization": "Bearer mcp-admin-key-here"
+      }
+    }
+  }
+}
+```
 
 ---
 
@@ -134,11 +164,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.19.0`** | 2026-08-18 | feat(admin): implement in-process virtual Admin MCP Server (`/admin`, `/router-admin`), 10 consolidated management tools, and standalone hybrid network auth |
 | **`v4.18.2`** | 2026-08-18 | refactor(reqs): normalize requirement taxonomy IDs across test suites and regenerate living SRS catalog |
 | **`v4.18.1`** | 2026-08-18 | fix(ci): fix frontend test assertions, preserve provider display names, and update test catalog |
 | **`v4.18.0`** | 2026-08-18 | feat(ui): implement dynamic DB-backed dashboard branding customization and CSS variable centralization |
 | **`v4.17.6`** | 2026-08-17 | docs(refactor): refine documentation for conciseness and add pitch deck |
-| **`v4.17.5`** | 2026-08-17 | chore(release): bump version to 4.17.5 and align verification badges |
 
 ---
 
