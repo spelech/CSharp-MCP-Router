@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-19T03:14:56.6645046Z",
-    "totalRequirements": 59,
-    "positiveCount": 45,
-    "guardrailCount": 14,
-    "totalProofs": 138
+    "generatedAt": "2026-08-19T03:19:54.1290315Z",
+    "totalRequirements": 75,
+    "positiveCount": 57,
+    "guardrailCount": 18,
+    "totalProofs": 154
   },
   "requirements": [
     {
@@ -712,6 +712,22 @@
       ]
     },
     {
+      "id": "GUARD-ADMIN-CUSTOM-FILES-VALIDATION",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "manage_custom_files rejects invalid prompt JSON syntax and unsupported file categories.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 790,
+          "testName": "ManageCustomFiles_ValidationGuardrails",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "GUARD-ADMIN-ENDPOINT-UNAUTHORIZED",
       "category": "GUARD",
       "type": "Negative",
@@ -723,6 +739,54 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs",
           "lineNumber": 196,
           "testName": "AdminEndpoint_UnauthorizedCaller_Returns403",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-ADMIN-POLICIES-WILDCARD-DENY",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "manage_policies rejects wildcard deny policies to prevent global lockout.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 524,
+          "testName": "ManagePolicies_WildcardDenyGuardrail",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-ADMIN-PROVIDERS-LDAP-PLAINTEXT",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "manage_providers rejects unencrypted LDAP connections on port 389.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 661,
+          "testName": "ManageProviders_LdapPlaintextGuardrail",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-ADMIN-SERVERS-VALIDATION",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "manage_servers rejects invalid transport types, non-existent servers, and missing required parameters.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 335,
+          "testName": "ManageServers_ValidationGuardrails",
           "details": null
         }
       ]
@@ -890,6 +954,198 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 205,
           "testName": "HandleInitializeAsync_NegotiatesProtocolVersion",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-APPKEYS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "manage_appkeys supports full parity for list, get_limits, create, and revoke actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 381,
+          "testName": "ManageAppKeys_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-CLIENTS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "manage_clients supports full parity for register, list, and delete actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 434,
+          "testName": "ManageClients_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-CUSTOM-FILES",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "manage_custom_files supports full parity for list, get, save, and delete prompt and resource files.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 727,
+          "testName": "ManageCustomFiles_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-GROUP-MAPPINGS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "manage_group_mappings supports full parity for list, save, and delete external-to-internal group mappings.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 541,
+          "testName": "ManageGroupMappings_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-JSONRPC-DISPATCH",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping).",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 884,
+          "testName": "AdminTools_ProcessRequest_JsonRpcProtocol",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-POLICIES",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "manage_policies supports full parity for list, save, and delete access control policies.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 475,
+          "testName": "ManagePolicies_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-PROVIDERS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "manage_providers supports full parity for list, save_secret, test_vault, save_auth, and test_ldap actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 588,
+          "testName": "ManageProviders_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-SERVERS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "manage_servers supports full parity for list, get, create, update, toggle, delete, reconnect, and reconnect_all actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 245,
+          "testName": "ManageServers_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-SETTINGS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "manage_settings supports full parity for get and update global router configurations.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 678,
+          "testName": "ManageSettings_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-SYSTEM",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "manage_system supports full parity for diagnostics, get_logs, clear_logs, and query_audit actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 827,
+          "testName": "ManageSystem_Parity_AllActions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-TEST-TOOL-CALL",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "test_tool_call executes test bench backend tool calls and formats responses.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 857,
+          "testName": "TestToolCall_Execution_Parity",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-PARITY-TOOLS-COVERAGE",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Every UI management flow has a corresponding verified action in the consolidated Admin MCP tools.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
+          "lineNumber": 202,
+          "testName": "AdminTools_ExecuteSuccessfully",
           "details": null
         }
       ]
