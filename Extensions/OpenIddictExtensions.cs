@@ -9,6 +9,7 @@ using OpenIddict.Validation.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using McpRouter.Middleware;
+using McpRouter.Components.Authorization;
 using Microsoft.Extensions.Hosting;
 
 namespace McpRouter.Extensions
@@ -37,40 +38,58 @@ namespace McpRouter.Extensions
 
                 options.AddPolicy("AdminPolicy", policy =>
                 {
-                    policy.RequireAuthenticatedUser()
-                          .RequireAssertion(ctx =>
-                          {
-                              var httpContext = ctx.Resource as Microsoft.AspNetCore.Http.HttpContext;
-                              var cfg = httpContext?.RequestServices?.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
-                              var adminSid = cfg?["Admin:GroupSid"] ?? "S-1-5-32-544";
-                              
-                              var configuredAdminGroups = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                              var singleGroupName = cfg?["Admin:GroupName"];
-                              if (!string.IsNullOrWhiteSpace(singleGroupName))
-                              {
-                                  configuredAdminGroups.Add(singleGroupName.Trim());
-                              }
-                              else
-                              {
-                                  configuredAdminGroups.Add("full_admin");
-                                  configuredAdminGroups.Add("Administrator");
-                                  configuredAdminGroups.Add("Administrators");
-                              }
+                    policy.RequireAssertion(ctx =>
+                    {
+                        var httpContext = ctx.Resource as Microsoft.AspNetCore.Http.HttpContext;
+                        var cfg = httpContext?.RequestServices?.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
 
-                              var adminGroupsSection = cfg?.GetSection("Admin:Groups")?.Get<string[]>();
-                              if (adminGroupsSection != null)
-                              {
-                                  foreach (var g in adminGroupsSection)
-                                  {
-                                      if (!string.IsNullOrWhiteSpace(g)) configuredAdminGroups.Add(g.Trim());
-                                  }
-                              }
+                        // Standalone network authorization (when no external IDP is configured)
+                        if (httpContext != null && SecurityValidationHelper.IsStandaloneAdminNetwork(httpContext.Connection.RemoteIpAddress, cfg))
+                        {
+                            if (!SecurityValidationHelper.HasExternalIdp(cfg, httpContext))
+                            {
+                                return true;
+                            }
+                        }
 
-                              return ctx.User.HasClaim("Sid", adminSid) ||
-                                     ctx.User.IsInRole("Administrator") ||
-                                     ctx.User.Claims.Any(c => c.Type == ClaimTypes.Role && configuredAdminGroups.Contains(c.Value));
-                          })
-                          .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey", "OidcHeader");
+                        if (ctx.User?.Identity?.IsAuthenticated != true)
+                        {
+                            return false;
+                        }
+
+                        if (ctx.User.IsInRole("Administrator") || ctx.User.HasClaim("Scope", "admin"))
+                        {
+                            return true;
+                        }
+
+                        var adminSid = cfg?["Admin:GroupSid"] ?? "S-1-5-32-544";
+                        
+                        var configuredAdminGroups = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                        var singleGroupName = cfg?["Admin:GroupName"];
+                        if (!string.IsNullOrWhiteSpace(singleGroupName))
+                        {
+                            configuredAdminGroups.Add(singleGroupName.Trim());
+                        }
+                        else
+                        {
+                            configuredAdminGroups.Add("full_admin");
+                            configuredAdminGroups.Add("Administrator");
+                            configuredAdminGroups.Add("Administrators");
+                        }
+
+                        var adminGroupsSection = cfg?.GetSection("Admin:Groups")?.Get<string[]>();
+                        if (adminGroupsSection != null)
+                        {
+                            foreach (var g in adminGroupsSection)
+                            {
+                                if (!string.IsNullOrWhiteSpace(g)) configuredAdminGroups.Add(g.Trim());
+                            }
+                        }
+
+                        return ctx.User.HasClaim("Sid", adminSid) ||
+                               ctx.User.Claims.Any(c => c.Type == ClaimTypes.Role && configuredAdminGroups.Contains(c.Value));
+                    })
+                    .AddAuthenticationSchemes(OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme, "AppKey", "OidcHeader");
                 });
             });
 
