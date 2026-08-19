@@ -158,6 +158,24 @@ Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can dir
 
 ---
 
+## 🛡️ Authentication Modes & Zero-Configuration Standalone Access
+
+The gateway adapts seamlessly to both personal / standalone home-lab environments and enterprise deployments:
+
+### 1. Standalone Mode (Zero-Config / Personal / Private Network)
+* **When Active**: Whenever no external identity provider (Active Directory LDAP or OIDC Reverse Proxy) is configured.
+* **Local Loopback (`127.0.0.1`, `::1`)**: By default, connections originating from localhost/loopback are granted local administrative privileges automatically without requiring an SSO provider or password.
+* **Private LAN / Docker Subnets (Central Gateway)**: Configure `Admin:StandaloneAllowedNetworks` in `appsettings.json` or environment variables (e.g. `ADMIN__STANDALONE_ALLOWED_NETWORKS__0="10.0.0.0/8"` or `"0.0.0.0/0"` for open private LANs) to grant admin access to your local network.
+* **External Clients**: Requests originating from outside the allowed subnets require an Admin AppKey (such as the default CLI key `mcp-global-admin-default-cli-key-99` or custom generated keys).
+
+### 2. Enterprise IDP Mode (Active Directory & OIDC Reverse Proxy)
+* **Active Directory (Windows Authentication / LDAP)**: Users whose SID matches `Admin:GroupSid` (default: `S-1-5-32-544` / Local Administrators) or domain admin groups are granted full gateway administration.
+* **OIDC & Reverse Proxy SSO**: Reverse proxies (Authentik, Authelia, PocketID, Keycloak, Traefik, Caddy, Nginx) transmitting `Remote-User` and `Remote-Groups` matching `Admin:GroupName` or `Admin:Groups` (e.g. `full_admin`, `Administrator`) are authorized.
+* **Dynamic Group Mappings**: Map external IdP group names to internal roles via the `GroupMappings` database table or Web Dashboard.
+* **Admin AppKeys**: Autonomous AI agents presenting an AppKey with `admin`, `all`, or `*` scope are granted the `Administrator` role across all endpoints.
+
+---
+
 ## 📜 Release Changelog
 
 For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.md).
