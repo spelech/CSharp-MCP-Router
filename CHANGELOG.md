@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.18.2`** | 2026-08-18 | refactor(reqs): normalize requirement taxonomy IDs across test suites and regenerate living SRS catalog |
 | **`v4.18.1`** | 2026-08-18 | fix(ci): fix frontend test assertions, preserve provider display names, and update test catalog |
 | **`v4.18.0`** | 2026-08-18 | feat(ui): implement dynamic DB-backed dashboard branding customization and CSS variable centralization |
 | **`v4.17.6`** | 2026-08-17 | docs(refactor): refine documentation for conciseness and add pitch deck |

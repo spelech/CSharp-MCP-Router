@@ -1,9 +1,9 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-18T21:21:14.4482342Z",
+    "generatedAt": "2026-08-19T02:06:46.5780846Z",
     "totalRequirements": 29,
-    "positiveCount": 23,
-    "guardrailCount": 6,
+    "positiveCount": 21,
+    "guardrailCount": 8,
     "totalProofs": 108
   },
   "requirements": [
@@ -268,8 +268,8 @@
       ]
     },
     {
-      "id": "REQ-AUTH-PASSTHROUGH-1",
-      "category": "Authentication",
+      "id": "AUTH-05",
+      "category": "AUTH",
       "type": "Positive",
       "description": "McpServer supports AllowPassThroughAuth flag",
       "proofCount": 1,
@@ -284,8 +284,8 @@
       ]
     },
     {
-      "id": "REQ-AUTH-PASSTHROUGH-2",
-      "category": "Authentication",
+      "id": "AUTH-06",
+      "category": "AUTH",
       "type": "Positive",
       "description": "Transports use passThroughToken when AllowPassThroughAuth is true",
       "proofCount": 1,
@@ -295,22 +295,6 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/TransportsAuthShapeTests.cs",
           "lineNumber": 208,
           "testName": "Transports_Use_PassThroughToken_If_Allowed",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "SEC-004",
-      "category": "Data Loss Prevention",
-      "type": "Negative",
-      "description": "Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/ProviderSettingsEncryptionTests.cs",
-          "lineNumber": 395,
-          "testName": "SaveSecretProvider_WhenDecryptionFailed_DoesNotOverwriteCorruptPayload",
           "details": null
         }
       ]
@@ -552,10 +536,10 @@
       ]
     },
     {
-      "id": "REQ-AUTH-BATCH-GUARD",
+      "id": "GUARD-05",
       "category": "GUARD",
-      "type": "Positive",
-      "description": "Must reject batch save if all auth providers are disabled.",
+      "type": "Negative",
+      "description": "Batch save of authentication providers must fail closed if all providers are disabled",
       "proofCount": 1,
       "proofs": [
         {
@@ -568,10 +552,10 @@
       ]
     },
     {
-      "id": "REQ-PERM-GUARD-01",
+      "id": "GUARD-06",
       "category": "GUARD",
-      "type": "Positive",
-      "description": "Must reject saving a policy with TargetId = \u0027*\u0027 and IsAllowed = false.",
+      "type": "Negative",
+      "description": "Global deny policies with TargetId \u0027*\u0027 and IsAllowed false must fail closed",
       "proofCount": 1,
       "proofs": [
         {
@@ -731,6 +715,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
           "lineNumber": 31,
           "testName": "GetSecretAsync_DecryptsDpapiBytes_WhenRegistryValueIsByteArray",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-05",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/ProviderSettingsEncryptionTests.cs",
+          "lineNumber": 395,
+          "testName": "SaveSecretProvider_WhenDecryptionFailed_DoesNotOverwriteCorruptPayload",
           "details": null
         }
       ]
@@ -1009,7 +1009,7 @@
       ]
     },
     {
-      "id": "UI-BRANDING-01",
+      "id": "UI-05",
       "category": "UI",
       "type": "Positive",
       "description": "Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API.",

@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.18.1-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.18.2-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-544%20passing-2ea44f?style=for-the-badge)
@@ -134,11 +134,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.18.2`** | 2026-08-18 | refactor(reqs): normalize requirement taxonomy IDs across test suites and regenerate living SRS catalog |
 | **`v4.18.1`** | 2026-08-18 | fix(ci): fix frontend test assertions, preserve provider display names, and update test catalog |
 | **`v4.18.0`** | 2026-08-18 | feat(ui): implement dynamic DB-backed dashboard branding customization and CSS variable centralization |
 | **`v4.17.6`** | 2026-08-17 | docs(refactor): refine documentation for conciseness and add pitch deck |
 | **`v4.17.5`** | 2026-08-17 | chore(release): bump version to 4.17.5 and align verification badges |
-| **`v4.17.4`** | 2026-08-17 | test(coverage): close frontend unit, Playwright E2E, and live MySQL repository coverage gaps |
 
 ---
 

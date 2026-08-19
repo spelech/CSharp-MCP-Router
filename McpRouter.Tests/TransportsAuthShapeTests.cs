@@ -206,7 +206,7 @@ namespace McpRouter.Tests
         }
 
     [Fact]
-    [Requirement("REQ-AUTH-PASSTHROUGH-2", "Authentication", RequirementType.Positive, "Transports use passThroughToken when AllowPassThroughAuth is true")]
+    [Requirement("AUTH-06", "AUTH", RequirementType.Positive, "Transports use passThroughToken when AllowPassThroughAuth is true")]
     public async Task Transports_Use_PassThroughToken_If_Allowed()
     {
         var server = new McpServer { Id = "test", AllowPassThroughAuth = true };

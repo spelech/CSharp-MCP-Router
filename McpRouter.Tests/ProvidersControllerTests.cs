@@ -322,7 +322,7 @@ namespace McpRouter.Tests
         }
     
         [Fact]
-        [Requirement("REQ-AUTH-BATCH-GUARD", "GUARD", RequirementType.Positive, "Must reject batch save if all auth providers are disabled.")]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "Batch save of authentication providers must fail closed if all providers are disabled")]
         public async Task SaveAuthProvidersBatch_ReturnsBadRequest_WhenAllProvidersDisabled()
         {
             var mockAudit = new Mock<IAuditLogger>();
