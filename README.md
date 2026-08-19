@@ -1,9 +1,9 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.19.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.19.1-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-605%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-609%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -19,6 +19,7 @@ A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the
 ## 🌟 Key Features
 
 * **Admin MCP Server & Control Plane (`/admin`, `/router-admin`)**: In-process virtual MCP server providing 10 consolidated entity management tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`) allowing autonomous AI agents (Claude Desktop, Cursor, Cline, Windsurf) to manage router configuration directly via MCP protocol with hybrid standalone network auth and audit logging.
+* **Universal Setup Skill (`mcp-router-setup`)**: Self-contained [AgentSkills.io](https://agentskills.io)-compliant skill enabling any AI assistant to bootstrap and configure the router across Docker Compose and Windows IIS with zero source code cloning.
 * **MCP 2026-07-28 Spec Support**: Spec-compliant header annotation; routing is body/path based (`Mcp-Method` & `Mcp-Name`) via `McpDualSpecMiddleware` with legacy JSON body fallback.
 * **Dynamic Docker Auto-Discovery**: Mounts `/var/run/docker.sock` to automatically discover and register backend MCP containers labeled with `mcp.enabled=true`, `mcp.id`, `mcp.port`, and `mcp.categories` (see [docs/features-guide.md](docs/features-guide.md#method-d-dynamic-docker-label-auto-discovery-mcp-labels)).
 * **Pluggable Identity Providers**: Dual authentication support for **Active Directory** (Kerberos/NTLM Windows SIDs) and **OIDC / Reverse Proxy Headers** (`Remote-User`, `Remote-Groups` headers from Authentik, Authelia, PocketID, Keycloak, etc.).
@@ -156,6 +157,21 @@ Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can dir
 }
 ```
 
+### 3. Universal Agent Setup Skill (Zero-Clone Bootstrapping)
+Equip any AI assistant (Antigravity, Claude Code, Cursor, Cline, Windsurf, Copilot CLI) to install, configure, and bootstrap the router for Docker Compose or Windows Server IIS without cloning or compiling source code:
+
+```bash
+mkdir -p .agents/skills/mcp-router-setup && curl -fsSL https://raw.githubusercontent.com/spelech/csharp-mcp-router/main/skills/mcp-router-setup/SKILL.md -o .agents/skills/mcp-router-setup/SKILL.md
+```
+
+Once installed, simply prompt your agent: *"Set up MCP router for my environment"* or *"Deploy MCP router on Docker/IIS"*. The skill automatically:
+- Probes host environment capabilities (OS, Docker daemon socket, HashiCorp Vault, Active Directory domain).
+- Guides deployment target selection (**Docker Compose** or **Windows IIS**).
+- Clarifies trade-offs between **Environment Variables** (`.env`) vs. **Web UI & Database** (dynamic hot-reloading).
+- Configures network topology (**Standalone / Home-Lab** with SQLite vs. **Enterprise** with AD/OIDC + MSSQL/MySQL/Vault).
+- Generates cryptographically secure 256-bit `ROUTER_MASTER_KEY` values and production configuration files (`docker-compose.yml`, `web.config`, `.env`, `appsettings.Production.json`).
+- Verifies gateway health (`/health`, `/sse`) and outputs client configuration snippets.
+
 ---
 
 ## 🛡️ Authentication Modes & Zero-Configuration Standalone Access
@@ -182,11 +198,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.19.1`** | 2026-08-18 | feat(skills): introduce universal `mcp-router-setup` agentic skill, bundled scaffold templates for Docker & IIS, and zero-clone setup workflow |
 | **`v4.19.0`** | 2026-08-18 | feat(admin): implement in-process virtual Admin MCP Server (`/admin`, `/router-admin`), 10 consolidated management tools, and standalone hybrid network auth |
 | **`v4.18.2`** | 2026-08-18 | refactor(reqs): normalize requirement taxonomy IDs across test suites and regenerate living SRS catalog |
 | **`v4.18.1`** | 2026-08-18 | fix(ci): fix frontend test assertions, preserve provider display names, and update test catalog |
 | **`v4.18.0`** | 2026-08-18 | feat(ui): implement dynamic DB-backed dashboard branding customization and CSS variable centralization |
-| **`v4.17.6`** | 2026-08-17 | docs(refactor): refine documentation for conciseness and add pitch deck |
 
 ---
 

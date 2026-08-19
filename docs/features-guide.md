@@ -322,3 +322,40 @@ For requirements traceability, feature proofs, guardrails, and verified invarian
 * [**Software Requirements Specification (SRS) & Test Verification Catalog**](software-requirements-and-test-catalog.md)
 * [**Test Catalog & Annotation Developer Guide**](test-catalog-guide.md)
 
+---
+
+## ⚡ 10. Universal Setup Skill (`mcp-router-setup`)
+
+The `mcp-router-setup` skill adheres to the [AgentSkills.io](https://agentskills.io) open standard, enabling any AI coding or operations assistant (Antigravity, Claude Code, Cursor, Cline, Windsurf, Copilot CLI) to guide administrators through installing, configuring, and bootstrapping `CSharp-MCP-Router` in any workspace without cloning or compiling the repository source code.
+
+### Zero-Clone Installation
+To install the skill into any project or workspace directory:
+
+```bash
+mkdir -p .agents/skills/mcp-router-setup && curl -fsSL https://raw.githubusercontent.com/spelech/csharp-mcp-router/main/skills/mcp-router-setup/SKILL.md -o .agents/skills/mcp-router-setup/SKILL.md
+```
+
+### Guided 6-Phase Deployment Workflow
+When invoked (e.g. *"Set up MCP router for my environment"*), the skill executes a structured 6-phase workflow:
+
+1. **Automated Environment Probing**: Probes the host OS, Docker daemon socket (`/var/run/docker.sock`), HashiCorp Vault (`VAULT_ADDR`), and Active Directory domain context (`USERDNSDOMAIN`) before asking the user for configuration details.
+2. **Hosting Platform Selection**: Guides deployment to **Docker Container / Docker Compose** (Linux, macOS, WSL2, Home-Lab) or **Windows Server IIS / Windows Service** (with in-process ANCM and DPAPI).
+3. **Configuration Paradigm**: Explains and helps choose between **Environment Variables** (immutable, 12-factor `.env`) and **Web UI & Database** (dynamic zero-downtime hot reloading & Admin MCP server).
+4. **Identity & Network Topology**:
+   - *Standalone / Home-Lab Mode*: Configures SQLite database (`data/mcp_router.db`) and loopback/LAN CIDR subnet authorization (`Admin:StandaloneAllowedNetworks`).
+   - *Enterprise Mode*: Configures Active Directory LDAP or OIDC forward-auth reverse proxies (Authentik, PocketID, Authelia, Keycloak) with MSSQL, MySQL, or Vault KV v2.
+5. **Artifact Generation & Secret Scaffolding**:
+   - Generates cryptographically secure 256-bit `ROUTER_MASTER_KEY` (`openssl rand -base64 32` or PowerShell crypto RNG).
+   - Generates production `docker-compose.yml`, `web.config` with unbuffered SSE (`responseBufferLimit="0"`), `.env`, and `appsettings.Production.json`.
+6. **Health Verification & Client Integration**:
+   - Verifies gateway reachability (`GET /health` and `GET /sse`).
+   - Outputs ready-to-copy client JSON configurations for Claude Desktop, Cursor, Cline, and Windsurf for both the Meta-Mode Gateway (`/sse`) and Admin MCP Server (`/admin`).
+
+### Bundled Scaffold Templates
+The skill includes pre-tested scaffold templates under `skills/mcp-router-setup/templates/`:
+- `docker-compose.yml`: Production container deployment with SQLite volume mount and Docker socket pass-through.
+- `web.config`: IIS ASP.NET Core In-Process module configuration with unbuffered SSE streaming.
+- `.env.example`: Standardized environment variable template with master key, provider, and network settings.
+- `appsettings.Production.json.example`: Production ASP.NET Core configuration snippet.
+
+
