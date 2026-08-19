@@ -615,5 +615,47 @@ namespace McpRouter.Tests
             using var docInvalid = JsonDocument.Parse(jsonInvalid);
             Assert.True(docInvalid.RootElement.GetProperty("isError").GetBoolean());
         }
+
+        [Fact]
+        [Requirement("SEC-ADMIN-AUDIT-REDACTION", "SEC", RequirementType.Positive, "AdminMcpServer redacts sensitive secrets from argument payloads before recording audit logs.")]
+        public async Task CallToolAsync_AuditLog_RedactsSensitivePayloadData()
+        {
+            var saveSecretArgs = JsonDocument.Parse(@"{
+                ""action"": ""save_secret"",
+                ""providerName"": ""vault"",
+                ""displayName"": ""HashiCorp Vault"",
+                ""configJson"": ""{\""Address\"":\""https://vault.local:8200\"",\""Token\"":\""super-secret-token-xyz\""}"",
+                ""isEnabled"": true
+            }").RootElement;
+
+            await _adminMcpServer.CallToolAsync("manage_providers", saveSecretArgs, "admin_auditor");
+
+            _mockAuditLogger.Verify(a => a.LogAdminActionAsync(
+                "admin_auditor",
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.Is<string>(details => !details.Contains("super-secret-token-xyz") && (details.Contains("********") || !details.Contains("Token"))),
+                true,
+                null
+            ), Times.AtLeastOnce);
+        }
+
+        [Fact]
+        [Requirement("MCP-ADMIN-TOOL-TEST-CALL-ERROR", "GUARD", RequirementType.Negative, "AdminMcpServer test_tool_call propagates downstream backend errors with visibility.")]
+        public async Task CallToolAsync_TestToolCall_MissingServer_ReturnsError()
+        {
+            var testArgs = JsonDocument.Parse(@"{
+                ""serverId"": ""non-existent-server"",
+                ""toolName"": ""some_tool""
+            }").RootElement;
+
+            var res = await _adminMcpServer.CallToolAsync("test_tool_call", testArgs, "admin_user");
+            var json = JsonSerializer.Serialize(res);
+            using var doc = JsonDocument.Parse(json);
+
+            Assert.True(doc.RootElement.GetProperty("isError").GetBoolean());
+            var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString()!;
+            Assert.Contains("non-existent-server", text);
+        }
     }
 }

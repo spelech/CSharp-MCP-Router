@@ -74,6 +74,22 @@ namespace McpRouter.Components.Providers
                             }
                         }
                     }
+                    else if (propVal is JsonValue strProp && strProp.TryGetValue<string>(out var rawStr) && !string.IsNullOrWhiteSpace(rawStr) && (rawStr.TrimStart().StartsWith("{") || rawStr.TrimStart().StartsWith("[")))
+                    {
+                        try
+                        {
+                            var nested = JsonNode.Parse(rawStr);
+                            if (nested != null)
+                            {
+                                RedactJsonNode(nested);
+                                obj[propName] = nested.ToJsonString();
+                            }
+                        }
+                        catch
+                        {
+                            // Not valid JSON string, leave unchanged
+                        }
+                    }
                     else
                     {
                         RedactJsonNode(propVal);

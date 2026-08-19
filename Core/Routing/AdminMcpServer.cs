@@ -146,7 +146,8 @@ namespace McpRouter.Core.Routing
             {
                 if (arguments.ValueKind == JsonValueKind.Object)
                 {
-                    argumentPayload = arguments.GetRawText();
+                    var rawPayload = arguments.GetRawText();
+                    argumentPayload = PiiSanitizer.SanitizePayload(ProviderConfigSecurityHelper.RedactConfigJson(rawPayload) ?? rawPayload);
                     if (arguments.TryGetProperty("action", out var actionProp))
                     {
                         actionName = actionProp.GetString() ?? "unknown";
@@ -1276,6 +1277,13 @@ namespace McpRouter.Core.Routing
 
             var targetBody = JsonSerializer.Serialize(targetPayload);
             var result = await conn.SendRequestAsync("tools/call", targetBody);
+
+            if (result.Error != null)
+            {
+                throw new InvalidOperationException(!string.IsNullOrWhiteSpace(result.Error.Message)
+                    ? result.Error.Message
+                    : $"Backend error code {result.Error.Code}");
+            }
 
             return result.Result.HasValue ? result.Result.Value : (object)new { };
         }
