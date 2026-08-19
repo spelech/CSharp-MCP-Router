@@ -126,7 +126,7 @@ Select the identity and network access tier based on deployment scope:
 ### Option A: Personal / Home-Lab (Standalone Mode)
 - **Database**: SQLite (`./data/mcp_router.db`).
 - **Network Restriction**: Restrict admin UI and admin tools to local loopback or local LAN CIDR subnets using `Admin:StandaloneAllowedNetworks`.
-- **Authentication**: Master API Key (`X-Admin-Key` header) for agent access, local IP trust for Web UI.
+- **Authentication**: Admin AppKey (`Authorization: Bearer mcp-...` or `X-App-Key` header) for external agent access, local IP network trust for Web UI.
 
 ### Option B: Enterprise Mode
 - **Database**: Microsoft SQL Server (`mssql`), MySQL (`mysql`), or SQLite (`sqlite`).
@@ -327,9 +327,9 @@ To allow an AI agent to manage, add, edit, or delete backend MCP servers dynamic
 {
   "mcpServers": {
     "mcp-router-admin": {
-      "url": "http://localhost:8080/admin",
+      "url": "http://localhost:8080/admin/sse",
       "headers": {
-        "X-Admin-Key": "YOUR_ADMIN_APP_KEY"
+        "Authorization": "Bearer mcp-global-admin-default-cli-key-99"
       }
     }
   }
