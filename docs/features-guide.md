@@ -94,10 +94,11 @@ Connect clients via these SSE endpoints:
 | `/sse` or `/sse?meta=true` | **Meta-Mode (Default)** | Hides backend tools during bootstrap; exposes only `search_tools` and `execute_tool`. Conserves context window. |
 | `/sse?meta=false` | **Full-List Mode** | Exposes all underlying tools from all connected servers. |
 | `/{targetServerId}` | **Target-Specific Proxying** | Proxies connections directly to the specified target server (e.g., `/docker` or `/ha`). |
+| `/admin` or `/router-admin` | **Admin MCP Server** | Virtual in-process control plane providing 10 consolidated entity tools for autonomous agents to manage router state. |
 
 > For transport protocol comparisons (`sse`, `http`, `stdio`), concurrency, security policies, and error recovery, see [**Transport Capability & Configuration Guide**](transports.md).
 
-### Client Setup Examples
+### Gateway Client Setup Examples (`/sse`)
 
 #### Claude Desktop Configuration (`config.json`)
 ```json
@@ -127,7 +128,70 @@ Connect clients via these SSE endpoints:
 
 ---
 
-## 🔍 3. Semantic Search
+## 🤖 3. Admin MCP Server & Autonomous Agent Administration
+
+The **Admin MCP Server** (`/admin`, `/admin/sse`, `/router-admin`) is an in-process virtual MCP server exposing 10 consolidated tools enabling autonomous AI agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) to configure and administer the entire gateway programmatically.
+
+### Consolidated Admin Tools Reference
+
+| Tool Name | Actions | Description | Key Parameters |
+| :--- | :--- | :--- | :--- |
+| `manage_servers` | `list`, `get`, `create`, `update`, `delete`, `toggle`, `reconnect`, `reconnect_all` | Manage backend MCP server registrations, URLs, transports, categories, and secret providers. | `action`, `id`, `name`, `url`, `type`, `category`, `enabled`, `secret_provider`, `secret_key` |
+| `manage_appkeys` | `list`, `get_limits`, `create`, `revoke` | Issue and revoke API AppKeys, enforce key quotas, expiration, and configure capability scopes. | `action`, `name`, `scopes`, `expires_in_days`, `prefix` |
+| `manage_clients` | `list`, `register`, `delete` | Manage dynamic OAuth 2.0 client registrations. | `action`, `client_id`, `client_name`, `redirect_uris`, `grant_types`, `scopes` |
+| `manage_policies` | `list`, `save`, `delete` | Manage role-based access control (RBAC) authorization policies across servers and categories. | `action`, `policy_id`, `role_name`, `server_id`, `category`, `allowed`, `priority` |
+| `manage_group_mappings` | `list`, `save`, `delete` | Map external Active Directory SIDs or OIDC SSO groups to internal security roles. | `action`, `id`, `source_type`, `external_identifier`, `role_name`, `priority` |
+| `manage_providers` | `list`, `save_secret`, `test_vault`, `save_auth`, `test_ldap` | Configure and verify HashiCorp Vault, Windows Registry DPAPI, Env, Active Directory LDAP, and OIDC providers. | `action`, `provider_type`, `vault_address`, `vault_token`, `ldap_server`, `bind_dn` |
+| `manage_settings` | `get`, `update` | Update dashboard UI branding (title, icon, accents) and semantic vector embedding providers/models. | `action`, `dashboard_title`, `dashboard_icon`, `embedding_provider`, `embedding_model` |
+| `manage_custom_files` | `list`, `get`, `save`, `delete` | Manage declarative prompt templates and resource files in persistent storage (`/app/data/`). | `action`, `file_type` (`prompts` or `resources`), `filename`, `content` |
+| `manage_system` | `diagnostics`, `get_logs`, `clear_logs`, `query_audit` | Retrieve server diagnostics, inspect/clear in-memory gateway logs, and query persistent audit log entries. | `action`, `limit`, `level`, `category`, `source_user`, `start_date`, `end_date` |
+| `test_tool_call` | `execute` | Execute and test capabilities against downstream MCP servers via the testbench engine. | `action`, `server_id`, `tool_name`, `arguments` |
+
+### Admin MCP Server Client Setup Examples
+
+#### Claude Desktop (`claude_desktop_config.json`)
+```json
+{
+  "mcpServers": {
+    "mcp-router-admin": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8026/admin"]
+    }
+  }
+}
+```
+
+#### Cursor (`~/.cursor/mcp.json`) / Windsurf / Cline (`cline_mcp_settings.json`)
+```json
+{
+  "mcpServers": {
+    "mcp-router-admin": {
+      "url": "http://localhost:8026/admin",
+      "headers": {
+        "Authorization": "Bearer mcp-admin-key-here"
+      }
+    }
+  }
+}
+```
+
+#### Antigravity CLI (`.gemini/settings.json`)
+```json
+{
+  "mcpServers": {
+    "mcp-router-admin": {
+      "url": "http://localhost:8026/admin",
+      "type": "sse",
+      "trust": true,
+      "serverUrl": "http://localhost:8026/admin"
+    }
+  }
+}
+```
+
+---
+
+## 🔍 4. Semantic Search
 
 In **Meta-Mode**, clients must semantically search for tools before execution.
 
@@ -145,7 +209,7 @@ Configure via the Settings panel:
 
 ---
 
-## 🔐 4. Authentication, Group Mapping & Unified MCP Capability Authorization
+## 🔐 5. Authentication, Group Mapping & Unified MCP Capability Authorization
 
 The MCP Router implements a **Unified Authorization Pipeline** across MCP capabilities:
 - **Tools**: `tools/list`, `tools/call`
@@ -169,6 +233,31 @@ External groups map to internal groups via the `GroupMappings` table (Settings -
 1. **Create Mapping**: Map an AD SID or OIDC group to an internal security group (`admin`, `operator`, `readonly`).
 2. **Evaluate Access**: Capability invocation triggers access evaluation against the user's mapped groups.
 
+### Standalone Network & Hybrid Authorization (`AdminPolicy`)
+The router supports a hybrid administrative security model:
+1. **Enterprise Mode (with Active Directory / OIDC)**:
+   - Evaluates caller groups against `Admin:GroupSid` (e.g. `S-1-5-32-544`), `Admin:Groups` (e.g. `["full_admin", "Administrator"]`), or dynamic `GroupMappings`.
+   - Admin AppKeys with `all` or `admin` scopes owned by an administrator are authorized as `Administrator`.
+2. **Standalone Mode (No External IDP Configured)**:
+   - When no external IDP is active, administrative endpoints (`/admin`, `/api/servers`, etc.) permit requests originating from configured networks (`Admin:StandaloneAllowedNetworks`).
+   - Default allowed networks: Loopback (`127.0.0.1`, `::1`).
+   - Configurable in `appsettings.json` or environment variables for LAN subnets (e.g., `10.0.0.0/8`, `192.168.1.0/24`) or `0.0.0.0/0` for centralized self-hosted setups:
+     ```json
+     {
+       "Admin": {
+         "StandaloneAllowedNetworks": [
+           "127.0.0.1",
+           "::1",
+           "192.168.1.0/24"
+         ]
+       }
+     }
+     ```
+     Or environment variables:
+     `ADMIN__STANDALONE_ALLOWED_NETWORKS__0="127.0.0.1"`
+     `ADMIN__STANDALONE_ALLOWED_NETWORKS__1="192.168.1.0/24"`
+   - Callers from non-whitelisted remote networks must present an AppKey with administrative credentials.
+
 ### AppKey Credentials & Category-Scoped Authorization
 The router issues fine-grained AppKeys and Client credentials:
 - **Scope Granularity**:
@@ -189,7 +278,7 @@ For production, configure allowed origins via the `CORS_ALLOWED_ORIGINS` (or `Al
 
 ---
 
-## 🔑 5. Pluggable Secret Retrievers
+## 🔑 6. Pluggable Secret Retrievers
 
 The router dynamically fetches downstream API keys and passwords via pluggable retrievers to prevent plaintext storage in the database.
 
@@ -208,7 +297,7 @@ The `CompositeSecretRetriever` resolves secrets from:
 
 ---
 
-## 🧪 6. Developer Test Bench & Diagnostics
+## 🧪 7. Developer Test Bench & Diagnostics
 
 The Web Dashboard includes a developer environment to debug and verify setups:
 
@@ -221,13 +310,13 @@ The Web Dashboard includes a developer environment to debug and verify setups:
 
 ---
 
-## 🗄️ 7. Database Engine Support & Deployment
+## 🗄️ 8. Database Engine Support & Deployment
 
 For SQLite, MS SQL Server, and MySQL dialect specifications, the 12-table [**Entity-Relationship Diagram (ERD)**](database-providers.md#unified-database-entity-relationship-diagram-erd), stored procedure catalogs, AES-256-GCM envelope encryption, and Docker Compose configurations, see the [**Database Provider Support & Deployment Matrix**](database-providers.md).
 
 ---
 
-## 📋 8. Software Requirements Specification & Automated Test Catalog
+## 📋 9. Software Requirements Specification & Automated Test Catalog
 
 For requirements traceability, feature proofs, guardrails, and verified invariants across test suites, reference:
 * [**Software Requirements Specification (SRS) & Test Verification Catalog**](software-requirements-and-test-catalog.md)

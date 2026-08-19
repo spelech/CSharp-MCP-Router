@@ -136,7 +136,47 @@ sequenceDiagram
 
 ---
 
-## 🔒 4-Stage Authorization Pipeline
+### 3. In-Process Virtual Admin MCP Server (`/admin`, `/router-admin`)
+
+For autonomous AI agents and IDE extensions (Claude Desktop, Cursor, Cline, Windsurf) administering the router programmatically, the gateway hosts an in-process virtual MCP server (`AdminMcpServer`):
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Agent as Autonomous Agent / IDE
+    participant Router as MCP Router (/admin)
+    participant AdminServer as AdminMcpServer (In-Process)
+    participant Repos as Dapper Repositories
+    participant Audit as AuditLogger
+
+    Agent->>Router: GET /admin (SSE Handshake)
+    Router->>Router: Validate AdminPolicy (IDP / Standalone Network / Admin AppKey)
+    Router-->>Agent: 200 OK (text/event-stream)
+    Agent->>Router: POST /admin/message (tools/list)
+    Router->>AdminServer: Process tools/list
+    AdminServer-->>Agent: 10 Consolidated Entity Management Tools
+    Agent->>Router: POST /admin/message (tools/call: manage_servers)
+    Router->>AdminServer: Execute action (e.g. create server)
+    AdminServer->>Repos: Persist configuration
+    AdminServer->>Audit: Log admin tool execution to AuditLogs
+    AdminServer-->>Agent: Return tool execution result JSON
+```
+
+#### Consolidated Entity Tools (10 Core Tools)
+1. `manage_servers`: Manage backend MCP servers (CRUD, toggle, reconnect).
+2. `manage_appkeys`: Manage API keys, key limits, expiration, and scopes.
+3. `manage_clients`: Manage OAuth 2.0 dynamic clients.
+4. `manage_policies`: Manage RBAC access policies and server/category assignments.
+5. `manage_group_mappings`: Map external AD SIDs / OIDC groups to internal roles.
+6. `manage_providers`: Manage secret retrievers (Vault, WinReg, Env) and auth providers (AD, OIDC).
+7. `manage_settings`: Configure UI branding, dashboard title, and semantic embedding providers.
+8. `manage_custom_files`: Manage prompt/resource configuration files in persistent storage.
+9. `manage_system`: Inspect diagnostics, memory logs, clear logs, and query audit trails.
+10. `test_tool_call`: Test execution of downstream backend tools via testbench engine.
+
+---
+
+## 🔒 4-Stage Authorization & Hybrid Standalone Pipeline
 
 Every request entering the router passes through four concentric security boundaries:
 
@@ -207,4 +247,4 @@ For comprehensive guides covering each individual subsystem in depth, refer to t
 
 ---
 
-*Last Updated: Release `v4.13.0`*
+*Last Updated: Release `v4.19.0`*
