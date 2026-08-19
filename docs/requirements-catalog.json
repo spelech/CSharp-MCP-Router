@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-19T03:25:28.7400575Z",
-    "totalRequirements": 75,
-    "positiveCount": 57,
+    "generatedAt": "2026-08-19T03:57:01.5628707Z",
+    "totalRequirements": 79,
+    "positiveCount": 61,
     "guardrailCount": 18,
-    "totalProofs": 154
+    "totalProofs": 158
   },
   "requirements": [
     {
@@ -444,6 +444,70 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/MySqlLiveIntegrationTests.cs",
           "lineNumber": 36,
           "testName": "MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "DOC-SETUP-SKILL-FRONTMATTER",
+      "category": "DOC",
+      "type": "Positive",
+      "description": "mcp-router-setup skill frontmatter is valid YAML, specifies name, description starting with \u0027Use when...\u0027, and length is under 1024 characters",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs",
+          "lineNumber": 22,
+          "testName": "Skill_Frontmatter_IsValidAndWithinCharacterLimit",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "DOC-SETUP-SKILL-MIRROR",
+      "category": "DOC",
+      "type": "Positive",
+      "description": "The mcp-router-setup skill and templates are mirrored 1:1 in .agents/skills/mcp-router-setup/",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs",
+          "lineNumber": 156,
+          "testName": "Skill_MirroredInAgentsDirectory",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "DOC-SETUP-SKILL-TEMPLATES",
+      "category": "DOC",
+      "type": "Positive",
+      "description": "All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/mcp-router",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs",
+          "lineNumber": 102,
+          "testName": "Templates_AreValidAndContainRequiredDirectives",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "DOC-SETUP-SKILL-WORKFLOW",
+      "category": "DOC",
+      "type": "Positive",
+      "description": "mcp-router-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs",
+          "lineNumber": 48,
+          "testName": "Skill_ContainsAllRequiredPhasesAndComparisons",
           "details": null
         }
       ]
