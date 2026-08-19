@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Dapper;
 using McpRouter.Components.Authorization;
 using McpRouter.Components.Servers;
+using McpRouter.Core.Protocol;
 using McpRouter.Core.Routing;
 using McpRouter.Infrastructure.Identity;
 using McpRouter.Infrastructure.Logging;
@@ -421,6 +422,13 @@ namespace McpRouter.Components.Capabilities
             // Minimal API route for handling GET (SSE initialization) and POST (JSON-RPC requests)
             app.MapMethods("/{targetServerId:regex(^[a-zA-Z0-9_-]+$)}", new[] { "GET", "POST", "HEAD" }, async (HttpContext httpContext, [FromServices] SessionManager sessionManager, ILogger<Program> logger, string targetServerId) =>
             {
+                // Target Routing for router-admin and admin virtual server
+                if (string.Equals(targetServerId, "router-admin", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(targetServerId, "admin", StringComparison.OrdinalIgnoreCase))
+                {
+                    await HandleTargetAdminAsync(httpContext, targetServerId);
+                    return;
+                }
                 // First check AppKey authorization if authenticated via AppKey
                 if (httpContext.Items.TryGetValue("AppKeyUsed", out var appKeyUsedObj) == true && appKeyUsedObj is bool appKeyUsed && appKeyUsed)
                 {
@@ -1064,6 +1072,160 @@ namespace McpRouter.Components.Capabilities
                 await handleMessage(httpContext, sessionId, sessionManager, logger)).RequireAuthorization();
 
             return app;
+        }
+
+        private static async Task HandleTargetAdminAsync(HttpContext httpContext, string targetServerId)
+        {
+            var compositeProvider = httpContext.RequestServices.GetRequiredService<CompositeIdentityProvider>();
+            var identity = await compositeProvider.ResolveIdentityAsync(httpContext);
+            var config = httpContext.RequestServices.GetService<IConfiguration>();
+
+            if (!SecurityValidationHelper.IsAdmin(identity, config, httpContext))
+            {
+                httpContext.Response.StatusCode = 403;
+                var audit = httpContext.RequestServices.GetService<IAuditLogger>();
+                if (audit != null)
+                {
+                    await audit.LogInvocationAsync(
+                        Guid.NewGuid().ToString("N"),
+                        identity.Username,
+                        identity.Sid ?? "",
+                        targetServerId,
+                        "server/connect",
+                        httpContext.Request.Method,
+                        0,
+                        403,
+                        errorMessage: "Access denied to admin server"
+                    );
+                }
+                await httpContext.Response.WriteAsJsonAsync(new { error = $"Access denied to admin server: {targetServerId}" });
+                return;
+            }
+
+            var adminMcpServer = httpContext.RequestServices.GetRequiredService<AdminMcpServer>();
+            var callerUsername = identity.Username ?? "admin";
+
+            if (httpContext.Request.Method == "POST")
+            {
+                httpContext.Request.EnableBuffering();
+                using var reader = new StreamReader(httpContext.Request.Body, leaveOpen: true);
+                var requestBody = await reader.ReadToEndAsync();
+                httpContext.Request.Body.Position = 0;
+
+                bool isSseAccept = httpContext.Request.Headers.Accept.ToString().Contains("text/event-stream");
+                string method = string.Empty;
+                JsonElement? id = null;
+
+                if (!string.IsNullOrWhiteSpace(requestBody))
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(requestBody);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("method", out var methodProp))
+                        {
+                            method = methodProp.GetString() ?? string.Empty;
+                        }
+                        if (root.TryGetProperty("id", out var idProp))
+                        {
+                            id = idProp.Clone();
+                        }
+                    }
+                    catch { }
+                }
+
+                bool isInitializeOrDiscover = method == "initialize" || method == "server/discover";
+
+                if (!isSseAccept && !string.IsNullOrEmpty(method) && !isInitializeOrDiscover)
+                {
+                    var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
+                        ?? new JsonRpcRequest
+                        {
+                            Method = method,
+                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null
+                        };
+                    var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
+                    httpContext.Response.Headers.ContentType = "application/json";
+                    await httpContext.Response.WriteAsJsonAsync(rpcResponse);
+                    return;
+                }
+
+                httpContext.Response.Headers.ContentType = "text/event-stream";
+                httpContext.Response.Headers.CacheControl = "no-cache";
+                httpContext.Response.Headers.Connection = "keep-alive";
+
+                var sessionId = Guid.NewGuid().ToString("N");
+                var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
+                if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+                var host = httpContext.Request.Host.Value;
+                var absoluteUrl = $"{scheme}://{host}/admin/message?sessionId={sessionId}";
+                await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
+                await httpContext.Response.Body.FlushAsync();
+
+                var sseSession = new AdminSseSession(sessionId, httpContext.Response, callerUsername);
+                AdminEndpoints.RegisterSession(sseSession);
+
+                if (isInitializeOrDiscover)
+                {
+                    var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
+                        ?? new JsonRpcRequest
+                        {
+                            Method = method,
+                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null
+                        };
+                    var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
+                    await sseSession.WriteMessageAsync(rpcResponse);
+                }
+
+                try
+                {
+                    while (!httpContext.RequestAborted.IsCancellationRequested)
+                    {
+                        await Task.Delay(15000, httpContext.RequestAborted);
+                        await httpContext.Response.WriteAsync(":ping\n\n");
+                        await httpContext.Response.Body.FlushAsync();
+                    }
+                }
+                catch (OperationCanceledException) { }
+                finally
+                {
+                    AdminEndpoints.UnregisterSession(sessionId);
+                }
+            }
+            else
+            {
+                httpContext.Response.Headers.ContentType = "text/event-stream";
+                httpContext.Response.Headers.CacheControl = "no-cache";
+                httpContext.Response.Headers.Connection = "keep-alive";
+
+                if (httpContext.Request.Method == "HEAD") return;
+
+                var sessionId = Guid.NewGuid().ToString("N");
+                var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
+                if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+                var host = httpContext.Request.Host.Value;
+                var absoluteUrl = $"{scheme}://{host}/admin/message?sessionId={sessionId}";
+                await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
+                await httpContext.Response.Body.FlushAsync();
+
+                var sseSession = new AdminSseSession(sessionId, httpContext.Response, callerUsername);
+                AdminEndpoints.RegisterSession(sseSession);
+
+                try
+                {
+                    while (!httpContext.RequestAborted.IsCancellationRequested)
+                    {
+                        await Task.Delay(15000, httpContext.RequestAborted);
+                        await httpContext.Response.WriteAsync(":ping\n\n");
+                        await httpContext.Response.Body.FlushAsync();
+                    }
+                }
+                catch (OperationCanceledException) { }
+                finally
+                {
+                    AdminEndpoints.UnregisterSession(sessionId);
+                }
+            }
         }
     }
 }

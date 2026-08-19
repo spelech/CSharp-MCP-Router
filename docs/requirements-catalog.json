@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-19T02:06:46.5780846Z",
-    "totalRequirements": 29,
-    "positiveCount": 21,
-    "guardrailCount": 8,
-    "totalProofs": 108
+    "generatedAt": "2026-08-19T03:14:56.6645046Z",
+    "totalRequirements": 59,
+    "positiveCount": 45,
+    "guardrailCount": 14,
+    "totalProofs": 138
   },
   "requirements": [
     {
@@ -300,6 +300,102 @@
       ]
     },
     {
+      "id": "AUTH-APPKEY-ADMIN-SCOPE-ALLOW",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "AppKeys with admin scope grant Administrator role and pass AdminPolicy.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 87,
+          "testName": "AppKey_WithAdminScope_GrantsAdminAccess",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-APPKEY-ITEMS-SCOPE-ALLOW",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "SecurityValidationHelper recognizes admin scopes in HttpContext.Items.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 263,
+          "testName": "IsAdmin_AppKeyScopes_InHttpContextItems_ReturnsTrue",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-APPKEY-WILDCARD-SCOPE-ALLOW",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "AppKeys with wildcard scope \u0027*\u0027 grant Administrator role and pass AdminPolicy.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 148,
+          "testName": "AppKey_WithWildcardScope_GrantsAdminAccess",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "AdminPolicy succeeds in standalone mode for unauthenticated loopback requests.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 184,
+          "testName": "AdminPolicy_StandaloneMode_LoopbackIp_PassesAdminPolicy",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-STANDALONE-CUSTOM-CIDR-ALLOW",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 43,
+          "testName": "IsAdmin_StandaloneMode_CustomCidr_ReturnsTrue",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-STANDALONE-LOOPBACK-ALLOW",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Standalone mode without external IDP grants admin access to loopback IP addresses.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 22,
+          "testName": "IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "DB-01",
       "category": "DB",
       "type": "Positive",
@@ -348,6 +444,54 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/MySqlLiveIntegrationTests.cs",
           "lineNumber": 36,
           "testName": "MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "When an external IDP is configured, anonymous loopback requests do not bypass authentication.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 232,
+          "testName": "AdminPolicy_ExternalIdpConfigured_LoopbackIp_RequiresCredentials",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 208,
+          "testName": "AdminPolicy_StandaloneMode_ExternalUntrustedIp_FailsAdminPolicy",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-STANDALONE-EXTERNAL-DENY",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Standalone mode denies admin access to non-whitelisted external IPs without an Admin AppKey.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 65,
+          "testName": "IsAdmin_StandaloneMode_UntrustedIp_ReturnsFalse",
           "details": null
         }
       ]
@@ -568,6 +712,54 @@
       ]
     },
     {
+      "id": "GUARD-ADMIN-ENDPOINT-UNAUTHORIZED",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "Unauthenticated / non-admin client request to /admin receives 403 Forbidden.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs",
+          "lineNumber": 196,
+          "testName": "AdminEndpoint_UnauthorizedCaller_Returns403",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "GUARD-ADMIN-UNKNOWN-TOOL",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "AdminMcpServer returns an error response for unknown tool or action invocations.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 602,
+          "testName": "CallToolAsync_UnknownToolOrAction_ReturnsErrorResponse",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-TEST-CALL-ERROR",
+      "category": "GUARD",
+      "type": "Negative",
+      "description": "AdminMcpServer test_tool_call propagates downstream backend errors with visibility.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 643,
+          "testName": "CallToolAsync_TestToolCall_MissingServer_ReturnsError",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-01",
       "category": "MCP",
       "type": "Positive",
@@ -603,6 +795,278 @@
           "lineNumber": 397,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-ENDPOINT-CALL-TOOL",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Admin endpoint /admin/message executes tools/call for manage_system diagnostics.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs",
+          "lineNumber": 289,
+          "testName": "AdminEndpoint_SseSession_CallTool_ManageSystemDiagnostics",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-ENDPOINT-HEAD-REQUEST",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Admin endpoint /admin handles HEAD request returning text/event-stream headers.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs",
+          "lineNumber": 215,
+          "testName": "AdminEndpoint_HeadRequest_ReturnsEventStreamHeaders",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-ENDPOINT-LIST-TOOLS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs",
+          "lineNumber": 227,
+          "testName": "AdminEndpoint_SseSession_ListTools",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-ENDPOINT-ROUTER-ADMIN-TARGET",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Target proxy endpoint /router-admin routes directly to the Admin MCP server.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs",
+          "lineNumber": 152,
+          "testName": "TargetProxy_RouterAdmin_RoutesToAdminServer",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-ENDPOINT-SSE-HANDSHAKE",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Admin endpoint /admin/sse performs initialize handshake with 2026-07-28 protocol version.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs",
+          "lineNumber": 73,
+          "testName": "AdminEndpoint_SseHandshake_NegotiatesProtocol",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-INITIALIZE-HANDSHAKE",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer initialize handles protocol negotiation for 2026-07-28 and 2024-11-05.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 205,
+          "testName": "HandleInitializeAsync_NegotiatesProtocolVersion",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-AUDIT-LOG",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer tool calls record audit log entries with caller and tool name.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 276,
+          "testName": "CallToolAsync_RecordsAuditLog",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-MANAGE-APPKEYS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer executes manage_appkeys create, list, limits, and revoke actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 293,
+          "testName": "CallToolAsync_ManageAppKeys_Lifecycle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-MANAGE-CLIENTS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer executes manage_clients register, list, and delete actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 340,
+          "testName": "CallToolAsync_ManageClients_Lifecycle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-MANAGE-CUSTOM-FILES",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer executes manage_custom_files save, get, list, and delete actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 514,
+          "testName": "CallToolAsync_ManageCustomFiles_Lifecycle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-MANAGE-GROUP-MAPPINGS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer executes manage_group_mappings save, list, and delete actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 412,
+          "testName": "CallToolAsync_ManageGroupMappings_Lifecycle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-MANAGE-POLICIES",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer executes manage_policies save, list, and delete actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 378,
+          "testName": "CallToolAsync_ManagePolicies_Lifecycle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-MANAGE-PROVIDERS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer executes manage_providers list, save_secret, and save_auth actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 445,
+          "testName": "CallToolAsync_ManageProviders_Lifecycle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-MANAGE-SERVERS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer executes manage_servers list, get, create, update, toggle, and delete actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 224,
+          "testName": "CallToolAsync_ManageServers_ListAndCreate",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-MANAGE-SETTINGS",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer executes manage_settings get and update actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 488,
+          "testName": "CallToolAsync_ManageSettings_Lifecycle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOL-MANAGE-SYSTEM",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer executes manage_system diagnostics, get_logs, clear_logs, and query_audit actions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 568,
+          "testName": "CallToolAsync_ManageSystem_Lifecycle",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-TOOLS-LIST-COUNT",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer tools/list returns all 10 consolidated tools with complete JSON schemas.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 157,
+          "testName": "ListToolsAsync_ReturnsTenConsolidatedTools",
+          "details": null
         }
       ]
     },
@@ -731,6 +1195,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/ProviderSettingsEncryptionTests.cs",
           "lineNumber": 395,
           "testName": "SaveSecretProvider_WhenDecryptionFailed_DoesNotOverwriteCorruptPayload",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-ADMIN-AUDIT-REDACTION",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "AdminMcpServer redacts sensitive secrets from argument payloads before recording audit logs.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 619,
+          "testName": "CallToolAsync_AuditLog_RedactsSensitivePayloadData",
           "details": null
         }
       ]

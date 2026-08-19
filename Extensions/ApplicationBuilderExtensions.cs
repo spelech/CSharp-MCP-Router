@@ -41,6 +41,16 @@ namespace McpRouter.Extensions
                 logger.LogWarning("Notice: Oidc:TrustedProxies is unset. Header-based authentication (reverse proxy auth) will trust loopback-only (127.0.0.1 / ::1).");
             }
 
+            if (!SecurityValidationHelper.HasExternalIdp(config))
+            {
+                var standaloneNetworks = config.GetSection("Admin:StandaloneAllowedNetworks").Get<string[]>();
+                var networksList = standaloneNetworks != null && standaloneNetworks.Length > 0
+                    ? string.Join(", ", standaloneNetworks)
+                    : (config["Admin:StandaloneAllowedNetworks"] ?? "127.0.0.1, ::1");
+
+                logger.LogInformation("Standalone Admin Mode active (no external IDP detected). Allowed administrative network CIDRs: {Networks}", networksList);
+            }
+
             app.UseCors();
 
             // Extract token from query parameters for SSE / WebSocket bypass support
@@ -162,6 +172,7 @@ namespace McpRouter.Extensions
 
             // Feature-focused endpoint composition
             app.MapProxyEndpoints();
+            app.MapAdminMcpEndpoints();
             app.MapCapabilityEndpoints();
             app.MapServerEndpoints();
             app.MapClientEndpoints();
@@ -173,6 +184,7 @@ namespace McpRouter.Extensions
         // Backwards compatibility endpoint forwarder
         public static void MapAdminEndpoints(this WebApplication app)
         {
+            app.MapAdminMcpEndpoints();
             app.MapCapabilityEndpoints();
             app.MapServerEndpoints();
             app.MapClientEndpoints();
