@@ -97,10 +97,17 @@ graph TD
 * Resolves Windows Kerberos / NTLM Security Identifiers (SIDs) and Active Directory group memberships (e.g. `S-1-5-32-544` / Administrators, `Domain Admins`).
 
 ### 3. AppKey Authentication (`AppKey`)
-* Connects AI agents and external IDEs using cryptographically hashed SHA-256 tokens.
-* Maps caller tokens to assigned user identities and fine-grained scope permissions.
+* Connects AI agents and external IDEs using cryptographically hashed SHA-256 tokens (`mcp-...`).
+* Supports granular scope controls (`*`, `all`, `admin`, `category:<name>`, `server:<id>`, `tool:<name>`, `resource:<uri>`, `prompt:<name>`).
+* Keys carrying `admin`, `all`, or `*` scopes assign `ClaimTypes.Role = Administrator` to grant administrative access over the management plane and Admin MCP Server.
 
-### 4. OAuth 2.0 Authorization Server (`OpenIddict`)
+### 4. Standalone Mode & Local Network Authorization
+* Active when **no external IDP** (Active Directory LDAP or OIDC SSO) is configured.
+* Evaluates client IP address against `Admin:StandaloneAllowedNetworks` (defaults to loopback `127.0.0.1`, `::1`).
+* Administrators can configure local LAN CIDRs (e.g. `10.0.0.0/8`, `192.168.0.0/16`) or central open mode (`0.0.0.0/0`) via environment variable `Admin__StandaloneAllowedNetworks__0=10.0.0.0/8`.
+* External non-matching IPs require an Admin AppKey (`mcp-global-admin...`).
+
+### 5. OAuth 2.0 Authorization Server (`OpenIddict`)
 * Built-in OAuth 2.0 authorization server for issuing signed access tokens with standard token lifecycles and scopes.
 
 ---

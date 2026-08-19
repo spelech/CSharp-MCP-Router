@@ -23,6 +23,11 @@
       "Domain Admins",
       "full_admin",
       "Administrators"
+    ],
+    "StandaloneAllowedNetworks": [
+      "127.0.0.1",
+      "::1",
+      "10.0.0.0/8"
     ]
   },
   "Oidc": {
