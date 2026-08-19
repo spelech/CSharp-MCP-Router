@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **59 Requirements Verified** across **138 Test Proofs** (45 Functional Capabilities, 14 Safety Guardrails).
+> **Catalog Statistics:** **75 Requirements Verified** across **154 Test Proofs** (57 Functional Capabilities, 18 Safety Guardrails).
 
 ---
 
@@ -11,8 +11,8 @@
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | **`AUTH`** | Authentication, RBAC & Identity | **12** | 11 | 1 | 40 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 5 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **12** | 0 | 12 | 29 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **19** | 19 | 0 | 20 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 33 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **6** | 5 | 1 | 13 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 7 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **5** | 5 | 0 | 24 proofs |
@@ -165,6 +165,78 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L205`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L205) (`HandleInitializeAsync_NegotiatesProtocolVersion`)
+
+### `[MCP-ADMIN-PARITY-APPKEYS]` manage_appkeys supports full parity for list, get_limits, create, and revoke actions.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L381`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L381) (`ManageAppKeys_Parity_AllActions`)
+
+### `[MCP-ADMIN-PARITY-CLIENTS]` manage_clients supports full parity for register, list, and delete actions.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L434`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L434) (`ManageClients_Parity_AllActions`)
+
+### `[MCP-ADMIN-PARITY-CUSTOM-FILES]` manage_custom_files supports full parity for list, get, save, and delete prompt and resource files.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L727`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L727) (`ManageCustomFiles_Parity_AllActions`)
+
+### `[MCP-ADMIN-PARITY-GROUP-MAPPINGS]` manage_group_mappings supports full parity for list, save, and delete external-to-internal group mappings.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L541`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L541) (`ManageGroupMappings_Parity_AllActions`)
+
+### `[MCP-ADMIN-PARITY-JSONRPC-DISPATCH]` AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping).
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L884`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L884) (`AdminTools_ProcessRequest_JsonRpcProtocol`)
+
+### `[MCP-ADMIN-PARITY-POLICIES]` manage_policies supports full parity for list, save, and delete access control policies.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L475`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L475) (`ManagePolicies_Parity_AllActions`)
+
+### `[MCP-ADMIN-PARITY-PROVIDERS]` manage_providers supports full parity for list, save_secret, test_vault, save_auth, and test_ldap actions.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L588`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L588) (`ManageProviders_Parity_AllActions`)
+
+### `[MCP-ADMIN-PARITY-SERVERS]` manage_servers supports full parity for list, get, create, update, toggle, delete, reconnect, and reconnect_all actions.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L245`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L245) (`ManageServers_Parity_AllActions`)
+
+### `[MCP-ADMIN-PARITY-SETTINGS]` manage_settings supports full parity for get and update global router configurations.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L678`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L678) (`ManageSettings_Parity_AllActions`)
+
+### `[MCP-ADMIN-PARITY-SYSTEM]` manage_system supports full parity for diagnostics, get_logs, clear_logs, and query_audit actions.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L827`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L827) (`ManageSystem_Parity_AllActions`)
+
+### `[MCP-ADMIN-PARITY-TEST-TOOL-CALL]` test_tool_call executes test bench backend tool calls and formats responses.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L857`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L857) (`TestToolCall_Execution_Parity`)
+
+### `[MCP-ADMIN-PARITY-TOOLS-COVERAGE]` Every UI management flow has a corresponding verified action in the consolidated Admin MCP tools.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L202`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L202) (`AdminTools_ExecuteSuccessfully`)
 
 ### `[MCP-ADMIN-TOOL-AUDIT-LOG]` AdminMcpServer tool calls record audit log entries with caller and tool name.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -437,11 +509,35 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/PermissionsControllerTests.cs#L236`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PermissionsControllerTests.cs#L236) (`SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy`)
 
+### `[GUARD-ADMIN-CUSTOM-FILES-VALIDATION]` manage_custom_files rejects invalid prompt JSON syntax and unsupported file categories.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L790`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L790) (`ManageCustomFiles_ValidationGuardrails`)
+
 ### `[GUARD-ADMIN-ENDPOINT-UNAUTHORIZED]` Unauthenticated / non-admin client request to /admin receives 403 Forbidden.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs#L196`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs#L196) (`AdminEndpoint_UnauthorizedCaller_Returns403`)
+
+### `[GUARD-ADMIN-POLICIES-WILDCARD-DENY]` manage_policies rejects wildcard deny policies to prevent global lockout.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L524`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L524) (`ManagePolicies_WildcardDenyGuardrail`)
+
+### `[GUARD-ADMIN-PROVIDERS-LDAP-PLAINTEXT]` manage_providers rejects unencrypted LDAP connections on port 389.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L661`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L661) (`ManageProviders_LdapPlaintextGuardrail`)
+
+### `[GUARD-ADMIN-SERVERS-VALIDATION]` manage_servers rejects invalid transport types, non-existent servers, and missing required parameters.
+* **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L335`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L335) (`ManageServers_ValidationGuardrails`)
 
 ### `[GUARD-ADMIN-UNKNOWN-TOOL]` AdminMcpServer returns an error response for unknown tool or action invocations.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -490,7 +586,11 @@
 | `GUARD-04` | **Guardrail** | `GUARD` | Malformed completion payloads or unmapped backends must fail closed safely | [`PairwiseIntegrationMatrixTests.cs:L520`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L520) | Backend xUnit |
 | `GUARD-05` | **Guardrail** | `GUARD` | Batch save of authentication providers must fail closed if all providers are disabled | [`ProvidersControllerTests.cs:L324`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ProvidersControllerTests.cs#L324) | Backend xUnit |
 | `GUARD-06` | **Guardrail** | `GUARD` | Global deny policies with TargetId '*' and IsAllowed false must fail closed | [`PermissionsControllerTests.cs:L236`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PermissionsControllerTests.cs#L236) | Backend xUnit |
+| `GUARD-ADMIN-CUSTOM-FILES-VALIDATION` | **Guardrail** | `GUARD` | manage_custom_files rejects invalid prompt JSON syntax and unsupported file categories. | [`AdminToolsParityTests.cs:L790`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L790) | Backend xUnit |
 | `GUARD-ADMIN-ENDPOINT-UNAUTHORIZED` | **Guardrail** | `GUARD` | Unauthenticated / non-admin client request to /admin receives 403 Forbidden. | [`AdminEndpointsTests.cs:L196`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs#L196) | Backend xUnit |
+| `GUARD-ADMIN-POLICIES-WILDCARD-DENY` | **Guardrail** | `GUARD` | manage_policies rejects wildcard deny policies to prevent global lockout. | [`AdminToolsParityTests.cs:L524`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L524) | Backend xUnit |
+| `GUARD-ADMIN-PROVIDERS-LDAP-PLAINTEXT` | **Guardrail** | `GUARD` | manage_providers rejects unencrypted LDAP connections on port 389. | [`AdminToolsParityTests.cs:L661`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L661) | Backend xUnit |
+| `GUARD-ADMIN-SERVERS-VALIDATION` | **Guardrail** | `GUARD` | manage_servers rejects invalid transport types, non-existent servers, and missing required parameters. | [`AdminToolsParityTests.cs:L335`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L335) | Backend xUnit |
 | `GUARD-ADMIN-UNKNOWN-TOOL` | **Guardrail** | `GUARD` | AdminMcpServer returns an error response for unknown tool or action invocations. | [`AdminMcpServerTests.cs:L602`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L602) | Backend xUnit |
 | `MCP-ADMIN-TOOL-TEST-CALL-ERROR` | **Guardrail** | `GUARD` | AdminMcpServer test_tool_call propagates downstream backend errors with visibility. | [`AdminMcpServerTests.cs:L643`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L643) | Backend xUnit |
 | `MCP-01` | Positive | `MCP` | Meta-mode execute_tool strictly enforces target tool authorization policies | [`PairwiseIntegrationMatrixTests.cs:L579`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L579) | Backend xUnit |
@@ -501,6 +601,18 @@
 | `MCP-ADMIN-ENDPOINT-ROUTER-ADMIN-TARGET` | Positive | `MCP` | Target proxy endpoint /router-admin routes directly to the Admin MCP server. | [`AdminEndpointsTests.cs:L152`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs#L152) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-SSE-HANDSHAKE` | Positive | `MCP` | Admin endpoint /admin/sse performs initialize handshake with 2026-07-28 protocol version. | [`AdminEndpointsTests.cs:L73`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminEndpointsTests.cs#L73) | Backend xUnit |
 | `MCP-ADMIN-INITIALIZE-HANDSHAKE` | Positive | `MCP` | AdminMcpServer initialize handles protocol negotiation for 2026-07-28 and 2024-11-05. | [`AdminMcpServerTests.cs:L205`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L205) | Backend xUnit |
+| `MCP-ADMIN-PARITY-APPKEYS` | Positive | `MCP` | manage_appkeys supports full parity for list, get_limits, create, and revoke actions. | [`AdminToolsParityTests.cs:L381`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L381) | Backend xUnit |
+| `MCP-ADMIN-PARITY-CLIENTS` | Positive | `MCP` | manage_clients supports full parity for register, list, and delete actions. | [`AdminToolsParityTests.cs:L434`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L434) | Backend xUnit |
+| `MCP-ADMIN-PARITY-CUSTOM-FILES` | Positive | `MCP` | manage_custom_files supports full parity for list, get, save, and delete prompt and resource files. | [`AdminToolsParityTests.cs:L727`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L727) | Backend xUnit |
+| `MCP-ADMIN-PARITY-GROUP-MAPPINGS` | Positive | `MCP` | manage_group_mappings supports full parity for list, save, and delete external-to-internal group mappings. | [`AdminToolsParityTests.cs:L541`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L541) | Backend xUnit |
+| `MCP-ADMIN-PARITY-JSONRPC-DISPATCH` | Positive | `MCP` | AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping). | [`AdminToolsParityTests.cs:L884`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L884) | Backend xUnit |
+| `MCP-ADMIN-PARITY-POLICIES` | Positive | `MCP` | manage_policies supports full parity for list, save, and delete access control policies. | [`AdminToolsParityTests.cs:L475`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L475) | Backend xUnit |
+| `MCP-ADMIN-PARITY-PROVIDERS` | Positive | `MCP` | manage_providers supports full parity for list, save_secret, test_vault, save_auth, and test_ldap actions. | [`AdminToolsParityTests.cs:L588`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L588) | Backend xUnit |
+| `MCP-ADMIN-PARITY-SERVERS` | Positive | `MCP` | manage_servers supports full parity for list, get, create, update, toggle, delete, reconnect, and reconnect_all actions. | [`AdminToolsParityTests.cs:L245`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L245) | Backend xUnit |
+| `MCP-ADMIN-PARITY-SETTINGS` | Positive | `MCP` | manage_settings supports full parity for get and update global router configurations. | [`AdminToolsParityTests.cs:L678`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L678) | Backend xUnit |
+| `MCP-ADMIN-PARITY-SYSTEM` | Positive | `MCP` | manage_system supports full parity for diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminToolsParityTests.cs:L827`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L827) | Backend xUnit |
+| `MCP-ADMIN-PARITY-TEST-TOOL-CALL` | Positive | `MCP` | test_tool_call executes test bench backend tool calls and formats responses. | [`AdminToolsParityTests.cs:L857`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L857) | Backend xUnit |
+| `MCP-ADMIN-PARITY-TOOLS-COVERAGE` | Positive | `MCP` | Every UI management flow has a corresponding verified action in the consolidated Admin MCP tools. | [`AdminToolsParityTests.cs:L202`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L202) | Backend xUnit |
 | `MCP-ADMIN-TOOL-AUDIT-LOG` | Positive | `MCP` | AdminMcpServer tool calls record audit log entries with caller and tool name. | [`AdminMcpServerTests.cs:L276`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L276) | Backend xUnit |
 | `MCP-ADMIN-TOOL-MANAGE-APPKEYS` | Positive | `MCP` | AdminMcpServer executes manage_appkeys create, list, limits, and revoke actions. | [`AdminMcpServerTests.cs:L293`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L293) | Backend xUnit |
 | `MCP-ADMIN-TOOL-MANAGE-CLIENTS` | Positive | `MCP` | AdminMcpServer executes manage_clients register, list, and delete actions. | [`AdminMcpServerTests.cs:L340`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L340) | Backend xUnit |
