@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **75 Requirements Verified** across **154 Test Proofs** (57 Functional Capabilities, 18 Safety Guardrails).
+> **Catalog Statistics:** **79 Requirements Verified** across **158 Test Proofs** (61 Functional Capabilities, 18 Safety Guardrails).
 
 ---
 
@@ -11,6 +11,7 @@
 | :--- | :--- | :---: | :---: | :---: | :---: |
 | **`AUTH`** | Authentication, RBAC & Identity | **12** | 11 | 1 | 40 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 5 proofs |
+| **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 33 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **6** | 5 | 1 | 13 proofs |
@@ -116,6 +117,30 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L243`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L243) (`MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L293`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L293) (`Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/MySqlLiveIntegrationTests.cs#L36`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/MySqlLiveIntegrationTests.cs#L36) (`MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds`)
+
+### `[DOC-SETUP-SKILL-FRONTMATTER]` mcp-router-setup skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters
+* **Category:** `DOC` (DOC)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L22) (`Skill_Frontmatter_IsValidAndWithinCharacterLimit`)
+
+### `[DOC-SETUP-SKILL-MIRROR]` The mcp-router-setup skill and templates are mirrored 1:1 in .agents/skills/mcp-router-setup/
+* **Category:** `DOC` (DOC)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L156`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L156) (`Skill_MirroredInAgentsDirectory`)
+
+### `[DOC-SETUP-SKILL-TEMPLATES]` All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/mcp-router
+* **Category:** `DOC` (DOC)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L102`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L102) (`Templates_AreValidAndContainRequiredDirectives`)
+
+### `[DOC-SETUP-SKILL-WORKFLOW]` mcp-router-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration
+* **Category:** `DOC` (DOC)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L48`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L48) (`Skill_ContainsAllRequiredPhasesAndComparisons`)
 
 ### `[MCP-01]` Meta-mode execute_tool strictly enforces target tool authorization policies
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -577,6 +602,10 @@
 | `AUTH-STANDALONE-LOOPBACK-ALLOW` | Positive | `AUTH` | Standalone mode without external IDP grants admin access to loopback IP addresses. | [`StandaloneAdminAuthTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22) | Backend xUnit |
 | `DB-01` | Positive | `DB` | SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data | [`DatabaseSchemaUpgradeAndContractTests.cs:L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L43) | Backend xUnit |
 | `DB-02` | Positive | `DB` | MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly | [`DatabaseSchemaUpgradeAndContractTests.cs:L198`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198) | Backend xUnit |
+| `DOC-SETUP-SKILL-FRONTMATTER` | Positive | `DOC` | mcp-router-setup skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters | [`SetupSkillTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L22) | Backend xUnit |
+| `DOC-SETUP-SKILL-MIRROR` | Positive | `DOC` | The mcp-router-setup skill and templates are mirrored 1:1 in .agents/skills/mcp-router-setup/ | [`SetupSkillTests.cs:L156`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L156) | Backend xUnit |
+| `DOC-SETUP-SKILL-TEMPLATES` | Positive | `DOC` | All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/mcp-router | [`SetupSkillTests.cs:L102`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L102) | Backend xUnit |
+| `DOC-SETUP-SKILL-WORKFLOW` | Positive | `DOC` | mcp-router-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration | [`SetupSkillTests.cs:L48`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L48) | Backend xUnit |
 | `AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK` | **Guardrail** | `GUARD` | When an external IDP is configured, anonymous loopback requests do not bypass authentication. | [`StandaloneAdminAuthTests.cs:L232`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L232) | Backend xUnit |
 | `AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY` | **Guardrail** | `GUARD` | AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode. | [`StandaloneAdminAuthTests.cs:L208`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L208) | Backend xUnit |
 | `AUTH-STANDALONE-EXTERNAL-DENY` | **Guardrail** | `GUARD` | Standalone mode denies admin access to non-whitelisted external IPs without an Admin AppKey. | [`StandaloneAdminAuthTests.cs:L65`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L65) | Backend xUnit |
