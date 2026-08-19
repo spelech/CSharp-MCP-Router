@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using McpRouter.Infrastructure.Identity;
+using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 
 namespace McpRouter.Components.Authorization
@@ -302,17 +304,93 @@ namespace McpRouter.Components.Authorization
         }
 
         /// <summary>
-        /// Single decision point for administrative authorization supporting both SIDs and configured Group Names.
+        /// Checks whether client IP is authorized for standalone administrative access based on Admin:StandaloneAllowedNetworks.
+        /// Defaults to loopback addresses (127.0.0.1, ::1).
         /// </summary>
-        public static bool IsAdmin(UserIdentityContext? identity, IConfiguration? config, IEnumerable<string>? mappedGroups = null)
+        public static bool IsStandaloneAdminNetwork(IPAddress? clientIp, IConfiguration? config)
         {
-            if (identity == null || string.IsNullOrWhiteSpace(identity.Username) || identity.Username.Equals("guest", StringComparison.OrdinalIgnoreCase) || identity.Username.Equals("anonymous", StringComparison.OrdinalIgnoreCase))
+            if (clientIp == null) return false;
+
+            var effectiveIp = clientIp.IsIPv4MappedToIPv6 ? clientIp.MapToIPv4() : clientIp;
+
+            var networks = new List<string>();
+
+            var sectionValues = config?.GetSection("Admin:StandaloneAllowedNetworks")?.Get<string[]>();
+            if (sectionValues != null)
             {
-                return false;
+                foreach (var net in sectionValues)
+                {
+                    if (!string.IsNullOrWhiteSpace(net)) networks.Add(net.Trim());
+                }
             }
 
+            var singleVal = config?["Admin:StandaloneAllowedNetworks"];
+            if (!string.IsNullOrWhiteSpace(singleVal))
+            {
+                var split = singleVal.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                foreach (var net in split)
+                {
+                    if (!string.IsNullOrWhiteSpace(net) && !networks.Contains(net, StringComparer.OrdinalIgnoreCase))
+                    {
+                        networks.Add(net.Trim());
+                    }
+                }
+            }
+
+            if (networks.Count == 0)
+            {
+                networks.Add("127.0.0.1");
+                networks.Add("::1");
+            }
+
+            foreach (var network in networks)
+            {
+                if (IsInSubnet(effectiveIp, network))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Determines if an external Identity Provider (LDAP/Active Directory or OIDC) is configured.
+        /// </summary>
+        public static bool HasExternalIdp(IConfiguration? config, HttpContext? httpContext = null)
+        {
+            if (config != null)
+            {
+                if (!string.IsNullOrWhiteSpace(config["Ldap:Server"]) ||
+                    !string.IsNullOrWhiteSpace(config["ActiveDirectory:Server"]) ||
+                    !string.IsNullOrWhiteSpace(config["Oidc:Authority"]) ||
+                    !string.IsNullOrWhiteSpace(config["Oidc:ClientId"]) ||
+                    !string.IsNullOrWhiteSpace(config["Oidc:Issuer"]))
+                {
+                    return true;
+                }
+
+                if (bool.TryParse(config["Identity:ExternalIdpEnabled"], out var extEnabled) && extEnabled)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
+        /// Single decision point for administrative authorization supporting both SIDs and configured Group Names,
+        /// Admin AppKeys, and standalone network authorization.
+        /// </summary>
+        public static bool IsAdmin(
+            UserIdentityContext? identity,
+            IConfiguration? config,
+            HttpContext? httpContext = null,
+            IEnumerable<string>? mappedGroups = null)
+        {
             var adminGroupSid = config?["Admin:GroupSid"] ?? "S-1-5-32-544";
-            if (identity.AllSids.Contains(adminGroupSid, StringComparer.OrdinalIgnoreCase))
+            if (identity != null && identity.AllSids.Contains(adminGroupSid, StringComparer.OrdinalIgnoreCase))
             {
                 return true;
             }
@@ -339,9 +417,14 @@ namespace McpRouter.Components.Authorization
                 }
             }
 
-            if (identity.GroupNames.Any(g => configuredAdminGroups.Contains(g)))
+            if (identity != null && identity.GroupNames.Any(g => configuredAdminGroups.Contains(g)))
             {
-                return true;
+                if (!string.IsNullOrWhiteSpace(identity.Username) &&
+                    !identity.Username.Equals("guest", StringComparison.OrdinalIgnoreCase) &&
+                    !identity.Username.Equals("anonymous", StringComparison.OrdinalIgnoreCase))
+                {
+                    return true;
+                }
             }
 
             if (mappedGroups != null && mappedGroups.Any(mg => configuredAdminGroups.Contains(mg) || string.Equals(mg, adminGroupSid, StringComparison.OrdinalIgnoreCase)))
@@ -349,7 +432,48 @@ namespace McpRouter.Components.Authorization
                 return true;
             }
 
+            if (httpContext != null)
+            {
+                if (httpContext.Items.TryGetValue("AppKeyScopes", out var scopesObj) && scopesObj is string scopesJson)
+                {
+                    try
+                    {
+                        var scopes = JsonSerializer.Deserialize<List<string>>(scopesJson);
+                        if (scopes != null && scopes.Any(s =>
+                            string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            return true;
+                        }
+                    }
+                    catch { }
+                }
+
+                if (httpContext.User?.IsInRole("Administrator") == true ||
+                    httpContext.User?.HasClaim("Scope", "admin") == true)
+                {
+                    return true;
+                }
+
+                if (!HasExternalIdp(config, httpContext) &&
+                    (identity == null || string.IsNullOrWhiteSpace(identity.Username) ||
+                     identity.Username.Equals("guest", StringComparison.OrdinalIgnoreCase) ||
+                     identity.Username.Equals("anonymous", StringComparison.OrdinalIgnoreCase)))
+                {
+                    if (IsStandaloneAdminNetwork(httpContext.Connection.RemoteIpAddress, config))
+                    {
+                        return true;
+                    }
+                }
+            }
+
             return false;
+        }
+
+        public static bool IsAdmin(UserIdentityContext? identity, IConfiguration? config, IEnumerable<string>? mappedGroups)
+        {
+            return IsAdmin(identity, config, httpContext: null, mappedGroups: mappedGroups);
         }
 
         public static ValueTask<System.IO.Stream> ValidatingConnectCallback(SocketsHttpConnectionContext context, CancellationToken cancellationToken)

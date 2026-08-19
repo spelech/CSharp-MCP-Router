@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
@@ -144,6 +147,40 @@ namespace McpRouter.Middleware
                     new Claim(ClaimTypes.Name, appKey.Username),
                     new Claim(ClaimTypes.Role, "McpClient")
                 };
+
+                bool isAdminAppKey = false;
+                if (!string.IsNullOrWhiteSpace(appKey.ScopesJson))
+                {
+                    try
+                    {
+                        var parsedScopes = JsonSerializer.Deserialize<List<string>>(appKey.ScopesJson);
+                        if (parsedScopes != null && parsedScopes.Any(s =>
+                            string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            isAdminAppKey = true;
+                        }
+                    }
+                    catch
+                    {
+                        var scopeParts = appKey.ScopesJson.Split(new[] { ',', '[', ']', '"', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (scopeParts.Any(s =>
+                            string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
+                        {
+                            isAdminAppKey = true;
+                        }
+                    }
+                }
+
+                if (isAdminAppKey)
+                {
+                    claims.Add(new Claim(ClaimTypes.Role, "Administrator"));
+                    claims.Add(new Claim("Scope", "admin"));
+                }
+
                 if (!string.IsNullOrEmpty(appKey.OwnerSid))
                 {
                     claims.Add(new Claim("Sid", appKey.OwnerSid));
