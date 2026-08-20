@@ -110,8 +110,25 @@ namespace McpRouter.Core.Routing
 
                     var retriever = _rootServices?.GetService<CompositeSecretRetriever>()
                         ?? _clientResponse?.HttpContext?.RequestServices?.GetService<CompositeSecretRetriever>();
-                                        string? passThroughToken = null;
-                    if (server.AllowPassThroughAuth && _clientResponse?.HttpContext != null)
+                    string? passThroughToken = null;
+                    if (server.SecretProvider == "UserProvided")
+                    {
+                        var identity = await ResolveUserIdentityAsync(_clientResponse?.HttpContext);
+                        var userSecretStore = _rootServices?.GetService<IUserSecretStore>()
+                            ?? _clientResponse?.HttpContext?.RequestServices?.GetService<IUserSecretStore>();
+                        if (userSecretStore != null)
+                        {
+                            var secretJson = await userSecretStore.GetSecretAsync(identity.Username, server.Id);
+                            if (string.IsNullOrEmpty(secretJson))
+                                throw new Exception($"User credential required but not found for server '{server.Id}'");
+                            passThroughToken = secretJson;
+                        }
+                        else
+                        {
+                            throw new Exception("IUserSecretStore is not registered in DI.");
+                        }
+                    }
+                    else if (server.AllowPassThroughAuth && _clientResponse?.HttpContext != null)
                     {
                         if (_clientResponse.HttpContext.Request.Headers.TryGetValue("X-Target-Auth", out var tokenVals))
                         {

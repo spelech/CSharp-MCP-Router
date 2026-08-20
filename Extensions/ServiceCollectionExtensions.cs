@@ -126,6 +126,7 @@ namespace McpRouter.Extensions
             builder.Services.AddSingleton<ISecretRetriever, WindowsRegistrySecretRetriever>();
             builder.Services.AddSingleton<ISecretRetriever, EnvironmentSecretRetriever>();
             builder.Services.AddSingleton<CompositeSecretRetriever>();
+            builder.Services.AddSingleton<McpRouter.Infrastructure.Secrets.IUserSecretStore, McpRouter.Infrastructure.Secrets.DatabaseUserSecretStore>();
 
             // Register Observability & Audit Logger
             builder.Services.AddSingleton<IAuditLogger, AuditLogger>();

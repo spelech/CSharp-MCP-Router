@@ -50,9 +50,9 @@ namespace McpRouter.Infrastructure.Transports
 
         public async Task<string?> ResolveTokenAsync(ISecretRetriever? secretRetriever = null)
         {
-            if (_server.AllowPassThroughAuth && !string.IsNullOrEmpty(_passThroughToken))
-            {
-                return _passThroughToken;
+            if (!string.IsNullOrEmpty(_passThroughToken) && (_server.AllowPassThroughAuth || _server.SecretProvider == "UserProvided"))
+            {
+                return _passThroughToken;
             }
 
             var provider = _server.SecretProvider ?? "None";
