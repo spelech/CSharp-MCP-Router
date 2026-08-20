@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-20T20:07:21.0423050Z",
-    "totalRequirements": 81,
-    "positiveCount": 63,
+    "generatedAt": "2026-08-20T21:27:56.0635580Z",
+    "totalRequirements": 82,
+    "positiveCount": 64,
     "guardrailCount": 18,
-    "totalProofs": 160
+    "totalProofs": 161
   },
   "requirements": [
     {
@@ -1640,6 +1640,22 @@
           "lineNumber": 482,
           "testName": "StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately",
           "details": "Verifies that STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly."
+        }
+      ]
+    },
+    {
+      "id": "REQ-UI-MY-SERVERS-01",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Renders the My MCP Servers view and allows editing user-provided authentication credentials.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts",
+          "lineNumber": 5,
+          "testName": "should render user provided servers and allow editing credentials",
+          "details": null
         }
       ]
     },
