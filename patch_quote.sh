@@ -1,1 +1,0 @@
-sed -i 's/conn.Execute("ALTER TABLE Settings ADD COLUMN UserSecretStorage TEXT DEFAULT .*;/conn.Execute("ALTER TABLE Settings ADD COLUMN UserSecretStorage TEXT DEFAULT '"'Database'"';");/g' Infrastructure/Persistence/DatabaseSeederService.cs

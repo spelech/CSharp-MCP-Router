@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-19T03:59:05.8728493Z",
-    "totalRequirements": 79,
-    "positiveCount": 61,
+    "generatedAt": "2026-08-20T20:07:21.0423050Z",
+    "totalRequirements": 81,
+    "positiveCount": 63,
     "guardrailCount": 18,
-    "totalProofs": 158
+    "totalProofs": 160
   },
   "requirements": [
     {
@@ -391,6 +391,38 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 22,
           "testName": "IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-001",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify DatabaseUserSecretStore encrypts and decrypts secret correctly.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs",
+          "lineNumber": 13,
+          "testName": "DatabaseUserSecretStore_SavesAndRetrieves_Secret",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-002",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify UserCredentialsController returns configured server IDs.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs",
+          "lineNumber": 18,
+          "testName": "GetUserCredentials_ReturnsServerIds",
           "details": null
         }
       ]

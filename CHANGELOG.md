@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.20.0`** | 2026-08-20 | feat(auth): User-Specific MCP Server Authentication - Added `UserProvided` secret provider to allow users to set personal auth for target MCP servers via a new self-service portal (`/my-mcp-servers`). Supported across DB and Vault. |
 | **`v4.19.1`** | 2026-08-18 | feat(skills): introduce universal `mcp-router-setup` agentic skill, interactive setup workflow, bundled scaffold templates for Docker Compose & Windows IIS, and zero-clone setup documentation |
 | **`v4.19.0`** | 2026-08-18 | feat(admin): implement in-process virtual Admin MCP Server (`/admin`, `/router-admin`), 10 consolidated management tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`), standalone hybrid network authorization, and comprehensive audit logging |
 | **`v4.18.2`** | 2026-08-18 | refactor(reqs): normalize requirement taxonomy IDs across test suites and regenerate living SRS catalog |
