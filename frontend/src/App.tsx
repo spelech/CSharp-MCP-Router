@@ -4,10 +4,11 @@ import { DashboardView, ServerModal, ServerInspectModal } from './components/ser
 import { SecurityView, PolicyModal, MappingModal } from './components/security';
 import { TestBenchView } from './components/testbench';
 import { SettingsView, CustomFileModal } from './components/settings';
+import { MyMcpServers } from './pages/MyMcpServers';
 import { ClientModal, AppKeyModal } from './components/clients';
 
 const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'dashboard' | 'security' | 'testbench' | 'settings'>('dashboard');
+  const [currentView, setCurrentView] = useState<'dashboard' | 'security' | 'testbench' | 'settings' | 'my-mcp-servers'>('dashboard');
 
   return (
     <>
@@ -44,12 +45,19 @@ const App: React.FC = () => {
           >
             <i className="fa-solid fa-gear"></i> Settings
           </button>
+          <button
+            className={`tab-btn ${currentView === 'my-mcp-servers' ? 'active' : ''}`}
+            onClick={() => setCurrentView('my-mcp-servers')}
+          >
+            <i className="fa-solid fa-server"></i> My MCP Servers
+          </button>
         </nav>
 
         {currentView === 'dashboard' && <DashboardView />}
         {currentView === 'security' && <SecurityView />}
         {currentView === 'testbench' && <TestBenchView />}
         {currentView === 'settings' && <SettingsView />}
+        {currentView === 'my-mcp-servers' && <MyMcpServers />}
 
         <Footer />
       </div>
