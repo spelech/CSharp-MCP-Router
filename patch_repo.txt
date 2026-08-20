@@ -86,3 +86,10 @@
 +        }
      }
  }
+        public async Task<IEnumerable<string>> GetServerIdsAsync(string username)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            return await conn.QueryAsync<string>(
+                "SELECT ServerId FROM UserServerCredentials WHERE Username = @Username;",
+                new { Username = username });
+        }
