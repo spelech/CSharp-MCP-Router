@@ -6,3 +6,5 @@ export * from './securityApi';
 export * from './settingsApi';
 export * from './testbenchApi';
 export * from './userApi';
+
+export * from './userCredentialsApi';
