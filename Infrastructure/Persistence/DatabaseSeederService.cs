@@ -152,6 +152,7 @@ namespace McpRouter.Infrastructure.Persistence
                 if (!cols.Contains("EmbeddingModelDir")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingModelDir TEXT;");
                 if (!cols.Contains("GlobalMaxKeys")) conn.Execute("ALTER TABLE Settings ADD COLUMN GlobalMaxKeys INTEGER DEFAULT 100;");
                 if (!cols.Contains("UserMaxKeys")) conn.Execute("ALTER TABLE Settings ADD COLUMN UserMaxKeys INTEGER DEFAULT 5;");
+                if (!cols.Contains("UserSecretStorage")) conn.Execute("ALTER TABLE Settings ADD COLUMN UserSecretStorage TEXT DEFAULT 'Database';");
             }
 
             // 4. AppKeys.OwnerSid
@@ -641,7 +642,18 @@ namespace McpRouter.Infrastructure.Persistence
                         EmbeddingApiModel TEXT,
                         EmbeddingModelDir TEXT,
                         GlobalMaxKeys INTEGER DEFAULT 100,
-                        UserMaxKeys INTEGER DEFAULT 5
+                        UserMaxKeys INTEGER DEFAULT 5,
+                        UserSecretStorage TEXT DEFAULT 'Database',
+                        UserSecretStorage TEXT DEFAULT 'Database'
+                        UserMaxKeys INTEGER DEFAULT 5,
+                        UserSecretStorage TEXT DEFAULT 'Database'
+                    );
+
+                    CREATE TABLE IF NOT EXISTS UserServerCredentials (
+                        Id TEXT PRIMARY KEY,
+                        Username TEXT,
+                        ServerId TEXT,
+                        EncryptedSecretJson TEXT
                     );
 
                     CREATE TABLE IF NOT EXISTS AppKeys (
@@ -767,7 +779,18 @@ namespace McpRouter.Infrastructure.Persistence
                             [EmbeddingModelDir]       VARCHAR(500) NULL,
                             [RequireManualApproval]   BIT NOT NULL DEFAULT 0,
                             [GlobalMaxKeys]           INT NOT NULL DEFAULT 100,
-                            [UserMaxKeys]             INT NOT NULL DEFAULT 5
+                            [UserMaxKeys]             INT NOT NULL DEFAULT 5,
+                            [UserSecretStorage]       VARCHAR(50) NOT NULL DEFAULT 'Database'
+                        );
+                    END;
+
+                    IF OBJECT_ID('dbo.UserServerCredentials', 'U') IS NULL
+                    BEGIN
+                        CREATE TABLE [dbo].[UserServerCredentials] (
+                            [Id]                  VARCHAR(100) PRIMARY KEY,
+                            [Username]            NVARCHAR(200) NOT NULL,
+                            [ServerId]            VARCHAR(100) NOT NULL,
+                            [EncryptedSecretJson] NVARCHAR(MAX) NULL
                         );
                     END;
 
@@ -901,7 +924,15 @@ namespace McpRouter.Infrastructure.Persistence
                         `EmbeddingModelDir`       VARCHAR(500) NULL,
                         `RequireManualApproval`   TINYINT(1) NOT NULL DEFAULT 0,
                         `GlobalMaxKeys`           INT NOT NULL DEFAULT 100,
-                        `UserMaxKeys`             INT NOT NULL DEFAULT 5
+                        `UserMaxKeys`             INT NOT NULL DEFAULT 5,
+                        `UserSecretStorage`       VARCHAR(50) NOT NULL DEFAULT 'Database'
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+                    CREATE TABLE IF NOT EXISTS `UserServerCredentials` (
+                        `Id`                  VARCHAR(100) PRIMARY KEY,
+                        `Username`            VARCHAR(200) NOT NULL,
+                        `ServerId`            VARCHAR(100) NOT NULL,
+                        `EncryptedSecretJson` LONGTEXT NULL
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
                     CREATE TABLE IF NOT EXISTS `AppKeys` (
