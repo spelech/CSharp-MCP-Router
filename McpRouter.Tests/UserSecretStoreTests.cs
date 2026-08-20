@@ -17,7 +17,7 @@ namespace McpRouter.Tests
             // Arrange
             var config = new ConfigurationBuilder().AddInMemoryCollection(new[] { new System.Collections.Generic.KeyValuePair<string, string?>("ROUTER_MASTER_KEY", "12345678901234567890123456789012") }).Build();
             var mockRepo = new Mock<IUserCredentialRepository>();
-            UserCredentialDto savedDto = null;
+            UserCredentialDto? savedDto = null;
             mockRepo.Setup(r => r.SaveCredentialAsync(It.IsAny<UserCredentialDto>())).Callback<UserCredentialDto>(d => savedDto = d).Returns(Task.CompletedTask);
             mockRepo.Setup(r => r.GetCredentialAsync(It.IsAny<string>(), It.IsAny<string>())).ReturnsAsync(() => savedDto);
 
