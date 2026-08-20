@@ -15,5 +15,6 @@ namespace McpRouter.Models
         public string EmbeddingModelDir { get; set; } = "data/models";
         public int GlobalMaxKeys { get; set; } = 100;
         public int UserMaxKeys { get; set; } = 5;
+        public string UserSecretStorage { get; set; } = "Database";
     }
 }
