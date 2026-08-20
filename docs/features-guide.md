@@ -18,7 +18,7 @@ Manage servers dynamically without restarting the gateway:
    - **Transport Type**: Select `sse` (stateful) or `http` (stateless).
    - **Category**: Classify the server (e.g., `homecontrol`, `infrastructure`, `development`).
    - **API Token/Key**: Downstream credentials.
-   - **Secret Provider**: Secret retrieval method (`None`, `Vault`, `WindowsRegistry`, or `Environment`). See [Pluggable Secret Retrievers](#5-pluggable-secret-retrievers).
+   - **Secret Provider**: Secret retrieval method (`None`, `Vault`, `WindowsRegistry`, or `Environment`). See [Pluggable Secret Retrievers](#6-pluggable-secret-retrievers).
 4. Click **Save Server**. The router registers the server and initializes connections.
 
 ![Add MCP Server Modal](../docs/assets/add_server_modal.jpg)
