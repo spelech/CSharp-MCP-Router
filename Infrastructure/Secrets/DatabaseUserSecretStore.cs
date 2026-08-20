@@ -49,5 +49,10 @@ namespace McpRouter.Infrastructure.Secrets
         {
             await _repo.DeleteCredentialAsync(username, serverId);
         }
+
+        public async Task<System.Collections.Generic.IEnumerable<string>> GetServerIdsAsync(string username)
+        {
+            return await _repo.GetServerIdsAsync(username);
+        }
     }
 }

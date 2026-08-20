@@ -62,6 +62,7 @@ namespace McpRouter.Infrastructure.Persistence
         Task<UserCredentialDto?> GetCredentialAsync(string username, string serverId);
         Task SaveCredentialAsync(UserCredentialDto dto);
         Task DeleteCredentialAsync(string username, string serverId);
+        Task<IEnumerable<string>> GetServerIdsAsync(string username);
     }
 
 
@@ -640,6 +641,14 @@ namespace McpRouter.Infrastructure.Persistence
             await conn.ExecuteAsync(
                 "DELETE FROM UserServerCredentials WHERE Username = @Username AND ServerId = @ServerId;",
                 new { Username = username, ServerId = serverId });
+        }
+
+        public async Task<IEnumerable<string>> GetServerIdsAsync(string username)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            return await conn.QueryAsync<string>(
+                "SELECT ServerId FROM UserServerCredentials WHERE Username = @Username;",
+                new { Username = username });
         }
     }
 }

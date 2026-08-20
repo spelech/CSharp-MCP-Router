@@ -26,5 +26,10 @@ namespace McpRouter.Infrastructure.Secrets
         {
             throw new NotImplementedException("Vault delete not implemented");
         }
+
+        public Task<System.Collections.Generic.IEnumerable<string>> GetServerIdsAsync(string username)
+        {
+            throw new NotImplementedException("Vault list not implemented");
+        }
     }
 }
