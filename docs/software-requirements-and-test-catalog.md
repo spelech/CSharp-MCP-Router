@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **81 Requirements Verified** across **160 Test Proofs** (63 Functional Capabilities, 18 Safety Guardrails).
+> **Catalog Statistics:** **82 Requirements Verified** across **161 Test Proofs** (64 Functional Capabilities, 18 Safety Guardrails).
 
 ---
 
@@ -16,7 +16,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **6** | 5 | 1 | 13 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 7 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **5** | 5 | 0 | 24 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **6** | 6 | 0 | 25 proofs |
 
 ---
 
@@ -400,6 +400,12 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L337`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L337) (`StdioTransport_ParseCommandLine_Handles_Quotes_And_Spaces`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L482`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L482) (`StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately`)
 
+### `[REQ-UI-MY-SERVERS-01]` Renders the My MCP Servers view and allows editing user-provided authentication credentials.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts#L5) (`should render user provided servers and allow editing credentials`)
+
 ### `[UI-01]` Dashboard renders stats card, connected server list, and setup instructions
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
@@ -676,6 +682,7 @@
 | `TRANS-01` | Positive | `TRANS` | SSE transport resolves static plaintext API keys when provider is None | [`SseTransportTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L18) | Backend xUnit |
 | `TRANS-02` | Positive | `TRANS` | HTTP stateless transport resolves static API keys when secret provider is None | [`HttpTransportTests.cs:L19`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L19) | Backend xUnit |
 | `TRANS-03` | Positive | `TRANS` | STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls | [`StdioTransportTests.cs:L59`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L59) | Backend xUnit |
+| `REQ-UI-MY-SERVERS-01` | Positive | `UI` | Renders the My MCP Servers view and allows editing user-provided authentication credentials. | [`my-mcp-servers.spec.ts:L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts#L5) | Playwright E2E |
 | `UI-01` | Positive | `UI` | Dashboard renders stats card, connected server list, and setup instructions | [`DashboardView.test.tsx:L36`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L36) | Frontend Vitest |
 | `UI-02` | Positive | `UI` | Modal remains hidden when isInspectOpen is false | [`ServerInspectModal.test.tsx:L46`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L46) | Frontend Vitest |
 | `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L59`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L59) | Frontend Vitest |
