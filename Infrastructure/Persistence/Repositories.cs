@@ -49,13 +49,29 @@ namespace McpRouter.Infrastructure.Persistence
         Task<IEnumerable<AuthProviderDto>> GetAuthProvidersAsync();
         Task SaveAuthProviderAsync(AuthProviderDto dto);
     }
+    public class UserCredentialDto
+    {
+        public string Id { get; set; } = "";
+        public string Username { get; set; } = "";
+        public string ServerId { get; set; } = "";
+        public string EncryptedSecretJson { get; set; } = "";
+    }
+
+    public interface IUserCredentialRepository
+    {
+        Task<UserCredentialDto?> GetCredentialAsync(string username, string serverId);
+        Task SaveCredentialAsync(UserCredentialDto dto);
+        Task DeleteCredentialAsync(string username, string serverId);
+    }
+
 
     public class DatabaseRepository :
         ISettingRepository,
         IServerRepository,
         IAppKeyRepository,
         ISecretProviderRepository,
-        IAuthProviderRepository
+        IAuthProviderRepository,
+        IUserCredentialRepository
     {
         private readonly IDbConnectionFactory _dbFactory;
         private readonly IConfiguration? _config;
@@ -567,6 +583,63 @@ namespace McpRouter.Infrastructure.Persistence
                 tx.Rollback();
                 throw;
             }
+        }
+        // ==========================================
+        // IUserCredentialRepository
+        // ==========================================
+        public async Task<UserCredentialDto?> GetCredentialAsync(string username, string serverId)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            return await conn.QueryFirstOrDefaultAsync<UserCredentialDto>(
+                "SELECT * FROM UserServerCredentials WHERE Username = @Username AND ServerId = @ServerId;",
+                new { Username = username, ServerId = serverId });
+        }
+
+        public async Task SaveCredentialAsync(UserCredentialDto dto)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            var provider = _dbFactory.ProviderName.ToLower();
+
+            if (provider == "sqlite")
+            {
+                const string sql = @"
+                    INSERT INTO UserServerCredentials (Id, Username, ServerId, EncryptedSecretJson)
+                    VALUES (@Id, @Username, @ServerId, @EncryptedSecretJson)
+                    ON CONFLICT(Id) DO UPDATE SET
+                        EncryptedSecretJson = @EncryptedSecretJson;";
+                await conn.ExecuteAsync(sql, dto);
+            }
+            else if (provider == "mysql")
+            {
+                const string sql = @"
+                    INSERT INTO UserServerCredentials (Id, Username, ServerId, EncryptedSecretJson)
+                    VALUES (@Id, @Username, @ServerId, @EncryptedSecretJson)
+                    ON DUPLICATE KEY UPDATE
+                        EncryptedSecretJson = @EncryptedSecretJson;";
+                await conn.ExecuteAsync(sql, dto);
+            }
+            else
+            {
+                const string sql = @"
+                    IF EXISTS (SELECT 1 FROM UserServerCredentials WHERE Id = @Id)
+                    BEGIN
+                        UPDATE UserServerCredentials SET EncryptedSecretJson = @EncryptedSecretJson WHERE Id = @Id;
+                    END
+                    ELSE
+                    BEGIN
+                        INSERT INTO UserServerCredentials (Id, Username, ServerId, EncryptedSecretJson)
+                        VALUES (@Id, @Username, @ServerId, @EncryptedSecretJson);
+                    END;";
+                await conn.ExecuteAsync(sql, dto);
+            }
+        }
+
+        public async Task DeleteCredentialAsync(string username, string serverId)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            await conn.ExecuteAsync(
+                "DELETE FROM UserServerCredentials WHERE Username = @Username AND ServerId = @ServerId;",
+                new { Username = username, ServerId = serverId });
         }
     }
 }
