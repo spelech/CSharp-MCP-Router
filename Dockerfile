@@ -21,8 +21,8 @@ COPY . ./
 COPY --from=frontend-build /wwwroot ./wwwroot
 RUN dotnet publish mcp-router.csproj -c Release -o /app
 
-# Stage 3: Final runtime image
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+# Stage 3: Standard runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
 
 # Install native dependencies for SQLite / SQLCipher bundle if any
@@ -42,3 +42,21 @@ ENV ASPNETCORE_URLS=http://+:8080 \
 
 # Run the app
 ENTRYPOINT ["dotnet", "mcp-router.dll"]
+
+# Stage 4: "Batteries-Included" full runtime image for STDIO backends
+FROM runtime AS runtime-full
+
+# Install Python 3, Node.js, npm, ca-certificates, and curl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    python3 \
+    python3-pip \
+    python3-venv \
+    nodejs \
+    npm \
+    ca-certificates \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy pre-compiled uv and bun binaries from official images
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+COPY --from=oven/bun:latest /usr/local/bin/bun /usr/local/bin/bun
