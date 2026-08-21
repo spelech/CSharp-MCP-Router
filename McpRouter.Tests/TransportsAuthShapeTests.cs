@@ -214,4 +214,19 @@ namespace McpRouter.Tests
         var token = await transport.ResolveTokenAsync();
         Assert.Equal("secret-token-123", token);
     }
+
+    [Fact]
+    public async Task HttpTransport_SendRequestAsync_Throws_When_Impersonation_Missing_WindowsIdentity()
+    {
+        var server = new McpServer
+        {
+            Id = "impersonate-srv",
+            Url = "http://localhost:5000/mcp",
+            AuthShape = "impersonation"
+        };
+        var transport = new HttpTransport(server, new HttpClient(), NullLogger<HttpTransport>.Instance, null, null, null);
+
+        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => transport.SendRequestAsync("ping", "{\"jsonrpc\":\"2.0\",\"method\":\"ping\",\"id\":1}"));
+        Assert.Contains("Kerberos impersonation failed", ex.Message);
+    }
 }}
