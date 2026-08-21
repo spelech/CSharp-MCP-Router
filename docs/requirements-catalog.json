@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-21T22:45:56.8125471Z",
-    "totalRequirements": 82,
-    "positiveCount": 64,
+    "generatedAt": "2026-08-21T23:55:32.6028623Z",
+    "totalRequirements": 83,
+    "positiveCount": 65,
     "guardrailCount": 18,
-    "totalProofs": 161
+    "totalProofs": 162
   },
   "requirements": [
     {
@@ -423,6 +423,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs",
           "lineNumber": 18,
           "testName": "GetUserCredentials_ReturnsServerIds",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-101",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "HTTP transport injects X-Forwarded-User header based on connected user identity.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs",
+          "lineNumber": 16,
+          "testName": "HttpTransport_InjectsXForwardedUserHeader",
           "details": null
         }
       ]

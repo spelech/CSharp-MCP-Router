@@ -26,18 +26,18 @@ namespace McpRouter.Core.Routing
         public ConcurrentDictionary<string, TaskCompletionSource<JsonRpcResponse>> PendingRequests => _stateManager.PendingRequests;
         public TimeSpan RequestTimeout { get => _transport.RequestTimeout; set => _transport.RequestTimeout = value; }
 
-        public BackendConnection(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null)
+        public BackendConnection(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, string? forwardedUser = null)
         {
             _server = server;
             _stateManager = new JsonRpcStateManager();
 
             if (server.Type == "http" || server.Type == "custom" || server.Type == "streamable")
             {
-                _transport = new HttpTransport(server, httpClient, logger, secretRetriever, passThroughToken);
+                _transport = new HttpTransport(server, httpClient, logger, secretRetriever, passThroughToken, null, forwardedUser);
             }
             else if (server.Type == "sse")
             {
-                _transport = new SseTransport(server, httpClient, logger, _stateManager, secretRetriever, passThroughToken);
+                _transport = new SseTransport(server, httpClient, logger, _stateManager, secretRetriever, passThroughToken, forwardedUser);
             }
             else if (server.Type == "stdio")
             {

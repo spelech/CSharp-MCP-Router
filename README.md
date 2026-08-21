@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.22.1-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.22.2-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-609%20passing-2ea44f?style=for-the-badge)
@@ -200,11 +200,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.22.2`** | 2026-08-21 | patch |
 | **`v4.22.1`** | 2026-08-21 | 4.22.0 |
 | **`v4.20.3`** | 2026-08-21 | fix: resolve typescript ERESOLVE in frontend dependencies |
 | **`v4.20.2`** | 2026-08-21 | chore(deps): bump dependencies and fix SQLCipher version conflict |
 | **`v4.20.1`** | 2026-08-21 | fix(e2e): fix backend DI scope and SQLite schema syntax errors, and add comprehensive Playwright E2E coverage for User Credentials |
-| **`v4.20.0`** | 2026-08-20 | feat(auth): User-Specific MCP Server Authentication via `UserProvided` secret provider and self-service portal |
 
 ---
 
