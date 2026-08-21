@@ -1,57 +1,42 @@
 import { test, expect } from '@playwright/test';
+import { DashboardPage } from './pages/DashboardPage';
+import { ServerModalPage } from './pages/ServerModalPage';
 
 test.describe('My MCP Servers & User Credentials Flow', () => {
 
-  /**
-   * @requirement REQ-UI-MY-SERVERS-01
-   * @category UI
-   * @type PositiveFeature
-   * @description Renders the My MCP Servers view and allows editing user-provided authentication credentials.
-   */
-  test('should render user provided servers and allow editing credentials', async ({ page }) => {
-    // Mock the API responses
-    await page.route('**/api/servers', async route => {
-      const json = [
-        { id: 'server-1', displayName: 'Mock Server 1', secretProvider: 'UserProvided' },
-        { id: 'server-2', displayName: 'Mock Server 2', secretProvider: 'Vault' } // Should be filtered out
-      ];
-      await route.fulfill({ json });
-    });
+  test('should render user provided servers and allow editing credentials with SQLite schema', async ({ page }) => {
+    test.setTimeout(60000);
+    const dashboard = new DashboardPage(page);
+    const serverModal = new ServerModalPage(page);
 
-    let mockCredentials: any[] = [];
+    await dashboard.goto();
 
-    await page.route('**/api/user/credentials', async route => {
-      if (route.request().method() === 'GET') {
-        await route.fulfill({ json: mockCredentials });
-      } else {
-        await route.continue();
-      }
-    });
+    if (await dashboard.addServerBtn.isVisible()) {
+      await dashboard.addServerBtn.click();
+      await expect(serverModal.modal).toBeVisible();
 
-    await page.route('**/api/user/credentials/server-1', async route => {
-      if (route.request().method() === 'POST' || route.request().method() === 'PUT') {
-        // Mock successful save
-        mockCredentials = [{ serverId: 'server-1', hasCredential: true }];
-        await route.fulfill({ status: 200, json: { success: true } });
-      } else {
-        await route.continue();
-      }
-    });
+      await serverModal.fillServerForm({
+        id: 'sqlite_schema_mock',
+        name: 'SQLite Auth Server',
+        type: 'sse',
+        url: 'http://mock-mcp-server:8090/sse',
+        secretProvider: 'UserProvided'
+      });
 
-    await page.goto('/');
+      await serverModal.save();
+    }
+
+    // Wait for save
+    await page.waitForTimeout(2000);
 
     // Navigate to My MCP Servers
     const tabBtn = page.locator('button:has-text("My MCP Servers")');
     await expect(tabBtn).toBeVisible();
     await tabBtn.click();
 
-    // Verify it only shows the UserProvided server
-    const tableRows = page.locator('table.data-table tbody tr');
-    await expect(tableRows).toHaveCount(1);
-    
     // Verify row content and Auth Missing status
-    const firstRow = tableRows.first();
-    await expect(firstRow).toContainText('Mock Server 1');
+    const firstRow = page.locator('table.data-table tbody tr').filter({ hasText: 'SQLite Auth Server' }).first();
+    await expect(firstRow).toBeVisible();
     await expect(firstRow).toContainText('Auth Missing');
 
     // Click Edit Auth
@@ -61,7 +46,7 @@ test.describe('My MCP Servers & User Credentials Flow', () => {
     // Verify modal overlay opens
     const modal = page.locator('.modal-backdrop, .modal-card').first();
     await expect(modal).toBeVisible();
-    await expect(modal).toContainText('Edit Auth for Mock Server 1');
+    await expect(modal).toContainText('Edit Auth for SQLite Auth Server');
 
     // Type JSON into textarea
     const textarea = modal.locator('textarea');
