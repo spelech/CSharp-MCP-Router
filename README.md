@@ -200,6 +200,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.20.3`** | 2026-08-21 | fix: resolve typescript ERESOLVE in frontend dependencies |
 | **`v4.20.2`** | 2026-08-21 | chore(deps): bump dependencies and fix SQLCipher version conflict |
 | **`v4.20.1`** | 2026-08-21 | fix(e2e): fix backend DI scope and SQLite schema syntax errors, and add comprehensive Playwright E2E coverage for User Credentials |
 | **`v4.20.0`** | 2026-08-20 | feat(auth): User-Specific MCP Server Authentication via `UserProvided` secret provider and self-service portal |
