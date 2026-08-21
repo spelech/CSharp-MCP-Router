@@ -11,10 +11,6 @@ export const MyMcpServers: React.FC = () => {
   const [editingServer, setEditingServer] = useState<McpServer | null>(null);
   const [secretJson, setSecretJson] = useState('');
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   const loadData = async () => {
     setLoading(true);
     try {
@@ -31,6 +27,11 @@ export const MyMcpServers: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    loadData();
+  }, []);
+
   const handleEdit = (server: McpServer) => {
     setEditingServer(server);
     setSecretJson('{\n  "apiKey": ""\n}'); // default template
@@ -45,7 +46,7 @@ export const MyMcpServers: React.FC = () => {
       await saveUserCredentialApi(editingServer.id, secretJson);
       setEditingServer(null);
       await loadData();
-    } catch (e) {
+    } catch {
       alert('Invalid JSON or failed to save.');
     }
   };
