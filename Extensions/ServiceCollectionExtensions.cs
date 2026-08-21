@@ -83,6 +83,7 @@ namespace McpRouter.Extensions
             builder.Services.AddSingleton<IAppKeyRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
             builder.Services.AddSingleton<ISecretProviderRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
             builder.Services.AddSingleton<IAuthProviderRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
+            builder.Services.AddSingleton<IUserCredentialRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
 
             // Register Credential Service
             builder.Services.AddSingleton<ICredentialService, CredentialService>();
