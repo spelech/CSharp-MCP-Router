@@ -16,6 +16,7 @@ describe('ServerInspectModal Component', () => {
     hidden: false,
     connectionAttempts: 0,
     connectionError: '',
+    allowPassThroughAuth: false,
   };
 
   const mockInspectData = {

@@ -16,6 +16,8 @@ export interface McpServer {
   connectionStatus: string;
   connectionAttempts: number;
   connectionError: string;
+  allowPassThroughAuth: boolean;
+  dynamicAuthPrompt?: string;
 }
 
 export interface ServerPayload {
@@ -31,6 +33,8 @@ export interface ServerPayload {
   apiKey?: string;
   enabled: boolean;
   hidden: boolean;
+  allowPassThroughAuth: boolean;
+  dynamicAuthPrompt?: string;
 }
 
 export interface InspectCapabilityData {

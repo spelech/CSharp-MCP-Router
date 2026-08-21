@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-20T21:27:56.0635580Z",
+    "generatedAt": "2026-08-21T22:45:56.8125471Z",
     "totalRequirements": 82,
     "positiveCount": 64,
     "guardrailCount": 18,
@@ -423,6 +423,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs",
           "lineNumber": 18,
           "testName": "GetUserCredentials_ReturnsServerIds",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-105",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Dynamic Auth Target Pass-Through",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 180,
+          "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
         }
       ]
@@ -1644,22 +1660,6 @@
       ]
     },
     {
-      "id": "REQ-UI-MY-SERVERS-01",
-      "category": "UI",
-      "type": "Positive",
-      "description": "Renders the My MCP Servers view and allows editing user-provided authentication credentials.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts",
-          "lineNumber": 5,
-          "testName": "should render user provided servers and allow editing credentials",
-          "details": null
-        }
-      ]
-    },
-    {
       "id": "UI-01",
       "category": "UI",
       "type": "Positive",
@@ -1669,14 +1669,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx",
-          "lineNumber": 36,
+          "lineNumber": 38,
           "testName": "renders stats card, server list, and client setup guide",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx",
-          "lineNumber": 111,
+          "lineNumber": 113,
           "testName": "renders empty state when no servers match search",
           "details": null
         },
@@ -1720,49 +1720,49 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
-          "lineNumber": 46,
+          "lineNumber": 47,
           "testName": "renders nothing when isInspectOpen is false",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
-          "lineNumber": 58,
+          "lineNumber": 59,
           "testName": "renders loading state when inspectLoading is true",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
-          "lineNumber": 76,
+          "lineNumber": 77,
           "testName": "renders tools tab with schema and handles tab switching",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
-          "lineNumber": 113,
+          "lineNumber": 114,
           "testName": "renders resources tab items and handles search filtering",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
-          "lineNumber": 141,
+          "lineNumber": 142,
           "testName": "renders prompts tab with arguments and empty state when filtered out",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
-          "lineNumber": 163,
+          "lineNumber": 164,
           "testName": "renders empty states for tabs when data is empty",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
-          "lineNumber": 191,
+          "lineNumber": 192,
           "testName": "closes modal when close button is clicked",
           "details": null
         }
@@ -1778,14 +1778,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx",
-          "lineNumber": 59,
+          "lineNumber": 61,
           "testName": "renders grouped server view by category and allows collapsing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx",
-          "lineNumber": 86,
+          "lineNumber": 88,
           "testName": "renders grouped server view by status and type",
           "details": null
         }

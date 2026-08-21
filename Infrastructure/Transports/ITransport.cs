@@ -8,7 +8,7 @@ namespace McpRouter.Infrastructure.Transports
     {
         Task ConnectAsync();
         void StartReader(Func<JsonRpcMessage, Task> onMessageReceived);
-        Task<JsonRpcResponse> SendRequestAsync(string method, string body);
+        Task<JsonRpcResponse> SendRequestAsync(string method, string body, string? targetAuthToken = null);
         Task SendNotificationAsync(string method, string body);
         Task SendResponseAsync(string responseJson);
         TimeSpan RequestTimeout { get; set; }

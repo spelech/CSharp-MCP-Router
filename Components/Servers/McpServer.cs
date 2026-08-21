@@ -23,6 +23,7 @@ namespace McpRouter.Components.Servers
         public string? HeadersJson { get; set; } // JSON dictionary of custom headers
         public bool AutoDiscovered { get; set; } = false;
         public bool AllowPassThroughAuth { get; set; } = false;
+        public string? DynamicAuthPrompt { get; set; }
     }
 
     public class BackendStatus
