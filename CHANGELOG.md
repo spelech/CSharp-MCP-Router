@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.20.2`** | 2026-08-21 | chore(deps): bump dependencies (npm, nuget, github-actions) and fix SQLCipher version conflict |
 | **`v4.20.1`** | 2026-08-21 | fix(e2e): fix backend DI scope and SQLite schema syntax errors, and add comprehensive Playwright E2E coverage for User Credentials across Vault and SQLite |
 | **`v4.20.0`** | 2026-08-20 | feat(auth): User-Specific MCP Server Authentication - Added `UserProvided` secret provider to allow users to set personal auth for target MCP servers via a new self-service portal (`/my-mcp-servers`). Supported across DB and Vault. |
 | **`v4.19.1`** | 2026-08-18 | feat(skills): introduce universal `mcp-router-setup` agentic skill, interactive setup workflow, bundled scaffold templates for Docker Compose & Windows IIS, and zero-clone setup documentation |
