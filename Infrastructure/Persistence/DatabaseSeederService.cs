@@ -643,9 +643,6 @@ namespace McpRouter.Infrastructure.Persistence
                         EmbeddingModelDir TEXT,
                         GlobalMaxKeys INTEGER DEFAULT 100,
                         UserMaxKeys INTEGER DEFAULT 5,
-                        UserSecretStorage TEXT DEFAULT 'Database',
-                        UserSecretStorage TEXT DEFAULT 'Database'
-                        UserMaxKeys INTEGER DEFAULT 5,
                         UserSecretStorage TEXT DEFAULT 'Database'
                     );
 
