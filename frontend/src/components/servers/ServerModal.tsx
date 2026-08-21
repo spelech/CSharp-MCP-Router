@@ -128,7 +128,6 @@ const ServerModalDialog: React.FC = () => {
                 <option value="Vault">HashiCorp Vault (KV v2)</option>
                 <option value="WindowsRegistry">Windows Registry (DPAPI)</option>
                 <option value="Environment">Environment Variables</option>
-                <option value="TokenExchange">OAuth2 / OIDC Token Exchange (OBO / PocketID)</option>
               </select>
             </div>
             <div className="form-group">
@@ -136,13 +135,7 @@ const ServerModalDialog: React.FC = () => {
               <input
                 type="text"
                 id="server-secret-key"
-                placeholder={
-                  secretProvider === 'Vault'
-                    ? 'e.g. secret:services/my-service:token'
-                    : secretProvider === 'TokenExchange'
-                    ? 'e.g. mcp:write (target scope)'
-                    : 'e.g. NOTES_API_KEY'
-                }
+                placeholder={secretProvider === 'Vault' ? 'e.g. secret:services/my-service:token' : 'e.g. NOTES_API_KEY'}
                 value={secretKey}
                 onChange={(e) => setSecretKey(e.target.value)}
               />
@@ -163,6 +156,7 @@ const ServerModalDialog: React.FC = () => {
                 <option value="x-api-key">X-API-Key Header (X-API-Key: &lt;token&gt;)</option>
                 <option value="custom-header">Custom Header Name (e.g. Slack-Token: &lt;token&gt;)</option>
                 <option value="query">URL Query Parameter (e.g. ?token=&lt;token&gt;)</option>
+                <option value="impersonation">Kerberos / NTLM Impersonation (S4U2Proxy / RunImpersonated)</option>
               </select>
             </div>
             {showCustomHeaderName && (
@@ -178,6 +172,13 @@ const ServerModalDialog: React.FC = () => {
               </div>
             )}
           </div>
+
+          {authShape === 'impersonation' && (
+            <div className="form-group" style={{ marginBottom: '12px', padding: '10px 12px', background: 'rgba(234, 179, 8, 0.1)', border: '1px solid rgba(234, 179, 8, 0.3)', borderRadius: '6px', fontSize: '0.85rem' }}>
+              <i className="fa-solid fa-triangle-exclamation" style={{ color: '#eab308', marginRight: '6px' }}></i>
+              <strong>Active Directory Impersonation:</strong> Outbound requests pass the caller's Windows identity via Kerberos S4U2Proxy. Requires AD Constrained Delegation and SPNs registered.
+            </div>
+          )}
 
           <div className="form-group">
             <label htmlFor="server-key">Static API Token / Secret (Fallback)</label>

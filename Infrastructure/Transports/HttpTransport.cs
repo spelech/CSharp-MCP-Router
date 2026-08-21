@@ -17,7 +17,8 @@ namespace McpRouter.Infrastructure.Transports
 {
     public class HttpTransport : ITransport
     {
-        private readonly string? _passThroughToken;
+        private readonly string? _passThroughToken;
+        private readonly System.Security.Principal.WindowsIdentity? _callerWindowsIdentity;
         public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
@@ -26,13 +27,36 @@ namespace McpRouter.Infrastructure.Transports
         private readonly CancellationTokenSource _cts = new();
         private string _sessionId = string.Empty;
 
-        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null)
+        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, System.Security.Principal.WindowsIdentity? callerWindowsIdentity = null)
         {
-            _passThroughToken = passThroughToken;
+            _passThroughToken = passThroughToken;
+            _callerWindowsIdentity = callerWindowsIdentity;
             _server = server;
             _httpClient = httpClient;
             _logger = logger;
             _secretRetriever = secretRetriever;
+        }
+
+        private static HttpRequestMessage CloneHttpRequestMessage(HttpRequestMessage req)
+        {
+            var clone = new HttpRequestMessage(req.Method, req.RequestUri);
+            if (req.Content != null)
+            {
+                var ms = new MemoryStream();
+                req.Content.CopyToAsync(ms).GetAwaiter().GetResult();
+                ms.Position = 0;
+                var streamContent = new StreamContent(ms);
+                foreach (var header in req.Content.Headers)
+                {
+                    streamContent.Headers.TryAddWithoutValidation(header.Key, header.Value);
+                }
+                clone.Content = streamContent;
+            }
+            foreach (var header in req.Headers)
+            {
+                clone.Headers.TryAddWithoutValidation(header.Key, header.Value);
+            }
+            return clone;
         }
 
         public async Task<string?> ResolveTokenAsync(ISecretRetriever? secretRetriever = null)
@@ -40,8 +64,8 @@ namespace McpRouter.Infrastructure.Transports
             if (!string.IsNullOrEmpty(_passThroughToken) && (_server.AllowPassThroughAuth || _server.SecretProvider == "UserProvided"))
             {
                 return _passThroughToken;
-            }
-
+            }
+
             var provider = _server.SecretProvider ?? "None";
             if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
@@ -188,7 +212,57 @@ namespace McpRouter.Infrastructure.Transports
             using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             using var linked = CancellationTokenSource.CreateLinkedTokenSource(_cts.Token, ctsTimeout.Token);
 
-            using var resp = await _httpClient.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, linked.Token);
+            HttpResponseMessage resp;
+            var authShape = (_server.AuthShape ?? "bearer").ToLowerInvariant();
+            bool isImpersonation = string.Equals(authShape, "impersonation", StringComparison.OrdinalIgnoreCase) ||
+                                   string.Equals(authShape, "kerberos-impersonate", StringComparison.OrdinalIgnoreCase);
+
+            if (isImpersonation)
+            {
+                if (!OperatingSystem.IsWindows())
+                {
+                    var msg = $"Kerberos impersonation failed for server '{_server.Id}': Impersonation requires running on a Windows host with Active Directory integration.";
+                    _logger.LogError("{ErrorMessage}", msg);
+                    throw new InvalidOperationException(msg);
+                }
+
+                if (_callerWindowsIdentity == null)
+                {
+                    var msg = $"Kerberos impersonation failed for server '{_server.Id}': Inbound caller is not authenticated via Active Directory / Windows Authentication.";
+                    _logger.LogError("{ErrorMessage}", msg);
+                    throw new InvalidOperationException(msg);
+                }
+
+#pragma warning disable CA1416
+                try
+                {
+                    resp = await System.Security.Principal.WindowsIdentity.RunImpersonatedAsync(
+                        _callerWindowsIdentity.AccessToken,
+                        async () =>
+                        {
+                            using var handler = new SocketsHttpHandler
+                            {
+                                AllowAutoRedirect = false,
+                                Credentials = System.Net.CredentialCache.DefaultNetworkCredentials
+                            };
+                            using var impClient = new HttpClient(handler);
+                            using var impReq = CloneHttpRequestMessage(req);
+                            return await impClient.SendAsync(impReq, HttpCompletionOption.ResponseHeadersRead, linked.Token);
+                        });
+                }
+                catch (Exception ex)
+                {
+                    var msg = $"Kerberos delegation failed for server '{_server.Id}': Ensure Service Principal Names (SPNs) are registered and AD Constrained Delegation (S4U2Proxy) is configured for the service account. Detail: {ex.Message}";
+                    _logger.LogError(ex, "{ErrorMessage}", msg);
+                    throw new InvalidOperationException(msg, ex);
+                }
+#pragma warning restore CA1416
+            }
+            else
+            {
+                resp = await _httpClient.SendAsync(req, HttpCompletionOption.ResponseHeadersRead, linked.Token);
+            }
+
             resp.EnsureSuccessStatusCode();
 
             if (resp.Headers.TryGetValues("Mcp-Session-Id", out var sVals))
@@ -253,5 +327,3 @@ namespace McpRouter.Infrastructure.Transports
         }
     }
 }
-
-
