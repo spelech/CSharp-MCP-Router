@@ -191,6 +191,8 @@ namespace McpRouter.Infrastructure.Persistence
                 if (!serversCols.Contains("ApiKey")) conn.Execute("ALTER TABLE Servers ADD COLUMN ApiKey TEXT NULL;");
                 if (!serversCols.Contains("HeadersJson")) conn.Execute("ALTER TABLE Servers ADD COLUMN HeadersJson TEXT NULL;");
                 if (!serversCols.Contains("AutoDiscovered")) conn.Execute("ALTER TABLE Servers ADD COLUMN AutoDiscovered INTEGER DEFAULT 0;");
+                if (!serversCols.Contains("AllowPassThroughAuth")) conn.Execute("ALTER TABLE Servers ADD COLUMN AllowPassThroughAuth INTEGER DEFAULT 0;");
+                if (!serversCols.Contains("DynamicAuthPrompt")) conn.Execute("ALTER TABLE Servers ADD COLUMN DynamicAuthPrompt TEXT NULL;");
             }
         }
 
@@ -219,7 +221,9 @@ namespace McpRouter.Infrastructure.Persistence
                             [Categories]        NVARCHAR(MAX) NOT NULL DEFAULT '[]',
                             [ApiKey]            NVARCHAR(MAX) NULL,
                             [HeadersJson]       NVARCHAR(MAX) NULL,
-                            [AutoDiscovered]    BIT NOT NULL DEFAULT 0
+                            [AutoDiscovered]    BIT NOT NULL DEFAULT 0,
+                            [AllowPassThroughAuth] BIT NOT NULL DEFAULT 0,
+                            [DynamicAuthPrompt] NVARCHAR(MAX) NULL
                         );
                     END;
 
@@ -263,6 +267,10 @@ namespace McpRouter.Infrastructure.Persistence
                         ALTER TABLE [dbo].[Servers] ADD [HeadersJson] NVARCHAR(MAX) NULL;
                     IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.Servers') AND name = 'AutoDiscovered')
                         ALTER TABLE [dbo].[Servers] ADD [AutoDiscovered] BIT NOT NULL DEFAULT 0;
+                    IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'AllowPassThroughAuth' AND Object_ID = Object_ID(N'dbo.Servers'))
+                        ALTER TABLE [dbo].[Servers] ADD [AllowPassThroughAuth] BIT NOT NULL DEFAULT 0;
+                    IF NOT EXISTS (SELECT * FROM sys.columns WHERE Name = N'DynamicAuthPrompt' AND Object_ID = Object_ID(N'dbo.Servers'))
+                        ALTER TABLE [dbo].[Servers] ADD [DynamicAuthPrompt] NVARCHAR(MAX) NULL;
                 END;
 
                 IF OBJECT_ID('dbo.Settings', 'U') IS NOT NULL
@@ -473,6 +481,8 @@ namespace McpRouter.Infrastructure.Persistence
                 if (!serversCols.Contains("ApiKey")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `ApiKey` LONGTEXT NULL;");
                 if (!serversCols.Contains("HeadersJson")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `HeadersJson` LONGTEXT NULL;");
                 if (!serversCols.Contains("AutoDiscovered")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `AutoDiscovered` TINYINT(1) NOT NULL DEFAULT 0;");
+                if (!serversCols.Contains("AllowPassThroughAuth")) conn.Execute("ALTER TABLE Servers ADD COLUMN AllowPassThroughAuth INTEGER DEFAULT 0;");
+                if (!serversCols.Contains("DynamicAuthPrompt")) conn.Execute("ALTER TABLE Servers ADD COLUMN DynamicAuthPrompt TEXT NULL;");
             }
 
             var settingsTableExists = conn.ExecuteScalar<int>(@"
@@ -629,7 +639,9 @@ namespace McpRouter.Infrastructure.Persistence
                         Categories TEXT DEFAULT '[]',
                         ApiKey TEXT,
                         HeadersJson TEXT,
-                        AutoDiscovered INTEGER DEFAULT 0
+                        AutoDiscovered INTEGER DEFAULT 0,
+                        AllowPassThroughAuth INTEGER DEFAULT 0,
+                        DynamicAuthPrompt TEXT
                     );
 
                     CREATE TABLE IF NOT EXISTS Settings (
@@ -759,7 +771,9 @@ namespace McpRouter.Infrastructure.Persistence
                             [Categories]        NVARCHAR(MAX) NOT NULL DEFAULT '[]',
                             [ApiKey]            NVARCHAR(MAX) NULL,
                             [HeadersJson]       NVARCHAR(MAX) NULL,
-                            [AutoDiscovered]    BIT NOT NULL DEFAULT 0
+                            [AutoDiscovered]    BIT NOT NULL DEFAULT 0,
+                            [AllowPassThroughAuth] BIT NOT NULL DEFAULT 0,
+                            [DynamicAuthPrompt] NVARCHAR(MAX) NULL
                         );
                     END;
 
@@ -907,7 +921,9 @@ namespace McpRouter.Infrastructure.Persistence
                         `Categories`        LONGTEXT NOT NULL,
                         `ApiKey`            LONGTEXT NULL,
                         `HeadersJson`       LONGTEXT NULL,
-                        `AutoDiscovered`    TINYINT(1) NOT NULL DEFAULT 0
+                        `AutoDiscovered`    TINYINT(1) NOT NULL DEFAULT 0,
+                        `AllowPassThroughAuth` TINYINT(1) NOT NULL DEFAULT 0,
+                        `DynamicAuthPrompt` LONGTEXT NULL
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
                     CREATE TABLE IF NOT EXISTS `Settings` (

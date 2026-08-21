@@ -16,6 +16,7 @@ describe('ServerCard Component', () => {
     hidden: false,
     connectionAttempts: 0,
     connectionError: '',
+    allowPassThroughAuth: false,
   };
 
   it('renders connected server details with badges and triggers actions', () => {

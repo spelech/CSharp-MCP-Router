@@ -18,6 +18,8 @@ const ServerModalDialog: React.FC = () => {
   const [apiKey, setApiKey] = useState('');
   const [enabled, setEnabled] = useState(editingServer ? editingServer.enabled : true);
   const [hidden, setHidden] = useState(editingServer ? editingServer.hidden : false);
+  const [allowPassThroughAuth, setAllowPassThroughAuth] = useState(editingServer ? editingServer.allowPassThroughAuth : false);
+  const [dynamicAuthPrompt, setDynamicAuthPrompt] = useState(editingServer?.dynamicAuthPrompt || "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,6 +35,8 @@ const ServerModalDialog: React.FC = () => {
       customHeaderName,
       enabled,
       hidden,
+      allowPassThroughAuth,
+      dynamicAuthPrompt,
     };
     if (editingServer) {
       serverPayload.id = editingServer.id;
@@ -216,6 +220,31 @@ const ServerModalDialog: React.FC = () => {
               </label>
               <span className="checkbox-label">Hidden</span>
             </div>
+          </div>
+
+                    <div className="form-group">
+            <div className="checkbox-group" style={{ marginBottom: "10px" }}>
+              <label className="switch">
+                <input
+                  type="checkbox"
+                  checked={allowPassThroughAuth}
+                  onChange={(e) => setAllowPassThroughAuth(e.target.checked)}
+                />
+                <span className="slider"></span>
+              </label>
+              <span className="checkbox-label">Allow Dynamic Pass-Through Auth</span>
+            </div>
+            {allowPassThroughAuth && (
+              <div>
+                <label>Dynamic Auth Prompt Instructions</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Provide a JWT token in target_auth_token parameter"
+                  value={dynamicAuthPrompt}
+                  onChange={(e) => setDynamicAuthPrompt(e.target.value)}
+                />
+              </div>
+            )}
           </div>
 
           <div className="modal-footer">

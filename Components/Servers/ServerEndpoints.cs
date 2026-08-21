@@ -29,7 +29,7 @@ namespace McpRouter.Components.Servers
                 try
                 {
                     using var conn = dbFactory.CreateConnection();
-                    var rawServers = (await conn.QueryAsync(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson FROM Servers")).ToList();
+                    var rawServers = (await conn.QueryAsync(@"SELECT Id, DisplayName, Url, Enabled, Hidden, Type, Categories, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt FROM Servers")).ToList();
                     var statuses = sessionManager.BackendStatuses;
 
                     var sanitized = rawServers.Select(s =>
@@ -39,6 +39,11 @@ namespace McpRouter.Components.Servers
                         if (s.Enabled is long longEnabled) isEnabled = longEnabled != 0L;
                         else if (s.Enabled is bool boolEnabled) isEnabled = boolEnabled;
                         else if (s.Enabled != null) isEnabled = Convert.ToBoolean(s.Enabled);
+
+                        bool isAllowPass = false;
+                        if (s.AllowPassThroughAuth is long longAllowPass) isAllowPass = longAllowPass != 0L;
+                        else if (s.AllowPassThroughAuth is bool boolAllowPass) isAllowPass = boolAllowPass;
+                        else if (s.AllowPassThroughAuth != null) isAllowPass = Convert.ToBoolean(s.AllowPassThroughAuth);
 
                         bool isHidden = false;
                         if (s.Hidden is long longHidden) isHidden = longHidden != 0L;
@@ -69,6 +74,8 @@ namespace McpRouter.Components.Servers
                             CustomHeaderName = (string?)s.CustomHeaderName,
                             HeadersJson = (string?)s.HeadersJson,
                             HasApiKey = !string.IsNullOrEmpty((string?)s.ApiKey),
+                            AllowPassThroughAuth = isAllowPass,
+                            DynamicAuthPrompt = (string?)s.DynamicAuthPrompt,
                             ConnectionStatus = isEnabled ? (status?.Status ?? "Disconnected") : "Disabled",
                             ConnectionAttempts = status?.Attempts ?? 0,
                             ConnectionError = status?.Error ?? string.Empty
@@ -173,7 +180,7 @@ namespace McpRouter.Components.Servers
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 await conn.ExecuteAsync(@"UPDATE Servers SET DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
                     SecretProvider = @SecretProvider, SecretItemKey = @SecretItemKey, AuthShape = @AuthShape, CustomHeaderName = @CustomHeaderName,
-                    Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson WHERE Id = @Id",
+                    Categories = @Categories, ApiKey = @ApiKey, HeadersJson = @HeadersJson, AllowPassThroughAuth = @AllowPassThroughAuth, DynamicAuthPrompt = @DynamicAuthPrompt WHERE Id = @Id",
                     new
                     {
                         server.DisplayName,
@@ -187,6 +194,8 @@ namespace McpRouter.Components.Servers
                         server.CustomHeaderName,
                         Categories = catJson,
                         server.ApiKey,
+                        AllowPassThroughAuth = server.AllowPassThroughAuth ? 1 : 0,
+                        server.DynamicAuthPrompt,
                         server.HeadersJson,
                         server.Id
                     });
@@ -240,7 +249,7 @@ namespace McpRouter.Components.Servers
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 var dbStart = sw.ElapsedMilliseconds;
                 await conn.ExecuteAsync(@"INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson)
-                    VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson)",
+                    VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AllowPassThroughAuth, @DynamicAuthPrompt)",
                     new
                     {
                         server.Id,
@@ -255,6 +264,8 @@ namespace McpRouter.Components.Servers
                         server.CustomHeaderName,
                         Categories = catJson,
                         server.ApiKey,
+                        AllowPassThroughAuth = server.AllowPassThroughAuth ? 1 : 0,
+                        server.DynamicAuthPrompt,
                         server.HeadersJson
                     });
                 logger.LogInformation("DB Insert finished after {ms}ms", sw.ElapsedMilliseconds - dbStart);

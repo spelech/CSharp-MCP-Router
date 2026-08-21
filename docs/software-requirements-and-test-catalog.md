@@ -9,14 +9,14 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **14** | 13 | 1 | 42 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **15** | 14 | 1 | 43 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 5 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 33 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **6** | 5 | 1 | 13 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 7 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **6** | 6 | 0 | 25 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **5** | 5 | 0 | 24 proofs |
 
 ---
 
@@ -114,6 +114,12 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18) (`GetUserCredentials_ReturnsServerIds`)
+
+### `[REQ-AUTH-105]` Dynamic Auth Target Pass-Through
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180) (`ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt`)
 
 ### `[DB-01]` SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
@@ -400,18 +406,12 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L337`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L337) (`StdioTransport_ParseCommandLine_Handles_Quotes_And_Spaces`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L482`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L482) (`StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately`)
 
-### `[REQ-UI-MY-SERVERS-01]` Renders the My MCP Servers view and allows editing user-provided authentication credentials.
-* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
-  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts#L5) (`should render user provided servers and allow editing credentials`)
-
 ### `[UI-01]` Dashboard renders stats card, connected server list, and setup instructions
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (6):**
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L36`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L36) (`renders stats card, server list, and client setup guide`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L111`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L111) (`renders empty state when no servers match search`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L38`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L38) (`renders stats card, server list, and client setup guide`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L113`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L113) (`renders empty state when no servers match search`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42`](file:////containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42) (`should navigate to Custom Files and Backups in Settings view`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L5) (`should render the dashboard layout and header components`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L21`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L21) (`should display aggregate statistics cards`)
@@ -421,20 +421,20 @@
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (7):**
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L46`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L46) (`renders nothing when isInspectOpen is false`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L58`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L58) (`renders loading state when inspectLoading is true`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L76`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L76) (`renders tools tab with schema and handles tab switching`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L113`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L113) (`renders resources tab items and handles search filtering`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L141`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L141) (`renders prompts tab with arguments and empty state when filtered out`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L163`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L163) (`renders empty states for tabs when data is empty`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L191`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L191) (`closes modal when close button is clicked`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L47`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L47) (`renders nothing when isInspectOpen is false`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L59`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L59) (`renders loading state when inspectLoading is true`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L77`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L77) (`renders tools tab with schema and handles tab switching`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L114`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L114) (`renders resources tab items and handles search filtering`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L142`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L142) (`renders prompts tab with arguments and empty state when filtered out`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L164`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L164) (`renders empty states for tabs when data is empty`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L192`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L192) (`closes modal when close button is clicked`)
 
 ### `[UI-03]` Grouped server view renders category sections and supports collapsible groups
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (2):**
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L59`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L59) (`renders grouped server view by category and allows collapsing`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L86`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L86) (`renders grouped server view by status and type`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L61`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L61) (`renders grouped server view by category and allows collapsing`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L88`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L88) (`renders grouped server view by status and type`)
 
 ### `[UI-04]` Interactive tool tester renders server and tool selection dropdowns
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -620,6 +620,7 @@
 | `AUTH-STANDALONE-LOOPBACK-ALLOW` | Positive | `AUTH` | Standalone mode without external IDP grants admin access to loopback IP addresses. | [`StandaloneAdminAuthTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22) | Backend xUnit |
 | `REQ-AUTH-001` | Positive | `AUTH` | Verify DatabaseUserSecretStore encrypts and decrypts secret correctly. | [`UserSecretStoreTests.cs:L13`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs#L13) | Backend xUnit |
 | `REQ-AUTH-002` | Positive | `AUTH` | Verify UserCredentialsController returns configured server IDs. | [`UserCredentialsControllerTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18) | Backend xUnit |
+| `REQ-AUTH-105` | Positive | `AUTH` | Dynamic Auth Target Pass-Through | [`ToolRoutingManagerTests.cs:L180`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180) | Backend xUnit |
 | `DB-01` | Positive | `DB` | SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data | [`DatabaseSchemaUpgradeAndContractTests.cs:L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L43) | Backend xUnit |
 | `DB-02` | Positive | `DB` | MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly | [`DatabaseSchemaUpgradeAndContractTests.cs:L198`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198) | Backend xUnit |
 | `DOC-SETUP-SKILL-FRONTMATTER` | Positive | `DOC` | mcp-router-setup skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters | [`SetupSkillTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L22) | Backend xUnit |
@@ -682,9 +683,8 @@
 | `TRANS-01` | Positive | `TRANS` | SSE transport resolves static plaintext API keys when provider is None | [`SseTransportTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L18) | Backend xUnit |
 | `TRANS-02` | Positive | `TRANS` | HTTP stateless transport resolves static API keys when secret provider is None | [`HttpTransportTests.cs:L19`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L19) | Backend xUnit |
 | `TRANS-03` | Positive | `TRANS` | STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls | [`StdioTransportTests.cs:L59`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L59) | Backend xUnit |
-| `REQ-UI-MY-SERVERS-01` | Positive | `UI` | Renders the My MCP Servers view and allows editing user-provided authentication credentials. | [`my-mcp-servers.spec.ts:L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts#L5) | Playwright E2E |
-| `UI-01` | Positive | `UI` | Dashboard renders stats card, connected server list, and setup instructions | [`DashboardView.test.tsx:L36`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L36) | Frontend Vitest |
-| `UI-02` | Positive | `UI` | Modal remains hidden when isInspectOpen is false | [`ServerInspectModal.test.tsx:L46`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L46) | Frontend Vitest |
-| `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L59`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L59) | Frontend Vitest |
+| `UI-01` | Positive | `UI` | Dashboard renders stats card, connected server list, and setup instructions | [`DashboardView.test.tsx:L38`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L38) | Frontend Vitest |
+| `UI-02` | Positive | `UI` | Modal remains hidden when isInspectOpen is false | [`ServerInspectModal.test.tsx:L47`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L47) | Frontend Vitest |
+| `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L61`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L61) | Frontend Vitest |
 | `UI-04` | Positive | `UI` | Interactive tool tester renders server and tool selection dropdowns | [`ToolTesterCard.test.tsx:L41`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L41) | Frontend Vitest |
 | `UI-05` | Positive | `UI` | Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API. | [`PipelineIntegrationTests.cs:L242`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PipelineIntegrationTests.cs#L242) | Backend xUnit |

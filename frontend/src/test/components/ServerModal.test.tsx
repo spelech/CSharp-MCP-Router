@@ -19,7 +19,8 @@ describe('ServerModal component', () => {
     hasApiKey: true,
     connectionStatus: 'Connected',
     connectionAttempts: 0,
-    connectionError: ''
+    connectionError: '',
+    allowPassThroughAuth: false
   };
 
   it('renders nothing when isAddEditOpen is false', () => {
