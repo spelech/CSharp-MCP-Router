@@ -1023,7 +1023,8 @@ namespace McpRouter.Infrastructure.Persistence
             {
                 new { ProviderName = "Vault", DisplayName = "HashiCorp Vault (KV v2)", IsEnabled = 1 },
                 new { ProviderName = "WindowsRegistry", DisplayName = "Windows Registry (DPAPI)", IsEnabled = 1 },
-                new { ProviderName = "Environment", DisplayName = "Container Environment", IsEnabled = 1 }
+                new { ProviderName = "Environment", DisplayName = "Container Environment", IsEnabled = 1 },
+                new { ProviderName = "TokenExchange", DisplayName = "OAuth2 / OIDC Token Exchange (OBO)", IsEnabled = 1 }
             };
 
             foreach (var sp in secretProviders)
@@ -1039,7 +1040,8 @@ namespace McpRouter.Infrastructure.Persistence
             var authProviders = new[]
             {
                 new { ProviderName = "ActiveDirectory", DisplayName = "Active Directory", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 },
-                new { ProviderName = "HeaderAuth", DisplayName = "Configurable Reverse Proxy Header Auth", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 }
+                new { ProviderName = "HeaderAuth", DisplayName = "Configurable Reverse Proxy Header Auth", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 },
+                new { ProviderName = "PocketID", DisplayName = "PocketID OIDC", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 }
             };
 
             foreach (var ap in authProviders)

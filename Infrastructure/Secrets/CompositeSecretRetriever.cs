@@ -40,7 +40,14 @@ namespace McpRouter.Infrastructure.Secrets
             {
                 if (string.Equals(retriever.ProviderName, providerName, StringComparison.OrdinalIgnoreCase) ||
                     (providerName.Equals("Vault", StringComparison.OrdinalIgnoreCase) && retriever.ProviderName.Equals("HashiCorpVault", StringComparison.OrdinalIgnoreCase)) ||
-                    (providerName.Equals("HashiCorpVault", StringComparison.OrdinalIgnoreCase) && retriever.ProviderName.Equals("Vault", StringComparison.OrdinalIgnoreCase)))
+                    (providerName.Equals("HashiCorpVault", StringComparison.OrdinalIgnoreCase) && retriever.ProviderName.Equals("Vault", StringComparison.OrdinalIgnoreCase)) ||
+                    (retriever.ProviderName.Equals("TokenExchange", StringComparison.OrdinalIgnoreCase) &&
+                     (providerName.Equals("OBO", StringComparison.OrdinalIgnoreCase) ||
+                      providerName.Equals("PocketID", StringComparison.OrdinalIgnoreCase) ||
+                      providerName.Equals("OAuth2", StringComparison.OrdinalIgnoreCase) ||
+                      providerName.Equals("OAuth2TokenExchange", StringComparison.OrdinalIgnoreCase) ||
+                      providerName.Equals("AzureAD", StringComparison.OrdinalIgnoreCase) ||
+                      providerName.Equals("Okta", StringComparison.OrdinalIgnoreCase))))
                 {
                     targetRetriever = retriever;
                     break;
