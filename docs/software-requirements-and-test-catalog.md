@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **82 Requirements Verified** across **161 Test Proofs** (64 Functional Capabilities, 18 Safety Guardrails).
+> **Catalog Statistics:** **83 Requirements Verified** across **162 Test Proofs** (65 Functional Capabilities, 18 Safety Guardrails).
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **15** | 14 | 1 | 43 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **16** | 15 | 1 | 44 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 5 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 33 proofs |
@@ -114,6 +114,12 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18) (`GetUserCredentials_ReturnsServerIds`)
+
+### `[REQ-AUTH-101]` HTTP transport injects X-Forwarded-User header based on connected user identity.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16) (`HttpTransport_InjectsXForwardedUserHeader`)
 
 ### `[REQ-AUTH-105]` Dynamic Auth Target Pass-Through
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -620,6 +626,7 @@
 | `AUTH-STANDALONE-LOOPBACK-ALLOW` | Positive | `AUTH` | Standalone mode without external IDP grants admin access to loopback IP addresses. | [`StandaloneAdminAuthTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22) | Backend xUnit |
 | `REQ-AUTH-001` | Positive | `AUTH` | Verify DatabaseUserSecretStore encrypts and decrypts secret correctly. | [`UserSecretStoreTests.cs:L13`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs#L13) | Backend xUnit |
 | `REQ-AUTH-002` | Positive | `AUTH` | Verify UserCredentialsController returns configured server IDs. | [`UserCredentialsControllerTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18) | Backend xUnit |
+| `REQ-AUTH-101` | Positive | `AUTH` | HTTP transport injects X-Forwarded-User header based on connected user identity. | [`IdentityHeaderTests.cs:L16`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16) | Backend xUnit |
 | `REQ-AUTH-105` | Positive | `AUTH` | Dynamic Auth Target Pass-Through | [`ToolRoutingManagerTests.cs:L180`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180) | Backend xUnit |
 | `DB-01` | Positive | `DB` | SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data | [`DatabaseSchemaUpgradeAndContractTests.cs:L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L43) | Backend xUnit |
 | `DB-02` | Positive | `DB` | MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly | [`DatabaseSchemaUpgradeAndContractTests.cs:L198`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198) | Backend xUnit |

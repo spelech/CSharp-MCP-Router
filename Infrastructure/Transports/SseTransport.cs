@@ -18,7 +18,8 @@ namespace McpRouter.Infrastructure.Transports
 {
     public class SseTransport : ITransport
     {
-        private readonly string? _passThroughToken;
+        private readonly string? _passThroughToken;
+        private readonly string? _forwardedUser;
         public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
@@ -38,9 +39,10 @@ namespace McpRouter.Infrastructure.Transports
             Converters = { new JsonRpcMessageConverter() }
         };
 
-        public SseTransport(McpServer server, HttpClient httpClient, ILogger logger, JsonRpcStateManager stateManager, ISecretRetriever? secretRetriever = null, string? passThroughToken = null)
+        public SseTransport(McpServer server, HttpClient httpClient, ILogger logger, JsonRpcStateManager stateManager, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, string? forwardedUser = null)
         {
-            _passThroughToken = passThroughToken;
+            _passThroughToken = passThroughToken;
+            _forwardedUser = forwardedUser;
             _server = server;
             _httpClient = httpClient;
             _logger = logger;
@@ -149,6 +151,11 @@ namespace McpRouter.Infrastructure.Transports
                         request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
                         break;
                 }
+            }
+
+            if (!string.IsNullOrEmpty(_forwardedUser))
+            {
+                request.Headers.TryAddWithoutValidation("X-Forwarded-User", _forwardedUser);
             }
 
             if (!string.IsNullOrEmpty(_server.HeadersJson))
