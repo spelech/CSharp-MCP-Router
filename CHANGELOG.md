@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.22.1`** | 2026-08-21 | 4.22.0 |
 | **`v4.20.3`** | 2026-08-21 | fix: resolve typescript ERESOLVE in frontend dependencies |
 | **`v4.20.2`** | 2026-08-21 | chore(deps): bump dependencies (npm, nuget, github-actions) and fix SQLCipher version conflict |
 | **`v4.20.1`** | 2026-08-21 | fix(e2e): fix backend DI scope and SQLite schema syntax errors, and add comprehensive Playwright E2E coverage for User Credentials across Vault and SQLite |
