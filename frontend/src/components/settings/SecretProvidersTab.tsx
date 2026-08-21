@@ -11,11 +11,22 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
   const vault = providers.find((p) => p.providerName === 'Vault');
   const winreg = providers.find((p) => p.providerName === 'WindowsRegistry');
   const env = providers.find((p) => p.providerName === 'Environment');
+  const te = providers.find((p) => p.providerName === 'TokenExchange');
 
   const parsedVault = vault?.configJson
     ? (() => {
         try {
           return JSON.parse(vault.configJson);
+        } catch {
+          return {};
+        }
+      })()
+    : {};
+
+  const parsedTe = te?.configJson
+    ? (() => {
+        try {
+          return JSON.parse(te.configJson);
         } catch {
           return {};
         }
@@ -64,6 +75,13 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
   const [secEnvEnabled, setSecEnvEnabled] = useState(env ? env.isEnabled : false);
   const [secEnvPrefix, setSecEnvPrefix] = useState(parsedEnv.prefix || '');
 
+  const [secTeEnabled, setSecTeEnabled] = useState(te ? te.isEnabled : false);
+  const [secTeTokenEndpoint, setSecTeTokenEndpoint] = useState(parsedTe.tokenEndpoint || parsedTe.token_endpoint || '');
+  const [secTeClientId, setSecTeClientId] = useState(parsedTe.clientId || parsedTe.client_id || '');
+  const [secTeClientSecret, setSecTeClientSecret] = useState(parsedTe.clientSecret || parsedTe.client_secret || '');
+  const [secTeGrantType, setSecTeGrantType] = useState(parsedTe.grantType || 'urn:ietf:params:oauth:grant-type:token-exchange');
+  const [secTeScope, setSecTeScope] = useState(parsedTe.scope || '');
+
   const handleTestVault = async () => {
     setVaultTestStatus({ type: 'testing', message: 'Testing Vault connection...' });
     try {
@@ -110,6 +128,14 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
         prefix: secEnvPrefix,
       };
 
+      const teConfig = {
+        tokenEndpoint: secTeTokenEndpoint,
+        clientId: secTeClientId,
+        clientSecret: secTeClientSecret,
+        grantType: secTeGrantType,
+        scope: secTeScope,
+      };
+
       await saveSecretProvider({
         providerName: 'Vault',
         displayName: vault?.displayName || 'HashiCorp Vault (KV v2)',
@@ -129,6 +155,12 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
         configJson: JSON.stringify(envConfig),
         isEnabled: secEnvEnabled,
       });
+      await saveSecretProvider({
+        providerName: 'TokenExchange',
+        displayName: te?.displayName || 'OAuth2 / OIDC Token Exchange (OBO)',
+        configJson: JSON.stringify(teConfig),
+        isEnabled: secTeEnabled,
+      });
       alert('Secret Provider configurations saved successfully!');
     } catch {
       alert('Failed to save Secret Providers');
@@ -145,7 +177,7 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
           Configure external vault and registry secret providers for resolving downstream MCP tokens.
         </p>
         <form id="secret-providers-form" onSubmit={handleSaveSecretProviders}>
-          <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 0.9fr 0.9fr', gap: '15px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
             {/* Vault */}
             <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
@@ -329,6 +361,69 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
                   value={secEnvPrefix}
                   onChange={(e) => setSecEnvPrefix(e.target.value)}
                   style={{ fontSize: '11px', padding: '4px 8px', width: '100%', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+              </div>
+            </div>
+
+            {/* Token Exchange (OBO / PocketID) */}
+            <div style={{ padding: '12px', background: 'rgba(255,255,255,0.03)', border: '1px solid var(--border-color)', borderRadius: '8px', gridColumn: 'span 2' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                <h4 style={{ margin: 0, fontSize: '13px' }}>
+                  <i className="fa-solid fa-key"></i> OAuth2 / OIDC Token Exchange (OBO / PocketID)
+                </h4>
+                <label className="switch">
+                  <input
+                    type="checkbox"
+                    id="sec-te-enabled"
+                    checked={secTeEnabled}
+                    onChange={(e) => setSecTeEnabled(e.target.checked)}
+                  />
+                  <span className="slider"></span>
+                </label>
+              </div>
+              <span className="badge badge-secondary" style={{ fontSize: '10px', marginBottom: '10px', display: 'inline-block' }}>
+                RFC 8693 Token Exchange / PocketID OIDC
+              </span>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginTop: '6px' }}>
+                <input
+                  type="text"
+                  id="sec-te-endpoint"
+                  placeholder="Token Endpoint (e.g. https://pocketid.domain.com/oauth/token)"
+                  value={secTeTokenEndpoint}
+                  onChange={(e) => setSecTeTokenEndpoint(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+                <input
+                  type="text"
+                  id="sec-te-client-id"
+                  placeholder="Client ID"
+                  value={secTeClientId}
+                  onChange={(e) => setSecTeClientId(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+                <input
+                  type="password"
+                  id="sec-te-client-secret"
+                  placeholder="Client Secret"
+                  value={secTeClientSecret}
+                  onChange={(e) => setSecTeClientSecret(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+                <input
+                  type="text"
+                  id="sec-te-grant-type"
+                  placeholder="Grant Type (default: urn:ietf:params:oauth:grant-type:token-exchange)"
+                  value={secTeGrantType}
+                  onChange={(e) => setSecTeGrantType(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)' }}
+                />
+                <input
+                  type="text"
+                  id="sec-te-scope"
+                  placeholder="Default Scope (e.g. mcp:read mcp:write)"
+                  value={secTeScope}
+                  onChange={(e) => setSecTeScope(e.target.value)}
+                  style={{ fontSize: '11px', padding: '4px 8px', border: '1px solid var(--border-color)', background: 'var(--bg-dark)', color: 'var(--text-main)', gridColumn: 'span 2' }}
                 />
               </div>
             </div>

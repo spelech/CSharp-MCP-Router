@@ -116,7 +116,8 @@ namespace McpRouter.Extensions
                 ));
             builder.Services.AddSingleton<CompositeIdentityProvider>();
 
-            // Register Secret Retrievers (HashiCorp Vault, Windows Registry & Environment)
+            // Register HttpContextAccessor and Secret Retrievers (HashiCorp Vault, Windows Registry, Environment & OAuth2 Token Exchange)
+            builder.Services.AddHttpContextAccessor();
             builder.Services.AddMemoryCache();
             builder.Services.AddSingleton<ISecretRetriever>(sp =>
                 new VaultSecretRetriever(
@@ -126,6 +127,16 @@ namespace McpRouter.Extensions
                 ));
             builder.Services.AddSingleton<ISecretRetriever, WindowsRegistrySecretRetriever>();
             builder.Services.AddSingleton<ISecretRetriever, EnvironmentSecretRetriever>();
+            builder.Services.AddSingleton<ISecretRetriever>(sp =>
+                new TokenExchangeSecretRetriever(
+                    sp.GetRequiredService<IHttpClientFactory>(),
+                    sp.GetRequiredService<Microsoft.Extensions.Caching.Memory.IMemoryCache>(),
+                    sp.GetService<Microsoft.AspNetCore.Http.IHttpContextAccessor>(),
+                    sp.GetService<ISecretProviderRepository>(),
+                    sp.GetService<IAuthProviderRepository>(),
+                    sp.GetService<IConfiguration>(),
+                    sp.GetService<ILogger<TokenExchangeSecretRetriever>>()
+                ));
             builder.Services.AddSingleton<CompositeSecretRetriever>();
             builder.Services.AddSingleton<McpRouter.Infrastructure.Secrets.IUserSecretStore, McpRouter.Infrastructure.Secrets.DatabaseUserSecretStore>();
 

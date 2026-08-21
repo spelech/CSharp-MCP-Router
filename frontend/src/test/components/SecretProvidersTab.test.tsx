@@ -54,7 +54,7 @@ describe('SecretProvidersTab Component', () => {
       fireEvent.click(saveBtn);
     });
 
-    expect(saveSecretProviderMock).toHaveBeenCalledTimes(3);
+    expect(saveSecretProviderMock).toHaveBeenCalledTimes(4);
   });
 
   /**

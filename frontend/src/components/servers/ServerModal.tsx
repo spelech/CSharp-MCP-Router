@@ -128,6 +128,7 @@ const ServerModalDialog: React.FC = () => {
                 <option value="Vault">HashiCorp Vault (KV v2)</option>
                 <option value="WindowsRegistry">Windows Registry (DPAPI)</option>
                 <option value="Environment">Environment Variables</option>
+                <option value="TokenExchange">OAuth2 / OIDC Token Exchange (OBO / PocketID)</option>
               </select>
             </div>
             <div className="form-group">
@@ -135,7 +136,13 @@ const ServerModalDialog: React.FC = () => {
               <input
                 type="text"
                 id="server-secret-key"
-                placeholder={secretProvider === 'Vault' ? 'e.g. secret:services/my-service:token' : 'e.g. NOTES_API_KEY'}
+                placeholder={
+                  secretProvider === 'Vault'
+                    ? 'e.g. secret:services/my-service:token'
+                    : secretProvider === 'TokenExchange'
+                    ? 'e.g. mcp:write (target scope)'
+                    : 'e.g. NOTES_API_KEY'
+                }
                 value={secretKey}
                 onChange={(e) => setSecretKey(e.target.value)}
               />
