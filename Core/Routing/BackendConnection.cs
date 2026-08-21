@@ -81,9 +81,9 @@ namespace McpRouter.Core.Routing
             });
         }
 
-        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
         {
-            return await _transport.SendRequestAsync(method, bodyJson);
+            return await _transport.SendRequestAsync(method, bodyJson, targetAuthToken);
         }
 
         public async Task<JsonRpcResponse> CallMethodAsync(string method, object parameters, string? overrideId = null)

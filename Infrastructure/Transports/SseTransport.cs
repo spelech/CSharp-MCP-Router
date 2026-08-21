@@ -355,7 +355,7 @@ namespace McpRouter.Infrastructure.Transports
             }
         }
 
-        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
         {
             if (_messageUrl == null)
             {
@@ -426,6 +426,7 @@ namespace McpRouter.Infrastructure.Transports
                 }
 
                 await ApplyAuthAndCustomHeadersAsync(req);
+                if (!string.IsNullOrEmpty(targetAuthToken)) req.Headers.Add("X-Target-Auth", targetAuthToken);
                 using var res = await _httpClient.SendAsync(req, _cts.Token);
                 res.EnsureSuccessStatusCode();
 
@@ -449,6 +450,7 @@ namespace McpRouter.Infrastructure.Transports
                 }
 
                 await ApplyAuthAndCustomHeadersAsync(req);
+                if (!string.IsNullOrEmpty(targetAuthToken)) req.Headers.Add("X-Target-Auth", targetAuthToken);
 
                 _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(modifiedBody));
 
