@@ -2698,3 +2698,819 @@ info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
          at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
          at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
          at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://mcp-arr-hd:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://mcp-arr-hd:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://mcp-arr-4k:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://mcp-arr-4k:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://docker-mcp:8000/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://docker-mcp:8000/sse
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://media-mcp:8080/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://media-mcp:8080/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 1.719ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-4k:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 1.6596ms
+      System.Net.Http.HttpRequestException: Name or service not known (media-mcp:8080)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 3.7988ms
+      System.Net.Http.HttpRequestException: Name or service not known (media-mcp:8080)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 4.9779ms
+      System.Net.Http.HttpRequestException: Name or service not known (docker-mcp:8000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 6.4522ms
+      System.Net.Http.HttpRequestException: Name or service not known (docker-mcp:8000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 4.421ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-4k:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 9.0473ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-hd:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 10.5203ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-hd:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://mcp-arr-hd:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://mcp-arr-hd:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://mcp-arr-4k:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://mcp-arr-4k:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://docker-mcp:8000/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://docker-mcp:8000/sse
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://media-mcp:8080/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://media-mcp:8080/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 1.4184ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-4k:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 2.0073ms
+      System.Net.Http.HttpRequestException: Name or service not known (docker-mcp:8000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 2.2005ms
+      System.Net.Http.HttpRequestException: Name or service not known (media-mcp:8080)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 3.061ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-4k:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 3.2071ms
+      System.Net.Http.HttpRequestException: Name or service not known (docker-mcp:8000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 3.4089ms
+      System.Net.Http.HttpRequestException: Name or service not known (media-mcp:8080)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 1.6431ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-hd:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 8.5245ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-hd:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://mcp-arr-hd:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://mcp-arr-hd:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://mcp-arr-4k:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://mcp-arr-4k:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://docker-mcp:8000/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://docker-mcp:8000/sse
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://media-mcp:8080/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://media-mcp:8080/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 22.5799ms
+      System.Net.Http.HttpRequestException: Name or service not known (docker-mcp:8000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 20.4325ms
+      System.Net.Http.HttpRequestException: Name or service not known (media-mcp:8080)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 21.4176ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-hd:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 23.9896ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-4k:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 45.8686ms
+      System.Net.Http.HttpRequestException: Name or service not known (media-mcp:8080)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 58.8165ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-hd:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 46.4995ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-4k:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 45.0666ms
+      System.Net.Http.HttpRequestException: Name or service not known (docker-mcp:8000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://mcp-arr-hd:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://mcp-arr-hd:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://mcp-arr-4k:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://mcp-arr-4k:3000/mcp
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://docker-mcp:8000/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://docker-mcp:8000/sse
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[100]
+      Start processing HTTP request GET http://media-mcp:8080/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[100]
+      Sending HTTP request GET http://media-mcp:8080/sse
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 2.6624ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-hd:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 2.6079ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-4k:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 4.9644ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-hd:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 2.9236ms
+      System.Net.Http.HttpRequestException: Name or service not known (media-mcp:8080)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 5.5129ms
+      System.Net.Http.HttpRequestException: Name or service not known (mcp-arr-4k:3000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.ClientHandler[104]
+      HTTP request failed after 102.7109ms
+      System.Net.Http.HttpRequestException: Name or service not known (docker-mcp:8000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 108.291ms
+      System.Net.Http.HttpRequestException: Name or service not known (docker-mcp:8000)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+info: System.Net.Http.HttpClient.McpClient.LogicalHandler[104]
+      HTTP request failed after 110.6211ms
+      System.Net.Http.HttpRequestException: Name or service not known (media-mcp:8080)
+       ---> System.Net.Sockets.SocketException (00000005, 0xFFFDFFFF): Name or service not known
+         at System.Net.Dns.GetHostEntryOrAddressesCore(String hostName, Boolean justAddresses, AddressFamily addressFamily, Nullable`1 activityOrDefault)
+         at System.Net.Dns.<>c.<GetHostEntryOrAddressesCoreAsync>b__34_0(Object s, NameResolutionActivity activity)
+         at System.Net.Dns.<>c__DisplayClass40_0`1.<RunAsync>b__0(Task <p0>, Object <p1>)
+         at System.Threading.Tasks.ContinuationResultTaskFromTask`1.InnerInvoke()
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+      --- End of stack trace from previous location ---
+         at System.Threading.ExecutionContext.RunFromThreadPoolDispatchLoop(Thread threadPoolThread, ExecutionContext executionContext, ContextCallback callback, Object state)
+         at System.Threading.Tasks.Task.ExecuteWithThreadLocal(Task& currentTaskSlot, Thread threadPoolThread)
+      --- End of stack trace from previous location ---
+         at McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback(SocketsHttpConnectionContext context, String[] allowedIpRanges, CancellationToken cancellationToken) in /app/Components/Authorization/SecurityValidationHelper.cs:line 496
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         --- End of inner exception stack trace ---
+         at System.Net.Http.HttpConnectionPool.ConnectToTcpHostAsync(String host, Int32 port, HttpRequestMessage initialRequest, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.ConnectAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.CreateHttp11ConnectionAsync(HttpRequestMessage request, Boolean async, CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.InjectNewHttp11ConnectionAsync(QueueItem queueItem)
+         at System.Threading.Tasks.TaskCompletionSourceWithCancellation`1.WaitWithCancellationAsync(CancellationToken cancellationToken)
+         at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage request, Boolean async, Boolean doRequestAuth, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
+         at Microsoft.Extensions.Http.Logging.LoggingScopeHttpMessageHandler.<SendCoreAsync>g__Core|4_0(HttpRequestMessage request, Boolean useAsync, CancellationToken cancellationToken)
