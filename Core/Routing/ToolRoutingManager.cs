@@ -85,7 +85,8 @@ namespace McpRouter.Core.Routing
                         properties = new
                         {
                             name = new { type = "string", description = "The exact name of the tool to execute (e.g., 'docker/list_containers')." },
-                            arguments = new { type = "object", description = "The arguments JSON object expected by the target tool." }
+                            arguments = new { type = "object", description = "The arguments JSON object expected by the target tool." },
+                            target_auth_token = new { type = "string", description = "Optional authentication token if the backend tool requires dynamic pass-through authorization." }
                         },
                         required = new[] { "name", "arguments" }
                     }
@@ -143,7 +144,17 @@ namespace McpRouter.Core.Routing
                             {
                                 toolDict["name"] = exposedName;
                                 if (toolDict.TryGetValue("description", out var desc))
+                                {
                                     toolDict["description"] = $"[{item.ServerId}] " + desc;
+                                }
+
+                                var srv = servers.FirstOrDefault(s => s.Id == item.ServerId);
+                                if (srv != null && (srv.AllowPassThroughAuth || !string.IsNullOrEmpty(srv.DynamicAuthPrompt)))
+                                {
+                                    var authPrompt = !string.IsNullOrEmpty(srv.DynamicAuthPrompt) ? srv.DynamicAuthPrompt : "This tool requires a target authentication token. Call with target_auth_token parameter.";
+                                    toolDict["description"] = $"{toolDict["description"]}\n\nAUTH REQUIRED: {authPrompt}";
+                                }
+
                                 serverTools.Add(toolDict);
                                 allTools.Add(toolDict);
                             }
@@ -270,6 +281,7 @@ namespace McpRouter.Core.Routing
 
                 string targetName = "";
                 JsonElement targetArgs = default;
+                string? targetAuthToken = null;
 
                 if (root.TryGetProperty("params", out var paramsProp) &&
                     paramsProp.TryGetProperty("arguments", out var argsProp))
@@ -281,6 +293,10 @@ namespace McpRouter.Core.Routing
                     if (argsProp.TryGetProperty("arguments", out var targetArgsProp))
                     {
                         targetArgs = targetArgsProp.Clone();
+                    }
+                    if (argsProp.TryGetProperty("target_auth_token", out var targetAuthTokenProp))
+                    {
+                        targetAuthToken = targetAuthTokenProp.GetString();
                     }
                 }
 
@@ -327,7 +343,7 @@ namespace McpRouter.Core.Routing
 
                 try
                 {
-                    var result = await ExecuteTargetToolAsync(targetName, targetBody, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
+                    var result = await ExecuteTargetToolAsync(targetName, targetBody, targetAuthToken, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
                     return result;
                 }
                 catch (Exception ex)
@@ -345,12 +361,13 @@ namespace McpRouter.Core.Routing
                 }
             }
 
-            return await ExecuteTargetToolAsync(toolName, body, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
+            return await ExecuteTargetToolAsync(toolName, body, null, dbFactory, backendConnections, servers, logger, httpClient, ensureBackendsInitializedAsync, rewriteRequestJson, cancellationToken, sessionManager, clientSessionId);
         }
 
         private async Task<object> ExecuteTargetToolAsync(
             string toolName,
             string body,
+            string? targetAuthToken,
             IDbConnectionFactory dbFactory,
             ConcurrentDictionary<string, BackendConnection> backendConnections,
             IEnumerable<McpServer> servers,
@@ -389,7 +406,7 @@ namespace McpRouter.Core.Routing
 
                 try
                 {
-                    var resp = await conn.SendRequestAsync("tools/call", routingBody);
+                    var resp = await conn.SendRequestAsync("tools/call", routingBody, targetAuthToken);
                     if (resp.Error != null)
                     {
                         var transformed = ToolErrorFormatter.TransformError(resp.Error, toolName, serverId);
@@ -405,6 +422,21 @@ namespace McpRouter.Core.Routing
                         };
                     }
                     return resp;
+                }
+                catch (System.Net.Http.HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+                {
+                    var srv = servers.FirstOrDefault(s => s.Id == serverId);
+                    var prompt = (srv != null && !string.IsNullOrEmpty(srv.DynamicAuthPrompt)) ? srv.DynamicAuthPrompt : "401 Unauthorized. Please provide a valid target_auth_token via execute_tool.";
+                    return new
+                    {
+                        isError = true,
+                        content = new[] {
+                            new {
+                                type = "text",
+                                text = prompt
+                            }
+                        }
+                    };
                 }
                 catch (Exception ex)
                 {

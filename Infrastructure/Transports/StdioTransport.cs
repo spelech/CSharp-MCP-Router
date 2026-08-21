@@ -382,7 +382,7 @@ namespace McpRouter.Infrastructure.Transports
             });
         }
 
-        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
         {
             if (_process == null || _process.HasExited)
             {

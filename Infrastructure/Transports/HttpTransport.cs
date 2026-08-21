@@ -193,12 +193,17 @@ namespace McpRouter.Infrastructure.Transports
             // HTTP transport has no background reader
         }
 
-        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
         {
             _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(bodyJson));
             var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _server.Url) { Content = content };
+
+            if (!string.IsNullOrEmpty(targetAuthToken))
+            {
+                req.Headers.Add("X-Target-Auth", targetAuthToken);
+            }
             req.Headers.Host = "localhost";
             req.Headers.Accept.Clear();
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));

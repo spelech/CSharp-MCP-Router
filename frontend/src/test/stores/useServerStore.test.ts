@@ -16,7 +16,8 @@ describe('useServerStore', () => {
     hasApiKey: false,
     connectionStatus: 'Connected',
     connectionAttempts: 0,
-    connectionError: ''
+    connectionError: '',
+    allowPassThroughAuth: false
   };
 
   it('initializes with default state', () => {

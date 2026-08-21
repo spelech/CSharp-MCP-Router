@@ -17,6 +17,7 @@ describe('DashboardView Component', () => {
       hidden: false,
       connectionAttempts: 0,
       connectionError: '',
+    allowPassThroughAuth: false,
     },
     {
       id: 'media',
@@ -30,6 +31,7 @@ describe('DashboardView Component', () => {
       hidden: false,
       connectionAttempts: 0,
       connectionError: '',
+    allowPassThroughAuth: false,
     },
   ];
 
