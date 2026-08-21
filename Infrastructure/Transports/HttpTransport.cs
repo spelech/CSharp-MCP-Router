@@ -19,6 +19,7 @@ namespace McpRouter.Infrastructure.Transports
     {
         private readonly string? _passThroughToken;
         private readonly System.Security.Principal.WindowsIdentity? _callerWindowsIdentity;
+        private readonly string? _forwardedUser;
         public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
@@ -27,10 +28,11 @@ namespace McpRouter.Infrastructure.Transports
         private readonly CancellationTokenSource _cts = new();
         private string _sessionId = string.Empty;
 
-        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, System.Security.Principal.WindowsIdentity? callerWindowsIdentity = null)
+        public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, System.Security.Principal.WindowsIdentity? callerWindowsIdentity = null, string? forwardedUser = null)
         {
             _passThroughToken = passThroughToken;
             _callerWindowsIdentity = callerWindowsIdentity;
+            _forwardedUser = forwardedUser;
             _server = server;
             _httpClient = httpClient;
             _logger = logger;
@@ -179,6 +181,11 @@ namespace McpRouter.Infrastructure.Transports
                 {
                     _logger.LogError(ex, "Failed to parse custom headers for server {ServerId}", _server.Id);
                 }
+            }
+
+            if (!string.IsNullOrEmpty(_forwardedUser))
+            {
+                request.Headers.TryAddWithoutValidation("X-Forwarded-User", _forwardedUser);
             }
         }
 

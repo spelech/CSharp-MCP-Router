@@ -111,9 +111,12 @@ namespace McpRouter.Core.Routing
                     var retriever = _rootServices?.GetService<CompositeSecretRetriever>()
                         ?? _clientResponse?.HttpContext?.RequestServices?.GetService<CompositeSecretRetriever>();
                     string? passThroughToken = null;
+                    
+                    var identity = await ResolveUserIdentityAsync(_clientResponse?.HttpContext);
+                    string? forwardedUser = string.IsNullOrEmpty(identity.Username) ? null : identity.Username;
+
                     if (server.SecretProvider == "UserProvided")
                     {
-                        var identity = await ResolveUserIdentityAsync(_clientResponse?.HttpContext);
                         var userSecretStore = _rootServices?.GetService<IUserSecretStore>()
                             ?? _clientResponse?.HttpContext?.RequestServices?.GetService<IUserSecretStore>();
                         if (userSecretStore != null)
@@ -135,7 +138,7 @@ namespace McpRouter.Core.Routing
                             passThroughToken = tokenVals.ToString();
                         }
                     }
-                    conn = new BackendConnection(server, _httpClient, _logger, retriever, passThroughToken);
+                    conn = new BackendConnection(server, _httpClient, _logger, retriever, passThroughToken, forwardedUser);
                     if (server.Type != "http" && server.Type != "streamable")
                     {
                         using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(5));
