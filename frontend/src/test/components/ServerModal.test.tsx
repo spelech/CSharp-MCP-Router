@@ -10,6 +10,8 @@ describe('ServerModal component', () => {
     url: 'http://ha-mcp:8123/sse',
     enabled: true,
     hidden: false,
+      allowPassThroughAuth: false,
+      dynamicAuthPrompt: "",
     type: 'sse',
     categories: ['smarthome', 'sensors'],
     secretProvider: 'Vault',
@@ -20,7 +22,6 @@ describe('ServerModal component', () => {
     connectionStatus: 'Connected',
     connectionAttempts: 0,
     connectionError: '',
-    allowPassThroughAuth: false
   };
 
   it('renders nothing when isAddEditOpen is false', () => {
@@ -132,7 +133,9 @@ describe('ServerModal component', () => {
       customHeaderName: '',
       apiKey: 'my-static-token',
       enabled: true,
-      hidden: false
+      hidden: false,
+      allowPassThroughAuth: false,
+      dynamicAuthPrompt: ""
     });
   });
 });
