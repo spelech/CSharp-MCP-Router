@@ -9,6 +9,8 @@ import { ConsentView } from './pages/ConsentView';
 import { ClientModal, AppKeyModal } from './components/clients';
 
 const App: React.FC = () => {
+  const [currentView, setCurrentView] = useState<'dashboard' | 'security' | 'testbench' | 'settings' | 'my-mcp-servers'>('dashboard');
+
   if (window.location.pathname === '/consent') {
     return (
       <>
@@ -20,8 +22,6 @@ const App: React.FC = () => {
       </>
     );
   }
-
-  const [currentView, setCurrentView] = useState<'dashboard' | 'security' | 'testbench' | 'settings' | 'my-mcp-servers'>('dashboard');
 
   return (
     <>

@@ -1,4 +1,3 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { ConsentView } from '../../pages/ConsentView';
 import { describe, it, expect, beforeEach } from 'vitest';
