@@ -286,9 +286,21 @@ namespace McpRouter.Components.Authorization
                         if (name.Contains("url") || name.Contains("uri") || name.Contains("authority") || name.Contains("issuer") || name.Contains("endpoint") || name.Contains("address") || name.Contains("addr"))
                         {
                             var val = prop.Value.GetString();
-                            if (!string.IsNullOrEmpty(val) && (val.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || val.StartsWith("https://", StringComparison.OrdinalIgnoreCase)))
+                            if (!string.IsNullOrEmpty(val) && val.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
                             {
-                                if (!val.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+                                if (Uri.TryCreate(val, UriKind.Absolute, out var uri))
+                                {
+                                    bool isLocalhost = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || 
+                                                       uri.Host.Equals("127.0.0.1") || 
+                                                       uri.Host.Equals("::1");
+                                    bool isSimpleHost = !uri.Host.Contains('.');
+
+                                    if (!isLocalhost && !isSimpleHost && !McpRouter.Components.Authorization.SecurityValidationHelper.IsPrivateOrLoopback(val))
+                                    {
+                                        throw new ArgumentException($"URL field '{prop.Name}' must use the HTTPS scheme.");
+                                    }
+                                }
+                                else 
                                 {
                                     throw new ArgumentException($"URL field '{prop.Name}' must use the HTTPS scheme.");
                                 }

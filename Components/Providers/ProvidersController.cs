@@ -142,6 +142,26 @@ namespace McpRouter.Components.Providers
                 return BadRequest(new { success = false, error = "Vault Address is required." });
             }
 
+            if (request.Address.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
+            {
+                if (Uri.TryCreate(request.Address, UriKind.Absolute, out var uri))
+                {
+                    bool isLocalhost = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || 
+                                       uri.Host.Equals("127.0.0.1") || 
+                                       uri.Host.Equals("::1");
+                    bool isSimpleHost = !uri.Host.Contains('.');
+
+                    if (!isLocalhost && !isSimpleHost && !McpRouter.Components.Authorization.SecurityValidationHelper.IsPrivateOrLoopback(request.Address))
+                    {
+                        return BadRequest(new { success = false, error = "Vault Address must use the HTTPS scheme in production for non-local addresses." });
+                    }
+                }
+                else
+                {
+                    return BadRequest(new { success = false, error = "Invalid Vault Address format." });
+                }
+            }
+
             try
             {
                 VaultSharp.V1.AuthMethods.IAuthMethodInfo authMethod;
