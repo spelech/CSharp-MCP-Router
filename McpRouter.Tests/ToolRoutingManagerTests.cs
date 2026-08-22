@@ -15,6 +15,7 @@ using McpRouter.Models;
 using McpRouter.Core.Routing;
 using Moq;
 using Xunit;
+using McpRouter.Tests.Attributes;
 using Dapper;
 
 namespace McpRouter.Tests
@@ -44,6 +45,7 @@ namespace McpRouter.Tests
             return (connection, mockDbFactory.Object);
         }
 
+        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         public async Task ListToolsAsync_ReturnsMetaTools_InMetaMode()
         {
@@ -64,6 +66,7 @@ namespace McpRouter.Tests
             Assert.Equal(2, tools.Count);
         }
 
+        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         public void InvalidateCache_ClearsPopulatedState()
         {
@@ -72,6 +75,7 @@ namespace McpRouter.Tests
             Assert.Empty(manager.GetCachedTools());
         }
 
+        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         public async Task CallToolAsync_SearchTools_ReturnsSemanticResults()
         {
@@ -100,6 +104,7 @@ namespace McpRouter.Tests
             Assert.NotNull(result);
         }
 
+        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         public async Task CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing()
         {
@@ -126,6 +131,7 @@ namespace McpRouter.Tests
             Assert.NotNull(result);
         }
 
+        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         public async Task CallToolAsync_ReturnsCancellationError_WhenCancelled()
         {
@@ -154,6 +160,7 @@ namespace McpRouter.Tests
             Assert.NotNull(result);
         }
 
+        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         public async Task CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable()
         {
@@ -177,6 +184,7 @@ namespace McpRouter.Tests
             ));
         }
     
+        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         [Requirement("AUTH-105", "Dynamic Auth Target Pass-Through", Type = RequirementType.Positive, Category = "AUTH")]
         public async Task ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt()
