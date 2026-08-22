@@ -14,13 +14,14 @@ using McpRouter.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.Extensions.DependencyInjection;
 using Dapper;
 
 namespace McpRouter.Components.AppKeys
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "AdminPolicy")]
+    [Authorize]
     public class AppKeysController : ControllerBase
     {
         private readonly IAppKeyRepository _appKeyRepository;
@@ -28,19 +29,22 @@ namespace McpRouter.Components.AppKeys
         private readonly IConfiguration _config;
         private readonly IAuditLogger _auditLogger;
         private readonly ICredentialService _credentialService;
+        private readonly IUserQuotaRepository? _userQuotaRepository;
 
         public AppKeysController(
             IAppKeyRepository appKeyRepository,
             ISettingRepository settingRepository,
             IConfiguration config,
             IAuditLogger auditLogger,
-            ICredentialService credentialService)
+            ICredentialService credentialService,
+            IUserQuotaRepository? userQuotaRepository = null)
         {
             _appKeyRepository = appKeyRepository;
             _settingRepository = settingRepository;
             _config = config;
             _auditLogger = auditLogger;
             _credentialService = credentialService;
+            _userQuotaRepository = userQuotaRepository ?? (appKeyRepository as IUserQuotaRepository);
         }
 
         private async Task<UserIdentityContext> GetIdentityAsync()
@@ -55,7 +59,7 @@ namespace McpRouter.Components.AppKeys
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAppKeys([FromQuery] string? usernameFilter = null)
+        public async Task<IActionResult> GetAppKeys([FromQuery] string? keyType = null, [FromQuery] string? usernameFilter = null)
         {
             var identity = await GetIdentityAsync();
             var currentUser = identity.Username;
@@ -63,7 +67,21 @@ namespace McpRouter.Components.AppKeys
 
             try
             {
-                var keys = await _appKeyRepository.GetAppKeysAsync(usernameFilter, isAdmin, currentUser);
+                string? effectiveKeyType;
+                string? effectiveUsernameFilter;
+
+                if (!isAdmin)
+                {
+                    effectiveKeyType = "personal";
+                    effectiveUsernameFilter = currentUser;
+                }
+                else
+                {
+                    effectiveKeyType = keyType;
+                    effectiveUsernameFilter = usernameFilter;
+                }
+
+                var keys = await _appKeyRepository.GetAppKeysAsync(effectiveUsernameFilter, isAdmin, currentUser, effectiveKeyType);
 
                 // Return sanitized keys (do not return the EncryptedKey string to prevent exposing DB cipher blocks)
                 var result = keys.Select(k => new
@@ -71,6 +89,7 @@ namespace McpRouter.Components.AppKeys
                     k.Id,
                     k.Name,
                     k.Username,
+                    k.KeyType,
                     k.KeyPrefix,
                     Scopes = DeserializeScopes(k.ScopesJson),
                     k.ExpiresAt,
@@ -95,7 +114,7 @@ namespace McpRouter.Components.AppKeys
             try
             {
                 int globalMax = 0;
-                int userMax = 0;
+                int userMax = 5;
 
                 // Load active settings
                 var settings = await _settingRepository.GetSettingsAsync();
@@ -103,6 +122,16 @@ namespace McpRouter.Components.AppKeys
                 {
                     globalMax = settings.GlobalMaxKeys;
                     userMax = settings.UserMaxKeys;
+                }
+
+                // Custom user quota override takes precedence for currentUser
+                if (_userQuotaRepository != null)
+                {
+                    var customQuota = await _userQuotaRepository.GetUserQuotaAsync(currentUser);
+                    if (customQuota != null)
+                    {
+                        userMax = customQuota.MaxKeys;
+                    }
                 }
 
                 int totalActiveKeys = await _appKeyRepository.GetTotalActiveKeysAsync();
@@ -129,47 +158,77 @@ namespace McpRouter.Components.AppKeys
             var identity = await GetIdentityAsync();
             var currentUser = identity.Username;
             var isAdmin = IsAdmin(identity);
-            var ownerSid = identity.AllSids.FirstOrDefault() ?? "";
 
-            // Allow admins to generate key for another user, default to current user
-            var targetUser = isAdmin && !string.IsNullOrEmpty(model.Username) ? model.Username : currentUser;
-
-            if (!targetUser.Equals(currentUser, StringComparison.OrdinalIgnoreCase))
-            {
-                ownerSid = ""; // Decouple admin's SID from target user's key
-                var ldapService = HttpContext.RequestServices.GetService<ILdapService>();
-                if (ldapService != null)
-                {
-                    var targetSids = await ldapService.ResolveUserSidsAsync(targetUser);
-                    var primarySid = targetSids.FirstOrDefault();
-                    if (!string.IsNullOrEmpty(primarySid))
-                    {
-                        ownerSid = primarySid;
-                    }
-                }
-            }
-
-            if (string.IsNullOrWhiteSpace(model.Name))
+            if (model == null || string.IsNullOrWhiteSpace(model.Name))
             {
                 return BadRequest(new { error = "Name is required." });
             }
 
+            string targetUser;
+            string keyType;
+            string ownerSid;
+
+            if (!isAdmin)
+            {
+                targetUser = currentUser;
+                keyType = "personal";
+                ownerSid = identity.AllSids.FirstOrDefault() ?? "";
+            }
+            else
+            {
+                targetUser = !string.IsNullOrWhiteSpace(model.Username) ? model.Username : currentUser;
+                keyType = string.Equals(model.KeyType, "system", StringComparison.OrdinalIgnoreCase) ? "system" : "personal";
+
+                if (keyType == "system")
+                {
+                    // System/service keys decouple from any user SID
+                    ownerSid = "";
+                }
+                else if (!targetUser.Equals(currentUser, StringComparison.OrdinalIgnoreCase))
+                {
+                    ownerSid = ""; // Decouple admin's SID from target user's key
+                    var ldapService = HttpContext.RequestServices.GetService<ILdapService>();
+                    if (ldapService != null)
+                    {
+                        var targetSids = await ldapService.ResolveUserSidsAsync(targetUser);
+                        var primarySid = targetSids.FirstOrDefault();
+                        if (!string.IsNullOrEmpty(primarySid))
+                        {
+                            ownerSid = primarySid;
+                        }
+                    }
+                }
+                else
+                {
+                    ownerSid = identity.AllSids.FirstOrDefault() ?? "";
+                }
+            }
+
             try
             {
-                // Retrieve max key limits (0 = unlimited)
-                int globalMax = 0;
-                int userMax = 0;
-
-                var settings = await _settingRepository.GetSettingsAsync();
-                if (settings != null)
-                {
-                    globalMax = settings.GlobalMaxKeys;
-                    userMax = settings.UserMaxKeys;
-                }
-
                 // Check limits (admins bypass limits; 0 = unlimited)
                 if (!isAdmin)
                 {
+                    // Retrieve max key limits (0 = unlimited)
+                    int globalMax = 0;
+                    int userMax = 5;
+
+                    var settings = await _settingRepository.GetSettingsAsync();
+                    if (settings != null)
+                    {
+                        globalMax = settings.GlobalMaxKeys;
+                        userMax = settings.UserMaxKeys;
+                    }
+
+                    if (_userQuotaRepository != null)
+                    {
+                        var customQuota = await _userQuotaRepository.GetUserQuotaAsync(targetUser);
+                        if (customQuota != null)
+                        {
+                            userMax = customQuota.MaxKeys;
+                        }
+                    }
+
                     if (globalMax > 0)
                     {
                         int totalActiveKeys = await _appKeyRepository.GetTotalActiveKeysAsync();
@@ -220,12 +279,13 @@ namespace McpRouter.Components.AppKeys
                     targetUser,
                     ownerSid,
                     scopes,
-                    model.ExpiresInDays
+                    model.ExpiresInDays,
+                    keyType
                 );
 
                 await _auditLogger.LogAdminActionAsync(
                     identity.Username, "appkey.create", appKey.Id,
-                    $"name={appKey.Name};owner={targetUser};ownerSid={ownerSid}", true);
+                    $"name={appKey.Name};owner={targetUser};ownerSid={ownerSid};keyType={keyType}", true);
 
                 // Return plaintext key ONCE to the user
                 return Ok(new
@@ -233,6 +293,7 @@ namespace McpRouter.Components.AppKeys
                     appKey.Id,
                     appKey.Name,
                     appKey.Username,
+                    appKey.KeyType,
                     appKey.KeyPrefix,
                     PlaintextKey = plaintextKey,
                     Scopes = scopes,
@@ -262,18 +323,107 @@ namespace McpRouter.Components.AppKeys
                     return NotFound(new { error = "AppKey not found." });
                 }
 
-                if (!isAdmin && !appKey.Username.Equals(currentUser, StringComparison.OrdinalIgnoreCase))
+                if (!isAdmin)
                 {
-                    return Forbid();
+                    // Non-admin can only delete their own personal keys (not system keys or other users' keys)
+                    if (!appKey.Username.Equals(currentUser, StringComparison.OrdinalIgnoreCase) ||
+                        !string.Equals(appKey.KeyType, "personal", StringComparison.OrdinalIgnoreCase))
+                    {
+                        return Forbid();
+                    }
                 }
 
                 await _credentialService.RevokeCredentialAsync(id);
 
                 await _auditLogger.LogAdminActionAsync(
                     identity.Username, "appkey.revoke", id,
-                    $"owner={appKey.Username}", true);
+                    $"owner={appKey.Username};keyType={appKey.KeyType}", true);
 
                 return Ok(new { success = true });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpGet("quotas")]
+        [Authorize(Policy = "AdminPolicy")]
+        public async Task<IActionResult> GetUserQuotas()
+        {
+            try
+            {
+                if (_userQuotaRepository == null)
+                {
+                    return Ok(Enumerable.Empty<UserQuota>());
+                }
+                var quotas = await _userQuotaRepository.GetAllUserQuotasAsync();
+                return Ok(quotas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpPost("quotas")]
+        [Authorize(Policy = "AdminPolicy")]
+        public async Task<IActionResult> SetUserQuota([FromBody] SetUserQuotaRequest model)
+        {
+            if (model == null || string.IsNullOrWhiteSpace(model.Username))
+            {
+                return BadRequest(new { error = "Username is required." });
+            }
+
+            if (model.MaxKeys < 0)
+            {
+                return BadRequest(new { error = "MaxKeys cannot be negative." });
+            }
+
+            var identity = await GetIdentityAsync();
+
+            try
+            {
+                if (_userQuotaRepository != null)
+                {
+                    await _userQuotaRepository.SetUserQuotaAsync(model.Username, model.MaxKeys);
+                }
+
+                await _auditLogger.LogAdminActionAsync(
+                    identity.Username, "userquota.set", model.Username,
+                    $"maxKeys={model.MaxKeys}", true);
+
+                return Ok(new { success = true, username = model.Username, maxKeys = model.MaxKeys });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
+        [HttpDelete("quotas/{username}")]
+        [Authorize(Policy = "AdminPolicy")]
+        public async Task<IActionResult> DeleteUserQuota(string username)
+        {
+            if (string.IsNullOrWhiteSpace(username))
+            {
+                return BadRequest(new { error = "Username is required." });
+            }
+
+            var identity = await GetIdentityAsync();
+
+            try
+            {
+                if (_userQuotaRepository != null)
+                {
+                    await _userQuotaRepository.DeleteUserQuotaAsync(username);
+                }
+
+                await _auditLogger.LogAdminActionAsync(
+                    identity.Username, "userquota.delete", username,
+                    $"username={username}", true);
+
+                return Ok(new { success = true, username });
             }
             catch (Exception ex)
             {

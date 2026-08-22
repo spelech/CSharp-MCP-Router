@@ -69,7 +69,7 @@ namespace McpRouter.Tests
                     HeadersJson TEXT, AutoDiscovered INTEGER DEFAULT 0
                 );
                 CREATE TABLE IF NOT EXISTS AppKeys (
-                    Id TEXT PRIMARY KEY, Name TEXT, Username TEXT, OwnerSid TEXT DEFAULT '', KeyPrefix TEXT,
+                    Id TEXT PRIMARY KEY, Name TEXT, Username TEXT, OwnerSid TEXT DEFAULT '', KeyType TEXT DEFAULT 'personal', KeyPrefix TEXT,
                     EncryptedKey TEXT, ScopesJson TEXT DEFAULT '[]', ExpiresAt TEXT, CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
                 );
                 CREATE TABLE IF NOT EXISTS Settings (
