@@ -19,7 +19,9 @@ namespace McpRouter.Tests
 {
     public class AuthorizationControllerTests
     {
+        
         [Fact]
+        [McpRouter.Tests.Attributes.Requirement("REQ-AUTH-106", "SEC", McpRouter.Tests.Attributes.RequirementType.Negative, "Exchange throws InvalidOperationException when request is null.")]
         public async Task Exchange_ThrowsInvalidOperationException_WhenRequestNull()
         {
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
@@ -35,7 +37,9 @@ namespace McpRouter.Tests
             await Assert.ThrowsAsync<InvalidOperationException>(() => controller.Exchange());
         }
 
+        
         [Fact]
+        [McpRouter.Tests.Attributes.Requirement("REQ-AUTH-107", "SEC", McpRouter.Tests.Attributes.RequirementType.Positive, "RegisterClient successfully handles DCR requests when open DCR is enabled.")]
         public async Task RegisterClient_CreatesApplicationAndReturnsOk()
         {
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();

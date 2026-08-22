@@ -1,0 +1,17 @@
+--- frontend/e2e/settings.spec.ts
++++ frontend/e2e/settings.spec.ts
+@@ -21,6 +21,14 @@
+     await providerSelect.selectOption('api');
+     await expect(providerSelect).toHaveValue('api');
+ 
++    // Check Security Defaults (RFC 7591)
++    const dcrCheckbox = page.getByLabel(/Allow Open Dynamic Client Registration/i);
++    await expect(dcrCheckbox).toBeVisible();
++    
++    // Toggle the checkbox
++    await dcrCheckbox.uncheck();
++    await expect(dcrCheckbox).not.toBeChecked();
++
+     // Check Save Settings button
+     const saveBtn = page.locator('#btn-save-settings, button:has-text("Save Settings")').first();
+     await expect(saveBtn).toBeVisible();

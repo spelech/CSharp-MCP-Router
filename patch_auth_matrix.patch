@@ -1,0 +1,17 @@
+--- docs/auth-flows/auth-support-matrix.md
++++ docs/auth-flows/auth-support-matrix.md
+@@ -75,6 +75,17 @@
+ * **Description**: Publish a secondary Docker image tag (e.g., `ghcr.io/org/mcp-router:latest-full`) that comes pre-installed with Node.js, Python 3, `uv`, and `bun`.
+ * **Why it matters**: The official lightweight `aspnet:10.0` Docker image lacks the toolchains needed to natively run python/node scripts via `stdio`. A "batteries-included" tag allows users to rapidly deploy and run `stdio` backend scripts natively inside the container without having to build custom images or manage sidecar network topologies.
+ 
++## 5. Dynamic Client Registration (DCR) & Per-User Consent
++
++The router includes built-in support for RFC 7591 Dynamic Client Registration, allowing IDEs and autonomous agents (like Gemini Spark) to provision long-lived OAuth 2.0 credentials via the `/api/register` endpoint or the `manage_clients` MCP tool.
++
++> **Note on DCR and OIDC Authorization Code Flows**: While DCR handles the initial client creation, using these OAuth 2.0 clients to authenticate end-users currently relies on Client Credentials (for machine-to-machine AppKeys) or standard OIDC headers from upstream reverse proxies. 
++> 
++> **Future Roadmap**: As the router expands to support true multi-tenant environments (similar to the Slack MCP Server), these dynamically registered clients will eventually leverage an interactive **Per-User OAuth Consent Screen**. This will allow a user to explicitly grant an AI IDE access to their isolated MCP resources via standard `authorization_code` flows, rather than relying strictly on static API Keys or proxy headers.
++
+ ---
+ 
+ ## Technical Edge Cases Discovered

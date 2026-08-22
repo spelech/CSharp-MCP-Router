@@ -1,0 +1,29 @@
+--- frontend/src/test/components/SettingsTabs.test.tsx
++++ frontend/src/test/components/SettingsTabs.test.tsx
+@@ -19,10 +19,25 @@
+           embeddingApiUrl: '',
+           embeddingApiModel: 'all-MiniLM-L6-v2',
+           embeddingApiKey: '',
++          allowOpenClientRegistration: false,
+         }}
+         saveEmbeddingSettings={saveSpy}
+       />
+     );
+ 
+     expect(screen.getByText('General Settings')).toBeInTheDocument();
+     expect(screen.getByText('Semantic Search')).toBeInTheDocument();
++    expect(screen.getByText('Security Defaults')).toBeInTheDocument();
++
++    // Check that checkbox is initially false
++    const checkbox = screen.getByRole('checkbox');
++    expect(checkbox).not.toBeChecked();
++    
++    // Toggle it
++    fireEvent.click(checkbox);
++    expect(checkbox).toBeChecked();
++
+     const saveBtn = screen.getByRole('button', { name: /save settings/i });
+     await act(async () => {
+       fireEvent.click(saveBtn);
+     });
++    expect(saveSpy).toHaveBeenCalledWith(expect.objectContaining({ allowOpenClientRegistration: true }));

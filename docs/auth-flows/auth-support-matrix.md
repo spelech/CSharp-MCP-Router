@@ -68,6 +68,17 @@ These features have been implemented to address the current limitations in ident
 
 ---
 
+## 5. Dynamic Client Registration (DCR) & Per-User Consent
+
+The router includes built-in support for RFC 7591 Dynamic Client Registration, allowing IDEs and autonomous agents (like Gemini Spark) to provision long-lived OAuth 2.0 credentials via the `/api/register` endpoint or the `manage_clients` MCP tool.
+
+> **Note on DCR and OIDC Authorization Code Flows**: While DCR handles the initial client creation, using these OAuth 2.0 clients to authenticate end-users currently relies on Client Credentials (for machine-to-machine AppKeys) or standard OIDC headers from upstream reverse proxies. 
+> 
+> **Future Roadmap**: As the router expands to support true multi-tenant environments (similar to the Slack MCP Server), these dynamically registered clients will eventually leverage an interactive **Per-User OAuth Consent Screen**. This will allow a user to explicitly grant an AI IDE access to their isolated MCP resources via standard `authorization_code` flows, rather than relying strictly on static API Keys or proxy headers.
+
+---
+
+
 ## Technical Edge Cases Discovered
 
 1. **Format Translation:** Pass-Through auth does not just blindly forward `X-Target-Auth`. The router translates it into the exact format the backend requires (e.g., standard `Authorization: Bearer <token>`) using the `AuthShape` configuration.
