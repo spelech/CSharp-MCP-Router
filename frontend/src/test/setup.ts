@@ -6,6 +6,7 @@ import { useClientStore } from '../stores/useClientStore';
 import { useAppKeyStore } from '../stores/useAppKeyStore';
 import { useSettingsStore } from '../stores/useSettingsStore';
 import { useToastStore } from '../stores/useToastStore';
+import { useConfirmStore } from '../stores/useConfirmStore';
 import { useLogStore } from '../stores/useLogStore';
 
 export interface MockFetchCall {
@@ -365,6 +366,12 @@ export function resetAllStores() {
 
   useToastStore.setState({
     toasts: []
+  });
+
+  useConfirmStore.setState({
+    isOpen: false,
+    options: { message: '' },
+    resolve: null
   });
 
   useLogStore.setState({

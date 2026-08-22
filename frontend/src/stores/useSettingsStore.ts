@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { showToast } from './useToastStore';
+import { confirmAction } from './useConfirmStore';
 import {
   EmbeddingSettings,
   AuthProviderConfig,
@@ -219,7 +220,13 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   },
 
   deleteCustomFile: async (type, name) => {
-    if (!window.confirm(`Are you sure you want to delete the custom file '${name}'? This action cannot be undone.`)) {
+    const confirmed = await confirmAction({
+      title: 'Delete Custom File',
+      message: `Are you sure you want to delete the custom file '${name}'? This action cannot be undone.`,
+      confirmText: 'Delete File',
+      danger: true
+    });
+    if (!confirmed) {
       return;
     }
     try {
@@ -254,7 +261,13 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   },
 
   deletePolicy: async (id) => {
-    if (!window.confirm('Are you sure you want to delete this access policy?')) return;
+    const confirmed = await confirmAction({
+      title: 'Delete Access Policy',
+      message: 'Are you sure you want to delete this access policy?',
+      confirmText: 'Delete Policy',
+      danger: true
+    });
+    if (!confirmed) return;
     try {
       await deletePolicyApi(id);
       showToast('Policy deleted successfully', 'success');
@@ -285,7 +298,13 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
   },
 
   deleteMapping: async (id) => {
-    if (!window.confirm('Are you sure you want to delete this group mapping?')) return;
+    const confirmed = await confirmAction({
+      title: 'Delete Group Mapping',
+      message: 'Are you sure you want to delete this group mapping?',
+      confirmText: 'Delete Mapping',
+      danger: true
+    });
+    if (!confirmed) return;
     try {
       await deleteMappingApi(id);
       showToast('Mapping deleted successfully', 'success');
