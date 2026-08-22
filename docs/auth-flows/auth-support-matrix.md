@@ -44,6 +44,7 @@ This matrix maps how the *inbound* identity (Client ➔ Router) can be propagate
 | OIDC (HeaderProxy) | Global API Key (Vault/Registry/Env) | Router trusts SSO headers, acts as Service Account. | ✅ **Yes** |
 | OIDC (HeaderProxy) | OAuth2 On-Behalf-Of (OBO) | Router exchanges tokens with Okta/Azure. | ✅ **Yes** |
 | AppKey / OIDC / AD | HTTP Identity Header (`X-Forwarded-User`) | Router forwards resolved Username for RLS. | ✅ **Yes** |
+| Interactive OAuth Consent | Any supported Outbound Method | Consent via React UI, Client calls via JWT, Router resolves subject. | ✅ **Yes** |
 
 ---
 
@@ -72,9 +73,9 @@ These features have been implemented to address the current limitations in ident
 
 The router includes built-in support for RFC 7591 Dynamic Client Registration, allowing IDEs and autonomous agents (like Gemini Spark) to provision long-lived OAuth 2.0 credentials via the `/api/register` endpoint or the `manage_clients` MCP tool.
 
-> **Note on DCR and OIDC Authorization Code Flows**: While DCR handles the initial client creation, using these OAuth 2.0 clients to authenticate end-users currently relies on Client Credentials (for machine-to-machine AppKeys) or standard OIDC headers from upstream reverse proxies. 
-> 
-> **Future Roadmap**: As the router expands to support true multi-tenant environments (similar to the Slack MCP Server), these dynamically registered clients will eventually leverage an interactive **Per-User OAuth Consent Screen**. This will allow a user to explicitly grant an AI IDE access to their isolated MCP resources via standard `authorization_code` flows, rather than relying strictly on static API Keys or proxy headers.
+> **Interactive Per-User OAuth Consent Screen**: To support true multi-tenant scenarios (like the Slack MCP Server and Splunk MCP), the router natively supports standard `authorization_code` flows. When an AI IDE needs access to isolated backend resources on behalf of a user, it can trigger an interactive consent screen at `/connect/authorize`. This allows a user to explicitly grant the dynamically registered client access to their resources, returning an OIDC standard `authorization_code` to the IDE which can be exchanged for a short-lived access token, rather than relying strictly on static API Keys or proxy headers.
+
+👉 For detailed architecture documentation, see **[Multi-Tenant OAuth Consent Flow & Dynamic Client Registration](multi-tenant-oauth-consent.md)**.
 
 ---
 
