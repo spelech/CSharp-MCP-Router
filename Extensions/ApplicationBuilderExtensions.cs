@@ -179,6 +179,7 @@ namespace McpRouter.Extensions
             app.MapAppKeyEndpoints();
             app.MapProviderEndpoints();
             app.MapPolicyEndpoints();
+            app.MapFallbackToFile("index.html");
         }
 
         // Backwards compatibility endpoint forwarder

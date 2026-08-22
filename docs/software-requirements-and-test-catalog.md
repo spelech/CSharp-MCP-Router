@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **88 Requirements Verified** across **167 Test Proofs** (68 Functional Capabilities, 20 Safety Guardrails).
+> **Catalog Statistics:** **90 Requirements Verified** across **196 Test Proofs** (68 Functional Capabilities, 22 Safety Guardrails).
 
 ---
 
@@ -9,14 +9,14 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **18** | 17 | 1 | 46 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **18** | 17 | 1 | 51 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 5 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 33 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **9** | 6 | 3 | 16 proofs |
-| **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 7 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **5** | 5 | 0 | 24 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **9** | 6 | 3 | 18 proofs |
+| **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **7** | 5 | 2 | 44 proofs |
 
 ---
 
@@ -48,8 +48,8 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L503`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L503) (`ClientSession_DynamicServerMembership_UpdatesAccessDynamically`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L539`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L539) (`ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L566`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L566) (`ClientSession_Complete_FiltersServerNamesByCategoryScope`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L20`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L20) (`renders empty state when no keys exist`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L44`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L44) (`renders keys list, copies config snippet, and revokes key`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L21`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L21) (`renders empty state when no keys exist`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L45`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L45) (`renders keys list, copies config snippet, and revokes key`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L68`](file:////containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L68) (`AppKey Direct Context: connects with API key header identity`)
 
 ### `[AUTH-03]` SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles
@@ -63,15 +63,17 @@
 ### `[AUTH-04]` ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
+* **Verification Proofs (3):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L17`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L17) (`ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L55`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L55) (`ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided`)
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/ldap-identity-and-auth-flow.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/ldap-identity-and-auth-flow.spec.ts#L5) (`should configure LDAP identity provider, test connection, and save settings`)
 
 ### `[AUTH-05]` McpServer supports AllowPassThroughAuth flag
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/McpServerTests.cs#L9`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/McpServerTests.cs#L9) (`McpServer_Should_Have_AllowPassThroughAuth`)
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts#L7`](file:////containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts#L7) (`should render user provided servers and allow editing credentials with SQLite schema`)
 
 ### `[AUTH-06]` Transports use passThroughToken when AllowPassThroughAuth is true
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -94,8 +96,9 @@
 ### `[AUTH-109]` ConsentView properly renders the client name from query string and builds correct form action.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx#L17`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx#L17) (`renders client name from query string and sets form action`)
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/oauth-consent-flow.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/oauth-consent-flow.spec.ts#L5) (`should render interactive OAuth consent screen and display requesting client name`)
 
 ### `[AUTH-110]` CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -374,19 +377,21 @@
 ### `[SEC-01]` VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (5):**
+* **Verification Proofs (6):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L23`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L23) (`EnsureVaultClientAsync_CreatesClient_WithAppRoleCredentials`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L44`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L44) (`EnsureVaultClientAsync_LoadsFromSecretRepo_WhenConfigJsonHasAppRole`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L96`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L96) (`ReloadConfigAsync_ClearsClient_ForcesRecreation`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L17`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L17) (`renders provider inputs and submits updated configuration`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L60`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L60) (`handles Test Vault connection button with success and failure responses`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L19`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L19) (`renders provider inputs and submits updated configuration`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L90`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L90) (`handles Test Vault connection button with success and failure responses`)
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-sse-vault.spec.ts#L8`](file:////containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-sse-vault.spec.ts#L8) (`should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search`)
 
 ### `[SEC-02]` STDIO transport securely injects secret credentials via environment variables rather than command-line arguments
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
+* **Verification Proofs (3):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L354`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L354) (`StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L439`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L439) (`StdioTransport_ShouldSanitizeAndMaskSecretsInLogs`)
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/vault-approle-config-flow.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/vault-approle-config-flow.spec.ts#L5) (`should configure Vault AppRole credentials and test connection in settings`)
 
 ### `[SEC-03]` Ensure TrustedProxyHelper supports CIDR ranges in XFF validation
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -411,14 +416,16 @@
 ### `[TRANS-01]` SSE transport resolves static plaintext API keys when provider is None
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L18) (`ResolveTokenAsync_ReturnsApiKey_WhenProviderNone`)
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-http-direct.spec.ts#L8`](file:////containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-http-direct.spec.ts#L8) (`should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench`)
 
 ### `[TRANS-02]` HTTP stateless transport resolves static API keys when secret provider is None
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L19`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L19) (`ResolveTokenAsync_ReturnsApiKey_WhenProviderNone`)
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8`](file:////containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-stdio-env.spec.ts#L8) (`should register STDIO server, verify card, and execute echo tool via Test Bench`)
 
 ### `[TRANS-03]` STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -436,7 +443,7 @@
 * **Verification Proofs (6):**
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L38`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L38) (`renders stats card, server list, and client setup guide`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L113`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L113) (`renders empty state when no servers match search`)
-  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42`](file:////containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42) (`should navigate to Custom Files and Backups in Settings view`)
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42`](file:////containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42) (`should navigate to Custom Files and Prompts in Settings view`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L5) (`should render the dashboard layout and header components`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L21`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L21) (`should display aggregate statistics cards`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L35`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L35) (`should filter servers using search input`)
@@ -489,7 +496,7 @@
 ### `[AUTH-01]` AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (14):**
+* **Verification Proofs (16):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L18) (`AdminPolicy_Allows_Principal_With_AdminGroupName`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L52`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L52) (`AdminPolicy_Allows_Principal_With_AdminSid`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L86`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L86) (`AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups`)
@@ -503,6 +510,8 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L275`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L275) (`SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L290`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L290) (`SecurityValidationHelper_IsAdmin_AllowsMappedGroups`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L305`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L305) (`OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L12`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L12) (`renders Active Directory disabled initially, toggles on and exposes fields`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L46`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L46) (`fills LDAP parameters and executes test connection`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L5) (`Admin Context: renders full administrator view and privileged controls`)
 
 ### `[AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK]` When an external IDP is configured, anonymous loopback requests do not bypass authentication.
@@ -636,6 +645,36 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/ProviderSettingsEncryptionTests.cs#L395`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ProviderSettingsEncryptionTests.cs#L395) (`SaveSecretProvider_WhenDecryptionFailed_DoesNotOverwriteCorruptPayload`)
 
+### `[REQ-UI-CONFIRM-MODAL]` Deletes an access policy when confirmed via confirm modal.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (12):**
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L76`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L76) (`deletes a policy when confirmed`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L105`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L105) (`does not delete policy when confirm is cancelled`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L166`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L166) (`deletes a group mapping when confirmed`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L195`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L195) (`does not delete group mapping when confirm is cancelled`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L222`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L222) (`deletes a custom file when confirmed`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L251`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L251) (`does not delete custom file when confirm is cancelled`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L88`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L88) (`prompts confirmation and deletes client when confirmed`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L117`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L117) (`cancels deletion when user denies confirmation`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L268`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L268) (`confirms and revokes AppKey and refreshes list`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L297`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L297) (`cancels revocation when confirm is rejected`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L203`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L203) (`prompts window.confirm and deletes server when confirmed`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L232`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L232) (`does not send delete request when confirm is cancelled`)
+
+### `[REQ-UI-TOAST-TRANSITION]` Displays error toast notification when saving invalid JSON credentials for user-provided server.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (8):**
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx#L24`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx#L24) (`shows error toast when saving invalid JSON credentials`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx#L65`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx#L65) (`saves valid credentials successfully and closes modal`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx#L88`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx#L88) (`shows error toast when switching from invalid JSON to Visual Prompt Builder`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx#L109`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx#L109) (`shows error toast when saving without a file name`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx#L129`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx#L129) (`shows error toast when saving prompt with invalid JSON content`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L99`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L99) (`saves updated Active Directory configuration JSON`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L138`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L138) (`displays error toast when saving auth providers fails`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L63`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L63) (`displays error toast when saving secret providers fails`)
+
 ---
 
 ## 4. Complete Verification Traceability Matrix
@@ -725,6 +764,8 @@
 | `TRANS-01` | Positive | `TRANS` | SSE transport resolves static plaintext API keys when provider is None | [`SseTransportTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L18) | Backend xUnit |
 | `TRANS-02` | Positive | `TRANS` | HTTP stateless transport resolves static API keys when secret provider is None | [`HttpTransportTests.cs:L19`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L19) | Backend xUnit |
 | `TRANS-03` | Positive | `TRANS` | STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls | [`StdioTransportTests.cs:L59`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L59) | Backend xUnit |
+| `REQ-UI-CONFIRM-MODAL` | **Guardrail** | `UI` | Deletes an access policy when confirmed via confirm modal. | [`usePolicyStore.test.ts:L76`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L76) | Frontend Vitest |
+| `REQ-UI-TOAST-TRANSITION` | **Guardrail** | `UI` | Displays error toast notification when saving invalid JSON credentials for user-provided server. | [`MyMcpServers.test.tsx:L24`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx#L24) | Frontend Vitest |
 | `UI-01` | Positive | `UI` | Dashboard renders stats card, connected server list, and setup instructions | [`DashboardView.test.tsx:L38`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L38) | Frontend Vitest |
 | `UI-02` | Positive | `UI` | Modal remains hidden when isInspectOpen is false | [`ServerInspectModal.test.tsx:L47`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L47) | Frontend Vitest |
 | `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L61`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L61) | Frontend Vitest |

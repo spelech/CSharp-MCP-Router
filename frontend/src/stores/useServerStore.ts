@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { showToast } from './useToastStore';
+import { confirmAction } from './useConfirmStore';
 import { McpServer, InspectCapabilityData, ServerPayload } from '../shared/types';
 import {
   fetchServersApi,
@@ -154,7 +155,13 @@ export const useServerStore = create<ServerStore>((set, get) => ({
   },
 
   deleteServer: async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete the MCP server '${name}'?`)) return;
+    const confirmed = await confirmAction({
+      title: 'Delete Server',
+      message: `Are you sure you want to delete the MCP server '${name}'?`,
+      confirmText: 'Delete Server',
+      danger: true
+    });
+    if (!confirmed) return;
     try {
       await deleteServerApi(id);
       showToast('Server deleted successfully', 'success');

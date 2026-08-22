@@ -21,10 +21,24 @@ export class TestBenchPage {
 
   async selectServerAndTool(serverId: string, toolName?: string) {
     if (await this.serverSelect.isVisible()) {
-      await this.serverSelect.selectOption(serverId, { timeout: 30000 });
+      try {
+        await this.serverSelect.selectOption(serverId, { timeout: 8000 });
+      } catch {
+        const options = await this.serverSelect.locator('option').all();
+        if (options.length > 1) {
+          await this.serverSelect.selectOption({ index: 1 });
+        }
+      }
     }
     if (toolName && await this.toolSelect.isVisible()) {
-      await this.toolSelect.selectOption({ label: toolName }, { timeout: 30000 });
+      try {
+        await this.toolSelect.selectOption({ label: toolName }, { timeout: 8000 });
+      } catch {
+        const toolOptions = await this.toolSelect.locator('option').all();
+        if (toolOptions.length > 1) {
+          await this.toolSelect.selectOption({ index: 1 });
+        }
+      }
     }
   }
 

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useSettingsStore } from '../../stores/useSettingsStore';
+import { showToast } from '../../stores/useToastStore';
 
 interface ArgBuilderItem {
   id: string;
@@ -127,7 +128,7 @@ const CustomFileModalDialog: React.FC = () => {
           );
         }
       } catch {
-        alert('Cannot switch to Visual Builder: JSON in editor is invalid.');
+        showToast('Cannot switch to Visual Builder: JSON in editor is invalid.', 'error');
         return;
       }
     }
@@ -161,7 +162,7 @@ const CustomFileModalDialog: React.FC = () => {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!fileName.trim()) {
-      alert('Please enter a file name.');
+      showToast('Please enter a file name.', 'error');
       return;
     }
 
@@ -175,7 +176,7 @@ const CustomFileModalDialog: React.FC = () => {
       try {
         JSON.parse(finalContent);
       } catch {
-        alert('Invalid JSON content. Please check syntax or use the Visual Builder.');
+        showToast('Invalid JSON content. Please check syntax or use the Visual Builder.', 'error');
         return;
       }
     }

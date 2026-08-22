@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T06:41:02.3084257Z",
-    "totalRequirements": 88,
+    "generatedAt": "2026-08-22T13:54:15.0700142Z",
+    "totalRequirements": 90,
     "positiveCount": 68,
-    "guardrailCount": 20,
-    "totalProofs": 167
+    "guardrailCount": 22,
+    "totalProofs": 196
   },
   "requirements": [
     {
@@ -44,7 +44,7 @@
       "category": "AUTH",
       "type": "Negative",
       "description": "AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)",
-      "proofCount": 14,
+      "proofCount": 16,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -138,6 +138,20 @@
           "details": null
         },
         {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 12,
+          "testName": "renders Active Directory disabled initially, toggles on and exposes fields",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 46,
+          "testName": "fills LDAP parameters and executes test connection",
+          "details": null
+        },
+        {
           "suite": "Playwright E2E",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 5,
@@ -226,14 +240,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 20,
+          "lineNumber": 21,
           "testName": "renders empty state when no keys exist",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 44,
+          "lineNumber": 45,
           "testName": "renders keys list, copies config snippet, and revokes key",
           "details": null
         },
@@ -281,7 +295,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP",
-      "proofCount": 2,
+      "proofCount": 3,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -296,6 +310,13 @@
           "lineNumber": 55,
           "testName": "ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided",
           "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/ldap-identity-and-auth-flow.spec.ts",
+          "lineNumber": 5,
+          "testName": "should configure LDAP identity provider, test connection, and save settings",
+          "details": null
         }
       ]
     },
@@ -304,13 +325,20 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "McpServer supports AllowPassThroughAuth flag",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/McpServerTests.cs",
           "lineNumber": 9,
           "testName": "McpServer_Should_Have_AllowPassThroughAuth",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts",
+          "lineNumber": 7,
+          "testName": "should render user provided servers and allow editing credentials with SQLite schema",
           "details": null
         }
       ]
@@ -368,13 +396,20 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "ConsentView properly renders the client name from query string and builds correct form action.",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
           "lineNumber": 17,
           "testName": "renders client name from query string and sets form action",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/oauth-consent-flow.spec.ts",
+          "lineNumber": 5,
+          "testName": "should render interactive OAuth consent screen and display requesting client name",
           "details": null
         }
       ]
@@ -1539,7 +1574,7 @@
       "category": "SEC",
       "type": "Positive",
       "description": "VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials",
-      "proofCount": 5,
+      "proofCount": 6,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1565,15 +1600,22 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
-          "lineNumber": 17,
+          "lineNumber": 19,
           "testName": "renders provider inputs and submits updated configuration",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
-          "lineNumber": 60,
+          "lineNumber": 90,
           "testName": "handles Test Vault connection button with success and failure responses",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-sse-vault.spec.ts",
+          "lineNumber": 8,
+          "testName": "should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search",
           "details": null
         }
       ]
@@ -1583,7 +1625,7 @@
       "category": "SEC",
       "type": "Positive",
       "description": "STDIO transport securely injects secret credentials via environment variables rather than command-line arguments",
-      "proofCount": 2,
+      "proofCount": 3,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1598,6 +1640,13 @@
           "lineNumber": 439,
           "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
           "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/vault-approle-config-flow.spec.ts",
+          "lineNumber": 5,
+          "testName": "should configure Vault AppRole credentials and test connection in settings",
+          "details": null
         }
       ]
     },
@@ -1684,7 +1733,7 @@
       "category": "TRANS",
       "type": "Positive",
       "description": "SSE transport resolves static plaintext API keys when provider is None",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1692,6 +1741,13 @@
           "lineNumber": 18,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that SSE transport resolves plaintext API key when secret provider is None."
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-http-direct.spec.ts",
+          "lineNumber": 8,
+          "testName": "should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench",
+          "details": null
         }
       ]
     },
@@ -1700,7 +1756,7 @@
       "category": "TRANS",
       "type": "Positive",
       "description": "HTTP stateless transport resolves static API keys when secret provider is None",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1708,6 +1764,13 @@
           "lineNumber": 19,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that HTTP transport resolves plaintext API key when secret provider is None."
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-stdio-env.spec.ts",
+          "lineNumber": 8,
+          "testName": "should register STDIO server, verify card, and execute echo tool via Test Bench",
+          "details": null
         }
       ]
     },
@@ -1756,6 +1819,164 @@
       ]
     },
     {
+      "id": "REQ-UI-CONFIRM-MODAL",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Deletes an access policy when confirmed via confirm modal.",
+      "proofCount": 12,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 76,
+          "testName": "deletes a policy when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 105,
+          "testName": "does not delete policy when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 166,
+          "testName": "deletes a group mapping when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 195,
+          "testName": "does not delete group mapping when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 222,
+          "testName": "deletes a custom file when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 251,
+          "testName": "does not delete custom file when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 88,
+          "testName": "prompts confirmation and deletes client when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 117,
+          "testName": "cancels deletion when user denies confirmation",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 268,
+          "testName": "confirms and revokes AppKey and refreshes list",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 297,
+          "testName": "cancels revocation when confirm is rejected",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
+          "lineNumber": 203,
+          "testName": "prompts window.confirm and deletes server when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
+          "lineNumber": 232,
+          "testName": "does not send delete request when confirm is cancelled",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-UI-TOAST-TRANSITION",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Displays error toast notification when saving invalid JSON credentials for user-provided server.",
+      "proofCount": 8,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 24,
+          "testName": "shows error toast when saving invalid JSON credentials",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 65,
+          "testName": "saves valid credentials successfully and closes modal",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "lineNumber": 88,
+          "testName": "shows error toast when switching from invalid JSON to Visual Prompt Builder",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "lineNumber": 109,
+          "testName": "shows error toast when saving without a file name",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "lineNumber": 129,
+          "testName": "shows error toast when saving prompt with invalid JSON content",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 99,
+          "testName": "saves updated Active Directory configuration JSON",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 138,
+          "testName": "displays error toast when saving auth providers fails",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "lineNumber": 63,
+          "testName": "displays error toast when saving secret providers fails",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "UI-01",
       "category": "UI",
       "type": "Positive",
@@ -1780,7 +2001,7 @@
           "suite": "Playwright E2E",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts",
           "lineNumber": 42,
-          "testName": "should navigate to Custom Files and Backups in Settings view",
+          "testName": "should navigate to Custom Files and Prompts in Settings view",
           "details": null
         },
         {

@@ -6,22 +6,17 @@ The **Settings View** (`Settings` tab) provides a comprehensive configuration pl
 
 ## 🧭 Settings Sub-Navigation Tabs
 
-The Settings interface is organized into 6 modular domain tabs:
+![System Settings Overview](../assets/settings_view.jpg)
 
-```
-+---------------------------------------------------------------------------------------------+
-| ⚙️ System Settings                                                                          |
-+---------------------------------------------------------------------------------------------+
-| [🧠 Vector & Search] [🛡️ Security & Approvals] [🪪 Identity & Auth] [🔐 Secret Providers]   |
-| [📂 Prompts & Resources] [👥 Access Control]                                                |
-+---------------------------------------------------------------------------------------------+
-```
+The Settings interface is organized into 6 modular domain tabs:
 
 ---
 
 ## 🧠 Tab 1: Vector & Search Engine (`GeneralTab`)
 
-The vector embedding engine powers the **Meta-Mode** dynamic discovery pipeline (`search_tools`), matching natural language agent queries against the tool catalog.
+![Settings Vector and Semantic Search Options](../assets/settings_vector_search.jpg)
+
+The vector embedding engine powers the **Meta-Mode** dynamic discovery pipeline (`search_tools`), matching natural language agent queries against the tool catalog:
 
 ```
 +-------------------------------------------------------------------------------+
@@ -71,6 +66,8 @@ Controls global execution policies and administrative barriers:
 
 ## 🪪 Tab 3: Identity & Auth Providers (`IdentityAuthTab`)
 
+![Settings Identity and Authentication Providers](../assets/settings_identity_auth.jpg)
+
 Manages incoming authentication and user identity resolution:
 
 ### 1. Active Directory / Windows SID Provider
@@ -89,31 +86,19 @@ Manages incoming authentication and user identity resolution:
 
 ## 🔐 Tab 4: Secret Providers (`SecretProvidersTab`)
 
-Manage centralized configurations for external secret stores:
+![Settings Enterprise Secret Providers](../assets/settings_secret_providers.jpg)
 
-```
-+-------------------------------------------------------------------------------+
-| 🔐 Enterprise Secret Providers                                                |
-+-------------------------------------------------------------------------------+
-| [ HashiCorp Vault KV v2 ]                         [ Status: 🟢 Connected ]   |
-| Vault Address:       [ http://vault:8200                                   ]  |
-| Mount Point:         [ secret                                              ]  |
-| Authentication Mode: [ AppRole ▾ ]                                            |
-| Role ID:             [ 4a3e21b0-****-****-****-****************            ]  |
-| Secret ID:           [ ************************************                ]  |
-| JIT Renewal Window:  [ 300 ] seconds (Auto-renews if TTL < 5 min)             |
-|                                                                               |
-| [ Windows Registry (DPAPI) ]                      [ Status: 🟢 Active    ]   |
-| Registry Hive:       [ LocalMachine (HKLM) ▾ ]                                |
-| Base Subkey Path:    [ SOFTWARE\Homelab\McpSecrets                         ]  |
-|                                                                               |
-| [ Save Provider Settings ]                                                    |
-+-------------------------------------------------------------------------------+
-```
+Manage centralized configurations for external secret stores:
+* **HashiCorp Vault KV v2**: AppRole (`roleId` / `secretId`) or direct Token with JIT renewal.
+* **Windows Registry**: DPAPI-encrypted secrets stored in `HKLM` or `HKCU`.
+* **Container Environment**: Secrets dynamically loaded from prefix-matched container env vars.
+* **OAuth2 / OIDC Token Exchange (RFC 8693 / PocketID)**: On-Behalf-Of (OBO) token exchange for downstream tools.
 
 ---
 
 ## 📂 Tab 5: Prompts & Resources File Manager (`CustomFilesTab`)
+
+![Settings Prompts and Resources File Manager](../assets/settings_prompts_resources.jpg)
 
 Create and manage custom JSON files that define virtual tools, prompt templates, and virtual resource endpoints:
 
@@ -125,11 +110,12 @@ Create and manage custom JSON files that define virtual tools, prompt templates,
 
 ## 👥 Tab 6: Access Control & Group Mappings (`AccessControlTab`)
 
+![Settings Access Control and Group Mappings](../assets/settings_access_control.jpg)
+
 Fine-tune enterprise permissions across servers and external groups:
 
-* **Group Mappings Table**: Define mappings that translate external Identity Provider groups (e.g. `CN=IT-Admins,OU=Groups,DC=corp`) to simplified internal roles (`full_admin`).
+* **Group Mappings Table**: Define mappings that translate external Identity Provider groups (e.g. `CN=IT-Admins,OU=Groups,DC=corp` or `S-1-5-21-1001`) to simplified internal roles (`full_admin`).
 * **Server Policies Table**: Complete matrix of server-level access rules:
-  * Server Identifier
-  * Allowed Groups (e.g. `full_admin, house_member`)
-  * Denied Groups (e.g. `contractors`)
-  * Default Allow / Deny policy flag
+  * Target Identifier (e.g. `server:docker`, `tool:docker__ps`, `prompt:router__diagnose`)
+  * Required Group (e.g. `Engineering`, `Administrators`)
+  * Mode (`ALLOW Access` or `DENY Access`)

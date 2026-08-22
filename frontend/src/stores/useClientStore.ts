@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { showToast } from './useToastStore';
+import { confirmAction } from './useConfirmStore';
 import { RegisteredClient, NewClientResult } from '../shared/types';
 import { fetchClientsApi, registerClientApi, deleteClientApi } from '../api/clientApi';
 
@@ -49,7 +50,13 @@ export const useClientStore = create<ClientStore>((set, get) => ({
   },
 
   deleteClient: async (id, name) => {
-    if (!window.confirm(`Are you sure you want to delete the registered client '${name}'?`)) return;
+    const confirmed = await confirmAction({
+      title: 'Delete Client',
+      message: `Are you sure you want to delete the registered client '${name}'?`,
+      confirmText: 'Delete Client',
+      danger: true
+    });
+    if (!confirmed) return;
     try {
       await deleteClientApi(id);
       showToast('Client deleted successfully', 'success');

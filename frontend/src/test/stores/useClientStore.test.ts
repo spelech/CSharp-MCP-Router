@@ -2,6 +2,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { useClientStore, RegisteredClient } from '../../stores/useClientStore';
 import { useAppKeyStore, AppKeyItem, AppKeyLimits } from '../../stores/useAppKeyStore';
 import { useToastStore } from '../../stores/useToastStore';
+import { useConfirmStore } from '../../stores/useConfirmStore';
 import { mockApiResponse } from '../setup';
 
 describe('useClientStore', () => {
@@ -84,8 +85,13 @@ describe('useClientStore', () => {
   });
 
   describe('deleteClient', () => {
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type PositiveFeature
+     * @description Prompts confirmation and deletes client when confirmed.
+     */
     it('prompts confirmation and deletes client when confirmed', async () => {
-      window.confirm = vi.fn(() => true);
       let deleteCalled = false;
       mockApiResponse(/\/api\/clients\/c-123/, (_url, options) => {
         if (options?.method === 'DELETE') {
@@ -95,15 +101,26 @@ describe('useClientStore', () => {
         return { success: true };
       });
 
-      await useClientStore.getState().deleteClient('c-123', 'Cursor IDE');
+      const deletePromise = useClientStore.getState().deleteClient('c-123', 'Cursor IDE');
 
-      expect(window.confirm).toHaveBeenCalled();
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      expect(useConfirmStore.getState().options.title).toBe('Delete Client');
+      expect(useConfirmStore.getState().options.danger).toBe(true);
+
+      useConfirmStore.getState().handleConfirm();
+      await deletePromise;
+
       expect(deleteCalled).toBe(true);
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('deleted successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type FailClosedGuardrail
+     * @description Cancels deletion when user denies confirmation.
+     */
     it('cancels deletion when user denies confirmation', async () => {
-      window.confirm = vi.fn(() => false);
       let deleteCalled = false;
       mockApiResponse(/\/api\/clients\/c-123/, (_url, options) => {
         if (options?.method === 'DELETE') {
@@ -113,17 +130,21 @@ describe('useClientStore', () => {
         return { success: true };
       });
 
-      await useClientStore.getState().deleteClient('c-123', 'Cursor IDE');
+      const deletePromise = useClientStore.getState().deleteClient('c-123', 'Cursor IDE');
 
-      expect(window.confirm).toHaveBeenCalled();
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      useConfirmStore.getState().handleCancel();
+      await deletePromise;
+
       expect(deleteCalled).toBe(false);
     });
 
     it('handles delete failure with error toast', async () => {
-      window.confirm = vi.fn(() => true);
       mockApiResponse(/\/api\/clients\/c-123/, 'Delete failed', 500);
 
-      await useClientStore.getState().deleteClient('c-123', 'Cursor IDE');
+      const deletePromise = useClientStore.getState().deleteClient('c-123', 'Cursor IDE');
+      useConfirmStore.getState().handleConfirm();
+      await deletePromise;
 
       expect(useToastStore.getState().toasts.some((t) => t.type === 'error')).toBe(true);
     });
@@ -244,8 +265,13 @@ describe('useAppKeyStore', () => {
   });
 
   describe('revokeAppKey', () => {
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type PositiveFeature
+     * @description Prompts confirmation modal and revokes AppKey when confirmed.
+     */
     it('confirms and revokes AppKey and refreshes list', async () => {
-      window.confirm = vi.fn(() => true);
       let deleteCalled = false;
       mockApiResponse(/\/api\/appkeys\/k-1/, (_url, options) => {
         if (options?.method === 'DELETE') {
@@ -255,15 +281,26 @@ describe('useAppKeyStore', () => {
         return { success: true };
       });
 
-      await useAppKeyStore.getState().revokeAppKey('k-1', 'Cursor Local');
+      const revokePromise = useAppKeyStore.getState().revokeAppKey('k-1', 'Cursor Local');
 
-      expect(window.confirm).toHaveBeenCalled();
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      expect(useConfirmStore.getState().options.title).toBe('Revoke App Key');
+      expect(useConfirmStore.getState().options.danger).toBe(true);
+
+      useConfirmStore.getState().handleConfirm();
+      await revokePromise;
+
       expect(deleteCalled).toBe(true);
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('revoked successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type FailClosedGuardrail
+     * @description Cancels revocation when confirm is rejected.
+     */
     it('cancels revocation when confirm is rejected', async () => {
-      window.confirm = vi.fn(() => false);
       let deleteCalled = false;
       mockApiResponse(/\/api\/appkeys\/k-1/, (_url, options) => {
         if (options?.method === 'DELETE') {
@@ -273,7 +310,11 @@ describe('useAppKeyStore', () => {
         return { success: true };
       });
 
-      await useAppKeyStore.getState().revokeAppKey('k-1', 'Cursor Local');
+      const revokePromise = useAppKeyStore.getState().revokeAppKey('k-1', 'Cursor Local');
+
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      useConfirmStore.getState().handleCancel();
+      await revokePromise;
 
       expect(deleteCalled).toBe(false);
     });

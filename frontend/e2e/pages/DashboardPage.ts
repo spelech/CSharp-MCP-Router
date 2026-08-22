@@ -18,9 +18,9 @@ export class DashboardPage {
     this.navSettingsBtn = page.getByRole('button', { name: /Settings/i });
     this.navClientsBtn = page.getByRole('button', { name: /Clients|App Keys/i });
     this.addServerBtn = page.getByRole('button', { name: /Add Server/i });
-    this.searchInput = page.getByTestId('server-search-input');
-    this.sortBySelect = page.getByTestId('sort-by-select');
-    this.groupBySelect = page.getByTestId('group-by-select');
+    this.searchInput = page.locator('#server-search, [data-testid="server-search-input"]');
+    this.sortBySelect = page.locator('#server-sort-by, [data-testid="sort-by-select"]');
+    this.groupBySelect = page.locator('#server-group-by, [data-testid="group-by-select"]');
   }
 
   async goto() {
@@ -46,19 +46,19 @@ export class DashboardPage {
   }
 
   getServerCard(serverId: string): Locator {
-    return this.page.locator(`.server-card[data-server-id="${serverId}"], #server-card-${serverId}, .server-item:has-text("${serverId}")`);
+    return this.page.locator(`[data-server-id="${serverId}"], .server-item:has-text("${serverId}")`);
   }
 
   getServerStatusBadge(serverId: string): Locator {
-    return this.page.locator(`[data-server-id="${serverId}"] .indicator, [data-server-id="${serverId}"] .status-badge`);
+    return this.page.locator(`[data-server-id="${serverId}"] .indicator, [data-server-id="${serverId}"] .server-badge, [data-server-id="${serverId}"] .status-badge`);
   }
 
   getServerStatusBadgeByName(name: string): Locator {
-    return this.page.locator(`.server-card:has-text("${name}"), .server-item:has-text("${name}")`).locator('.status-badge, .indicator').first();
+    return this.page.locator(`.server-item:has-text("${name}"), .server-card:has-text("${name}")`).locator('.server-badge, .indicator, .status-badge').first();
   }
 
   async getServerIdByName(name: string): Promise<string> {
-    const card = this.page.locator(`.server-card:has-text("${name}"), .server-item:has-text("${name}")`).first();
+    const card = this.page.locator(`.server-item:has-text("${name}"), .server-card:has-text("${name}")`).first();
     await card.waitFor({ state: 'visible' });
     const id = await card.getAttribute('data-server-id');
     return id || '';
