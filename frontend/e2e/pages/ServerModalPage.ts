@@ -36,9 +36,9 @@ export class ServerModalPage {
   async fillServerForm(details: {
     id: string;
     name: string;
-    type?: 'http' | 'sse' | 'stdio';
+    type?: 'http' | 'sse' | 'stdio' | 'streamable';
     url: string;
-    secretProvider?: 'None' | 'Environment' | 'Vault' | 'WindowsRegistry';
+    secretProvider?: 'None' | 'Environment' | 'Vault' | 'WindowsRegistry' | 'UserProvided';
     vaultMount?: string;
     vaultPath?: string;
     vaultField?: string;

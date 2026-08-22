@@ -1,25 +1,35 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('LDAP and Active Directory Identity Flow', () => {
+
+  /**
+   * @requirement AUTH-04
+   * @category AUTH
+   * @type PositiveFeature
+   * @description Configure LDAP / Active Directory identity provider, test connection, and save settings.
+   */
   test('should configure LDAP identity provider, test connection, and save settings', async ({ page }) => {
+    page.on('dialog', async (dialog) => {
+      await dialog.accept();
+    });
+
     // Navigate to Settings
     await page.goto('/');
     const settingsTab = page.locator('button:has-text("Settings")').first();
     await expect(settingsTab).toBeVisible();
     await settingsTab.click();
 
-    // Click on Providers tab
-    const providersTab = page.locator('button:has-text("Providers"), .nav-tab:has-text("Providers")').first();
+    // Click on Identity & Auth tab
+    const providersTab = page.locator('button:has-text("Identity & Auth"), button:has-text("Providers")').first();
     if (await providersTab.isVisible()) {
       await providersTab.click();
     }
 
     // Verify Identity & Auth card
-    await expect(page.locator('text=Identity & Auth Providers')).toBeVisible();
+    await expect(page.locator('h2:has-text("Identity & Auth")').first()).toBeVisible();
 
     // Toggle Active Directory switch on if not enabled
     const adSwitch = page.locator('#auth-ad-enabled');
-    await expect(adSwitch).toBeVisible();
     if (!(await adSwitch.isChecked())) {
       await page.locator('label:has(#auth-ad-enabled) .slider').click();
     }
@@ -28,10 +38,10 @@ test.describe('LDAP and Active Directory Identity Flow', () => {
     // Fill in LDAP Server details
     const serverInput = page.locator('#ad-server');
     await expect(serverInput).toBeVisible();
-    await serverInput.fill('ldap-test');
+    await serverInput.fill(process.env.LDAP_TEST_SERVER || '127.0.0.1');
 
     const portInput = page.locator('#ad-port');
-    await portInput.fill('636');
+    await portInput.fill(process.env.LDAP_TEST_PORT || '6636');
 
     const domainInput = page.locator('#ad-domain');
     await domainInput.fill('corp.local');

@@ -4,10 +4,18 @@ import { ServerModalPage } from './pages/ServerModalPage';
 
 test.describe('My MCP Servers & User Credentials Flow', () => {
 
+  /**
+   * @requirement AUTH-05
+   * @category AUTH
+   * @type PositiveFeature
+   * @description Render user-provided servers and configure per-user credentials in My MCP Servers view.
+   */
   test('should render user provided servers and allow editing credentials with SQLite schema', async ({ page }) => {
     test.setTimeout(60000);
     const dashboard = new DashboardPage(page);
     const serverModal = new ServerModalPage(page);
+    const testServerId = `sqlite_auth_${Date.now()}`;
+    const testServerName = `SQLite Auth ${Date.now()}`;
 
     await dashboard.goto();
 
@@ -16,10 +24,10 @@ test.describe('My MCP Servers & User Credentials Flow', () => {
       await expect(serverModal.modal).toBeVisible();
 
       await serverModal.fillServerForm({
-        id: 'sqlite_schema_mock',
-        name: 'SQLite Auth Server',
+        id: testServerId,
+        name: testServerName,
         type: 'sse',
-        url: 'http://mock-mcp-server:8090/sse',
+        url: process.env.MOCK_MCP_SSE_URL || 'http://127.0.0.1:8090/sse',
         secretProvider: 'UserProvided'
       });
 
@@ -35,7 +43,7 @@ test.describe('My MCP Servers & User Credentials Flow', () => {
     await tabBtn.click();
 
     // Verify row content and Auth Missing status
-    const firstRow = page.locator('table.data-table tbody tr').filter({ hasText: 'SQLite Auth Server' }).first();
+    const firstRow = page.locator('table.data-table tbody tr').filter({ hasText: testServerName }).first();
     await expect(firstRow).toBeVisible();
     await expect(firstRow).toContainText('Auth Missing');
 
@@ -46,7 +54,7 @@ test.describe('My MCP Servers & User Credentials Flow', () => {
     // Verify modal overlay opens
     const modal = page.locator('.modal-backdrop, .modal-card').first();
     await expect(modal).toBeVisible();
-    await expect(modal).toContainText('Edit Auth for SQLite Auth Server');
+    await expect(modal).toContainText(`Edit Auth for ${testServerName}`);
 
     // Type JSON into textarea
     const textarea = modal.locator('textarea');
