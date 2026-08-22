@@ -193,7 +193,7 @@ Stores cached metadata and JSON schemas for downstream MCP tools discovered duri
 
 ---
 
-### 3. `AppKeys` (LiteLLM-Style Scoped API Keys)
+### 3. `AppKeys` (Scoped API Keys)
 Stores client API credentials used by IDEs, CLI tools, and background agents.
 
 | Column | Type | Nullable | Constraints | Description |
@@ -296,8 +296,8 @@ Stores global singleton settings controlling vector embeddings, approval thresho
 | `EmbeddingApiModel` | `VARCHAR(100)` | Yes | | Remote embedding model identifier (e.g. `text-embedding-3-small`) |
 | `EmbeddingModelDir` | `VARCHAR(500)` | Yes | | Local path to ONNX model weights (`/app/data/models`) |
 | `RequireManualApproval` | `BOOLEAN / INT` | No | Default `0` | Toggles human-in-the-loop validation for dangerous operations |
-| `GlobalMaxKeys` | `INT` | No | Default `100` | Gateway-wide limit on active AppKeys |
-| `UserMaxKeys` | `INT` | No | Default `5` | Per-user limit on active AppKeys |
+| `GlobalMaxKeys` | `INT` | No | Default `0` | Gateway-wide limit on active AppKeys (`0` = Unlimited) |
+| `UserMaxKeys` | `INT` | No | Default `0` | Per-user limit on active AppKeys (`0` = Unlimited) |
 
 ---
 
@@ -351,4 +351,4 @@ graph TD
 - [database-providers.md](database-providers.md): Dialect-specific DDL, stored procedure definitions, and connection configuration.
 - [architecture.md](architecture.md): End-to-end system context, component diagrams, and runtime sequence diagrams.
 - [secret-providers.md](secret-providers.md): Pluggable secret retriever architecture and HashiCorp Vault integration.
-- [appkey-scopes.md](appkey-scopes.md): LiteLLM-style AppKey scoping, life cycle, and authorization logic.
+- [appkey-scopes.md](appkey-scopes.md): AppKey scoping, life cycle, and authorization logic.
