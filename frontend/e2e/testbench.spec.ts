@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-128 */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('Test Bench View Flow', () => {

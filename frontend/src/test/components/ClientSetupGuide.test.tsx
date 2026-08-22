@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-109 */
+
 import { describe, it, expect } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ClientSetupGuide } from '../../components/clients/ClientSetupGuide';

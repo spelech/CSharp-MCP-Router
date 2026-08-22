@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-123 */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('Client Setup & App Key Management Flow', () => {
