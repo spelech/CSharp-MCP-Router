@@ -19,7 +19,8 @@ namespace McpRouter.Components.Clients
             string username,
             string ownerSid,
             List<string> scopes,
-            int? expiresInDays);
+            int? expiresInDays,
+            string keyType = "personal");
 
         Task<bool> RevokeCredentialAsync(string id);
     }
@@ -38,7 +39,8 @@ namespace McpRouter.Components.Clients
             string username,
             string ownerSid,
             List<string> scopes,
-            int? expiresInDays)
+            int? expiresInDays,
+            string keyType = "personal")
         {
             var scopesList = scopes ?? new List<string> { "all" };
             var scopeSlug = "global";
@@ -83,6 +85,7 @@ namespace McpRouter.Components.Clients
                     Name = name,
                     Username = username,
                     OwnerSid = ownerSid ?? string.Empty,
+                    KeyType = string.IsNullOrEmpty(keyType) ? "personal" : keyType,
                     KeyPrefix = prefix,
                     EncryptedKey = encryptedKey,
                     ScopesJson = JsonSerializer.Serialize(scopesList),
@@ -106,8 +109,8 @@ namespace McpRouter.Components.Clients
                     if (_dbFactory.ProviderName == "sqlite")
                     {
                         const string insertSql = @"
-                            INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
-                            VALUES (@Id, @Name, @Username, @OwnerSid, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
+                            INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
+                            VALUES (@Id, @Name, @Username, @OwnerSid, @KeyType, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
                         await conn.ExecuteAsync(insertSql, appKey);
                     }
                     else if (_dbFactory.ProviderName == "mysql")
@@ -123,6 +126,7 @@ namespace McpRouter.Components.Clients
                                 p_EncryptedKey = appKey.EncryptedKey,
                                 p_ScopesJson = appKey.ScopesJson,
                                 p_OwnerSid = appKey.OwnerSid,
+                                p_KeyType = string.IsNullOrEmpty(appKey.KeyType) ? "personal" : appKey.KeyType,
                                 p_ExpiresAt = appKey.ExpiresAt
                             },
                             commandType: CommandType.StoredProcedure
@@ -138,6 +142,7 @@ namespace McpRouter.Components.Clients
                                 appKey.Name,
                                 appKey.Username,
                                 appKey.OwnerSid,
+                                KeyType = string.IsNullOrEmpty(appKey.KeyType) ? "personal" : appKey.KeyType,
                                 appKey.KeyPrefix,
                                 appKey.EncryptedKey,
                                 appKey.ScopesJson,

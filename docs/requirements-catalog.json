@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T14:27:27.5328334Z",
-    "totalRequirements": 90,
-    "positiveCount": 68,
+    "generatedAt": "2026-08-22T14:37:13.6283551Z",
+    "totalRequirements": 94,
+    "positiveCount": 72,
     "guardrailCount": 22,
-    "totalProofs": 203
+    "totalProofs": 207
   },
   "requirements": [
     {
@@ -91,7 +91,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 273,
+          "lineNumber": 274,
           "testName": "AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds",
           "details": "Verifies that admin callers can create forward-looking AppKeys for unconfigured categories."
         },
@@ -170,7 +170,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
-          "lineNumber": 254,
+          "lineNumber": 255,
           "testName": "Pairwise_AppKeyScopes_RestrictsAccessPrecisely",
           "details": "Verifies pairwise combination of AppKey scopes across all MCP capabilities and backend targets."
         },
@@ -184,63 +184,63 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 212,
+          "lineNumber": 213,
           "testName": "AppKeysController_CreateAppKey_ValidCategory_Succeeds",
           "details": "Verifies that AppKeys can be created with valid category scopes."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 296,
+          "lineNumber": 297,
           "testName": "ClientsController_CreateClient_ValidCategory_Succeeds",
           "details": "Verifies that OAuth client credentials can be created with category-scoped access rules."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 379,
+          "lineNumber": 380,
           "testName": "ClientSession_CategoryScope_AuthorizesMatchingServerTools_AndDeniesOthers",
           "details": "Verifies that category-scoped AppKey authorizes access exclusively to servers belonging to the permitted category."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 403,
+          "lineNumber": 404,
           "testName": "ClientSession_GroupAliasScope_AuthorizesIdenticallyToCategory",
           "details": "Verifies that group-alias scopes evaluate identically to category scopes during tool authorization."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 425,
+          "lineNumber": 426,
           "testName": "ClientSession_CategoryScope_IsCaseInsensitive",
           "details": "Verifies that category scope matching is case-insensitive across server categories."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 475,
+          "lineNumber": 476,
           "testName": "ClientSession_ResourcesAndTemplates_FilteredByCategoryScope",
           "details": "Verifies that resources and templates are filtered according to category-scoped AppKey permissions."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 503,
+          "lineNumber": 504,
           "testName": "ClientSession_DynamicServerMembership_UpdatesAccessDynamically",
           "details": "Verifies that dynamic updates to server categories immediately update tool access without re-authenticating."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 539,
+          "lineNumber": 540,
           "testName": "ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes",
           "details": "Verifies that AppKeys can combine category scopes and granular tool-level scopes additively."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 566,
+          "lineNumber": 567,
           "testName": "ClientSession_Complete_FiltersServerNamesByCategoryScope",
           "details": "Verifies that autocomplete and completion requests filter suggestions to servers within category scopes."
         },
@@ -277,7 +277,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
-          "lineNumber": 331,
+          "lineNumber": 332,
           "testName": "Pairwise_SsoIdentityAndGroupMappings_EvaluateCorrectly",
           "details": "Verifies pairwise combination of SSO identities, SIDs, and group mappings across all targets."
         },
@@ -431,7 +431,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
-          "lineNumber": 205,
+          "lineNumber": 347,
           "testName": "CreateAppKey_AllowsUnlimited_WhenLimitsAreZero",
           "details": null
         }
@@ -529,6 +529,70 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 22,
           "testName": "IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-PERSONAL-APPKEY-CREATE",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Non-admin users can create personal App Keys up to quota",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 199,
+          "testName": "CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-PERSONAL-APPKEY-LIST",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Non-admin users can view their personal App Keys",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 133,
+          "testName": "GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Custom user quotas override default limit",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 231,
+          "testName": "CreateAppKey_CustomQuotaOverride_AllowsHigherLimit",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-SYSTEM-APPKEY-SEPARATION",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "System keys are distinct and require admin permissions",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 159,
+          "testName": "SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys",
           "details": null
         }
       ]
@@ -743,35 +807,35 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
-          "lineNumber": 480,
+          "lineNumber": 481,
           "testName": "Pairwise_NullOrEmptyTarget_FailsClosed_ReturnsFalse",
           "details": "Ensures null or whitespace capability targets fail closed immediately."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
-          "lineNumber": 502,
+          "lineNumber": 503,
           "testName": "Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse",
           "details": "Ensures corrupted AppKey scopes JSON fails closed safely and rejects execution."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 235,
+          "lineNumber": 236,
           "testName": "AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest",
           "details": "Ensures non-admin callers cannot create AppKeys with unconfigured categories."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 254,
+          "lineNumber": 255,
           "testName": "AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest",
           "details": "Ensures AppKey creation with empty or whitespace category fails closed with BadRequest."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 319,
+          "lineNumber": 320,
           "testName": "ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest",
           "details": "Ensures client creation with empty category scope fails closed with BadRequest."
         }
@@ -896,14 +960,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
-          "lineNumber": 520,
+          "lineNumber": 521,
           "testName": "Pairwise_CompleteAsync_MalformedOrMissingBackends_ThrowsOrFailsClosed",
           "details": "Ensures malformed completion payloads or unmapped backends throw or fail closed."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
-          "lineNumber": 543,
+          "lineNumber": 544,
           "testName": "Pairwise_DatabaseDisconnection_FailsClosedSafely",
           "details": "Ensures database disconnection or failure fails closed safely without leaking access."
         },
@@ -1077,14 +1141,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
-          "lineNumber": 579,
+          "lineNumber": 580,
           "testName": "Pairwise_MetaMode_ExecuteTool_EnforcesTargetAuthorization",
           "details": "Verifies that router meta-mode execute_tool strictly enforces target tool authorization policies."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 443,
+          "lineNumber": 444,
           "testName": "ClientSession_ExecuteTool_EnforcesCategoryScopeOnInnerTarget",
           "details": "Verifies that router meta-mode execute_tool validates and enforces category scopes on target tool calls."
         }
@@ -1100,7 +1164,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
-          "lineNumber": 397,
+          "lineNumber": 398,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
         }

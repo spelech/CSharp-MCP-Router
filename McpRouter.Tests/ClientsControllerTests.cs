@@ -46,6 +46,7 @@ namespace McpRouter.Tests
                     EncryptedKey TEXT,
                     ScopesJson TEXT DEFAULT '[]',
                     OwnerSid TEXT,
+                    KeyType TEXT DEFAULT 'personal',
                     ExpiresAt TEXT,
                     CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
                 );
