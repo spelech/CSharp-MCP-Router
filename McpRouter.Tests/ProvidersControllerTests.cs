@@ -403,7 +403,7 @@ namespace McpRouter.Tests
 
             var result = await controller.SaveSecretProvider(dto, mockAudit.Object, mockServiceProvider.Object);
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Contains("must use the HTTPS scheme", badRequest.Value.ToString());
+            Assert.Contains("must use the HTTPS scheme", badRequest.Value!.ToString());
         }
 }
 }

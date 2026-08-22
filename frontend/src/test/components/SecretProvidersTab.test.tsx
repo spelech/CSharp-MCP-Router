@@ -84,7 +84,7 @@ describe('SecretProvidersTab Component', () => {
       fireEvent.click(saveBtn);
     });
 
-    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Failed to save Secret Providers') && t.type === 'error')).toBe(true);
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Save failed') && t.type === 'error')).toBe(true);
   });
 
   /**
