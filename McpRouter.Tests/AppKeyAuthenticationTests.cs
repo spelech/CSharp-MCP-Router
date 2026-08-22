@@ -15,6 +15,7 @@ using Xunit;
 using McpRouter.Infrastructure.Logging;
 using System.Net.Http;
 using McpRouter.Core.Routing;
+using McpRouter.Tests.Attributes;
 
 namespace McpRouter.Tests
 {
@@ -301,6 +302,112 @@ namespace McpRouter.Tests
             {
                 await session.CallToolAsync("testserver__testtool", "{}", null!);
             });
+        }
+
+        [Fact]
+        [Requirement("REQ-AUTH-SYSTEM-APPKEY-SEPARATION", "AUTH", RequirementType.Positive, "Personal AppKey with 'all' scope does not grant Administrator role")]
+        public async Task PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole()
+        {
+            var keyString = "mcp-all-personalkeytest123456789";
+            var prefix = keyString.Substring(0, 16);
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var hash = Convert.ToHexString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(keyString))).ToLowerInvariant();
+
+            var key = new AppKey
+            {
+                Id = "personal-key-1",
+                Name = "Personal Alice Key",
+                Username = "alice",
+                KeyPrefix = prefix,
+                EncryptedKey = hash,
+                ScopesJson = "[\"all\"]",
+                KeyType = "personal"
+            };
+
+            await _connection.ExecuteAsync(@"
+                INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, KeyType)
+                VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @KeyType);",
+                key);
+
+            var optionsMonitorMock = new Mock<Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions>>();
+            optionsMonitorMock.Setup(o => o.Get(It.IsAny<string>())).Returns(new Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions());
+
+            var handler = new McpRouter.Middleware.AppKeyAuthenticationHandler(
+                optionsMonitorMock.Object,
+                Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory.Instance,
+                System.Text.Encodings.Web.UrlEncoder.Default,
+                _dbFactory,
+                _config
+            );
+
+            var context = new DefaultHttpContext();
+            context.Request.Headers["X-App-Key"] = keyString;
+            var scheme = new Microsoft.AspNetCore.Authentication.AuthenticationScheme("AppKey", null, typeof(McpRouter.Middleware.AppKeyAuthenticationHandler));
+            await handler.InitializeAsync(scheme, context);
+
+            var result = await handler.AuthenticateAsync();
+            Assert.True(result.Succeeded);
+            Assert.NotNull(result.Principal);
+            Assert.True(result.Principal.IsInRole("McpClient"));
+            Assert.False(result.Principal.IsInRole("Administrator"));
+            Assert.False(result.Principal.HasClaim("Scope", "admin"));
+
+            // Verify SecurityValidationHelper.IsAdmin returns false
+            var identity = new McpRouter.Infrastructure.Identity.UserIdentityContext("alice", "AppKey", new List<string>());
+            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, _config, context));
+        }
+
+        [Fact]
+        [Requirement("REQ-AUTH-SYSTEM-APPKEY-SEPARATION", "AUTH", RequirementType.Positive, "System AppKey with 'admin' scope grants Administrator role")]
+        public async Task SystemAppKey_WithAdminScope_GrantsAdministratorRole()
+        {
+            var keyString = "mcp-admin-systemkeytest123456789";
+            var prefix = keyString.Substring(0, 16);
+            using var sha = System.Security.Cryptography.SHA256.Create();
+            var hash = Convert.ToHexString(sha.ComputeHash(System.Text.Encoding.UTF8.GetBytes(keyString))).ToLowerInvariant();
+
+            var key = new AppKey
+            {
+                Id = "system-key-1",
+                Name = "System Daemon Key",
+                Username = "system",
+                KeyPrefix = prefix,
+                EncryptedKey = hash,
+                ScopesJson = "[\"admin\"]",
+                KeyType = "system"
+            };
+
+            await _connection.ExecuteAsync(@"
+                INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, KeyType)
+                VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @KeyType);",
+                key);
+
+            var optionsMonitorMock = new Mock<Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions>>();
+            optionsMonitorMock.Setup(o => o.Get(It.IsAny<string>())).Returns(new Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions());
+
+            var handler = new McpRouter.Middleware.AppKeyAuthenticationHandler(
+                optionsMonitorMock.Object,
+                Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory.Instance,
+                System.Text.Encodings.Web.UrlEncoder.Default,
+                _dbFactory,
+                _config
+            );
+
+            var context = new DefaultHttpContext();
+            context.Request.Headers["X-App-Key"] = keyString;
+            var scheme = new Microsoft.AspNetCore.Authentication.AuthenticationScheme("AppKey", null, typeof(McpRouter.Middleware.AppKeyAuthenticationHandler));
+            await handler.InitializeAsync(scheme, context);
+
+            var result = await handler.AuthenticateAsync();
+            Assert.True(result.Succeeded);
+            Assert.NotNull(result.Principal);
+            Assert.True(result.Principal.IsInRole("McpClient"));
+            Assert.True(result.Principal.IsInRole("Administrator"));
+            Assert.True(result.Principal.HasClaim("Scope", "admin"));
+
+            // Verify SecurityValidationHelper.IsAdmin returns true
+            var identity = new McpRouter.Infrastructure.Identity.UserIdentityContext("system", "AppKey", new List<string>());
+            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, _config, context));
         }
     }
 }

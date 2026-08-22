@@ -434,14 +434,16 @@ namespace McpRouter.Components.Authorization
 
             if (httpContext != null)
             {
-                if (httpContext.Items.TryGetValue("AppKeyScopes", out var scopesObj) && scopesObj is string scopesJson)
+                var keyTypeObj = httpContext.Items.TryGetValue("AppKeyType", out var kt) ? kt as string : null;
+                bool isExplicitPersonal = string.Equals(keyTypeObj, "personal", StringComparison.OrdinalIgnoreCase);
+
+                if (!isExplicitPersonal && httpContext.Items.TryGetValue("AppKeyScopes", out var scopesObj) && scopesObj is string scopesJson)
                 {
                     try
                     {
                         var scopes = JsonSerializer.Deserialize<List<string>>(scopesJson);
                         if (scopes != null && scopes.Any(s =>
                             string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
                         {
                             return true;

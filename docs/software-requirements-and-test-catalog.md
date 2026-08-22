@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **94 Requirements Verified** across **228 Test Proofs** (71 Functional Capabilities, 23 Safety Guardrails).
+> **Catalog Statistics:** **94 Requirements Verified** across **230 Test Proofs** (71 Functional Capabilities, 23 Safety Guardrails).
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **22** | 20 | 2 | 75 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **22** | 20 | 2 | 77 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 10 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 34 proofs |
@@ -164,8 +164,10 @@
 ### `[REQ-AUTH-SYSTEM-APPKEY-SEPARATION]` System keys are distinct and require admin permissions
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (7):**
+* **Verification Proofs (9):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L159`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L159) (`SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L307`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L307) (`PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L360`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L360) (`SystemAppKey_WithAdminScope_GrantsAdministratorRole`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L216`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L216) (`switches keyTypeTab between personal and system`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L250`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L250) (`fetches system-filtered app keys via query parameters`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L15`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L15) (`renders header, navigation tabs, and default overview dashboard for admin user`)

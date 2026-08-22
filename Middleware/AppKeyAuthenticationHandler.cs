@@ -149,14 +149,15 @@ namespace McpRouter.Middleware
                 };
 
                 bool isAdminAppKey = false;
-                if (!string.IsNullOrWhiteSpace(appKey.ScopesJson))
+                bool isSystemKey = string.Equals(appKey.KeyType, "system", StringComparison.OrdinalIgnoreCase);
+
+                if (isSystemKey && !string.IsNullOrWhiteSpace(appKey.ScopesJson))
                 {
                     try
                     {
                         var parsedScopes = JsonSerializer.Deserialize<List<string>>(appKey.ScopesJson);
                         if (parsedScopes != null && parsedScopes.Any(s =>
                             string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
                         {
                             isAdminAppKey = true;
@@ -167,7 +168,6 @@ namespace McpRouter.Middleware
                         var scopeParts = appKey.ScopesJson.Split(new[] { ',', '[', ']', '"', ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         if (scopeParts.Any(s =>
                             string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
                         {
                             isAdminAppKey = true;
@@ -195,6 +195,7 @@ namespace McpRouter.Middleware
                 Context.Items["AppKeyScopes"] = appKey.ScopesJson;
                 Context.Items["AppKeyOwner"] = appKey.Username;
                 Context.Items["AppKeyOwnerSid"] = appKey.OwnerSid;
+                Context.Items["AppKeyType"] = appKey.KeyType;
 
                 return AuthenticateResult.Success(ticket);
             }

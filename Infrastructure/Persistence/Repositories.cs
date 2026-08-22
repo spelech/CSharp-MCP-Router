@@ -370,7 +370,7 @@ namespace McpRouter.Infrastructure.Persistence
         public async Task<int> GetUserActiveKeysAsync(string username)
         {
             using var conn = _dbFactory.CreateConnection();
-            return await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppKeys WHERE Username = @Username;", new { Username = username });
+            return await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM AppKeys WHERE Username = @Username AND (KeyType IS NULL OR KeyType != 'system');", new { Username = username });
         }
 
         // ==========================================
