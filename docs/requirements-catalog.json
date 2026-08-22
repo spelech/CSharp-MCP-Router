@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T14:21:05.7740318Z",
+    "generatedAt": "2026-08-22T14:27:27.5328334Z",
     "totalRequirements": 90,
     "positiveCount": 68,
     "guardrailCount": 22,
-    "totalProofs": 197
+    "totalProofs": 203
   },
   "requirements": [
     {
@@ -165,7 +165,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "AppKey scopes restrict access precisely across all MCP capabilities and backend targets",
-      "proofCount": 13,
+      "proofCount": 14,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -173,6 +173,13 @@
           "lineNumber": 254,
           "testName": "Pairwise_AppKeyScopes_RestrictsAccessPrecisely",
           "details": "Verifies pairwise combination of AppKey scopes across all MCP capabilities and backend targets."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "lineNumber": 151,
+          "testName": "AppKeyRepository_SaveAndGet_PersistsKeyTypeAndFilters",
+          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -531,7 +538,7 @@
       "category": "DB",
       "type": "Positive",
       "description": "SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data",
-      "proofCount": 1,
+      "proofCount": 6,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -539,6 +546,41 @@
           "lineNumber": 43,
           "testName": "Sqlite_UpgradeMigration_FromLegacySchema_PreservesDataAndPassesValidation",
           "details": "Verifies that SQLite upgrade migration from legacy schema preserves data, encrypts configs, and passes schema validation."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "lineNumber": 90,
+          "testName": "UserQuotaRepository_SetAndGet_ReturnsPersistedQuota",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "lineNumber": 103,
+          "testName": "UserQuotaRepository_GetAll_ReturnsAllUserQuotas",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "lineNumber": 122,
+          "testName": "UserQuotaRepository_Update_UpdatesExistingQuota",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "lineNumber": 137,
+          "testName": "UserQuotaRepository_Delete_RemovesQuota",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "lineNumber": 204,
+          "testName": "DependencyInjection_RegistersIUserQuotaRepository",
+          "details": null
         }
       ]
     },

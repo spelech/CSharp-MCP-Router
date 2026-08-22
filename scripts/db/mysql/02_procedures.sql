@@ -236,11 +236,12 @@ CREATE PROCEDURE `sp_SaveAppKey`(
     IN p_EncryptedKey LONGTEXT,
     IN p_ScopesJson LONGTEXT,
     IN p_OwnerSid VARCHAR(200),
+    IN p_KeyType VARCHAR(50),
     IN p_ExpiresAt DATETIME
 )
 BEGIN
-    INSERT INTO `AppKeys` (`Id`, `Name`, `Username`, `OwnerSid`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`)
-    VALUES (p_Id, p_Name, p_Username, IFNULL(p_OwnerSid, ''), p_KeyPrefix, p_EncryptedKey, p_ScopesJson, p_ExpiresAt, NOW())
+    INSERT INTO `AppKeys` (`Id`, `Name`, `Username`, `OwnerSid`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `KeyType`, `ExpiresAt`, `CreatedAt`)
+    VALUES (p_Id, p_Name, p_Username, IFNULL(p_OwnerSid, ''), p_KeyPrefix, p_EncryptedKey, p_ScopesJson, IFNULL(p_KeyType, 'personal'), p_ExpiresAt, NOW())
     ON DUPLICATE KEY UPDATE
         `Name` = p_Name,
         `Username` = p_Username,
@@ -248,6 +249,7 @@ BEGIN
         `KeyPrefix` = p_KeyPrefix,
         `EncryptedKey` = p_EncryptedKey,
         `ScopesJson` = p_ScopesJson,
+        `KeyType` = IFNULL(p_KeyType, 'personal'),
         `ExpiresAt` = p_ExpiresAt;
 END //
 
@@ -263,18 +265,15 @@ END //
 -- 9. Procedure: Get AppKeys
 DROP PROCEDURE IF EXISTS `sp_GetAppKeys` //
 CREATE PROCEDURE `sp_GetAppKeys`(
-    IN p_Username VARCHAR(256)
+    IN p_Username VARCHAR(256),
+    IN p_KeyType VARCHAR(50)
 )
 BEGIN
-    IF p_Username IS NULL THEN
-        SELECT `Id`, `Name`, `Username`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`
-        FROM `AppKeys`;
-    END IF;
-    IF p_Username IS NOT NULL THEN
-        SELECT `Id`, `Name`, `Username`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `ExpiresAt`, `CreatedAt`
-        FROM `AppKeys`
-        WHERE `Username` = p_Username;
-    END IF;
+    SELECT `Id`, `Name`, `Username`, `KeyPrefix`, `EncryptedKey`, `ScopesJson`, `OwnerSid`, `KeyType`, `ExpiresAt`, `CreatedAt`
+    FROM `AppKeys`
+    WHERE (p_Username IS NULL OR `Username` = p_Username)
+      AND (p_KeyType IS NULL OR `KeyType` = p_KeyType)
+    ORDER BY `CreatedAt` DESC;
 END //
 
 -- 10. Procedure: Insert Admin Audit Log Entry
