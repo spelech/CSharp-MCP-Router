@@ -35,7 +35,7 @@ describe('AppKeysCard Component', () => {
 
     render(<AppKeysCard />);
 
-    expect(screen.getByText(/LiteLLM-Style App Keys/i)).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /App Keys/i })).toBeInTheDocument();
     expect(screen.getByText(/No App Keys active/i)).toBeInTheDocument();
     expect(fetchAppKeysMock).toHaveBeenCalled();
     expect(fetchLimitsMock).toHaveBeenCalled();

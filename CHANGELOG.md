@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.25.0`** | 2026-08-22 | feat(appkeys): removed LiteLLM branding from AppKeys UI/docs and enabled unlimited AppKeys by default (`0` = Unlimited) |
 | **`v4.24.0`** | 2026-08-22 | feat(auth): added native React UI for OAuth Consent Screen, and enabled `refresh_token` flows for multi-tenant clients |
 | **`v4.23.0`** | 2026-08-22 | feat(auth): added interactive Per-User OAuth Consent Screen to support true multi-tenant scenarios via authorization_code flows |
 | **`v4.22.2`** | 2026-08-21 | patch |

@@ -32,11 +32,15 @@ export const AppKeysCard: React.FC = () => {
       <div className="card-header-btn">
         <div>
           <h2>
-            <i className="fa-solid fa-key"></i> LiteLLM-Style App Keys
+            <i className="fa-solid fa-key"></i> App Keys
           </h2>
           {limits && (
             <small style={{ color: 'var(--secondary)', display: 'block', marginTop: '2px' }}>
-              User Quota: <strong>{limits.userActiveKeys} / {limits.userMax}</strong> Keys Used &bull; Global: {limits.totalActiveKeys} / {limits.globalMax}
+              {limits.userMax > 0 ? (
+                <>User Quota: <strong>{limits.userActiveKeys} / {limits.userMax}</strong> Keys Used &bull; Global: {limits.globalMax > 0 ? `${limits.totalActiveKeys} / ${limits.globalMax}` : 'Unlimited'}</>
+              ) : (
+                <>Active Keys: <strong>{limits.userActiveKeys}</strong> &bull; Quota: Unlimited</>
+              )}
             </small>
           )}
         </div>

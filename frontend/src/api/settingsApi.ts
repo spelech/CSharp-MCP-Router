@@ -18,8 +18,8 @@ export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | n
     embeddingApiModel: settings.embeddingApiModel || 'all-MiniLM-L6-v2',
     embeddingApiKey: settings.embeddingApiKey || '',
     allowOpenClientRegistration: settings.allowOpenClientRegistration ?? true,
-    globalMaxKeys: settings.globalMaxKeys || 100,
-    userMaxKeys: settings.userMaxKeys || 5,
+    globalMaxKeys: settings.globalMaxKeys ?? 0,
+    userMaxKeys: settings.userMaxKeys ?? 0,
   };
 }
 
