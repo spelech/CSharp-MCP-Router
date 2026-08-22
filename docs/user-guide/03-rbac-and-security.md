@@ -114,6 +114,8 @@ graph TD
 
 ## 🎛️ Configuring Access Control & Group Mappings
 
+![Settings Access Control and RBAC Policies](../assets/settings_access_control.jpg)
+
 ### 1. Server Policy Configuration Modal
 Click **`Policy`** on any server card on the Overview dashboard:
 
@@ -125,6 +127,8 @@ Click **`Policy`** on any server card on the Overview dashboard:
 Navigate to **`Settings`** -> **`Access Control`**:
 * **Group Mappings Table**: Map external SSO/AD groups to standardized internal roles.
 * **Server Policies Table**: Centralized grid of all server policies with quick inline editing.
+
+![Settings Identity and Authentication Providers](../assets/settings_identity_auth.jpg)
 
 ---
 

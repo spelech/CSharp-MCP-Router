@@ -6,26 +6,11 @@ The **MCP Gateway Router** enables AI coding assistants, IDEs, and autonomous ag
 
 ## 🔑 Managing App Keys (`App Keys & Security` Tab)
 
+![App Keys and Security Management View](../assets/security_view.jpg)
+
 AppKeys grant external clients secure, authenticated access to the router without exposing master administrator credentials or passing raw SSO headers.
 
-```
-+-------------------------------------------------------------------------------+
-| 🔑 Generate New App Key                                                    [X] |
-+-------------------------------------------------------------------------------+
-| Key Label / Description: [ Cursor IDE Workstation                           ] |
-| Assigned User Principal: [ admin                                            ] |
-|                                                                               |
-| Access Scopes:                                                                |
-|   (•) Global Administrator (*)                                                |
-|   ( ) Category Scoped (category:infrastructure, category:smarthome)           |
-|   ( ) Server Scoped (server:docker, server:homeassistant)                     |
-|   ( ) Custom Granular Scopes [                                              ] |
-|                                                                               |
-| Expiration Policy:       [ 90 Days ▾                                        ] |
-|                                                                               |
-| [ Cancel ]                                                  [ Generate Key ] |
-+-------------------------------------------------------------------------------+
-```
+![Generate App Key Modal](../assets/add_appkey_modal.jpg)
 
 ### 1. Generating an AppKey
 1. Click **`App Keys & Security`** in the top navigation bar.
@@ -201,6 +186,8 @@ asyncio.run(main())
 
 ## 👥 Registered Clients Registry (`RegisteredClientsCard`)
 
+![Registered OAuth Client Modal](../assets/registered_client_modal.jpg)
+
 The **Registered Clients** table in the App Keys & Security view provides real-time visibility into active client connections:
 
 * **Client Name & ID**: Reported client user-agent or application name.
@@ -208,3 +195,11 @@ The **Registered Clients** table in the App Keys & Security view provides real-t
 * **Client IP Address**: Source IP address of the client connection.
 * **Active Sessions**: Number of open SSE / HTTP sessions.
 * **Last Seen**: Live timestamp of the most recent JSON-RPC activity.
+
+---
+
+## 🛡️ Interactive OAuth 2.0 Consent Screen
+
+![Interactive OAuth Consent Screen](../assets/oauth_consent_screen.jpg)
+
+When third-party multi-tenant applications or developer tools initiate the standard OAuth 2.0 Authorization Code flow against `/oauth/authorize` or `/connect/authorize`, the gateway presents the interactive consent authorization screen at `/consent`. End-users can inspect the requested client identity, verify backend scope boundaries, and approve or deny access in real time.

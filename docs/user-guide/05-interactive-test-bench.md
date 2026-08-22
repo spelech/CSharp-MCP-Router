@@ -6,6 +6,8 @@ The **Interactive Test Bench** (`Test Bench` tab) is a developer and operator pl
 
 ## 🎛️ Test Bench Overview & Layout
 
+![Interactive Test Bench View](../assets/test_bench_view.jpg)
+
 The Test Bench aggregates five specialized diagnostic tools in an interactive multi-panel layout:
 
 ```
