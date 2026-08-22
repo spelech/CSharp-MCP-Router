@@ -72,10 +72,8 @@ export const ClientSetupGuide: React.FC = () => {
       case 'generic':
         return {
           "sseEndpoint": endpointUrl,
-          "messageEndpoint": `${baseUrl}/messages?sessionId=<session_id>`,
-          "authHeader": {
-            "X-App-Key": effectiveKey
-          }
+          "messageEndpoint": `${baseUrl}/message?sessionId={sessionId}`,
+          "authHeader": `X-App-Key: ${effectiveKey}`
         };
       case 'standard':
       default:

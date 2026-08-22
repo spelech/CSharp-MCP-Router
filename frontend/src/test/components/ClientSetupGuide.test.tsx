@@ -59,8 +59,8 @@ describe('ClientSetupGuide Component', () => {
     const genericBtn = screen.getByRole('button', { name: /Generic SSE/i });
     fireEvent.click(genericBtn);
     expect(screen.getByText(/sseEndpoint/i)).toBeInTheDocument();
-    expect(screen.getByText(/messageEndpoint/i)).toBeInTheDocument();
-    expect(screen.getByText(/authHeader/i)).toBeInTheDocument();
+    expect(screen.getByText(/"messageEndpoint":\s*".*\/message\?sessionId=\{sessionId\}"/i)).toBeInTheDocument();
+    expect(screen.getByText(/"authHeader":\s*"X-App-Key:\s*mcp_live_YOUR_APP_KEY_HERE"/i)).toBeInTheDocument();
   });
 
   it('switches server scope from all servers to individual server', async () => {
