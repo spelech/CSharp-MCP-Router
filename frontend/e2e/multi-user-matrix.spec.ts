@@ -1,4 +1,4 @@
-/** @requirement REQ-UI-125 */
+/** @requirement UI-125 */
 
 import { test, expect } from './fixtures/userContexts';
 

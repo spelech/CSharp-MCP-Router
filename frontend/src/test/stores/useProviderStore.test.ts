@@ -1,4 +1,4 @@
-/** @requirement REQ-UI-100 */
+/** @requirement UI-100 */
 
 import { describe, it, expect, vi } from 'vitest';
 import { useSettingsStore, AuthProviderConfig, SecretProviderConfig } from '../../stores/useSettingsStore';
