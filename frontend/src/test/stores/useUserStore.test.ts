@@ -1,3 +1,5 @@
+/** @requirement UI-101 */
+
 import { describe, it, expect, vi } from 'vitest';
 import { useUserStore } from '../../stores/useUserStore';
 import { mockApiResponse } from '../setup';

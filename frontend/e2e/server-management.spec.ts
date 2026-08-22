@@ -1,3 +1,5 @@
+/** @requirement UI-121 */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('Server Registration & Secret Providers Flow', () => {
