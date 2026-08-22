@@ -152,7 +152,7 @@ namespace McpRouter.Components.Capabilities
                     var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
                         ?? new JsonRpcRequest
                         {
-                            Method = method,
+                            Method = method ?? string.Empty,
                             Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null
                         };
 
@@ -197,7 +197,7 @@ namespace McpRouter.Components.Capabilities
                     var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
                         ?? new JsonRpcRequest
                         {
-                            Method = method,
+                            Method = method ?? string.Empty,
                             Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : (object)id.Value.GetString()!) : null
                         };
 
@@ -287,7 +287,7 @@ namespace McpRouter.Components.Capabilities
                 {
                     jsonRpcReq = new JsonRpcRequest
                     {
-                        Method = method,
+                        Method = method ?? string.Empty,
                         Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null,
                         Params = root.TryGetProperty("params", out var p) ? p.Clone() : null
                     };
