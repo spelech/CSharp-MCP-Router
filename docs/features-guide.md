@@ -359,3 +359,46 @@ The skill includes pre-tested scaffold templates under `skills/mcp-router-setup/
 - `appsettings.Production.json.example`: Production ASP.NET Core configuration snippet.
 
 
+
+---
+
+## 👁️ 11. Observability & PII Audit Logging
+
+The MCP Router includes built-in observability features with a strong focus on privacy and security.
+
+### PII Sanitization
+The `PiiSanitizer` automatically scrubs sensitive information before it reaches the logs:
+- **Redacted Items**: Bearer tokens, API keys, passwords, and authorization headers are replaced with `[REDACTED]`.
+- **Safe Logging**: Ensures that developer consoles and persistent log aggregators never leak downstream credentials.
+
+### Audit Logging
+Administrative actions and tool executions are persistently recorded via stored procedures (e.g., `sp_InsertAuditLog`):
+- **Traceability**: Records the caller's identity (user, group mapping, or AppKey), target server, tool invoked, and timestamp.
+- **Auditing Tool**: The Admin MCP Server provides the `query_audit` action via the `manage_system` tool, allowing administrators and autonomous agents to query historical gateway logs.
+
+---
+
+## 🏢 12. Enterprise Identity Delegation
+
+For complex enterprise networks, the router manages downstream identity flow dynamically, allowing backend services to enforce Row-Level Security (RLS) based on the user's origin identity.
+
+### Delegation Strategies
+1. **X-Forwarded-User Propagation (Trusted Gateway Pattern)**:
+   The gateway injects the authenticated caller's username (extracted from the OIDC proxy or Active Directory) into the downstream HTTP/SSE backend requests.
+2. **Kerberos / NTLM Impersonation**:
+   In native Windows IIS deployments, the router uses `S4U2Proxy` to assume the inbound caller's Active Directory identity when making downstream enterprise endpoint calls.
+3. **OAuth2 / OIDC On-Behalf-Of**:
+   The router can act as a Confidential Client to dynamically mint or exchange tokens with Identity Providers (Azure AD, Okta, Authentik) on behalf of the user.
+4. **Dynamic Auth Pass-Through**:
+   When downstream services issue interactive challenges, the router can proxy these `dynamic_auth` prompts directly back to the client IDE or LLM to complete the challenge.
+
+---
+
+## 🐳 13. Batteries-Included Docker Environment
+
+The official Docker image simplifies deployment of STDIO-based subprocess servers without requiring complex sidecar networking.
+
+- **Image Tag**: `ghcr.io/org/mcp-router:latest-full`
+- **Embedded Runtimes**: The image ships with pre-installed Node.js, Python 3, `uv` package manager, and `bun`.
+- **Use Case**: Natively execute STDIO backend scripts (e.g., `npx -y @modelcontextprotocol/server-postgres`) directly from within the router container, minimizing network configuration overhead.
+
