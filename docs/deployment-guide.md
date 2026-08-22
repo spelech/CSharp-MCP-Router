@@ -128,3 +128,6 @@ Run the corresponding delta migration script against your database using standar
 ## 📦 Deployment Configuration Templates
 
 For quick integration, copy `.env.example` to `.env` or copy `appsettings.Production.json.example` to `appsettings.Production.json` directly into your container/server configuration.
+## 🧩 Support Matrix
+
+For detailed information on supported combinations of hosting environments, authentication providers, and downstream delegation methods (e.g., Docker vs IIS, OIDC vs AppKey), please refer to the [**Deployment & Authentication Support Matrix**](support-matrix.md).
