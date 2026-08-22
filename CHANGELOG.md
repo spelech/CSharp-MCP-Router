@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.27.2`** | 2026-08-22 | refactor(reqs): normalize requirement taxonomy IDs across all C#, Vitest, and Playwright test suites to eliminate `REQ-` prefixes and strictly enforce standard category codes (`AUTH-`, `UI-`, `DB-`, `GUARD-`) |
 | **`v4.27.1`** | 2026-08-22 | test(e2e): add comprehensive Playwright E2E test suites for self-service personal AppKeys, personal quota limits, and admin custom user quota overrides |
 | **`v4.27.0`** | 2026-08-22 | feat(auth): self-service personal AppKeys, App-Level keys separation, UserQuotas table & management endpoints, and role-adaptive frontend UI |
 | **`v4.26.1`** | 2026-08-22 | feat(ui): implement accessible dark-mode ConfirmModal with useConfirmStore and migrate all destructive window.confirm dialogs across settings and server management to custom modal with toast notifications |

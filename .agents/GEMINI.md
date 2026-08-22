@@ -96,21 +96,22 @@ Every test proof across backend C# xUnit suites, frontend Vitest component suite
   Must use the `[Requirement]` attribute from `McpRouter.Tests.Attributes`:
   ```csharp
   [Fact]
-  [Requirement("REQ-ID", "Category", RequirementType.Positive, "Description statement.")]
+  [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Description statement.")]
   public async Task Test_Name() { ... }
   ```
-  *(Or with named properties: `[Requirement("REQ-ID", "Description", Type = RequirementType.Positive, Category = "Category")]`)*
+  *(Or with named properties: `[Requirement("AUTH-01", "Description", Type = RequirementType.Positive, Category = "AUTH")]`)*
 * **Frontend Vitest & Playwright Tests (`frontend/src/test`, `frontend/e2e`)**:
   Must include structured JSDoc `@requirement` (or `@id` / `@req`) blocks immediately preceding the test/it block:
   ```typescript
   /**
-   * @requirement REQ-ID
-   * @category CATEGORY
+   * @requirement AUTH-01
+   * @category AUTH
    * @type PositiveFeature | FailClosedGuardrail
    * @description Detailed requirement specification.
    */
   test('description', () => { ... });
   ```
+* **IMPORTANT**: Requirement IDs must **NEVER** use `REQ-` prefixes. Use standard category codes (`AUTH-01`, `DB-01`, `GUARD-01`, `MCP-01`, `SEC-01`, `TRANS-01`, `UI-01`).
 
 * **Living Catalog Generation & Verification**:
   Whenever tests are added, modified, or deleted, agents **MUST** regenerate the SRS test catalog and verify zero-drift:

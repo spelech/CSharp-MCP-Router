@@ -305,7 +305,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [Requirement("REQ-AUTH-SYSTEM-APPKEY-SEPARATION", "AUTH", RequirementType.Positive, "Personal AppKey with 'all' scope does not grant Administrator role")]
+        [Requirement("AUTH-SYSTEM-APPKEY-SEPARATION", "AUTH", RequirementType.Positive, "Personal AppKey with 'all' scope does not grant Administrator role")]
         public async Task PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole()
         {
             var keyString = "mcp-all-personalkeytest123456789";
@@ -358,7 +358,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [Requirement("REQ-AUTH-SYSTEM-APPKEY-SEPARATION", "AUTH", RequirementType.Positive, "System AppKey with 'admin' scope grants Administrator role")]
+        [Requirement("AUTH-SYSTEM-APPKEY-SEPARATION", "AUTH", RequirementType.Positive, "System AppKey with 'admin' scope grants Administrator role")]
         public async Task SystemAppKey_WithAdminScope_GrantsAdministratorRole()
         {
             var keyString = "mcp-admin-systemkeytest123456789";

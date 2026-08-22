@@ -13,7 +13,7 @@ describe('App component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+   * @requirement AUTH-SYSTEM-APPKEY-SEPARATION
    * @category AUTH
    * @type PositiveFeature
    * @description Renders header, navigation tabs including Settings, and default overview dashboard for admin.
@@ -33,7 +33,7 @@ describe('App component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+   * @requirement AUTH-SYSTEM-APPKEY-SEPARATION
    * @category AUTH
    * @type PositiveFeature
    * @description Switches between tabs on navigation click including Settings for admin.
@@ -77,7 +77,7 @@ describe('App component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-LIST
+   * @requirement AUTH-PERSONAL-APPKEY-LIST
    * @category AUTH
    * @type PositiveFeature
    * @description Adapts navigation for non-admin users: shows My App Keys, hides Settings tab, and hides RegisteredClientsCard.

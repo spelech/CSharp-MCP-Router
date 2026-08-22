@@ -74,7 +74,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type PositiveFeature
      * @description Deletes an access policy when confirmed via confirm modal.
@@ -103,7 +103,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type FailClosedGuardrail
      * @description Does not delete policy when confirm is cancelled.
@@ -164,7 +164,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type PositiveFeature
      * @description Deletes a group mapping when confirmed via confirm modal.
@@ -193,7 +193,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type FailClosedGuardrail
      * @description Does not delete group mapping when confirm is cancelled.
@@ -220,7 +220,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
 
   describe('customFiles management', () => {
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type PositiveFeature
      * @description Deletes a custom file when confirmed via confirm modal.
@@ -249,7 +249,7 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type FailClosedGuardrail
      * @description Does not delete custom file when confirm is cancelled.

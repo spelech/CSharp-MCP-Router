@@ -131,7 +131,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [Requirement("REQ-AUTH-PERSONAL-APPKEY-LIST", "AUTH", RequirementType.Positive, "Non-admin users can view their personal App Keys")]
+        [Requirement("AUTH-PERSONAL-APPKEY-LIST", "AUTH", RequirementType.Positive, "Non-admin users can view their personal App Keys")]
         public async Task GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser()
         {
             await _rawConnection.ExecuteAsync(@"
@@ -157,7 +157,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [Requirement("REQ-AUTH-SYSTEM-APPKEY-SEPARATION", "AUTH", RequirementType.Positive, "System keys are distinct and require admin permissions")]
+        [Requirement("AUTH-SYSTEM-APPKEY-SEPARATION", "AUTH", RequirementType.Positive, "System keys are distinct and require admin permissions")]
         public async Task SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys()
         {
             var adminController = CreateController("admin", "Admin");
@@ -197,7 +197,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [Requirement("REQ-AUTH-PERSONAL-APPKEY-CREATE", "AUTH", RequirementType.Positive, "Non-admin users can create personal App Keys up to quota")]
+        [Requirement("AUTH-PERSONAL-APPKEY-CREATE", "AUTH", RequirementType.Positive, "Non-admin users can create personal App Keys up to quota")]
         public async Task CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota()
         {
             var controller = CreateController("alice", "User");
@@ -229,7 +229,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [Requirement("REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE", "AUTH", RequirementType.Positive, "Custom user quotas override default limit")]
+        [Requirement("AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE", "AUTH", RequirementType.Positive, "Custom user quotas override default limit")]
         public async Task CreateAppKey_CustomQuotaOverride_AllowsHigherLimit()
         {
             // Insert custom quota override: dave gets 7 keys instead of default 5

@@ -38,16 +38,17 @@ Run tests via `dotnet test McpRouter.slnx`.
   - Agents **MUST** use logical, atomic commits for changes. Commit code and documentation separately or in cleanly grouped atomic commits.
 - **MANDATORY TEST REQUIREMENT ANNOTATIONS RULE**: **ALL NEW AND MODIFIED TESTS MUST BE ANNOTATED WITH REQUIREMENTS.**
   - Every test proof in C# (`McpRouter.Tests`), Vitest (`frontend/src/test`), and Playwright (`frontend/e2e`) **MUST** include requirement metadata:
-    - **C#**: `[Requirement("REQ-ID", "Category", RequirementType.Positive, "Description")]` (or with named properties `[Requirement("REQ-ID", "Description", Type = RequirementType.Positive, Category = "Category")]`)
+    - **C#**: `[Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Description")]` (or with named properties `[Requirement("AUTH-01", "Description", Type = RequirementType.Positive, Category = "AUTH")]`)
     - **TypeScript / JSDoc**:
       ```typescript
       /**
-       * @requirement REQ-ID
-       * @category CATEGORY
+       * @requirement AUTH-01
+       * @category AUTH
        * @type PositiveFeature | FailClosedGuardrail
        * @description Detailed specification statement.
        */
       ```
+    - **IMPORTANT**: Requirement IDs must **NEVER** use `REQ-` prefixes. Always use the standard category taxonomy (e.g. `AUTH-01`, `DB-01`, `GUARD-01`, `MCP-01`, `SEC-01`, `TRANS-01`, `UI-01`).
   - When tests are added, updated, or deleted, agents **MUST** regenerate and verify the requirements catalog:
     ```bash
     dotnet run --project scripts/CatalogGenerator

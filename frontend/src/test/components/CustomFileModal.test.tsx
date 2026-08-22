@@ -86,7 +86,7 @@ describe('CustomFileModal Component', () => {
   });
 
   /**
-   * @requirement REQ-UI-TOAST-TRANSITION
+   * @requirement UI-TOAST-TRANSITION
    * @category UI
    * @type FailClosedGuardrail
    * @description Displays error toast notification when switching from invalid JSON to Visual Prompt Builder.
@@ -107,7 +107,7 @@ describe('CustomFileModal Component', () => {
   });
 
   /**
-   * @requirement REQ-UI-TOAST-TRANSITION
+   * @requirement UI-TOAST-TRANSITION
    * @category UI
    * @type FailClosedGuardrail
    * @description Displays error toast notification when saving without a file name.
@@ -127,7 +127,7 @@ describe('CustomFileModal Component', () => {
   });
 
   /**
-   * @requirement REQ-UI-TOAST-TRANSITION
+   * @requirement UI-TOAST-TRANSITION
    * @category UI
    * @type FailClosedGuardrail
    * @description Displays error toast notification when saving prompt with invalid JSON content.

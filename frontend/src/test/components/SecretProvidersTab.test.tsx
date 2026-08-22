@@ -61,7 +61,7 @@ describe('SecretProvidersTab Component', () => {
   });
 
   /**
-   * @requirement REQ-UI-TOAST-TRANSITION
+   * @requirement UI-TOAST-TRANSITION
    * @category UI
    * @type FailClosedGuardrail
    * @description Displays error toast notification when saving secret providers fails.

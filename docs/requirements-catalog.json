@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T15:41:06.3702005Z",
+    "generatedAt": "2026-08-22T15:52:22.5663680Z",
     "totalRequirements": 94,
     "positiveCount": 71,
     "guardrailCount": 23,
@@ -472,55 +472,7 @@
       ]
     },
     {
-      "id": "AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW",
-      "category": "AUTH",
-      "type": "Positive",
-      "description": "AdminPolicy succeeds in standalone mode for unauthenticated loopback requests.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 184,
-          "testName": "AdminPolicy_StandaloneMode_LoopbackIp_PassesAdminPolicy",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "AUTH-STANDALONE-CUSTOM-CIDR-ALLOW",
-      "category": "AUTH",
-      "type": "Positive",
-      "description": "Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 43,
-          "testName": "IsAdmin_StandaloneMode_CustomCidr_ReturnsTrue",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "AUTH-STANDALONE-LOOPBACK-ALLOW",
-      "category": "AUTH",
-      "type": "Positive",
-      "description": "Standalone mode without external IDP grants admin access to loopback IP addresses.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 22,
-          "testName": "IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "REQ-AUTH-PERSONAL-APPKEY-CREATE",
+      "id": "AUTH-PERSONAL-APPKEY-CREATE",
       "category": "AUTH",
       "type": "Negative",
       "description": "Non-admin users can create personal App Keys up to quota",
@@ -592,7 +544,7 @@
       ]
     },
     {
-      "id": "REQ-AUTH-PERSONAL-APPKEY-LIST",
+      "id": "AUTH-PERSONAL-APPKEY-LIST",
       "category": "AUTH",
       "type": "Positive",
       "description": "Non-admin users can view their personal App Keys",
@@ -643,7 +595,7 @@
       ]
     },
     {
-      "id": "REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE",
+      "id": "AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE",
       "category": "AUTH",
       "type": "Positive",
       "description": "Custom user quotas override default limit",
@@ -694,7 +646,55 @@
       ]
     },
     {
-      "id": "REQ-AUTH-SYSTEM-APPKEY-SEPARATION",
+      "id": "AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "AdminPolicy succeeds in standalone mode for unauthenticated loopback requests.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 184,
+          "testName": "AdminPolicy_StandaloneMode_LoopbackIp_PassesAdminPolicy",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-STANDALONE-CUSTOM-CIDR-ALLOW",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 43,
+          "testName": "IsAdmin_StandaloneMode_CustomCidr_ReturnsTrue",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-STANDALONE-LOOPBACK-ALLOW",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Standalone mode without external IDP grants admin access to loopback IP addresses.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "lineNumber": 22,
+          "testName": "IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-SYSTEM-APPKEY-SEPARATION",
       "category": "AUTH",
       "type": "Positive",
       "description": "System keys are distinct and require admin permissions",
@@ -2107,178 +2107,6 @@
       ]
     },
     {
-      "id": "REQ-UI-CONFIRM-MODAL",
-      "category": "UI",
-      "type": "Negative",
-      "description": "Deletes an access policy when confirmed via confirm modal.",
-      "proofCount": 14,
-      "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 76,
-          "testName": "deletes a policy when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 105,
-          "testName": "does not delete policy when confirm is cancelled",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 166,
-          "testName": "deletes a group mapping when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 195,
-          "testName": "does not delete group mapping when confirm is cancelled",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 222,
-          "testName": "deletes a custom file when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 251,
-          "testName": "does not delete custom file when confirm is cancelled",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 88,
-          "testName": "prompts confirmation and deletes client when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 117,
-          "testName": "cancels deletion when user denies confirmation",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 350,
-          "testName": "confirms and revokes AppKey and refreshes list",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 379,
-          "testName": "cancels revocation when confirm is rejected",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 471,
-          "testName": "prompts confirmation modal and resets user quota when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 501,
-          "testName": "cancels quota reset when user denies confirmation",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
-          "lineNumber": 203,
-          "testName": "prompts window.confirm and deletes server when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
-          "lineNumber": 232,
-          "testName": "does not send delete request when confirm is cancelled",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "REQ-UI-TOAST-TRANSITION",
-      "category": "UI",
-      "type": "Negative",
-      "description": "Displays error toast notification when saving invalid JSON credentials for user-provided server.",
-      "proofCount": 8,
-      "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 23,
-          "testName": "shows error toast when saving invalid JSON credentials",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 64,
-          "testName": "saves valid credentials successfully and closes modal",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
-          "lineNumber": 88,
-          "testName": "shows error toast when switching from invalid JSON to Visual Prompt Builder",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
-          "lineNumber": 109,
-          "testName": "shows error toast when saving without a file name",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
-          "lineNumber": 129,
-          "testName": "shows error toast when saving prompt with invalid JSON content",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
-          "lineNumber": 99,
-          "testName": "saves updated Active Directory configuration JSON",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
-          "lineNumber": 138,
-          "testName": "displays error toast when saving auth providers fails",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
-          "lineNumber": 63,
-          "testName": "displays error toast when saving secret providers fails",
-          "details": null
-        }
-      ]
-    },
-    {
       "id": "UI-01",
       "category": "UI",
       "type": "Positive",
@@ -2487,6 +2315,178 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PipelineIntegrationTests.cs",
           "lineNumber": 242,
           "testName": "Pipeline_Settings_Branding_ReadWrite",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-CONFIRM-MODAL",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Deletes an access policy when confirmed via confirm modal.",
+      "proofCount": 14,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 76,
+          "testName": "deletes a policy when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 105,
+          "testName": "does not delete policy when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 166,
+          "testName": "deletes a group mapping when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 195,
+          "testName": "does not delete group mapping when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 222,
+          "testName": "deletes a custom file when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 251,
+          "testName": "does not delete custom file when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 88,
+          "testName": "prompts confirmation and deletes client when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 117,
+          "testName": "cancels deletion when user denies confirmation",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 350,
+          "testName": "confirms and revokes AppKey and refreshes list",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 379,
+          "testName": "cancels revocation when confirm is rejected",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 471,
+          "testName": "prompts confirmation modal and resets user quota when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 501,
+          "testName": "cancels quota reset when user denies confirmation",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
+          "lineNumber": 203,
+          "testName": "prompts window.confirm and deletes server when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
+          "lineNumber": 232,
+          "testName": "does not send delete request when confirm is cancelled",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-TOAST-TRANSITION",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Displays error toast notification when saving invalid JSON credentials for user-provided server.",
+      "proofCount": 8,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 23,
+          "testName": "shows error toast when saving invalid JSON credentials",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 64,
+          "testName": "saves valid credentials successfully and closes modal",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "lineNumber": 88,
+          "testName": "shows error toast when switching from invalid JSON to Visual Prompt Builder",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "lineNumber": 109,
+          "testName": "shows error toast when saving without a file name",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "lineNumber": 129,
+          "testName": "shows error toast when saving prompt with invalid JSON content",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 99,
+          "testName": "saves updated Active Directory configuration JSON",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 138,
+          "testName": "displays error toast when saving auth providers fails",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "lineNumber": 63,
+          "testName": "displays error toast when saving secret providers fails",
           "details": null
         }
       ]

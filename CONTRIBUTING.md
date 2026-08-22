@@ -139,8 +139,9 @@ dotnet run --project scripts/CatalogGenerator -- --verify-only
 ## 🧪 Test Requirement Annotations Rule
 
 All new or modified tests in C# (`McpRouter.Tests`), Vitest (`frontend/src/test`), and Playwright (`frontend/e2e`) **MUST** include structured requirement annotations:
-- **C#**: `[Requirement("REQ-ID", "Category", RequirementType.Positive, "Description")]`
-- **TypeScript**: JSDoc `@requirement REQ-ID` block
+- **C#**: `[Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Description")]`
+- **TypeScript**: JSDoc `@requirement AUTH-01` block
+- **Naming Rule**: Requirement IDs must **NEVER** use `REQ-` prefixes. Use standard category codes (`AUTH-01`, `DB-01`, `GUARD-01`, `MCP-01`, `SEC-01`, `TRANS-01`, `UI-01`).
 
 For full conventions, category taxonomy (`AUTH`, `DB`, `GUARD`, `MCP`, `SEC`, `TRANS`, `UI`), and CLI usage, see the [**Software Requirements & Test Catalog Guide**](docs/test-catalog-guide.md).
 
