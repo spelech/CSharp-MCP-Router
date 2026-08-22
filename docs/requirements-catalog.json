@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T13:54:15.0700142Z",
+    "generatedAt": "2026-08-22T14:01:59.7324928Z",
     "totalRequirements": 90,
     "positiveCount": 68,
     "guardrailCount": 22,
@@ -401,7 +401,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
-          "lineNumber": 17,
+          "lineNumber": 16,
           "testName": "renders client name from query string and sets form action",
           "details": null
         },
