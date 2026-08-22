@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Header, Footer, Toasts } from './components/shared';
+import { Header, Footer, Toasts, ConfirmModal } from './components/shared';
 import { DashboardView, ServerModal, ServerInspectModal } from './components/servers';
 import { SecurityView, PolicyModal, MappingModal } from './components/security';
 import { TestBenchView } from './components/testbench';
@@ -83,6 +83,7 @@ const App: React.FC = () => {
       <CustomFileModal />
       <PolicyModal />
       <MappingModal />
+      <ConfirmModal />
 
       {/* Toast Manager */}
       <Toasts />
