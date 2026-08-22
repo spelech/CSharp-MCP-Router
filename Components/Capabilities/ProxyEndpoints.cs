@@ -429,6 +429,20 @@ namespace McpRouter.Components.Capabilities
                     await HandleTargetAdminAsync(httpContext, targetServerId);
                     return;
                 }
+                if (string.Equals(targetServerId, "consent", StringComparison.OrdinalIgnoreCase))
+                {
+                    httpContext.Response.ContentType = "text/html";
+                    var indexPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "index.html");
+                    if (File.Exists(indexPath))
+                    {
+                        await httpContext.Response.SendFileAsync(indexPath);
+                    }
+                    else
+                    {
+                        httpContext.Response.StatusCode = 404;
+                    }
+                    return;
+                }
                 // First check AppKey authorization if authenticated via AppKey
                 if (httpContext.Items.TryGetValue("AppKeyUsed", out var appKeyUsedObj) == true && appKeyUsedObj is bool appKeyUsed && appKeyUsed)
                 {

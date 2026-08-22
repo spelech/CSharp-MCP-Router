@@ -248,7 +248,7 @@ namespace McpRouter.Components.Servers
                 using var conn = dbFactory.CreateConnection();
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 var dbStart = sw.ElapsedMilliseconds;
-                await conn.ExecuteAsync(@"INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson)
+                await conn.ExecuteAsync(@"INSERT INTO Servers (Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AllowPassThroughAuth, DynamicAuthPrompt)
                     VALUES (@Id, @DisplayName, @Url, @Enabled, @Hidden, @Type, @SecretProvider, @SecretItemKey, @AuthShape, @CustomHeaderName, @Categories, @ApiKey, @HeadersJson, @AllowPassThroughAuth, @DynamicAuthPrompt)",
                     new
                     {
