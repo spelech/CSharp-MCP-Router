@@ -1,4 +1,4 @@
-/** @requirement REQ-UI-117 */
+/** @requirement UI-117 */
 
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
