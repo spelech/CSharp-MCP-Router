@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import { useClientStore, RegisteredClient } from '../../stores/useClientStore';
-import { useAppKeyStore, AppKeyItem, AppKeyLimits } from '../../stores/useAppKeyStore';
+import { useAppKeyStore, AppKeyItem, AppKeyLimits, UserQuota } from '../../stores/useAppKeyStore';
 import { useToastStore } from '../../stores/useToastStore';
 import { useConfirmStore } from '../../stores/useConfirmStore';
 import { mockApiResponse } from '../setup';
@@ -169,7 +169,18 @@ describe('useAppKeyStore', () => {
     id: 'k-1',
     name: 'Cursor Local',
     username: 'admin',
+    keyType: 'personal',
     keyPrefix: 'mcp_live_1234',
+    scopes: ['all'],
+    createdAt: '2026-08-14T00:00:00Z'
+  };
+
+  const sampleSystemKey: AppKeyItem = {
+    id: 'k-2',
+    name: 'CI Service Key',
+    username: 'admin',
+    keyType: 'system',
+    keyPrefix: 'mcp_live_9999',
     scopes: ['all'],
     createdAt: '2026-08-14T00:00:00Z'
   };
@@ -182,16 +193,48 @@ describe('useAppKeyStore', () => {
     isLimitReached: false
   };
 
+  const sampleQuota: UserQuota = {
+    username: 'developer1',
+    maxKeys: 12,
+    createdAt: '2026-08-22T00:00:00Z',
+    updatedAt: '2026-08-22T00:00:00Z'
+  };
+
   it('initializes with default state', () => {
     const state = useAppKeyStore.getState();
     expect(state.appKeys).toEqual([]);
     expect(state.limits).toBeNull();
+    expect(state.keyTypeTab).toBe('personal');
+    expect(state.userQuotas).toEqual([]);
     expect(state.isLoading).toBe(false);
+    expect(state.isLoadingQuotas).toBe(false);
     expect(state.isCreateModalOpen).toBe(false);
     expect(state.createdResult).toBeNull();
   });
 
+  describe('keyTypeTab management', () => {
+    /**
+     * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+     * @category AUTH
+     * @type PositiveFeature
+     * @description Switches keyTypeTab between personal and system.
+     */
+    it('switches keyTypeTab between personal and system', () => {
+      useAppKeyStore.getState().setKeyTypeTab('system');
+      expect(useAppKeyStore.getState().keyTypeTab).toBe('system');
+
+      useAppKeyStore.getState().setKeyTypeTab('personal');
+      expect(useAppKeyStore.getState().keyTypeTab).toBe('personal');
+    });
+  });
+
   describe('fetchAppKeys and fetchLimits', () => {
+    /**
+     * @requirement REQ-AUTH-PERSONAL-APPKEY-LIST
+     * @category AUTH
+     * @type PositiveFeature
+     * @description Loads personal AppKeys and updates store.
+     */
     it('loads app keys and updates store', async () => {
       mockApiResponse('/api/appkeys', [sampleKey]);
 
@@ -204,6 +247,25 @@ describe('useAppKeyStore', () => {
       expect(useAppKeyStore.getState().appKeys).toEqual([sampleKey]);
     });
 
+    /**
+     * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+     * @category AUTH
+     * @type PositiveFeature
+     * @description Fetches system-filtered app keys via query parameters.
+     */
+    it('fetches system-filtered app keys via query parameters', async () => {
+      mockApiResponse('/api/appkeys', (url) => {
+        if (url.includes('keyType=system')) {
+          return [sampleSystemKey];
+        }
+        return [sampleKey];
+      });
+
+      await useAppKeyStore.getState().fetchAppKeys('system');
+
+      expect(useAppKeyStore.getState().appKeys).toEqual([sampleSystemKey]);
+    });
+
     it('loads app key limits', async () => {
       mockApiResponse('/api/appkeys/limits', sampleLimits);
 
@@ -211,14 +273,32 @@ describe('useAppKeyStore', () => {
 
       expect(useAppKeyStore.getState().limits).toEqual(sampleLimits);
     });
+
+    it('handles fetch error gracefully without crashing', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      mockApiResponse('/api/appkeys', 'Failed to load', 500);
+
+      await useAppKeyStore.getState().fetchAppKeys();
+
+      expect(useAppKeyStore.getState().isLoading).toBe(false);
+      expect(useAppKeyStore.getState().appKeys).toEqual([]);
+      consoleSpy.mockRestore();
+    });
   });
 
   describe('createAppKey', () => {
+    /**
+     * @requirement REQ-AUTH-PERSONAL-APPKEY-CREATE
+     * @category AUTH
+     * @type PositiveFeature
+     * @description Creates category-scoped personal key, captures one-time plaintext key, and refreshes.
+     */
     it('creates category-scoped key, captures one-time plaintext key, and refreshes', async () => {
       const createdResult = {
         id: 'new-key-id',
         name: 'SmartHome CLI',
         username: 'admin',
+        keyType: 'personal' as const,
         keyPrefix: 'mcp_live_5678',
         plaintextKey: 'mcp_live_5678_secret_token_123',
         scopes: ['category:smarthome'],
@@ -237,12 +317,14 @@ describe('useAppKeyStore', () => {
 
       await useAppKeyStore.getState().createAppKey({
         name: 'SmartHome CLI',
+        keyType: 'personal',
         scopes: ['category:smarthome'],
         expiresInDays: 30
       });
 
       expect(postBody).toEqual({
         name: 'SmartHome CLI',
+        keyType: 'personal',
         scopes: ['category:smarthome'],
         expiresInDays: 30
       });
@@ -317,6 +399,138 @@ describe('useAppKeyStore', () => {
       await revokePromise;
 
       expect(deleteCalled).toBe(false);
+    });
+
+    it('handles revoke failure with error toast', async () => {
+      mockApiResponse(/\/api\/appkeys\/k-1/, 'Revoke failed', 500);
+
+      const revokePromise = useAppKeyStore.getState().revokeAppKey('k-1', 'Cursor Local');
+      useConfirmStore.getState().handleConfirm();
+      await revokePromise;
+
+      expect(useToastStore.getState().toasts.some((t) => t.type === 'error')).toBe(true);
+    });
+  });
+
+  describe('user quota management', () => {
+    it('loads user quotas and updates store', async () => {
+      mockApiResponse('/api/appkeys/quotas', [sampleQuota]);
+
+      const promise = useAppKeyStore.getState().fetchUserQuotas();
+      expect(useAppKeyStore.getState().isLoadingQuotas).toBe(true);
+
+      await promise;
+
+      expect(useAppKeyStore.getState().isLoadingQuotas).toBe(false);
+      expect(useAppKeyStore.getState().userQuotas).toEqual([sampleQuota]);
+    });
+
+    it('handles fetchUserQuotas error gracefully without crashing', async () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+      mockApiResponse('/api/appkeys/quotas', 'Failed to load quotas', 500);
+
+      await useAppKeyStore.getState().fetchUserQuotas();
+
+      expect(useAppKeyStore.getState().isLoadingQuotas).toBe(false);
+      expect(useAppKeyStore.getState().userQuotas).toEqual([]);
+      consoleSpy.mockRestore();
+    });
+
+    /**
+     * @requirement REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
+     * @category AUTH
+     * @type PositiveFeature
+     * @description Sets custom user quota override and refreshes quota list.
+     */
+    it('sets user quota override and refreshes quota list', async () => {
+      let postBody: any = null;
+      mockApiResponse('/api/appkeys/quotas', (_url, options) => {
+        if (options?.method === 'POST') {
+          postBody = JSON.parse(options.body as string);
+          return { success: true, username: 'developer1', maxKeys: 15 };
+        }
+        return [sampleQuota];
+      });
+
+      await useAppKeyStore.getState().setUserQuota('developer1', 15);
+
+      expect(postBody).toEqual({ username: 'developer1', maxKeys: 15 });
+      expect(useToastStore.getState().toasts.some((t) => t.message.includes('Quota updated'))).toBe(true);
+    });
+
+    it('handles setUserQuota error with toast and throws', async () => {
+      mockApiResponse('/api/appkeys/quotas', 'Invalid quota', 400);
+
+      await expect(
+        useAppKeyStore.getState().setUserQuota('developer1', -1)
+      ).rejects.toThrow();
+
+      expect(useToastStore.getState().toasts.some((t) => t.type === 'error')).toBe(true);
+    });
+
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type PositiveFeature
+     * @description Prompts confirmation modal and resets user quota when confirmed.
+     */
+    it('prompts confirmation modal and resets user quota when confirmed', async () => {
+      let deleteCalled = false;
+      mockApiResponse(/\/api\/appkeys\/quotas\/developer1/, (_url, options) => {
+        if (options?.method === 'DELETE') {
+          deleteCalled = true;
+          return { success: true, username: 'developer1' };
+        }
+        return { success: true };
+      });
+      mockApiResponse('/api/appkeys/quotas', []);
+
+      const deletePromise = useAppKeyStore.getState().deleteUserQuota('developer1');
+
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      expect(useConfirmStore.getState().options.title).toBe('Reset User Quota');
+      expect(useConfirmStore.getState().options.danger).toBe(true);
+
+      useConfirmStore.getState().handleConfirm();
+      await deletePromise;
+
+      expect(deleteCalled).toBe(true);
+      expect(useToastStore.getState().toasts.some((t) => t.message.includes('Quota reset'))).toBe(true);
+    });
+
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type FailClosedGuardrail
+     * @description Cancels quota reset when user denies confirmation.
+     */
+    it('cancels quota reset when user denies confirmation', async () => {
+      let deleteCalled = false;
+      mockApiResponse(/\/api\/appkeys\/quotas\/developer1/, (_url, options) => {
+        if (options?.method === 'DELETE') {
+          deleteCalled = true;
+          return { success: true };
+        }
+        return { success: true };
+      });
+
+      const deletePromise = useAppKeyStore.getState().deleteUserQuota('developer1');
+
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      useConfirmStore.getState().handleCancel();
+      await deletePromise;
+
+      expect(deleteCalled).toBe(false);
+    });
+
+    it('handles deleteUserQuota failure with error toast', async () => {
+      mockApiResponse(/\/api\/appkeys\/quotas\/developer1/, 'Delete quota failed', 500);
+
+      const deletePromise = useAppKeyStore.getState().deleteUserQuota('developer1');
+      useConfirmStore.getState().handleConfirm();
+      await deletePromise;
+
+      expect(useToastStore.getState().toasts.some((t) => t.type === 'error')).toBe(true);
     });
   });
 

@@ -12,6 +12,7 @@ import {
 } from '../../api/serverApi';
 import { fetchClientsApi, registerClientApi, deleteClientApi } from '../../api/clientApi';
 import { fetchAppKeysApi, fetchAppKeyLimitsApi, createAppKeyApi, revokeAppKeyApi } from '../../api/appKeyApi';
+import { fetchUserQuotasApi, setUserQuotaApi, deleteUserQuotaApi } from '../../api/userQuotaApi';
 import { fetchPoliciesApi, savePolicyApi, deletePolicyApi, fetchMappingsApi, saveMappingApi, deleteMappingApi } from '../../api/securityApi';
 import {
   fetchEmbeddingSettingsApi,
@@ -54,7 +55,12 @@ describe('Typed API Client Layer', () => {
     it('calls client and appkey endpoints correctly', async () => {
       mockApiResponse('/api/clients', [{ id: 'c1', clientId: 'client-1', displayName: 'Client 1', isDynamic: false }]);
       mockApiResponse('/api/clients/c1', { success: true });
-      mockApiResponse('/api/appkeys', [{ id: 'k1', name: 'Key 1', username: 'admin', keyPrefix: 'mcp_live_123', scopes: ['all'], createdAt: '' }]);
+      mockApiResponse('/api/appkeys', (url) => {
+        if (url.includes('keyType=system')) {
+          return [{ id: 'k2', name: 'Key 2', username: 'admin', keyType: 'system', keyPrefix: 'mcp_live_456', scopes: ['all'], createdAt: '' }];
+        }
+        return [{ id: 'k1', name: 'Key 1', username: 'admin', keyType: 'personal', keyPrefix: 'mcp_live_123', scopes: ['all'], createdAt: '' }];
+      });
       mockApiResponse('/api/appkeys/limits', { globalMax: 50, userMax: 10, totalActiveKeys: 1, userActiveKeys: 1, isLimitReached: false });
       mockApiResponse(/\/api\/appkeys\/k1/, { success: true });
 
@@ -67,11 +73,38 @@ describe('Typed API Client Layer', () => {
       const appKeys = await fetchAppKeysApi();
       expect(appKeys).toHaveLength(1);
 
+      const filteredKeys = await fetchAppKeysApi('system', 'admin');
+      expect(filteredKeys).toHaveLength(1);
+      expect(filteredKeys[0].keyType).toBe('system');
+
       const limits = await fetchAppKeyLimitsApi();
       expect(limits.globalMax).toBe(50);
 
-      await createAppKeyApi({ name: 'New Key', scopes: ['all'] });
+      await createAppKeyApi({ name: 'New Key', keyType: 'personal', scopes: ['all'] });
       await revokeAppKeyApi('k1');
+    });
+  });
+
+  describe('userQuotaApi', () => {
+    it('calls user quota endpoints correctly', async () => {
+      mockApiResponse('/api/appkeys/quotas', (_url, options) => {
+        if (options?.method === 'POST') {
+          return { success: true, username: 'bob', maxKeys: 8 };
+        }
+        return [
+          { username: 'alice', maxKeys: 10, createdAt: '2026-08-22T00:00:00Z', updatedAt: '2026-08-22T00:00:00Z' }
+        ];
+      });
+      mockApiResponse(/\/api\/appkeys\/quotas\/alice/, { success: true, username: 'alice' });
+
+      const quotas = await fetchUserQuotasApi();
+      expect(quotas).toHaveLength(1);
+      expect(quotas[0].username).toBe('alice');
+
+      const setResult = await setUserQuotaApi('bob', 8);
+      expect(setResult.success).toBe(true);
+
+      await deleteUserQuotaApi('alice');
     });
   });
 

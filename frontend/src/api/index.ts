@@ -2,9 +2,9 @@ export * from './api';
 export * from './serverApi';
 export * from './clientApi';
 export * from './appKeyApi';
+export * from './userQuotaApi';
 export * from './securityApi';
 export * from './settingsApi';
 export * from './testbenchApi';
 export * from './userApi';
-
 export * from './userCredentialsApi';
