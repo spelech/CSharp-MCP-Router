@@ -473,8 +473,8 @@ namespace McpRouter.Core.Routing
                     var targetUser = args.TryGetProperty("username", out var uProp) ? (uProp.GetString() ?? callerUsername) : callerUsername;
                     var settings = await _settingRepository.GetSettingsAsync();
 
-                    int globalMax = settings?.GlobalMaxKeys ?? 100;
-                    int userMax = settings?.UserMaxKeys ?? 5;
+                    int globalMax = settings?.GlobalMaxKeys ?? 0;
+                    int userMax = settings?.UserMaxKeys ?? 0;
                     int totalActiveKeys = await _appKeyRepository.GetTotalActiveKeysAsync();
                     int userActiveKeys = await _appKeyRepository.GetUserActiveKeysAsync(targetUser);
 

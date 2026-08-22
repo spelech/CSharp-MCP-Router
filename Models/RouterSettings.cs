@@ -13,8 +13,8 @@ namespace McpRouter.Models
         public string EmbeddingApiKey { get; set; } = "";
         public string EmbeddingApiModel { get; set; } = "all-MiniLM-L6-v2";
         public string EmbeddingModelDir { get; set; } = "data/models";
-        public int GlobalMaxKeys { get; set; } = 100;
-        public int UserMaxKeys { get; set; } = 5;
+        public int GlobalMaxKeys { get; set; } = 0; // 0 = unlimited
+        public int UserMaxKeys { get; set; } = 0; // 0 = unlimited
         public string UserSecretStorage { get; set; } = "Database"; // "Database" or "Vault"
         public bool AllowOpenClientRegistration { get; set; } = true;
     }

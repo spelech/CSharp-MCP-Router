@@ -94,8 +94,8 @@ namespace McpRouter.Components.AppKeys
 
             try
             {
-                int globalMax = 100;
-                int userMax = 5;
+                int globalMax = 0;
+                int userMax = 0;
 
                 // Load active settings
                 var settings = await _settingRepository.GetSettingsAsync();
@@ -114,7 +114,7 @@ namespace McpRouter.Components.AppKeys
                     userMax,
                     totalActiveKeys,
                     userActiveKeys,
-                    isLimitReached = !isAdmin && (totalActiveKeys >= globalMax || userActiveKeys >= userMax)
+                    isLimitReached = !isAdmin && ((globalMax > 0 && totalActiveKeys >= globalMax) || (userMax > 0 && userActiveKeys >= userMax))
                 });
             }
             catch (Exception ex)
@@ -156,9 +156,9 @@ namespace McpRouter.Components.AppKeys
 
             try
             {
-                // Retrieve max key limits
-                int globalMax = 100;
-                int userMax = 5;
+                // Retrieve max key limits (0 = unlimited)
+                int globalMax = 0;
+                int userMax = 0;
 
                 var settings = await _settingRepository.GetSettingsAsync();
                 if (settings != null)
@@ -167,19 +167,25 @@ namespace McpRouter.Components.AppKeys
                     userMax = settings.UserMaxKeys;
                 }
 
-                // Check limits (admins bypass limits)
+                // Check limits (admins bypass limits; 0 = unlimited)
                 if (!isAdmin)
                 {
-                    int totalActiveKeys = await _appKeyRepository.GetTotalActiveKeysAsync();
-                    if (totalActiveKeys >= globalMax)
+                    if (globalMax > 0)
                     {
-                        return BadRequest(new { error = $"Global app-key limit of {globalMax} has been reached. Please contact an administrator." });
+                        int totalActiveKeys = await _appKeyRepository.GetTotalActiveKeysAsync();
+                        if (totalActiveKeys >= globalMax)
+                        {
+                            return BadRequest(new { error = $"Global app-key limit of {globalMax} has been reached. Please contact an administrator." });
+                        }
                     }
 
-                    int userActiveKeys = await _appKeyRepository.GetUserActiveKeysAsync(targetUser);
-                    if (userActiveKeys >= userMax)
+                    if (userMax > 0)
                     {
-                        return BadRequest(new { error = $"You have reached your personal app-key limit of {userMax}. Please revoke an existing key first." });
+                        int userActiveKeys = await _appKeyRepository.GetUserActiveKeysAsync(targetUser);
+                        if (userActiveKeys >= userMax)
+                        {
+                            return BadRequest(new { error = $"You have reached your personal app-key limit of {userMax}. Please revoke an existing key first." });
+                        }
                     }
                 }
 

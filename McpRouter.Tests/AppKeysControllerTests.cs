@@ -20,6 +20,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using Xunit;
+using McpRouter.Tests.Attributes;
 
 namespace McpRouter.Tests
 {
@@ -199,6 +200,32 @@ namespace McpRouter.Tests
             var res2 = await controller.CreateAppKey(req2);
             var badRes = Assert.IsAssignableFrom<BadRequestObjectResult>(res2);
             Assert.Equal(400, badRes.StatusCode);
+        }
+
+        [Fact]
+        [Requirement("AUTH-110", "AUTH", RequirementType.Positive, "CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0.")]
+        public async Task CreateAppKey_AllowsUnlimited_WhenLimitsAreZero()
+        {
+            // Set UserMaxKeys to 0 (unlimited) and GlobalMaxKeys to 0 (unlimited)
+            await _rawConnection.ExecuteAsync("UPDATE Settings SET UserMaxKeys = 0, GlobalMaxKeys = 0;");
+
+            var controller = CreateController("carol", "User");
+            for (int i = 1; i <= 10; i++)
+            {
+                var req = new CreateAppKeyRequest { Name = $"Key {i}" };
+                var res = await controller.CreateAppKey(req);
+                var okRes = Assert.IsAssignableFrom<ObjectResult>(res);
+                Assert.Equal(200, okRes.StatusCode);
+            }
+
+            var limitsRes = await controller.GetAppKeysLimits();
+            var okLimits = Assert.IsAssignableFrom<OkObjectResult>(limitsRes);
+            var json = System.Text.Json.JsonSerializer.Serialize(okLimits.Value);
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            Assert.False(doc.RootElement.GetProperty("isLimitReached").GetBoolean());
+            Assert.Equal(10, doc.RootElement.GetProperty("userActiveKeys").GetInt32());
+            Assert.Equal(0, doc.RootElement.GetProperty("userMax").GetInt32());
+            Assert.Equal(0, doc.RootElement.GetProperty("globalMax").GetInt32());
         }
 
         [Fact]

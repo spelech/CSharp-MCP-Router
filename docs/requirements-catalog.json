@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T06:13:00.3417107Z",
-    "totalRequirements": 87,
-    "positiveCount": 67,
+    "generatedAt": "2026-08-22T06:41:02.3084257Z",
+    "totalRequirements": 88,
+    "positiveCount": 68,
     "guardrailCount": 20,
-    "totalProofs": 166
+    "totalProofs": 167
   },
   "requirements": [
     {
@@ -375,6 +375,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
           "lineNumber": 17,
           "testName": "renders client name from query string and sets form action",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-110",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 205,
+          "testName": "CreateAppKey_AllowsUnlimited_WhenLimitsAreZero",
           "details": null
         }
       ]

@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **87 Requirements Verified** across **166 Test Proofs** (67 Functional Capabilities, 20 Safety Guardrails).
+> **Catalog Statistics:** **88 Requirements Verified** across **167 Test Proofs** (68 Functional Capabilities, 20 Safety Guardrails).
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **17** | 16 | 1 | 45 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **18** | 17 | 1 | 46 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 5 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 33 proofs |
@@ -96,6 +96,12 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx#L17`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx#L17) (`renders client name from query string and sets form action`)
+
+### `[AUTH-110]` CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L205`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L205) (`CreateAppKey_AllowsUnlimited_WhenLimitsAreZero`)
 
 ### `[AUTH-APPKEY-ADMIN-SCOPE-ALLOW]` AppKeys with admin scope grant Administrator role and pass AdminPolicy.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -647,6 +653,7 @@
 | `AUTH-101` | Positive | `AUTH` | HTTP transport injects X-Forwarded-User header based on connected user identity. | [`IdentityHeaderTests.cs:L16`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16) | Backend xUnit |
 | `AUTH-105` | Positive | `AUTH` | Dynamic Auth Target Pass-Through | [`ToolRoutingManagerTests.cs:L180`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180) | Backend xUnit |
 | `AUTH-109` | Positive | `AUTH` | ConsentView properly renders the client name from query string and builds correct form action. | [`ConsentView.test.tsx:L17`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx#L17) | Frontend Vitest |
+| `AUTH-110` | Positive | `AUTH` | CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0. | [`AppKeysControllerTests.cs:L205`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L205) | Backend xUnit |
 | `AUTH-APPKEY-ADMIN-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with admin scope grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L87`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L87) | Backend xUnit |
 | `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L263`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L263) | Backend xUnit |
 | `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L148`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L148) | Backend xUnit |

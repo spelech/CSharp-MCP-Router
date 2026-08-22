@@ -1031,7 +1031,7 @@ namespace McpRouter.Infrastructure.Persistence
             var countSettings = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM Settings;");
             if (countSettings == 0)
             {
-                conn.Execute("INSERT INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 100, 5);");
+                conn.Execute("INSERT INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 0, 0);");
             }
 
             // Populate default SecretProviders safely and provider-agnostically
