@@ -281,6 +281,11 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
                 </label>
               </div>
               <p style={{ fontSize: '12px', color: 'var(--text-muted)' }}>Parse user and group headers from SSO reverse proxies (Authentik, Authelia, PocketID, Keycloak, Caddy, Traefik, etc.).</p>
+              {authOidcEnabled && (
+                <div className="alert alert-warning mb-3 mt-2" style={{ fontSize: '12px' }}>
+                  Security Warning: Ensure your router is running behind a trusted reverse proxy that securely sets these headers and strips them from incoming requests. Otherwise, clients could spoof their identity.
+                </div>
+              )}
               <div className="form-group" style={{ marginTop: '10px' }}>
                 <label htmlFor="auth-user-header" style={{ fontSize: '11px' }}>
                   User Header Name

@@ -57,18 +57,6 @@ namespace McpRouter.Middleware
                     {
                         token = xApiKey.Trim();
                     }
-                    else if (Request.Query.TryGetValue("app_key", out var qAppKey) && !string.IsNullOrEmpty(qAppKey))
-                    {
-                        token = qAppKey.ToString().Trim();
-                    }
-                    else if (Request.Query.TryGetValue("api_key", out var qApiKey) && !string.IsNullOrEmpty(qApiKey))
-                    {
-                        token = qApiKey.ToString().Trim();
-                    }
-                    else if (Request.Query.TryGetValue("key", out var qKey) && !string.IsNullOrEmpty(qKey))
-                    {
-                        token = qKey.ToString().Trim();
-                    }
                 }
             }
 
