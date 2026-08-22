@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { showToast } from './useToastStore';
+import { confirmAction } from './useConfirmStore';
 import { AppKeyItem, AppKeyLimits, NewAppKeyResult, CreateAppKeyPayload } from '../shared/types';
 import {
   fetchAppKeysApi,
@@ -66,7 +67,13 @@ export const useAppKeyStore = create<AppKeyStore>((set, get) => ({
   },
 
   revokeAppKey: async (id, name) => {
-    if (!window.confirm(`Are you sure you want to revoke the App Key '${name}'?`)) return;
+    const confirmed = await confirmAction({
+      title: 'Revoke App Key',
+      message: `Are you sure you want to revoke the App Key '${name}'? This cannot be undone.`,
+      confirmText: 'Revoke Key',
+      danger: true
+    });
+    if (!confirmed) return;
     try {
       await revokeAppKeyApi(id);
       showToast('App Key revoked successfully', 'success');

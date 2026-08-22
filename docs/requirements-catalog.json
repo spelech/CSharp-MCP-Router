@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T13:43:37.6010837Z",
-    "totalRequirements": 89,
+    "generatedAt": "2026-08-22T13:49:09.4475391Z",
+    "totalRequirements": 90,
     "positiveCount": 68,
-    "guardrailCount": 21,
-    "totalProofs": 184
+    "guardrailCount": 22,
+    "totalProofs": 196
   },
   "requirements": [
     {
@@ -1815,6 +1815,99 @@
           "lineNumber": 482,
           "testName": "StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately",
           "details": "Verifies that STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly."
+        }
+      ]
+    },
+    {
+      "id": "REQ-UI-CONFIRM-MODAL",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Deletes an access policy when confirmed via confirm modal.",
+      "proofCount": 12,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 76,
+          "testName": "deletes a policy when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 105,
+          "testName": "does not delete policy when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 166,
+          "testName": "deletes a group mapping when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 195,
+          "testName": "does not delete group mapping when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 222,
+          "testName": "deletes a custom file when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 251,
+          "testName": "does not delete custom file when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 88,
+          "testName": "prompts confirmation and deletes client when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 117,
+          "testName": "cancels deletion when user denies confirmation",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 268,
+          "testName": "confirms and revokes AppKey and refreshes list",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 297,
+          "testName": "cancels revocation when confirm is rejected",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
+          "lineNumber": 203,
+          "testName": "prompts window.confirm and deletes server when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
+          "lineNumber": 232,
+          "testName": "does not send delete request when confirm is cancelled",
+          "details": null
         }
       ]
     },

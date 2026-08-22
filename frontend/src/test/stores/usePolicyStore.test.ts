@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { useSettingsStore, AccessPolicy, GroupMapping } from '../../stores/useSettingsStore';
 import { useToastStore } from '../../stores/useToastStore';
+import { useConfirmStore } from '../../stores/useConfirmStore';
 import { mockApiResponse } from '../setup';
 
 describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
@@ -72,8 +73,13 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useToastStore.getState().toasts.some((t) => t.type === 'error')).toBe(true);
     });
 
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type PositiveFeature
+     * @description Deletes an access policy when confirmed via confirm modal.
+     */
     it('deletes a policy when confirmed', async () => {
-      window.confirm = vi.fn(() => true);
       let deleteCalled = false;
       mockApiResponse(/\/api\/permissions\/policies\/pol-1/, (_url, options) => {
         if (options?.method === 'DELETE') {
@@ -83,15 +89,26 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
         return { success: true };
       });
 
-      await useSettingsStore.getState().deletePolicy('pol-1');
+      const deletePromise = useSettingsStore.getState().deletePolicy('pol-1');
 
-      expect(window.confirm).toHaveBeenCalled();
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      expect(useConfirmStore.getState().options.title).toBe('Delete Access Policy');
+      expect(useConfirmStore.getState().options.danger).toBe(true);
+
+      useConfirmStore.getState().handleConfirm();
+      await deletePromise;
+
       expect(deleteCalled).toBe(true);
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('Policy deleted successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type FailClosedGuardrail
+     * @description Does not delete policy when confirm is cancelled.
+     */
     it('does not delete policy when confirm is cancelled', async () => {
-      window.confirm = vi.fn(() => false);
       let deleteCalled = false;
       mockApiResponse(/\/api\/permissions\/policies\/pol-1/, (_url, options) => {
         if (options?.method === 'DELETE') {
@@ -101,7 +118,11 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
         return { success: true };
       });
 
-      await useSettingsStore.getState().deletePolicy('pol-1');
+      const deletePromise = useSettingsStore.getState().deletePolicy('pol-1');
+
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      useConfirmStore.getState().handleCancel();
+      await deletePromise;
 
       expect(deleteCalled).toBe(false);
     });
@@ -142,8 +163,13 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('Mapping saved successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type PositiveFeature
+     * @description Deletes a group mapping when confirmed via confirm modal.
+     */
     it('deletes a group mapping when confirmed', async () => {
-      window.confirm = vi.fn(() => true);
       let deleteCalled = false;
       mockApiResponse(/\/api\/permissions\/mappings\/map-1/, (_url, options) => {
         if (options?.method === 'DELETE') {
@@ -153,11 +179,98 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
         return { success: true };
       });
 
-      await useSettingsStore.getState().deleteMapping('map-1');
+      const deletePromise = useSettingsStore.getState().deleteMapping('map-1');
 
-      expect(window.confirm).toHaveBeenCalled();
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      expect(useConfirmStore.getState().options.title).toBe('Delete Group Mapping');
+      expect(useConfirmStore.getState().options.danger).toBe(true);
+
+      useConfirmStore.getState().handleConfirm();
+      await deletePromise;
+
       expect(deleteCalled).toBe(true);
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('Mapping deleted successfully'))).toBe(true);
+    });
+
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type FailClosedGuardrail
+     * @description Does not delete group mapping when confirm is cancelled.
+     */
+    it('does not delete group mapping when confirm is cancelled', async () => {
+      let deleteCalled = false;
+      mockApiResponse(/\/api\/permissions\/mappings\/map-1/, (_url, options) => {
+        if (options?.method === 'DELETE') {
+          deleteCalled = true;
+          return { success: true };
+        }
+        return { success: true };
+      });
+
+      const deletePromise = useSettingsStore.getState().deleteMapping('map-1');
+
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      useConfirmStore.getState().handleCancel();
+      await deletePromise;
+
+      expect(deleteCalled).toBe(false);
+    });
+  });
+
+  describe('customFiles management', () => {
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type PositiveFeature
+     * @description Deletes a custom file when confirmed via confirm modal.
+     */
+    it('deletes a custom file when confirmed', async () => {
+      let deleteCalled = false;
+      mockApiResponse(/\/api\/custom-files\/prompts\/test\.json/, (_url, options) => {
+        if (options?.method === 'DELETE') {
+          deleteCalled = true;
+          return { success: true };
+        }
+        return { success: true };
+      });
+
+      const deletePromise = useSettingsStore.getState().deleteCustomFile('prompts', 'test.json');
+
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      expect(useConfirmStore.getState().options.title).toBe('Delete Custom File');
+      expect(useConfirmStore.getState().options.danger).toBe(true);
+
+      useConfirmStore.getState().handleConfirm();
+      await deletePromise;
+
+      expect(deleteCalled).toBe(true);
+      expect(useToastStore.getState().toasts.some((t) => t.message.includes('File deleted successfully'))).toBe(true);
+    });
+
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type FailClosedGuardrail
+     * @description Does not delete custom file when confirm is cancelled.
+     */
+    it('does not delete custom file when confirm is cancelled', async () => {
+      let deleteCalled = false;
+      mockApiResponse(/\/api\/custom-files\/prompts\/test\.json/, (_url, options) => {
+        if (options?.method === 'DELETE') {
+          deleteCalled = true;
+          return { success: true };
+        }
+        return { success: true };
+      });
+
+      const deletePromise = useSettingsStore.getState().deleteCustomFile('prompts', 'test.json');
+
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      useConfirmStore.getState().handleCancel();
+      await deletePromise;
+
+      expect(deleteCalled).toBe(false);
     });
   });
 
