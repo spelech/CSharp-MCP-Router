@@ -76,5 +76,21 @@ namespace McpRouter.Tests
             Assert.Equal(200, result.StatusCode);
             mockAppManager.Verify(m => m.CreateAsync(It.Is<OpenIddictApplicationDescriptor>(d => d.DisplayName == "IntegrationTestApp"), default), Times.Once);
         }
+        [Fact]
+        [McpRouter.Tests.Attributes.Requirement("AUTH-108", "SEC", McpRouter.Tests.Attributes.RequirementType.Negative, "Authorize throws InvalidOperationException when OIDC request is null.")]
+        public async Task Authorize_ThrowsInvalidOperationException_WhenRequestNull()
+        {
+            var mockAppManager = new Mock<IOpenIddictApplicationManager>();
+            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+            var controller = new AuthorizationController(mockAppManager.Object, mockAudit.Object)
+            {
+                ControllerContext = new ControllerContext
+                {
+                    HttpContext = new DefaultHttpContext()
+                }
+            };
+
+            await Assert.ThrowsAsync<InvalidOperationException>(() => controller.Authorize());
+        }
     }
 }

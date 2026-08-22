@@ -8,6 +8,8 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.24.0`** | 2026-08-22 | feat(auth): added native React UI for OAuth Consent Screen, and enabled `refresh_token` flows for multi-tenant clients |
+| **`v4.23.0`** | 2026-08-22 | feat(auth): added interactive Per-User OAuth Consent Screen to support true multi-tenant scenarios via authorization_code flows |
 | **`v4.22.2`** | 2026-08-21 | patch |
 | **`v4.22.1`** | 2026-08-21 | 4.22.0 |
 | **`v4.20.3`** | 2026-08-21 | fix: resolve typescript ERESOLVE in frontend dependencies |

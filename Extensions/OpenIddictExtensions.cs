@@ -97,7 +97,10 @@ namespace McpRouter.Extensions
                 .AddServer(options =>
                 {
                     options.SetTokenEndpointUris("/connect/token", "/oauth/token");
+                    options.SetAuthorizationEndpointUris("/connect/authorize");
                     options.AllowClientCredentialsFlow();
+                    options.AllowAuthorizationCodeFlow();
+                    options.AllowRefreshTokenFlow();
 
                     var certPath = config["OpenIddict:CertificatePath"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PATH");
                     var certPass = config["OpenIddict:CertificatePassword"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD");
@@ -119,7 +122,8 @@ namespace McpRouter.Extensions
                     }
 
                     options.UseAspNetCore()
-                           .EnableTokenEndpointPassthrough();
+                           .EnableTokenEndpointPassthrough()
+                           .EnableAuthorizationEndpointPassthrough();
                 })
                 .AddValidation(options =>
                 {

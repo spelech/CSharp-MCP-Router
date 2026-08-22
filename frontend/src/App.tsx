@@ -5,9 +5,22 @@ import { SecurityView, PolicyModal, MappingModal } from './components/security';
 import { TestBenchView } from './components/testbench';
 import { SettingsView, CustomFileModal } from './components/settings';
 import { MyMcpServers } from './pages/MyMcpServers';
+import { ConsentView } from './pages/ConsentView';
 import { ClientModal, AppKeyModal } from './components/clients';
 
 const App: React.FC = () => {
+  if (window.location.pathname === '/consent') {
+    return (
+      <>
+        <div className="background-decor">
+          <div className="circle circle-1"></div>
+          <div className="circle circle-2"></div>
+        </div>
+        <ConsentView />
+      </>
+    );
+  }
+
   const [currentView, setCurrentView] = useState<'dashboard' | 'security' | 'testbench' | 'settings' | 'my-mcp-servers'>('dashboard');
 
   return (
