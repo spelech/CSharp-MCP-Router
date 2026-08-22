@@ -54,7 +54,7 @@ Run tests via `dotnet test McpRouter.slnx`.
     dotnet run --project scripts/CatalogGenerator
     dotnet run --project scripts/CatalogGenerator -- --verify-only
     ```
-  - For full taxonomy, category codes (`AUTH`, `DB`, `GUARD`, `MCP`, `SEC`, `TRANS`, `UI`), and conventions, refer to [`docs/test-catalog-guide.md`](file:///containers/dev/csharp-mcp-router/docs/test-catalog-guide.md).
+  - For full taxonomy, category codes (`AUTH`, `DB`, `GUARD`, `MCP`, `SEC`, `TRANS`, `UI`), and conventions, refer to [`docs/test-catalog-guide.md`](docs/test-catalog-guide.md).
 - Do not use string manipulation (`string.Replace`) for JSON payloads. Use `JsonNode` (see `ClientSession.RewriteRequestJson`).
 - Do not commit mockups to `docs/assets/`. Use actual UI screenshots.
 - Ensure that you use atomic commits for logical changes.
