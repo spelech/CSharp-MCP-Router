@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EmbeddingSettings } from '../../shared/types';
 
 export interface GeneralTabProps {
@@ -7,15 +7,32 @@ export interface GeneralTabProps {
 }
 
 export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSettings }) => {
-  const [dashboardTitle, setDashboardTitle] = useState(settings?.dashboardTitle || 'MCP Gateway');
-  const [dashboardIcon, setDashboardIcon] = useState(settings?.dashboardIcon || 'fa-solid fa-network-wired');
-  const [embProvider, setEmbProvider] = useState(settings?.embeddingProvider || 'local');
-  const [embModelDir, setEmbModelDir] = useState(settings?.embeddingModelDir || 'data/models');
-  const [embApiUrl, setEmbApiUrl] = useState(settings?.embeddingApiUrl || 'http://litellm:4000/v1/embeddings');
-  const [embApiModel, setEmbApiModel] = useState(settings?.embeddingApiModel || 'all-MiniLM-L6-v2');
-  const [embApiKey, setEmbApiKey] = useState(settings?.embeddingApiKey || '');
+  const [dashboardTitle, setDashboardTitle] = useState(settings?.dashboardTitle ?? 'MCP Gateway');
+  const [dashboardIcon, setDashboardIcon] = useState(settings?.dashboardIcon ?? 'fa-solid fa-network-wired');
+  const [embProvider, setEmbProvider] = useState(settings?.embeddingProvider ?? 'local');
+  const [embModelDir, setEmbModelDir] = useState(settings?.embeddingModelDir ?? 'data/models');
+  const [embApiUrl, setEmbApiUrl] = useState(settings?.embeddingApiUrl ?? 'http://litellm:4000/v1/embeddings');
+  const [embApiModel, setEmbApiModel] = useState(settings?.embeddingApiModel ?? 'all-MiniLM-L6-v2');
+  const [embApiKey, setEmbApiKey] = useState(settings?.embeddingApiKey ?? '');
   const [allowOpenDCR, setAllowOpenDCR] = useState(settings?.allowOpenClientRegistration ?? true);
+  const [userMaxKeys, setUserMaxKeys] = useState<number>(settings?.userMaxKeys ?? 5);
+  const [globalMaxKeys, setGlobalMaxKeys] = useState<number>(settings?.globalMaxKeys ?? 100);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  useEffect(() => {
+    if (settings) {
+      setDashboardTitle(settings.dashboardTitle ?? 'MCP Gateway');
+      setDashboardIcon(settings.dashboardIcon ?? 'fa-solid fa-network-wired');
+      setEmbProvider(settings.embeddingProvider ?? 'local');
+      setEmbModelDir(settings.embeddingModelDir ?? 'data/models');
+      setEmbApiUrl(settings.embeddingApiUrl ?? 'http://litellm:4000/v1/embeddings');
+      setEmbApiModel(settings.embeddingApiModel ?? 'all-MiniLM-L6-v2');
+      setEmbApiKey(settings.embeddingApiKey ?? '');
+      setAllowOpenDCR(settings.allowOpenClientRegistration ?? true);
+      setUserMaxKeys(settings.userMaxKeys ?? 5);
+      setGlobalMaxKeys(settings.globalMaxKeys ?? 100);
+    }
+  }, [settings]);
 
   const handleSaveSearchSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,6 +46,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
       embeddingApiModel: embApiModel,
       embeddingApiKey: embApiKey,
       allowOpenClientRegistration: allowOpenDCR,
+      userMaxKeys: Number(userMaxKeys),
+      globalMaxKeys: Number(globalMaxKeys),
     });
     setSaveStatus(success ? 'saved' : 'error');
     setTimeout(() => setSaveStatus('idle'), 2500);
@@ -142,6 +161,37 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
           
           <div className="form-group">
             <h3 style={{ fontSize: '14px', marginBottom: '10px', marginTop: '20px', color: 'var(--primary)' }}><i className="fa-solid fa-shield-halved"></i> Security Defaults</h3>
+          </div>
+
+          <div className="form-row">
+            <div className="form-group">
+              <label htmlFor="settings-user-max-keys">Default User Quota (UserMaxKeys)</label>
+              <input
+                type="number"
+                id="settings-user-max-keys"
+                min="0"
+                placeholder="5"
+                value={userMaxKeys}
+                onChange={(e) => setUserMaxKeys(parseInt(e.target.value, 10) || 0)}
+              />
+              <small style={{ color: 'var(--text-muted)' }}>
+                Default maximum personal App Keys per user (0 = unlimited).
+              </small>
+            </div>
+            <div className="form-group">
+              <label htmlFor="settings-global-max-keys">Global Max Keys</label>
+              <input
+                type="number"
+                id="settings-global-max-keys"
+                min="0"
+                placeholder="100"
+                value={globalMaxKeys}
+                onChange={(e) => setGlobalMaxKeys(parseInt(e.target.value, 10) || 0)}
+              />
+              <small style={{ color: 'var(--text-muted)' }}>
+                Maximum total active App Keys allowed across all users (0 = unlimited).
+              </small>
+            </div>
           </div>
           
           <div className="form-group" style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>

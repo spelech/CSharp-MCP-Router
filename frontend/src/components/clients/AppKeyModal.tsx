@@ -1,15 +1,41 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
+import { useUserStore } from '../../stores/useUserStore';
 
 export const AppKeyModal: React.FC = () => {
-  const { isCreateModalOpen, createdResult, createAppKey, closeModal, limits } = useAppKeyStore();
+  const { user } = useUserStore();
+  const isAdmin = !!(user?.groups && user.groups.includes('full_admin'));
+
+  const {
+    isCreateModalOpen,
+    createdResult,
+    createAppKey,
+    closeModal,
+    limits,
+    keyTypeTab
+  } = useAppKeyStore();
 
   const [name, setName] = useState('');
+  const [keyType, setKeyType] = useState<'personal' | 'system'>('personal');
+  const [targetUsername, setTargetUsername] = useState('');
   const [scopeType, setScopeType] = useState<'all' | 'server' | 'category'>('all');
   const [customScope, setCustomScope] = useState('');
   const [expiresInDays, setExpiresInDays] = useState<number | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
+
+  useEffect(() => {
+    if (isCreateModalOpen) {
+      setName('');
+      setKeyType(keyTypeTab === 'system' ? 'system' : 'personal');
+      setTargetUsername('');
+      setScopeType('all');
+      setCustomScope('');
+      setExpiresInDays(undefined);
+      setIsSubmitting(false);
+      setCopiedKey(false);
+    }
+  }, [isCreateModalOpen, keyTypeTab]);
 
   if (!isCreateModalOpen) return null;
 
@@ -27,6 +53,8 @@ export const AppKeyModal: React.FC = () => {
     try {
       await createAppKey({
         name,
+        keyType: isAdmin ? keyType : 'personal',
+        username: isAdmin && keyType === 'personal' && targetUsername.trim() ? targetUsername.trim() : undefined,
         scopes,
         expiresInDays
       });
@@ -65,12 +93,57 @@ export const AppKeyModal: React.FC = () => {
     <div id="add-appkey-modal" className="modal-backdrop" style={{ display: 'flex' }}>
       <div className="glass-card modal-card" style={{ maxWidth: '540px' }}>
         <div className="modal-header">
-          <h2><i className="fa-solid fa-key"></i> Create New App Key</h2>
+          <h2><i className="fa-solid fa-key"></i> {isAdmin ? 'Create New App Key' : 'Create Personal App Key'}</h2>
           <button className="btn-close" onClick={closeModal}>&times;</button>
         </div>
 
         {!createdResult ? (
           <form onSubmit={handleSubmit}>
+            {isAdmin ? (
+              <>
+                <div className="form-group">
+                  <label htmlFor="modal-key-type">Key Type</label>
+                  <select
+                    id="modal-key-type"
+                    value={keyType}
+                    onChange={(e) => setKeyType(e.target.value as 'personal' | 'system')}
+                    style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', color: '#fff', border: '1px solid var(--glass-border)' }}
+                  >
+                    <option value="personal">Personal Key (User-owned)</option>
+                    <option value="system">App-Level / System Key (Service &amp; Integration)</option>
+                  </select>
+                </div>
+
+                {keyType === 'personal' && (
+                  <div className="form-group">
+                    <label htmlFor="modal-target-username">Target Username (optional, defaults to current user)</label>
+                    <input
+                      type="text"
+                      id="modal-target-username"
+                      placeholder={user?.username || 'Username'}
+                      value={targetUsername}
+                      onChange={(e) => setTargetUsername(e.target.value)}
+                    />
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="form-group" style={{ background: 'rgba(255,255,255,0.03)', padding: '12px', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.08)', marginBottom: '16px' }}>
+                <div style={{ fontSize: '13px', color: '#e2e8f0' }}>
+                  Key Type: <strong style={{ color: 'var(--accent)' }}>Personal Key</strong> ({user?.username || 'Current User'})
+                </div>
+                {limits && (
+                  <div style={{ fontSize: '12px', marginTop: '6px', color: limits.isLimitReached ? '#ef4444' : 'var(--secondary)' }}>
+                    {limits.userMax > 0 ? (
+                      <>Remaining Quota: <strong>{Math.max(0, limits.userMax - limits.userActiveKeys)}</strong> keys left ({limits.userActiveKeys} / {limits.userMax} used)</>
+                    ) : (
+                      <>Quota: <strong>Unlimited</strong> &bull; Active: {limits.userActiveKeys}</>
+                    )}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="form-group">
               <label htmlFor="key-name">Key Name (e.g. Cursor IDE, OpenClaw Agent)</label>
               <input
@@ -84,8 +157,9 @@ export const AppKeyModal: React.FC = () => {
             </div>
 
             <div className="form-group">
-              <label>Scope / Access Level</label>
+              <label htmlFor="key-scope-type">Scope / Access Level</label>
               <select
+                id="key-scope-type"
                 value={scopeType}
                 onChange={(e) => setScopeType(e.target.value as any)}
                 style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', color: '#fff', border: '1px solid var(--glass-border)' }}
@@ -98,9 +172,10 @@ export const AppKeyModal: React.FC = () => {
 
             {scopeType !== 'all' && (
               <div className="form-group">
-                <label>Target Server / Category Name</label>
+                <label htmlFor="key-custom-scope">Target Server / Category Name</label>
                 <input
                   type="text"
+                  id="key-custom-scope"
                   placeholder={scopeType === 'server' ? 'e.g. ha, docker' : 'e.g. smarthome, media'}
                   value={customScope}
                   onChange={(e) => setCustomScope(e.target.value)}
@@ -110,8 +185,9 @@ export const AppKeyModal: React.FC = () => {
             )}
 
             <div className="form-group">
-              <label>Expiration</label>
+              <label htmlFor="key-expires">Expiration</label>
               <select
+                id="key-expires"
                 value={expiresInDays === undefined ? 'never' : expiresInDays}
                 onChange={(e) => setExpiresInDays(e.target.value === 'never' ? undefined : Number(e.target.value))}
                 style={{ width: '100%', padding: '8px 12px', borderRadius: '6px', background: 'rgba(0,0,0,0.3)', color: '#fff', border: '1px solid var(--glass-border)' }}

@@ -7,9 +7,12 @@ import { SettingsView, CustomFileModal } from './components/settings';
 import { MyMcpServers } from './pages/MyMcpServers';
 import { ConsentView } from './pages/ConsentView';
 import { ClientModal, AppKeyModal } from './components/clients';
+import { useUserStore } from './stores/useUserStore';
 
 const App: React.FC = () => {
   const [currentView, setCurrentView] = useState<'dashboard' | 'security' | 'testbench' | 'settings' | 'my-mcp-servers'>('dashboard');
+  const { user } = useUserStore();
+  const isAdmin = !!(user?.groups && user.groups.includes('full_admin'));
 
   if (window.location.pathname === '/consent') {
     return (
@@ -44,7 +47,7 @@ const App: React.FC = () => {
             className={`tab-btn ${currentView === 'security' ? 'active' : ''}`}
             onClick={() => setCurrentView('security')}
           >
-            <i className="fa-solid fa-key"></i> App Keys &amp; Security
+            <i className="fa-solid fa-key"></i> {isAdmin ? 'App Keys & Security' : 'My App Keys'}
           </button>
           <button
             className={`tab-btn ${currentView === 'testbench' ? 'active' : ''}`}
@@ -52,12 +55,14 @@ const App: React.FC = () => {
           >
             <i className="fa-solid fa-vial"></i> Test Bench
           </button>
-          <button
-            className={`tab-btn ${currentView === 'settings' ? 'active' : ''}`}
-            onClick={() => setCurrentView('settings')}
-          >
-            <i className="fa-solid fa-gear"></i> Settings
-          </button>
+          {isAdmin && (
+            <button
+              className={`tab-btn ${currentView === 'settings' ? 'active' : ''}`}
+              onClick={() => setCurrentView('settings')}
+            >
+              <i className="fa-solid fa-gear"></i> Settings
+            </button>
+          )}
           <button
             className={`tab-btn ${currentView === 'my-mcp-servers' ? 'active' : ''}`}
             onClick={() => setCurrentView('my-mcp-servers')}
@@ -69,7 +74,7 @@ const App: React.FC = () => {
         {currentView === 'dashboard' && <DashboardView />}
         {currentView === 'security' && <SecurityView />}
         {currentView === 'testbench' && <TestBenchView />}
-        {currentView === 'settings' && <SettingsView />}
+        {currentView === 'settings' && isAdmin && <SettingsView />}
         {currentView === 'my-mcp-servers' && <MyMcpServers />}
 
         <Footer />
@@ -78,7 +83,7 @@ const App: React.FC = () => {
       {/* Modals */}
       <ServerModal />
       <ServerInspectModal />
-      <ClientModal />
+      {isAdmin && <ClientModal />}
       <AppKeyModal />
       <CustomFileModal />
       <PolicyModal />
