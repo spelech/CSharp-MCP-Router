@@ -44,6 +44,13 @@ A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the
   * **Provider Management Controls**: Interactive UI cards in Settings to toggle and configure Auth and Secret providers.
 * **Target-Specific Proxying:** Exposes separate endpoints (`/{targetServerId}`) to route directly to specific backends (e.g., `/plex`, `/docker`).
 * **OAuth 2.0 Security & CORS Config:** Integrates a lightweight OAuth 2.0 authorization server for secure API access. Leverages strict, configurable CORS protection with `CORS_ALLOWED_ORIGINS` to prevent cross-origin request hijacking / forgery vulnerabilities.
+* **Enterprise Identity Delegation**:
+  * **X-Forwarded-User Propagation (Trusted Gateway Pattern)**: Automatically injects the inbound authenticated user's identity into downstream HTTP/SSE backend requests for seamless Row-Level Security (RLS) enforcement.
+  * **Kerberos / NTLM Impersonation**: For native Windows IIS deployments, the router utilizes `S4U2Proxy` to assume the inbound caller's Active Directory identity when communicating with downstream enterprise endpoints.
+  * **OAuth2 / OIDC On-Behalf-Of**: Acts as a Confidential Client to dynamically mint/exchange tokens with identity providers (Azure AD, Okta, Authentik) on behalf of the user.
+  * **Dynamic Auth Pass-Through**: Issues `dynamic_auth` prompts directly to the client (IDE/LLM) when downstream services require interactive challenges.
+* **Batteries-Included Docker**: `ghcr.io/org/mcp-router:latest-full` tag provides pre-installed Node.js, Python 3, `uv`, and `bun` environments for natively executing `stdio` sub-process servers without sidecar networking complexity.
+
 * **Built-in Web Dashboard:** A responsive, dark-mode, glassmorphic UI to monitor connected clients, stats, and backend health status.
 
 ---

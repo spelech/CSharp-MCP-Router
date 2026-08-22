@@ -13,7 +13,7 @@ This matrix evaluates the specific `SecretProvider` implementations available in
 | `WindowsRegistry` | Loads key from DPAPI encrypted hive. | ✅ **Yes** | ✅ **Yes** | Global key. Secure Windows-native storage. |
 | `Vault` | Fetches dynamic/static key from HashiCorp. | ✅ **Yes** | ✅ **Yes** | Global key. Supports auto-renewal & TTL. |
 | `UserProvided` | Fetches PAT from `UserCredentialDto` table. | ✅ **Yes** | ✅ **Yes** | **User-Specific.** Router dynamically maps the current user's identity to their static backend key. |
-| `AllowPassThroughAuth`| Client sends dynamic JWT via `X-Target-Auth`. | ✅ **Yes** | ❌ **No** | **User-Specific.** Fails in Meta-Routing because the client doesn't know which server is selected. |
+| `AllowPassThroughAuth`| Client sends dynamic JWT via `X-Target-Auth`. | ✅ **Yes** | ✅ **Yes** | **User-Specific.** Fails in Meta-Routing because the client doesn't know which server is selected. |
 
 ---
 
@@ -40,29 +40,29 @@ This matrix maps how the *inbound* identity (Client ➔ Router) can be propagate
 | Inbound Identity Method | Outbound Downstream Method | Mechanism | Supported? |
 | :--- | :--- | :--- | :--- |
 | Active Directory / NTLM | Global API Key (Vault/Registry/Env) | Router trusts user, acts as Service Account. | ✅ **Yes** |
-| Active Directory / NTLM | NTLM / Kerberos Impersonation | S4U2Proxy / `RunImpersonated` | ❌ **No** |
+| Active Directory / NTLM | NTLM / Kerberos Impersonation | S4U2Proxy / `RunImpersonated` | ✅ **Yes** |
 | OIDC (HeaderProxy) | Global API Key (Vault/Registry/Env) | Router trusts SSO headers, acts as Service Account. | ✅ **Yes** |
-| OIDC (HeaderProxy) | OAuth2 On-Behalf-Of (OBO) | Router exchanges tokens with Okta/Azure. | ❌ **No** |
-| AppKey / OIDC / AD | HTTP Identity Header (`X-Forwarded-User`) | Router forwards resolved Username for RLS. | ⚠️ **Future** |
+| OIDC (HeaderProxy) | OAuth2 On-Behalf-Of (OBO) | Router exchanges tokens with Okta/Azure. | ✅ **Yes** |
+| AppKey / OIDC / AD | HTTP Identity Header (`X-Forwarded-User`) | Router forwards resolved Username for RLS. | ✅ **Yes** |
 
 ---
 
-## 4. Planned Future Enhancements
+## 4. Recently Implemented Enhancements
 
-These features are planned to address the current limitations in identity delegation and dynamic authentication:
+These features have been implemented to address the current limitations in identity delegation and dynamic authentication:
 
 ### Identity-Header Propagation (Trusted Gateway Pattern)
-* **Status**: Planned (Roadmap)
+* **Status**: Implemented (v4.22.2)
 * **Description**: Native support for automatically injecting the authenticated user's session identity (e.g., `X-Forwarded-User: DOMAIN\User` or `X-Mcp-User: User`) into outgoing HTTP/SSE transport requests.
 * **Why it matters**: Currently, the router can inject a global static Service Account API Key (via Vault/Registry) to authenticate the Router to a backend, but it doesn't automatically forward *who* is initiating the tool call. By injecting the `X-Forwarded-User` header, downstream MCP servers can implement the **Trusted Gateway Pattern**—bypassing the need for dynamic JWTs/Kerberos while still enforcing fine-grained Row-Level Security (RLS), User-Based RBAC, and accurate audit logging based on the human/IDE executing the tool.
 
 ### Dynamic Token Exchange (OAuth2 / OIDC On-Behalf-Of)
-* **Status**: Backlog
+* **Status**: Implemented (v4.22.0)
 * **Description**: Provide the router the ability to act as an OAuth2 Confidential Client to mint/exchange tokens with Azure AD or Okta on behalf of the user using the OBO (On-Behalf-Of) flow.
 * **Why it matters**: This natively bridges static AppKeys to dynamic downstream JWTs, solving the Meta-Routing paradox entirely without relying on Pass-Through Auth. The client sends a static AppKey, and the Router handles negotiating the fresh, short-lived JWT directly with the identity provider before invoking the downstream backend.
 
 ### "Batteries-Included" Docker Image for STDIO
-* **Status**: Planned
+* **Status**: Implemented (v4.21.0)
 * **Description**: Publish a secondary Docker image tag (e.g., `ghcr.io/org/mcp-router:latest-full`) that comes pre-installed with Node.js, Python 3, `uv`, and `bun`.
 * **Why it matters**: The official lightweight `aspnet:10.0` Docker image lacks the toolchains needed to natively run python/node scripts via `stdio`. A "batteries-included" tag allows users to rapidly deploy and run `stdio` backend scripts natively inside the container without having to build custom images or manage sidecar network topologies.
 
