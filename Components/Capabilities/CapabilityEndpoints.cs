@@ -106,7 +106,7 @@ namespace McpRouter.Components.Capabilities
                 catch (ArgumentException ex)
                 {
                     _ = auditLogger.LogAdminActionAsync(username, "UpdateSettings", "embedding-settings", JsonSerializer.Serialize(settings), false, ex.Message);
-                    return Results.BadRequest(new { error = "An unexpected error occurred." });
+                    return Results.BadRequest(new { error = ex.Message });
                 }
             });
 
