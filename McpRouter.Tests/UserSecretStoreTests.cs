@@ -11,7 +11,7 @@ namespace McpRouter.Tests
     public class UserSecretStoreTests
     {
         [Fact]
-        [Requirement("REQ-AUTH-001", "AUTH", RequirementType.Positive, "Verify DatabaseUserSecretStore encrypts and decrypts secret correctly.")]
+        [Requirement("AUTH-001", "AUTH", RequirementType.Positive, "Verify DatabaseUserSecretStore encrypts and decrypts secret correctly.")]
         public async Task DatabaseUserSecretStore_SavesAndRetrieves_Secret()
         {
             // Arrange

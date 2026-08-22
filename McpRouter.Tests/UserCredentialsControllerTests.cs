@@ -16,7 +16,7 @@ namespace McpRouter.Tests
     public class UserCredentialsControllerTests
     {
         [Fact]
-        [Requirement("REQ-AUTH-002", "AUTH", RequirementType.Positive, "Verify UserCredentialsController returns configured server IDs.")]
+        [Requirement("AUTH-002", "AUTH", RequirementType.Positive, "Verify UserCredentialsController returns configured server IDs.")]
         public async Task GetUserCredentials_ReturnsServerIds()
         {
             // Arrange
