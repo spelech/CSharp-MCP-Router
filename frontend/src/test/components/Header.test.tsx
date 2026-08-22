@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-110 */
+
 import { describe, it, expect, beforeEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { Header } from '../../components/shared/Header';

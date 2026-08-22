@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-126 */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('Server Inspector Modal Flow', () => {

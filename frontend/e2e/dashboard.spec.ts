@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-124 */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('Dashboard & Navigation Flow', () => {

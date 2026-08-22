@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-120 */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('RBAC Policy and Group/SID Mapping Lifecycle Flow', () => {

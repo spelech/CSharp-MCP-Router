@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-127 */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('RBAC Access Control & Policy Modal Flow', () => {

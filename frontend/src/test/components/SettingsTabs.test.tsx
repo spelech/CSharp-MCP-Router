@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-111 */
+
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { GeneralTab } from '../../components/settings/GeneralTab';

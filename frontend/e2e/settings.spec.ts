@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-122 */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('Settings View Flow', () => {

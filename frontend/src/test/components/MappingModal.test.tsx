@@ -1,3 +1,5 @@
+/** @requirement REQ-UI-108 */
+
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { MappingModal } from '../../components/security/MappingModal';
