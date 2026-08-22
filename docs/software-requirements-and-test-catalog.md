@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **83 Requirements Verified** across **162 Test Proofs** (65 Functional Capabilities, 18 Safety Guardrails).
+> **Catalog Statistics:** **85 Requirements Verified** across **164 Test Proofs** (66 Functional Capabilities, 19 Safety Guardrails).
 
 ---
 
@@ -14,7 +14,7 @@
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 33 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **6** | 5 | 1 | 13 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **8** | 6 | 2 | 15 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 7 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **5** | 5 | 0 | 24 proofs |
 
@@ -353,6 +353,12 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L157`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L157) (`ListToolsAsync_ReturnsTenConsolidatedTools`)
 
+### `[REQ-AUTH-107]` RegisterClient successfully handles DCR requests when open DCR is enabled.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L41`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L41) (`RegisterClient_CreatesApplicationAndReturnsOk`)
+
 ### `[SEC-01]` VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
@@ -600,6 +606,12 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L643`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L643) (`CallToolAsync_TestToolCall_MissingServer_ReturnsError`)
 
+### `[REQ-AUTH-106]` Exchange throws InvalidOperationException when request is null.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L23`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L23) (`Exchange_ThrowsInvalidOperationException_WhenRequestNull`)
+
 ### `[SEC-05]` Router must not overwrite corrupt encrypted database fields if an update occurs without user reset.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -681,6 +693,8 @@
 | `MCP-ADMIN-TOOL-MANAGE-SETTINGS` | Positive | `MCP` | AdminMcpServer executes manage_settings get and update actions. | [`AdminMcpServerTests.cs:L488`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L488) | Backend xUnit |
 | `MCP-ADMIN-TOOL-MANAGE-SYSTEM` | Positive | `MCP` | AdminMcpServer executes manage_system diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminMcpServerTests.cs:L568`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L568) | Backend xUnit |
 | `MCP-ADMIN-TOOLS-LIST-COUNT` | Positive | `MCP` | AdminMcpServer tools/list returns all 10 consolidated tools with complete JSON schemas. | [`AdminMcpServerTests.cs:L157`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L157) | Backend xUnit |
+| `REQ-AUTH-106` | **Guardrail** | `SEC` | Exchange throws InvalidOperationException when request is null. | [`AuthorizationControllerTests.cs:L23`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L23) | Backend xUnit |
+| `REQ-AUTH-107` | Positive | `SEC` | RegisterClient successfully handles DCR requests when open DCR is enabled. | [`AuthorizationControllerTests.cs:L41`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L41) | Backend xUnit |
 | `SEC-01` | Positive | `SEC` | VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials | [`VaultAppRoleAndRenewalTests.cs:L23`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L23) | Backend xUnit |
 | `SEC-02` | Positive | `SEC` | STDIO transport securely injects secret credentials via environment variables rather than command-line arguments | [`StdioTransportTests.cs:L354`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L354) | Backend xUnit |
 | `SEC-03` | Positive | `SEC` | Ensure TrustedProxyHelper supports CIDR ranges in XFF validation | [`IdentityProviderTests.cs:L366`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L366) | Backend xUnit |

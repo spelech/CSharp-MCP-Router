@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-21T23:55:32.6028623Z",
-    "totalRequirements": 83,
-    "positiveCount": 65,
-    "guardrailCount": 18,
-    "totalProofs": 162
+    "generatedAt": "2026-08-22T05:42:48.1723982Z",
+    "totalRequirements": 85,
+    "positiveCount": 66,
+    "guardrailCount": 19,
+    "totalProofs": 164
   },
   "requirements": [
     {
@@ -1450,6 +1450,38 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 157,
           "testName": "ListToolsAsync_ReturnsTenConsolidatedTools",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-106",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "Exchange throws InvalidOperationException when request is null.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 23,
+          "testName": "Exchange_ThrowsInvalidOperationException_WhenRequestNull",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "REQ-AUTH-107",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "RegisterClient successfully handles DCR requests when open DCR is enabled.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 41,
+          "testName": "RegisterClient_CreatesApplicationAndReturnsOk",
           "details": null
         }
       ]

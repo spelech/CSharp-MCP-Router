@@ -17,6 +17,7 @@ describe('Modular Settings Tab Components', () => {
           embeddingApiUrl: '',
           embeddingApiModel: 'all-MiniLM-L6-v2',
           embeddingApiKey: '',
+          allowOpenClientRegistration: false,
         }}
         saveEmbeddingSettings={saveSpy}
       />
@@ -24,11 +25,17 @@ describe('Modular Settings Tab Components', () => {
 
     expect(screen.getByText('General Settings')).toBeInTheDocument();
     expect(screen.getByText('Semantic Search')).toBeInTheDocument();
+    expect(screen.getByText('Security Defaults')).toBeInTheDocument();
+    const checkbox = screen.getByRole('checkbox');
+    expect(checkbox).not.toBeChecked();
+    fireEvent.click(checkbox);
+    expect(checkbox).toBeChecked();
     const saveBtn = screen.getByRole('button', { name: /save settings/i });
     await act(async () => {
       fireEvent.click(saveBtn);
     });
     expect(saveSpy).toHaveBeenCalled();
+    expect(saveSpy).toHaveBeenCalledWith(expect.objectContaining({ allowOpenClientRegistration: true }));
   });
 
   it('renders IdentityAuthTab and SecretProvidersTab inside ProvidersTab', () => {
