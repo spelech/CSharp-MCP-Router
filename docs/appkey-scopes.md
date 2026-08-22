@@ -226,7 +226,7 @@ Incoming requests supply the token via HTTP headers or query parameters:
 
 ### 4. Quotas, Expiration & Revocation
 
-- **Key Quotas**: Configured in `Settings` table (`GlobalMaxKeys`, default 100; `UserMaxKeys`, default 5). Non-admin users who exceed their limit receive `400 Bad Request`.
+- **Key Quotas**: Configured in `Settings` table (`GlobalMaxKeys`, default 0; `UserMaxKeys`, default 0, where `0` = Unlimited). Non-admin users who exceed an administrator-configured limit receive `400 Bad Request`.
 - **Expiration**: Keys support optional expiration (`ExpiresInDays`). Expired keys fail authentication with an audited `App Key has expired` message.
 - **Revocation**: Keys can be revoked via `DELETE /api/appkeys/{id}` or `DELETE /api/clients/{id}` (`sp_DeleteAppKey`). Revocations take effect immediately.
 - **Audit Logging**: All administrative key creations, revocations, and authentication failures are recorded via `IAuditLogger.LogAdminActionAsync` and stored in the database audit log table.
