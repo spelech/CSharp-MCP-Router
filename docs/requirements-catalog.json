@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T16:36:28.5780903Z",
-    "totalRequirements": 100,
-    "positiveCount": 77,
+    "generatedAt": "2026-08-22T16:41:38.5335548Z",
+    "totalRequirements": 101,
+    "positiveCount": 78,
     "guardrailCount": 23,
-    "totalProofs": 234
+    "totalProofs": 243
   },
   "requirements": [
     {
@@ -16,7 +16,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/UserSecretStoreTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/UserSecretStoreTests.cs",
           "lineNumber": 13,
           "testName": "DatabaseUserSecretStore_SavesAndRetrieves_Secret",
           "details": null
@@ -32,7 +32,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/UserCredentialsControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/UserCredentialsControllerTests.cs",
           "lineNumber": 18,
           "testName": "GetUserCredentials_ReturnsServerIds",
           "details": null
@@ -48,105 +48,105 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
           "lineNumber": 18,
           "testName": "AdminPolicy_Allows_Principal_With_AdminGroupName",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
           "lineNumber": 52,
           "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
           "lineNumber": 86,
           "testName": "AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminPolicyHybridAuthTests.cs",
           "lineNumber": 121,
           "testName": "AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
           "lineNumber": 21,
           "testName": "AdminPolicy_Denies_StandardRole_Without_AdminSid",
           "details": "Verifies that users with standard/unconfigured role names lacking explicit Admin SID claim or Admin Group are denied by AdminPolicy."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminPolicySidOnlyTests.cs",
           "lineNumber": 63,
           "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
           "details": "Verifies that principals with the configured Admin SID are granted administrative policy access."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 274,
           "testName": "AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds",
           "details": "Verifies that admin callers can create forward-looking AppKeys for unconfigured categories."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 226,
           "testName": "SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 244,
           "testName": "SecurityValidationHelper_IsAdmin_AllowsAdminGroupName",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 258,
           "testName": "SecurityValidationHelper_IsAdmin_RejectsNonAdminGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 275,
           "testName": "SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 290,
           "testName": "SecurityValidationHelper_IsAdmin_AllowsMappedGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 305,
           "testName": "OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 12,
           "testName": "renders Active Directory disabled initially, toggles on and exposes fields",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 46,
           "testName": "fills LDAP parameters and executes test connection",
           "details": null
@@ -162,84 +162,84 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 255,
           "testName": "Pairwise_AppKeyScopes_RestrictsAccessPrecisely",
           "details": "Verifies pairwise combination of AppKey scopes across all MCP capabilities and backend targets."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 151,
           "testName": "AppKeyRepository_SaveAndGet_PersistsKeyTypeAndFilters",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 213,
           "testName": "AppKeysController_CreateAppKey_ValidCategory_Succeeds",
           "details": "Verifies that AppKeys can be created with valid category scopes."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 297,
           "testName": "ClientsController_CreateClient_ValidCategory_Succeeds",
           "details": "Verifies that OAuth client credentials can be created with category-scoped access rules."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 380,
           "testName": "ClientSession_CategoryScope_AuthorizesMatchingServerTools_AndDeniesOthers",
           "details": "Verifies that category-scoped AppKey authorizes access exclusively to servers belonging to the permitted category."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 404,
           "testName": "ClientSession_GroupAliasScope_AuthorizesIdenticallyToCategory",
           "details": "Verifies that group-alias scopes evaluate identically to category scopes during tool authorization."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 426,
           "testName": "ClientSession_CategoryScope_IsCaseInsensitive",
           "details": "Verifies that category scope matching is case-insensitive across server categories."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 476,
           "testName": "ClientSession_ResourcesAndTemplates_FilteredByCategoryScope",
           "details": "Verifies that resources and templates are filtered according to category-scoped AppKey permissions."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 504,
           "testName": "ClientSession_DynamicServerMembership_UpdatesAccessDynamically",
           "details": "Verifies that dynamic updates to server categories immediately update tool access without re-authenticating."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 540,
           "testName": "ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes",
           "details": "Verifies that AppKeys can combine category scopes and granular tool-level scopes additively."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 567,
           "testName": "ClientSession_Complete_FiltersServerNamesByCategoryScope",
           "details": "Verifies that autocomplete and completion requests filter suggestions to servers within category scopes."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 70,
           "testName": "AppKey Direct Context: connects with API key header identity",
           "details": null
@@ -255,14 +255,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 332,
           "testName": "Pairwise_SsoIdentityAndGroupMappings_EvaluateCorrectly",
           "details": "Verifies pairwise combination of SSO identities, SIDs, and group mappings across all targets."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 36,
           "testName": "Operator Context: allows overview and testbench navigation with operator identity",
           "details": null
@@ -278,21 +278,21 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
           "lineNumber": 17,
           "testName": "ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs",
           "lineNumber": 55,
           "testName": "ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/ldap-identity-and-auth-flow.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/ldap-identity-and-auth-flow.spec.ts",
           "lineNumber": 5,
           "testName": "should configure LDAP identity provider, test connection, and save settings",
           "details": null
@@ -308,14 +308,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/McpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/McpServerTests.cs",
           "lineNumber": 9,
           "testName": "McpServer_Should_Have_AllowPassThroughAuth",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/my-mcp-servers.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/my-mcp-servers.spec.ts",
           "lineNumber": 7,
           "testName": "should render user provided servers and allow editing credentials with SQLite schema",
           "details": null
@@ -331,7 +331,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/TransportsAuthShapeTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/TransportsAuthShapeTests.cs",
           "lineNumber": 208,
           "testName": "Transports_Use_PassThroughToken_If_Allowed",
           "details": null
@@ -347,7 +347,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/IdentityHeaderTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/IdentityHeaderTests.cs",
           "lineNumber": 16,
           "testName": "HttpTransport_InjectsXForwardedUserHeader",
           "details": null
@@ -363,8 +363,8 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 180,
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 187,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
         }
@@ -379,14 +379,14 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/pages/ConsentView.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/pages/ConsentView.test.tsx",
           "lineNumber": 16,
           "testName": "renders client name from query string and sets form action",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/oauth-consent-flow.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/oauth-consent-flow.spec.ts",
           "lineNumber": 5,
           "testName": "should render interactive OAuth consent screen and display requesting client name",
           "details": null
@@ -402,7 +402,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AppKeysControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AppKeysControllerTests.cs",
           "lineNumber": 347,
           "testName": "CreateAppKey_AllowsUnlimited_WhenLimitsAreZero",
           "details": null
@@ -418,7 +418,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 87,
           "testName": "AppKey_WithAdminScope_GrantsAdminAccess",
           "details": null
@@ -434,7 +434,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 263,
           "testName": "IsAdmin_AppKeyScopes_InHttpContextItems_ReturnsTrue",
           "details": null
@@ -450,7 +450,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 148,
           "testName": "AppKey_WithWildcardScope_GrantsAdminAccess",
           "details": null
@@ -466,63 +466,63 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AppKeysControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AppKeysControllerTests.cs",
           "lineNumber": 199,
           "testName": "CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 290,
           "testName": "creates category-scoped key, captures one-time plaintext key, and refreshes",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 19,
           "testName": "renders nothing when isCreateModalOpen is false",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 61,
           "testName": "locks key type to personal key for non-admin and shows quota feedback",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 115,
           "testName": "handles scope serialization for server scope and target username for admin",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 154,
           "testName": "handles scope serialization for category scope and expiration days",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 192,
           "testName": "disables submit button when quota limit is reached",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 217,
           "testName": "displays one-time secret result and copies plaintext key to clipboard",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 33,
           "testName": "Non-Admin Context: mints personal key, views snippet, and revokes key",
           "details": null
@@ -538,42 +538,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AppKeysControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AppKeysControllerTests.cs",
           "lineNumber": 133,
           "testName": "GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 232,
           "testName": "loads app keys and updates store",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/App.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/App.test.tsx",
           "lineNumber": 79,
           "testName": "renders role-adaptive UI for non-admin user",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeysCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 34,
           "testName": "renders role-adapted My App Keys view for non-admin user",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeysCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 79,
           "testName": "renders keys list, copies config snippet, and revokes key",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 5,
           "testName": "Non-Admin Context: displays My App Keys navigation and personal quota indicator",
           "details": null
@@ -589,42 +589,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AppKeysControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AppKeysControllerTests.cs",
           "lineNumber": 231,
           "testName": "CreateAppKey_CustomQuotaOverride_AllowsHigherLimit",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 439,
           "testName": "sets user quota override and refreshes quota list",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/GeneralTab.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/GeneralTab.test.tsx",
           "lineNumber": 6,
           "testName": "renders GeneralTab with security default quota inputs and triggers save",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/GeneralTab.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/GeneralTab.test.tsx",
           "lineNumber": 71,
           "testName": "updates form state when settings prop changes",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeysCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 222,
           "testName": "manages custom user quotas in admin quotas tab",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 135,
           "testName": "Admin Context: configures custom user quota override",
           "details": null
@@ -640,7 +640,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 184,
           "testName": "AdminPolicy_StandaloneMode_LoopbackIp_PassesAdminPolicy",
           "details": null
@@ -656,7 +656,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 43,
           "testName": "IsAdmin_StandaloneMode_CustomCidr_ReturnsTrue",
           "details": null
@@ -672,7 +672,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 22,
           "testName": "IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue",
           "details": null
@@ -688,70 +688,70 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AppKeysControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AppKeysControllerTests.cs",
           "lineNumber": 159,
           "testName": "SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AppKeyAuthenticationTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AppKeyAuthenticationTests.cs",
           "lineNumber": 307,
           "testName": "PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AppKeyAuthenticationTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AppKeyAuthenticationTests.cs",
           "lineNumber": 360,
           "testName": "SystemAppKey_WithAdminScope_GrantsAdministratorRole",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 216,
           "testName": "switches keyTypeTab between personal and system",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 250,
           "testName": "fetches system-filtered app keys via query parameters",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/App.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/App.test.tsx",
           "lineNumber": 15,
           "testName": "renders header, navigation tabs, and default overview dashboard for admin user",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/App.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/App.test.tsx",
           "lineNumber": 35,
           "testName": "switches between tabs on navigation click",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 31,
           "testName": "allows admin to select key type and create system app key",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/AppKeysCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 166,
           "testName": "handles admin tab switching and username filtering",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 87,
           "testName": "Admin Context: manages segmented App-Level Keys and User Personal Keys",
           "details": null
@@ -767,7 +767,7 @@
       "proofs": [
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/rbac-enforcement-flow.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/rbac-enforcement-flow.spec.ts",
           "lineNumber": 1,
           "testName": "should create, verify, and delete RBAC policy and SID mapping",
           "details": null
@@ -783,9 +783,81 @@
       "proofs": [
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 1,
           "testName": "Admin Context: renders full administrator view and privileged controls",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "CORE-101",
+      "category": "CORE",
+      "type": "Positive",
+      "description": "Auto-added requirement tracking",
+      "proofCount": 9,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/SessionManagerTests.cs",
+          "lineNumber": 14,
+          "testName": "PerformanceMetrics_And_TotalRequests_IncrementCorrectly",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/SessionManagerTests.cs",
+          "lineNumber": 38,
+          "testName": "UpdateBackendStatus_TracksBackendHealth",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 48,
+          "testName": "ListToolsAsync_ReturnsMetaTools_InMetaMode",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 69,
+          "testName": "InvalidateCache_ClearsPopulatedState",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 78,
+          "testName": "CallToolAsync_SearchTools_ReturnsSemanticResults",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 107,
+          "testName": "CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 134,
+          "testName": "CallToolAsync_ReturnsCancellationError_WhenCancelled",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 163,
+          "testName": "CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 187,
+          "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
         }
       ]
@@ -799,42 +871,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 43,
           "testName": "Sqlite_UpgradeMigration_FromLegacySchema_PreservesDataAndPassesValidation",
           "details": "Verifies that SQLite upgrade migration from legacy schema preserves data, encrypts configs, and passes schema validation."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 90,
           "testName": "UserQuotaRepository_SetAndGet_ReturnsPersistedQuota",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 103,
           "testName": "UserQuotaRepository_GetAll_ReturnsAllUserQuotas",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 122,
           "testName": "UserQuotaRepository_Update_UpdatesExistingQuota",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 137,
           "testName": "UserQuotaRepository_Delete_RemovesQuota",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 204,
           "testName": "DependencyInjection_RegistersIUserQuotaRepository",
           "details": null
@@ -850,28 +922,28 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 325,
           "testName": "Mssql_Scripts_DeclareAllProceduresAndExpectedParameters",
           "details": "Verifies that MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 370,
           "testName": "MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters",
           "details": "Verifies that MySQL stored procedure scripts declare all required procedures with p_ parameter conventions."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 420,
           "testName": "Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters",
           "details": "Verifies that Dapper repository mappings for MySQL correctly bind stored procedure p_ parameters."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/MySqlLiveIntegrationTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/MySqlLiveIntegrationTests.cs",
           "lineNumber": 36,
           "testName": "MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds",
           "details": null
@@ -887,7 +959,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/SetupSkillTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/SetupSkillTests.cs",
           "lineNumber": 22,
           "testName": "Skill_Frontmatter_IsValidAndWithinCharacterLimit",
           "details": null
@@ -903,7 +975,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/SetupSkillTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/SetupSkillTests.cs",
           "lineNumber": 156,
           "testName": "Skill_MirroredInAgentsDirectory",
           "details": null
@@ -919,7 +991,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/SetupSkillTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/SetupSkillTests.cs",
           "lineNumber": 102,
           "testName": "Templates_AreValidAndContainRequiredDirectives",
           "details": null
@@ -935,7 +1007,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/SetupSkillTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/SetupSkillTests.cs",
           "lineNumber": 48,
           "testName": "Skill_ContainsAllRequiredPhasesAndComparisons",
           "details": null
@@ -951,7 +1023,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 232,
           "testName": "AdminPolicy_ExternalIdpConfigured_LoopbackIp_RequiresCredentials",
           "details": null
@@ -967,7 +1039,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 208,
           "testName": "AdminPolicy_StandaloneMode_ExternalUntrustedIp_FailsAdminPolicy",
           "details": null
@@ -983,7 +1055,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 65,
           "testName": "IsAdmin_StandaloneMode_UntrustedIp_ReturnsFalse",
           "details": null
@@ -999,35 +1071,35 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 481,
           "testName": "Pairwise_NullOrEmptyTarget_FailsClosed_ReturnsFalse",
           "details": "Ensures null or whitespace capability targets fail closed immediately."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 503,
           "testName": "Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse",
           "details": "Ensures corrupted AppKey scopes JSON fails closed safely and rejects execution."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 236,
           "testName": "AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest",
           "details": "Ensures non-admin callers cannot create AppKeys with unconfigured categories."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 255,
           "testName": "AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest",
           "details": "Ensures AppKey creation with empty or whitespace category fails closed with BadRequest."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 320,
           "testName": "ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest",
           "details": "Ensures client creation with empty category scope fails closed with BadRequest."
@@ -1043,49 +1115,49 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/SseTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/SseTransportTests.cs",
           "lineNumber": 39,
           "testName": "ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails",
           "details": "Ensures SSE transport fails closed with SecurityException when secret retriever fails."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/SseTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/SseTransportTests.cs",
           "lineNumber": 60,
           "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
           "details": "Ensures SSE transport fails closed when no secret retriever is registered."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 404,
           "testName": "StdioTransport_ShouldFailClosed_WhenSecretResolutionFails",
           "details": "Ensures STDIO transport fails closed without spawning subprocess if secret resolution fails."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/HttpTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/HttpTransportTests.cs",
           "lineNumber": 39,
           "testName": "ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails",
           "details": "Ensures HTTP transport fails closed with SecurityException when secret retriever fails."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/HttpTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/HttpTransportTests.cs",
           "lineNumber": 62,
           "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
           "details": "Ensures HTTP transport fails closed when no secret retriever is registered."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 70,
           "testName": "EnsureVaultClientAsync_ReturnsNull_WhenVaultProviderDisabledInRepo",
           "details": "Ensures Vault client returns null when Vault provider is disabled in repository."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 122,
           "testName": "GetSecretAsync_ThrowsSecurityException_OnVaultException",
           "details": "Ensures Vault secret retrieval failures throw SecurityException and fail closed."
@@ -1101,42 +1173,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 114,
           "testName": "StdioTransport_ShouldThrowSecurityExceptionForUnsafeExecutable",
           "details": "Ensures STDIO transport rejects commands with shell metacharacters or dangerous commands."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 136,
           "testName": "StdioTransport_ShouldThrowSecurityExceptionForShellExecutable",
           "details": "Ensures STDIO transport rejects shell wrappers and script interpreters lacking explicit safe paths."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 158,
           "testName": "StdioTransport_ShouldThrowOnInvalidExecutable",
           "details": "Ensures STDIO transport fails cleanly with InvalidOperationException when target binary is not found."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 220,
           "testName": "StdioTransport_ShouldTimeoutOnSlowRequests",
           "details": "Ensures STDIO transport times out requests exceeding configured execution duration limits."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 299,
           "testName": "StdioTransport_ShouldHandleUnexpectedExit",
           "details": "Ensures STDIO transport clears pending requests and fails closed upon unexpected child process termination."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 55,
           "testName": "Guest / Denied Context: restricted user session renders safely",
           "details": null
@@ -1152,28 +1224,28 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 521,
           "testName": "Pairwise_CompleteAsync_MalformedOrMissingBackends_ThrowsOrFailsClosed",
           "details": "Ensures malformed completion payloads or unmapped backends throw or fail closed."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 544,
           "testName": "Pairwise_DatabaseDisconnection_FailsClosedSafely",
           "details": "Ensures database disconnection or failure fails closed safely without leaking access."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 177,
           "testName": "SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing",
           "details": "Ensures database schema validation fails closed when required columns or tables are missing."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 203,
           "testName": "SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing",
           "details": "Ensures database schema validation fails closed when KeyType column or UserQuotas table is missing."
@@ -1189,7 +1261,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/ProvidersControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ProvidersControllerTests.cs",
           "lineNumber": 324,
           "testName": "SaveAuthProvidersBatch_ReturnsBadRequest_WhenAllProvidersDisabled",
           "details": null
@@ -1205,7 +1277,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PermissionsControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PermissionsControllerTests.cs",
           "lineNumber": 236,
           "testName": "SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy",
           "details": null
@@ -1221,7 +1293,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 790,
           "testName": "ManageCustomFiles_ValidationGuardrails",
           "details": null
@@ -1237,7 +1309,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminEndpointsTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminEndpointsTests.cs",
           "lineNumber": 196,
           "testName": "AdminEndpoint_UnauthorizedCaller_Returns403",
           "details": null
@@ -1253,7 +1325,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 524,
           "testName": "ManagePolicies_WildcardDenyGuardrail",
           "details": null
@@ -1269,7 +1341,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 661,
           "testName": "ManageProviders_LdapPlaintextGuardrail",
           "details": null
@@ -1280,12 +1352,12 @@
       "id": "GUARD-ADMIN-SERVERS-VALIDATION",
       "category": "GUARD",
       "type": "Negative",
-      "description": "manage_servers rejects invalid transport types, non-existent servers, and missing required parameters.",
+      "description": "Verifies that the manage_servers tool accurately enforces validation by rejecting malformed transport types, missing required parameters, and requests for non-existent servers.",
       "proofCount": 1,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 335,
           "testName": "ManageServers_ValidationGuardrails",
           "details": null
@@ -1301,7 +1373,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 602,
           "testName": "CallToolAsync_UnknownToolOrAction_ReturnsErrorResponse",
           "details": null
@@ -1317,7 +1389,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 643,
           "testName": "CallToolAsync_TestToolCall_MissingServer_ReturnsError",
           "details": null
@@ -1333,14 +1405,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 580,
           "testName": "Pairwise_MetaMode_ExecuteTool_EnforcesTargetAuthorization",
           "details": "Verifies that router meta-mode execute_tool strictly enforces target tool authorization policies."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 444,
           "testName": "ClientSession_ExecuteTool_EnforcesCategoryScopeOnInnerTarget",
           "details": "Verifies that router meta-mode execute_tool validates and enforces category scopes on target tool calls."
@@ -1356,7 +1428,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 398,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
@@ -1372,7 +1444,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminEndpointsTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminEndpointsTests.cs",
           "lineNumber": 289,
           "testName": "AdminEndpoint_SseSession_CallTool_ManageSystemDiagnostics",
           "details": null
@@ -1388,7 +1460,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminEndpointsTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminEndpointsTests.cs",
           "lineNumber": 215,
           "testName": "AdminEndpoint_HeadRequest_ReturnsEventStreamHeaders",
           "details": null
@@ -1404,7 +1476,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminEndpointsTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminEndpointsTests.cs",
           "lineNumber": 227,
           "testName": "AdminEndpoint_SseSession_ListTools",
           "details": null
@@ -1420,7 +1492,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminEndpointsTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminEndpointsTests.cs",
           "lineNumber": 152,
           "testName": "TargetProxy_RouterAdmin_RoutesToAdminServer",
           "details": null
@@ -1436,7 +1508,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminEndpointsTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminEndpointsTests.cs",
           "lineNumber": 73,
           "testName": "AdminEndpoint_SseHandshake_NegotiatesProtocol",
           "details": null
@@ -1452,7 +1524,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 205,
           "testName": "HandleInitializeAsync_NegotiatesProtocolVersion",
           "details": null
@@ -1468,7 +1540,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 381,
           "testName": "ManageAppKeys_Parity_AllActions",
           "details": null
@@ -1484,7 +1556,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 434,
           "testName": "ManageClients_Parity_AllActions",
           "details": null
@@ -1500,7 +1572,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 727,
           "testName": "ManageCustomFiles_Parity_AllActions",
           "details": null
@@ -1516,7 +1588,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 541,
           "testName": "ManageGroupMappings_Parity_AllActions",
           "details": null
@@ -1532,7 +1604,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 884,
           "testName": "AdminTools_ProcessRequest_JsonRpcProtocol",
           "details": null
@@ -1548,7 +1620,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 475,
           "testName": "ManagePolicies_Parity_AllActions",
           "details": null
@@ -1564,7 +1636,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 588,
           "testName": "ManageProviders_Parity_AllActions",
           "details": null
@@ -1575,12 +1647,12 @@
       "id": "MCP-ADMIN-PARITY-SERVERS",
       "category": "MCP",
       "type": "Positive",
-      "description": "manage_servers supports full parity for list, get, create, update, toggle, delete, reconnect, and reconnect_all actions.",
+      "description": "Validates that the manage_servers tool provides comprehensive administrative capabilities including listing, retrieving, creating, updating, toggling, deleting, and reconnecting servers.",
       "proofCount": 1,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 245,
           "testName": "ManageServers_Parity_AllActions",
           "details": null
@@ -1596,7 +1668,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 678,
           "testName": "ManageSettings_Parity_AllActions",
           "details": null
@@ -1612,7 +1684,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 827,
           "testName": "ManageSystem_Parity_AllActions",
           "details": null
@@ -1628,7 +1700,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 857,
           "testName": "TestToolCall_Execution_Parity",
           "details": null
@@ -1639,12 +1711,12 @@
       "id": "MCP-ADMIN-PARITY-TOOLS-COVERAGE",
       "category": "MCP",
       "type": "Positive",
-      "description": "Every UI management flow has a corresponding verified action in the consolidated Admin MCP tools.",
+      "description": "Ensures every UI management workflow is backed by a verified, equivalent action within the consolidated Admin MCP tools.",
       "proofCount": 1,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminToolsParityTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 202,
           "testName": "AdminTools_ExecuteSuccessfully",
           "details": null
@@ -1660,7 +1732,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 276,
           "testName": "CallToolAsync_RecordsAuditLog",
           "details": null
@@ -1676,7 +1748,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 293,
           "testName": "CallToolAsync_ManageAppKeys_Lifecycle",
           "details": null
@@ -1692,7 +1764,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 340,
           "testName": "CallToolAsync_ManageClients_Lifecycle",
           "details": null
@@ -1708,7 +1780,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 514,
           "testName": "CallToolAsync_ManageCustomFiles_Lifecycle",
           "details": null
@@ -1724,7 +1796,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 412,
           "testName": "CallToolAsync_ManageGroupMappings_Lifecycle",
           "details": null
@@ -1740,7 +1812,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 378,
           "testName": "CallToolAsync_ManagePolicies_Lifecycle",
           "details": null
@@ -1756,7 +1828,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 445,
           "testName": "CallToolAsync_ManageProviders_Lifecycle",
           "details": null
@@ -1772,7 +1844,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 224,
           "testName": "CallToolAsync_ManageServers_ListAndCreate",
           "details": null
@@ -1788,7 +1860,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 488,
           "testName": "CallToolAsync_ManageSettings_Lifecycle",
           "details": null
@@ -1804,7 +1876,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 568,
           "testName": "CallToolAsync_ManageSystem_Lifecycle",
           "details": null
@@ -1820,7 +1892,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 157,
           "testName": "ListToolsAsync_ReturnsTenConsolidatedTools",
           "details": null
@@ -1836,7 +1908,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 23,
           "testName": "Exchange_ThrowsInvalidOperationException_WhenRequestNull",
           "details": null
@@ -1852,7 +1924,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 41,
           "testName": "RegisterClient_CreatesApplicationAndReturnsOk",
           "details": null
@@ -1868,7 +1940,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 79,
           "testName": "Authorize_ThrowsInvalidOperationException_WhenRequestNull",
           "details": null
@@ -1884,42 +1956,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 23,
           "testName": "EnsureVaultClientAsync_CreatesClient_WithAppRoleCredentials",
           "details": "Verifies that VaultSecretRetriever authenticates with HashiCorp Vault using AppRole credentials."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 44,
           "testName": "EnsureVaultClientAsync_LoadsFromSecretRepo_WhenConfigJsonHasAppRole",
           "details": "Verifies that VaultSecretRetriever loads AppRole credentials dynamically from repository."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 96,
           "testName": "ReloadConfigAsync_ClearsClient_ForcesRecreation",
           "details": "Verifies that reloading config flushes cached Vault client and forces recreation."
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/SecretProvidersTab.test.tsx",
           "lineNumber": 19,
           "testName": "renders provider inputs and submits updated configuration",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/SecretProvidersTab.test.tsx",
           "lineNumber": 90,
           "testName": "handles Test Vault connection button with success and failure responses",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/full-ui-flow-sse-vault.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/full-ui-flow-sse-vault.spec.ts",
           "lineNumber": 8,
           "testName": "should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search",
           "details": null
@@ -1935,21 +2007,21 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 354,
           "testName": "StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine",
           "details": "Verifies that STDIO transport securely injects secret credentials via environment variables rather than command-line arguments."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 439,
           "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
           "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/vault-approle-config-flow.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/vault-approle-config-flow.spec.ts",
           "lineNumber": 5,
           "testName": "should configure Vault AppRole credentials and test connection in settings",
           "details": null
@@ -1965,14 +2037,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 366,
           "testName": "TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/IdentityProviderTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/IdentityProviderTests.cs",
           "lineNumber": 425,
           "testName": "TrustedProxyHelper_ConfiguredProxyTrusted_CIDR",
           "details": null
@@ -1988,14 +2060,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
           "lineNumber": 16,
           "testName": "GetSecretAsync_ReturnsPlainString_WhenRegistryValueIsString",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs",
           "lineNumber": 31,
           "testName": "GetSecretAsync_DecryptsDpapiBytes_WhenRegistryValueIsByteArray",
           "details": null
@@ -2011,7 +2083,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/ProviderSettingsEncryptionTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/ProviderSettingsEncryptionTests.cs",
           "lineNumber": 395,
           "testName": "SaveSecretProvider_WhenDecryptionFailed_DoesNotOverwriteCorruptPayload",
           "details": null
@@ -2027,7 +2099,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/AdminMcpServerTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 619,
           "testName": "CallToolAsync_AuditLog_RedactsSensitivePayloadData",
           "details": null
@@ -2043,14 +2115,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/SseTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/SseTransportTests.cs",
           "lineNumber": 18,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that SSE transport resolves plaintext API key when secret provider is None."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/full-ui-flow-http-direct.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/full-ui-flow-http-direct.spec.ts",
           "lineNumber": 8,
           "testName": "should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench",
           "details": null
@@ -2066,14 +2138,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/HttpTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/HttpTransportTests.cs",
           "lineNumber": 19,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that HTTP transport resolves plaintext API key when secret provider is None."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/full-ui-flow-stdio-env.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/full-ui-flow-stdio-env.spec.ts",
           "lineNumber": 8,
           "testName": "should register STDIO server, verify card, and execute echo tool via Test Bench",
           "details": null
@@ -2089,35 +2161,35 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 59,
           "testName": "StdioTransport_ShouldInitializeAndCallToolSuccessfully",
           "details": "Verifies that STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 180,
           "testName": "StdioTransport_ShouldRouteStderrToLogs",
           "details": "Verifies that STDIO transport streams subprocess stderr asynchronously to logs."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 252,
           "testName": "StdioTransport_ShouldSupportCancellationAndProcessTreeTermination",
           "details": "Verifies that STDIO transport terminates subprocess tree cleanly upon disposal or cancellation."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 337,
           "testName": "StdioTransport_ParseCommandLine_Handles_Quotes_And_Spaces",
           "details": "Verifies that STDIO command-line tokenizer preserves quoted arguments and space escaping."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/StdioTransportTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/StdioTransportTests.cs",
           "lineNumber": 482,
           "testName": "StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately",
           "details": "Verifies that STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly."
@@ -2133,28 +2205,28 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 115,
           "testName": "renders empty state when no servers match search",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/prompts-resources-customfiles.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/prompts-resources-customfiles.spec.ts",
           "lineNumber": 42,
           "testName": "should navigate to Custom Files and Prompts in Settings view",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/dashboard.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 23,
           "testName": "should display aggregate statistics cards",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/dashboard.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 37,
           "testName": "should filter servers using search input",
           "details": null
@@ -2170,42 +2242,42 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 61,
           "testName": "renders loading state when inspectLoading is true",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 79,
           "testName": "renders tools tab with schema and handles tab switching",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 116,
           "testName": "renders resources tab items and handles search filtering",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 144,
           "testName": "renders prompts tab with arguments and empty state when filtered out",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 166,
           "testName": "renders empty states for tabs when data is empty",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 194,
           "testName": "closes modal when close button is clicked",
           "details": null
@@ -2221,14 +2293,14 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 63,
           "testName": "renders grouped server view by category and allows collapsing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 90,
           "testName": "renders grouped server view by status and type",
           "details": null
@@ -2244,49 +2316,49 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 77,
           "testName": "filters tools by selected server and handles tool change",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 106,
           "testName": "filters custom tools with no namespace prefix when selectedServer is custom",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 131,
           "testName": "renders dynamic fields for boolean, number, string, array, and object types",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 178,
           "testName": "renders empty state when selected tool takes no arguments",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 203,
           "testName": "switches to raw JSON tab and handles raw JSON editing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 242,
           "testName": "handles form submission",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/prompts-resources-customfiles.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/prompts-resources-customfiles.spec.ts",
           "lineNumber": 5,
           "testName": "should interact with Prompt Tester and Resource Tester cards in Test Bench",
           "details": null
@@ -2302,7 +2374,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/McpRouter.Tests/PipelineIntegrationTests.cs",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/McpRouter.Tests/PipelineIntegrationTests.cs",
           "lineNumber": 242,
           "testName": "Pipeline_Settings_Branding_ReadWrite",
           "details": null
@@ -2318,7 +2390,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 1,
           "testName": "renders stats card, server list, and client setup guide",
           "details": null
@@ -2334,7 +2406,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 1,
           "testName": "renders initial server and tool selection options",
           "details": null
@@ -2350,7 +2422,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 1,
           "testName": "renders nothing when isInspectOpen is false",
           "details": null
@@ -2366,7 +2438,7 @@
       "proofs": [
         {
           "suite": "Playwright E2E",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/e2e/dashboard.spec.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 1,
           "testName": "should render the dashboard layout and header components",
           "details": null
@@ -2382,98 +2454,98 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/usePolicyStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/usePolicyStore.test.ts",
           "lineNumber": 76,
           "testName": "deletes a policy when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/usePolicyStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/usePolicyStore.test.ts",
           "lineNumber": 105,
           "testName": "does not delete policy when confirm is cancelled",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/usePolicyStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/usePolicyStore.test.ts",
           "lineNumber": 166,
           "testName": "deletes a group mapping when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/usePolicyStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/usePolicyStore.test.ts",
           "lineNumber": 195,
           "testName": "does not delete group mapping when confirm is cancelled",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/usePolicyStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/usePolicyStore.test.ts",
           "lineNumber": 222,
           "testName": "deletes a custom file when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/usePolicyStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/usePolicyStore.test.ts",
           "lineNumber": 251,
           "testName": "does not delete custom file when confirm is cancelled",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 88,
           "testName": "prompts confirmation and deletes client when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 117,
           "testName": "cancels deletion when user denies confirmation",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 350,
           "testName": "confirms and revokes AppKey and refreshes list",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 379,
           "testName": "cancels revocation when confirm is rejected",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 471,
           "testName": "prompts confirmation modal and resets user quota when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 501,
           "testName": "cancels quota reset when user denies confirmation",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useServerStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useServerStore.test.ts",
           "lineNumber": 203,
           "testName": "prompts window.confirm and deletes server when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/stores/useServerStore.test.ts",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/stores/useServerStore.test.ts",
           "lineNumber": 232,
           "testName": "does not send delete request when confirm is cancelled",
           "details": null
@@ -2489,56 +2561,56 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/pages/MyMcpServers.test.tsx",
           "lineNumber": 23,
           "testName": "shows error toast when saving invalid JSON credentials",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/pages/MyMcpServers.test.tsx",
           "lineNumber": 64,
           "testName": "saves valid credentials successfully and closes modal",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/CustomFileModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/CustomFileModal.test.tsx",
           "lineNumber": 88,
           "testName": "shows error toast when switching from invalid JSON to Visual Prompt Builder",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/CustomFileModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/CustomFileModal.test.tsx",
           "lineNumber": 109,
           "testName": "shows error toast when saving without a file name",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/CustomFileModal.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/CustomFileModal.test.tsx",
           "lineNumber": 129,
           "testName": "shows error toast when saving prompt with invalid JSON content",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 99,
           "testName": "saves updated Active Directory configuration JSON",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 138,
           "testName": "displays error toast when saving auth providers fails",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/home/steve/.gemini/antigravity-cli/brain/4ad4cbce-929e-4962-8ca9-042b9902f33a/.system_generated/worktrees/subagent-Frontend-Fixer-Frontend-Fixer-e2478524/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "filePath": "/home/steve/.gemini/antigravity-cli/brain/1da572ff-d460-4160-9d3d-a451cae51f49/.system_generated/worktrees/subagent-Arch---Reqs-Writer-doc-writer-f82a384f/frontend/src/test/components/SecretProvidersTab.test.tsx",
           "lineNumber": 63,
           "testName": "displays error toast when saving secret providers fails",
           "details": null
