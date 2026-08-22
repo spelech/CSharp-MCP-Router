@@ -22,6 +22,18 @@
 
 ## 2. Functional Requirements ("What the Application DOES")
 
+### `[AUTH-001]` Verify DatabaseUserSecretStore encrypts and decrypts secret correctly.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs#L13`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs#L13) (`DatabaseUserSecretStore_SavesAndRetrieves_Secret`)
+
+### `[AUTH-002]` Verify UserCredentialsController returns configured server IDs.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18) (`GetUserCredentials_ReturnsServerIds`)
+
 ### `[AUTH-02]` AppKey scopes restrict access precisely across all MCP capabilities and backend targets
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
@@ -67,6 +79,18 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/TransportsAuthShapeTests.cs#L208`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/TransportsAuthShapeTests.cs#L208) (`Transports_Use_PassThroughToken_If_Allowed`)
 
+### `[AUTH-101]` HTTP transport injects X-Forwarded-User header based on connected user identity.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16) (`HttpTransport_InjectsXForwardedUserHeader`)
+
+### `[AUTH-105]` Dynamic Auth Target Pass-Through
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180) (`ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt`)
+
 ### `[AUTH-APPKEY-ADMIN-SCOPE-ALLOW]` AppKeys with admin scope grant Administrator role and pass AdminPolicy.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
@@ -102,30 +126,6 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22) (`IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue`)
-
-### `[REQ-AUTH-001]` Verify DatabaseUserSecretStore encrypts and decrypts secret correctly.
-* **Category:** `AUTH` (Authentication, RBAC & Identity)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs#L13`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs#L13) (`DatabaseUserSecretStore_SavesAndRetrieves_Secret`)
-
-### `[REQ-AUTH-002]` Verify UserCredentialsController returns configured server IDs.
-* **Category:** `AUTH` (Authentication, RBAC & Identity)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18) (`GetUserCredentials_ReturnsServerIds`)
-
-### `[REQ-AUTH-101]` HTTP transport injects X-Forwarded-User header based on connected user identity.
-* **Category:** `AUTH` (Authentication, RBAC & Identity)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16) (`HttpTransport_InjectsXForwardedUserHeader`)
-
-### `[REQ-AUTH-105]` Dynamic Auth Target Pass-Through
-* **Category:** `AUTH` (Authentication, RBAC & Identity)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180) (`ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt`)
 
 ### `[DB-01]` SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
@@ -353,7 +353,7 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L157`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L157) (`ListToolsAsync_ReturnsTenConsolidatedTools`)
 
-### `[REQ-AUTH-107]` RegisterClient successfully handles DCR requests when open DCR is enabled.
+### `[AUTH-107]` RegisterClient successfully handles DCR requests when open DCR is enabled.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
@@ -606,7 +606,7 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L643`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L643) (`CallToolAsync_TestToolCall_MissingServer_ReturnsError`)
 
-### `[REQ-AUTH-106]` Exchange throws InvalidOperationException when request is null.
+### `[AUTH-106]` Exchange throws InvalidOperationException when request is null.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
@@ -624,22 +624,22 @@
 
 | Requirement ID | Type | Category | Description | Primary Proof | Suite |
 | :--- | :---: | :--- | :--- | :--- | :--- |
+| `AUTH-001` | Positive | `AUTH` | Verify DatabaseUserSecretStore encrypts and decrypts secret correctly. | [`UserSecretStoreTests.cs:L13`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs#L13) | Backend xUnit |
+| `AUTH-002` | Positive | `AUTH` | Verify UserCredentialsController returns configured server IDs. | [`UserCredentialsControllerTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18) | Backend xUnit |
 | `AUTH-01` | **Guardrail** | `AUTH` | AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin) | [`AdminPolicyHybridAuthTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminPolicyHybridAuthTests.cs#L18) | Backend xUnit |
 | `AUTH-02` | Positive | `AUTH` | AppKey scopes restrict access precisely across all MCP capabilities and backend targets | [`PairwiseIntegrationMatrixTests.cs:L254`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L254) | Backend xUnit |
 | `AUTH-03` | Positive | `AUTH` | SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles | [`PairwiseIntegrationMatrixTests.cs:L331`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L331) | Backend xUnit |
 | `AUTH-04` | Positive | `AUTH` | ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP | [`ActiveDirectoryWindowsIdentityTests.cs:L17`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ActiveDirectoryWindowsIdentityTests.cs#L17) | Backend xUnit |
 | `AUTH-05` | Positive | `AUTH` | McpServer supports AllowPassThroughAuth flag | [`McpServerTests.cs:L9`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/McpServerTests.cs#L9) | Backend xUnit |
 | `AUTH-06` | Positive | `AUTH` | Transports use passThroughToken when AllowPassThroughAuth is true | [`TransportsAuthShapeTests.cs:L208`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/TransportsAuthShapeTests.cs#L208) | Backend xUnit |
+| `AUTH-101` | Positive | `AUTH` | HTTP transport injects X-Forwarded-User header based on connected user identity. | [`IdentityHeaderTests.cs:L16`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16) | Backend xUnit |
+| `AUTH-105` | Positive | `AUTH` | Dynamic Auth Target Pass-Through | [`ToolRoutingManagerTests.cs:L180`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180) | Backend xUnit |
 | `AUTH-APPKEY-ADMIN-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with admin scope grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L87`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L87) | Backend xUnit |
 | `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L263`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L263) | Backend xUnit |
 | `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L148`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L148) | Backend xUnit |
 | `AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW` | Positive | `AUTH` | AdminPolicy succeeds in standalone mode for unauthenticated loopback requests. | [`StandaloneAdminAuthTests.cs:L184`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L184) | Backend xUnit |
 | `AUTH-STANDALONE-CUSTOM-CIDR-ALLOW` | Positive | `AUTH` | Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges. | [`StandaloneAdminAuthTests.cs:L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L43) | Backend xUnit |
 | `AUTH-STANDALONE-LOOPBACK-ALLOW` | Positive | `AUTH` | Standalone mode without external IDP grants admin access to loopback IP addresses. | [`StandaloneAdminAuthTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22) | Backend xUnit |
-| `REQ-AUTH-001` | Positive | `AUTH` | Verify DatabaseUserSecretStore encrypts and decrypts secret correctly. | [`UserSecretStoreTests.cs:L13`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs#L13) | Backend xUnit |
-| `REQ-AUTH-002` | Positive | `AUTH` | Verify UserCredentialsController returns configured server IDs. | [`UserCredentialsControllerTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs#L18) | Backend xUnit |
-| `REQ-AUTH-101` | Positive | `AUTH` | HTTP transport injects X-Forwarded-User header based on connected user identity. | [`IdentityHeaderTests.cs:L16`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs#L16) | Backend xUnit |
-| `REQ-AUTH-105` | Positive | `AUTH` | Dynamic Auth Target Pass-Through | [`ToolRoutingManagerTests.cs:L180`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs#L180) | Backend xUnit |
 | `DB-01` | Positive | `DB` | SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data | [`DatabaseSchemaUpgradeAndContractTests.cs:L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L43) | Backend xUnit |
 | `DB-02` | Positive | `DB` | MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly | [`DatabaseSchemaUpgradeAndContractTests.cs:L198`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198) | Backend xUnit |
 | `DOC-SETUP-SKILL-FRONTMATTER` | Positive | `DOC` | mcp-router-setup skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters | [`SetupSkillTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L22) | Backend xUnit |
@@ -693,8 +693,8 @@
 | `MCP-ADMIN-TOOL-MANAGE-SETTINGS` | Positive | `MCP` | AdminMcpServer executes manage_settings get and update actions. | [`AdminMcpServerTests.cs:L488`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L488) | Backend xUnit |
 | `MCP-ADMIN-TOOL-MANAGE-SYSTEM` | Positive | `MCP` | AdminMcpServer executes manage_system diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminMcpServerTests.cs:L568`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L568) | Backend xUnit |
 | `MCP-ADMIN-TOOLS-LIST-COUNT` | Positive | `MCP` | AdminMcpServer tools/list returns all 10 consolidated tools with complete JSON schemas. | [`AdminMcpServerTests.cs:L157`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L157) | Backend xUnit |
-| `REQ-AUTH-106` | **Guardrail** | `SEC` | Exchange throws InvalidOperationException when request is null. | [`AuthorizationControllerTests.cs:L23`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L23) | Backend xUnit |
-| `REQ-AUTH-107` | Positive | `SEC` | RegisterClient successfully handles DCR requests when open DCR is enabled. | [`AuthorizationControllerTests.cs:L41`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L41) | Backend xUnit |
+| `AUTH-106` | **Guardrail** | `SEC` | Exchange throws InvalidOperationException when request is null. | [`AuthorizationControllerTests.cs:L23`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L23) | Backend xUnit |
+| `AUTH-107` | Positive | `SEC` | RegisterClient successfully handles DCR requests when open DCR is enabled. | [`AuthorizationControllerTests.cs:L41`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs#L41) | Backend xUnit |
 | `SEC-01` | Positive | `SEC` | VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials | [`VaultAppRoleAndRenewalTests.cs:L23`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/VaultAppRoleAndRenewalTests.cs#L23) | Backend xUnit |
 | `SEC-02` | Positive | `SEC` | STDIO transport securely injects secret credentials via environment variables rather than command-line arguments | [`StdioTransportTests.cs:L354`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L354) | Backend xUnit |
 | `SEC-03` | Positive | `SEC` | Ensure TrustedProxyHelper supports CIDR ranges in XFF validation | [`IdentityProviderTests.cs:L366`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityProviderTests.cs#L366) | Backend xUnit |

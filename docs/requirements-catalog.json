@@ -1,12 +1,44 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T05:42:48.1723982Z",
+    "generatedAt": "2026-08-22T05:45:07.1363746Z",
     "totalRequirements": 85,
     "positiveCount": 66,
     "guardrailCount": 19,
     "totalProofs": 164
   },
   "requirements": [
+    {
+      "id": "AUTH-001",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify DatabaseUserSecretStore encrypts and decrypts secret correctly.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs",
+          "lineNumber": 13,
+          "testName": "DatabaseUserSecretStore_SavesAndRetrieves_Secret",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-002",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Verify UserCredentialsController returns configured server IDs.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs",
+          "lineNumber": 18,
+          "testName": "GetUserCredentials_ReturnsServerIds",
+          "details": null
+        }
+      ]
+    },
     {
       "id": "AUTH-01",
       "category": "AUTH",
@@ -300,6 +332,38 @@
       ]
     },
     {
+      "id": "AUTH-101",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "HTTP transport injects X-Forwarded-User header based on connected user identity.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs",
+          "lineNumber": 16,
+          "testName": "HttpTransport_InjectsXForwardedUserHeader",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-105",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Dynamic Auth Target Pass-Through",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 180,
+          "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "AUTH-APPKEY-ADMIN-SCOPE-ALLOW",
       "category": "AUTH",
       "type": "Positive",
@@ -391,70 +455,6 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 22,
           "testName": "IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "REQ-AUTH-001",
-      "category": "AUTH",
-      "type": "Positive",
-      "description": "Verify DatabaseUserSecretStore encrypts and decrypts secret correctly.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserSecretStoreTests.cs",
-          "lineNumber": 13,
-          "testName": "DatabaseUserSecretStore_SavesAndRetrieves_Secret",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "REQ-AUTH-002",
-      "category": "AUTH",
-      "type": "Positive",
-      "description": "Verify UserCredentialsController returns configured server IDs.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/UserCredentialsControllerTests.cs",
-          "lineNumber": 18,
-          "testName": "GetUserCredentials_ReturnsServerIds",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "REQ-AUTH-101",
-      "category": "AUTH",
-      "type": "Positive",
-      "description": "HTTP transport injects X-Forwarded-User header based on connected user identity.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/IdentityHeaderTests.cs",
-          "lineNumber": 16,
-          "testName": "HttpTransport_InjectsXForwardedUserHeader",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "REQ-AUTH-105",
-      "category": "AUTH",
-      "type": "Positive",
-      "description": "Dynamic Auth Target Pass-Through",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 180,
-          "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
         }
       ]
@@ -1455,7 +1455,7 @@
       ]
     },
     {
-      "id": "REQ-AUTH-106",
+      "id": "AUTH-106",
       "category": "SEC",
       "type": "Negative",
       "description": "Exchange throws InvalidOperationException when request is null.",
@@ -1471,7 +1471,7 @@
       ]
     },
     {
-      "id": "REQ-AUTH-107",
+      "id": "AUTH-107",
       "category": "SEC",
       "type": "Positive",
       "description": "RegisterClient successfully handles DCR requests when open DCR is enabled.",

@@ -14,7 +14,7 @@ namespace McpRouter.Tests
     public class IdentityHeaderTests
     {
         [Fact]
-        [Requirement("REQ-AUTH-101", "AUTH", RequirementType.Positive, "HTTP transport injects X-Forwarded-User header based on connected user identity.")]
+        [Requirement("AUTH-101", "AUTH", RequirementType.Positive, "HTTP transport injects X-Forwarded-User header based on connected user identity.")]
         public async Task HttpTransport_InjectsXForwardedUserHeader()
         {
             var server = new McpServer { Id = "test-server", Type = "http", Url = "http://localhost/mcp" };
