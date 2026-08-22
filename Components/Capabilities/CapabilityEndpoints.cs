@@ -778,8 +778,9 @@ namespace McpRouter.Components.Capabilities
 
             string SanitizeFileName(string name)
             {
+                var safeName = Path.GetFileName(name);
                 var invalidChars = Path.GetInvalidFileNameChars();
-                return new string(name.Where(c => !invalidChars.Contains(c) && c != '/' && c != '\\').ToArray());
+                return new string(safeName.Where(c => !invalidChars.Contains(c) && c != '/' && c != '\\').ToArray());
             }
 
             string GetCustomFilesDirectory(string type)
@@ -830,8 +831,7 @@ namespace McpRouter.Components.Capabilities
                 if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
 
                 var dir = GetCustomFilesDirectory(type);
-                var filePath = Path.GetFullPath(Path.Combine(dir, cleanName));
-                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase)) return Results.BadRequest("Invalid file path");
+                var filePath = Path.Combine(dir, Path.GetFileName(cleanName));
                 if (!File.Exists(filePath)) return Results.NotFound("File not found");
 
                 try
@@ -874,8 +874,7 @@ namespace McpRouter.Components.Capabilities
                 }
 
                 var dir = GetCustomFilesDirectory(type);
-                var filePath = Path.GetFullPath(Path.Combine(dir, cleanName));
-                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase)) return Results.BadRequest("Invalid file path");
+                var filePath = Path.Combine(dir, Path.GetFileName(cleanName));
 
                 try
                 {
@@ -896,8 +895,7 @@ namespace McpRouter.Components.Capabilities
                 if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
 
                 var dir = GetCustomFilesDirectory(type);
-                var filePath = Path.GetFullPath(Path.Combine(dir, cleanName));
-                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase)) return Results.BadRequest("Invalid file path");
+                var filePath = Path.Combine(dir, Path.GetFileName(cleanName));
                 if (!File.Exists(filePath)) return Results.NotFound("File not found");
 
                 try
