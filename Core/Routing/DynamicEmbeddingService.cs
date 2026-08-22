@@ -34,7 +34,7 @@ namespace McpRouter.Core.Routing
             LoadSettings();
         }
 
-        public RouterSettings GetSettings()
+        public virtual RouterSettings GetSettings()
         {
             lock (_lock)
             {
@@ -42,7 +42,7 @@ namespace McpRouter.Core.Routing
             }
         }
 
-        public void SaveSettings(RouterSettings newSettings)
+        public virtual void SaveSettings(RouterSettings newSettings)
         {
             if (newSettings.EmbeddingProvider != null && newSettings.EmbeddingProvider.Equals("api", StringComparison.OrdinalIgnoreCase))
             {

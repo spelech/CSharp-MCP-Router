@@ -60,11 +60,24 @@ namespace McpRouter.Components.Clients
             throw new NotImplementedException("The specified grant type is not implemented.");
         }
 
-        [Authorize(Policy = "AdminPolicy")]
+        
         [HttpPost("~/api/register")]
         [Produces("application/json")]
         public async Task<IActionResult> RegisterClient([FromBody] JsonElement metadata)
         {
+            var embeddingService = HttpContext.RequestServices.GetRequiredService<McpRouter.Core.Routing.DynamicEmbeddingService>();
+            var settings = embeddingService.GetSettings();
+            
+            if (!settings.AllowOpenClientRegistration)
+            {
+                var authService = HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.Authorization.IAuthorizationService>();
+                var authResult = await authService.AuthorizeAsync(User, "AdminPolicy");
+                if (!authResult.Succeeded)
+                {
+                    return Forbid();
+                }
+            }
+
             var clientName = metadata.TryGetProperty("client_name", out var cn) ? cn.GetString() : "Unknown Client";
             var clientId = Guid.NewGuid().ToString("N");
             var clientSecret = Guid.NewGuid().ToString("N");

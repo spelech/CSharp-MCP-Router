@@ -6,6 +6,9 @@ export interface EmbeddingSettings {
   embeddingApiUrl: string;
   embeddingApiModel: string;
   embeddingApiKey: string;
+  allowOpenClientRegistration?: boolean;
+  globalMaxKeys?: number;
+  userMaxKeys?: number;
 }
 
 export interface AuthProviderConfig {

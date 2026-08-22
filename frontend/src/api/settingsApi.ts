@@ -17,6 +17,9 @@ export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | n
     embeddingApiUrl: settings.embeddingApiUrl || '',
     embeddingApiModel: settings.embeddingApiModel || 'all-MiniLM-L6-v2',
     embeddingApiKey: settings.embeddingApiKey || '',
+    allowOpenClientRegistration: settings.allowOpenClientRegistration ?? true,
+    globalMaxKeys: settings.globalMaxKeys || 100,
+    userMaxKeys: settings.userMaxKeys || 5,
   };
 }
 
@@ -29,6 +32,9 @@ export async function saveEmbeddingSettingsApi(settings: EmbeddingSettings): Pro
     embeddingApiUrl: settings.embeddingApiUrl,
     embeddingApiModel: settings.embeddingApiModel,
     embeddingApiKey: settings.embeddingApiKey,
+    allowOpenClientRegistration: settings.allowOpenClientRegistration,
+    globalMaxKeys: settings.globalMaxKeys,
+    userMaxKeys: settings.userMaxKeys,
   };
   const result = await apiRequest<{ success: boolean }>('/api/settings', {
     method: 'POST',

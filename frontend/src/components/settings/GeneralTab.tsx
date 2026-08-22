@@ -14,6 +14,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
   const [embApiUrl, setEmbApiUrl] = useState(settings?.embeddingApiUrl || 'http://litellm:4000/v1/embeddings');
   const [embApiModel, setEmbApiModel] = useState(settings?.embeddingApiModel || 'all-MiniLM-L6-v2');
   const [embApiKey, setEmbApiKey] = useState(settings?.embeddingApiKey || '');
+  const [allowOpenDCR, setAllowOpenDCR] = useState(settings?.allowOpenClientRegistration ?? true);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
 
   const handleSaveSearchSettings = async (e: React.FormEvent) => {
@@ -27,6 +28,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
       embeddingApiUrl: embApiUrl,
       embeddingApiModel: embApiModel,
       embeddingApiKey: embApiKey,
+      allowOpenClientRegistration: allowOpenDCR,
     });
     setSaveStatus(success ? 'saved' : 'error');
     setTimeout(() => setSaveStatus('idle'), 2500);
@@ -137,6 +139,25 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
               </div>
             </div>
           )}
+          
+          <div className="form-group">
+            <h3 style={{ fontSize: '14px', marginBottom: '10px', marginTop: '20px', color: 'var(--primary)' }}><i className="fa-solid fa-shield-halved"></i> Security Defaults</h3>
+          </div>
+          
+          <div className="form-group" style={{ backgroundColor: 'rgba(255,255,255,0.02)', padding: '15px', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.05)' }}>
+            <label style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer', margin: 0 }}>
+              <input
+                type="checkbox"
+                checked={allowOpenDCR}
+                onChange={(e) => setAllowOpenDCR(e.target.checked)}
+                style={{ width: '18px', height: '18px', margin: 0, cursor: 'pointer' }}
+              />
+              <strong style={{ fontSize: '14px', color: '#e2e8f0' }}>Allow Open Dynamic Client Registration (RFC 7591)</strong>
+            </label>
+            <p style={{ margin: '8px 0 0 28px', fontSize: '12px', color: 'var(--text-muted)' }}>
+              If enabled, third-party clients (like Gemini Spark) can programmatically register themselves via <code>/api/register</code> without requiring an Admin AppKey.
+            </p>
+          </div>
 
           <div className="settings-actions" style={{ marginTop: '25px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
             <button
