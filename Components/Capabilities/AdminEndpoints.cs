@@ -187,7 +187,7 @@ namespace McpRouter.Components.Capabilities
             await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
             await httpContext.Response.Body.FlushAsync();
 
-            var sseSession = new AdminSseSession(sessionId, httpContext.Response, callerUsername);
+            var sseSession = new AdminSseSession(sessionId, httpContext.Response, callerUsername ?? "anonymous");
             RegisterSession(sseSession);
 
             if (httpContext.Request.Method == "POST" && isInitializeOrDiscover)
