@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T06:41:02.3084257Z",
+    "generatedAt": "2026-08-22T07:23:57.3260622Z",
     "totalRequirements": 88,
     "positiveCount": 68,
     "guardrailCount": 20,
-    "totalProofs": 167
+    "totalProofs": 174
   },
   "requirements": [
     {
@@ -281,7 +281,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP",
-      "proofCount": 2,
+      "proofCount": 3,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -296,6 +296,13 @@
           "lineNumber": 55,
           "testName": "ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided",
           "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/ldap-identity-and-auth-flow.spec.ts",
+          "lineNumber": 5,
+          "testName": "should configure LDAP identity provider, test connection, and save settings",
+          "details": null
         }
       ]
     },
@@ -304,13 +311,20 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "McpServer supports AllowPassThroughAuth flag",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/McpServerTests.cs",
           "lineNumber": 9,
           "testName": "McpServer_Should_Have_AllowPassThroughAuth",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts",
+          "lineNumber": 7,
+          "testName": "should render user provided servers and allow editing credentials with SQLite schema",
           "details": null
         }
       ]
@@ -368,13 +382,20 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "ConsentView properly renders the client name from query string and builds correct form action.",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
-          "lineNumber": 17,
+          "lineNumber": 16,
           "testName": "renders client name from query string and sets form action",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/oauth-consent-flow.spec.ts",
+          "lineNumber": 5,
+          "testName": "should render interactive OAuth consent screen and display requesting client name",
           "details": null
         }
       ]
@@ -1539,7 +1560,7 @@
       "category": "SEC",
       "type": "Positive",
       "description": "VaultSecretRetriever authenticates with HashiCorp Vault using AppRole RoleID and SecretID credentials",
-      "proofCount": 5,
+      "proofCount": 6,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1575,6 +1596,13 @@
           "lineNumber": 60,
           "testName": "handles Test Vault connection button with success and failure responses",
           "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-sse-vault.spec.ts",
+          "lineNumber": 8,
+          "testName": "should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search",
+          "details": null
         }
       ]
     },
@@ -1583,7 +1611,7 @@
       "category": "SEC",
       "type": "Positive",
       "description": "STDIO transport securely injects secret credentials via environment variables rather than command-line arguments",
-      "proofCount": 2,
+      "proofCount": 3,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1598,6 +1626,13 @@
           "lineNumber": 439,
           "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
           "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/vault-approle-config-flow.spec.ts",
+          "lineNumber": 5,
+          "testName": "should configure Vault AppRole credentials and test connection in settings",
+          "details": null
         }
       ]
     },
@@ -1684,7 +1719,7 @@
       "category": "TRANS",
       "type": "Positive",
       "description": "SSE transport resolves static plaintext API keys when provider is None",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1692,6 +1727,13 @@
           "lineNumber": 18,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that SSE transport resolves plaintext API key when secret provider is None."
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-http-direct.spec.ts",
+          "lineNumber": 8,
+          "testName": "should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench",
+          "details": null
         }
       ]
     },
@@ -1700,7 +1742,7 @@
       "category": "TRANS",
       "type": "Positive",
       "description": "HTTP stateless transport resolves static API keys when secret provider is None",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1708,6 +1750,13 @@
           "lineNumber": 19,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that HTTP transport resolves plaintext API key when secret provider is None."
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-stdio-env.spec.ts",
+          "lineNumber": 8,
+          "testName": "should register STDIO server, verify card, and execute echo tool via Test Bench",
+          "details": null
         }
       ]
     },
@@ -1780,7 +1829,7 @@
           "suite": "Playwright E2E",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts",
           "lineNumber": 42,
-          "testName": "should navigate to Custom Files and Backups in Settings view",
+          "testName": "should navigate to Custom Files and Prompts in Settings view",
           "details": null
         },
         {
