@@ -198,10 +198,10 @@ namespace McpRouter.Components.Capabilities
                         ?? new JsonRpcRequest
                         {
                             Method = method,
-                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null
+                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : (object)id.Value.GetString()!) : null
                         };
 
-                    var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
+                    var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername!);
                     await sseSession.WriteMessageAsync(rpcResponse);
                 }
                 catch (Exception ex)
