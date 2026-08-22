@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **90 Requirements Verified** across **196 Test Proofs** (68 Functional Capabilities, 22 Safety Guardrails).
+> **Catalog Statistics:** **90 Requirements Verified** across **197 Test Proofs** (68 Functional Capabilities, 22 Safety Guardrails).
 
 ---
 
@@ -12,7 +12,7 @@
 | **`AUTH`** | Authentication, RBAC & Identity | **18** | 17 | 1 | 51 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 5 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 33 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 34 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **9** | 6 | 3 | 18 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
@@ -152,9 +152,9 @@
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (4):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198) (`Mssql_Scripts_DeclareAllProceduresAndExpectedParameters`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L243`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L243) (`MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L293`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L293) (`Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L325`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L325) (`Mssql_Scripts_DeclareAllProceduresAndExpectedParameters`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L370`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L370) (`MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L420`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L420) (`Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/MySqlLiveIntegrationTests.cs#L36`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/MySqlLiveIntegrationTests.cs#L36) (`MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds`)
 
 ### `[DOC-SETUP-SKILL-FRONTMATTER]` mcp-router-setup skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters
@@ -568,10 +568,11 @@
 ### `[GUARD-04]` Malformed completion payloads or unmapped backends must fail closed safely
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (3):**
+* **Verification Proofs (4):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L520`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L520) (`Pairwise_CompleteAsync_MalformedOrMissingBackends_ThrowsOrFailsClosed`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L543`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L543) (`Pairwise_DatabaseDisconnection_FailsClosedSafely`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L172`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L172) (`SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L177`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L177) (`SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L203`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L203) (`SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing`)
 
 ### `[GUARD-05]` Batch save of authentication providers must fail closed if all providers are disabled
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -700,7 +701,7 @@
 | `AUTH-STANDALONE-CUSTOM-CIDR-ALLOW` | Positive | `AUTH` | Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges. | [`StandaloneAdminAuthTests.cs:L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L43) | Backend xUnit |
 | `AUTH-STANDALONE-LOOPBACK-ALLOW` | Positive | `AUTH` | Standalone mode without external IDP grants admin access to loopback IP addresses. | [`StandaloneAdminAuthTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22) | Backend xUnit |
 | `DB-01` | Positive | `DB` | SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data | [`DatabaseSchemaUpgradeAndContractTests.cs:L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L43) | Backend xUnit |
-| `DB-02` | Positive | `DB` | MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly | [`DatabaseSchemaUpgradeAndContractTests.cs:L198`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L198) | Backend xUnit |
+| `DB-02` | Positive | `DB` | MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly | [`DatabaseSchemaUpgradeAndContractTests.cs:L325`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L325) | Backend xUnit |
 | `DOC-SETUP-SKILL-FRONTMATTER` | Positive | `DOC` | mcp-router-setup skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters | [`SetupSkillTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L22) | Backend xUnit |
 | `DOC-SETUP-SKILL-MIRROR` | Positive | `DOC` | The mcp-router-setup skill and templates are mirrored 1:1 in .agents/skills/mcp-router-setup/ | [`SetupSkillTests.cs:L156`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L156) | Backend xUnit |
 | `DOC-SETUP-SKILL-TEMPLATES` | Positive | `DOC` | All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/mcp-router | [`SetupSkillTests.cs:L102`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SetupSkillTests.cs#L102) | Backend xUnit |

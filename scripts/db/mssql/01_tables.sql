@@ -60,12 +60,13 @@ BEGIN
         [Id]           VARCHAR(100) PRIMARY KEY,
         [Name]         NVARCHAR(200) NOT NULL,
         [Username]     NVARCHAR(256) NOT NULL,
+        [OwnerSid]     NVARCHAR(200) NOT NULL DEFAULT '',
+        [KeyType]      VARCHAR(50) NOT NULL DEFAULT 'personal',
         [KeyPrefix]    VARCHAR(50) NOT NULL,
         [EncryptedKey] NVARCHAR(MAX) NOT NULL,
         [ScopesJson]   NVARCHAR(MAX) NOT NULL DEFAULT '[]',
         [ExpiresAt]    DATETIME2 NULL,
-        [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
-        [OwnerSid]     NVARCHAR(200) NOT NULL DEFAULT ''
+        [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
 END;
 GO
@@ -73,6 +74,11 @@ GO
 -- Idempotent: add OwnerSid to pre-existing AppKeys tables so app-key calls are attributable.
 IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE Name = N'OwnerSid' AND Object_ID = Object_ID(N'dbo.AppKeys'))
     ALTER TABLE [dbo].[AppKeys] ADD [OwnerSid] NVARCHAR(200) NOT NULL DEFAULT '';
+GO
+
+-- Idempotent: add KeyType to pre-existing AppKeys tables
+IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE Name = N'KeyType' AND Object_ID = Object_ID(N'dbo.AppKeys'))
+    ALTER TABLE [dbo].[AppKeys] ADD [KeyType] VARCHAR(50) NOT NULL DEFAULT 'personal';
 GO
 
 -- Idempotent: add unique index on KeyPrefix for high-entropy lookup and collision prevention
@@ -214,6 +220,18 @@ BEGIN
         [Success]      BIT NOT NULL,
         [ErrorMessage] NVARCHAR(MAX) NULL,
         [Timestamp]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END;
+GO
+
+-- 10. User Quotas Table
+IF OBJECT_ID('dbo.UserQuotas', 'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[UserQuotas] (
+        [Username]     NVARCHAR(256) PRIMARY KEY,
+        [MaxKeys]      INT NOT NULL DEFAULT 5,
+        [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+        [UpdatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
     );
 END;
 GO

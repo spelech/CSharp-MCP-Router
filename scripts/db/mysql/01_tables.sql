@@ -137,12 +137,13 @@ CREATE TABLE IF NOT EXISTS `AppKeys` (
     `Id`           VARCHAR(100) PRIMARY KEY,
     `Name`         VARCHAR(200) NOT NULL,
     `Username`     VARCHAR(256) NOT NULL,
+    `OwnerSid`     VARCHAR(200) NOT NULL DEFAULT '',
+    `KeyType`      VARCHAR(50) NOT NULL DEFAULT 'personal',
     `KeyPrefix`    VARCHAR(50) NOT NULL,
     `EncryptedKey` LONGTEXT NOT NULL,
     `ScopesJson`   LONGTEXT NOT NULL,
     `ExpiresAt`    DATETIME NULL,
     `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    `OwnerSid`     VARCHAR(200) NOT NULL DEFAULT '',
     UNIQUE KEY `UQ_AppKeys_KeyPrefix` (`KeyPrefix`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -156,4 +157,12 @@ CREATE TABLE IF NOT EXISTS `AdminAuditLogs` (
     `Success`      TINYINT(1) NOT NULL,
     `ErrorMessage` LONGTEXT NULL,
     `Timestamp`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 10. User Quotas Table
+CREATE TABLE IF NOT EXISTS `UserQuotas` (
+    `Username`     VARCHAR(256) PRIMARY KEY,
+    `MaxKeys`      INT NOT NULL DEFAULT 5,
+    `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    `UpdatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
