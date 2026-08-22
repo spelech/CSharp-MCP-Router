@@ -3,7 +3,7 @@ import { test, expect } from './fixtures/userContexts';
 test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', () => {
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-LIST
+   * @requirement AUTH-PERSONAL-APPKEY-LIST
    * @category AUTH
    * @type PositiveFeature
    * @description Regular non-admin users see role-adaptive 'My App Keys' view and personal quota indicator
@@ -31,7 +31,7 @@ test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', (
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-CREATE
+   * @requirement AUTH-PERSONAL-APPKEY-CREATE
    * @category AUTH
    * @type PositiveFeature
    * @description Regular users can self-mint a personal AppKey and copy config snippets
@@ -85,7 +85,7 @@ test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', (
   });
 
   /**
-   * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+   * @requirement AUTH-SYSTEM-APPKEY-SEPARATION
    * @category AUTH
    * @type PositiveFeature
    * @description Administrators manage segmented views for User Personal Keys and App-Level System Keys
@@ -133,7 +133,7 @@ test.describe('Self-Service Personal AppKeys, System Keys & User Quotas Flow', (
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
+   * @requirement AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
    * @category AUTH
    * @type PositiveFeature
    * @description Administrators can view, set, and delete custom per-user quota overrides

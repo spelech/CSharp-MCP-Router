@@ -201,7 +201,7 @@ describe('useServerStore', () => {
 
   describe('deleteServer', () => {
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type PositiveFeature
      * @description Prompts confirmation modal and deletes server when confirmed.
@@ -230,7 +230,7 @@ describe('useServerStore', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type FailClosedGuardrail
      * @description Does not send delete request when confirm is cancelled.

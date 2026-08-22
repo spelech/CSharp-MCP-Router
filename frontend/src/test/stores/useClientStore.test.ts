@@ -86,7 +86,7 @@ describe('useClientStore', () => {
 
   describe('deleteClient', () => {
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type PositiveFeature
      * @description Prompts confirmation and deletes client when confirmed.
@@ -115,7 +115,7 @@ describe('useClientStore', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type FailClosedGuardrail
      * @description Cancels deletion when user denies confirmation.
@@ -214,7 +214,7 @@ describe('useAppKeyStore', () => {
 
   describe('keyTypeTab management', () => {
     /**
-     * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+     * @requirement AUTH-SYSTEM-APPKEY-SEPARATION
      * @category AUTH
      * @type PositiveFeature
      * @description Switches keyTypeTab between personal and system.
@@ -230,7 +230,7 @@ describe('useAppKeyStore', () => {
 
   describe('fetchAppKeys and fetchLimits', () => {
     /**
-     * @requirement REQ-AUTH-PERSONAL-APPKEY-LIST
+     * @requirement AUTH-PERSONAL-APPKEY-LIST
      * @category AUTH
      * @type PositiveFeature
      * @description Loads personal AppKeys and updates store.
@@ -248,7 +248,7 @@ describe('useAppKeyStore', () => {
     });
 
     /**
-     * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+     * @requirement AUTH-SYSTEM-APPKEY-SEPARATION
      * @category AUTH
      * @type PositiveFeature
      * @description Fetches system-filtered app keys via query parameters.
@@ -288,7 +288,7 @@ describe('useAppKeyStore', () => {
 
   describe('createAppKey', () => {
     /**
-     * @requirement REQ-AUTH-PERSONAL-APPKEY-CREATE
+     * @requirement AUTH-PERSONAL-APPKEY-CREATE
      * @category AUTH
      * @type PositiveFeature
      * @description Creates category-scoped personal key, captures one-time plaintext key, and refreshes.
@@ -348,7 +348,7 @@ describe('useAppKeyStore', () => {
 
   describe('revokeAppKey', () => {
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type PositiveFeature
      * @description Prompts confirmation modal and revokes AppKey when confirmed.
@@ -377,7 +377,7 @@ describe('useAppKeyStore', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type FailClosedGuardrail
      * @description Cancels revocation when confirm is rejected.
@@ -437,7 +437,7 @@ describe('useAppKeyStore', () => {
     });
 
     /**
-     * @requirement REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
+     * @requirement AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
      * @category AUTH
      * @type PositiveFeature
      * @description Sets custom user quota override and refreshes quota list.
@@ -469,7 +469,7 @@ describe('useAppKeyStore', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type PositiveFeature
      * @description Prompts confirmation modal and resets user quota when confirmed.
@@ -499,7 +499,7 @@ describe('useAppKeyStore', () => {
     });
 
     /**
-     * @requirement REQ-UI-CONFIRM-MODAL
+     * @requirement UI-CONFIRM-MODAL
      * @category UI
      * @type FailClosedGuardrail
      * @description Cancels quota reset when user denies confirmation.

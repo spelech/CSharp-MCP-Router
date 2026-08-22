@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { useConfirmStore, confirmAction } from '../../stores/useConfirmStore';
 
 /**
- * @requirement REQ-UI-CONFIRM-MODAL
+ * @requirement UI-CONFIRM-MODAL
  * @category UI
  * @type PositiveFeature
  * @description Centralized promise-based confirmation store resolves true on confirmation and false on cancellation.

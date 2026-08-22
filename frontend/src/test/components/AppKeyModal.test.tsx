@@ -17,7 +17,7 @@ describe('AppKeyModal component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-CREATE
+   * @requirement AUTH-PERSONAL-APPKEY-CREATE
    * @category AUTH
    * @type FailClosedGuardrail
    * @description Renders nothing when modal is closed.
@@ -29,7 +29,7 @@ describe('AppKeyModal component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+   * @requirement AUTH-SYSTEM-APPKEY-SEPARATION
    * @category AUTH
    * @type PositiveFeature
    * @description Allows admin to create system-level app key.
@@ -59,7 +59,7 @@ describe('AppKeyModal component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-CREATE
+   * @requirement AUTH-PERSONAL-APPKEY-CREATE
    * @category AUTH
    * @type PositiveFeature
    * @description Non-admin user is locked to personal key with quota feedback.
@@ -113,7 +113,7 @@ describe('AppKeyModal component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-CREATE
+   * @requirement AUTH-PERSONAL-APPKEY-CREATE
    * @category AUTH
    * @type PositiveFeature
    * @description Handles scope serialization for server scope and custom username for admin.
@@ -152,7 +152,7 @@ describe('AppKeyModal component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-CREATE
+   * @requirement AUTH-PERSONAL-APPKEY-CREATE
    * @category AUTH
    * @type PositiveFeature
    * @description Handles scope serialization for category scope and expiration days.
@@ -190,7 +190,7 @@ describe('AppKeyModal component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-CREATE
+   * @requirement AUTH-PERSONAL-APPKEY-CREATE
    * @category AUTH
    * @type FailClosedGuardrail
    * @description Disables submit button when quota limit is reached.
@@ -215,7 +215,7 @@ describe('AppKeyModal component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-CREATE
+   * @requirement AUTH-PERSONAL-APPKEY-CREATE
    * @category AUTH
    * @type PositiveFeature
    * @description Displays one-time secret result and copies plaintext key to clipboard.

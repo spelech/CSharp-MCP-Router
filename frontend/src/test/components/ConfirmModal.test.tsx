@@ -4,7 +4,7 @@ import { ConfirmModal } from '../../components/shared/ConfirmModal';
 import { useConfirmStore } from '../../stores/useConfirmStore';
 
 /**
- * @requirement REQ-UI-CONFIRM-MODAL
+ * @requirement UI-CONFIRM-MODAL
  * @category UI
  * @type PositiveFeature
  * @description Renders confirmation dialog with title, message, and trigger buttons for confirm and cancel.

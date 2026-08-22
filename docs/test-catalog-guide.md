@@ -190,6 +190,6 @@ cd frontend && npm run docs:catalog:verify
 When contributing features, bug fixes, or test enhancements:
 
 1. **Annotate Every New Test**: Whenever writing a unit, component, or E2E test that validates a functional requirement or security guardrail, add the corresponding `[Requirement]` attribute or JSDoc `@requirement` tag.
-2. **Reuse Existing IDs for Related Proofs**: If a new test verifies an existing requirement from a different perspective (e.g. adding a Playwright E2E proof for an existing C# backend requirement), reuse the exact same `REQ-ID`, `Category`, and `Description`.
+2. **Reuse Existing IDs for Related Proofs**: If a new test verifies an existing requirement from a different perspective (e.g. adding a Playwright E2E proof for an existing C# backend requirement), reuse the exact same `ID`, `Category`, and `Description`. (Do NOT prefix IDs with `REQ-`; use standard category codes like `AUTH-01`, `UI-01`, `GUARD-01`).
 3. **Regenerate Before Committing**: Run `dotnet run --project scripts/CatalogGenerator` to update `docs/software-requirements-and-test-catalog.md` and `docs/requirements-catalog.json`.
 4. **Verify Clean Pass**: Run `dotnet run --project scripts/CatalogGenerator -- --verify-only` to ensure zero drift before creating a pull request or pushing to `main`.

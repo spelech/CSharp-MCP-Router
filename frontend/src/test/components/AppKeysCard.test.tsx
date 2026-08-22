@@ -32,7 +32,7 @@ describe('AppKeysCard Component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-LIST
+   * @requirement AUTH-PERSONAL-APPKEY-LIST
    * @category AUTH
    * @type PositiveFeature
    * @description Renders empty state and triggers fetch on mount for non-admin users without owner column.
@@ -77,7 +77,7 @@ describe('AppKeysCard Component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-LIST
+   * @requirement AUTH-PERSONAL-APPKEY-LIST
    * @category AUTH
    * @type PositiveFeature
    * @description Renders keys list, handles copy snippet and key revocation.
@@ -164,7 +164,7 @@ describe('AppKeysCard Component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+   * @requirement AUTH-SYSTEM-APPKEY-SEPARATION
    * @category AUTH
    * @type PositiveFeature
    * @description Allows admin to switch to App-Level Keys tab and filter personal keys by username.
@@ -220,7 +220,7 @@ describe('AppKeysCard Component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
+   * @requirement AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
    * @category AUTH
    * @type PositiveFeature
    * @description Allows admin to view custom user quotas, set a quota override, and reset a quota.

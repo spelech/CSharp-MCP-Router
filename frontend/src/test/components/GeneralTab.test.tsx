@@ -4,7 +4,7 @@ import { GeneralTab } from '../../components/settings/GeneralTab';
 
 describe('GeneralTab component', () => {
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
+   * @requirement AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
    * @category AUTH
    * @type PositiveFeature
    * @description Renders GeneralTab with security default quota inputs and saves settings.
@@ -69,7 +69,7 @@ describe('GeneralTab component', () => {
   });
 
   /**
-   * @requirement REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
+   * @requirement AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
    * @category AUTH
    * @type PositiveFeature
    * @description Updates form state when settings prop changes.

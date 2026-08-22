@@ -97,7 +97,7 @@ describe('IdentityAuthTab Component', () => {
   });
 
   /**
-   * @requirement REQ-UI-TOAST-TRANSITION
+   * @requirement UI-TOAST-TRANSITION
    * @category UI
    * @type PositiveFeature
    * @description Saves updated Active Directory configuration JSON and shows success toast.
@@ -136,7 +136,7 @@ describe('IdentityAuthTab Component', () => {
   });
 
   /**
-   * @requirement REQ-UI-TOAST-TRANSITION
+   * @requirement UI-TOAST-TRANSITION
    * @category UI
    * @type FailClosedGuardrail
    * @description Displays error toast notification when saving auth providers fails.

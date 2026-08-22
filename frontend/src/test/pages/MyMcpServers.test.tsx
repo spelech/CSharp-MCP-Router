@@ -21,7 +21,7 @@ describe('MyMcpServers Page', () => {
   });
 
   /**
-   * @requirement REQ-UI-TOAST-TRANSITION
+   * @requirement UI-TOAST-TRANSITION
    * @category UI
    * @type FailClosedGuardrail
    * @description Displays error toast notification when saving invalid JSON credentials for user-provided server.
@@ -62,7 +62,7 @@ describe('MyMcpServers Page', () => {
   });
 
   /**
-   * @requirement REQ-UI-TOAST-TRANSITION
+   * @requirement UI-TOAST-TRANSITION
    * @category UI
    * @type PositiveFeature
    * @description Successfully saves valid credentials and updates UI state.
