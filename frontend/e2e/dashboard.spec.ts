@@ -1,4 +1,4 @@
-/** @requirement REQ-UI-124 */
+/** @requirement UI-124 */
 
 import { test, expect } from '@playwright/test';
 
