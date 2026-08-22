@@ -1,25 +1,28 @@
 :root {
-    /* Base Colors - Material You Dark */
-    --bg-dark: #09090b;
-    --bg-card: #18181b;
-    --bg-code: #09090b;
-    --bg-input: rgba(255, 255, 255, 0.03);
+    /* Base Colors - Monochrome Dark */
+    --bg-dark: #000000;
+    --bg-card: #0a0a0a;
+    --bg-code: #0a0a0a;
+    --bg-input: rgba(255, 255, 255, 0.06);
     --border-color: #27272a;
     --border-hover: #3f3f46;
     
-    --primary: #f97316; /* Orange */
-    --primary-rgb: 249, 115, 22;
-    --primary-glow: rgba(249, 115, 22, 0.15);
+    /* Vibrant Accents */
+    --primary: #00c853; /* Vibrant Green */
+    --primary-rgb: 0, 200, 83;
+    --primary-glow: rgba(0, 200, 83, 0.25);
     
-    --secondary: #eab308; /* Yellow */
-    --secondary-rgb: 234, 179, 8;
+    --secondary: #ff5f1f; /* Neon Orange */
+    --secondary-rgb: 255, 95, 31;
     
-    --accent: #14b8a6; /* Teal */
-    --accent-rgb: 20, 184, 166;
+    --accent: #eab308; /* Yellow 500 */
+    --accent-rgb: 234, 179, 8;
     
-    --text-main: #fafafa;
+    --text-main: #ffffff;
     --text-muted: #a1a1aa;
+    --btn-primary-text: #ffffff;
     
+    /* Statuses */
     --status-online: #22c55e;
     --status-offline: #ef4444;
 
@@ -40,7 +43,7 @@
     /* Typography */
     --font-family-base: 'Outfit', sans-serif;
     --font-family-code: 'JetBrains Mono', monospace;
-    --font-size-xs: 11px;
+    --font-size-xs: 12px;
     --font-size-sm: 13px;
     --font-size-md: 14px;
     --font-size-lg: 15px;
@@ -89,32 +92,35 @@
 }
 
 [data-theme="light"] {
-    /* Base Colors - Material You Light */
-    --bg-dark: #f4f4f5;
-    --bg-card: #ffffff;
+    /* Base Colors - Monochrome Light */
+    --bg-dark: #f4f4f5; /* Slight off-white for body */
+    --bg-card: #ffffff; /* Pure white for cards */
     --bg-code: #e4e4e7;
-    --bg-input: rgba(0, 0, 0, 0.03);
+    --bg-input: rgba(0, 0, 0, 0.04);
     --border-color: #e4e4e7;
     --border-hover: #d4d4d8;
     --card-shadow: var(--shadow-sm);
     
-    --primary: #ea580c; /* Orange */
-    --primary-rgb: 234, 88, 12;
-    --primary-glow: rgba(234, 88, 12, 0.1);
+    /* Vibrant Accents */
+    --primary: #2563eb; /* Blue 600 */
+    --primary-rgb: 37, 99, 235;
+    --primary-glow: rgba(37, 99, 235, 0.15);
     
-    --secondary: #ca8a04; /* Yellow */
-    --secondary-rgb: 202, 138, 4;
+    --secondary: #0891b2; /* Cyan 600 */
+    --secondary-rgb: 8, 145, 178;
     
-    --accent: #0d9488;
-    --accent-rgb: 13, 148, 136;
+    --accent: #8b5cf6; /* Violet 500 */
+    --accent-rgb: 139, 92, 246;
     
-    --text-main: #09090b;
-    --text-muted: #71717a;
+    --text-main: #000000;
+    --text-muted: #52525b;
+    --btn-primary-text: #ffffff;
     
+    /* Statuses */
     --status-online: #16a34a;
     --status-offline: #dc2626;
 
-    /* Semantic States (Adjusted for Light Mode if needed, else same) */
+    /* Semantic States */
     --color-info: #2563eb;
     --color-info-rgb: 37, 99, 235;
     --color-success: #16a34a;

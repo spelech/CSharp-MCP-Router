@@ -247,4 +247,42 @@
         width: 100%;
         justify-content: center;
     }
+
+    /* Server Controls Toolbar (Mobile) */
+    .server-controls-toolbar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        width: 100%;
+        min-width: 100%;
+    }
+    
+    .toolbar-actions {
+        width: 100%;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: var(--space-3);
+    }
+    
+    .toolbar-actions .btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .select-group {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 2px;
+    }
+    
+    .select-group select {
+        width: 100%;
+    }
+
+    /* Stats Grid (Mobile) */
+    .stats-grid {
+        grid-template-columns: 1fr 1fr;
+    }
 }
