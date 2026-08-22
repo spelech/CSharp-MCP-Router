@@ -778,9 +778,13 @@ namespace McpRouter.Components.Capabilities
 
             string SanitizeFileName(string name)
             {
+                if (string.IsNullOrEmpty(name) || name.Contains("..") || name.Contains("/") || name.Contains("\\"))
+                {
+                    return string.Empty;
+                }
                 var safeName = Path.GetFileName(name);
                 var invalidChars = Path.GetInvalidFileNameChars();
-                return new string(safeName.Where(c => !invalidChars.Contains(c) && c != '/' && c != '\\').ToArray());
+                return new string(safeName.Where(c => !invalidChars.Contains(c)).ToArray());
             }
 
             string GetCustomFilesDirectory(string type)

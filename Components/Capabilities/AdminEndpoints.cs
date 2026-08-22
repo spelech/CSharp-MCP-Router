@@ -177,7 +177,7 @@ namespace McpRouter.Components.Capabilities
 
             var sessionId = Guid.NewGuid().ToString("N");
             logger.LogInformation("New Admin SSE connection ({Method}). SessionId: {SessionId}, User: {User}",
-                httpContext.Request.Method, sessionId, callerUsername?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
+                httpContext.Request.Method, sessionId, System.Net.WebUtility.UrlEncode(callerUsername));
 
             var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
             if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
