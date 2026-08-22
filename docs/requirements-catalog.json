@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T14:01:59.7324928Z",
+    "generatedAt": "2026-08-22T14:21:05.7740318Z",
     "totalRequirements": 90,
     "positiveCount": 68,
     "guardrailCount": 22,
-    "totalProofs": 196
+    "totalProofs": 197
   },
   "requirements": [
     {
@@ -552,21 +552,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 198,
+          "lineNumber": 325,
           "testName": "Mssql_Scripts_DeclareAllProceduresAndExpectedParameters",
           "details": "Verifies that MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 243,
+          "lineNumber": 370,
           "testName": "MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters",
           "details": "Verifies that MySQL stored procedure scripts declare all required procedures with p_ parameter conventions."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 293,
+          "lineNumber": 420,
           "testName": "Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters",
           "details": "Verifies that Dapper repository mappings for MySQL correctly bind stored procedure p_ parameters."
         },
@@ -849,7 +849,7 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "Malformed completion payloads or unmapped backends must fail closed safely",
-      "proofCount": 3,
+      "proofCount": 4,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -868,9 +868,16 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 172,
+          "lineNumber": 177,
           "testName": "SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing",
           "details": "Ensures database schema validation fails closed when required columns or tables are missing."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "lineNumber": 203,
+          "testName": "SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing",
+          "details": "Ensures database schema validation fails closed when KeyType column or UserQuotas table is missing."
         }
       ]
     },

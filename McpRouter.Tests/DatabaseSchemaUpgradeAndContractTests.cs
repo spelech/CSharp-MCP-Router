@@ -146,10 +146,15 @@ namespace McpRouter.Tests
             Assert.NotNull(adProvider);
             Assert.Equal("{\"server\":\"ldaps.corp.local\"}", adProvider.ConfigJson);
 
-            // Assert: AppKeys has OwnerSid
+            // Assert: AppKeys has OwnerSid and KeyType
             var keyRow = await repo.GetAppKeyByIdAsync("key1");
             Assert.NotNull(keyRow);
             Assert.Equal("Test Key", keyRow.Name);
+            Assert.Equal("personal", keyRow.KeyType);
+
+            // Assert: UserQuotas table exists
+            var userQuotasCount = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM UserQuotas;");
+            Assert.Equal(0, userQuotasCount);
 
             // Assert: Settings columns were added
             var settings = await repo.GetSettingsAsync();
@@ -186,6 +191,128 @@ namespace McpRouter.Tests
             ");
 
             // Calling validation should throw InvalidOperationException
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                DatabaseSeederService.ValidateSchemaCompatibility(conn, "sqlite", NullLogger.Instance);
+            });
+        }
+
+        /// <summary>
+        /// Ensures database schema validation fails closed when KeyType column or UserQuotas table is missing.
+        /// </summary>
+        [Fact]
+        [Requirement("GUARD-04", "Database schema validation fails closed when UserQuotas or AppKeys.KeyType is missing", Type = RequirementType.Negative, Category = "GUARD")]
+        public void SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing()
+        {
+            var (conn, _) = CreateDbFactory();
+
+            // Create baseline tables without UserQuotas or AppKeys.KeyType
+            conn.Execute(@"
+                CREATE TABLE Servers (
+                    Id TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    Url TEXT,
+                    Enabled INTEGER DEFAULT 1,
+                    Hidden INTEGER DEFAULT 0,
+                    Type TEXT DEFAULT 'sse',
+                    SecretProvider TEXT DEFAULT 'None',
+                    SecretItemKey TEXT,
+                    SecretMount TEXT,
+                    SecretPath TEXT,
+                    SecretField TEXT,
+                    AuthShape TEXT DEFAULT 'bearer',
+                    CustomHeaderName TEXT,
+                    Categories TEXT DEFAULT '[]',
+                    ApiKey TEXT,
+                    HeadersJson TEXT,
+                    AutoDiscovered INTEGER DEFAULT 0,
+                    AllowPassThroughAuth INTEGER DEFAULT 0,
+                    DynamicAuthPrompt TEXT
+                );
+
+                CREATE TABLE Settings (
+                    Id TEXT PRIMARY KEY,
+                    DashboardTitle TEXT DEFAULT 'MCP Gateway',
+                    DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired',
+                    EmbeddingProvider TEXT,
+                    EmbeddingApiUrl TEXT,
+                    EmbeddingApiKey TEXT,
+                    EmbeddingApiModel TEXT,
+                    EmbeddingModelDir TEXT,
+                    GlobalMaxKeys INTEGER DEFAULT 100,
+                    UserMaxKeys INTEGER DEFAULT 5,
+                    UserSecretStorage TEXT DEFAULT 'Database'
+                );
+
+                CREATE TABLE AppKeys (
+                    Id TEXT PRIMARY KEY,
+                    Name TEXT,
+                    Username TEXT,
+                    OwnerSid TEXT DEFAULT '',
+                    KeyPrefix TEXT,
+                    EncryptedKey TEXT,
+                    ScopesJson TEXT DEFAULT '[]',
+                    ExpiresAt TEXT,
+                    CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+
+                CREATE TABLE AccessPolicies (
+                    Id TEXT PRIMARY KEY,
+                    TargetId TEXT,
+                    RequiredGroup TEXT,
+                    IsAllowed INTEGER DEFAULT 1
+                );
+
+                CREATE TABLE GroupMappings (
+                    Id TEXT PRIMARY KEY,
+                    ExternalId TEXT,
+                    InternalGroup TEXT
+                );
+
+                CREATE TABLE AuditLogs (
+                    RequestId TEXT PRIMARY KEY,
+                    UserPrincipalName TEXT,
+                    UserSid TEXT,
+                    ServerCodeName TEXT,
+                    ItemName TEXT,
+                    RequestMethod TEXT,
+                    ExecutionTimeMs INTEGER,
+                    StatusCode INTEGER,
+                    RequestPayload TEXT,
+                    ResponsePayload TEXT,
+                    ErrorMessage TEXT,
+                    Timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+
+                CREATE TABLE AdminAuditLogs (
+                    Id TEXT PRIMARY KEY,
+                    Username TEXT,
+                    Action TEXT,
+                    Target TEXT,
+                    Details TEXT,
+                    Success INTEGER,
+                    ErrorMessage TEXT,
+                    Timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+
+                CREATE TABLE SecretProviders (
+                    ProviderName TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    EncryptedConfigJson TEXT,
+                    IsEnabled INTEGER DEFAULT 1
+                );
+
+                CREATE TABLE AuthProviderConfigs (
+                    ProviderName TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    UserHeader TEXT,
+                    GroupsHeader TEXT,
+                    EncryptedConfigJson TEXT,
+                    IsEnabled INTEGER DEFAULT 1
+                );
+            ");
+
+            // Calling validation should throw InvalidOperationException because UserQuotas and KeyType are missing
             Assert.Throws<InvalidOperationException>(() =>
             {
                 DatabaseSeederService.ValidateSchemaCompatibility(conn, "sqlite", NullLogger.Instance);

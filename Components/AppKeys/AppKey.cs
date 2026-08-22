@@ -13,6 +13,7 @@ namespace McpRouter.Components.AppKeys
         public string EncryptedKey { get; set; } = string.Empty;
         public string ScopesJson { get; set; } = "[]"; // JSON array of scopes, e.g. ["all"], ["server:ha"], etc.
         public string OwnerSid { get; set; } = string.Empty;
+        public string KeyType { get; set; } = "personal"; // "personal" | "system"
         public DateTime? ExpiresAt { get; set; }
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

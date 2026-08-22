@@ -155,12 +155,13 @@ namespace McpRouter.Infrastructure.Persistence
                 if (!cols.Contains("UserSecretStorage")) conn.Execute("ALTER TABLE Settings ADD COLUMN UserSecretStorage TEXT DEFAULT 'Database';");
             }
 
-            // 4. AppKeys.OwnerSid
+            // 4. AppKeys.OwnerSid and AppKeys.KeyType
             var appKeysExists = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='AppKeys';") > 0;
             if (appKeysExists)
             {
                 var cols = conn.Query<string>("SELECT name FROM pragma_table_info('AppKeys');").ToHashSet(StringComparer.OrdinalIgnoreCase);
                 if (!cols.Contains("OwnerSid")) conn.Execute("ALTER TABLE AppKeys ADD COLUMN OwnerSid TEXT DEFAULT '';");
+                if (!cols.Contains("KeyType")) conn.Execute("ALTER TABLE AppKeys ADD COLUMN KeyType TEXT DEFAULT 'personal';");
             }
 
             // 5. Legacy McpServers -> Servers
@@ -385,13 +386,17 @@ namespace McpRouter.Infrastructure.Persistence
                 END;
             ");
 
-            // 5. Migrate AppKeys.OwnerSid
+            // 5. Migrate AppKeys.OwnerSid and AppKeys.KeyType
             conn.Execute(@"
                 IF OBJECT_ID('dbo.AppKeys', 'U') IS NOT NULL
                 BEGIN
                     IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.AppKeys') AND name = 'OwnerSid')
                     BEGIN
                         ALTER TABLE [dbo].[AppKeys] ADD [OwnerSid] NVARCHAR(200) NOT NULL DEFAULT '';
+                    END;
+                    IF NOT EXISTS (SELECT 1 FROM sys.columns WHERE object_id = OBJECT_ID('dbo.AppKeys') AND name = 'KeyType')
+                    BEGIN
+                        ALTER TABLE [dbo].[AppKeys] ADD [KeyType] VARCHAR(50) NOT NULL DEFAULT 'personal';
                     END;
                 END;
             ");
@@ -599,7 +604,7 @@ namespace McpRouter.Infrastructure.Persistence
                 }
             }
 
-            // 5. Migrate AppKeys.OwnerSid
+            // 5. Migrate AppKeys.OwnerSid and AppKeys.KeyType
             var appKeysExists = conn.ExecuteScalar<int>(@"
                 SELECT COUNT(*) FROM information_schema.tables 
                 WHERE table_schema = DATABASE() AND table_name = 'AppKeys';") > 0;
@@ -613,6 +618,15 @@ namespace McpRouter.Infrastructure.Persistence
                 if (!hasOwnerSid)
                 {
                     conn.Execute("ALTER TABLE `AppKeys` ADD COLUMN `OwnerSid` VARCHAR(200) NOT NULL DEFAULT '';");
+                }
+
+                var hasKeyType = conn.ExecuteScalar<int>(@"
+                    SELECT COUNT(*) FROM information_schema.columns 
+                    WHERE table_schema = DATABASE() AND table_name = 'AppKeys' AND column_name = 'KeyType';") > 0;
+
+                if (!hasKeyType)
+                {
+                    conn.Execute("ALTER TABLE `AppKeys` ADD COLUMN `KeyType` VARCHAR(50) NOT NULL DEFAULT 'personal';");
                 }
             }
         }
@@ -670,11 +684,19 @@ namespace McpRouter.Infrastructure.Persistence
                         Name TEXT,
                         Username TEXT,
                         OwnerSid TEXT DEFAULT '',
+                        KeyType TEXT DEFAULT 'personal',
                         KeyPrefix TEXT,
                         EncryptedKey TEXT,
                         ScopesJson TEXT DEFAULT '[]',
                         ExpiresAt TEXT,
                         CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                    );
+
+                    CREATE TABLE IF NOT EXISTS UserQuotas (
+                        Username TEXT PRIMARY KEY,
+                        MaxKeys INTEGER DEFAULT 5,
+                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                        UpdatedAt TEXT DEFAULT CURRENT_TIMESTAMP
                     );
 
                     CREATE TABLE IF NOT EXISTS AccessPolicies (
@@ -812,11 +834,22 @@ namespace McpRouter.Infrastructure.Persistence
                             [Name]         NVARCHAR(200) NOT NULL,
                             [Username]     NVARCHAR(256) NOT NULL,
                             [OwnerSid]     NVARCHAR(200) NOT NULL DEFAULT '',
+                            [KeyType]      VARCHAR(50) NOT NULL DEFAULT 'personal',
                             [KeyPrefix]    VARCHAR(50) NOT NULL,
                             [EncryptedKey] NVARCHAR(MAX) NOT NULL,
                             [ScopesJson]   NVARCHAR(MAX) NOT NULL DEFAULT '[]',
                             [ExpiresAt]    DATETIME2 NULL,
                             [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+                        );
+                    END;
+
+                    IF OBJECT_ID('dbo.UserQuotas', 'U') IS NULL
+                    BEGIN
+                        CREATE TABLE [dbo].[UserQuotas] (
+                            [Username]     NVARCHAR(256) PRIMARY KEY,
+                            [MaxKeys]      INT NOT NULL DEFAULT 5,
+                            [CreatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME(),
+                            [UpdatedAt]    DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
                         );
                     END;
 
@@ -953,11 +986,19 @@ namespace McpRouter.Infrastructure.Persistence
                         `Name`         VARCHAR(200) NOT NULL,
                         `Username`     VARCHAR(256) NOT NULL,
                         `OwnerSid`     VARCHAR(200) NOT NULL DEFAULT '',
+                        `KeyType`      VARCHAR(50) NOT NULL DEFAULT 'personal',
                         `KeyPrefix`    VARCHAR(50) NOT NULL,
                         `EncryptedKey` LONGTEXT NOT NULL,
                         `ScopesJson`   LONGTEXT NOT NULL,
                         `ExpiresAt`    DATETIME NULL,
                         `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+                    CREATE TABLE IF NOT EXISTS `UserQuotas` (
+                        `Username`     VARCHAR(256) PRIMARY KEY,
+                        `MaxKeys`      INT NOT NULL DEFAULT 5,
+                        `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                        `UpdatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
                     CREATE TABLE IF NOT EXISTS `AccessPolicies` (
@@ -1078,7 +1119,8 @@ namespace McpRouter.Infrastructure.Persistence
             {
                 { "Servers", "SELECT Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered FROM Servers WHERE 1=0" },
                 { "Settings", "SELECT Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys FROM Settings WHERE 1=0" },
-                { "AppKeys", "SELECT Id, Name, Username, OwnerSid, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys WHERE 1=0" },
+                { "AppKeys", "SELECT Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys WHERE 1=0" },
+                { "UserQuotas", "SELECT Username, MaxKeys, CreatedAt, UpdatedAt FROM UserQuotas WHERE 1=0" },
                 { "AccessPolicies", "SELECT Id, TargetId, RequiredGroup, IsAllowed FROM AccessPolicies WHERE 1=0" },
                 { "GroupMappings", "SELECT Id, ExternalId, InternalGroup FROM GroupMappings WHERE 1=0" },
                 { "AuditLogs", "SELECT RequestId, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, ExecutionTimeMs, StatusCode, RequestPayload, ResponsePayload, ErrorMessage, Timestamp FROM AuditLogs WHERE 1=0" },
@@ -1136,6 +1178,10 @@ namespace McpRouter.Infrastructure.Persistence
             if (!appKeyCols.Contains("OwnerSid"))
             {
                 throw new InvalidOperationException("SQLite schema compatibility check failed: AppKeys table is missing 'OwnerSid' column.");
+            }
+            if (!appKeyCols.Contains("KeyType"))
+            {
+                throw new InvalidOperationException("SQLite schema compatibility check failed: AppKeys table is missing 'KeyType' column.");
             }
         }
 

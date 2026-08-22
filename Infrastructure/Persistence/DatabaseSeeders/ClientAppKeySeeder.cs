@@ -94,6 +94,8 @@ namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
                         Id = Guid.NewGuid().ToString("N"),
                         Name = "CLI Default Admin Key",
                         Username = "admin",
+                        OwnerSid = string.Empty,
+                        KeyType = "system",
                         KeyPrefix = checkPrefix,
                         EncryptedKey = hashedKey,
                         ScopesJson = "[\"all\"]",
@@ -104,8 +106,8 @@ namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
                     if (dbFactory.ProviderName == "sqlite")
                     {
                         const string insertSql = @"
-                            INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
-                            VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
+                            INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
+                            VALUES (@Id, @Name, @Username, @OwnerSid, @KeyType, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
                         conn.Execute(insertSql, defaultKey);
                     }
                     else if (dbFactory.ProviderName == "mysql")
