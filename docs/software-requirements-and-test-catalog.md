@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **94 Requirements Verified** across **207 Test Proofs** (72 Functional Capabilities, 22 Safety Guardrails).
+> **Catalog Statistics:** **94 Requirements Verified** across **214 Test Proofs** (72 Functional Capabilities, 22 Safety Guardrails).
 
 ---
 
@@ -9,14 +9,14 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **22** | 21 | 1 | 56 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **22** | 21 | 1 | 61 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 10 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 34 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **9** | 6 | 3 | 18 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **7** | 5 | 2 | 44 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **7** | 5 | 2 | 46 proofs |
 
 ---
 
@@ -146,26 +146,31 @@
 ### `[REQ-AUTH-PERSONAL-APPKEY-CREATE]` Non-admin users can create personal App Keys up to quota
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L199`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L199) (`CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L290`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L290) (`creates category-scoped key, captures one-time plaintext key, and refreshes`)
 
 ### `[REQ-AUTH-PERSONAL-APPKEY-LIST]` Non-admin users can view their personal App Keys
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L133`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L133) (`GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L232`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L232) (`loads app keys and updates store`)
 
 ### `[REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE]` Custom user quotas override default limit
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L231`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L231) (`CreateAppKey_CustomQuotaOverride_AllowsHigherLimit`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L439`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L439) (`sets user quota override and refreshes quota list`)
 
 ### `[REQ-AUTH-SYSTEM-APPKEY-SEPARATION]` System keys are distinct and require admin permissions
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (3):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L159`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L159) (`SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L216`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L216) (`switches keyTypeTab between personal and system`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L250`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L250) (`fetches system-filtered app keys via query parameters`)
 
 ### `[DB-01]` SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
@@ -679,7 +684,7 @@
 ### `[REQ-UI-CONFIRM-MODAL]` Deletes an access policy when confirmed via confirm modal.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (12):**
+* **Verification Proofs (14):**
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L76`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L76) (`deletes a policy when confirmed`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L105`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L105) (`does not delete policy when confirm is cancelled`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L166`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L166) (`deletes a group mapping when confirmed`)
@@ -688,8 +693,10 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L251`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L251) (`does not delete custom file when confirm is cancelled`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L88`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L88) (`prompts confirmation and deletes client when confirmed`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L117`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L117) (`cancels deletion when user denies confirmation`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L268`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L268) (`confirms and revokes AppKey and refreshes list`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L297`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L297) (`cancels revocation when confirm is rejected`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L350`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L350) (`confirms and revokes AppKey and refreshes list`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L379`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L379) (`cancels revocation when confirm is rejected`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L471`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L471) (`prompts confirmation modal and resets user quota when confirmed`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L501`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L501) (`cancels quota reset when user denies confirmation`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L203`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L203) (`prompts window.confirm and deletes server when confirmed`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L232`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L232) (`does not send delete request when confirm is cancelled`)
 

@@ -1,8 +1,17 @@
 import { apiRequest } from '../shared/api/api';
 import { AppKeyItem, AppKeyLimits, NewAppKeyResult, CreateAppKeyPayload } from '../shared/types';
 
-export async function fetchAppKeysApi(): Promise<AppKeyItem[]> {
-  const data = await apiRequest<AppKeyItem[]>('/api/appkeys');
+export async function fetchAppKeysApi(keyType?: string, usernameFilter?: string): Promise<AppKeyItem[]> {
+  const params = new URLSearchParams();
+  if (keyType) {
+    params.append('keyType', keyType);
+  }
+  if (usernameFilter) {
+    params.append('usernameFilter', usernameFilter);
+  }
+  const queryString = params.toString();
+  const endpoint = queryString ? `/api/appkeys?${queryString}` : '/api/appkeys';
+  const data = await apiRequest<AppKeyItem[]>(endpoint);
   return data || [];
 }
 

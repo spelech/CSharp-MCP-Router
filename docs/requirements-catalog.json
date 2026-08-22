@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T14:37:13.6283551Z",
+    "generatedAt": "2026-08-22T14:42:13.5100303Z",
     "totalRequirements": 94,
     "positiveCount": 72,
     "guardrailCount": 22,
-    "totalProofs": 207
+    "totalProofs": 214
   },
   "requirements": [
     {
@@ -538,13 +538,20 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "Non-admin users can create personal App Keys up to quota",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
           "lineNumber": 199,
           "testName": "CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 290,
+          "testName": "creates category-scoped key, captures one-time plaintext key, and refreshes",
           "details": null
         }
       ]
@@ -554,13 +561,20 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "Non-admin users can view their personal App Keys",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
           "lineNumber": 133,
           "testName": "GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 232,
+          "testName": "loads app keys and updates store",
           "details": null
         }
       ]
@@ -570,13 +584,20 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "Custom user quotas override default limit",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
           "lineNumber": 231,
           "testName": "CreateAppKey_CustomQuotaOverride_AllowsHigherLimit",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 439,
+          "testName": "sets user quota override and refreshes quota list",
           "details": null
         }
       ]
@@ -586,13 +607,27 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "System keys are distinct and require admin permissions",
-      "proofCount": 1,
+      "proofCount": 3,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs",
           "lineNumber": 159,
           "testName": "SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 216,
+          "testName": "switches keyTypeTab between personal and system",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 250,
+          "testName": "fetches system-filtered app keys via query parameters",
           "details": null
         }
       ]
@@ -1936,7 +1971,7 @@
       "category": "UI",
       "type": "Negative",
       "description": "Deletes an access policy when confirmed via confirm modal.",
-      "proofCount": 12,
+      "proofCount": 14,
       "proofs": [
         {
           "suite": "Frontend Vitest",
@@ -1997,15 +2032,29 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 268,
+          "lineNumber": 350,
           "testName": "confirms and revokes AppKey and refreshes list",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 297,
+          "lineNumber": 379,
           "testName": "cancels revocation when confirm is rejected",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 471,
+          "testName": "prompts confirmation modal and resets user quota when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 501,
+          "testName": "cancels quota reset when user denies confirmation",
           "details": null
         },
         {

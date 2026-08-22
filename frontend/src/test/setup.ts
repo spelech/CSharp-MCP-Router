@@ -77,6 +77,14 @@ export const defaultMockData = {
     userActiveKeys: 1,
     isLimitReached: false
   },
+  userQuotas: [
+    {
+      username: 'admin',
+      maxKeys: 10,
+      createdAt: '2026-08-14T00:00:00Z',
+      updatedAt: '2026-08-14T00:00:00Z'
+    }
+  ],
   settings: {
     embeddingProvider: 'local',
     embeddingModelDir: 'data/models',
@@ -253,6 +261,19 @@ function setupDefaultRoutes() {
     }
     return { success: true };
   });
+  mockApiResponse('/api/appkeys/quotas', (_url: string, options?: RequestInit) => {
+    if (options?.method === 'POST') {
+      const body = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
+      return { success: true, username: body?.username || 'user', maxKeys: body?.maxKeys ?? 5 };
+    }
+    return defaultMockData.userQuotas;
+  });
+  mockApiResponse(/\/api\/appkeys\/quotas\/[^/]+/, (_url: string, options?: RequestInit) => {
+    if (options?.method === 'DELETE') {
+      return { success: true };
+    }
+    return { success: true };
+  });
   mockApiResponse('/api/settings', (_url: string, options?: RequestInit) => {
     if (options?.method === 'POST') {
       return { success: true };
@@ -340,7 +361,10 @@ export function resetAllStores() {
   useAppKeyStore.setState({
     appKeys: [],
     limits: null,
+    keyTypeTab: 'personal',
+    userQuotas: [],
     isLoading: false,
+    isLoadingQuotas: false,
     isCreateModalOpen: false,
     createdResult: null
   });
@@ -393,7 +417,7 @@ globalThis.fetch = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) =>
 
   // First pass: exact string matching (most specific)
   for (const [pattern, handler] of handlers) {
-    if (typeof pattern === 'string' && cleanUrl === pattern) {
+    if (typeof pattern === 'string' && (url === pattern || cleanUrl === pattern)) {
       const result = handler(url, init);
       const { data, status = 200, statusText = 'OK' } = result || {};
       const ok = status >= 200 && status < 300;
