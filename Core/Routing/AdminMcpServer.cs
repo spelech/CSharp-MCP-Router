@@ -1019,6 +1019,7 @@ namespace McpRouter.Core.Routing
                         if (args.TryGetProperty("embeddingModelDir", out var emdProp)) current.EmbeddingModelDir = emdProp.GetString() ?? current.EmbeddingModelDir;
                         if (args.TryGetProperty("globalMaxKeys", out var gmkProp) && gmkProp.TryGetInt32(out var gmk)) current.GlobalMaxKeys = gmk;
                         if (args.TryGetProperty("userMaxKeys", out var umkProp) && umkProp.TryGetInt32(out var umk)) current.UserMaxKeys = umk;
+                        if (args.TryGetProperty("allowOpenClientRegistration", out var aocrProp)) current.AllowOpenClientRegistration = aocrProp.GetBoolean();
                     }
 
                     _dynamicEmbeddingService.SaveSettings(current);

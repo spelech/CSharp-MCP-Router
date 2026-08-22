@@ -1,0 +1,41 @@
+--- frontend/src/components/settings/GeneralTab.tsx
++++ frontend/src/components/settings/GeneralTab.tsx
+@@ -14,6 +14,7 @@
+   const [embApiUrl, setEmbApiUrl] = useState(settings?.embeddingApiUrl || 'http://litellm:4000/v1/embeddings');
+   const [embApiModel, setEmbApiModel] = useState(settings?.embeddingApiModel || 'all-MiniLM-L6-v2');
+   const [embApiKey, setEmbApiKey] = useState(settings?.embeddingApiKey || '');
++  const [allowOpenDCR, setAllowOpenDCR] = useState(settings?.allowOpenClientRegistration ?? true);
+ 
+   const handleSave = async () => {
+     try {
+@@ -27,6 +28,7 @@
+         embeddingApiUrl: embApiUrl,
+         embeddingApiModel: embApiModel,
+         embeddingApiKey: embApiKey,
++        allowOpenClientRegistration: allowOpenDCR,
+       });
+       setSaveSuccess(true);
+       setTimeout(() => setSaveSuccess(false), 3000);
+@@ -128,6 +130,22 @@
+             </div>
+           )}
+         </div>
++        
++        <div className="settings-section mt-4">
++          <h3 className="section-title"><i className="fa-solid fa-shield-halved"></i> Security Defaults</h3>
++          <div className="form-group checkbox-group">
++            <label className="checkbox-label" style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
++              <input
++                type="checkbox"
++                checked={allowOpenDCR}
++                onChange={(e) => setAllowOpenDCR(e.target.checked)}
++                style={{ width: '16px', height: '16px', margin: 0 }}
++              />
++              <strong>Allow Open Dynamic Client Registration (RFC 7591)</strong>
++            </label>
++            <p className="help-text" style={{ marginLeft: '24px' }}>If enabled, third-party clients (like Gemini Spark) can programmatically register themselves without requiring an Admin AppKey.</p>
++          </div>
++        </div>
+ 
+         <div className="settings-actions">
+           {saveSuccess && <span className="success-text fade-out"><i className="fa-solid fa-check"></i> Saved successfully</span>}

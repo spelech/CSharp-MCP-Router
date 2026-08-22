@@ -1,0 +1,11 @@
+--- Components/Clients/AuthorizationController.cs
++++ Components/Clients/AuthorizationController.cs
+@@ -6,6 +6,8 @@
+ using Microsoft.AspNetCore.Mvc;
+ using Microsoft.AspNetCore.Authorization;
+ using OpenIddict.Abstractions;
+ using OpenIddict.Server.AspNetCore;
+ using System.Text.Json;
++using Microsoft.Extensions.DependencyInjection;
++using McpRouter.Core.Routing;
+ 

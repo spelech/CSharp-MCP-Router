@@ -1,0 +1,10 @@
+--- frontend/src/shared/types/settings.ts
++++ frontend/src/shared/types/settings.ts
+@@ -7,6 +7,7 @@
+   embeddingApiModel: string;
+   globalMaxKeys?: number;
+   userMaxKeys?: number;
++  allowOpenClientRegistration?: boolean;
+ }
+ 
+ export interface SettingsState {

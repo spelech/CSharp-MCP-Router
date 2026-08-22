@@ -1,0 +1,9 @@
+--- Models/RouterSettings.cs
++++ Models/RouterSettings.cs
+@@ -14,5 +14,6 @@
+         public int GlobalMaxKeys { get; set; } = 100;
+         public int UserMaxKeys { get; set; } = 5;
+         public string UserSecretStorage { get; set; } = "Database"; // "Database" or "Vault"
++        public bool AllowOpenClientRegistration { get; set; } = true;
+     }
+ }

@@ -1,0 +1,22 @@
+--- McpRouter.Tests/AuthorizationControllerTests.cs
++++ McpRouter.Tests/AuthorizationControllerTests.cs
+@@ -10,6 +10,8 @@
+ using McpRouter.Core.Routing;
+ using McpRouter.Models;
+ using Microsoft.Extensions.Configuration;
++using Microsoft.Extensions.Logging;
++using System.Net.Http;
+ 
+ namespace McpRouter.Tests
+ {
+@@ -42,8 +44,8 @@
+ 
+             // Mock embedding service and settings
+-            var mockConfig = new Mock<IConfiguration>();
+-            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(mockConfig.Object, mockAudit.Object, null);
++            var mockLoggerFactory = new Mock<ILoggerFactory>();
++            mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
++            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), mockLoggerFactory.Object, new Mock<IServiceProvider>().Object);
+             embeddingServiceMock.Setup(m => m.GetSettings()).Returns(new RouterSettings { AllowOpenClientRegistration = true });
+ 
+             var mockAuthService = new Mock<IAuthorizationService>();

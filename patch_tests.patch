@@ -1,0 +1,37 @@
+--- McpRouter.Tests/AuthorizationControllerTests.cs
++++ McpRouter.Tests/AuthorizationControllerTests.cs
+@@ -37,13 +37,34 @@
+         {
+             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
+             mockAppManager.Setup(m => m.CreateAsync(It.IsAny<OpenIddictApplicationDescriptor>(), default))
+                           .ReturnsAsync(new object());
+             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+ 
++            var mockEmbeddingService = new Mock<McpRouter.Core.Routing.DynamicEmbeddingService>(
++                new Mock<Microsoft.Extensions.Configuration.IConfiguration>().Object,
++                new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object,
++                null);
++            mockEmbeddingService.Setup(m => m.GetSettings()).Returns(new McpRouter.Models.RouterSettings { AllowOpenClientRegistration = true });
++
++            var mockAuthService = new Mock<Microsoft.AspNetCore.Authorization.IAuthorizationService>();
++
++            var serviceProvider = new Microsoft.Extensions.DependencyInjection.ServiceCollection()
++                .AddSingleton(mockEmbeddingService.Object)
++                .AddSingleton(mockAuthService.Object)
++                .BuildServiceProvider();
++
++            var httpContext = new DefaultHttpContext
++            {
++                RequestServices = serviceProvider
++            };
++
+             var controller = new AuthorizationController(mockAppManager.Object, mockAudit.Object);
++            controller.ControllerContext = new ControllerContext
++            {
++                HttpContext = httpContext
++            };
+             var json = JsonDocument.Parse("{\"client_name\":\"IntegrationTestApp\"}").RootElement;
+ 
+             var result = await controller.RegisterClient(json) as OkObjectResult;
+ 
+             Assert.NotNull(result);

@@ -1,0 +1,35 @@
+--- Components/Clients/AuthorizationController.cs
++++ Components/Clients/AuthorizationController.cs
+@@ -7,6 +7,7 @@
+ using System.Security.Claims;
+ using System.Threading.Tasks;
+ using Microsoft.AspNetCore.Http;
++using Microsoft.Extensions.DependencyInjection;
+ using McpRouter.Core.Routing;
+ 
+ namespace McpRouter.Controllers
+@@ -60,11 +61,23 @@
+             throw new NotImplementedException("The specified grant type is not implemented.");
+         }
+ 
+-        [Authorize(Policy = "AdminPolicy")]
+         [HttpPost("~/api/register")]
+         [Produces("application/json")]
+         public async Task<IActionResult> RegisterClient([FromBody] JsonElement metadata)
+         {
++            var embeddingService = HttpContext.RequestServices.GetRequiredService<DynamicEmbeddingService>();
++            var settings = embeddingService.GetSettings();
++            
++            if (!settings.AllowOpenClientRegistration)
++            {
++                var authService = HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.Authorization.IAuthorizationService>();
++                var authResult = await authService.AuthorizeAsync(User, "AdminPolicy");
++                if (!authResult.Succeeded)
++                {
++                    return Forbid();
++                }
++            }
++
+             var clientName = metadata.TryGetProperty("client_name", out var cn) ? cn.GetString() : "Unknown Client";
+             var clientId = Guid.NewGuid().ToString("N");
+             var clientSecret = Guid.NewGuid().ToString("N");

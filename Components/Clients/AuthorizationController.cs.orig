@@ -60,12 +60,11 @@ namespace McpRouter.Components.Clients
             throw new NotImplementedException("The specified grant type is not implemented.");
         }
 
-        
         [HttpPost("~/api/register")]
         [Produces("application/json")]
         public async Task<IActionResult> RegisterClient([FromBody] JsonElement metadata)
         {
-            var embeddingService = HttpContext.RequestServices.GetRequiredService<McpRouter.Core.Routing.DynamicEmbeddingService>();
+            var embeddingService = HttpContext.RequestServices.GetRequiredService<DynamicEmbeddingService>();
             var settings = embeddingService.GetSettings();
             
             if (!settings.AllowOpenClientRegistration)
