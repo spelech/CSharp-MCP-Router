@@ -163,8 +163,9 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
         isEnabled: secTeEnabled,
       });
       showToast('Secret Provider configurations saved successfully!', 'success');
-    } catch {
-      showToast('Failed to save Secret Providers', 'error');
+    } catch (err: any) {
+      const msg = err?.response?.data?.error || err?.message || 'Failed to save Secret Providers';
+      showToast(msg, 'error');
     }
   };
 
