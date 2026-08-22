@@ -22,6 +22,10 @@ export const useConfirmStore = create<ConfirmState>((set, get) => ({
   options: { message: '' },
   resolve: null,
   confirm: (options: ConfirmOptions | string) => {
+    const { resolve: prevResolve } = get();
+    if (prevResolve) {
+      prevResolve(false);
+    }
     const opts: ConfirmOptions = typeof options === 'string' ? { message: options } : options;
     return new Promise<boolean>((resolve) => {
       set({
