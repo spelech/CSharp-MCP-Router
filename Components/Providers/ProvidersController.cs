@@ -55,7 +55,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -74,7 +75,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -123,13 +125,14 @@ namespace McpRouter.Components.Providers
             {
                 var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
                 _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "A validation error occurred." });
             }
             catch (Exception ex)
             {
+                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
                 var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
                 _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -191,7 +194,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return Ok(new { success = false, error = $"Vault connection failed: {ex.Message}" });
+                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                return Ok(new { success = false, error = "Vault connection failed." });
             }
         }
 
@@ -209,7 +213,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -257,13 +262,14 @@ namespace McpRouter.Components.Providers
             {
                 var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
                 _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
-                return BadRequest(new { error = ex.Message });
+                return BadRequest(new { error = "A validation error occurred." });
             }
             catch (Exception ex)
             {
+                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
                 var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
                 _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
         [HttpPost("auth/batch")]
@@ -323,8 +329,9 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
+                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
                 _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvidersBatch", "batch", "", false, ex.Message);
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -363,7 +370,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return Ok(new { success = false, error = $"LDAP connection/bind failed: {ex.Message}" });
+                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                return Ok(new { success = false, error = "LDAP connection/bind failed." });
             }
         }
     }

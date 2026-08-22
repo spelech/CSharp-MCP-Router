@@ -106,7 +106,7 @@ namespace McpRouter.Components.Capabilities
                 catch (ArgumentException ex)
                 {
                     _ = auditLogger.LogAdminActionAsync(username, "UpdateSettings", "embedding-settings", JsonSerializer.Serialize(settings), false, ex.Message);
-                    return Results.BadRequest(new { error = ex.Message });
+                    return Results.BadRequest(new { error = "An unexpected error occurred." });
                 }
             });
 
@@ -290,7 +290,7 @@ namespace McpRouter.Components.Capabilities
                 {
                     var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
                     await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, false, ex.Message);
-                    return Results.Problem(ex.Message);
+                    return Results.Problem("An unexpected error occurred.");
                 }
             });
 
@@ -794,7 +794,7 @@ namespace McpRouter.Components.Capabilities
                 return path;
             }
 
-            api.MapGet("/api/custom-files", () =>
+            api.MapGet("/api/custom-files", (ILogger<Program> logger) =>
             {
                 var result = new List<object>();
                 try
@@ -817,12 +817,13 @@ namespace McpRouter.Components.Capabilities
                 }
                 catch (Exception ex)
                 {
-                    return Results.Problem(ex.Message);
+                    logger.LogError(ex, "An unexpected error occurred.");
+                    return Results.Problem("An unexpected error occurred.");
                 }
                 return Results.Ok(result);
             });
 
-            api.MapGet("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name) =>
+            api.MapGet("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name, ILogger<Program> logger) =>
             {
                 if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
                 var cleanName = SanitizeFileName(name);
@@ -839,11 +840,12 @@ namespace McpRouter.Components.Capabilities
                 }
                 catch (Exception ex)
                 {
-                    return Results.Problem(ex.Message);
+                    logger.LogError(ex, "An unexpected error occurred.");
+                    return Results.Problem("An unexpected error occurred.");
                 }
             });
 
-            api.MapPost("/api/custom-files/{type}/{name}", async ([FromRoute] string type, [FromRoute] string name, [FromBody] JsonElement body) =>
+            api.MapPost("/api/custom-files/{type}/{name}", async ([FromRoute] string type, [FromRoute] string name, [FromBody] JsonElement body, ILogger<Program> logger) =>
             {
                 if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
                 var cleanName = SanitizeFileName(name);
@@ -865,7 +867,8 @@ namespace McpRouter.Components.Capabilities
                     }
                     catch (Exception ex)
                     {
-                        return Results.BadRequest($"Invalid JSON format: {ex.Message}");
+                        logger.LogError(ex, "Invalid JSON format.");
+                        return Results.BadRequest("Invalid JSON format.");
                     }
                 }
 
@@ -879,11 +882,12 @@ namespace McpRouter.Components.Capabilities
                 }
                 catch (Exception ex)
                 {
-                    return Results.Problem(ex.Message);
+                    logger.LogError(ex, "An unexpected error occurred.");
+                    return Results.Problem("An unexpected error occurred.");
                 }
             });
 
-            api.MapDelete("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name) =>
+            api.MapDelete("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name, ILogger<Program> logger) =>
             {
                 if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
                 var cleanName = SanitizeFileName(name);
@@ -900,7 +904,8 @@ namespace McpRouter.Components.Capabilities
                 }
                 catch (Exception ex)
                 {
-                    return Results.Problem(ex.Message);
+                    logger.LogError(ex, "An unexpected error occurred.");
+                    return Results.Problem("An unexpected error occurred.");
                 }
             });
 
