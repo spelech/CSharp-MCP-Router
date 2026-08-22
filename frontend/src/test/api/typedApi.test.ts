@@ -1,3 +1,5 @@
+/** @requirement UI-119 */
+
 import { describe, it, expect } from 'vitest';
 import { mockApiResponse } from '../setup';
 import {

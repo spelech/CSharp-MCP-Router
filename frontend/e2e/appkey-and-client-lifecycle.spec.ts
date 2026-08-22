@@ -1,3 +1,5 @@
+/** @requirement UI-129 */
+
 import { test, expect } from '@playwright/test';
 
 test.describe('AppKey and Client Lifecycle Flow', () => {

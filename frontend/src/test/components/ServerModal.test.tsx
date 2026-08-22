@@ -1,3 +1,5 @@
+/** @requirement UI-112 */
+
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { ServerModal } from '../../components/servers/ServerModal';
