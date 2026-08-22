@@ -210,7 +210,7 @@ namespace McpRouter.Tests
         [InlineData("manage_custom_files")]
         [InlineData("manage_system")]
         [InlineData("test_tool_call")]
-        [Requirement("MCP-ADMIN-PARITY-TOOLS-COVERAGE", "MCP", RequirementType.Positive, "Every UI management flow has a corresponding verified action in the consolidated Admin MCP tools.")]
+        [Requirement("MCP-ADMIN-PARITY-TOOLS-COVERAGE", "MCP", RequirementType.Positive, "Ensures every UI management workflow is backed by a verified, equivalent action within the consolidated Admin MCP tools.")]
         public async Task AdminTools_ExecuteSuccessfully(string toolName)
         {
             JsonElement args = toolName switch
@@ -243,7 +243,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [Requirement("MCP-ADMIN-PARITY-SERVERS", "MCP", RequirementType.Positive, "manage_servers supports full parity for list, get, create, update, toggle, delete, reconnect, and reconnect_all actions.")]
+        [Requirement("MCP-ADMIN-PARITY-SERVERS", "MCP", RequirementType.Positive, "Validates that the manage_servers tool provides comprehensive administrative capabilities including listing, retrieving, creating, updating, toggling, deleting, and reconnecting servers.")]
         public async Task ManageServers_Parity_AllActions()
         {
             var serverId = "srv-parity-01";
@@ -333,7 +333,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [Requirement("GUARD-ADMIN-SERVERS-VALIDATION", "GUARD", RequirementType.Negative, "manage_servers rejects invalid transport types, non-existent servers, and missing required parameters.")]
+        [Requirement("GUARD-ADMIN-SERVERS-VALIDATION", "GUARD", RequirementType.Negative, "Verifies that the manage_servers tool accurately enforces validation by rejecting malformed transport types, missing required parameters, and requests for non-existent servers.")]
         public async Task ManageServers_ValidationGuardrails()
         {
             // Invalid transport type
