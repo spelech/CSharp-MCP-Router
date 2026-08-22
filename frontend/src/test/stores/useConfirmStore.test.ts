@@ -54,4 +54,16 @@ describe('useConfirmStore', () => {
     expect(result).toBe(false);
     expect(useConfirmStore.getState().isOpen).toBe(false);
   });
+
+  it('settles existing pending promise with false when a new confirmation is opened', async () => {
+    const firstPromise = confirmAction('First confirmation');
+    const secondPromise = confirmAction('Second confirmation');
+
+    const firstResult = await firstPromise;
+    expect(firstResult).toBe(false);
+
+    useConfirmStore.getState().handleConfirm();
+    const secondResult = await secondPromise;
+    expect(secondResult).toBe(true);
+  });
 });
