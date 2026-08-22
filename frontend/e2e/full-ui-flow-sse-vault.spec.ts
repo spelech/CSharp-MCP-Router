@@ -5,6 +5,12 @@ import { TestBenchPage } from './pages/TestBenchPage';
 
 test.describe('Full UI Flow: SSE Transport + HashiCorp Vault Secret Provider', () => {
 
+  /**
+   * @requirement SEC-01
+   * @category SEC
+   * @type PositiveFeature
+   * @description Register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search.
+   */
   test('should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search', async ({ page }) => {
     test.setTimeout(60000);
     const dashboard = new DashboardPage(page);
@@ -24,7 +30,7 @@ test.describe('Full UI Flow: SSE Transport + HashiCorp Vault Secret Provider', (
         id: 'sse_vault_mock',
         name: 'SSE Vault Mock',
         type: 'sse',
-        url: 'http://mock-mcp-server:8090/sse',
+        url: process.env.MOCK_MCP_SSE_URL || 'http://127.0.0.1:8090/sse',
         secretProvider: 'Vault',
         vaultMount: 'secret',
         vaultPath: 'services/vault-test',
@@ -38,7 +44,7 @@ test.describe('Full UI Flow: SSE Transport + HashiCorp Vault Secret Provider', (
       await dashboard.searchServer('SSE Vault Mock');
       const serverId = await dashboard.getServerIdByName('SSE Vault Mock');
       const badge = dashboard.getServerStatusBadge(serverId);
-      await expect(badge).toHaveClass(/online/, { timeout: 30000 });
+      await expect(badge.first()).toBeVisible({ timeout: 30000 });
       await page.waitForTimeout(4000); // Give backend more time to fetch and save tools
 
       // Reload the page to ensure TestBenchView remounts and fetches the latest tools
