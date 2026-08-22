@@ -1,12 +1,8 @@
-import React, { useEffect, useState } from 'react';
-
+import React from 'react';
+ 
 export const ConsentView: React.FC = () => {
-  const [clientName, setClientName] = useState('');
   const searchParams = new URLSearchParams(window.location.search);
-
-  useEffect(() => {
-    setClientName(searchParams.get('client_name') || searchParams.get('client_id') || 'Unknown Client');
-  }, []);
+  const clientName = searchParams.get('client_name') || searchParams.get('client_id') || 'Unknown Client';
 
   return (
     <div className="card" style={{ maxWidth: 400, margin: '100px auto', textAlign: 'center' }}>
