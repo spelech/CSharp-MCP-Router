@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.30.0`** | 2026-08-22 | feat(ui): comprehensive aesthetic UI overhaul implementing stark monochrome mode, vibrant neon green/orange dark mode accents, cyan/blue light mode accents, and mobile responsive flex refactoring for toolbar dropdowns and stat grids |
 | **`v4.29.0`** | 2026-08-22 | Security fixes: resolved CodeQL alerts for log forging, path injection, cleartext sensitive info storage, and missing X-Frame-Options headers. |
 | **`v4.28.0`** | 2026-08-22 | chore(repo): large repository health sweep refactoring backend, frontend, auth, secrets, CI, and rewriting all documentation guides |
 | **`v4.27.2`** | 2026-08-22 | refactor(reqs): normalize requirement taxonomy IDs across all C#, Vitest, and Playwright test suites to eliminate `REQ-` prefixes and strictly enforce standard category codes (`AUTH-`, `UI-`, `DB-`, `GUARD-`) |

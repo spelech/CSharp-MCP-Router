@@ -94,6 +94,7 @@
     background: var(--primary);
     border-color: var(--primary);
     box-shadow: 0 0 10px var(--primary-glow);
+    color: var(--btn-primary-text);
 }
 .btn-primary:hover {
     background: rgb(var(--primary-rgb) / 0.85);
@@ -128,6 +129,8 @@
     font-size: var(--font-size-md);
     cursor: pointer;
     padding: 6px;
+    min-width: 44px;
+    min-height: 44px;
     border-radius: var(--radius-sm);
     transition: all var(--transition-fast);
     display: inline-flex;

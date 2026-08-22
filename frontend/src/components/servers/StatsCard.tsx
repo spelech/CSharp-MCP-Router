@@ -11,21 +11,21 @@ export const StatsCard: React.FC = () => {
 
   return (
     <div className="stats-grid">
-      <div className="stat-card">
+      <div className="stat-box">
         <span className="stat-label">Total Servers</span>
-        <span className="stat-value" id="stat-total-servers">{total}</span>
+        <span className="stat-number" id="stat-total-servers">{total}</span>
       </div>
-      <div className="stat-card">
+      <div className="stat-box">
         <span className="stat-label">Connected</span>
-        <span className="stat-value text-success" id="stat-connected-servers">{connected}</span>
+        <span className="stat-number text-success" id="stat-connected-servers">{connected}</span>
       </div>
-      <div className="stat-card">
+      <div className="stat-box">
         <span className="stat-label">Failed / Error</span>
-        <span className="stat-value text-danger" id="stat-failed-servers">{failed}</span>
+        <span className="stat-number text-danger" id="stat-failed-servers">{failed}</span>
       </div>
-      <div className="stat-card">
+      <div className="stat-box">
         <span className="stat-label">Disabled</span>
-        <span className="stat-value text-muted" id="stat-disabled-servers">{disabled}</span>
+        <span className="stat-number text-muted" id="stat-disabled-servers">{disabled}</span>
       </div>
     </div>
   );

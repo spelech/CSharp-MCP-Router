@@ -1,7 +1,7 @@
 /* Toast Container */
 #toast-container {
     position: fixed;
-    top: var(--space-5);
+    bottom: var(--space-5);
     right: var(--space-5);
     z-index: var(--z-toast);
     display: flex;
@@ -70,6 +70,8 @@
 }
 
 .toast-close {
+    min-width: 44px;
+    min-height: 44px;
     background: transparent;
     border: none;
     color: var(--text-muted);
