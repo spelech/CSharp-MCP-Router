@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T15:13:07.1630445Z",
+    "generatedAt": "2026-08-22T15:41:06.3702005Z",
     "totalRequirements": 94,
     "positiveCount": 71,
     "guardrailCount": 23,
-    "totalProofs": 230
+    "totalProofs": 234
   },
   "requirements": [
     {
@@ -524,7 +524,7 @@
       "category": "AUTH",
       "type": "Negative",
       "description": "Non-admin users can create personal App Keys up to quota",
-      "proofCount": 8,
+      "proofCount": 9,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -581,6 +581,13 @@
           "lineNumber": 217,
           "testName": "displays one-time secret result and copies plaintext key to clipboard",
           "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "lineNumber": 33,
+          "testName": "Non-Admin Context: mints personal key, views snippet, and revokes key",
+          "details": null
         }
       ]
     },
@@ -589,7 +596,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "Non-admin users can view their personal App Keys",
-      "proofCount": 5,
+      "proofCount": 6,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -625,6 +632,13 @@
           "lineNumber": 79,
           "testName": "renders keys list, copies config snippet, and revokes key",
           "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "lineNumber": 5,
+          "testName": "Non-Admin Context: displays My App Keys navigation and personal quota indicator",
+          "details": null
         }
       ]
     },
@@ -633,7 +647,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "Custom user quotas override default limit",
-      "proofCount": 5,
+      "proofCount": 6,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -669,6 +683,13 @@
           "lineNumber": 222,
           "testName": "manages custom user quotas in admin quotas tab",
           "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "lineNumber": 135,
+          "testName": "Admin Context: configures custom user quota override",
+          "details": null
         }
       ]
     },
@@ -677,7 +698,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "System keys are distinct and require admin permissions",
-      "proofCount": 9,
+      "proofCount": 10,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -740,6 +761,13 @@
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 166,
           "testName": "handles admin tab switching and username filtering",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "lineNumber": 87,
+          "testName": "Admin Context: manages segmented App-Level Keys and User Personal Keys",
           "details": null
         }
       ]
