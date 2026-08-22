@@ -100,7 +100,7 @@ namespace McpRouter.Components.AppKeys
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
@@ -149,7 +149,7 @@ namespace McpRouter.Components.AppKeys
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
@@ -313,7 +313,7 @@ namespace McpRouter.Components.AppKeys
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
@@ -354,7 +354,7 @@ namespace McpRouter.Components.AppKeys
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
@@ -374,7 +374,7 @@ namespace McpRouter.Components.AppKeys
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
@@ -410,7 +410,7 @@ namespace McpRouter.Components.AppKeys
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
@@ -441,7 +441,7 @@ namespace McpRouter.Components.AppKeys
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
