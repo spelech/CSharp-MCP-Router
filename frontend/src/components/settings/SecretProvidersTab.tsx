@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { SecretProviderConfig } from '../../shared/types';
 import { testVaultConnectionApi } from '../../api/settingsApi';
+import { showToast } from '../../stores/useToastStore';
 
 export interface SecretProvidersTabProps {
   providers: SecretProviderConfig[];
@@ -161,9 +162,9 @@ export const SecretProvidersTab: React.FC<SecretProvidersTabProps> = ({ provider
         configJson: JSON.stringify(teConfig),
         isEnabled: secTeEnabled,
       });
-      alert('Secret Provider configurations saved successfully!');
+      showToast('Secret Provider configurations saved successfully!', 'success');
     } catch {
-      alert('Failed to save Secret Providers');
+      showToast('Failed to save Secret Providers', 'error');
     }
   };
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { AuthProviderConfig } from '../../shared/types';
 import { testLdapConnectionApi } from '../../api/settingsApi';
+import { showToast } from '../../stores/useToastStore';
 
 export interface IdentityAuthTabProps {
   providers: AuthProviderConfig[];
@@ -96,9 +97,9 @@ export const IdentityAuthTab: React.FC<IdentityAuthTabProps> = ({ providers, sav
         isEnabled: authOidcEnabled,
       });
 
-      alert('Auth Provider configurations saved successfully!');
+      showToast('Auth Provider configurations saved successfully!', 'success');
     } catch {
-      alert('Failed to save Auth Providers');
+      showToast('Failed to save Auth Providers', 'error');
     }
   };
 
