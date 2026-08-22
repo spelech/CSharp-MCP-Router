@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.27.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.27.1-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-620%20passing-2ea44f?style=for-the-badge)
@@ -207,11 +207,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.27.1`** | 2026-08-22 | test(e2e): add comprehensive Playwright E2E test suites for self-service personal AppKeys, personal quota limits, and admin custom user quota overrides |
 | **`v4.27.0`** | 2026-08-22 | feat(auth): self-service personal AppKeys, App-Level keys separation, UserQuotas table & management endpoints, and role-adaptive frontend UI |
 | **`v4.26.1`** | 2026-08-22 | feat(ui): implement accessible dark-mode ConfirmModal with useConfirmStore and migrate all destructive window.confirm dialogs across settings and server management to custom modal with toast notifications |
 | **`v4.26.0`** | 2026-08-22 | feat(testing): containerized multi-service E2E testing stack (OpenLDAP, Vault, MySQL, Mock MCP), comprehensive Playwright E2E suites (24 proofs, 100% pass), OAuth consent SPA routing fixes, and automated live user guide screenshots |
 | **`v4.25.0`** | 2026-08-22 | feat(appkeys): removed LiteLLM branding from AppKeys UI/docs and enabled unlimited AppKeys by default (`0` = Unlimited) |
-| **`v4.24.0`** | 2026-08-22 | feat(auth): added native React UI for OAuth Consent Screen, and enabled `refresh_token` flows for multi-tenant clients |
 
 ---
 
