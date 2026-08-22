@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T05:45:07.1363746Z",
-    "totalRequirements": 85,
-    "positiveCount": 66,
-    "guardrailCount": 19,
-    "totalProofs": 164
+    "generatedAt": "2026-08-22T06:13:00.3417107Z",
+    "totalRequirements": 87,
+    "positiveCount": 67,
+    "guardrailCount": 20,
+    "totalProofs": 166
   },
   "requirements": [
     {
@@ -359,6 +359,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 180,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-109",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "ConsentView properly renders the client name from query string and builds correct form action.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
+          "lineNumber": 17,
+          "testName": "renders client name from query string and sets form action",
           "details": null
         }
       ]
@@ -1482,6 +1498,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 41,
           "testName": "RegisterClient_CreatesApplicationAndReturnsOk",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-108",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "Authorize throws InvalidOperationException when OIDC request is null.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 79,
+          "testName": "Authorize_ThrowsInvalidOperationException_WhenRequestNull",
           "details": null
         }
       ]

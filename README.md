@@ -1,9 +1,9 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.22.2-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.24.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-609%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-619%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -207,11 +207,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.22.2`** | 2026-08-21 | patch |
+| **`v4.24.0`** | 2026-08-22 | feat(auth): added native React UI for OAuth Consent Screen, and enabled `refresh_token` flows for multi-tenant clients |
+| **`v4.23.0`** | 2026-08-22 | feat(auth): added interactive Per-User OAuth Consent Screen to support true multi-tenant scenarios via authorization_code flows |
 | **`v4.22.1`** | 2026-08-21 | 4.22.0 |
 | **`v4.20.3`** | 2026-08-21 | fix: resolve typescript ERESOLVE in frontend dependencies |
 | **`v4.20.2`** | 2026-08-21 | chore(deps): bump dependencies and fix SQLCipher version conflict |
-| **`v4.20.1`** | 2026-08-21 | fix(e2e): fix backend DI scope and SQLite schema syntax errors, and add comprehensive Playwright E2E coverage for User Credentials |
 
 ---
 
