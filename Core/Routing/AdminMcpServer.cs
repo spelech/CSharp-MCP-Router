@@ -210,7 +210,7 @@ namespace McpRouter.Core.Routing
                     ex.Message
                 );
 
-                return FormatErrorResponse("An unexpected error occurred.");
+                return FormatErrorResponse(ex.Message);
             }
         }
 
@@ -277,7 +277,7 @@ namespace McpRouter.Core.Routing
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "An unexpected error occurred.");
-                response.Error = new JsonRpcError { Code = -32603, Message = "An unexpected error occurred." };
+                response.Error = new JsonRpcError { Code = -32603, Message = ex.Message };
             }
 
             return response;

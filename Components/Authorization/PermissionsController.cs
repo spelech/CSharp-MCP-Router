@@ -38,7 +38,7 @@ namespace McpRouter.Components.Authorization
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
@@ -99,7 +99,7 @@ namespace McpRouter.Components.Authorization
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 await _auditLogger.LogAdminActionAsync(username, "policy.save", policy.TargetId ?? policy.Id ?? "", System.Text.Json.JsonSerializer.Serialize(policy), false, ex.Message);
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
@@ -119,7 +119,7 @@ namespace McpRouter.Components.Authorization
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 await _auditLogger.LogAdminActionAsync(username, "policy.delete", id, "", false, ex.Message);
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
@@ -139,7 +139,7 @@ namespace McpRouter.Components.Authorization
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
@@ -195,7 +195,7 @@ namespace McpRouter.Components.Authorization
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 await _auditLogger.LogAdminActionAsync(username, "mapping.save", mapping.ExternalId ?? mapping.Id ?? "", System.Text.Json.JsonSerializer.Serialize(mapping), false, ex.Message);
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
@@ -215,7 +215,7 @@ namespace McpRouter.Components.Authorization
             }
             catch (Exception ex)
             {
-                HttpContext.RequestServices.GetRequiredService<Microsoft.Extensions.Logging.ILoggerFactory>().CreateLogger(GetType().Name).LogError(ex, "An unexpected error occurred.");
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 await _auditLogger.LogAdminActionAsync(username, "mapping.delete", id, "", false, ex.Message);
                 return StatusCode(500, new { error = "An unexpected error occurred." });
             }
