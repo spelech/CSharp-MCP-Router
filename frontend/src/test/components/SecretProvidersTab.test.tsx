@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { SecretProvidersTab } from '../../components/settings/SecretProvidersTab';
 import * as settingsApi from '../../api/settingsApi';
+import { useToastStore } from '../../stores/useToastStore';
 
 vi.mock('../../api/settingsApi', () => ({
   testVaultConnectionApi: vi.fn(),
@@ -12,6 +13,7 @@ describe('SecretProvidersTab Component', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useToastStore.setState({ toasts: [] });
   });
 
   /**
@@ -55,6 +57,34 @@ describe('SecretProvidersTab Component', () => {
     });
 
     expect(saveSecretProviderMock).toHaveBeenCalledTimes(4);
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Secret Provider configurations saved successfully') && t.type === 'success')).toBe(true);
+  });
+
+  /**
+   * @requirement REQ-UI-TOAST-TRANSITION
+   * @category UI
+   * @type FailClosedGuardrail
+   * @description Displays error toast notification when saving secret providers fails.
+   */
+  it('displays error toast when saving secret providers fails', async () => {
+    const failingSaveMock = vi.fn().mockRejectedValue(new Error('Save failed'));
+    const providers = [
+      { providerName: 'Vault', displayName: 'HashiCorp Vault', isEnabled: true, configJson: '{"address":"http://127.0.0.1:8200"}' },
+    ];
+
+    render(
+      <SecretProvidersTab
+        providers={providers}
+        saveSecretProvider={failingSaveMock}
+      />
+    );
+
+    const saveBtn = screen.getByRole('button', { name: /save secret config/i });
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Failed to save Secret Providers') && t.type === 'error')).toBe(true);
   });
 
   /**

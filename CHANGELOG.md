@@ -8,6 +8,8 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.26.1`** | 2026-08-22 | feat(ui): implement accessible dark-mode ConfirmModal with useConfirmStore and migrate all destructive window.confirm dialogs across settings and server management to custom modal with toast notifications |
+| **`v4.26.0`** | 2026-08-22 | feat(testing): containerized multi-service E2E testing stack (OpenLDAP, Vault, MySQL, Mock MCP), comprehensive Playwright E2E suites (24 proofs, 100% pass), OAuth consent SPA routing fixes, and automated live user guide screenshots |
 | **`v4.25.0`** | 2026-08-22 | feat(appkeys): removed LiteLLM branding from AppKeys UI/docs and enabled unlimited AppKeys by default (`0` = Unlimited) |
 | **`v4.24.0`** | 2026-08-22 | feat(auth): added native React UI for OAuth Consent Screen, and enabled `refresh_token` flows for multi-tenant clients |
 | **`v4.23.0`** | 2026-08-22 | feat(auth): added interactive Per-User OAuth Consent Screen to support true multi-tenant scenarios via authorization_code flows |

@@ -6,6 +6,8 @@ The **MCP Gateway Router** enables seamless registration and management of backe
 
 ## ➕ Registering a New Backend Server
 
+![Add Server Registration Modal](../assets/add_server_modal.jpg)
+
 Click the **`+ Add Server`** button in the dashboard toolbar to launch the Server Registration Modal.
 
 ```
@@ -121,6 +123,8 @@ To eliminate hardcoded credentials and plaintext secrets in databases, the route
 ---
 
 ## 👁️ Inspecting Server Capabilities (Inspect Modal)
+
+![Server Capabilities Inspect Modal](../assets/server_inspect_modal.jpg)
 
 Click **`Inspect`** on any server card to open the Server Inspect Modal:
 

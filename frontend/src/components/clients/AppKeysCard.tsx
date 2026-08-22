@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
+import { showToast } from '../../stores/useToastStore';
 
 export const AppKeysCard: React.FC = () => {
   const { appKeys, limits, fetchAppKeys, fetchLimits, revokeAppKey, openModal } = useAppKeyStore();
@@ -24,7 +25,7 @@ export const AppKeysCard: React.FC = () => {
       }
     }, null, 2);
     navigator.clipboard.writeText(snippet);
-    alert('Copied sample mcp_config.json snippet to clipboard!');
+    showToast('Copied sample mcp_config.json snippet to clipboard!', 'success');
   };
 
   return (

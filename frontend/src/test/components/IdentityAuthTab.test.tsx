@@ -1,9 +1,20 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { IdentityAuthTab } from '../../components/settings/IdentityAuthTab';
 import * as settingsApi from '../../api/settingsApi';
+import { useToastStore } from '../../stores/useToastStore';
 
 describe('IdentityAuthTab Component', () => {
+  beforeEach(() => {
+    useToastStore.setState({ toasts: [] });
+  });
+
+  /**
+   * @requirement AUTH-01
+   * @category AUTH
+   * @type PositiveFeature
+   * @description Renders Active Directory disabled initially, toggles on and exposes fields.
+   */
   it('renders Active Directory disabled initially, toggles on and exposes fields', async () => {
     const saveSpy = vi.fn().mockResolvedValue(undefined);
     render(
@@ -32,6 +43,12 @@ describe('IdentityAuthTab Component', () => {
     expect(screen.getByLabelText('Domain Name')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement AUTH-01
+   * @category AUTH
+   * @type PositiveFeature
+   * @description Fills LDAP parameters and executes test connection.
+   */
   it('fills LDAP parameters and executes test connection', async () => {
     const testApiSpy = vi.spyOn(settingsApi, 'testLdapConnectionApi').mockResolvedValue({
       success: true,
@@ -79,6 +96,12 @@ describe('IdentityAuthTab Component', () => {
     expect(screen.getByText(/LDAP bind successful/i)).toBeInTheDocument();
   });
 
+  /**
+   * @requirement REQ-UI-TOAST-TRANSITION
+   * @category UI
+   * @type PositiveFeature
+   * @description Saves updated Active Directory configuration JSON and shows success toast.
+   */
   it('saves updated Active Directory configuration JSON', async () => {
     const saveSpy = vi.fn().mockResolvedValue(undefined);
     render(
@@ -109,5 +132,35 @@ describe('IdentityAuthTab Component', () => {
         configJson: expect.stringContaining('ldap.production.local'),
       })
     );
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Auth Provider configurations saved successfully') && t.type === 'success')).toBe(true);
+  });
+
+  /**
+   * @requirement REQ-UI-TOAST-TRANSITION
+   * @category UI
+   * @type FailClosedGuardrail
+   * @description Displays error toast notification when saving auth providers fails.
+   */
+  it('displays error toast when saving auth providers fails', async () => {
+    const saveSpy = vi.fn().mockRejectedValue(new Error('Save failed'));
+    render(
+      <IdentityAuthTab
+        providers={[
+          {
+            providerName: 'ActiveDirectory',
+            displayName: 'Active Directory',
+            isEnabled: true,
+          },
+        ]}
+        saveAuthProvider={saveSpy}
+      />
+    );
+
+    const saveBtn = screen.getByRole('button', { name: /save auth config/i });
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Failed to save Auth Providers') && t.type === 'error')).toBe(true);
   });
 });

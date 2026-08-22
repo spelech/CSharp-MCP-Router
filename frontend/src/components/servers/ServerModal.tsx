@@ -132,6 +132,7 @@ const ServerModalDialog: React.FC = () => {
                 <option value="Vault">HashiCorp Vault (KV v2)</option>
                 <option value="WindowsRegistry">Windows Registry (DPAPI)</option>
                 <option value="Environment">Environment Variables</option>
+                <option value="UserProvided">User-Provided Authentication (PAT / Per-User)</option>
               </select>
             </div>
             <div className="form-group">

@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { useServerStore, McpServer } from '../../stores/useServerStore';
 import { useToastStore } from '../../stores/useToastStore';
+import { useConfirmStore } from '../../stores/useConfirmStore';
 import { mockApiResponse } from '../setup';
 
 describe('useServerStore', () => {
@@ -199,8 +200,13 @@ describe('useServerStore', () => {
   });
 
   describe('deleteServer', () => {
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type PositiveFeature
+     * @description Prompts confirmation modal and deletes server when confirmed.
+     */
     it('prompts window.confirm and deletes server when confirmed', async () => {
-      window.confirm = vi.fn(() => true);
       let deleteCalled = false;
       mockApiResponse(/\/api\/servers\/docker-mcp/, (_url, options) => {
         if (options?.method === 'DELETE') {
@@ -210,15 +216,26 @@ describe('useServerStore', () => {
         return sampleServer;
       });
 
-      await useServerStore.getState().deleteServer('docker-mcp', 'Docker MCP');
+      const deletePromise = useServerStore.getState().deleteServer('docker-mcp', 'Docker MCP');
 
-      expect(window.confirm).toHaveBeenCalled();
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      expect(useConfirmStore.getState().options.title).toBe('Delete Server');
+      expect(useConfirmStore.getState().options.danger).toBe(true);
+
+      useConfirmStore.getState().handleConfirm();
+      await deletePromise;
+
       expect(deleteCalled).toBe(true);
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('deleted successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement REQ-UI-CONFIRM-MODAL
+     * @category UI
+     * @type FailClosedGuardrail
+     * @description Does not send delete request when confirm is cancelled.
+     */
     it('does not send delete request when confirm is cancelled', async () => {
-      window.confirm = vi.fn(() => false);
       let deleteCalled = false;
       mockApiResponse(/\/api\/servers\/docker-mcp/, (_url, options) => {
         if (options?.method === 'DELETE') {
@@ -228,9 +245,12 @@ describe('useServerStore', () => {
         return sampleServer;
       });
 
-      await useServerStore.getState().deleteServer('docker-mcp', 'Docker MCP');
+      const deletePromise = useServerStore.getState().deleteServer('docker-mcp', 'Docker MCP');
 
-      expect(window.confirm).toHaveBeenCalled();
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      useConfirmStore.getState().handleCancel();
+      await deletePromise;
+
       expect(deleteCalled).toBe(false);
     });
   });

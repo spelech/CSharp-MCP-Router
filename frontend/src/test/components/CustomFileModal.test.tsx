@@ -2,10 +2,11 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { CustomFileModal } from '../../components/settings/CustomFileModal';
 import { useSettingsStore } from '../../stores/useSettingsStore';
+import { useToastStore } from '../../stores/useToastStore';
 
 describe('CustomFileModal Component', () => {
   beforeEach(() => {
-    vi.spyOn(window, 'alert').mockImplementation(() => {});
+    useToastStore.setState({ toasts: [] });
     useSettingsStore.setState({
       isCustomFileOpen: true,
       editingFileMeta: null,
@@ -84,7 +85,13 @@ describe('CustomFileModal Component', () => {
     expect(useSettingsStore.getState().activeFileModalTab).toBe('editor');
   });
 
-  it('alerts when switching from invalid JSON to Visual Prompt Builder', async () => {
+  /**
+   * @requirement REQ-UI-TOAST-TRANSITION
+   * @category UI
+   * @type FailClosedGuardrail
+   * @description Displays error toast notification when switching from invalid JSON to Visual Prompt Builder.
+   */
+  it('shows error toast when switching from invalid JSON to Visual Prompt Builder', async () => {
     useSettingsStore.setState({ activeFileModalTab: 'editor' });
     render(<CustomFileModal />);
 
@@ -96,7 +103,51 @@ describe('CustomFileModal Component', () => {
       fireEvent.click(builderTabBtn);
     });
 
-    expect(window.alert).toHaveBeenCalledWith(expect.stringContaining('Cannot switch to Visual Builder'));
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Cannot switch to Visual Builder') && t.type === 'error')).toBe(true);
+  });
+
+  /**
+   * @requirement REQ-UI-TOAST-TRANSITION
+   * @category UI
+   * @type FailClosedGuardrail
+   * @description Displays error toast notification when saving without a file name.
+   */
+  it('shows error toast when saving without a file name', async () => {
+    render(<CustomFileModal />);
+
+    const fileNameInput = screen.getByLabelText(/file name/i);
+    fireEvent.change(fileNameInput, { target: { value: '   ' } });
+
+    const saveBtn = screen.getByRole('button', { name: /save file/i });
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Please enter a file name') && t.type === 'error')).toBe(true);
+  });
+
+  /**
+   * @requirement REQ-UI-TOAST-TRANSITION
+   * @category UI
+   * @type FailClosedGuardrail
+   * @description Displays error toast notification when saving prompt with invalid JSON content.
+   */
+  it('shows error toast when saving prompt with invalid JSON content', async () => {
+    useSettingsStore.setState({ activeFileModalTab: 'editor' });
+    render(<CustomFileModal />);
+
+    const fileNameInput = screen.getByLabelText(/file name/i);
+    fireEvent.change(fileNameInput, { target: { value: 'invalid.json' } });
+
+    const rawEditor = screen.getByLabelText('File Content');
+    fireEvent.change(rawEditor, { target: { value: '{ bad json' } });
+
+    const saveBtn = screen.getByRole('button', { name: /save file/i });
+    await act(async () => {
+      fireEvent.click(saveBtn);
+    });
+
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Invalid JSON content') && t.type === 'error')).toBe(true);
   });
 
   it('changes file type to resources and adjusts extension', async () => {
