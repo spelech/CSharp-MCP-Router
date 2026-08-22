@@ -6,6 +6,8 @@ The **MCP Gateway Router Dashboard** provides a centralized control plane for mo
 
 ## 🖥️ Layout & Primary Navigation Tabs
 
+![MCP Gateway Router Overview Dashboard](../assets/dashboard.jpg)
+
 The web interface features a dark-mode glassmorphic design with a fixed top navigation bar that enables one-click switching across primary functional views:
 
 ```
@@ -107,7 +109,15 @@ Each registered backend MCP server is rendered in an individual glassmorphic car
 * **🔄 Reconnect**: Forces an immediate background cache flush and downstream connection reset.
 * **🗑️ Delete**: Safely removes the server registration and cleans up in-memory sessions.
 
+![Server Capabilities Inspect Modal](../assets/server_inspect_modal.jpg)
+
 ---
+
+## 🔑 My MCP Servers (Per-User Provided Credentials)
+
+![My MCP Servers View](../assets/my_mcp_servers_view.jpg)
+
+For multi-tenant environments where individual users bring their own personal access tokens (PATs) or API credentials, the **My MCP Servers** tab allows end-users to securely manage and store isolated credentials encrypted in SQLite or MySQL with the master envelope key.
 
 ## 📖 Navigation Flow Summary
 
