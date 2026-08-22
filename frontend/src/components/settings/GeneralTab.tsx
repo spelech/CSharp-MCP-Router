@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { EmbeddingSettings } from '../../shared/types';
 
 export interface GeneralTabProps {
@@ -7,6 +7,10 @@ export interface GeneralTabProps {
 }
 
 export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSettings }) => {
+  return <GeneralTabForm key={JSON.stringify(settings)} settings={settings} saveEmbeddingSettings={saveEmbeddingSettings} />;
+};
+
+const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSettings }) => {
   const [dashboardTitle, setDashboardTitle] = useState(settings?.dashboardTitle ?? 'MCP Gateway');
   const [dashboardIcon, setDashboardIcon] = useState(settings?.dashboardIcon ?? 'fa-solid fa-network-wired');
   const [embProvider, setEmbProvider] = useState(settings?.embeddingProvider ?? 'local');
@@ -18,21 +22,6 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
   const [userMaxKeys, setUserMaxKeys] = useState<number>(settings?.userMaxKeys ?? 5);
   const [globalMaxKeys, setGlobalMaxKeys] = useState<number>(settings?.globalMaxKeys ?? 100);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
-
-  useEffect(() => {
-    if (settings) {
-      setDashboardTitle(settings.dashboardTitle ?? 'MCP Gateway');
-      setDashboardIcon(settings.dashboardIcon ?? 'fa-solid fa-network-wired');
-      setEmbProvider(settings.embeddingProvider ?? 'local');
-      setEmbModelDir(settings.embeddingModelDir ?? 'data/models');
-      setEmbApiUrl(settings.embeddingApiUrl ?? 'http://litellm:4000/v1/embeddings');
-      setEmbApiModel(settings.embeddingApiModel ?? 'all-MiniLM-L6-v2');
-      setEmbApiKey(settings.embeddingApiKey ?? '');
-      setAllowOpenDCR(settings.allowOpenClientRegistration ?? true);
-      setUserMaxKeys(settings.userMaxKeys ?? 5);
-      setGlobalMaxKeys(settings.globalMaxKeys ?? 100);
-    }
-  }, [settings]);
 
   const handleSaveSearchSettings = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T14:48:49.9383540Z",
+    "generatedAt": "2026-08-22T15:00:32.8790341Z",
     "totalRequirements": 94,
     "positiveCount": 71,
     "guardrailCount": 23,
@@ -2181,14 +2181,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 24,
+          "lineNumber": 23,
           "testName": "shows error toast when saving invalid JSON credentials",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 65,
+          "lineNumber": 64,
           "testName": "saves valid credentials successfully and closes modal",
           "details": null
         },

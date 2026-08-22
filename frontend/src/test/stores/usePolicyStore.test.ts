@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { useSettingsStore, AccessPolicy, GroupMapping } from '../../stores/useSettingsStore';
 import { useToastStore } from '../../stores/useToastStore';
 import { useConfirmStore } from '../../stores/useConfirmStore';

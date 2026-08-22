@@ -34,7 +34,7 @@ export const AppKeysCard: React.FC = () => {
       if (activeTab === 'quotas') {
         fetchUserQuotas();
       } else {
-        fetchAppKeys(activeTab, activeTab === 'personal' ? (usernameFilter.trim() || undefined) : undefined);
+        fetchAppKeys(activeTab);
       }
     } else {
       fetchAppKeys('personal');
