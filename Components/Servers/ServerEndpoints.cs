@@ -212,7 +212,7 @@ namespace McpRouter.Components.Servers
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
-                logger.LogInformation("POST /api/servers started for {url}", server.Url);
+                logger.LogInformation("POST /api/servers started for {url}", server.Url?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
 
                 var allowedTypes = new[] { "sse", "http", "streamable", "stdio", "custom" };
                 var lowerType = (server.Type ?? "sse").ToLowerInvariant();

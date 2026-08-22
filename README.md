@@ -207,6 +207,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.28.1`** | 2026-08-22 | Security fixes: resolved CodeQL alerts. |
 | **`v4.28.0`** | 2026-08-22 | chore(repo): large repository health sweep refactoring backend, frontend, auth, secrets, CI, and rewriting all documentation guides |
 | **`v4.27.2`** | 2026-08-22 | refactor(reqs): normalize requirement taxonomy IDs across all C#, Vitest, and Playwright test suites to eliminate `REQ-` prefixes and strictly enforce standard category codes (`AUTH-`, `UI-`, `DB-`, `GUARD-`) |
 | **`v4.27.1`** | 2026-08-22 | test(e2e): add comprehensive Playwright E2E test suites for self-service personal AppKeys, personal quota limits, and admin custom user quota overrides |

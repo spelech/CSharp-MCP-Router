@@ -831,7 +831,8 @@ namespace McpRouter.Components.Capabilities
                 if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
 
                 var dir = GetCustomFilesDirectory(type);
-                var filePath = Path.Combine(dir, Path.GetFileName(cleanName));
+                var filePath = Path.GetFullPath(Path.Combine(dir, Path.GetFileName(cleanName)));
+                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase)) return Results.BadRequest("Invalid file path");
                 if (!File.Exists(filePath)) return Results.NotFound("File not found");
 
                 try
@@ -874,7 +875,8 @@ namespace McpRouter.Components.Capabilities
                 }
 
                 var dir = GetCustomFilesDirectory(type);
-                var filePath = Path.Combine(dir, Path.GetFileName(cleanName));
+                var filePath = Path.GetFullPath(Path.Combine(dir, Path.GetFileName(cleanName)));
+                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase)) return Results.BadRequest("Invalid file path");
 
                 try
                 {
@@ -895,7 +897,8 @@ namespace McpRouter.Components.Capabilities
                 if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
 
                 var dir = GetCustomFilesDirectory(type);
-                var filePath = Path.Combine(dir, Path.GetFileName(cleanName));
+                var filePath = Path.GetFullPath(Path.Combine(dir, Path.GetFileName(cleanName)));
+                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase)) return Results.BadRequest("Invalid file path");
                 if (!File.Exists(filePath)) return Results.NotFound("File not found");
 
                 try

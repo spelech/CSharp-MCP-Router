@@ -76,7 +76,7 @@ namespace McpRouter.Infrastructure.Identity
                     {
                         if (!adDb.IsEnabled)
                         {
-                            _logger.LogDebug("ActiveDirectory provider is disabled in database; skipping LDAP resolution for user {Username}", username);
+                            _logger.LogDebug("ActiveDirectory provider is disabled in database; skipping LDAP resolution for user {Username}", username?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
                             return sids;
                         }
 
@@ -136,7 +136,7 @@ namespace McpRouter.Infrastructure.Identity
 
             if (string.IsNullOrEmpty(server))
             {
-                _logger.LogDebug("LDAP server is not configured; skipping LDAP resolution for user {Username}", username);
+                _logger.LogDebug("LDAP server is not configured; skipping LDAP resolution for user {Username}", username?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
                 return sids;
             }
 
@@ -217,7 +217,7 @@ namespace McpRouter.Infrastructure.Identity
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to resolve SIDs via LDAP for user {Username}", username);
+                _logger.LogError(ex, "Failed to resolve SIDs via LDAP for user {Username}", username?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
                 throw new System.Security.SecurityException($"LDAP SID resolution failed for user '{username}'. Fail-closed policy active.", ex);
             }
 

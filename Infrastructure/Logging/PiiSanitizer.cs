@@ -20,6 +20,7 @@ namespace McpRouter.Infrastructure.Logging
             s = QueryRegex.Replace(s, "$1[REDACTED]");
             s = UserInfoRegex.Replace(s, "$1[REDACTED]@");
             s = ConnStringPasswordRegex.Replace(s, "Password=[REDACTED]");
+            s = s.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", "");
             return s;
         }
     }
