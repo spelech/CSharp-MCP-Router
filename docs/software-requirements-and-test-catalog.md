@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **94 Requirements Verified** across **214 Test Proofs** (72 Functional Capabilities, 22 Safety Guardrails).
+> **Catalog Statistics:** **94 Requirements Verified** across **228 Test Proofs** (71 Functional Capabilities, 23 Safety Guardrails).
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **22** | 21 | 1 | 61 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **22** | 20 | 2 | 75 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 10 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 34 proofs |
@@ -37,7 +37,7 @@
 ### `[AUTH-02]` AppKey scopes restrict access precisely across all MCP capabilities and backend targets
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (14):**
+* **Verification Proofs (12):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L255`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L255) (`Pairwise_AppKeyScopes_RestrictsAccessPrecisely`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L151`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L151) (`AppKeyRepository_SaveAndGet_PersistsKeyTypeAndFilters`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L213`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L213) (`AppKeysController_CreateAppKey_ValidCategory_Succeeds`)
@@ -49,8 +49,6 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L504`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L504) (`ClientSession_DynamicServerMembership_UpdatesAccessDynamically`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L540`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L540) (`ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L567`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L567) (`ClientSession_Complete_FiltersServerNamesByCategoryScope`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L21`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L21) (`renders empty state when no keys exist`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L45`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L45) (`renders keys list, copies config snippet, and revokes key`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L68`](file:////containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L68) (`AppKey Direct Context: connects with API key header identity`)
 
 ### `[AUTH-03]` SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles
@@ -143,34 +141,37 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22) (`IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue`)
 
-### `[REQ-AUTH-PERSONAL-APPKEY-CREATE]` Non-admin users can create personal App Keys up to quota
-* **Category:** `AUTH` (Authentication, RBAC & Identity)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L199`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L199) (`CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L290`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L290) (`creates category-scoped key, captures one-time plaintext key, and refreshes`)
-
 ### `[REQ-AUTH-PERSONAL-APPKEY-LIST]` Non-admin users can view their personal App Keys
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
+* **Verification Proofs (5):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L133`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L133) (`GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L232`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L232) (`loads app keys and updates store`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L79`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L79) (`renders role-adaptive UI for non-admin user`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L34`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L34) (`renders role-adapted My App Keys view for non-admin user`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L79`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L79) (`renders keys list, copies config snippet, and revokes key`)
 
 ### `[REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE]` Custom user quotas override default limit
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (2):**
+* **Verification Proofs (5):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L231`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L231) (`CreateAppKey_CustomQuotaOverride_AllowsHigherLimit`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L439`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L439) (`sets user quota override and refreshes quota list`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L6`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L6) (`renders GeneralTab with security default quota inputs and triggers save`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L71`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L71) (`updates form state when settings prop changes`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L222`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L222) (`manages custom user quotas in admin quotas tab`)
 
 ### `[REQ-AUTH-SYSTEM-APPKEY-SEPARATION]` System keys are distinct and require admin permissions
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (3):**
+* **Verification Proofs (7):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L159`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L159) (`SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L216`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L216) (`switches keyTypeTab between personal and system`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L250`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L250) (`fetches system-filtered app keys via query parameters`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L15`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L15) (`renders header, navigation tabs, and default overview dashboard for admin user`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L35`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L35) (`switches between tabs on navigation click`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L31`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L31) (`allows admin to select key type and create system app key`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L166`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L166) (`handles admin tab switching and username filtering`)
 
 ### `[DB-01]` SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
@@ -549,6 +550,19 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L46`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx#L46) (`fills LDAP parameters and executes test connection`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L5) (`Admin Context: renders full administrator view and privileged controls`)
 
+### `[REQ-AUTH-PERSONAL-APPKEY-CREATE]` Non-admin users can create personal App Keys up to quota
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (8):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L199`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L199) (`CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L290`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L290) (`creates category-scoped key, captures one-time plaintext key, and refreshes`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L19`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L19) (`renders nothing when isCreateModalOpen is false`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L61`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L61) (`locks key type to personal key for non-admin and shows quota feedback`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L115`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L115) (`handles scope serialization for server scope and target username for admin`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L154`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L154) (`handles scope serialization for category scope and expiration days`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L192`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L192) (`disables submit button when quota limit is reached`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L217`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L217) (`displays one-time secret result and copies plaintext key to clipboard`)
+
 ### `[AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK]` When an external IDP is configured, anonymous loopback requests do not bypass authentication.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -737,7 +751,7 @@
 | `AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW` | Positive | `AUTH` | AdminPolicy succeeds in standalone mode for unauthenticated loopback requests. | [`StandaloneAdminAuthTests.cs:L184`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L184) | Backend xUnit |
 | `AUTH-STANDALONE-CUSTOM-CIDR-ALLOW` | Positive | `AUTH` | Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges. | [`StandaloneAdminAuthTests.cs:L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L43) | Backend xUnit |
 | `AUTH-STANDALONE-LOOPBACK-ALLOW` | Positive | `AUTH` | Standalone mode without external IDP grants admin access to loopback IP addresses. | [`StandaloneAdminAuthTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L22) | Backend xUnit |
-| `REQ-AUTH-PERSONAL-APPKEY-CREATE` | Positive | `AUTH` | Non-admin users can create personal App Keys up to quota | [`AppKeysControllerTests.cs:L199`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L199) | Backend xUnit |
+| `REQ-AUTH-PERSONAL-APPKEY-CREATE` | **Guardrail** | `AUTH` | Non-admin users can create personal App Keys up to quota | [`AppKeysControllerTests.cs:L199`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L199) | Backend xUnit |
 | `REQ-AUTH-PERSONAL-APPKEY-LIST` | Positive | `AUTH` | Non-admin users can view their personal App Keys | [`AppKeysControllerTests.cs:L133`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L133) | Backend xUnit |
 | `REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE` | Positive | `AUTH` | Custom user quotas override default limit | [`AppKeysControllerTests.cs:L231`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L231) | Backend xUnit |
 | `REQ-AUTH-SYSTEM-APPKEY-SEPARATION` | Positive | `AUTH` | System keys are distinct and require admin permissions | [`AppKeysControllerTests.cs:L159`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L159) | Backend xUnit |

@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { AppKeysCard } from '../../components/clients/AppKeysCard';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
+import { useUserStore } from '../../stores/useUserStore';
 import { useToastStore } from '../../stores/useToastStore';
 
 vi.mock('../../stores/useAppKeyStore', () => ({
@@ -11,39 +12,72 @@ vi.mock('../../stores/useAppKeyStore', () => ({
 describe('AppKeysCard Component', () => {
   const fetchAppKeysMock = vi.fn();
   const fetchLimitsMock = vi.fn();
+  const fetchUserQuotasMock = vi.fn();
+  const setUserQuotaMock = vi.fn();
+  const deleteUserQuotaMock = vi.fn();
   const revokeAppKeyMock = vi.fn();
   const openModalMock = vi.fn();
+  const setKeyTypeTabMock = vi.fn();
 
   beforeEach(() => {
     vi.clearAllMocks();
+    useUserStore.setState({
+      user: {
+        authenticated: true,
+        username: 'steve',
+        name: 'Steve Pelech',
+        groups: ['full_admin']
+      }
+    });
   });
 
   /**
-   * @requirement AUTH-02
+   * @requirement REQ-AUTH-PERSONAL-APPKEY-LIST
    * @category AUTH
    * @type PositiveFeature
-   * @description Renders empty state and triggers fetch on mount.
+   * @description Renders empty state and triggers fetch on mount for non-admin users without owner column.
    */
-  it('renders empty state when no keys exist', () => {
+  it('renders role-adapted My App Keys view for non-admin user', () => {
+    useUserStore.setState({
+      user: {
+        authenticated: true,
+        username: 'alice',
+        name: 'Alice Cooper',
+        groups: ['developer']
+      }
+    });
+
     (useAppKeyStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       appKeys: [],
       limits: { userActiveKeys: 0, userMax: 5, totalActiveKeys: 0, globalMax: 50, isLimitReached: false },
+      keyTypeTab: 'personal',
+      userQuotas: [],
       fetchAppKeys: fetchAppKeysMock,
       fetchLimits: fetchLimitsMock,
+      fetchUserQuotas: fetchUserQuotasMock,
+      setUserQuota: setUserQuotaMock,
+      deleteUserQuota: deleteUserQuotaMock,
       revokeAppKey: revokeAppKeyMock,
       openModal: openModalMock,
+      setKeyTypeTab: setKeyTypeTabMock,
     });
 
     render(<AppKeysCard />);
 
-    expect(screen.getByRole('heading', { name: /App Keys/i })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: /My App Keys/i })).toBeInTheDocument();
+    expect(screen.getByText(/Personal Quota:/i)).toBeInTheDocument();
+    expect(screen.getByText(/0 \/ 5/i)).toBeInTheDocument();
     expect(screen.getByText(/No App Keys active/i)).toBeInTheDocument();
-    expect(fetchAppKeysMock).toHaveBeenCalled();
+    // Non-admin view must not show Owner column in table header
+    expect(screen.queryByRole('columnheader', { name: /^Owner$/i })).toBeNull();
+    // Non-admin view must not show admin sub-tabs
+    expect(screen.queryByRole('button', { name: /App-Level Keys/i })).toBeNull();
+    expect(fetchAppKeysMock).toHaveBeenCalledWith('personal');
     expect(fetchLimitsMock).toHaveBeenCalled();
   });
 
   /**
-   * @requirement AUTH-02
+   * @requirement REQ-AUTH-PERSONAL-APPKEY-LIST
    * @category AUTH
    * @type PositiveFeature
    * @description Renders keys list, handles copy snippet and key revocation.
@@ -87,10 +121,16 @@ describe('AppKeysCard Component', () => {
         }
       ],
       limits: { userActiveKeys: 3, userMax: 5, totalActiveKeys: 10, globalMax: 50, isLimitReached: false },
+      keyTypeTab: 'personal',
+      userQuotas: [],
       fetchAppKeys: fetchAppKeysMock,
       fetchLimits: fetchLimitsMock,
+      fetchUserQuotas: fetchUserQuotasMock,
+      setUserQuota: setUserQuotaMock,
+      deleteUserQuota: deleteUserQuotaMock,
       revokeAppKey: revokeAppKeyMock,
       openModal: openModalMock,
+      setKeyTypeTab: setKeyTypeTabMock,
     });
 
     render(<AppKeysCard />);
@@ -99,6 +139,8 @@ describe('AppKeysCard Component', () => {
     expect(screen.getByText('Expired')).toBeInTheDocument();
     expect(screen.getByText('Never')).toBeInTheDocument();
     expect(screen.getByText('category:smarthome')).toBeInTheDocument();
+    // Admin view shows Owner column
+    expect(screen.getByRole('columnheader', { name: /^Owner$/i })).toBeInTheDocument();
 
     // Test Copy Snippet button
     const copyBtns = screen.getAllByTitle(/copy mcp config snippet/i);
@@ -119,5 +161,124 @@ describe('AppKeysCard Component', () => {
     const createBtn = screen.getByRole('button', { name: /create app key/i });
     fireEvent.click(createBtn);
     expect(openModalMock).toHaveBeenCalled();
+  });
+
+  /**
+   * @requirement REQ-AUTH-SYSTEM-APPKEY-SEPARATION
+   * @category AUTH
+   * @type PositiveFeature
+   * @description Allows admin to switch to App-Level Keys tab and filter personal keys by username.
+   */
+  it('handles admin tab switching and username filtering', async () => {
+    (useAppKeyStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      appKeys: [],
+      limits: { userActiveKeys: 1, userMax: 5, totalActiveKeys: 5, globalMax: 50, isLimitReached: false },
+      keyTypeTab: 'personal',
+      userQuotas: [],
+      fetchAppKeys: fetchAppKeysMock,
+      fetchLimits: fetchLimitsMock,
+      fetchUserQuotas: fetchUserQuotasMock,
+      setUserQuota: setUserQuotaMock,
+      deleteUserQuota: deleteUserQuotaMock,
+      revokeAppKey: revokeAppKeyMock,
+      openModal: openModalMock,
+      setKeyTypeTab: setKeyTypeTabMock,
+    });
+
+    render(<AppKeysCard />);
+
+    // Switch to App-Level Keys
+    const systemTabBtn = screen.getByRole('button', { name: /App-Level Keys/i });
+    await act(async () => {
+      fireEvent.click(systemTabBtn);
+    });
+    expect(setKeyTypeTabMock).toHaveBeenCalledWith('system');
+    expect(fetchAppKeysMock).toHaveBeenCalledWith('system', undefined);
+
+    // Switch back to Personal Keys
+    const personalTabBtn = screen.getByRole('button', { name: /User Personal Keys/i });
+    await act(async () => {
+      fireEvent.click(personalTabBtn);
+    });
+    expect(setKeyTypeTabMock).toHaveBeenCalledWith('personal');
+
+    // Filter by username
+    const filterInput = screen.getByPlaceholderText(/Filter by username\.\.\./i);
+    fireEvent.change(filterInput, { target: { value: 'alice' } });
+    const filterBtn = screen.getByRole('button', { name: /Filter/i });
+    await act(async () => {
+      fireEvent.click(filterBtn);
+    });
+    expect(fetchAppKeysMock).toHaveBeenCalledWith('personal', 'alice');
+
+    // Clear filter
+    const clearBtn = screen.getByRole('button', { name: /Clear/i });
+    await act(async () => {
+      fireEvent.click(clearBtn);
+    });
+    expect(fetchAppKeysMock).toHaveBeenCalledWith('personal');
+  });
+
+  /**
+   * @requirement REQ-AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE
+   * @category AUTH
+   * @type PositiveFeature
+   * @description Allows admin to view custom user quotas, set a quota override, and reset a quota.
+   */
+  it('manages custom user quotas in admin quotas tab', async () => {
+    setUserQuotaMock.mockResolvedValue(undefined);
+    deleteUserQuotaMock.mockResolvedValue(undefined);
+
+    (useAppKeyStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      appKeys: [],
+      limits: { userActiveKeys: 1, userMax: 5, totalActiveKeys: 5, globalMax: 50, isLimitReached: false },
+      keyTypeTab: 'personal',
+      userQuotas: [
+        {
+          username: 'special_user',
+          maxKeys: 25,
+          createdAt: '2026-08-01T00:00:00Z',
+          updatedAt: '2026-08-02T00:00:00Z'
+        }
+      ],
+      fetchAppKeys: fetchAppKeysMock,
+      fetchLimits: fetchLimitsMock,
+      fetchUserQuotas: fetchUserQuotasMock,
+      setUserQuota: setUserQuotaMock,
+      deleteUserQuota: deleteUserQuotaMock,
+      revokeAppKey: revokeAppKeyMock,
+      openModal: openModalMock,
+      setKeyTypeTab: setKeyTypeTabMock,
+    });
+
+    render(<AppKeysCard />);
+
+    // Click Custom User Quotas tab
+    const quotasTabBtn = screen.getByRole('button', { name: /Custom User Quotas/i });
+    await act(async () => {
+      fireEvent.click(quotasTabBtn);
+    });
+    expect(fetchUserQuotasMock).toHaveBeenCalled();
+    expect(screen.getByText('special_user')).toBeInTheDocument();
+    expect(screen.getByText('25 keys')).toBeInTheDocument();
+
+    // Set new quota
+    const usernameInput = screen.getByLabelText(/Username/i);
+    const maxKeysInput = screen.getByLabelText(/Max Keys/i);
+    fireEvent.change(usernameInput, { target: { value: 'power_dev' } });
+    fireEvent.change(maxKeysInput, { target: { value: '15' } });
+
+    const setQuotaBtn = screen.getByRole('button', { name: /Set Quota/i });
+    await act(async () => {
+      fireEvent.click(setQuotaBtn);
+    });
+    expect(setUserQuotaMock).toHaveBeenCalledWith('power_dev', 15);
+
+    // Reset quota
+    const resetBtn = screen.getByRole('button', { name: /Reset/i });
+    await act(async () => {
+      fireEvent.click(resetBtn);
+    });
+    expect(deleteUserQuotaMock).toHaveBeenCalledWith('special_user');
   });
 });
