@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-22T07:23:57.3260622Z",
-    "totalRequirements": 88,
+    "generatedAt": "2026-08-22T13:43:37.6010837Z",
+    "totalRequirements": 89,
     "positiveCount": 68,
-    "guardrailCount": 20,
-    "totalProofs": 174
+    "guardrailCount": 21,
+    "totalProofs": 184
   },
   "requirements": [
     {
@@ -44,7 +44,7 @@
       "category": "AUTH",
       "type": "Negative",
       "description": "AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)",
-      "proofCount": 14,
+      "proofCount": 16,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -138,6 +138,20 @@
           "details": null
         },
         {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 12,
+          "testName": "renders Active Directory disabled initially, toggles on and exposes fields",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 46,
+          "testName": "fills LDAP parameters and executes test connection",
+          "details": null
+        },
+        {
           "suite": "Playwright E2E",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 5,
@@ -226,14 +240,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 20,
+          "lineNumber": 21,
           "testName": "renders empty state when no keys exist",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 44,
+          "lineNumber": 45,
           "testName": "renders keys list, copies config snippet, and revokes key",
           "details": null
         },
@@ -387,7 +401,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
-          "lineNumber": 16,
+          "lineNumber": 17,
           "testName": "renders client name from query string and sets form action",
           "details": null
         },
@@ -1586,14 +1600,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
-          "lineNumber": 17,
+          "lineNumber": 19,
           "testName": "renders provider inputs and submits updated configuration",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
-          "lineNumber": 60,
+          "lineNumber": 90,
           "testName": "handles Test Vault connection button with success and failure responses",
           "details": null
         },
@@ -1801,6 +1815,71 @@
           "lineNumber": 482,
           "testName": "StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately",
           "details": "Verifies that STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly."
+        }
+      ]
+    },
+    {
+      "id": "REQ-UI-TOAST-TRANSITION",
+      "category": "UI",
+      "type": "Negative",
+      "description": "Displays error toast notification when saving invalid JSON credentials for user-provided server.",
+      "proofCount": 8,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 24,
+          "testName": "shows error toast when saving invalid JSON credentials",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 65,
+          "testName": "saves valid credentials successfully and closes modal",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "lineNumber": 88,
+          "testName": "shows error toast when switching from invalid JSON to Visual Prompt Builder",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "lineNumber": 109,
+          "testName": "shows error toast when saving without a file name",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "lineNumber": 129,
+          "testName": "shows error toast when saving prompt with invalid JSON content",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 99,
+          "testName": "saves updated Active Directory configuration JSON",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "lineNumber": 138,
+          "testName": "displays error toast when saving auth providers fails",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "lineNumber": 63,
+          "testName": "displays error toast when saving secret providers fails",
+          "details": null
         }
       ]
     },

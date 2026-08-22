@@ -2,6 +2,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent, act } from '@testing-library/react';
 import { AppKeysCard } from '../../components/clients/AppKeysCard';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
+import { useToastStore } from '../../stores/useToastStore';
 
 vi.mock('../../stores/useAppKeyStore', () => ({
   useAppKeyStore: vi.fn(),
@@ -54,7 +55,6 @@ describe('AppKeysCard Component', () => {
         writeText: writeTextSpy,
       },
     });
-    const alertSpy = vi.spyOn(window, 'alert').mockImplementation(() => {});
 
     (useAppKeyStore as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
       appKeys: [
@@ -106,7 +106,7 @@ describe('AppKeysCard Component', () => {
       fireEvent.click(copyBtns[0]);
     });
     expect(writeTextSpy).toHaveBeenCalled();
-    expect(alertSpy).toHaveBeenCalled();
+    expect(useToastStore.getState().toasts.some((t) => t.message.includes('Copied sample mcp_config.json snippet'))).toBe(true);
 
     // Test Revoke button
     const revokeBtns = screen.getAllByRole('button', { name: /revoke/i });

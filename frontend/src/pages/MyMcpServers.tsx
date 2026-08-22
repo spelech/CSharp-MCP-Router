@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { McpServer } from '../shared/types';
 import { fetchServersApi } from '../api/serverApi';
 import { fetchUserCredentialsApi, saveUserCredentialApi, UserCredential } from '../api/userCredentialsApi';
+import { showToast } from '../stores/useToastStore';
 
 export const MyMcpServers: React.FC = () => {
   const [servers, setServers] = useState<McpServer[]>([]);
@@ -47,7 +48,7 @@ export const MyMcpServers: React.FC = () => {
       setEditingServer(null);
       await loadData();
     } catch {
-      alert('Invalid JSON or failed to save.');
+      showToast('Invalid JSON or failed to save.', 'error');
     }
   };
 
