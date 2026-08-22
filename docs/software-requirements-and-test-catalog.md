@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **90 Requirements Verified** across **197 Test Proofs** (68 Functional Capabilities, 22 Safety Guardrails).
+> **Catalog Statistics:** **90 Requirements Verified** across **203 Test Proofs** (68 Functional Capabilities, 22 Safety Guardrails).
 
 ---
 
@@ -9,8 +9,8 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **18** | 17 | 1 | 51 proofs |
-| **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 5 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **18** | 17 | 1 | 52 proofs |
+| **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 10 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 34 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
@@ -37,8 +37,9 @@
 ### `[AUTH-02]` AppKey scopes restrict access precisely across all MCP capabilities and backend targets
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (13):**
+* **Verification Proofs (14):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L254`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PairwiseIntegrationMatrixTests.cs#L254) (`Pairwise_AppKeyScopes_RestrictsAccessPrecisely`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L151`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L151) (`AppKeyRepository_SaveAndGet_PersistsKeyTypeAndFilters`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L212`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L212) (`AppKeysController_CreateAppKey_ValidCategory_Succeeds`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L296`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L296) (`ClientsController_CreateClient_ValidCategory_Succeeds`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L379`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/CategoryScopedAppKeysTests.cs#L379) (`ClientSession_CategoryScope_AuthorizesMatchingServerTools_AndDeniesOthers`)
@@ -145,8 +146,13 @@
 ### `[DB-01]` SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (6):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L43`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L43) (`Sqlite_UpgradeMigration_FromLegacySchema_PreservesDataAndPassesValidation`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L90`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L90) (`UserQuotaRepository_SetAndGet_ReturnsPersistedQuota`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L103`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L103) (`UserQuotaRepository_GetAll_ReturnsAllUserQuotas`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L122`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L122) (`UserQuotaRepository_Update_UpdatesExistingQuota`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L137`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L137) (`UserQuotaRepository_Delete_RemovesQuota`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L204`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L204) (`DependencyInjection_RegistersIUserQuotaRepository`)
 
 ### `[DB-02]` MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly
 * **Category:** `DB` (Multi-Database Persistence & Migrations)

@@ -28,12 +28,27 @@ namespace McpRouter.Infrastructure.Persistence
             ", server);
         }
 
-        public async Task<IEnumerable<AppKey>> GetAppKeysAsync(IDbConnection conn, string? usernameFilter, bool isAdmin, string? currentUser)
+        public async Task<IEnumerable<AppKey>> GetAppKeysAsync(IDbConnection conn, string? usernameFilter, bool isAdmin, string? currentUser, string? keyType = null)
         {
-            var sql = "SELECT * FROM [dbo].[AppKeys]";
-            if (!isAdmin) sql += " WHERE Username = @Username";
-            else if (!string.IsNullOrEmpty(usernameFilter)) sql += " WHERE Username = @Username";
-            return await conn.QueryAsync<AppKey>(sql, new { Username = isAdmin ? usernameFilter : currentUser });
+            var sql = "SELECT * FROM [dbo].[AppKeys] WHERE 1=1";
+            var p = new DynamicParameters();
+            if (!isAdmin)
+            {
+                sql += " AND [Username] = @Username";
+                p.Add("Username", currentUser);
+            }
+            else if (!string.IsNullOrEmpty(usernameFilter))
+            {
+                sql += " AND [Username] = @Username";
+                p.Add("Username", usernameFilter);
+            }
+            if (!string.IsNullOrEmpty(keyType))
+            {
+                sql += " AND [KeyType] = @KeyType";
+                p.Add("KeyType", keyType);
+            }
+            sql += " ORDER BY [CreatedAt] DESC;";
+            return await conn.QueryAsync<AppKey>(sql, p);
         }
 
         public async Task SaveAppKeyAsync(IDbConnection conn, AppKey key)
@@ -43,10 +58,10 @@ namespace McpRouter.Infrastructure.Persistence
                 USING (SELECT @Id AS Id) AS source
                 ON target.Id = source.Id
                 WHEN MATCHED THEN
-                    UPDATE SET Name = @Name, Username = @Username, OwnerSid = @OwnerSid, KeyPrefix = @KeyPrefix, EncryptedKey = @EncryptedKey, ScopesJson = @ScopesJson, ExpiresAt = @ExpiresAt
+                    UPDATE SET Name = @Name, Username = @Username, OwnerSid = @OwnerSid, KeyType = @KeyType, KeyPrefix = @KeyPrefix, EncryptedKey = @EncryptedKey, ScopesJson = @ScopesJson, ExpiresAt = @ExpiresAt
                 WHEN NOT MATCHED THEN
-                    INSERT (Id, Name, Username, OwnerSid, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
-                    VALUES (@Id, @Name, @Username, @OwnerSid, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);
+                    INSERT (Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
+                    VALUES (@Id, @Name, @Username, @OwnerSid, @KeyType, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);
             ", key);
         }
 

@@ -30,12 +30,20 @@ namespace McpRouter.Infrastructure.Persistence
 
     public interface IAppKeyRepository
     {
-        Task<IEnumerable<AppKey>> GetAppKeysAsync(string? usernameFilter = null, bool isAdmin = false, string? currentUser = null);
+        Task<IEnumerable<AppKey>> GetAppKeysAsync(string? usernameFilter = null, bool isAdmin = false, string? currentUser = null, string? keyType = null);
         Task<AppKey?> GetAppKeyByIdAsync(string id);
         Task SaveAppKeyAsync(AppKey key);
         Task DeleteAppKeyAsync(string id);
         Task<int> GetTotalActiveKeysAsync();
         Task<int> GetUserActiveKeysAsync(string username);
+    }
+
+    public interface IUserQuotaRepository
+    {
+        Task<UserQuota?> GetUserQuotaAsync(string username);
+        Task<IEnumerable<UserQuota>> GetAllUserQuotasAsync();
+        Task SetUserQuotaAsync(string username, int maxKeys);
+        Task DeleteUserQuotaAsync(string username);
     }
 
     public interface ISecretProviderRepository
@@ -72,7 +80,8 @@ namespace McpRouter.Infrastructure.Persistence
         IAppKeyRepository,
         ISecretProviderRepository,
         IAuthProviderRepository,
-        IUserCredentialRepository
+        IUserCredentialRepository,
+        IUserQuotaRepository
     {
         private readonly IDbConnectionFactory _dbFactory;
         private readonly IConfiguration? _config;
@@ -206,26 +215,43 @@ namespace McpRouter.Infrastructure.Persistence
         // ==========================================
         // IAppKeyRepository
         // ==========================================
-        public async Task<IEnumerable<AppKey>> GetAppKeysAsync(string? usernameFilter = null, bool isAdmin = false, string? currentUser = null)
+        public async Task<IEnumerable<AppKey>> GetAppKeysAsync(string? usernameFilter = null, bool isAdmin = false, string? currentUser = null, string? keyType = null)
         {
             using var conn = _dbFactory.CreateConnection();
             var provider = _dbFactory.ProviderName.ToLower();
 
             if (provider == "sqlite")
             {
-                if (isAdmin)
+                var sql = "SELECT * FROM AppKeys WHERE 1=1";
+                var p = new DynamicParameters();
+
+                if (!isAdmin)
                 {
-                    if (!string.IsNullOrEmpty(usernameFilter))
-                    {
-                        return await conn.QueryAsync<AppKey>("SELECT * FROM AppKeys WHERE Username = @Username ORDER BY CreatedAt DESC;", new { Username = usernameFilter });
-                    }
-                    return await conn.QueryAsync<AppKey>("SELECT * FROM AppKeys ORDER BY CreatedAt DESC;");
+                    sql += " AND Username = @Username";
+                    p.Add("Username", currentUser);
                 }
-                return await conn.QueryAsync<AppKey>("SELECT * FROM AppKeys WHERE Username = @Username ORDER BY CreatedAt DESC;", new { Username = currentUser });
+                else if (!string.IsNullOrEmpty(usernameFilter))
+                {
+                    sql += " AND Username = @Username";
+                    p.Add("Username", usernameFilter);
+                }
+
+                if (!string.IsNullOrEmpty(keyType))
+                {
+                    sql += " AND KeyType = @KeyType";
+                    p.Add("KeyType", keyType);
+                }
+
+                sql += " ORDER BY CreatedAt DESC;";
+                return await conn.QueryAsync<AppKey>(sql, p);
             }
             else if (provider == "mysql")
             {
-                var parameters = new { p_Username = isAdmin ? usernameFilter : currentUser };
+                var parameters = new
+                {
+                    p_Username = isAdmin ? usernameFilter : currentUser,
+                    p_KeyType = keyType
+                };
                 return await conn.QueryAsync<AppKey>(
                     "sp_GetAppKeys",
                     parameters,
@@ -234,7 +260,11 @@ namespace McpRouter.Infrastructure.Persistence
             }
             else
             {
-                var parameters = new { Username = isAdmin ? usernameFilter : currentUser };
+                var parameters = new
+                {
+                    Username = isAdmin ? usernameFilter : currentUser,
+                    KeyType = keyType
+                };
                 return await conn.QueryAsync<AppKey>(
                     "sp_GetAppKeys",
                     parameters,
@@ -257,10 +287,10 @@ namespace McpRouter.Infrastructure.Persistence
             if (provider == "sqlite")
             {
                 const string sql = @"
-                    INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
-                    VALUES (@Id, @Name, @Username, @OwnerSid, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt)
+                    INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
+                    VALUES (@Id, @Name, @Username, @OwnerSid, @KeyType, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt)
                     ON CONFLICT(Id) DO UPDATE SET
-                        Name = @Name, Username = @Username, OwnerSid = @OwnerSid, KeyPrefix = @KeyPrefix,
+                        Name = @Name, Username = @Username, OwnerSid = @OwnerSid, KeyType = @KeyType, KeyPrefix = @KeyPrefix,
                         EncryptedKey = @EncryptedKey, ScopesJson = @ScopesJson, ExpiresAt = @ExpiresAt;";
                 await conn.ExecuteAsync(sql, key);
             }
@@ -277,6 +307,7 @@ namespace McpRouter.Infrastructure.Persistence
                         p_EncryptedKey = key.EncryptedKey,
                         p_ScopesJson = key.ScopesJson,
                         p_OwnerSid = key.OwnerSid ?? "",
+                        p_KeyType = string.IsNullOrEmpty(key.KeyType) ? "personal" : key.KeyType,
                         p_ExpiresAt = key.ExpiresAt
                     },
                     commandType: CommandType.StoredProcedure
@@ -292,6 +323,7 @@ namespace McpRouter.Infrastructure.Persistence
                         key.Name,
                         key.Username,
                         key.OwnerSid,
+                        KeyType = string.IsNullOrEmpty(key.KeyType) ? "personal" : key.KeyType,
                         key.KeyPrefix,
                         key.EncryptedKey,
                         key.ScopesJson,
@@ -648,6 +680,75 @@ namespace McpRouter.Infrastructure.Persistence
             using var conn = _dbFactory.CreateConnection();
             return await conn.QueryAsync<string>(
                 "SELECT ServerId FROM UserServerCredentials WHERE Username = @Username;",
+                new { Username = username });
+        }
+
+        // ==========================================
+        // IUserQuotaRepository
+        // ==========================================
+        public async Task<UserQuota?> GetUserQuotaAsync(string username)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            return await conn.QueryFirstOrDefaultAsync<UserQuota>(
+                "SELECT * FROM UserQuotas WHERE Username = @Username;",
+                new { Username = username });
+        }
+
+        public async Task<IEnumerable<UserQuota>> GetAllUserQuotasAsync()
+        {
+            using var conn = _dbFactory.CreateConnection();
+            return await conn.QueryAsync<UserQuota>("SELECT * FROM UserQuotas ORDER BY Username ASC;");
+        }
+
+        public async Task SetUserQuotaAsync(string username, int maxKeys)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            var provider = _dbFactory.ProviderName.ToLower();
+
+            if (provider == "sqlite")
+            {
+                const string sql = @"
+                    INSERT INTO UserQuotas (Username, MaxKeys, CreatedAt, UpdatedAt)
+                    VALUES (@Username, @MaxKeys, @Now, @Now)
+                    ON CONFLICT(Username) DO UPDATE SET
+                        MaxKeys = @MaxKeys,
+                        UpdatedAt = @Now;";
+                await conn.ExecuteAsync(sql, new { Username = username, MaxKeys = maxKeys, Now = DateTime.UtcNow });
+            }
+            else if (provider == "mysql")
+            {
+                const string sql = @"
+                    INSERT INTO `UserQuotas` (`Username`, `MaxKeys`, `CreatedAt`, `UpdatedAt`)
+                    VALUES (@Username, @MaxKeys, NOW(), NOW())
+                    ON DUPLICATE KEY UPDATE
+                        `MaxKeys` = @MaxKeys,
+                        `UpdatedAt` = NOW();";
+                await conn.ExecuteAsync(sql, new { Username = username, MaxKeys = maxKeys });
+            }
+            else
+            {
+                const string sql = @"
+                    IF EXISTS (SELECT 1 FROM [dbo].[UserQuotas] WHERE [Username] = @Username)
+                    BEGIN
+                        UPDATE [dbo].[UserQuotas]
+                        SET [MaxKeys] = @MaxKeys,
+                            [UpdatedAt] = SYSUTCDATETIME()
+                        WHERE [Username] = @Username;
+                    END
+                    ELSE
+                    BEGIN
+                        INSERT INTO [dbo].[UserQuotas] ([Username], [MaxKeys], [CreatedAt], [UpdatedAt])
+                        VALUES (@Username, @MaxKeys, SYSUTCDATETIME(), SYSUTCDATETIME());
+                    END;";
+                await conn.ExecuteAsync(sql, new { Username = username, MaxKeys = maxKeys });
+            }
+        }
+
+        public async Task DeleteUserQuotaAsync(string username)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            await conn.ExecuteAsync(
+                "DELETE FROM UserQuotas WHERE Username = @Username;",
                 new { Username = username });
         }
     }

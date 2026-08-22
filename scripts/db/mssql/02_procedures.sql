@@ -218,6 +218,7 @@ CREATE OR ALTER PROCEDURE [dbo].[sp_SaveAppKey]
     @EncryptedKey NVARCHAR(MAX),
     @ScopesJson NVARCHAR(MAX),
     @OwnerSid NVARCHAR(200) = '',
+    @KeyType VARCHAR(50) = 'personal',
     @ExpiresAt DATETIME2 = NULL
 AS
 BEGIN
@@ -232,13 +233,14 @@ BEGIN
             [KeyPrefix] = @KeyPrefix,
             [EncryptedKey] = @EncryptedKey,
             [ScopesJson] = @ScopesJson,
+            [KeyType] = @KeyType,
             [ExpiresAt] = @ExpiresAt
         WHERE [Id] = @Id;
     END
     ELSE
     BEGIN
-        INSERT INTO [dbo].[AppKeys] ([Id], [Name], [Username], [OwnerSid], [KeyPrefix], [EncryptedKey], [ScopesJson], [ExpiresAt], [CreatedAt])
-        VALUES (@Id, @Name, @Username, @OwnerSid, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, SYSUTCDATETIME());
+        INSERT INTO [dbo].[AppKeys] ([Id], [Name], [Username], [OwnerSid], [KeyPrefix], [EncryptedKey], [ScopesJson], [KeyType], [ExpiresAt], [CreatedAt])
+        VALUES (@Id, @Name, @Username, @OwnerSid, @KeyPrefix, @EncryptedKey, @ScopesJson, @KeyType, @ExpiresAt, SYSUTCDATETIME());
     END
 END;
 GO
@@ -255,21 +257,16 @@ GO
 
 -- 9. Procedure: Get AppKeys
 CREATE OR ALTER PROCEDURE [dbo].[sp_GetAppKeys]
-    @Username NVARCHAR(256) = NULL
+    @Username NVARCHAR(256) = NULL,
+    @KeyType VARCHAR(50) = NULL
 AS
 BEGIN
     SET NOCOUNT ON;
-    IF @Username IS NULL
-    BEGIN
-        SELECT [Id], [Name], [Username], [KeyPrefix], [EncryptedKey], [ScopesJson], [ExpiresAt], [CreatedAt]
-        FROM [dbo].[AppKeys];
-    END
-    ELSE
-    BEGIN
-        SELECT [Id], [Name], [Username], [KeyPrefix], [EncryptedKey], [ScopesJson], [ExpiresAt], [CreatedAt]
-        FROM [dbo].[AppKeys]
-        WHERE [Username] = @Username;
-    END
+    SELECT [Id], [Name], [Username], [KeyPrefix], [EncryptedKey], [ScopesJson], [OwnerSid], [KeyType], [ExpiresAt], [CreatedAt]
+    FROM [dbo].[AppKeys]
+    WHERE (@Username IS NULL OR [Username] = @Username)
+      AND (@KeyType IS NULL OR [KeyType] = @KeyType)
+    ORDER BY [CreatedAt] DESC;
 END;
 GO
 
