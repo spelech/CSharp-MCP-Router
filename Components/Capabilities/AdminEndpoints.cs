@@ -132,7 +132,7 @@ namespace McpRouter.Components.Capabilities
                         {
                             id = idProp.Clone();
                         }
-                        logger.LogDebug("[JSON-RPC Admin Client -> Gateway] {Payload}", PiiSanitizer.SanitizePayload(requestBody));
+                        logger.LogDebug("[JSON-RPC Admin Client -> Gateway] Method: {Method}", method?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
                     }
                 }
                 catch (Exception ex)
@@ -152,7 +152,7 @@ namespace McpRouter.Components.Capabilities
                     var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
                         ?? new JsonRpcRequest
                         {
-                            Method = method,
+                            Method = method ?? string.Empty,
                             Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null
                         };
 
@@ -169,7 +169,7 @@ namespace McpRouter.Components.Capabilities
                     {
                         jsonrpc = "2.0",
                         id = id != null ? (object)id : null,
-                        error = new { code = -32603, message = ex.Message }
+                        error = new { code = -32603, message = "An unexpected error occurred." }
                     });
                     return;
                 }
@@ -177,7 +177,7 @@ namespace McpRouter.Components.Capabilities
 
             var sessionId = Guid.NewGuid().ToString("N");
             logger.LogInformation("New Admin SSE connection ({Method}). SessionId: {SessionId}, User: {User}",
-                httpContext.Request.Method, sessionId, callerUsername);
+                httpContext.Request.Method, sessionId, System.Net.WebUtility.UrlEncode(callerUsername));
 
             var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
             if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
@@ -187,7 +187,7 @@ namespace McpRouter.Components.Capabilities
             await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
             await httpContext.Response.Body.FlushAsync();
 
-            var sseSession = new AdminSseSession(sessionId, httpContext.Response, callerUsername);
+            var sseSession = new AdminSseSession(sessionId, httpContext.Response, callerUsername ?? "anonymous");
             RegisterSession(sseSession);
 
             if (httpContext.Request.Method == "POST" && isInitializeOrDiscover)
@@ -197,11 +197,11 @@ namespace McpRouter.Components.Capabilities
                     var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
                         ?? new JsonRpcRequest
                         {
-                            Method = method,
-                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null
+                            Method = method ?? string.Empty,
+                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : (object)id.Value.GetString()!) : null
                         };
 
-                    var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
+                    var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername!);
                     await sseSession.WriteMessageAsync(rpcResponse);
                 }
                 catch (Exception ex)
@@ -265,7 +265,6 @@ namespace McpRouter.Components.Capabilities
                 return Results.BadRequest(new { error = "Request body cannot be empty." });
             }
 
-            logger.LogDebug("[JSON-RPC Admin Client -> Gateway] {Payload}", PiiSanitizer.SanitizePayload(body));
 
             try
             {
@@ -278,6 +277,7 @@ namespace McpRouter.Components.Capabilities
                 }
 
                 var method = methodProp.GetString() ?? string.Empty;
+            logger.LogDebug("[JSON-RPC Admin Client -> Gateway] Method: {Method}", method?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
                 var id = root.TryGetProperty("id", out var idProp) ? idProp.Clone() : (JsonElement?)null;
                 var identity = await identityProvider.ResolveIdentityAsync(httpContext);
                 var callerUsername = identity?.Username ?? session.CallerUsername ?? "admin";
@@ -287,7 +287,7 @@ namespace McpRouter.Components.Capabilities
                 {
                     jsonRpcReq = new JsonRpcRequest
                     {
-                        Method = method,
+                        Method = method ?? string.Empty,
                         Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null,
                         Params = root.TryGetProperty("params", out var p) ? p.Clone() : null
                     };
@@ -301,7 +301,7 @@ namespace McpRouter.Components.Capabilities
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error processing admin message for sessionId {SessionId}", sessionId);
-                return Results.Problem(ex.Message);
+                return Results.Problem("An unexpected error occurred.");
             }
         }
     }

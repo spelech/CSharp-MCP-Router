@@ -1,3 +1,5 @@
+/** @requirement UI-116 */
+
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { ServerInspectModal } from '../../components/servers/ServerInspectModal';

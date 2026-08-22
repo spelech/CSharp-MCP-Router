@@ -89,7 +89,7 @@ docker run --env-file .env -v mcprouter-data:/data -p 8080:8080 <image>
 
 ## 📂 Database Providers & Schema Initialization
 
-The MCP Router supports SQL Server, MySQL/MariaDB, and SQLite. For comprehensive dialect specifications, envelope encryption details, fail-closed validation contracts, and Docker Compose configurations, see the [**Database Provider Support & Deployment Matrix Guide**](docs/database-providers.md).
+The MCP Router supports SQL Server, MySQL/MariaDB, and SQLite. For comprehensive dialect specifications, envelope encryption details, fail-closed validation contracts, and Docker Compose configurations, see the [**Database Provider Support & Deployment Matrix Guide**](database-providers.md).
 
 When configuring MS SQL Server or MySQL, execute the database scripts in the exact sequence described below to initialize the database and stored procedures.
 
@@ -128,3 +128,6 @@ Run the corresponding delta migration script against your database using standar
 ## 📦 Deployment Configuration Templates
 
 For quick integration, copy `.env.example` to `.env` or copy `appsettings.Production.json.example` to `appsettings.Production.json` directly into your container/server configuration.
+## 🧩 Support Matrix
+
+For detailed information on supported combinations of hosting environments, authentication providers, and downstream delegation methods (e.g., Docker vs IIS, OIDC vs AppKey), please refer to the [**Deployment & Authentication Support Matrix**](support-matrix.md).

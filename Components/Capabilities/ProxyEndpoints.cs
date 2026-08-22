@@ -1075,7 +1075,7 @@ namespace McpRouter.Components.Capabilities
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error routing client message.");
-                    return Results.Problem(ex.Message);
+                    return Results.Problem("An unexpected error occurred.");
                 }
             };
 

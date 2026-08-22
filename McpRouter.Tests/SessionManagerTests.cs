@@ -5,11 +5,13 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
+using McpRouter.Tests.Attributes;
 
 namespace McpRouter.Tests
 {
     public class SessionManagerTests
     {
+        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         public void PerformanceMetrics_And_TotalRequests_IncrementCorrectly()
         {
@@ -33,6 +35,7 @@ namespace McpRouter.Tests
             Assert.Equal(50, manager.TotalDurationMs);
         }
 
+        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         public void UpdateBackendStatus_TracksBackendHealth()
         {

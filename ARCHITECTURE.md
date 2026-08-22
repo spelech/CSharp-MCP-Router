@@ -262,3 +262,22 @@ For comprehensive guides covering each individual subsystem in depth, refer to t
 ---
 
 *Last Updated: Release `v4.19.0`*
+
+### Transport Execution Flow
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Client
+    participant Router
+    participant StdioTransport
+    participant Process
+
+    Client->>Router: Execute tool
+    Router->>StdioTransport: Request execution
+    StdioTransport->>Process: Launch subprocess (Node/Python)
+    Process-->>StdioTransport: Return stdout/stderr
+    StdioTransport-->>Router: Format as JSON-RPC
+    Router-->>Client: Deliver response
+```
+

@@ -276,6 +276,7 @@ namespace McpRouter.Core.Routing
             }
             catch (Exception ex)
             {
+                _logger?.LogError(ex, "An unexpected error occurred.");
                 response.Error = new JsonRpcError { Code = -32603, Message = ex.Message };
             }
 
@@ -903,7 +904,8 @@ namespace McpRouter.Core.Routing
                     }
                     catch (Exception ex)
                     {
-                        return new { success = false, error = $"Vault connection failed: {ex.Message}" };
+                        _logger?.LogError(ex, "Vault connection failed.");
+                return new { success = false, error = "Vault connection failed." };
                     }
                 }
 
@@ -977,7 +979,8 @@ namespace McpRouter.Core.Routing
                     }
                     catch (Exception ex)
                     {
-                        return new { success = false, error = $"LDAP connection/bind failed: {ex.Message}" };
+                        _logger?.LogError(ex, "LDAP connection/bind failed.");
+                return new { success = false, error = "LDAP connection/bind failed." };
                     }
                 }
 

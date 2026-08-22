@@ -55,7 +55,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -74,7 +75,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -127,9 +129,10 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
                 _ = auditLogger.LogAdminActionAsync(username, "SaveSecretProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -140,6 +143,26 @@ namespace McpRouter.Components.Providers
             if (string.IsNullOrWhiteSpace(request.Address))
             {
                 return BadRequest(new { success = false, error = "Vault Address is required." });
+            }
+
+            if (request.Address.StartsWith("http://", StringComparison.OrdinalIgnoreCase))
+            {
+                if (Uri.TryCreate(request.Address, UriKind.Absolute, out var uri))
+                {
+                    bool isLocalhost = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || 
+                                       uri.Host.Equals("127.0.0.1") || 
+                                       uri.Host.Equals("::1");
+                    bool isSimpleHost = !uri.Host.Contains('.');
+
+                    if (!isLocalhost && !isSimpleHost && !McpRouter.Components.Authorization.SecurityValidationHelper.IsPrivateOrLoopback(request.Address))
+                    {
+                        return BadRequest(new { success = false, error = "Vault Address must use the HTTPS scheme in production for non-local addresses." });
+                    }
+                }
+                else
+                {
+                    return BadRequest(new { success = false, error = "Invalid Vault Address format." });
+                }
             }
 
             try
@@ -171,7 +194,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return Ok(new { success = false, error = $"Vault connection failed: {ex.Message}" });
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
+                return Ok(new { success = false, error = "Vault connection failed." });
             }
         }
 
@@ -189,7 +213,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, new { error = ex.Message });
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -241,9 +266,10 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 var redactedDetails = ProviderConfigSecurityHelper.RedactConfigJson(dto.ConfigJson);
                 _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvider", dto.ProviderName, redactedDetails ?? "", false, ex.Message);
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
         [HttpPost("auth/batch")]
@@ -303,8 +329,9 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
                 _ = auditLogger.LogAdminActionAsync(username, "SaveAuthProvidersBatch", "batch", "", false, ex.Message);
-                return StatusCode(500, new { error = ex.Message });
+                return StatusCode(500, new { error = "An unexpected error occurred." });
             }
         }
 
@@ -343,7 +370,8 @@ namespace McpRouter.Components.Providers
             }
             catch (Exception ex)
             {
-                return Ok(new { success = false, error = $"LDAP connection/bind failed: {ex.Message}" });
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
+                return Ok(new { success = false, error = "LDAP connection/bind failed." });
             }
         }
     }

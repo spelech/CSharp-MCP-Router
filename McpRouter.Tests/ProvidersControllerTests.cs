@@ -339,5 +339,71 @@ namespace McpRouter.Tests
             Assert.NotNull(result);
             Assert.Equal(400, result.StatusCode);
         }
-    }
+    
+        [Fact]
+        public async Task SaveSecretProvider_HttpUrl_AllowedForLocalhost()
+        {
+            var mockAudit = new Mock<IAuditLogger>();
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            mockServiceProvider.Setup(x => x.GetService(typeof(System.Collections.Generic.IEnumerable<McpRouter.Infrastructure.Secrets.ISecretRetriever>)))
+                .Returns(new System.Collections.Generic.List<McpRouter.Infrastructure.Secrets.ISecretRetriever>());
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
+            var dto = new SecretProviderDto
+            {
+                ProviderName = "Vault",
+                IsEnabled = true,
+                ConfigJson = "{\"url\":\"http://localhost:8200\"}"
+            };
+
+            var result = await controller.SaveSecretProvider(dto, mockAudit.Object, mockServiceProvider.Object);
+            if (result is ObjectResult br && br.StatusCode != 200)
+            {
+                throw new Exception("ObjectResult: " + System.Text.Json.JsonSerializer.Serialize(br.Value));
+            }
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task SaveSecretProvider_HttpUrl_AllowedForSimpleHost()
+        {
+            var mockAudit = new Mock<IAuditLogger>();
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            mockServiceProvider.Setup(x => x.GetService(typeof(System.Collections.Generic.IEnumerable<McpRouter.Infrastructure.Secrets.ISecretRetriever>)))
+                .Returns(new System.Collections.Generic.List<McpRouter.Infrastructure.Secrets.ISecretRetriever>());
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
+            var dto = new SecretProviderDto
+            {
+                ProviderName = "Vault",
+                IsEnabled = true,
+                ConfigJson = "{\"url\":\"http://vault:8200\"}"
+            };
+
+            var result = await controller.SaveSecretProvider(dto, mockAudit.Object, mockServiceProvider.Object);
+            if (result is ObjectResult br && br.StatusCode != 200)
+            {
+                throw new Exception("ObjectResult: " + System.Text.Json.JsonSerializer.Serialize(br.Value));
+            }
+            Assert.IsType<OkObjectResult>(result);
+        }
+
+        [Fact]
+        public async Task SaveSecretProvider_HttpUrl_RejectedForExternal()
+        {
+            var mockAudit = new Mock<IAuditLogger>();
+            var mockServiceProvider = new Mock<IServiceProvider>();
+            mockServiceProvider.Setup(x => x.GetService(typeof(System.Collections.Generic.IEnumerable<McpRouter.Infrastructure.Secrets.ISecretRetriever>)))
+                .Returns(new System.Collections.Generic.List<McpRouter.Infrastructure.Secrets.ISecretRetriever>());
+            var controller = new ProvidersController(_dbRepo, _dbRepo);
+            var dto = new SecretProviderDto
+            {
+                ProviderName = "Vault",
+                IsEnabled = true,
+                ConfigJson = "{\"url\":\"http://vault.external.com:8200\"}"
+            };
+
+            var result = await controller.SaveSecretProvider(dto, mockAudit.Object, mockServiceProvider.Object);
+            var badRequest = Assert.IsType<BadRequestObjectResult>(result);
+            Assert.Contains("must use the HTTPS scheme", badRequest.Value!.ToString());
+        }
+}
 }

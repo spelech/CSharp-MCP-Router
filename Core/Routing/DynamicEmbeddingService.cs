@@ -119,7 +119,7 @@ namespace McpRouter.Core.Routing
         {
             if (_settings.EmbeddingProvider?.ToLower() == "api")
             {
-                _logger.LogInformation("Activating external API embedding provider pointing to {Url}", _settings.EmbeddingApiUrl);
+                _logger.LogInformation("Activating external API embedding provider pointing to {Url}", _settings.EmbeddingApiUrl?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
                 _activeService = new ApiEmbeddingService(_httpClient, _settings);
             }
             else

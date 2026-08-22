@@ -86,7 +86,7 @@ namespace McpRouter.Components.Servers
                 catch (Exception ex)
                 {
                     logger.LogError(ex, "Error executing GET /api/servers");
-                    return Results.Problem(ex.Message);
+                    return Results.Problem("An unexpected error occurred.");
                 }
             });
 
@@ -212,7 +212,7 @@ namespace McpRouter.Components.Servers
             {
                 var sw = System.Diagnostics.Stopwatch.StartNew();
                 var username = httpContext.User.Identity?.Name ?? "anonymous";
-                logger.LogInformation("POST /api/servers started for {url}", server.Url);
+                logger.LogInformation("POST /api/servers started for {url}", server.Url?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
 
                 var allowedTypes = new[] { "sse", "http", "streamable", "stdio", "custom" };
                 var lowerType = (server.Type ?? "sse").ToLowerInvariant();
@@ -359,7 +359,7 @@ namespace McpRouter.Components.Servers
                         tools = new List<object>(),
                         prompts = new List<object>(),
                         resources = new List<object>(),
-                        error = ex.Message
+                        error = "An unexpected error occurred."
                     });
                 }
                 finally
