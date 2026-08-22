@@ -73,7 +73,7 @@ export const MyMcpServers: React.FC = () => {
                 <tr><td colSpan={3}>No user-provided servers available.</td></tr>
               )}
               {servers.map(server => {
-                const isConfigured = credentials.some(c => c.serverId === server.id);
+                const isConfigured = credentials.some(c => (typeof c === 'string' ? c === server.id : c.serverId === server.id));
                 return (
                   <tr key={server.id}>
                     <td>{server.displayName || server.id}</td>
