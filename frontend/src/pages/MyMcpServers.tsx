@@ -3,6 +3,7 @@ import { McpServer } from '../shared/types';
 import { fetchServersApi } from '../api/serverApi';
 import { fetchUserCredentialsApi, saveUserCredentialApi, UserCredential } from '../api/userCredentialsApi';
 import { showToast } from '../stores/useToastStore';
+import { ClientSetupGuide } from '../components/clients/ClientSetupGuide';
 
 export const MyMcpServers: React.FC = () => {
   const [servers, setServers] = useState<McpServer[]>([]);
@@ -96,6 +97,10 @@ export const MyMcpServers: React.FC = () => {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div style={{ marginTop: '25px' }}>
+        <ClientSetupGuide />
       </div>
 
       {editingServer && (

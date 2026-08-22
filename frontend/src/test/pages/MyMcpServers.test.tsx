@@ -98,4 +98,21 @@ describe('MyMcpServers Page', () => {
     expect(saveSpy).toHaveBeenCalledWith('user-srv-1', '{"apiKey":"secret123"}');
     expect(screen.queryByText(/Edit Auth for My Custom Service/i)).not.toBeInTheDocument();
   });
+
+  /**
+   * @requirement UI-109
+   * @category UI
+   * @type PositiveFeature
+   * @description Renders ClientSetupGuide below the user credentials card.
+   */
+  it('renders client setup guide below credentials card', async () => {
+    vi.spyOn(serverApi, 'fetchServersApi').mockResolvedValue([]);
+    vi.spyOn(userCredentialsApi, 'fetchUserCredentialsApi').mockResolvedValue([]);
+
+    await act(async () => {
+      render(<MyMcpServers />);
+    });
+
+    expect(screen.getByText('Client Connection Guide')).toBeInTheDocument();
+  });
 });

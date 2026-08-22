@@ -54,8 +54,9 @@ describe('App component', () => {
     });
     expect(secTab).toHaveClass('active');
     expect(overTab).not.toHaveClass('active');
-    // Admin security view includes Registered Clients Card
+    // Admin security view includes Registered Clients Card and ClientSetupGuide
     expect(screen.getByText(/Dynamic Client Registration \(RFC 7591\)/i)).toBeInTheDocument();
+    expect(screen.getByText(/Client Connection Guide/i)).toBeInTheDocument();
 
     // Switch to Test Bench
     await act(async () => {
