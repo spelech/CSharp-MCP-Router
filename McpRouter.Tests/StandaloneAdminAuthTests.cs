@@ -269,14 +269,13 @@ namespace McpRouter.Tests
             var httpContext = new DefaultHttpContext();
             httpContext.Connection.RemoteIpAddress = IPAddress.Parse("203.0.113.99");
             httpContext.Items["AppKeyScopes"] = "[\"admin\"]";
-
-            Assert.True(SecurityValidationHelper.IsAdmin(null, config, httpContext));
-
-            httpContext.Items["AppKeyScopes"] = "[\"all\"]";
             Assert.True(SecurityValidationHelper.IsAdmin(null, config, httpContext));
 
             httpContext.Items["AppKeyScopes"] = "[\"*\"]";
             Assert.True(SecurityValidationHelper.IsAdmin(null, config, httpContext));
+
+            httpContext.Items["AppKeyScopes"] = "[\"all\"]";
+            Assert.False(SecurityValidationHelper.IsAdmin(null, config, httpContext));
 
             httpContext.Items["AppKeyScopes"] = "[\"tools/read\"]";
             Assert.False(SecurityValidationHelper.IsAdmin(null, config, httpContext));

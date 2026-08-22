@@ -250,6 +250,14 @@ namespace McpRouter.Components.AppKeys
 
                 var scopes = model.Scopes ?? new List<string> { "all" };
 
+                // Non-admins cannot request administrative scopes
+                if (!isAdmin && scopes.Any(s =>
+                    string.Equals(s?.Trim(), "admin", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(s?.Trim(), "*", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return BadRequest(new { error = "Non-admin users cannot request administrative scopes." });
+                }
+
                 // Validate category scopes
                 foreach (var scope in scopes)
                 {
