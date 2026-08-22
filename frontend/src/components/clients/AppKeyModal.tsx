@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAppKeyStore } from '../../stores/useAppKeyStore';
 import { useUserStore } from '../../stores/useUserStore';
 
@@ -16,26 +16,13 @@ export const AppKeyModal: React.FC = () => {
   } = useAppKeyStore();
 
   const [name, setName] = useState('');
-  const [keyType, setKeyType] = useState<'personal' | 'system'>('personal');
+  const [keyType, setKeyType] = useState<'personal' | 'system'>(() => keyTypeTab === 'system' ? 'system' : 'personal');
   const [targetUsername, setTargetUsername] = useState('');
   const [scopeType, setScopeType] = useState<'all' | 'server' | 'category'>('all');
   const [customScope, setCustomScope] = useState('');
   const [expiresInDays, setExpiresInDays] = useState<number | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedKey, setCopiedKey] = useState(false);
-
-  useEffect(() => {
-    if (isCreateModalOpen) {
-      setName('');
-      setKeyType(keyTypeTab === 'system' ? 'system' : 'personal');
-      setTargetUsername('');
-      setScopeType('all');
-      setCustomScope('');
-      setExpiresInDays(undefined);
-      setIsSubmitting(false);
-      setCopiedKey(false);
-    }
-  }, [isCreateModalOpen, keyTypeTab]);
 
   if (!isCreateModalOpen) return null;
 
