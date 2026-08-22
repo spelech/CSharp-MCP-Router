@@ -169,7 +169,7 @@ namespace McpRouter.Components.Capabilities
                     {
                         jsonrpc = "2.0",
                         id = id != null ? (object)id : null,
-                        error = new { code = -32603, message = ex.Message }
+                        error = new { code = -32603, message = "An unexpected error occurred." }
                     });
                     return;
                 }
@@ -301,7 +301,7 @@ namespace McpRouter.Components.Capabilities
             catch (Exception ex)
             {
                 logger.LogError(ex, "Error processing admin message for sessionId {SessionId}", sessionId);
-                return Results.Problem(ex.Message);
+                return Results.Problem("An unexpected error occurred.");
             }
         }
     }
