@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.34.0`** | 2026-08-23 | feat(skills): introduce universal `mcp-router-admin` automation skill, blank-slate safe defaults documentation, provider scaffolding templates (Authentik, Keycloak, Entra ID, Active Directory LDAPS, Cloudflare, Vault, Embeddings), and comprehensive DevOps automation guide |
 | **`v4.33.0`** | 2026-08-22 | feat(testing): integrate playwright-layout-inspector for spatial layout auditing, eliminate background DOM collisions, enhance interactive touch targets and focus rings |
 | **`v4.32.0`** | 2026-08-22 | feat(ui): dynamic multi-brand logo resolution (favicons, manifests, meta icons) and centered page layout containerization across all dashboard tabs |
 | **`v4.31.0`** | 2026-08-22 | feat(frontend): implement dynamic multi-target client connection guide |

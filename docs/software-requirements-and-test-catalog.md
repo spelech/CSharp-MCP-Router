@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **104 Requirements Verified** across **253 Test Proofs** (81 Functional Capabilities, 23 Safety Guardrails).
+> **Catalog Statistics:** **108 Requirements Verified** across **257 Test Proofs** (85 Functional Capabilities, 23 Safety Guardrails).
 
 ---
 
@@ -14,7 +14,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 10 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 34 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **35** | 35 | 0 | 36 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **9** | 6 | 3 | 18 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **14** | 12 | 2 | 56 proofs |
@@ -368,6 +368,30 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L202`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L202) (`AdminTools_ExecuteSuccessfully`)
+
+### `[MCP-ADMIN-SKILL-FRONTMATTER]` mcp-router-admin skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L22) (`Skill_Frontmatter_IsValidAndWithinCharacterLimit`)
+
+### `[MCP-ADMIN-SKILL-MIRROR]` mcp-router-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L148`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L148) (`Skill_MirroredInAgentsDirectory`)
+
+### `[MCP-ADMIN-SKILL-TEMPLATES]` All mcp-router-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L104`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L104) (`Templates_AllExistAndAreValidJsonOrScripts`)
+
+### `[MCP-ADMIN-SKILL-WORKFLOW]` mcp-router-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L48`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L48) (`Skill_ContainsAllRequiredPhasesAndProviderCookbooks`)
 
 ### `[MCP-ADMIN-TOOL-AUDIT-LOG]` AdminMcpServer tool calls record audit log entries with caller and tool name.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -876,6 +900,10 @@
 | `MCP-ADMIN-PARITY-SYSTEM` | Positive | `MCP` | manage_system supports full parity for diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminToolsParityTests.cs:L827`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L827) | Backend xUnit |
 | `MCP-ADMIN-PARITY-TEST-TOOL-CALL` | Positive | `MCP` | test_tool_call executes test bench backend tool calls and formats responses. | [`AdminToolsParityTests.cs:L857`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L857) | Backend xUnit |
 | `MCP-ADMIN-PARITY-TOOLS-COVERAGE` | Positive | `MCP` | Ensures every UI management workflow is backed by a verified, equivalent action within the consolidated Admin MCP tools. | [`AdminToolsParityTests.cs:L202`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L202) | Backend xUnit |
+| `MCP-ADMIN-SKILL-FRONTMATTER` | Positive | `MCP` | mcp-router-admin skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters | [`AdminAutomationSkillTests.cs:L22`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L22) | Backend xUnit |
+| `MCP-ADMIN-SKILL-MIRROR` | Positive | `MCP` | mcp-router-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories | [`AdminAutomationSkillTests.cs:L148`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L148) | Backend xUnit |
+| `MCP-ADMIN-SKILL-TEMPLATES` | Positive | `MCP` | All mcp-router-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation | [`AdminAutomationSkillTests.cs:L104`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L104) | Backend xUnit |
+| `MCP-ADMIN-SKILL-WORKFLOW` | Positive | `MCP` | mcp-router-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification | [`AdminAutomationSkillTests.cs:L48`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L48) | Backend xUnit |
 | `MCP-ADMIN-TOOL-AUDIT-LOG` | Positive | `MCP` | AdminMcpServer tool calls record audit log entries with caller and tool name. | [`AdminMcpServerTests.cs:L276`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L276) | Backend xUnit |
 | `MCP-ADMIN-TOOL-MANAGE-APPKEYS` | Positive | `MCP` | AdminMcpServer executes manage_appkeys create, list, limits, and revoke actions. | [`AdminMcpServerTests.cs:L293`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L293) | Backend xUnit |
 | `MCP-ADMIN-TOOL-MANAGE-CLIENTS` | Positive | `MCP` | AdminMcpServer executes manage_clients register, list, and delete actions. | [`AdminMcpServerTests.cs:L340`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L340) | Backend xUnit |

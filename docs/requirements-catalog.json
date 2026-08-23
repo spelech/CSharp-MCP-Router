@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-23T04:44:26.4823032Z",
-    "totalRequirements": 104,
-    "positiveCount": 81,
+    "generatedAt": "2026-08-23T05:26:58.4960789Z",
+    "totalRequirements": 108,
+    "positiveCount": 85,
     "guardrailCount": 23,
-    "totalProofs": 253
+    "totalProofs": 257
   },
   "requirements": [
     {
@@ -1719,6 +1719,70 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs",
           "lineNumber": 202,
           "testName": "AdminTools_ExecuteSuccessfully",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-SKILL-FRONTMATTER",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "mcp-router-admin skill frontmatter is valid YAML, specifies name, description starting with \u0027Use when...\u0027, and length is under 1024 characters",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 22,
+          "testName": "Skill_Frontmatter_IsValidAndWithinCharacterLimit",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-SKILL-MIRROR",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "mcp-router-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 148,
+          "testName": "Skill_MirroredInAgentsDirectory",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-SKILL-TEMPLATES",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "All mcp-router-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 104,
+          "testName": "Templates_AllExistAndAreValidJsonOrScripts",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-SKILL-WORKFLOW",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "mcp-router-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 48,
+          "testName": "Skill_ContainsAllRequiredPhasesAndProviderCookbooks",
           "details": null
         }
       ]
