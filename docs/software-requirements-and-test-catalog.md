@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **103 Requirements Verified** across **245 Test Proofs** (80 Functional Capabilities, 23 Safety Guardrails).
+> **Catalog Statistics:** **103 Requirements Verified** across **249 Test Proofs** (80 Functional Capabilities, 23 Safety Guardrails).
 
 ---
 
@@ -17,7 +17,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **9** | 6 | 3 | 18 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **13** | 11 | 2 | 48 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **13** | 11 | 2 | 52 proofs |
 
 ---
 
@@ -507,8 +507,12 @@
 ### `[UI-01]` Dashboard shows empty filter state when no servers match search term
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (4):**
+* **Verification Proofs (8):**
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L115`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L115) (`renders empty state when no servers match search`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L19`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L19) (`renders top navigation bar with centered alignment in layout.css and App`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L42`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L42) (`renders tester tabs with centered alignment in tester.css`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L58`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L58) (`renders SettingsView sub-navigation bar with centered alignment`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L74`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L74) (`renders AppKeysCard sub-navigation tabs with centered alignment for admin`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42`](file:////containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42) (`should navigate to Custom Files and Prompts in Settings view`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L23`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L23) (`should display aggregate statistics cards`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L37`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L37) (`should filter servers using search input`)

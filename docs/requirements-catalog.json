@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-23T03:44:15.3555379Z",
+    "generatedAt": "2026-08-23T03:46:15.6048011Z",
     "totalRequirements": 103,
     "positiveCount": 80,
     "guardrailCount": 23,
-    "totalProofs": 245
+    "totalProofs": 249
   },
   "requirements": [
     {
@@ -2201,13 +2201,41 @@
       "category": "UI",
       "type": "Positive",
       "description": "Dashboard shows empty filter state when no servers match search term",
-      "proofCount": 4,
+      "proofCount": 8,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 115,
           "testName": "renders empty state when no servers match search",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "lineNumber": 19,
+          "testName": "renders top navigation bar with centered alignment in layout.css and App",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "lineNumber": 42,
+          "testName": "renders tester tabs with centered alignment in tester.css",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "lineNumber": 58,
+          "testName": "renders SettingsView sub-navigation bar with centered alignment",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "lineNumber": 74,
+          "testName": "renders AppKeysCard sub-navigation tabs with centered alignment for admin",
           "details": null
         },
         {

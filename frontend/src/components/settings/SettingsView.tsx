@@ -47,7 +47,7 @@ export const SettingsView: React.FC = () => {
       <div
         className="tester-tabs settings-sub-nav"
         style={{
-          justifyContent: 'flex-start',
+          justifyContent: 'center',
           gap: '15px',
           marginBottom: '25px',
           borderBottom: '1px solid var(--border-color)',

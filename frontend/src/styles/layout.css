@@ -196,6 +196,7 @@ body {
 /* Tabs Navigation */
 .tabs-nav {
     display: flex;
+    justify-content: center;
     gap: var(--space-2);
     border-bottom: 1px solid var(--border-color);
     padding-bottom: var(--space-2);
