@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-23T03:50:13.7687485Z",
+    "generatedAt": "2026-08-23T04:35:46.2757018Z",
     "totalRequirements": 103,
     "positiveCount": 80,
     "guardrailCount": 23,
-    "totalProofs": 249
+    "totalProofs": 251
   },
   "requirements": [
     {
@@ -2201,7 +2201,7 @@
       "category": "UI",
       "type": "Positive",
       "description": "Dashboard shows empty filter state when no servers match search term",
-      "proofCount": 8,
+      "proofCount": 10,
       "proofs": [
         {
           "suite": "Frontend Vitest",
@@ -2236,6 +2236,20 @@
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
           "lineNumber": 74,
           "testName": "renders AppKeysCard sub-navigation tabs with centered alignment for admin",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "lineNumber": 90,
+          "testName": "uses body::before and body::after pseudo-elements for ambient gradients and removes background-decor DOM nodes",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "lineNumber": 117,
+          "testName": "defines focus-visible outline indicators for interactive focus styling",
           "details": null
         },
         {

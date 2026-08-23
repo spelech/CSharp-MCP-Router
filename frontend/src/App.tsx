@@ -15,24 +15,11 @@ const App: React.FC = () => {
   const isAdmin = !!(user?.groups && user.groups.includes('full_admin'));
 
   if (window.location.pathname === '/consent') {
-    return (
-      <>
-        <div className="background-decor">
-          <div className="circle circle-1"></div>
-          <div className="circle circle-2"></div>
-        </div>
-        <ConsentView />
-      </>
-    );
+    return <ConsentView />;
   }
 
   return (
     <>
-      <div className="background-decor">
-        <div className="circle circle-1"></div>
-        <div className="circle circle-2"></div>
-      </div>
-
       <div className="dashboard-container">
         <Header />
 

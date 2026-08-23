@@ -242,7 +242,7 @@ export const ClientSetupGuide: React.FC = () => {
             <label
               htmlFor="meta-mode-toggle"
               style={{
-                display: 'flex',
+                display: 'inline-flex',
                 alignItems: 'center',
                 gap: '8px',
                 cursor: 'pointer',
@@ -251,6 +251,7 @@ export const ClientSetupGuide: React.FC = () => {
                 borderRadius: '6px',
                 border: '1px solid var(--glass-border)',
                 fontSize: '12px',
+                minHeight: '24px',
                 height: '32px'
               }}
             >
@@ -259,7 +260,7 @@ export const ClientSetupGuide: React.FC = () => {
                 id="meta-mode-toggle"
                 checked={metaMode}
                 onChange={(e) => setMetaMode(e.target.checked)}
-                style={{ cursor: 'pointer' }}
+                style={{ cursor: 'pointer', width: '16px', height: '16px' }}
               />
               <span>Meta-Mode (Dynamic Routing)</span>
             </label>

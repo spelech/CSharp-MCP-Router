@@ -86,4 +86,47 @@ describe('Layout and Sub-Navigation Centering', () => {
     expect(subNav).toBeInTheDocument();
     expect(subNav.style.justifyContent).toBe('center');
   });
+
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Ambient background glowing decorations use body pseudo-elements instead of DOM nodes.
+   */
+  it('uses body::before and body::after pseudo-elements for ambient gradients and removes background-decor DOM nodes', async () => {
+    await act(async () => {
+      render(<App />);
+    });
+
+    // Ensure no .background-decor DOM nodes exist in App
+    const bgDecor = document.querySelector('.background-decor');
+    expect(bgDecor).toBeNull();
+
+    const cssPath = path.resolve(__dirname, '../../styles/layout.css');
+    const cssContent = fs.readFileSync(cssPath, 'utf-8');
+
+    expect(cssContent).toContain('body::before');
+    expect(cssContent).toContain('body::after');
+    expect(cssContent).toContain('pointer-events: none;');
+    expect(cssContent).toContain('position: fixed;');
+    expect(cssContent).toContain('filter: blur(120px);');
+    expect(cssContent).toContain('contain: paint;');
+    expect(cssContent).toContain('z-index: -1;');
+  });
+
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type PositiveFeature
+   * @description Focus-visible outline styles are defined for keyboard accessibility.
+   */
+  it('defines focus-visible outline indicators for interactive focus styling', () => {
+    const cssPath = path.resolve(__dirname, '../../styles/components.css');
+    const cssContent = fs.readFileSync(cssPath, 'utf-8');
+
+    expect(cssContent).toContain(':focus-visible');
+    expect(cssContent).toContain('outline: 2px solid var(--primary);');
+    expect(cssContent).toContain('outline-offset: 2px;');
+  });
 });
+
