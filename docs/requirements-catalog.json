@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-23T04:35:46.2757018Z",
-    "totalRequirements": 103,
-    "positiveCount": 80,
+    "generatedAt": "2026-08-23T04:41:28.5635177Z",
+    "totalRequirements": 104,
+    "positiveCount": 81,
     "guardrailCount": 23,
-    "totalProofs": 251
+    "totalProofs": 253
   },
   "requirements": [
     {
@@ -2435,6 +2435,29 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PipelineIntegrationTests.cs",
           "lineNumber": 420,
           "testName": "Branding_Logo_Upload_And_Retrieval_Works",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-07",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Audits desktop viewport layout for zero horizontal overflow and high UX score.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 38,
+          "testName": "should pass layout audit on desktop 1080p viewport",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/layout-inspector.spec.ts",
+          "lineNumber": 64,
+          "testName": "should pass layout audit on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
         }
       ]

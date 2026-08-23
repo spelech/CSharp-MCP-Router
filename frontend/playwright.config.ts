@@ -8,7 +8,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: [['html', { open: 'never' }], ['list']],
   use: {
-    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:8080',
+    baseURL: process.env.PLAYWRIGHT_TEST_BASE_URL || 'http://localhost:5173',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     actionTimeout: 10000,
@@ -24,6 +24,12 @@ export default defineConfig({
       'Remote-Name': 'Administrator',
       'Remote-User-Sid': 'S-1-5-32-544'
     }
+  },
+  webServer: {
+    command: 'npx vite --port 5173',
+    port: 5173,
+    reuseExistingServer: !process.env.CI,
+    timeout: 30000,
   },
   projects: [
     {

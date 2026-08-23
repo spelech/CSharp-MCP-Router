@@ -11,6 +11,7 @@
     "test:watch": "vitest",
     "test:coverage": "vitest run --coverage",
     "test:e2e": "playwright test",
+    "test:layout": "playwright-layout-inspector audit http://localhost:3000 --device 'Desktop 1080p' --min-score 85",
     "docs:catalog": "dotnet run --project ../scripts/CatalogGenerator",
     "docs:catalog:verify": "dotnet run --project ../scripts/CatalogGenerator -- --verify-only"
   },
@@ -32,6 +33,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.4",
     "happy-dom": "^20.11.2",
+    "playwright-layout-inspector": "github:spelech/playwright-layout-inspector",
     "typescript": "~5.7.3",
     "typescript-eslint": "^8.67.0",
     "vite": "^8.2.1",
