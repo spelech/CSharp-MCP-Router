@@ -358,7 +358,28 @@ The skill includes pre-tested scaffold templates under `skills/mcp-router-setup/
 - `.env.example`: Standardized environment variable template with master key, provider, and network settings.
 - `appsettings.Production.json.example`: Production ASP.NET Core configuration snippet.
 
+---
 
+## 🤖 11. Universal Admin MCP Automation Skill (`mcp-router-admin`)
+
+The `mcp-router-admin` skill enables AI coding assistants and automation pipelines to connect directly to the in-process **Admin MCP Server** (`/admin/sse`) to configure, manage, and verify any gateway deployment from a blank slate with zero human dashboard interaction.
+
+### Zero-Clone Installation
+```bash
+mkdir -p .agents/skills/mcp-router-admin && curl -fsSL https://raw.githubusercontent.com/spelech/csharp-mcp-router/main/skills/mcp-router-admin/SKILL.md -o .agents/skills/mcp-router-admin/SKILL.md
+```
+
+### 7-Phase Autonomous Administration Engine
+1. **Gateway Diagnostics**: Connects via `Authorization: Bearer mcp-global-admin-default-cli-key-99` and runs `manage_system(action: "diagnostics")`.
+2. **Secret Provider Provisioning**: Configures HashiCorp Vault KV v2 (Token or AppRole auth with `test_vault` validation) or Built-in AES-256-GCM Master Key.
+3. **Auth Provider Provisioning**: Configures Authentik / Authelia Forward-Auth, Keycloak OIDC, Microsoft Entra ID (Azure AD), or Active Directory LDAPS (with `test_ldap` validation).
+4. **RBAC & Group Mappings**: Maps external SSO groups/SIDs to internal roles (`manage_group_mappings`) and sets fine-grained allow/deny policies (`manage_policies`).
+5. **Semantic Search & Embeddings**: Configures OpenAI, Azure OpenAI, or local Ollama embeddings (`manage_settings`).
+6. **Backend MCP Servers & AppKeys**: Registers backend servers (`manage_servers`), issues developer AppKeys (`manage_appkeys`), and provisions OAuth clients (`manage_clients`).
+7. **End-to-End Verification**: Tests live tool execution through the gateway (`test_tool_call`) and reviews security audit trails (`manage_system(action: "query_audit")`).
+
+> [!TIP]
+> For complete reference architectures, ready-to-use JSON payloads, and automated cURL/PowerShell scripts, see the [**Admin MCP Automation & Provider Configuration Guide**](admin-mcp-automation-guide.md).
 
 ---
 
