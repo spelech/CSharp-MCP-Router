@@ -36,10 +36,10 @@ namespace McpRouter.Infrastructure.Persistence
 
             logger.LogInformation("Initializing database via Dapper ({Provider})...", provider);
             
-            var encryptionKey = configuration["DB_ENCRYPTION_KEY"];
-            if (string.IsNullOrEmpty(encryptionKey))
+            var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
+            if (string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"]) && string.IsNullOrEmpty(configuration["ROUTER_MASTER_KEY"]))
             {
-                logger.LogInformation("No DB_ENCRYPTION_KEY provided in configuration. A unique key has been resolved.");
+                logger.LogInformation("Master encryption key resolved from persistent keyfile or auto-generated key.");
             }
             else if (encryptionKey.Length < 16)
             {

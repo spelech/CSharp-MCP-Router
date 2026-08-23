@@ -2,18 +2,58 @@
 
 This guide outlines requirements, configurations, and migration paths for deploying the **Model Context Protocol (MCP) Router Gateway** into production environments.
 
+## 📦 Minimal Blank-Slate Startup (Zero-Config or File Secrets)
+
+You can spin up the gateway container with **zero environment variables** or with secure **Docker/Kubernetes file secrets** without exposing plaintext secrets in process tables:
+
+### 1. Master Encryption Key Options
+
+The gateway resolves the 256-bit Master Encryption Key (used for AES-256-GCM application-level database envelope encryption) in the following order:
+
+1. **Auto-Generated Persistent Keyfile (`./data/.master.key`)** *(Default)*:
+   If no environment variable is provided on first boot, the router automatically generates a cryptographically secure 256-bit key, writes it to `./data/.master.key` with restricted permissions (`chmod 0600`), and logs a startup notice. As long as `./data` is mounted to persistent storage, the key is preserved across container restarts with zero manual configuration.
+2. **Docker / Kubernetes File Secret (`ROUTER_MASTER_KEY_FILE`)**:
+   Point `ROUTER_MASTER_KEY_FILE` at a mounted secret file (e.g., `ROUTER_MASTER_KEY_FILE=/run/secrets/router_master_key`). The gateway also automatically checks standard Docker secret paths (`/run/secrets/router_master_key`, `/run/secrets/master_key`).
+3. **Explicit Environment Variable (`ROUTER_MASTER_KEY` or `ROUTER_SECRET`)**:
+   Pass a 256-bit base64-encoded key directly via `ROUTER_MASTER_KEY=<base64-key>` if preferred.
+4. **Windows DPAPI (IIS / Windows Service)**:
+   When deploying natively to Windows IIS, the gateway can leverage Windows DPAPI machine keys, requiring zero configuration keys.
+
+> [!TIP]
+> **Zero Plaintext Secrets**: Using the auto-generated persistent keyfile (`./data/.master.key`) or `ROUTER_MASTER_KEY_FILE` prevents secret leakage via `docker inspect` or `/proc/<pid>/environ`.
+
+### 2. Automatic Out-of-the-Box Safe Defaults
+When no environment variables or configuration files are provided:
+
+| Subsystem | Automatic Safe Default |
+| :--- | :--- |
+| **🗄️ Database** | • Defaults to `DB_PROVIDER=sqlite`.<br>• Automatically creates `./data/mcp_router.db`.<br>• Runs schema migrations and seeds baseline tables (`Servers`, `Settings`, `AppKeys`, `AccessPolicies`, `GroupMappings`, `SecretProviders`, `AuthProviderConfigs`, `AuditLogs`). |
+| **🔒 Secret Storage** | • Uses the **Built-in Master Secret Provider** (AES-256-GCM).<br>• All backend server credentials are encrypted in SQLite using your resolved master key (no external Vault or DPAPI needed). |
+| **👤 Authentication** | • Detects that no external Identity Provider (LDAP or OIDC forward-auth) is active.<br>• **Standalone Mode** engages automatically.<br>• Local loopback (`127.0.0.1`, `::1`) is trusted as `Administrator` for Web UI access without requiring an SSO login. |
+| **🔑 Pre-Seeded Admin Key** | • Seeds a default system Admin AppKey into the database: `mcp-global-admin-default-cli-key-99`.<br>• Has username `admin` and scope `["all", "admin"]`.<br>• Enables remote AI coding agents and CLI scripts to authenticate to `/admin` and `/admin/sse` immediately. |
+| **🐳 Docker Discovery** | • If `-v /var/run/docker.sock:/var/run/docker.sock` is mounted, background discovery immediately registers containers labeled `mcp.enabled=true`. |
+
+### 3. Immediate Live Endpoints
+* **Dashboard Web UI**: `http://localhost:8080/` (Full administrative dashboard)
+* **Health Probe**: `http://localhost:8080/health` (`{"status":"healthy","service":"McpRouter","version":"4.34.0"}`)
+* **Meta-Mode MCP Gateway**: `http://localhost:8080/sse` (Exposes `search_tools` and `execute_tool`)
+* **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` for direct JSON-RPC tool dispatch)
+
+### 4. Transitioning to Production
+From this blank-slate container, an autonomous AI agent (using the **`mcp-router-admin`** skill) or a DevOps script can connect to `/admin` using `mcp-global-admin-default-cli-key-99` to configure Authentik, Keycloak, Entra ID, Active Directory, HashiCorp Vault, semantic search embeddings, backend MCP servers, and personal AppKeys without restarting the container or editing static files.
+
 ---
 
-## 🔒 Required Production Configuration
+## 🔒 Production Configuration Parameters
 
-Production environments must be locked down to prevent spoofing, unauthorized access, and credential leakage. Below are the mandatory configuration parameters.
+Production environments can be locked down to prevent spoofing, unauthorized access, and credential leakage.
 
-### 🚨 Critical Parameters
+### 🚨 Key Parameters
 
 | Configuration Key | Environment Variable Equivalent | Type | Description / Behavior |
 | :--- | :--- | :--- | :--- |
-| **`ROUTER_MASTER_KEY`** | `ROUTER_MASTER_KEY` | **Mandatory** | A high-entropy Base64/hex-encoded 256-bit key. Used to encrypt downstream server credentials, API tokens, and configurations in the database. **Fatal error on startup if missing!** |
-| **`DB_PROVIDER`** | `DB_PROVIDER` | Optional | Supported: `sqlite`, `mssql`, `mysql`. Defaults silently to `sqlite` if missing or unconfigured. |
+| **`ROUTER_MASTER_KEY`** | `ROUTER_MASTER_KEY` or `ROUTER_MASTER_KEY_FILE` | Optional | High-entropy 256-bit key or file path. If unset, automatically generated and stored in `./data/.master.key`. |
+| **`DB_PROVIDER`** | `DB_PROVIDER` | Optional | Supported: `sqlite`, `mssql`, `mysql`. Defaults to `sqlite`. |
 | **`ConnectionStrings:DefaultConnection`** | `ConnectionStrings__DefaultConnection` | **Mandatory** | Connection string for the chosen database provider. |
 | **`CORS_ALLOWED_ORIGINS`** | `CORS_ALLOWED_ORIGINS` | **Mandatory** | Comma/semicolon/whitespace-separated list of allowed origins. Unconfigured/empty locks out browser access in production. |
 | **`OpenIddict:CertificatePath`** | `OpenIddict__CertificatePath` | **Mandatory** | Filepath to the PFX/PKCS#12 certificate used to sign OAuth tokens in production. Unconfigured fallbacks reset on application restart, invalidating active client sessions. |

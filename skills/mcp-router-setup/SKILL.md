@@ -139,9 +139,12 @@ Select the identity and network access tier based on deployment scope:
 
 ## Phase 5: Artifact Generation & Secrets Scaffolding
 
-### 5.1 Generate Cryptographic Master Key
+### 5.1 Master Key Options
 
-Generate a 256-bit cryptographically secure Base64 `ROUTER_MASTER_KEY`:
+The router encrypts database credentials using a 256-bit key. You have three flexible options:
+1. **Auto-Generated Persistent Keyfile** *(Default)*: Omit `ROUTER_MASTER_KEY` and the gateway will auto-generate and store `./data/.master.key` on first boot.
+2. **File Secret / Docker Secrets**: Set `ROUTER_MASTER_KEY_FILE=/run/secrets/router_master_key`.
+3. **Explicit Environment Variable**: Generate a 256-bit Base64 key:
 
 ```bash
 # Linux / macOS / Bash
@@ -167,7 +170,8 @@ services:
       - "8080:8080"
     environment:
       - DB_PROVIDER=${DB_PROVIDER:-sqlite}
-      - ROUTER_MASTER_KEY=${ROUTER_MASTER_KEY}
+      # Optional: Auto-generated to ./data/.master.key if omitted
+      # - ROUTER_MASTER_KEY=${ROUTER_MASTER_KEY}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
       - Admin__StandaloneAllowedNetworks__0=${STANDALONE_ALLOWED_NETWORK:-127.0.0.1}
       - Admin__StandaloneAllowedNetworks__1=::1
@@ -322,7 +326,7 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
 ```
 
 #### Autonomous Agent Router Administration (`Admin MCP Server`)
-To allow an AI agent to manage, add, edit, or delete backend MCP servers dynamically:
+To allow an AI agent to manage, add, edit, or delete backend MCP servers, auth providers, secret stores, and access policies dynamically:
 ```json
 {
   "mcpServers": {
@@ -335,6 +339,10 @@ To allow an AI agent to manage, add, edit, or delete backend MCP servers dynamic
   }
 }
 ```
+
+> [!TIP]
+> **Next Step: Automated Provider Provisioning**
+> Once the gateway is deployed and running, use the **`mcp-router-admin`** skill (`.agents/skills/mcp-router-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Microsoft Entra ID, Active Directory, HashiCorp Vault, semantic search embeddings, access policies, and backend servers.
 
 ---
 

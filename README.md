@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.33.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.34.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-620%20passing-2ea44f?style=for-the-badge)
@@ -19,6 +19,7 @@ A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the
 ## 🌟 Key Features
 
 * **Admin MCP Server & Control Plane (`/admin`, `/router-admin`)**: In-process virtual MCP server providing 10 consolidated entity management tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`) allowing autonomous AI agents (Claude Desktop, Cursor, Cline, Windsurf) to manage router configuration directly via MCP protocol with hybrid standalone network auth and audit logging.
+* **Universal Admin Automation Skill (`mcp-router-admin`)**: Specialized [AgentSkills.io](https://agentskills.io) skill enabling AI agents to programmatically provision Auth providers (Authentik, Keycloak, Entra ID, Active Directory LDAPS), Secret stores (Vault KV v2, AES-256-GCM Master Key, DPAPI), RBAC policies, group mappings, embeddings, backend servers, and client keys from a blank slate with zero UI clicking (see [docs/admin-mcp-automation-guide.md](docs/admin-mcp-automation-guide.md)).
 * **Universal Setup Skill (`mcp-router-setup`)**: Self-contained [AgentSkills.io](https://agentskills.io)-compliant skill enabling any AI assistant to bootstrap and configure the router across Docker Compose and Windows IIS with zero source code cloning.
 * **MCP 2026-07-28 Spec Support**: Spec-compliant header annotation; routing is body/path based (`Mcp-Method` & `Mcp-Name`) via `McpDualSpecMiddleware` with legacy JSON body fallback.
 * **Dynamic Docker Auto-Discovery**: Mounts `/var/run/docker.sock` to automatically discover and register backend MCP containers labeled with `mcp.enabled=true`, `mcp.id`, `mcp.port`, and `mcp.categories` (see [docs/features-guide.md](docs/features-guide.md#method-d-dynamic-docker-label-auto-discovery-mcp-labels)).
@@ -52,6 +53,30 @@ A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the
 * **Batteries-Included Docker**: `ghcr.io/org/mcp-router:latest-full` tag provides pre-installed Node.js, Python 3, `uv`, and `bun` environments for natively executing `stdio` sub-process servers without sidecar networking complexity.
 
 * **Built-in Web Dashboard:** A responsive, dark-mode, glassmorphic UI to monitor connected clients, stats, and backend health status.
+
+---
+
+## ⚡ Quickstart: Zero-Config Blank-Slate Deployment
+
+You can spin up `CSharp-MCP-Router` with **zero required environment variables**. On first launch, the router automatically generates a 256-bit master key saved to `./data/.master.key` and initializes safe defaults:
+
+```bash
+docker run -d \
+  --name mcp-router \
+  -p 8080:8080 \
+  -v $(pwd)/data:/app/data \
+  -v /var/run/docker.sock:/var/run/docker.sock \
+  ghcr.io/spelech/mcp-router:latest
+```
+
+*(Alternatively, mount a Docker/Kubernetes file secret with `-e ROUTER_MASTER_KEY_FILE=/run/secrets/my_key` or pass `-e ROUTER_MASTER_KEY="<key>"`).*
+
+### Out-of-the-Box Safe Defaults
+* **Auto-Generated Master Key**: Automatically created and stored in `./data/.master.key` (with `chmod 0600`) so credentials remain encrypted at rest with zero plaintext env vars.
+* **SQLite Database**: Automatically created and migrated at `./data/mcp_router.db`.
+* **Standalone Security**: Local loopback (`127.0.0.1`, `::1`) is trusted as `Administrator` for the Web Dashboard (`http://localhost:8080`).
+* **Pre-Seeded Admin Key**: Seeds `mcp-global-admin-default-cli-key-99` for remote AI agents and DevOps scripts to automate configuration via the Admin MCP Server (`/admin/sse` or `POST /admin`).
+* **Instant Automation**: Use the **`mcp-router-admin`** skill (`.agents/skills/mcp-router-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Entra ID, Active Directory, Vault, embeddings, and backend servers. See [**docs/deployment-guide.md**](docs/deployment-guide.md#minimal-blank-slate-startup-zero-config-or-file-secrets).
 
 ---
 
@@ -207,11 +232,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.34.0`** | 2026-08-23 | feat(skills): introduce universal `mcp-router-admin` automation skill, blank-slate safe defaults documentation, provider scaffolding templates (Authentik, Keycloak, Entra ID, Active Directory LDAPS, Cloudflare, Vault, Embeddings), and comprehensive DevOps automation guide |
 | **`v4.33.0`** | 2026-08-22 | feat(testing): integrate playwright-layout-inspector for spatial layout auditing, eliminate background DOM collisions, enhance interactive touch targets and focus rings |
 | **`v4.32.0`** | 2026-08-22 | feat(ui): dynamic multi-brand logo resolution (favicons, manifests, meta icons) and centered page layout containerization across all dashboard tabs |
 | **`v4.31.0`** | 2026-08-22 | feat(frontend): implement dynamic multi-target client connection guide |
 | **`v4.30.0`** | 2026-08-22 | feat(ui): comprehensive aesthetic UI overhaul implementing stark monochrome mode, vibrant neon green/orange dark mode accents, cyan/blue light mode accents, and mobile responsive flex refactoring for toolbar dropdowns and stat grids |
-| **`v4.29.0`** | 2026-08-22 | Security fixes: resolved CodeQL alerts. |
 ---
 
 ## 🧪 Code Coverage & Quality Gates

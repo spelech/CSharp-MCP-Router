@@ -1,0 +1,14 @@
+{
+  "providerName": "HeaderAuth",
+  "displayName": "Cloudflare Access Ingress",
+  "userHeader": "Cf-Access-Authenticated-User-Email",
+  "groupsHeader": "Remote-Groups",
+  "isEnabled": true,
+  "configJson": {
+    "trustedProxies": [
+      "127.0.0.1",
+      "::1"
+    ],
+    "requireTrustedProxy": true
+  }
+}

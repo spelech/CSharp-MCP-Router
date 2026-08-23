@@ -1,0 +1,14 @@
+{
+  "providerName": "Keycloak",
+  "displayName": "Corporate Keycloak Realm",
+  "userHeader": "X-Forwarded-User",
+  "groupsHeader": "X-Forwarded-Groups",
+  "isEnabled": true,
+  "configJson": {
+    "authority": "https://keycloak.internal.corp/realms/master",
+    "clientId": "mcp-router",
+    "clientSecret": "REPLACE_WITH_KEYCLOAK_CLIENT_SECRET",
+    "requireHttps": true,
+    "groupClaim": "groups"
+  }
+}

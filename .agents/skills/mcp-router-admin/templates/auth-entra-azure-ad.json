@@ -1,0 +1,14 @@
+{
+  "providerName": "EntraID",
+  "displayName": "Microsoft Entra ID",
+  "userHeader": "Remote-User",
+  "groupsHeader": "Remote-Groups",
+  "isEnabled": true,
+  "configJson": {
+    "tenantId": "00000000-0000-0000-0000-000000000000",
+    "clientId": "11111111-1111-1111-1111-111111111111",
+    "clientSecret": "REPLACE_WITH_ENTRA_CLIENT_SECRET",
+    "instance": "https://login.microsoftonline.com/",
+    "groupClaim": "groups"
+  }
+}

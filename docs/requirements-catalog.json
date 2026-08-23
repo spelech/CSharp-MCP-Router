@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-23T04:44:26.4823032Z",
-    "totalRequirements": 104,
-    "positiveCount": 81,
+    "generatedAt": "2026-08-23T06:25:09.1295654Z",
+    "totalRequirements": 120,
+    "positiveCount": 97,
     "guardrailCount": 23,
-    "totalProofs": 253
+    "totalProofs": 269
   },
   "requirements": [
     {
@@ -1724,6 +1724,86 @@
       ]
     },
     {
+      "id": "MCP-ADMIN-SKILL-E2E-PROVISIONING",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Admin automation templates and JSON-RPC tool calls successfully provision a blank-slate gateway instance end-to-end via HTTP /admin/message.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 183,
+          "testName": "EndToEnd_BlankSlateProvisioning_ConfiguresAllEntitiesViaAdminTools",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-SKILL-FRONTMATTER",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "mcp-router-admin skill frontmatter is valid YAML, specifies name, description starting with \u0027Use when...\u0027, and length is under 1024 characters",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 28,
+          "testName": "Skill_Frontmatter_IsValidAndWithinCharacterLimit",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-SKILL-MIRROR",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "mcp-router-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 154,
+          "testName": "Skill_MirroredInAgentsDirectory",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-SKILL-TEMPLATES",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "All mcp-router-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 110,
+          "testName": "Templates_AllExistAndAreValidJsonOrScripts",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ADMIN-SKILL-WORKFLOW",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "mcp-router-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 54,
+          "testName": "Skill_ContainsAllRequiredPhasesAndProviderCookbooks",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-TOOL-AUDIT-LOG",
       "category": "MCP",
       "type": "Positive",
@@ -2102,6 +2182,182 @@
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs",
           "lineNumber": 619,
           "testName": "CallToolAsync_AuditLog_RedactsSensitivePayloadData",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-GATEWAY-ZERO-CONFIG-BOOT",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Gateway boots from a blank slate with zero master key environment variables, auto-generates .master.key, and serves health and admin endpoints.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 358,
+          "testName": "Gateway_BlankSlate_WithoutMasterKeyEnv_AutoGeneratesKeyFileAndBootsSuccessfully",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEY-PROVIDER-AUTOGEN",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "EncryptionKeyProvider delegates to DbKeyHelper to auto-generate master key when unconfigured.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs",
+          "lineNumber": 48,
+          "testName": "GetDbEncryptionKey_AutoGenerates_WhenUnconfigured",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEY-PROVIDER-CONFIG",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or ROUTER_SECRET.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs",
+          "lineNumber": 34,
+          "testName": "GetDbEncryptionKey_UsesConfig_WhenProvided",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEY-PROVIDER-FALLBACK",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when ROUTER_SECRET is unconfigured.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs",
+          "lineNumber": 76,
+          "testName": "GetRouterSecret_FallsBackToDbEncryptionKey_WhenDbEncryptionKeyProvided",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEY-PROVIDER-SECRET",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "EncryptionKeyProvider returns configured ROUTER_SECRET.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs",
+          "lineNumber": 62,
+          "testName": "GetRouterSecret_UsesConfig_WhenProvided",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEYFILE-AUTOGEN",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Blank-slate initialization auto-generates a 256-bit base64 master key and persists it to .master.key.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 68,
+          "testName": "ResolveDbEncryptionKey_AutoGeneratesAndPersistsKey_WhenBlankSlate",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEYFILE-ENV-PRECEDENCE",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 33,
+          "testName": "ResolveDbEncryptionKey_ReturnsConfiguredEnvKey_WhenPresent",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEYFILE-FILE-OVER-KEYFILE",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Explicit file secrets take precedence over persistent .master.key files.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 128,
+          "testName": "ResolveDbEncryptionKey_FileSecretTakesPrecedenceOverKeyFile",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEYFILE-FILE-SECRET",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 50,
+          "testName": "ResolveDbEncryptionKey_ReturnsFileSecret_WhenKeyFileSpecified",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEYFILE-HIERARCHY-PRECEDENCE",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Explicit environment variables take precedence over file secrets and keyfiles.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 106,
+          "testName": "ResolveDbEncryptionKey_EnvVarTakesPrecedenceOverFileSecretAndKeyFile",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEYFILE-RELOAD",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Existing .master.key file is loaded across gateway restarts without key mutation.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 88,
+          "testName": "ResolveDbEncryptionKey_LoadsExistingKeyFile_OnSubsequentBoot",
           "details": null
         }
       ]

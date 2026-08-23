@@ -1,0 +1,11 @@
+{
+  "dashboardTitle": "MCP Gateway",
+  "dashboardIcon": "fa-solid fa-network-wired",
+  "embeddingProvider": "OpenAI",
+  "embeddingApiUrl": "https://api.openai.com/v1",
+  "embeddingApiKey": "sk-proj-REPLACE_WITH_OPENAI_API_KEY",
+  "embeddingApiModel": "text-embedding-3-small",
+  "globalMaxKeys": 100,
+  "userMaxKeys": 10,
+  "allowOpenClientRegistration": false
+}

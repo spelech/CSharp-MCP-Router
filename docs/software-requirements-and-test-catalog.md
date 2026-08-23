@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **104 Requirements Verified** across **253 Test Proofs** (81 Functional Capabilities, 23 Safety Guardrails).
+> **Catalog Statistics:** **120 Requirements Verified** across **269 Test Proofs** (97 Functional Capabilities, 23 Safety Guardrails).
 
 ---
 
@@ -14,8 +14,8 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 10 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 34 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **31** | 31 | 0 | 32 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **9** | 6 | 3 | 18 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **36** | 36 | 0 | 37 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **20** | 17 | 3 | 29 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **14** | 12 | 2 | 56 proofs |
 
@@ -369,6 +369,36 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L202`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L202) (`AdminTools_ExecuteSuccessfully`)
 
+### `[MCP-ADMIN-SKILL-E2E-PROVISIONING]` Admin automation templates and JSON-RPC tool calls successfully provision a blank-slate gateway instance end-to-end via HTTP /admin/message.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L183`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L183) (`EndToEnd_BlankSlateProvisioning_ConfiguresAllEntitiesViaAdminTools`)
+
+### `[MCP-ADMIN-SKILL-FRONTMATTER]` mcp-router-admin skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L28`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L28) (`Skill_Frontmatter_IsValidAndWithinCharacterLimit`)
+
+### `[MCP-ADMIN-SKILL-MIRROR]` mcp-router-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L154`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L154) (`Skill_MirroredInAgentsDirectory`)
+
+### `[MCP-ADMIN-SKILL-TEMPLATES]` All mcp-router-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L110`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L110) (`Templates_AllExistAndAreValidJsonOrScripts`)
+
+### `[MCP-ADMIN-SKILL-WORKFLOW]` mcp-router-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L54`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L54) (`Skill_ContainsAllRequiredPhasesAndProviderCookbooks`)
+
 ### `[MCP-ADMIN-TOOL-AUDIT-LOG]` AdminMcpServer tool calls record audit log entries with caller and tool name.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
@@ -479,6 +509,72 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L619`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L619) (`CallToolAsync_AuditLog_RedactsSensitivePayloadData`)
+
+### `[SEC-GATEWAY-ZERO-CONFIG-BOOT]` Gateway boots from a blank slate with zero master key environment variables, auto-generates .master.key, and serves health and admin endpoints.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L358`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L358) (`Gateway_BlankSlate_WithoutMasterKeyEnv_AutoGeneratesKeyFileAndBootsSuccessfully`)
+
+### `[SEC-KEY-PROVIDER-AUTOGEN]` EncryptionKeyProvider delegates to DbKeyHelper to auto-generate master key when unconfigured.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L48`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L48) (`GetDbEncryptionKey_AutoGenerates_WhenUnconfigured`)
+
+### `[SEC-KEY-PROVIDER-CONFIG]` EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or ROUTER_SECRET.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L34`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L34) (`GetDbEncryptionKey_UsesConfig_WhenProvided`)
+
+### `[SEC-KEY-PROVIDER-FALLBACK]` EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when ROUTER_SECRET is unconfigured.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L76`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L76) (`GetRouterSecret_FallsBackToDbEncryptionKey_WhenDbEncryptionKeyProvided`)
+
+### `[SEC-KEY-PROVIDER-SECRET]` EncryptionKeyProvider returns configured ROUTER_SECRET.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L62`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L62) (`GetRouterSecret_UsesConfig_WhenProvided`)
+
+### `[SEC-KEYFILE-AUTOGEN]` Blank-slate initialization auto-generates a 256-bit base64 master key and persists it to .master.key.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L68`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L68) (`ResolveDbEncryptionKey_AutoGeneratesAndPersistsKey_WhenBlankSlate`)
+
+### `[SEC-KEYFILE-ENV-PRECEDENCE]` Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L33`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L33) (`ResolveDbEncryptionKey_ReturnsConfiguredEnvKey_WhenPresent`)
+
+### `[SEC-KEYFILE-FILE-OVER-KEYFILE]` Explicit file secrets take precedence over persistent .master.key files.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L128`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L128) (`ResolveDbEncryptionKey_FileSecretTakesPrecedenceOverKeyFile`)
+
+### `[SEC-KEYFILE-FILE-SECRET]` File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L50`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L50) (`ResolveDbEncryptionKey_ReturnsFileSecret_WhenKeyFileSpecified`)
+
+### `[SEC-KEYFILE-HIERARCHY-PRECEDENCE]` Explicit environment variables take precedence over file secrets and keyfiles.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L106`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L106) (`ResolveDbEncryptionKey_EnvVarTakesPrecedenceOverFileSecretAndKeyFile`)
+
+### `[SEC-KEYFILE-RELOAD]` Existing .master.key file is loaded across gateway restarts without key mutation.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L88`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L88) (`ResolveDbEncryptionKey_LoadsExistingKeyFile_OnSubsequentBoot`)
 
 ### `[TRANS-01]` SSE transport resolves static plaintext API keys when provider is None
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -876,6 +972,11 @@
 | `MCP-ADMIN-PARITY-SYSTEM` | Positive | `MCP` | manage_system supports full parity for diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminToolsParityTests.cs:L827`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L827) | Backend xUnit |
 | `MCP-ADMIN-PARITY-TEST-TOOL-CALL` | Positive | `MCP` | test_tool_call executes test bench backend tool calls and formats responses. | [`AdminToolsParityTests.cs:L857`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L857) | Backend xUnit |
 | `MCP-ADMIN-PARITY-TOOLS-COVERAGE` | Positive | `MCP` | Ensures every UI management workflow is backed by a verified, equivalent action within the consolidated Admin MCP tools. | [`AdminToolsParityTests.cs:L202`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminToolsParityTests.cs#L202) | Backend xUnit |
+| `MCP-ADMIN-SKILL-E2E-PROVISIONING` | Positive | `MCP` | Admin automation templates and JSON-RPC tool calls successfully provision a blank-slate gateway instance end-to-end via HTTP /admin/message. | [`AdminAutomationSkillTests.cs:L183`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L183) | Backend xUnit |
+| `MCP-ADMIN-SKILL-FRONTMATTER` | Positive | `MCP` | mcp-router-admin skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters | [`AdminAutomationSkillTests.cs:L28`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L28) | Backend xUnit |
+| `MCP-ADMIN-SKILL-MIRROR` | Positive | `MCP` | mcp-router-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories | [`AdminAutomationSkillTests.cs:L154`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L154) | Backend xUnit |
+| `MCP-ADMIN-SKILL-TEMPLATES` | Positive | `MCP` | All mcp-router-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation | [`AdminAutomationSkillTests.cs:L110`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L110) | Backend xUnit |
+| `MCP-ADMIN-SKILL-WORKFLOW` | Positive | `MCP` | mcp-router-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification | [`AdminAutomationSkillTests.cs:L54`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L54) | Backend xUnit |
 | `MCP-ADMIN-TOOL-AUDIT-LOG` | Positive | `MCP` | AdminMcpServer tool calls record audit log entries with caller and tool name. | [`AdminMcpServerTests.cs:L276`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L276) | Backend xUnit |
 | `MCP-ADMIN-TOOL-MANAGE-APPKEYS` | Positive | `MCP` | AdminMcpServer executes manage_appkeys create, list, limits, and revoke actions. | [`AdminMcpServerTests.cs:L293`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L293) | Backend xUnit |
 | `MCP-ADMIN-TOOL-MANAGE-CLIENTS` | Positive | `MCP` | AdminMcpServer executes manage_clients register, list, and delete actions. | [`AdminMcpServerTests.cs:L340`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L340) | Backend xUnit |
@@ -896,6 +997,17 @@
 | `SEC-04` | Positive | `SEC` | WindowsRegistrySecretRetriever securely decrypts DPAPI LocalMachine machine-level encrypted binary values and retrieves plaintext registry strings | [`WindowsRegistrySecretRetrieverTests.cs:L16`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/WindowsRegistrySecretRetrieverTests.cs#L16) | Backend xUnit |
 | `SEC-05` | **Guardrail** | `SEC` | Router must not overwrite corrupt encrypted database fields if an update occurs without user reset. | [`ProviderSettingsEncryptionTests.cs:L395`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/ProviderSettingsEncryptionTests.cs#L395) | Backend xUnit |
 | `SEC-ADMIN-AUDIT-REDACTION` | Positive | `SEC` | AdminMcpServer redacts sensitive secrets from argument payloads before recording audit logs. | [`AdminMcpServerTests.cs:L619`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminMcpServerTests.cs#L619) | Backend xUnit |
+| `SEC-GATEWAY-ZERO-CONFIG-BOOT` | Positive | `SEC` | Gateway boots from a blank slate with zero master key environment variables, auto-generates .master.key, and serves health and admin endpoints. | [`AdminAutomationSkillTests.cs:L358`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs#L358) | Backend xUnit |
+| `SEC-KEY-PROVIDER-AUTOGEN` | Positive | `SEC` | EncryptionKeyProvider delegates to DbKeyHelper to auto-generate master key when unconfigured. | [`EncryptionKeyProviderTests.cs:L48`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L48) | Backend xUnit |
+| `SEC-KEY-PROVIDER-CONFIG` | Positive | `SEC` | EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or ROUTER_SECRET. | [`EncryptionKeyProviderTests.cs:L34`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L34) | Backend xUnit |
+| `SEC-KEY-PROVIDER-FALLBACK` | Positive | `SEC` | EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when ROUTER_SECRET is unconfigured. | [`EncryptionKeyProviderTests.cs:L76`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L76) | Backend xUnit |
+| `SEC-KEY-PROVIDER-SECRET` | Positive | `SEC` | EncryptionKeyProvider returns configured ROUTER_SECRET. | [`EncryptionKeyProviderTests.cs:L62`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L62) | Backend xUnit |
+| `SEC-KEYFILE-AUTOGEN` | Positive | `SEC` | Blank-slate initialization auto-generates a 256-bit base64 master key and persists it to .master.key. | [`DbKeyHelperTests.cs:L68`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L68) | Backend xUnit |
+| `SEC-KEYFILE-ENV-PRECEDENCE` | Positive | `SEC` | Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles. | [`DbKeyHelperTests.cs:L33`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L33) | Backend xUnit |
+| `SEC-KEYFILE-FILE-OVER-KEYFILE` | Positive | `SEC` | Explicit file secrets take precedence over persistent .master.key files. | [`DbKeyHelperTests.cs:L128`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L128) | Backend xUnit |
+| `SEC-KEYFILE-FILE-SECRET` | Positive | `SEC` | File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved. | [`DbKeyHelperTests.cs:L50`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L50) | Backend xUnit |
+| `SEC-KEYFILE-HIERARCHY-PRECEDENCE` | Positive | `SEC` | Explicit environment variables take precedence over file secrets and keyfiles. | [`DbKeyHelperTests.cs:L106`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L106) | Backend xUnit |
+| `SEC-KEYFILE-RELOAD` | Positive | `SEC` | Existing .master.key file is loaded across gateway restarts without key mutation. | [`DbKeyHelperTests.cs:L88`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L88) | Backend xUnit |
 | `TRANS-01` | Positive | `TRANS` | SSE transport resolves static plaintext API keys when provider is None | [`SseTransportTests.cs:L18`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L18) | Backend xUnit |
 | `TRANS-02` | Positive | `TRANS` | HTTP stateless transport resolves static API keys when secret provider is None | [`HttpTransportTests.cs:L19`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L19) | Backend xUnit |
 | `TRANS-03` | Positive | `TRANS` | STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls | [`StdioTransportTests.cs:L59`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L59) | Backend xUnit |
