@@ -27,6 +27,7 @@ import {
   fetchCustomFileContentApi,
   saveCustomFileApi,
   deleteCustomFileApi,
+  uploadBrandingLogo,
 } from '../../api/settingsApi';
 import { fetchTestToolsApi, fetchTestPromptsApi, fetchTestResourcesApi, fetchLogsApi, clearLogsApi } from '../../api/testbenchApi';
 
@@ -170,6 +171,11 @@ describe('Typed API Client Layer', () => {
       expect(files).toEqual([]);
       const fileContent = await fetchCustomFileContentApi('prompts', 'test.json');
       expect(fileContent).toBe('{}');
+
+      mockApiResponse('/api/config/branding/logo', { url: '/api/config/branding/logo', success: true });
+      const logoUpload = await uploadBrandingLogo(new File(['test'], 'logo.png', { type: 'image/png' }));
+      expect(logoUpload.success).toBe(true);
+      expect(logoUpload.url).toBe('/api/config/branding/logo');
 
       await saveCustomFileApi('prompts', 'test.json', '{}');
       await deleteCustomFileApi('prompts', 'test.json');

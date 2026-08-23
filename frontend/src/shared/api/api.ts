@@ -15,9 +15,12 @@ export interface ApiRequestOptions extends Omit<RequestInit, 'body'> {
 }
 
 export async function apiRequest<T = any>(url: string, options: ApiRequestOptions = {}): Promise<T> {
-  const defaultHeaders: Record<string, string> = {
-    'Content-Type': 'application/json'
-  };
+  const isFormData = typeof FormData !== 'undefined' && options.body instanceof FormData;
+  const defaultHeaders: Record<string, string> = isFormData
+    ? {}
+    : {
+        'Content-Type': 'application/json'
+      };
 
   const fetchOptions: RequestInit = {
     ...options,

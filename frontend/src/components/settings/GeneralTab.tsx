@@ -1,5 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { EmbeddingSettings } from '../../shared/types';
+import { uploadBrandingLogo } from '../../api/settingsApi';
+import { isImageUrl } from '../../shared/utils/branding';
+import { showToast } from '../../stores/useToastStore';
 
 export interface GeneralTabProps {
   settings: EmbeddingSettings | null;
@@ -13,6 +16,8 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
 const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSettings }) => {
   const [dashboardTitle, setDashboardTitle] = useState(settings?.dashboardTitle ?? 'MCP Gateway');
   const [dashboardIcon, setDashboardIcon] = useState(settings?.dashboardIcon ?? 'fa-solid fa-network-wired');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [embProvider, setEmbProvider] = useState(settings?.embeddingProvider ?? 'local');
   const [embModelDir, setEmbModelDir] = useState(settings?.embeddingModelDir ?? 'data/models');
   const [embApiUrl, setEmbApiUrl] = useState(settings?.embeddingApiUrl ?? 'http://litellm:4000/v1/embeddings');
@@ -22,6 +27,28 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
   const [userMaxKeys, setUserMaxKeys] = useState<number>(settings?.userMaxKeys ?? 5);
   const [globalMaxKeys, setGlobalMaxKeys] = useState<number>(settings?.globalMaxKeys ?? 100);
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'saved' | 'error'>('idle');
+
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setIsUploading(true);
+    try {
+      const res = await uploadBrandingLogo(file);
+      if (res && res.success && res.url) {
+        setDashboardIcon(res.url);
+        showToast('Logo image uploaded successfully.', 'success');
+      } else {
+        showToast('Failed to upload logo image.', 'error');
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Failed to upload logo image.', 'error');
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   const handleSaveSearchSettings = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,14 +95,55 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
               />
             </div>
             <div className="form-group">
-              <label htmlFor="settings-dashboard-icon">Header Icon (FontAwesome class)</label>
-              <input
-                type="text"
-                id="settings-dashboard-icon"
-                placeholder="fa-solid fa-network-wired"
-                value={dashboardIcon}
-                onChange={(e) => setDashboardIcon(e.target.value)}
-              />
+              <label htmlFor="settings-dashboard-icon">Header Icon or Logo URL (FontAwesome class or Image URL)</label>
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <input
+                  type="text"
+                  id="settings-dashboard-icon"
+                  placeholder="fa-solid fa-network-wired"
+                  value={dashboardIcon}
+                  onChange={(e) => setDashboardIcon(e.target.value)}
+                  style={{ flex: 1 }}
+                />
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  id="settings-dashboard-icon-file"
+                  accept="image/png,image/jpeg,image/svg+xml,image/webp,image/x-icon"
+                  style={{ display: 'none' }}
+                  onChange={handleLogoUpload}
+                />
+                <button
+                  type="button"
+                  className="btn btn-secondary btn-sm"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={isUploading}
+                  style={{ whiteSpace: 'nowrap' }}
+                >
+                  <i className={isUploading ? "fa-solid fa-spinner fa-spin" : "fa-solid fa-upload"}></i> {isUploading ? 'Uploading...' : 'Upload Image'}
+                </button>
+              </div>
+              <div className="logo-preview-container" style={{ marginTop: '8px', display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', color: 'var(--text-muted)' }}>
+                <span>Preview:</span>
+                <div className="logo-preview-box" style={{ width: '36px', height: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: 'rgba(255,255,255,0.05)', borderRadius: '6px', border: '1px solid rgba(255,255,255,0.1)' }}>
+                  {dashboardIcon && isImageUrl(dashboardIcon) ? (
+                    <img
+                      src={dashboardIcon}
+                      alt="Logo Preview"
+                      className="logo-icon logo-img"
+                      style={{ maxWidth: '28px', maxHeight: '28px', objectFit: 'contain' }}
+                    />
+                  ) : (
+                    <i
+                      className={`${dashboardIcon || 'fa-solid fa-network-wired'} logo-icon`}
+                      style={{ fontSize: '18px', color: 'var(--primary)' }}
+                    ></i>
+                  )}
+                </div>
+                <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>
+                  {dashboardIcon && isImageUrl(dashboardIcon) ? 'Image Logo' : 'FontAwesome Icon'}
+                </span>
+              </div>
             </div>
           </div>
           

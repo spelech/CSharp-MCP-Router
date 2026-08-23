@@ -122,3 +122,13 @@ export async function deleteCustomFileApi(type: 'prompts' | 'resources', name: s
   });
   return !!(result && result.success);
 }
+
+export async function uploadBrandingLogo(file: File): Promise<{ url: string; success: boolean }> {
+  const formData = new FormData();
+  formData.append('file', file);
+  const result = await apiRequest<{ url: string; success: boolean }>('/api/config/branding/logo', {
+    method: 'POST',
+    body: formData
+  });
+  return result || { url: '', success: false };
+}
