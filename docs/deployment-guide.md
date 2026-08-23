@@ -2,6 +2,39 @@
 
 This guide outlines requirements, configurations, and migration paths for deploying the **Model Context Protocol (MCP) Router Gateway** into production environments.
 
+## 📦 Minimal Blank-Slate Startup (Bare Minimum Configuration)
+
+If you spin up the container with the **bare minimum environment variables**, the router initializes automatically into a secure, functional out-of-the-box state:
+
+### 1. The Single Strictly Required Variable
+```ini
+ROUTER_MASTER_KEY=<256-bit-base64-key>
+```
+*(Generated via `openssl rand -base64 32`)*
+
+> [!CAUTION]
+> **Fatal Error on Missing Key**: If `ROUTER_MASTER_KEY` is omitted, the application intentionally fails closed on startup: `Master encryption key is missing. Set ROUTER_MASTER_KEY. Self-generated key fallback is disabled for security.`
+
+### 2. Automatic Out-of-the-Box Safe Defaults
+When no other environment variables or configuration files are provided:
+
+| Subsystem | Automatic Safe Default |
+| :--- | :--- |
+| **🗄️ Database** | • Defaults to `DB_PROVIDER=sqlite`.<br>• Automatically creates `./data/mcp_router.db`.<br>• Runs schema migrations and seeds baseline tables (`Servers`, `Settings`, `AppKeys`, `AccessPolicies`, `GroupMappings`, `SecretProviders`, `AuthProviderConfigs`, `AuditLogs`). |
+| **🔒 Secret Storage** | • Uses the **Built-in Master Secret Provider** (AES-256-GCM).<br>• All backend server credentials are encrypted in SQLite using your `ROUTER_MASTER_KEY` (no external Vault or DPAPI needed). |
+| **👤 Authentication** | • Detects that no external Identity Provider (LDAP or OIDC forward-auth) is active.<br>• **Standalone Mode** engages automatically.<br>• Local loopback (`127.0.0.1`, `::1`) is trusted as `Administrator` for Web UI access without requiring an SSO login. |
+| **🔑 Pre-Seeded Admin Key** | • Seeds a default system Admin AppKey into the database: `mcp-global-admin-default-cli-key-99`.<br>• Has username `admin` and scope `["all", "admin"]`.<br>• Enables remote AI coding agents and CLI scripts to authenticate to `/admin` and `/admin/sse` immediately. |
+| **🐳 Docker Discovery** | • If `-v /var/run/docker.sock:/var/run/docker.sock` is mounted, background discovery immediately registers containers labeled `mcp.enabled=true`. |
+
+### 3. Immediate Live Endpoints
+* **Dashboard Web UI**: `http://localhost:8080/` (Full administrative dashboard)
+* **Health Probe**: `http://localhost:8080/health` (`{"status":"healthy","service":"McpRouter","version":"4.34.0"}`)
+* **Meta-Mode MCP Gateway**: `http://localhost:8080/sse` (Exposes `search_tools` and `execute_tool`)
+* **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` for direct JSON-RPC tool dispatch)
+
+### 4. Transitioning to Production
+From this bare-minimum container, an autonomous AI agent (using the **`mcp-router-admin`** skill) or a DevOps script can connect to `/admin` using `mcp-global-admin-default-cli-key-99` to configure Authentik, Keycloak, Entra ID, Active Directory, HashiCorp Vault, semantic search embeddings, backend MCP servers, and personal AppKeys without restarting the container or editing static files.
+
 ---
 
 ## 🔒 Required Production Configuration
