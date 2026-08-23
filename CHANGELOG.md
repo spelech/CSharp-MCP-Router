@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.32.0`** | 2026-08-22 | feat(ui): dynamic multi-brand logo resolution (favicons, manifests, meta icons) and centered page layout containerization across all dashboard tabs |
 | **`v4.31.0`** | 2026-08-22 | feat(frontend): implement dynamic multi-target client connection guide |
 | **`v4.30.0`** | 2026-08-22 | feat(ui): comprehensive aesthetic UI overhaul implementing stark monochrome mode, vibrant neon green/orange dark mode accents, cyan/blue light mode accents, and mobile responsive flex refactoring for toolbar dropdowns and stat grids |
 | **`v4.29.0`** | 2026-08-22 | Security fixes: resolved CodeQL alerts for log forging, path injection, cleartext sensitive info storage, and missing X-Frame-Options headers. |
