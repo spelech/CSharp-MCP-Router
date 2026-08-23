@@ -8,6 +8,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using McpRouter;
+using McpRouter.Tests.Attributes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
@@ -414,6 +415,40 @@ namespace McpRouter.Tests
             var client = CreateAuthenticatedClient();
             var response = await client.GetAsync("/health");
             Assert.True((int)response.StatusCode < 600);
+        }
+
+        [Fact]
+        [Requirement("UI-06", "UI", RequirementType.Positive, "Router supports uploading and retrieving custom branding logo images via dedicated endpoints.")]
+        public async Task Branding_Logo_Upload_And_Retrieval_Works()
+        {
+            var client = CreateAuthenticatedClient();
+
+            // 1. Upload dummy png to /api/config/branding/logo
+            using var content = new MultipartFormDataContent();
+            var dummyImageBytes = new byte[] { 0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00 };
+            var byteContent = new ByteArrayContent(dummyImageBytes);
+            byteContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/png");
+            content.Add(byteContent, "file", "test-logo.png");
+
+            var uploadRes = await client.PostAsync("/api/config/branding/logo", content);
+            Assert.Equal(HttpStatusCode.OK, uploadRes.StatusCode);
+
+            var uploadJson = await uploadRes.Content.ReadFromJsonAsync<JsonElement>();
+            Assert.True(uploadJson.GetProperty("success").GetBoolean());
+            Assert.Equal("/api/config/branding/logo", uploadJson.GetProperty("url").GetString());
+
+            // 2. Verify GET /api/config/branding/logo returns the image with 200 OK
+            var logoRes = await client.GetAsync("/api/config/branding/logo");
+            Assert.Equal(HttpStatusCode.OK, logoRes.StatusCode);
+            Assert.Equal("image/png", logoRes.Content.Headers.ContentType?.MediaType);
+            var downloadedBytes = await logoRes.Content.ReadAsByteArrayAsync();
+            Assert.Equal(dummyImageBytes, downloadedBytes);
+
+            // 3. Verify GET /api/config/branding returns icon = "/api/config/branding/logo"
+            var brandingRes = await client.GetAsync("/api/config/branding");
+            Assert.Equal(HttpStatusCode.OK, brandingRes.StatusCode);
+            var brandingJson = await brandingRes.Content.ReadFromJsonAsync<JsonElement>();
+            Assert.Equal("/api/config/branding/logo", brandingJson.GetProperty("icon").GetString());
         }
     }
 }

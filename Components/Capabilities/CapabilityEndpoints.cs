@@ -110,6 +110,46 @@ namespace McpRouter.Components.Capabilities
                 }
             });
 
+            api.MapPost("/api/config/branding/logo", async (HttpRequest request, [FromServices] ISettingRepository settingsRepo, [FromServices] DynamicEmbeddingService embeddingService, [FromServices] IAuditLogger auditLogger, HttpContext httpContext) =>
+            {
+                if (!request.HasFormContentType || request.Form.Files.Count == 0)
+                    return Results.BadRequest(new { error = "No file uploaded" });
+
+                var file = request.Form.Files[0];
+                if (file.Length > 2 * 1024 * 1024)
+                    return Results.BadRequest(new { error = "File size exceeds 2MB limit" });
+
+                var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+                var allowedExtensions = new[] { ".png", ".jpg", ".jpeg", ".svg", ".ico", ".webp" };
+                if (!allowedExtensions.Contains(ext))
+                    return Results.BadRequest(new { error = "Unsupported image format" });
+
+                var dir = Path.Combine(AppContext.BaseDirectory, "data", "branding");
+                Directory.CreateDirectory(dir);
+
+                // Remove older logo files
+                foreach (var old in Directory.GetFiles(dir, "logo.*"))
+                {
+                    try { File.Delete(old); } catch { }
+                }
+
+                var targetPath = Path.Combine(dir, $"logo{ext}");
+                using (var stream = new FileStream(targetPath, FileMode.Create))
+                {
+                    await file.CopyToAsync(stream);
+                }
+
+                var settings = await settingsRepo.GetSettingsAsync() ?? new RouterSettings();
+                settings.DashboardIcon = "/api/config/branding/logo";
+                await settingsRepo.SaveSettingsAsync(settings);
+                embeddingService.ReloadSettings(settings);
+
+                var username = httpContext.User.Identity?.Name ?? "admin";
+                await auditLogger.LogAdminActionAsync(username, "branding.logo.upload", "BrandingLogo", "/api/config/branding/logo", true);
+
+                return Results.Ok(new { url = "/api/config/branding/logo", success = true });
+            }).DisableAntiforgery();
+
             api.MapGet("/api/diagnostics", ([FromServices] SessionManager sessionManager) =>
             {
                 var proc = System.Diagnostics.Process.GetCurrentProcess();

@@ -109,6 +109,24 @@ namespace McpRouter.Extensions
                     icon = settings.DashboardIcon
                 });
             });
+            app.MapGet("/api/config/branding/logo", () =>
+            {
+                var dir = Path.Combine(AppContext.BaseDirectory, "data", "branding");
+                if (!Directory.Exists(dir)) return Results.NotFound();
+                var file = Directory.GetFiles(dir, "logo.*").FirstOrDefault();
+                if (file == null) return Results.NotFound();
+                var ext = Path.GetExtension(file).ToLowerInvariant();
+                var contentType = ext switch
+                {
+                    ".svg" => "image/svg+xml",
+                    ".png" => "image/png",
+                    ".jpg" or ".jpeg" => "image/jpeg",
+                    ".webp" => "image/webp",
+                    ".ico" => "image/x-icon",
+                    _ => "application/octet-stream"
+                };
+                return Results.File(file, contentType, enableRangeProcessing: true);
+            });
 
             // ----------------------------------------------------
             // OAUTH & OIDC DISCOVERY ENDPOINTS
