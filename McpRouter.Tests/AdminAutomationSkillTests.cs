@@ -354,5 +354,77 @@ namespace McpRouter.Tests
                 }
             }
         }
+
+        [Fact]
+        [Requirement("SEC-GATEWAY-ZERO-CONFIG-BOOT", "SEC", RequirementType.Positive, "Gateway boots from a blank slate with zero master key environment variables, auto-generates .master.key, and serves health and admin endpoints.")]
+        public async Task Gateway_BlankSlate_WithoutMasterKeyEnv_AutoGeneratesKeyFileAndBootsSuccessfully()
+        {
+            McpRouter.Infrastructure.Secrets.DbKeyHelper.ResetCache();
+            McpRouter.Infrastructure.Secrets.EncryptionKeyProvider.ResetCache();
+
+            var tempDir = Path.Combine(Path.GetTempPath(), $"mcp_zero_config_{Guid.NewGuid():N}");
+            Directory.CreateDirectory(tempDir);
+            var tempDbFile = Path.Combine(tempDir, "router.db");
+
+            try
+            {
+                using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+                {
+                    builder.UseEnvironment("Development");
+                    builder.ConfigureAppConfiguration((context, config) =>
+                    {
+                        config.AddInMemoryCollection(new Dictionary<string, string?>
+                        {
+                            { "DATA_DIR", tempDir },
+                            { "ConnectionStrings:Sqlite", $"Data Source={tempDbFile}" },
+                            { "Admin:StandaloneAllowedNetworks:0", "127.0.0.1" },
+                            { "Admin:StandaloneAllowedNetworks:1", "::1" }
+                        });
+                    });
+                });
+
+                var client = factory.CreateClient();
+                client.DefaultRequestHeaders.Add("X-Forwarded-For", "127.0.0.1");
+
+                // 1. Health Probe
+                var healthResp = await client.GetAsync("/health");
+                Assert.Equal(System.Net.HttpStatusCode.OK, healthResp.StatusCode);
+
+                // 2. Assert .master.key was auto-generated
+                var keyFilePath = Path.Combine(tempDir, ".master.key");
+                Assert.True(File.Exists(keyFilePath), "Persistent .master.key file must be auto-generated in data dir.");
+                var generatedKey = File.ReadAllText(keyFilePath).Trim();
+                Assert.False(string.IsNullOrWhiteSpace(generatedKey));
+                Assert.Equal(32, Convert.FromBase64String(generatedKey).Length);
+
+                // 3. Admin MCP Server invocation with seeded key
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer mcp-global-admin-default-cli-key-99");
+                var payload = new
+                {
+                    jsonrpc = "2.0",
+                    id = "zero-config-test",
+                    method = "tools/call",
+                    @params = new
+                    {
+                        name = "manage_system",
+                        arguments = new { action = "diagnostics" }
+                    }
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+                var adminResp = await client.PostAsync("/admin", content);
+                Assert.Equal(System.Net.HttpStatusCode.OK, adminResp.StatusCode);
+
+                var adminBody = await adminResp.Content.ReadAsStringAsync();
+                Assert.Contains("activeSessions", adminBody);
+            }
+            finally
+            {
+                if (Directory.Exists(tempDir))
+                {
+                    try { Directory.Delete(tempDir, true); } catch { }
+                }
+            }
+        }
     }
 }

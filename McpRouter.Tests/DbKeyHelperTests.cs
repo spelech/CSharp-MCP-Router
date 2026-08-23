@@ -102,5 +102,48 @@ namespace McpRouter.Tests
 
             Assert.Equal(existingKey, resolvedKey);
         }
+
+        [Fact]
+        [Requirement("SEC-KEYFILE-HIERARCHY-PRECEDENCE", "SEC", RequirementType.Positive, "Explicit environment variables take precedence over file secrets and keyfiles.")]
+        public void ResolveDbEncryptionKey_EnvVarTakesPrecedenceOverFileSecretAndKeyFile()
+        {
+            var keyFilePath = Path.Combine(_tempDataDir, ".master.key");
+            File.WriteAllText(keyFilePath, "KeyFileKey123456789012345678901234567890==");
+
+            var secretFile = Path.Combine(_tempDataDir, "secret.txt");
+            File.WriteAllText(secretFile, "FileSecretKey1234567890123456789012345678==");
+
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "DATA_DIR", _tempDataDir },
+                { "ROUTER_MASTER_KEY_FILE", secretFile },
+                { "ROUTER_MASTER_KEY", "WinningEnvMasterKey12345678901234567890123==" }
+            }).Build();
+
+            var resolvedKey = DbKeyHelper.ResolveDbEncryptionKey(config);
+
+            Assert.Equal("WinningEnvMasterKey12345678901234567890123==", resolvedKey);
+        }
+
+        [Fact]
+        [Requirement("SEC-KEYFILE-FILE-OVER-KEYFILE", "SEC", RequirementType.Positive, "Explicit file secrets take precedence over persistent .master.key files.")]
+        public void ResolveDbEncryptionKey_FileSecretTakesPrecedenceOverKeyFile()
+        {
+            var keyFilePath = Path.Combine(_tempDataDir, ".master.key");
+            File.WriteAllText(keyFilePath, "KeyFileKey123456789012345678901234567890==");
+
+            var secretFile = Path.Combine(_tempDataDir, "secret.txt");
+            File.WriteAllText(secretFile, "WinningFileSecret123456789012345678901234==");
+
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "DATA_DIR", _tempDataDir },
+                { "ROUTER_MASTER_KEY_FILE", secretFile }
+            }).Build();
+
+            var resolvedKey = DbKeyHelper.ResolveDbEncryptionKey(config);
+
+            Assert.Equal("WinningFileSecret123456789012345678901234==", resolvedKey);
+        }
     }
 }
