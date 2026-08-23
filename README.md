@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.32.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.33.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-620%20passing-2ea44f?style=for-the-badge)
@@ -207,11 +207,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.33.0`** | 2026-08-22 | feat(testing): integrate playwright-layout-inspector for spatial layout auditing, eliminate background DOM collisions, enhance interactive touch targets and focus rings |
 | **`v4.32.0`** | 2026-08-22 | feat(ui): dynamic multi-brand logo resolution (favicons, manifests, meta icons) and centered page layout containerization across all dashboard tabs |
 | **`v4.31.0`** | 2026-08-22 | feat(frontend): implement dynamic multi-target client connection guide |
 | **`v4.30.0`** | 2026-08-22 | feat(ui): comprehensive aesthetic UI overhaul implementing stark monochrome mode, vibrant neon green/orange dark mode accents, cyan/blue light mode accents, and mobile responsive flex refactoring for toolbar dropdowns and stat grids |
 | **`v4.29.0`** | 2026-08-22 | Security fixes: resolved CodeQL alerts. |
-| **`v4.28.0`** | 2026-08-22 | chore(repo): large repository health sweep refactoring backend, frontend, auth, secrets, CI, and rewriting all documentation guides |
 ---
 
 ## 🧪 Code Coverage & Quality Gates
