@@ -56,30 +56,27 @@ A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the
 
 ---
 
-## ⚡ Quickstart: Minimal Blank-Slate Deployment
+## ⚡ Quickstart: Zero-Config Blank-Slate Deployment
 
-You can spin up `CSharp-MCP-Router` with a **single required environment variable** (`ROUTER_MASTER_KEY`). The router automatically initializes safe out-of-the-box defaults:
+You can spin up `CSharp-MCP-Router` with **zero required environment variables**. On first launch, the router automatically generates a 256-bit master key saved to `./data/.master.key` and initializes safe defaults:
 
 ```bash
-# 1. Generate 256-bit Master Key
-export ROUTER_MASTER_KEY=$(openssl rand -base64 32)
-
-# 2. Run the Gateway Container
 docker run -d \
   --name mcp-router \
   -p 8080:8080 \
-  -e ROUTER_MASTER_KEY="${ROUTER_MASTER_KEY}" \
   -v $(pwd)/data:/app/data \
   -v /var/run/docker.sock:/var/run/docker.sock \
   ghcr.io/spelech/mcp-router:latest
 ```
 
+*(Alternatively, mount a Docker/Kubernetes file secret with `-e ROUTER_MASTER_KEY_FILE=/run/secrets/my_key` or pass `-e ROUTER_MASTER_KEY="<key>"`).*
+
 ### Out-of-the-Box Safe Defaults
+* **Auto-Generated Master Key**: Automatically created and stored in `./data/.master.key` (with `chmod 0600`) so credentials remain encrypted at rest with zero plaintext env vars.
 * **SQLite Database**: Automatically created and migrated at `./data/mcp_router.db`.
-* **Master Key Encryption**: All backend API keys and credentials are encrypted in SQLite using AES-256-GCM (no external Vault required).
 * **Standalone Security**: Local loopback (`127.0.0.1`, `::1`) is trusted as `Administrator` for the Web Dashboard (`http://localhost:8080`).
 * **Pre-Seeded Admin Key**: Seeds `mcp-global-admin-default-cli-key-99` for remote AI agents and DevOps scripts to automate configuration via the Admin MCP Server (`/admin/sse` or `POST /admin`).
-* **Instant Automation**: Use the **`mcp-router-admin`** skill (`.agents/skills/mcp-router-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Entra ID, Active Directory, Vault, embeddings, and backend servers. See [**docs/deployment-guide.md**](docs/deployment-guide.md#minimal-blank-slate-startup-bare-minimum-configuration).
+* **Instant Automation**: Use the **`mcp-router-admin`** skill (`.agents/skills/mcp-router-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Entra ID, Active Directory, Vault, embeddings, and backend servers. See [**docs/deployment-guide.md**](docs/deployment-guide.md#minimal-blank-slate-startup-zero-config-or-file-secrets).
 
 ---
 

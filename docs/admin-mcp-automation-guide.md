@@ -34,7 +34,7 @@ When `CSharp-MCP-Router` boots in a fresh environment without existing configura
 | Parameter | Default Value | Description |
 | :--- | :--- | :--- |
 | **`DB_PROVIDER`** | `sqlite` | Default storage provider. Automatically creates `./data/mcp_router.db`. |
-| **`ROUTER_MASTER_KEY`** | *Required (256-bit Base64)* | Master key used to encrypt all provider credentials and API tokens at rest. |
+| **Master Encryption Key** | `./data/.master.key` (Auto-Generated) or `ROUTER_MASTER_KEY` / `ROUTER_MASTER_KEY_FILE` | Master key used to encrypt all provider credentials and API tokens at rest (AES-256-GCM). |
 | **`Admin:StandaloneAllowedNetworks`** | `127.0.0.1, ::1` | CIDR allowlist for admin endpoints when no external IDP is configured. |
 | **Default Admin Key** | `mcp-global-admin-default-cli-key-99` | Seeded in DB on first boot to allow instant administrative connection. |
 | **`CORS_ALLOWED_ORIGINS`** | `http://localhost:3000, http://localhost:8080` | Allowed web dashboard CORS origins. |

@@ -18,7 +18,7 @@ When `CSharp-MCP-Router` starts in a new environment, it initializes with secure
 | Component | Default Configuration | Notes |
 | :--- | :--- | :--- |
 | **Database** | SQLite (`./data/mcp_router.db`) | Zero external database dependencies required. Auto-seeded on startup. |
-| **Master Key** | `ROUTER_MASTER_KEY` (AES-256-GCM) | Encrypts all sensitive provider credentials and keys at rest in the DB. |
+| **Master Key** | `./data/.master.key` (Auto-Generated) or `ROUTER_MASTER_KEY` / `ROUTER_MASTER_KEY_FILE` | Encrypts sensitive credentials at rest in the DB (AES-256-GCM). Auto-generated if unset. |
 | **Default Admin Key** | `mcp-global-admin-default-cli-key-99` | Scoped to `["all"]` for user `admin`. Seeded automatically in the database. |
 | **Network Trust** | `127.0.0.1, ::1` (Loopback) | Configurable via `Admin:StandaloneAllowedNetworks` for LAN/CIDR subnets. |
 | **Admin Endpoint** | `http://<host>:8080/admin/sse` | MCP SSE transport for administrative JSON-RPC tool calling. |
