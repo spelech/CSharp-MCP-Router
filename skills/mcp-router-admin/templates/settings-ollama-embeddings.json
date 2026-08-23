@@ -1,0 +1,10 @@
+{
+  "dashboardTitle": "Local MCP Gateway",
+  "dashboardIcon": "fa-solid fa-brain",
+  "embeddingProvider": "Ollama",
+  "embeddingApiUrl": "http://localhost:11434/api/embeddings",
+  "embeddingApiModel": "nomic-embed-text",
+  "globalMaxKeys": 100,
+  "userMaxKeys": 10,
+  "allowOpenClientRegistration": false
+}

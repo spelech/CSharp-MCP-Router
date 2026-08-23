@@ -322,7 +322,7 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
 ```
 
 #### Autonomous Agent Router Administration (`Admin MCP Server`)
-To allow an AI agent to manage, add, edit, or delete backend MCP servers dynamically:
+To allow an AI agent to manage, add, edit, or delete backend MCP servers, auth providers, secret stores, and access policies dynamically:
 ```json
 {
   "mcpServers": {
@@ -335,6 +335,10 @@ To allow an AI agent to manage, add, edit, or delete backend MCP servers dynamic
   }
 }
 ```
+
+> [!TIP]
+> **Next Step: Automated Provider Provisioning**
+> Once the gateway is deployed and running, use the **`mcp-router-admin`** skill (`.agents/skills/mcp-router-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Microsoft Entra ID, Active Directory, HashiCorp Vault, semantic search embeddings, access policies, and backend servers.
 
 ---
 

@@ -1,0 +1,14 @@
+{
+  "id": "docker",
+  "displayName": "Docker Host Engine",
+  "url": "http://docker-mcp:8000/sse",
+  "type": "sse",
+  "enabled": true,
+  "hidden": false,
+  "secretProvider": "None",
+  "authShape": "bearer",
+  "categories": [
+    "infrastructure",
+    "devops"
+  ]
+}

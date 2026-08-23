@@ -1,0 +1,14 @@
+{
+  "providerName": "ActiveDirectory",
+  "displayName": "Corporate Active Directory (LDAPS)",
+  "isEnabled": true,
+  "configJson": {
+    "server": "dc01.internal.corp",
+    "port": 636,
+    "useSsl": true,
+    "domain": "INTERNAL",
+    "baseDn": "DC=internal,DC=corp",
+    "bindDn": "CN=svc-mcp-router,OU=ServiceAccounts,DC=internal,DC=corp",
+    "bindPassword": "REPLACE_WITH_SERVICE_ACCOUNT_PASSWORD"
+  }
+}
