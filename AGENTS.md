@@ -55,6 +55,20 @@ Run tests via `dotnet test McpRouter.slnx`.
     dotnet run --project scripts/CatalogGenerator -- --verify-only
     ```
   - For full taxonomy, category codes (`AUTH`, `DB`, `GUARD`, `MCP`, `SEC`, `TRANS`, `UI`), and conventions, refer to [`docs/test-catalog-guide.md`](docs/test-catalog-guide.md).
+- **MANDATORY RELEASE TAGGING & DOCKER PUBLISHING RULE**: **EVERY MERGE TO `main` CUTTING A NEW RELEASE MUST CREATE AND PUSH A GIT TAG.**
+  - Once PR quality gates pass and the PR is merged into `main`, agents **MUST** immediately create and push the release tag:
+    ```bash
+    git tag v<version>
+    git push origin v<version>
+    ```
+  - This triggers the automated `Build and Push Docker Image` GitHub Actions workflow to build and publish the container images (`ghcr.io/spelech/csharp-mcp-router:latest`, `:<version>`, `:latest-full`, `:<version>-full`).
+- **MANDATORY POST-RELEASE MCP STACK REFRESH RULE**: **PULL LATEST IMAGE IN THE MCP STACK AFTER RELEASE.**
+  - After confirming the release workflow has published the new image, agents **MUST** update the running router in the MCP stack:
+    ```bash
+    docker compose -f /containers/mcp/docker-compose.yaml pull mcp-router
+    docker compose -f /containers/mcp/docker-compose.yaml up -d mcp-router
+    ```
+  - Verify live health: `curl -s http://localhost:8026/health` should return `{"status":"healthy","service":"McpRouter","version":"<version>"}`.
 - Do not use string manipulation (`string.Replace`) for JSON payloads. Use `JsonNode` (see `ClientSession.RewriteRequestJson`).
 - Do not commit mockups to `docs/assets/`. Use actual UI screenshots.
 - Ensure that you use atomic commits for logical changes.

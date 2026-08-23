@@ -85,6 +85,22 @@ Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) o
 * Whenever an AI agent implements a bugfix or feature, they **MUST** update the documentation (e.g., `README.md`, `ARCHITECTURE.md`, or the `docs/` folder) to reflect those changes.
 * Agents **MUST** use clean, logical atomic commits. Code changes and documentation updates should be committed in grouped, logical chunks.
 
+**MANDATORY RELEASE TAGGING & DOCKER PUBLISHING**:
+* Every merge to `main` cutting a new release **MUST** create and push the Git tag:
+  ```bash
+  git tag v<version>
+  git push origin v<version>
+  ```
+* This triggers the automated `Build and Push Docker Image` GitHub Actions workflow to build and publish container images (`ghcr.io/spelech/csharp-mcp-router:latest`, `:<version>`, `:latest-full`, `:<version>-full`).
+
+**MANDATORY POST-RELEASE MCP STACK REFRESH**:
+* Once the release workflow publishes the container image, agents **MUST** pull and recreate the router in the live MCP stack:
+  ```bash
+  docker compose -f /containers/mcp/docker-compose.yaml pull mcp-router
+  docker compose -f /containers/mcp/docker-compose.yaml up -d mcp-router
+  ```
+* Verify live health: `curl -s http://localhost:8026/health` returns `{"status":"healthy","service":"McpRouter","version":"<version>"}`.
+
 ---
 
 ## 🧪 6. Mandatory Test Requirement Annotations Rule
