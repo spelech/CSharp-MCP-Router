@@ -1,8 +1,14 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using McpRouter.Tests.Attributes;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.Configuration;
 using Xunit;
 
 namespace McpRouter.Tests
@@ -171,6 +177,181 @@ namespace McpRouter.Tests
                 var targetFile = Path.Combine(targetTemplatesDir, fileName);
                 Assert.True(File.Exists(targetFile), $"Expected mirrored template {fileName} to exist in .agents/skills/mcp-router-admin/templates/");
                 Assert.Equal(File.ReadAllText(file), File.ReadAllText(targetFile));
+            }
+        }
+
+        [Fact]
+        [Requirement("MCP-ADMIN-SKILL-E2E-PROVISIONING", "MCP", RequirementType.Positive, "Admin automation templates and JSON-RPC tool calls successfully provision a blank-slate gateway instance end-to-end via HTTP /admin/message.")]
+        public async Task EndToEnd_BlankSlateProvisioning_ConfiguresAllEntitiesViaAdminTools()
+        {
+            var root = GetRepoRootDir();
+            var templatesDir = Path.Combine(root, "skills", "mcp-router-admin", "templates");
+
+            var tempDbFile = Path.Combine(Path.GetTempPath(), $"mcp_admin_auto_{Guid.NewGuid():N}.db");
+            try
+            {
+                using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
+                {
+                    builder.UseEnvironment("Development");
+                    builder.ConfigureAppConfiguration((context, config) =>
+                    {
+                        config.AddInMemoryCollection(new Dictionary<string, string?>
+                        {
+                            { "ConnectionStrings:Sqlite", $"Data Source={tempDbFile}" },
+                            { "DB_ENCRYPTION_KEY", "TestMasterSecretKey123456789012345678901234" },
+                            { "Admin:StandaloneAllowedNetworks:0", "127.0.0.1" },
+                            { "Admin:StandaloneAllowedNetworks:1", "::1" }
+                        });
+                    });
+                });
+
+                var client = factory.CreateClient();
+                client.DefaultRequestHeaders.Add("X-Forwarded-For", "127.0.0.1");
+                client.DefaultRequestHeaders.Add("Authorization", "Bearer mcp-global-admin-default-cli-key-99");
+
+            async Task<JsonDocument> SendToolCallAsync(string toolName, object arguments)
+            {
+                var payload = new
+                {
+                    jsonrpc = "2.0",
+                    id = Guid.NewGuid().ToString("N"),
+                    method = "tools/call",
+                    @params = new
+                    {
+                        name = toolName,
+                        arguments
+                    }
+                };
+
+                var content = new StringContent(JsonSerializer.Serialize(payload), System.Text.Encoding.UTF8, "application/json");
+                var response = await client.PostAsync("/admin", content);
+                Assert.Equal(System.Net.HttpStatusCode.OK, response.StatusCode);
+
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var doc = JsonDocument.Parse(responseBody);
+                Assert.True(!doc.RootElement.TryGetProperty("error", out var err) || err.ValueKind == JsonValueKind.Null, $"Tool call '{toolName}' returned JSON-RPC error: {responseBody}");
+                return doc;
+            }
+
+            // 1. Diagnostics Probe
+            var diagDoc = await SendToolCallAsync("manage_system", new { action = "diagnostics" });
+            Assert.True(diagDoc.RootElement.TryGetProperty("result", out var diagResult));
+            Assert.Contains("activeSessions", diagResult.GetRawText());
+
+            // 2. Provision Authentik Forward-Auth Provider
+            var authentikRaw = File.ReadAllText(Path.Combine(templatesDir, "auth-authentik-forwardauth.json"));
+            using var authDoc = JsonDocument.Parse(authentikRaw);
+            var authElem = authDoc.RootElement;
+            await SendToolCallAsync("manage_providers", new
+            {
+                action = "save_auth",
+                providerName = authElem.GetProperty("providerName").GetString(),
+                displayName = authElem.GetProperty("displayName").GetString(),
+                userHeader = authElem.GetProperty("userHeader").GetString(),
+                groupsHeader = authElem.GetProperty("groupsHeader").GetString(),
+                isEnabled = authElem.GetProperty("isEnabled").GetBoolean(),
+                configJson = authElem.GetProperty("configJson").GetRawText()
+            });
+
+            // 3. Provision Vault AppRole Secret Provider
+            var vaultRaw = File.ReadAllText(Path.Combine(templatesDir, "secret-vault-approle.json"));
+            using var vaultDoc = JsonDocument.Parse(vaultRaw);
+            var vaultElem = vaultDoc.RootElement;
+            await SendToolCallAsync("manage_providers", new
+            {
+                action = "save_secret",
+                providerName = vaultElem.GetProperty("providerName").GetString(),
+                displayName = vaultElem.GetProperty("displayName").GetString(),
+                isEnabled = vaultElem.GetProperty("isEnabled").GetBoolean(),
+                configJson = vaultElem.GetProperty("configJson").GetRawText()
+            });
+
+            // 4. Update Gateway Settings & OpenAI Embeddings
+            var settingsRaw = File.ReadAllText(Path.Combine(templatesDir, "settings-openai-embeddings.json"));
+            using var settingsDoc = JsonDocument.Parse(settingsRaw);
+            var setElem = settingsDoc.RootElement;
+            await SendToolCallAsync("manage_settings", new
+            {
+                action = "update",
+                dashboardTitle = setElem.GetProperty("dashboardTitle").GetString(),
+                dashboardIcon = setElem.GetProperty("dashboardIcon").GetString(),
+                embeddingProvider = setElem.GetProperty("embeddingProvider").GetString(),
+                embeddingApiUrl = setElem.GetProperty("embeddingApiUrl").GetString(),
+                embeddingApiKey = setElem.GetProperty("embeddingApiKey").GetString(),
+                embeddingApiModel = setElem.GetProperty("embeddingApiModel").GetString(),
+                globalMaxKeys = setElem.GetProperty("globalMaxKeys").GetInt32(),
+                userMaxKeys = setElem.GetProperty("userMaxKeys").GetInt32()
+            });
+
+            // 5. Create Group Mapping (Domain Admins -> full_admin)
+            await SendToolCallAsync("manage_group_mappings", new
+            {
+                action = "save",
+                externalId = "S-1-5-32-544",
+                internalGroup = "full_admin"
+            });
+
+            // 6. Create Target Access Policy
+            await SendToolCallAsync("manage_policies", new
+            {
+                action = "save",
+                targetId = "docker",
+                requiredGroup = "devops",
+                isAllowed = true
+            });
+
+            // 7. Register Backend MCP Server
+            var serverRaw = File.ReadAllText(Path.Combine(templatesDir, "server-docker-mcp.json"));
+            using var serverDoc = JsonDocument.Parse(serverRaw);
+            var srvElem = serverDoc.RootElement;
+            await SendToolCallAsync("manage_servers", new
+            {
+                action = "create",
+                id = srvElem.GetProperty("id").GetString(),
+                displayName = srvElem.GetProperty("displayName").GetString(),
+                url = srvElem.GetProperty("url").GetString(),
+                type = srvElem.GetProperty("type").GetString(),
+                enabled = srvElem.GetProperty("enabled").GetBoolean(),
+                hidden = srvElem.GetProperty("hidden").GetBoolean(),
+                secretProvider = srvElem.GetProperty("secretProvider").GetString(),
+                authShape = srvElem.GetProperty("authShape").GetString(),
+                categories = new[] { "infrastructure", "devops" }
+            });
+
+            // 8. Issue Developer AppKey
+            var keyDoc = await SendToolCallAsync("manage_appkeys", new
+            {
+                action = "create",
+                name = "Dev Automation Key",
+                username = "devops-engineer",
+                scopes = new[] { "all" },
+                expiresInDays = 90
+            });
+            Assert.Contains("plaintextKey", keyDoc.RootElement.GetRawText(), StringComparison.OrdinalIgnoreCase);
+
+            // 9. Verify All Provisioned Entities via List Queries
+            var listProvidersDoc = await SendToolCallAsync("manage_providers", new { action = "list", type = "all" });
+            Assert.Contains("HeaderAuth", listProvidersDoc.RootElement.GetRawText());
+            Assert.Contains("HashiCorpVault", listProvidersDoc.RootElement.GetRawText());
+
+            var listServersDoc = await SendToolCallAsync("manage_servers", new { action = "list" });
+            Assert.Contains("docker", listServersDoc.RootElement.GetRawText());
+
+            var getSettingsDoc = await SendToolCallAsync("manage_settings", new { action = "get" });
+            Assert.Contains("OpenAI", getSettingsDoc.RootElement.GetRawText());
+
+            var listMappingsDoc = await SendToolCallAsync("manage_group_mappings", new { action = "list" });
+            Assert.Contains("S-1-5-32-544", listMappingsDoc.RootElement.GetRawText());
+
+            var listPoliciesDoc = await SendToolCallAsync("manage_policies", new { action = "list" });
+            Assert.Contains("docker", listPoliciesDoc.RootElement.GetRawText());
+            }
+            finally
+            {
+                if (File.Exists(tempDbFile))
+                {
+                    try { File.Delete(tempDbFile); } catch { }
+                }
             }
         }
     }

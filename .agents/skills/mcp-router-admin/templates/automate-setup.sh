@@ -33,7 +33,7 @@ call_admin_tool() {
 EOF
 )
 
-  curl -s -f -X POST "${ROUTER_URL}/admin/message" \
+  curl -s -f -X POST "${ROUTER_URL}/admin" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${ADMIN_KEY}" \
     -d "${payload}"

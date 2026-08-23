@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-23T05:26:58.4960789Z",
-    "totalRequirements": 108,
-    "positiveCount": 85,
+    "generatedAt": "2026-08-23T05:35:40.9286775Z",
+    "totalRequirements": 109,
+    "positiveCount": 86,
     "guardrailCount": 23,
-    "totalProofs": 257
+    "totalProofs": 258
   },
   "requirements": [
     {
@@ -1724,6 +1724,22 @@
       ]
     },
     {
+      "id": "MCP-ADMIN-SKILL-E2E-PROVISIONING",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Admin automation templates and JSON-RPC tool calls successfully provision a blank-slate gateway instance end-to-end via HTTP /admin/message.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
+          "lineNumber": 183,
+          "testName": "EndToEnd_BlankSlateProvisioning_ConfiguresAllEntitiesViaAdminTools",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-SKILL-FRONTMATTER",
       "category": "MCP",
       "type": "Positive",
@@ -1733,7 +1749,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
-          "lineNumber": 22,
+          "lineNumber": 28,
           "testName": "Skill_Frontmatter_IsValidAndWithinCharacterLimit",
           "details": null
         }
@@ -1749,7 +1765,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
-          "lineNumber": 148,
+          "lineNumber": 154,
           "testName": "Skill_MirroredInAgentsDirectory",
           "details": null
         }
@@ -1765,7 +1781,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
-          "lineNumber": 104,
+          "lineNumber": 110,
           "testName": "Templates_AllExistAndAreValidJsonOrScripts",
           "details": null
         }
@@ -1781,7 +1797,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AdminAutomationSkillTests.cs",
-          "lineNumber": 48,
+          "lineNumber": 54,
           "testName": "Skill_ContainsAllRequiredPhasesAndProviderCookbooks",
           "details": null
         }

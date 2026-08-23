@@ -146,6 +146,7 @@ namespace McpRouter.Middleware
                         var parsedScopes = JsonSerializer.Deserialize<List<string>>(appKey.ScopesJson);
                         if (parsedScopes != null && parsedScopes.Any(s =>
                             string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
                         {
                             isAdminAppKey = true;
@@ -156,6 +157,7 @@ namespace McpRouter.Middleware
                         var scopeParts = appKey.ScopesJson.Split(new[] { ',', '[', ']', '"', ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         if (scopeParts.Any(s =>
                             string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
                             string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
                         {
                             isAdminAppKey = true;

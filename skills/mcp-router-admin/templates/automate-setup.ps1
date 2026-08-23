@@ -37,7 +37,7 @@ function Invoke-AdminTool {
         "Content-Type"  = "application/json"
     }
 
-    $response = Invoke-RestMethod -Uri "$RouterUrl/admin/message" -Method Post -Headers $headers -Body $payload
+    $response = Invoke-RestMethod -Uri "$RouterUrl/admin" -Method Post -Headers $headers -Body $payload
     return $response
 }
 

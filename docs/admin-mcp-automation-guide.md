@@ -64,10 +64,10 @@ Add the following to your AI client configuration file:
 
 ### JSON-RPC 2.0 Direct HTTP Dispatch
 
-You can send tool execution requests directly via standard HTTP `POST` to `/admin/message`:
+You can send tool execution requests directly via standard HTTP `POST` to `/admin`:
 
 ```bash
-curl -X POST http://localhost:8080/admin/message \
+curl -X POST http://localhost:8080/admin \
   -H "Content-Type: application/json" \
   -H "Authorization: Bearer mcp-global-admin-default-cli-key-99" \
   -d '{
