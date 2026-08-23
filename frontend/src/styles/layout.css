@@ -104,6 +104,15 @@ body {
     text-shadow: 0 0 10px rgb(var(--accent-rgb) / 0.4);
 }
 
+.logo-icon.logo-img {
+    height: 36px;
+    width: auto;
+    max-width: 48px;
+    object-fit: contain;
+    vertical-align: middle;
+    border-radius: var(--radius-sm);
+}
+
 .header-title h1 {
     font-size: var(--font-size-2xl);
     font-weight: var(--font-weight-bold);

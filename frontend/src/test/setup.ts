@@ -8,6 +8,7 @@ import { useSettingsStore } from '../stores/useSettingsStore';
 import { useToastStore } from '../stores/useToastStore';
 import { useConfirmStore } from '../stores/useConfirmStore';
 import { useLogStore } from '../stores/useLogStore';
+import { useConfigStore } from '../stores/useConfigStore';
 
 export interface MockFetchCall {
   url: string;
@@ -404,6 +405,10 @@ export function resetAllStores() {
     levelFilter: 'ALL',
     autoScroll: true,
     isLoadingLogs: false
+  });
+
+  useConfigStore.setState({
+    branding: null
   });
 }
 

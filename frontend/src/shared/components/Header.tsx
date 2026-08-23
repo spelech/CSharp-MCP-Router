@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useUserStore } from '../../stores/useUserStore';
 import { useConfigStore } from '../../stores/useConfigStore';
+import { isImageUrl, updateFaviconAndTitle } from '../utils/branding';
 
 export const Header: React.FC = () => {
   const { user, version, loadUser, loadVersion } = useUserStore();
@@ -14,6 +15,10 @@ export const Header: React.FC = () => {
     loadVersion();
     loadBranding();
   }, [loadUser, loadVersion, loadBranding]);
+
+  useEffect(() => {
+    updateFaviconAndTitle(branding?.title, branding?.icon);
+  }, [branding?.title, branding?.icon]);
 
   useEffect(() => {
     document.documentElement.setAttribute('data-theme', theme);
@@ -32,7 +37,11 @@ export const Header: React.FC = () => {
   return (
     <header className="dashboard-header">
       <div className="header-logo">
-        <i className={`${branding?.icon || 'fa-solid fa-network-wired'} logo-icon`}></i>
+        {branding?.icon && isImageUrl(branding.icon) ? (
+          <img src={branding.icon} alt="Logo" className="logo-icon logo-img" />
+        ) : (
+          <i className={`${branding?.icon || 'fa-solid fa-network-wired'} logo-icon`}></i>
+        )}
         <div className="header-title">
           <h1>{branding?.title || 'MCP Gateway'}</h1>
           <span className="badge badge-primary" id="version-badge">
