@@ -16,14 +16,23 @@ data/*.txt
 # Build, test, and runtime outputs
 mcp_server.log
 **/TestResults/
+test-results/
+frontend/playwright-report/
+frontend/test-results/
+frontend/coverage/
 wwwroot/
 
-# OS specific files
+# OS and Scratch files
 .DS_Store
 Thumbs.db
+*.tmp
+*.bak
+*.swp
+*~
 
-# Large model files
+# Large model files and temporary agent directories
 data/models/
 data/.docker/
 diagnostics-report.json
 .worktrees/
+.superpowers/
