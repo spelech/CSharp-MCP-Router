@@ -1,6 +1,6 @@
 # 06. System Settings & Vector Embeddings
 
-The **Settings View** (`Settings` tab) provides a comprehensive configuration plane for adjusting vector embedding search engines, security approval policies, authentication providers, enterprise secret retrievers, custom JSON specification files, and access control matrices.
+The **Settings View** (`Settings` tab - accessible to administrators) provides a comprehensive configuration plane for adjusting vector embedding search engines, identity & authentication providers, enterprise secret retrievers, custom JSON specification files, and access control matrices.
 
 ---
 
@@ -8,7 +8,13 @@ The **Settings View** (`Settings` tab) provides a comprehensive configuration pl
 
 ![System Settings Overview](../assets/settings_view.jpg)
 
-The Settings interface is organized into 6 modular domain tabs:
+The Settings interface is organized into 5 modular domain tabs:
+
+```
++-------------------------------------------------------------------------------------------------------------------------+
+| [ 🧠 Vector & Search ]  [ 🪪 Identity & Auth ]  [ 🔐 Secret Providers ]  [ 📂 Prompts & Resources ]  [ 👥 Access Control ] |
++-------------------------------------------------------------------------------------------------------------------------+
+```
 
 ---
 
@@ -52,19 +58,7 @@ The vector embedding engine powers the **Meta-Mode** dynamic discovery pipeline 
 
 ---
 
-## 🛡️ Tab 2: Security & Approvals (`SecurityTab`)
-
-Controls global execution policies and administrative barriers:
-
-* **Require Manual Approval for Destructive Tools**:
-  * When enabled, tool invocations matching destructive patterns (e.g. `rm`, `delete`, `drop`, `restart`, `unlock`) are paused in the approval queue until confirmed by an administrator.
-* **Global Max AppKeys**: Limits the total number of active AppKeys that can be generated across the system (default: `100`).
-* **User Max AppKeys**: Restricts the maximum AppKeys any single user principal can issue (default: `5`).
-* **Dynamic Configuration Reload**: Automatically reloads downstream server definitions when underlying database records or secret providers change.
-
----
-
-## 🪪 Tab 3: Identity & Auth Providers (`IdentityAuthTab`)
+## 🪪 Tab 2: Identity & Auth Providers (`IdentityAuthTab`)
 
 ![Settings Identity and Authentication Providers](../assets/settings_identity_auth.jpg)
 
@@ -84,7 +78,7 @@ Manages incoming authentication and user identity resolution:
 
 ---
 
-## 🔐 Tab 4: Secret Providers (`SecretProvidersTab`)
+## 🔐 Tab 3: Secret Providers (`SecretProvidersTab`)
 
 ![Settings Enterprise Secret Providers](../assets/settings_secret_providers.jpg)
 
@@ -96,19 +90,19 @@ Manage centralized configurations for external secret stores:
 
 ---
 
-## 📂 Tab 5: Prompts & Resources File Manager (`CustomFilesTab`)
+## 📂 Tab 4: Prompts & Resources File Manager (`CustomFilesTab`)
 
 ![Settings Prompts and Resources File Manager](../assets/settings_prompts_resources.jpg)
 
 Create and manage custom JSON files that define virtual tools, prompt templates, and virtual resource endpoints:
 
 * **File Catalog Grid**: Lists all registered specification files with file name, type (`Tools`, `Prompts`, `Resources`), and last updated timestamp.
-* **Interactive Editor**: Built-in JSON editor with validation before persistence.
+* **Interactive Editor & Visual Prompt Builder**: Built-in JSON editor and visual template builder with validation before persistence.
 * **Hot Reload**: Instantly updates catalog caches and vector embeddings upon saving.
 
 ---
 
-## 👥 Tab 6: Access Control & Group Mappings (`AccessControlTab`)
+## 👥 Tab 5: Access Control & Group Mappings (`AccessControlTab`)
 
 ![Settings Access Control and Group Mappings](../assets/settings_access_control.jpg)
 
@@ -119,3 +113,4 @@ Fine-tune enterprise permissions across servers and external groups:
   * Target Identifier (e.g. `server:docker`, `tool:docker__ps`, `prompt:router__diagnose`)
   * Required Group (e.g. `Engineering`, `Administrators`)
   * Mode (`ALLOW Access` or `DENY Access`)
+

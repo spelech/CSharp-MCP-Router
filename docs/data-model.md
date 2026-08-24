@@ -50,7 +50,7 @@ erDiagram
         string EmbeddingApiKey "Encrypted embedding API key"
         string EmbeddingApiModel "Embedding model name"
         string EmbeddingModelDir "Filesystem directory for local ONNX model"
-        boolean RequireManualApproval "Require admin approval for high-risk tools"
+        string UserSecretStorage "Storage mode for user personal secrets"
         int GlobalMaxKeys "Maximum total active AppKeys allowed"
         int UserMaxKeys "Maximum active AppKeys allowed per user"
     }
@@ -285,7 +285,7 @@ Stores encrypted connection credentials and runtime configuration for pluggable 
 ---
 
 ### 7. `Settings` (System Singleton)
-Stores global singleton settings controlling vector embeddings, approval thresholds, and quotas.
+Stores global singleton settings controlling vector embeddings, user quotas, and secret storage strategies.
 
 | Column | Type | Nullable | Constraints | Description |
 | :--- | :--- | :--- | :--- | :--- |
@@ -295,7 +295,7 @@ Stores global singleton settings controlling vector embeddings, approval thresho
 | `EmbeddingApiKey` | `VARCHAR(500)` | Yes | | Encrypted embedding API authentication key |
 | `EmbeddingApiModel` | `VARCHAR(100)` | Yes | | Remote embedding model identifier (e.g. `text-embedding-3-small`) |
 | `EmbeddingModelDir` | `VARCHAR(500)` | Yes | | Local path to ONNX model weights (`/app/data/models`) |
-| `RequireManualApproval` | `BOOLEAN / INT` | No | Default `0` | Toggles human-in-the-loop validation for dangerous operations |
+| `UserSecretStorage` | `VARCHAR(50)` | No | Default `'Database'` | Storage strategy for user-supplied secrets (`Database`, `Vault`) |
 | `GlobalMaxKeys` | `INT` | No | Default `0` | Gateway-wide limit on active AppKeys (`0` = Unlimited) |
 | `UserMaxKeys` | `INT` | No | Default `0` | Per-user limit on active AppKeys (`0` = Unlimited) |
 

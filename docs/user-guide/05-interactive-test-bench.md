@@ -1,6 +1,6 @@
 # 05. Interactive Test Bench
 
-The **Interactive Test Bench** (`Test Bench` tab) is a developer and operator playground for interactively testing backend MCP tools, reading virtual resources, evaluating prompt templates, simulating semantic vector search, and inspecting real-time diagnostic logs.
+The **Interactive Test Bench** (`Test Bench` tab) is a developer and operator playground for interactively testing backend MCP tools, reading virtual resources, evaluating prompt templates, simulating semantic vector search, executing raw JSON-RPC payloads, and inspecting real-time diagnostic logs.
 
 ---
 
@@ -8,27 +8,27 @@ The **Interactive Test Bench** (`Test Bench` tab) is a developer and operator pl
 
 ![Interactive Test Bench View](../assets/test_bench_view.jpg)
 
-The Test Bench aggregates five specialized diagnostic tools in an interactive multi-panel layout:
+The Test Bench aggregates six specialized diagnostic tools in an interactive multi-panel layout:
 
 ```
-+---------------------------------------------------------------------------------------------+
-| 🧪 Interactive Test Bench                                                                   |
-+---------------------------------------------------------------------------------------------+
-|  [ 🛠️ Tool Tester ]   [ 📄 Resource Tester ]   [ 💬 Prompt Tester ]   [ 🧠 Semantic Router ] |
-+---------------------------------------------------------------------------------------------+
-|                                                                                             |
-|  [ Active Tester Panel: Dynamic Forms, Arguments, & Execution Controls ]                    |
-|                                                                                             |
-+---------------------------------------------------------------------------------------------+
-| 📟 Live Diagnostic Logs & Gateway Terminal                                                   |
-+---------------------------------------------------------------------------------------------+
++---------------------------------------------------------------------------------------------------------------+
+| 🧪 Interactive Test Bench                                                                                     |
++---------------------------------------------------------------------------------------------------------------+
+|  [ 🛠️ Tools ]   [ 📄 Resources ]   [ 💬 Prompts ]   [ 🧠 Semantic Router ]   [ 💻 Console ]   [ 📟 Logs ]     |
++---------------------------------------------------------------------------------------------------------------+
+|                                                                                                               |
+|  [ Active Tester Panel: Dynamic Forms, Schema Builder, Raw Arguments Editor, & Execution Controls ]          |
+|                                                                                                               |
++---------------------------------------------------------------------------------------------------------------+
+| 📟 Live Diagnostic Logs & Gateway Terminal                                                                     |
++---------------------------------------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 🛠️ 1. Tool Tester (`ToolTesterCard`)
+## 🛠️ 1. Tool Execution Tester (`ToolTesterCard`)
 
-The Tool Tester allows manual invocation of any discovered or custom namespaced tool across connected servers without needing an external AI client.
+The Tool Tester allows direct interactive execution of any discovered or custom namespaced tool across connected servers without needing an external AI client or IDE.
 
 ```
 +-------------------------------------------------------------------------------+
@@ -54,9 +54,10 @@ The Tool Tester allows manual invocation of any discovered or custom namespaced 
 
 ### Key Capabilities
 1. **Dynamic JSON Schema Form Builder**: Inspects the tool's JSON Schema parameter definition and automatically generates typed form inputs (strings, numbers, booleans, arrays, nested JSON objects).
-2. **Schema Validation**: Enforces required fields and type constraints before sending requests.
-3. **Execution Metrics**: Displays response status code (`200 OK`, `403 Forbidden`, `500 Internal Error`) and execution latency in milliseconds.
-4. **Syntax-Highlighted Output**: Pretty-printed JSON payload formatting with one-click copy.
+2. **Raw JSON Payload Editor**: Switch between dynamic form fields and a raw JSON arguments editor for complex payloads.
+3. **Schema Validation**: Enforces required fields and type constraints before sending requests.
+4. **Execution Metrics**: Displays response status code (`200 OK`, `403 Forbidden`, `500 Internal Error`) and execution latency in milliseconds.
+5. **Syntax-Highlighted Output**: Pretty-printed JSON payload formatting with one-click copy.
 
 ---
 
@@ -147,7 +148,36 @@ Simulate how the router's vector embedding engine scores and ranks tools when an
 
 ---
 
-## 📟 5. Live Diagnostic Logs Terminal (`LogsTerminalCard`)
+## 💻 5. Direct JSON-RPC Raw Console (`ConsoleCard`)
+
+Send raw JSON-RPC 2.0 payloads directly to the gateway router:
+
+```
++-------------------------------------------------------------------------------+
+| 💻 Direct JSON-RPC Raw Console                                                |
++-------------------------------------------------------------------------------+
+| Request:                                                                      |
+| {                                                                             |
+|   "jsonrpc": "2.0",                                                           |
+|   "id": 1,                                                                    |
+|   "method": "tools/list",                                                     |
+|   "params": {}                                                                |
+| }                                                                             |
+|                                                                               |
+| [ 🚀 Send Request ]                                                           |
++-------------------------------------------------------------------------------+
+| Response (200 OK):                                                            |
+| {                                                                             |
+|   "jsonrpc": "2.0",                                                           |
+|   "id": 1,                                                                    |
+|   "result": { "tools": [...] }                                                |
+| }                                                                             |
++-------------------------------------------------------------------------------+
+```
+
+---
+
+## 📟 6. Live Diagnostic Logs Terminal (`LogsTerminalCard`)
 
 Positioned at the bottom of the Test Bench view, the Live Logs Terminal provides real-time visibility into internal router operations:
 
@@ -168,3 +198,4 @@ Positioned at the bottom of the Test Bench view, the Live Logs Terminal provides
 * **Thread-Safe In-Memory Stream**: Streams live gateway logs without disk I/O bottlenecks.
 * **Severity Filtering**: Filter logs by `INFO`, `WARN`, or `ERROR` levels.
 * **Auto-Scroll & Freeze**: Pin terminal scroll position while diagnosing active issues.
+

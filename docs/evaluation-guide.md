@@ -99,7 +99,7 @@ The **MCP Gateway Router** provides a single, hardened proxy between client appl
 | **Identity & Group RBAC** | ❌ Disjoint / None | ⚠️ Reverse proxy handles basic auth only | ✅ **Multi-Tenant RBAC**: Active Directory SIDs + OIDC/SSO (`Remote-Groups`) + AppKeys |
 | **Scope Authorization** | ❌ All or nothing | ❌ None | ✅ **Granular Scopes**: `*`, `server:*`, `category:*`, `tool:*`, `resource:*`, `prompt:*` |
 | **Multi-Database Support** | ❌ N/A | ❌ N/A | ✅ **Enterprise Dapper**: SQLite, Microsoft SQL Server, MySQL with fail-closed checks |
-| **Human-in-the-Loop** | ❌ Direct execution | ❌ None | ✅ **Manual Approval Queue**: Intercepts destructive actions with admin UI |
+| **Fail-Closed Security** | ❌ Direct execution | ❌ None | ✅ **4-Stage Authorization Pipeline**: Multi-level Explicit Deny > Allow > Scope > Default Policy |
 | **PII & Audit Trail** | ❌ No centralized logging | ⚠️ Access logs only | ✅ **Automated Redaction**: Sanitizes Bearer tokens, passwords, and API keys in audit tables |
 | **Developer Test Bench** | ❌ Separate CLI tools | ❌ None | ✅ **Interactive UI**: Dynamic JSON schema forms, virtual resources, prompt testing, live logs |
 
@@ -171,7 +171,7 @@ Incoming requests undergo a 4-stage evaluation pipeline:
 | **Authentication Modes** | None / Hardcoded | Bearer token | **OIDC Headers, Active Directory Windows SIDs, AppKeys, OAuth 2.0** |
 | **Secret Resolution** | Plaintext config files | Environment only | **HashiCorp Vault (KV v2 + JIT renew), Windows DPAPI, Env** |
 | **Storage Engines** | None / In-memory | JSON file / SQLite | **SQLite (SQLCipher), Microsoft SQL Server, MySQL** |
-| **Human-in-the-Loop** | ❌ No | ❌ No | **✅ Built-in Manual Approval Queue for destructive tools** |
+| **Fail-Closed Security** | ❌ No | ❌ No | **✅ 4-Stage Authorization Pipeline & Granular RBAC** |
 | **Auditing & Compliance** | ❌ None | ⚠️ Console logs | **✅ Structured DB logs with automated PII & secret redaction** |
 | **Admin UI & Test Bench** | ❌ None | ⚠️ Minimal HTML | **✅ Vite React 19 glassmorphic dashboard + interactive forms** |
 
@@ -189,7 +189,7 @@ Incoming requests undergo a 4-stage evaluation pipeline:
 
 ### 🛡️ 3. Security & Compliance Operations (SecOps)
 * **Scenario**: Monitoring and controlling AI agent access to production infrastructure.
-* **Benefit**: Enforce manual approvals for destructive tools, sanitize PII in logs, and enforce least-privilege AppKey scopes.
+* **Benefit**: Enforce explicit deny rules, sanitize PII in logs, and enforce least-privilege AppKey scopes.
 
 ---
 

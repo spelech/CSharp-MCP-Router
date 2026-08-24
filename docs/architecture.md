@@ -184,7 +184,7 @@ graph TD
         CSession["ClientSession (Partial Classes)"]
         StateManager["JsonRpcStateManager<br>(Out-of-Order Demux & ID Rewriter)"]
         SemanticEngine["DynamicEmbeddingService & SemanticSearchService<br>(Local ONNX & API Embeddings)"]
-        ApprovalMgr["ToolApprovalManager"]
+        ToolRouting["ToolRoutingManager"]
     end
 
     subgraph SecurityRbac ["Layer 5: Authorization & Governance"]
@@ -222,7 +222,7 @@ graph TD
     SessionMgr --> CSession
     CSession --> StateManager
     CSession --> SemanticEngine
-    CSession --> ApprovalMgr
+    CSession --> ToolRouting
 
     CSession --> SecHelper
     SecHelper --> RbacProc
@@ -494,8 +494,8 @@ frontend/src/
 │   ├── clients/            # RegisteredClientsCard, ClientSetupGuide, AppKeysCard, ClientModal
 │   ├── security/           # SecurityView, PolicyModal, MappingModal
 │   ├── settings/           # SettingsView, GeneralTab, IdentityAuthTab, SecretProvidersTab,
-│   │                       # AccessControlTab, CustomFilesTab, BackupsTab, ApprovalsCard
-│   ├── testbench/          # TestBenchView (Interactive JSON Schema Form Builder & Log Stream)
+│   │                       # AccessControlTab, CustomFilesTab, BackupsTab
+│   ├── testbench/          # TestBenchView (Interactive JSON Schema Form Builder, Console, & Log Stream)
 │   └── shared/             # Header, Footer, Toasts, Modal, StatusBadge, PaginationToolbar
 ├── stores/                 # Centralized Zustand Reactive Stores
 │   ├── useServerStore.ts   # Servers list, health states, filter queries
@@ -960,7 +960,7 @@ erDiagram
         string EmbeddingApiKey "Encrypted embedding API key"
         string EmbeddingApiModel "Embedding model name"
         string EmbeddingModelDir "Filesystem directory for local ONNX model"
-        boolean RequireManualApproval "Require admin approval for high-risk tools"
+        string UserSecretStorage "Storage mode for user personal secrets"
         int GlobalMaxKeys "Maximum total active AppKeys allowed"
         int UserMaxKeys "Maximum active AppKeys allowed per user"
     }

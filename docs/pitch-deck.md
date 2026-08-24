@@ -28,7 +28,7 @@ The Router provides a level of authorization and auditing not available in stand
 - **4-Stage Multi-Tenant RBAC**: Combines Active Directory Windows SIDs, OIDC/SSO group claims, and AppKeys. Enforces granular capability scopes (e.g., `*`, `category:smarthome`, `server:docker`, `tool:docker__rm`).
 - **Zero CLI Leakage**: Resolves secrets internally and passes them exclusively through process environment dictionaries, completely avoiding command-line exposure.
 - **PII-Sanitized Audit Trail**: Automatically redacts Bearer tokens, passwords, and API keys from logs while persisting comprehensive execution records to the database.
-- **Human-in-the-Loop Safeguards**: Intercepts destructive actions via a manual approval queue with an administrative UI.
+- **Fail-Closed Safeguards**: Enforces multi-tier explicit deny safety barriers, user quota limits, and cryptographic AppKey scope validation.
 
 ---
 

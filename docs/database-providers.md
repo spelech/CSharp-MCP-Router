@@ -69,7 +69,7 @@ erDiagram
         string EmbeddingApiKey "Encrypted embedding API key"
         string EmbeddingApiModel "Embedding model name"
         string EmbeddingModelDir "Filesystem directory for local ONNX model"
-        boolean RequireManualApproval "Require admin approval for high-risk tools"
+        string UserSecretStorage "Storage mode for user personal secrets"
         int GlobalMaxKeys "Maximum total active AppKeys allowed"
         int UserMaxKeys "Maximum active AppKeys allowed per user"
     }

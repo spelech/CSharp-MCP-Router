@@ -1,6 +1,6 @@
-# 03. RBAC, Security & Approvals
+# 03. RBAC, Security & Access Control Policies
 
-The **MCP Gateway Router** enforces multi-stage Role-Based Access Control (RBAC), multi-provider identity resolution, explicit deny safety barriers, and a real-time manual approval queue for sensitive operations.
+The **MCP Gateway Router** enforces multi-stage Role-Based Access Control (RBAC), multi-provider identity resolution, explicit deny safety barriers, user quota limits, and cryptographic AppKey scope validation.
 
 ---
 
@@ -56,7 +56,7 @@ Every request directed at a backend tool, virtual resource, or prompt undergoes 
 * If any of the caller's groups match a server's `AllowedGroups` list, the request passes group-level checks and advances to scope verification.
 
 ### Stage 3: AppKey Scope Verification
-* When authenticating via an AppKey, the router verifies whether the requested action is permitted by the key's scopes (`*`, `category:<name>`, `server:<id>`, `tool:<name>`, `resource:<uri>`, `prompt:<name>`).
+* When authenticating via an AppKey, the router verifies whether the requested action is permitted by the key's scopes (`*`, `all`, `admin`, `category:<name>`, `server:<id>`, `tool:<name>`, `resource:<uri>`, `prompt:<name>`).
 
 ### Stage 4: Default Policy Fallback
 * If no explicit group policy matches, the router checks the server's `DefaultAllow` flag. If `DefaultAllow` is `false`, the request is rejected by default (fail-closed security).
@@ -132,49 +132,14 @@ Navigate to **`Settings`** -> **`Access Control`**:
 
 ---
 
-## 🛑 Manual Tool Execution Approval Queue
+## 📊 User Quotas & Lifecycle Limits
 
-To safeguard production environments from unintended or destructive AI agent actions (e.g. `docker__remove_container`, `kubernetes__delete_namespace`, `homeassistant__unlock_door`), the router includes an interactive **Human-in-the-Loop Approval Queue**:
+To prevent key sprawl and resource exhaustion across multi-tenant environments, the router provides built-in user quota management:
 
-```
-                       MANUAL APPROVAL WORKFLOW
-                       
-   +-------------------+                     +--------------------+
-   |  AI Agent / IDE   |                     |  MCP Router        |
-   +-------------------+                     +--------------------+
-             |                                         |
-             | 1. tools/call: docker__rm_container     |
-             |---------------------------------------->|
-             |                                         | 2. Intercepts call
-             |                                         |    Creates PendingApproval
-             | 3. Returns Pending (Status: 202)        |    Pushes to Dashboard UI
-             |<----------------------------------------|
-             |                                         |
-             |                                         |       +--------------------+
-             |                                         |       | Administrator (UI) |
-             |                                         |       +--------------------+
-             |                                         |                 |
-             |                                         | 4. Views Card   |
-             |                                         |<----------------|
-             |                                         | 5. Clicks       |
-             |                                         |    "Approve"    |
-             |                                         |<----------------|
-             |                                         |
-             |                                         | 6. Executes tool on backend
-             | 7. Delivers execution result            |    Logs audit record
-             |<----------------------------------------|
-```
-
-### Enabling Manual Approvals
-1. Navigate to **`Settings`** -> **`Security & Approvals`**.
-2. Toggle **`Require Manual Approval for Destructive Tools`** to **ON**.
-3. Destructive tool calls will automatically pause and generate approval requests.
-
-### Reviewing & Approving Requests
-1. The **Pending Approvals Card** on the Overview dashboard displays all open approval requests in real time.
-2. Review the caller identity, tool name, timestamp, and JSON argument payload.
-3. Click **`Approve`** to resume execution immediately and deliver the result to the waiting agent.
-4. Click **`Reject`** to cancel execution and return an explicit rejection error to the agent.
+* **Max AppKeys per User**: Administrators can enforce custom key generation quotas per user principal (default: 5 keys).
+* **Key Expiration Lifecycles**: Supports mandatory or optional expiration dates (`30 Days`, `90 Days`, `1 Year`, `Never`).
+* **Instant Revocation**: Administrators and key owners can revoke active AppKeys with immediate effect across all gateway sessions.
+* **Quota Management UI**: Available directly in the **`App Keys & Security`** tab under **User Quota Limits**.
 
 ---
 

@@ -11,22 +11,23 @@ The **MCP Gateway Router Dashboard** provides a centralized control plane for mo
 The web interface features a dark-mode glassmorphic design with a fixed top navigation bar that enables one-click switching across primary functional views:
 
 ```
-+---------------------------------------------------------------------------------------------+
-| 🌐 MCP Router Gateway   [Overview]  [App Keys & Security]  [Test Bench]  [Settings]   👤 admin |
-+---------------------------------------------------------------------------------------------+
++--------------------------------------------------------------------------------------------------------+
+| 🌐 MCP Router Gateway  [Overview] [App Keys & Security] [Test Bench] [Settings] [My MCP Servers]  👤 admin |
++--------------------------------------------------------------------------------------------------------+
 ```
 
-1. **Overview (`Overview`)**: Primary dashboard displaying operational statistics, pending approval notifications, the backend MCP server catalog, filtering/sorting toolbars, and the client setup guide.
-2. **App Keys & Security (`App Keys & Security`)**: Dedicated management plane for generating AppKeys, inspecting connected client agents, configuring least-privilege scopes, and copying client configuration JSON snippets.
-3. **Test Bench (`Test Bench`)**: Interactive developer playground for executing namespaced tools, reading virtual resource URIs, evaluating prompt templates, testing semantic vector search, and monitoring live logs.
-4. **Settings (`Settings`)**: Multi-tab system configuration for vector embedding engines, security approval rules, Identity & Auth providers, Secret retrievers, custom JSON files, and Access Control policies.
-5. **Identity & Version Badge**: Top-right corner displays the authenticated user identity (resolved via OIDC headers or Active Directory) alongside the live router version.
+1. **Overview (`Overview`)**: Primary dashboard displaying aggregated operational metrics (`StatsCard`), the backend MCP server catalog, dynamic filtering/sorting toolbars, and the interactive client setup generator.
+2. **App Keys & Security (`App Keys & Security` / `My App Keys`)**: Dedicated management plane for generating AppKeys, inspecting connected client agents, configuring least-privilege scopes, managing user quotas, and copying client configuration JSON snippets.
+3. **Test Bench (`Test Bench`)**: Interactive developer playground for executing namespaced tools, reading virtual resource URIs, evaluating prompt templates, testing semantic vector search, direct JSON-RPC console, and monitoring live logs.
+4. **Settings (`Settings` - Admin Only)**: Multi-tab system configuration for vector embedding engines, Identity & Auth providers, enterprise Secret retrievers, custom JSON specification files, and Access Control policies.
+5. **My MCP Servers (`My MCP Servers`)**: Multi-tenant workspace for end-users to manage personal access tokens (PATs), view user-accessible servers, and copy direct personalized connection endpoints.
+6. **Identity & Version Badge**: Top-right corner displays the authenticated user identity (resolved via OIDC headers or Active Directory) alongside the live router version.
 
 ---
 
 ## 📊 Overview View: Statistics & Metric Cards
 
-### 1. Statistics Summary Card (`StatsCard`)
+### Statistics Summary Card (`StatsCard`)
 Positioned at the top of the Overview tab, this card aggregates real-time health and catalog metrics:
 
 * **Total Backend Servers**: Total number of registered MCP servers in the database.
@@ -34,12 +35,6 @@ Positioned at the top of the Overview tab, this card aggregates real-time health
 * **Total Tools**: Aggregated count of all discovered backend tools across active servers.
 * **Total Resources & Prompts**: Count of registered virtual resource URIs and prompt templates.
 * **Active Clients & AppKeys**: Number of registered external client applications and valid AppKeys.
-
-### 2. Manual Approvals Notification Card (`ApprovalsCard`)
-When manual approvals are enabled for sensitive or destructive operations (e.g. `docker__remove_container`), pending tool calls are surfaced here with:
-* Request ID, calling client identity, target server, and namespaced tool name.
-* Formatted JSON arguments payload.
-* One-click **Approve** (resumes tool execution) or **Reject** (cancels execution with an error) buttons.
 
 ---
 
@@ -99,7 +94,7 @@ Each registered backend MCP server is rendered in an individual glassmorphic car
   * ⚫ **Gray (Disabled)**: Administratively paused; no traffic routed.
 * **Transport Badge**: Protocol used (`SSE`, `HTTP`, `STDIO`).
 * **Capabilities Badges**: Count of discovered tools, virtual resources, and prompt templates.
-* **Secret Provider Badge**: Credential source (`None`, `Env`, `Vault`, `Registry`).
+* **Secret Provider Badge**: Credential source (`None`, `Env`, `Vault`, `Registry`, `OAuth2`).
 * **Category Badges**: Categorization tags applied to the server.
 
 ### Card Actions
@@ -126,27 +121,33 @@ graph TD
     Nav[Global Top Navigation] --> Overview[Overview Tab]
     Nav --> Security[App Keys & Security Tab]
     Nav --> TestBench[Test Bench Tab]
-    Nav --> Settings[Settings Tab]
+    Nav --> Settings[Settings Tab - Admin]
+    Nav --> MyServers[My MCP Servers Tab]
 
-    Overview --> Stats[Stats & Approvals Cards]
+    Overview --> Stats[Operational Stats Card]
     Overview --> Controls[Search / Sort / Group Controls]
     Overview --> ServerCards[Server Status Cards]
     Overview --> QuickSetup[Client Setup Guide]
 
     Security --> AppKeys[AppKey Generation & Scopes]
     Security --> Clients[Connected Clients Registry]
+    Security --> Quotas[User Quotas & Lifecycle Limits]
     Security --> SetupSnippets[Client Config Snippets]
 
     TestBench --> ToolTester[Tool Execution Form Builder]
     TestBench --> ResTester[Virtual Resource Reader]
     TestBench --> PromptTester[Prompt Template Tester]
     TestBench --> SemanticRouter[Semantic Search Simulator]
+    TestBench --> RawConsole[JSON-RPC Direct Console]
     TestBench --> LiveLogs[Real-time Terminal Logs]
 
     Settings --> GenTab[Vector & Search Engines]
-    Settings --> SecTab[Security & Manual Approvals]
     Settings --> IdTab[Identity & Auth Providers]
     Settings --> SecProvTab[Secret Providers Configuration]
     Settings --> FilesTab[Custom Prompts & Resources]
     Settings --> AccessTab[RBAC Policies & Group Mappings]
+
+    MyServers --> PersonalCreds[Personal User Credentials]
+    MyServers --> UserEndpoints[Custom Connection Endpoints]
 ```
+

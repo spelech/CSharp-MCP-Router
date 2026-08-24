@@ -32,7 +32,8 @@ AppKeys grant external clients secure, authenticated access to the router withou
 
 | Scope Pattern | Description | Example |
 | :--- | :--- | :--- |
-| `*` | **Global Access**: Grants unrestricted access to all servers, tools, resources, and prompts. | `*` |
+| `*`, `all` | **Global Access**: Grants unrestricted access to all servers, tools, resources, and prompts. | `*`, `all` |
+| `admin` | **Administrative Access**: Grants full gateway administration rights and access to the `/admin` MCP server. | `admin` |
 | `category:<name>` | **Category Scope**: Grants access to all servers tagged with the specified category. | `category:smarthome`, `category:media` |
 | `server:<id>` | **Server Scope**: Grants access to all capabilities of a specific backend server. | `server:docker`, `server:actual_budget` |
 | `tool:<name>` | **Granular Tool**: Grants execution rights for a specific namespaced tool. | `tool:docker__ps`, `tool:ha__get_state` |

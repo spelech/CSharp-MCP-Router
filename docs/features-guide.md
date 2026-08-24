@@ -304,7 +304,8 @@ The Web Dashboard includes a developer environment to debug and verify setups:
 1. **Interactive Form Builder**: Generates forms matching the JSON schemas of registered backend tools.
 2. **Logs Console**: Thread-safe, real-time console displaying JSON-RPC traffic, request IDs, and security classifications.
 3. **Search Simulator**: Evaluation panel to test queries against the semantic search engine and inspect scores.
-4. **Manual Approval Modal**: Pauses dangerous tool executions pending administrator approval via the UI.
+4. **Direct JSON-RPC Console**: Live terminal to execute raw JSON-RPC 2.0 requests against the router.
+5. **Resource & Prompt Testers**: Dedicated interfaces to read virtual resources and evaluate prompt templates.
 
 ![Test Bench View](../docs/assets/test_bench_view.jpg)
 
