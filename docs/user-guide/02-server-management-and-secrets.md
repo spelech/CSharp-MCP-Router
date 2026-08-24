@@ -2,6 +2,9 @@
 
 The **MCP Gateway Router** enables seamless registration and management of backend Model Context Protocol (MCP) servers across multiple transport types (`SSE`, `HTTP`, `STDIO`), while providing enterprise-grade secret providers to prevent credential leakage.
 
+> [!TIP]
+> **Need a recipe for your specific MCP server?** Check the [**MCP Server Authentication & Integration Cookbook**](../mcp-server-auth-cookbook.md) for quick-lookup decision matrices and copy-paste examples (*"If your server requires Bearer / Custom Header / Basic Auth / Vault / STDIO ➔ Setup is Y"*).
+
 ---
 
 ## ➕ Registering a New Backend Server

@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.34.2`** | 2026-08-24 | docs(auth): introduce comprehensive MCP Server Authentication & Integration Cookbook (`docs/mcp-server-auth-cookbook.md`) with 11 scenario-driven recipes, decision matrix, and copy-paste recipes for Bearer, Custom Headers, Basic Auth, Query Params, STDIO, Vault, DPAPI, BYOK, Pass-Through, and Identity-Forwarding |
 | **`v4.34.1`** | 2026-08-24 | docs(user-guide): comprehensive overhaul and cleanup of user guides, removing outdated manual approval references, synchronizing Settings tabs, documenting JSON-RPC console, user quotas, and My MCP Servers |
 | **`v4.34.0`** | 2026-08-23 | feat(skills): introduce universal `mcp-router-admin` automation skill, blank-slate safe defaults documentation, provider scaffolding templates (Authentik, Keycloak, Entra ID, Active Directory LDAPS, Cloudflare, Vault, Embeddings), and comprehensive DevOps automation guide |
 | **`v4.33.0`** | 2026-08-22 | feat(testing): integrate playwright-layout-inspector for spatial layout auditing, eliminate background DOM collisions, enhance interactive touch targets and focus rings |

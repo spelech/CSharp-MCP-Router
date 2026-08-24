@@ -2,6 +2,9 @@
 
 This matrix defines the supported combinations of inbound client identities, outbound backend credentials, routing modes, and secret providers. It serves as the source of truth for understanding how the Router bridges authentication between clients (IDEs/LLMs) and downstream MCP Servers.
 
+> [!TIP]
+> **Looking for quick copy-paste setup recipes?** See the [**MCP Server Authentication & Integration Cookbook**](../mcp-server-auth-cookbook.md) (*"If Your Backend MCP Server Requires X ➔ Setup Is Y"*).
+
 ## 1. Outbound Secret Providers vs Routing Modes
 
 This matrix evaluates the specific `SecretProvider` implementations available in the Router against the two core routing modes.

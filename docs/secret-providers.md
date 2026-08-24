@@ -4,6 +4,9 @@ The **MCP Router Gateway & Semantic Proxy** provides a pluggable secrets managem
 
 This guide details supported secret providers, AES-256-GCM encryption-at-rest architecture, dynamic runtime reloading, audit safety mechanisms, Docker configurations, and troubleshooting.
 
+> [!TIP]
+> **Need server setup recipes?** Check the [**MCP Server Authentication & Integration Cookbook**](mcp-server-auth-cookbook.md) for quick-lookup tables and copy-paste examples (*"If your server requires Bearer / Custom Header / Basic Auth / Vault / STDIO ➔ Setup is Y"*).
+
 ---
 
 ## 📑 Table of Contents

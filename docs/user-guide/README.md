@@ -39,7 +39,7 @@ Welcome to the official user manual for the **Model Context Protocol (MCP) Gatew
 
 ## 🧭 Related Technical Documentation
 
-For developers, operators, and architects seeking deeper specifications:
+* 📖 [**MCP Server Auth & Integration Cookbook**](../mcp-server-auth-cookbook.md)
 * 🎯 [**Evaluation & Product Overview Guide**](../evaluation-guide.md)
 * 🏛️ [**Comprehensive Enterprise Architecture Guide**](../architecture.md)
 * 🔐 [**Enterprise Secret Providers Guide**](../secret-providers.md)

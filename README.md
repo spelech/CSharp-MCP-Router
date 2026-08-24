@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.34.1-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.34.2-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-620%20passing-2ea44f?style=for-the-badge)
@@ -99,6 +99,7 @@ For architectural specifications, Mermaid sequence diagrams, component models, E
 
 For UI guides, server registration, secret provider configuration, RBAC, client setup, and test bench operations, see:
 * [**Official User Guide Suite**](docs/user-guide/README.md)
+  * [**📖 MCP Server Auth & Integration Cookbook**](docs/mcp-server-auth-cookbook.md) (*"If your server requires X ➔ Setup is Y"*)
   * [01. Dashboard & Navigation Interface](docs/user-guide/01-dashboard-and-navigation.md)
   * [02. Server Management & Secret Providers](docs/user-guide/02-server-management-and-secrets.md)
   * [03. RBAC, Security & Approvals](docs/user-guide/03-rbac-and-security.md)
@@ -232,11 +233,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.34.2`** | 2026-08-24 | docs(auth): introduce comprehensive MCP Server Authentication & Integration Cookbook (`docs/mcp-server-auth-cookbook.md`) with 11 scenario-driven recipes, decision matrix, and copy-paste recipes for Bearer, Custom Headers, Basic Auth, Query Params, STDIO, Vault, DPAPI, BYOK, Pass-Through, and Identity-Forwarding |
 | **`v4.34.1`** | 2026-08-24 | docs(user-guide): comprehensive overhaul and cleanup of user guides, removing outdated manual approval references, synchronizing Settings tabs, documenting JSON-RPC console, user quotas, and My MCP Servers |
 | **`v4.34.0`** | 2026-08-23 | feat(skills): introduce universal `mcp-router-admin` automation skill, blank-slate safe defaults documentation, provider scaffolding templates (Authentik, Keycloak, Entra ID, Active Directory LDAPS, Cloudflare, Vault, Embeddings), and comprehensive DevOps automation guide |
 | **`v4.33.0`** | 2026-08-22 | feat(testing): integrate playwright-layout-inspector for spatial layout auditing, eliminate background DOM collisions, enhance interactive touch targets and focus rings |
 | **`v4.32.0`** | 2026-08-22 | feat(ui): dynamic multi-brand logo resolution (favicons, manifests, meta icons) and centered page layout containerization across all dashboard tabs |
-| **`v4.31.0`** | 2026-08-22 | feat(frontend): implement dynamic multi-target client connection guide |
 ---
 
 ## 🧪 Code Coverage & Quality Gates
