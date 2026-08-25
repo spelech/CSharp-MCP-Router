@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.35.0`** | 2026-08-24 | feat(security): compact Base62 AppKeys with semantic prefix taxonomy (`mcp-adm-`, `mcp-glb-`, `mcp-{domain}-`, `mcp-usr-`, `mcp-srv-`), custom `ROUTER_ADMIN_KEY` seeding, Master Key `KeySource` tracking, Vault bootstrapping, and Web UI dynamic re-encryption |
 | **`v4.34.4`** | 2026-08-24 | chore(formatting): standardize C# formatting with `.editorconfig`, enforce CI `dotnet format --verify-no-changes` quality gate, and codebase housekeeping |
 | **`v4.34.3`** | 2026-08-24 | chore(hygiene): repository cleanup removing straggler patch scripts, subagent artifacts, and updating `.gitignore` with report/test output patterns |
 | **`v4.34.2`** | 2026-08-24 | docs(auth): introduce comprehensive MCP Server Authentication & Integration Cookbook (`docs/mcp-server-auth-cookbook.md`) with 11 scenario-driven recipes, decision matrix, and copy-paste recipes for Bearer, Custom Headers, Basic Auth, Query Params, STDIO, Vault, DPAPI, BYOK, Pass-Through, and Identity-Forwarding |
