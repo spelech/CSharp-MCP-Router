@@ -5,13 +5,13 @@ This document details the **AppKey Scoping and Authorization Engine** in the `CS
 ---
 
 ## 📑 Table of Contents
-1. [Overview & Security Architecture](#1-overview--security-architecture)
-2. [Canonical Scope Syntax & Normalization](#2-canonical-scope-syntax--normalization)
+1. [Overview & Security Architecture](#1-overview-security-architecture)
+2. [Canonical Scope Syntax & Normalization](#2-canonical-scope-syntax-normalization)
 3. [Multi-Stage Authorization Pipeline](#3-multi-stage-authorization-pipeline)
 4. [Capability Authorization Matrix](#4-capability-authorization-matrix)
-5. [Key Lifecycle & Cryptographic Architecture](#5-key-lifecycle--cryptographic-architecture)
-6. [Least-Privilege Personas & Configuration Recipes](#6-least-privilege-personas--configuration-recipes)
-7. [Diagnostics, Auditing & Troubleshooting](#7-diagnostics-auditing--troubleshooting)
+5. [Key Lifecycle & Cryptographic Architecture](#5-key-lifecycle-cryptographic-architecture)
+6. [Least-Privilege Personas & Configuration Recipes](#6-least-privilege-personas-configuration-recipes)
+7. [Diagnostics, Auditing & Troubleshooting](#7-diagnostics-auditing-troubleshooting)
 
 ---
 

@@ -632,7 +632,7 @@ volumes:
 ## 🔗 Related Documentation & References
 
 * [Production Deployment & Database Migration Guide](deployment-guide.md)
-* [System Architecture & Dependency Injection](../ARCHITECTURE.md)
+* [System Architecture & Dependency Injection](architecture.md)
 * [Pairwise Testing Matrix & Integration Suites](testing-matrix.md)
 * [Pluggable Secret Providers & Server Management](user-guide/02-server-management-and-secrets.md)
 * [Features & Connection Guidelines](features-guide.md)

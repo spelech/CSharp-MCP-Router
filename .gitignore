@@ -36,3 +36,9 @@ data/.docker/
 diagnostics-report.json
 .worktrees/
 .superpowers/
+docs/plans/
+docs/superpowers/
+
+# Python virtual environments & MkDocs build directory
+.venv*/
+site/

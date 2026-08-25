@@ -21,7 +21,7 @@ Manage servers dynamically without restarting the gateway:
    - **Secret Provider**: Secret retrieval method (`None`, `Vault`, `WindowsRegistry`, or `Environment`). See [Pluggable Secret Retrievers](#6-pluggable-secret-retrievers).
 4. Click **Save Server**. The router registers the server and initializes connections.
 
-![Add MCP Server Modal](../docs/assets/add_server_modal.jpg)
+![Add MCP Server Modal](assets/add_server_modal.jpg)
 
 ### Method B: Static JSON Seeding (`custom_servers.json`)
 For declarative configurations:
@@ -341,7 +341,7 @@ The Web Dashboard includes a developer environment to debug and verify setups:
 4. **Direct JSON-RPC Console**: Live terminal to execute raw JSON-RPC 2.0 requests against the router.
 5. **Resource & Prompt Testers**: Dedicated interfaces to read virtual resources and evaluate prompt templates.
 
-![Test Bench View](../docs/assets/test_bench_view.jpg)
+![Test Bench View](assets/test_bench_view.jpg)
 
 ---
 

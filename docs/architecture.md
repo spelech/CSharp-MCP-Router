@@ -8,47 +8,47 @@ This document is the **architectural specification**, detailing system context, 
 
 ## 📑 Table of Contents
 
-1. [Executive Summary & Architectural Tenets](#1-executive-summary--architectural-tenets)
-2. [High-Level System Architecture & Context](#2-high-level-system-architecture--context)
-   - [Client Ecosystem & Ingress](#client-ecosystem--ingress)
+1. [Executive Summary & Architectural Tenets](#1-executive-summary-architectural-tenets)
+2. [High-Level System Architecture & Context](#2-high-level-system-architecture-context)
+   - [Client Ecosystem & Ingress](#client-ecosystem-ingress)
    - [7-Layer Gateway Architecture](#7-layer-gateway-architecture)
-   - [System Context & Architecture Diagram](#system-context--architecture-diagram)
-3. [Backend Component & Boundary Model](#3-backend-component--boundary-model)
+   - [System Context & Architecture Diagram](#system-context-architecture-diagram)
+3. [Backend Component & Boundary Model](#3-backend-component-boundary-model)
    - [Domain Components (`Components/`)](#domain-components-components)
    - [Infrastructure Services (`Infrastructure/`)](#infrastructure-services-infrastructure)
-   - [Core Protocol & Routing Engine (`Core/`)](#core-protocol--routing-engine-core)
+   - [Core Protocol & Routing Engine (`Core/`)](#core-protocol-routing-engine-core)
    - [Architectural Dependency Rules](#architectural-dependency-rules)
    - [Component Subsystem Diagram](#component-subsystem-diagram)
-4. [Frontend Component & Typed Architecture](#4-frontend-component--typed-architecture)
-   - [React 19 & Vite SPA Architecture](#react-19--vite-spa-architecture)
+4. [Frontend Component & Typed Architecture](#4-frontend-component-typed-architecture)
+   - [React 19 & Vite SPA Architecture](#react-19-vite-spa-architecture)
    - [Domain Component Decomposition](#domain-component-decomposition)
-   - [Typed API Layer & Zustand State Stores](#typed-api-layer--zustand-state-stores)
-   - [Frontend Architecture & State Flow Diagram](#frontend-architecture--state-flow-diagram)
-5. [Protocol & Routing Engine Deep-Dive](#5-protocol--routing-engine-deep-dive)
-   - [Meta-Mode Dynamic Capability Hiding (`/sse` & `/message`)](#meta-mode-dynamic-capability-hiding-sse--message)
+   - [Typed API Layer & Zustand State Stores](#typed-api-layer-zustand-state-stores)
+   - [Frontend Architecture & State Flow Diagram](#frontend-architecture-state-flow-diagram)
+5. [Protocol & Routing Engine Deep-Dive](#5-protocol-routing-engine-deep-dive)
+   - [Meta-Mode Dynamic Capability Hiding (`/sse` & `/message`)](#meta-mode-dynamic-capability-hiding-sse-message)
    - [Target-Specific Virtual Proxying (`/{targetServerId}`)](#target-specific-virtual-proxying-targetserverid)
-   - [JSON-RPC 2.0 In-Flight Multiplexing & ID Preservation](#json-rpc-20-in-flight-multiplexing--id-preservation)
+   - [JSON-RPC 2.0 In-Flight Multiplexing & ID Preservation](#json-rpc-20-in-flight-multiplexing-id-preservation)
    - [Sequence Diagram: Stateful SSE Session Lifecycle](#sequence-diagram-stateful-sse-session-lifecycle)
    - [Sequence Diagram: Stateless HTTP Stream Execution](#sequence-diagram-stateless-http-stream-execution)
-6. [Authorization Pipeline & RBAC Decision Engine](#6-authorization-pipeline--rbac-decision-engine)
+6. [Authorization Pipeline & RBAC Decision Engine](#6-authorization-pipeline-rbac-decision-engine)
    - [4-Stage Hierarchical Decision Flow](#4-stage-hierarchical-decision-flow)
-   - [Scope Grammar & Resolution](#scope-grammar--resolution)
-   - [Admin SID Bypass & Database-Backed RBAC Evaluation](#admin-sid-bypass--database-backed-rbac-evaluation)
+   - [Scope Grammar & Resolution](#scope-grammar-resolution)
+   - [Admin SID Bypass & Database-Backed RBAC Evaluation](#admin-sid-bypass-database-backed-rbac-evaluation)
    - [Mermaid Authorization Decision Flowchart](#mermaid-authorization-decision-flowchart)
-7. [Transport Subsystem & Subprocess Lifecycle](#7-transport-subsystem--subprocess-lifecycle)
+7. [Transport Subsystem & Subprocess Lifecycle](#7-transport-subsystem-subprocess-lifecycle)
    - [Strategy Pattern (`ITransport`)](#strategy-pattern-itransport)
-   - [Subprocess STDIO Architecture & Security Hardening](#subprocess-stdio-architecture--security-hardening)
-   - [Child Process Tree Lifecycle & Signal Handling](#child-process-tree-lifecycle--signal-handling)
-   - [Stderr Log Capture & PII Token Masking](#stderr-log-capture--pii-token-masking)
+   - [Subprocess STDIO Architecture & Security Hardening](#subprocess-stdio-architecture-security-hardening)
+   - [Child Process Tree Lifecycle & Signal Handling](#child-process-tree-lifecycle-signal-handling)
+   - [Stderr Log Capture & PII Token Masking](#stderr-log-capture-pii-token-masking)
    - [Sequence Diagram: STDIO Subprocess Execution](#sequence-diagram-stdio-subprocess-execution)
-8. [Database & Persistence Architecture](#8-database--persistence-architecture)
+8. [Database & Persistence Architecture](#8-database-persistence-architecture)
    - [Unified Entity-Relationship Diagram (Mermaid ERD)](#unified-entity-relationship-diagram-mermaid-erd)
    - [Engine Dialect Strategies (SQLite, MS SQL Server, MySQL)](#engine-dialect-strategies-sqlite-ms-sql-server-mysql)
-9. [Secret Provider & Envelope Encryption Pipeline](#9-secret-provider--envelope-encryption-pipeline)
+9. [Secret Provider & Envelope Encryption Pipeline](#9-secret-provider-envelope-encryption-pipeline)
    - [AES-256-GCM Envelope Encryption Specification](#aes-256-gcm-envelope-encryption-specification)
-   - [Pluggable Retrievers & Dynamic Reload Without Restart](#pluggable-retrievers--dynamic-reload-without-restart)
-   - [Secret Resolution & Encryption Pipeline Flowchart](#secret-resolution--encryption-pipeline-flowchart)
-10. [Cross-References, Verification & Operational Guide](#10-cross-references-verification--operational-guide)
+   - [Pluggable Retrievers & Dynamic Reload Without Restart](#pluggable-retrievers-dynamic-reload-without-restart)
+   - [Secret Resolution & Encryption Pipeline Flowchart](#secret-resolution-encryption-pipeline-flowchart)
+10. [Cross-References, Verification & Operational Guide](#10-cross-references-verification-operational-guide)
 
 ---
 
@@ -1163,8 +1163,8 @@ For complete setup guides, AppRole configuration commands, and DPAPI registry re
 | **End-User Guides & Interactive UI Manual** | [**Official User Guide Suite**](user-guide/README.md) |
 | **Developer Environment & Coding Guidelines** | [**Developer Guide & Local Setup**](developer-guide.md) |
 | **Operations, Deployment & Disaster Recovery** | [**Operations & Production Runbook**](runbook.md) |
-| **Contributor Workflow & PR Standards** | [**Contributing Guide**](../CONTRIBUTING.md) |
-| **Core README & Getting Started** | [**Project Overview & Quickstart**](../README.md) |
+| **Contributor Workflow & PR Standards** | [**Contributing Guide**](developer-guide.md) |
+| **Core Documentation & Getting Started** | [**Project Overview & Quickstart**](index.md) |
 
 ### Verification & Test Suite Execution
 

@@ -1,9 +1,10 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.35.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.36.0-orange?style=for-the-badge)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/csharp-mcp-router/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-620%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-672%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -11,6 +12,8 @@
 A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the **Model Context Protocol (MCP)**. 
 
 `mcp-router` aggregates backend MCP servers (Docker, Plex, Home Assistant, Actual Budget, Excel) and proxies them to clients via a single unified connection.
+
+📖 **Documentation Portal:** [https://spelech.github.io/csharp-mcp-router/](https://spelech.github.io/csharp-mcp-router/)
 
 ![MCP Router Gateway Dashboard](docs/assets/dashboard.jpg)
 
@@ -234,11 +237,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.36.0`** | 2026-08-25 | docs(portal): introduce Material for MkDocs documentation portal (`https://spelech.github.io/csharp-mcp-router/`), automated GitHub Pages deployment workflow, comprehensive navigation structure, and purge of agent plan artifacts |
 | **`v4.35.0`** | 2026-08-24 | feat(security): compact Base62 AppKeys with semantic prefix taxonomy (`mcp-adm-`, `mcp-glb-`, `mcp-{domain}-`, `mcp-usr-`, `mcp-srv-`), custom `ROUTER_ADMIN_KEY` seeding, Master Key `KeySource` tracking, Vault bootstrapping, and Web UI dynamic re-encryption |
 | **`v4.34.4`** | 2026-08-24 | chore(formatting): standardize C# formatting with `.editorconfig`, enforce CI `dotnet format --verify-no-changes` quality gate, and codebase housekeeping |
 | **`v4.34.3`** | 2026-08-24 | chore(hygiene): repository cleanup removing straggler patch scripts, subagent artifacts, and updating `.gitignore` with report/test output patterns |
 | **`v4.34.2`** | 2026-08-24 | docs(auth): introduce comprehensive MCP Server Authentication & Integration Cookbook (`docs/mcp-server-auth-cookbook.md`) with 11 scenario-driven recipes, decision matrix, and copy-paste recipes for Bearer, Custom Headers, Basic Auth, Query Params, STDIO, Vault, DPAPI, BYOK, Pass-Through, and Identity-Forwarding |
-| **`v4.34.1`** | 2026-08-24 | docs(user-guide): comprehensive overhaul and cleanup of user guides, removing outdated manual approval references, synchronizing Settings tabs, documenting JSON-RPC console, user quotas, and My MCP Servers |
 ---
 
 ## 🧪 Code Coverage & Quality Gates
