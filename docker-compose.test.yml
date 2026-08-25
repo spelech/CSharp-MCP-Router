@@ -193,19 +193,20 @@ services:
     ports:
       - "8090:8090"
 
-  # 6. Router Gateway test container instance
-  mcp-router-e2e:
+  # 6. Model Context Gateway (MCG) test container instance
+  mcg:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: mcp-router-e2e
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg
     ports:
       - "8088:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - DB_ENCRYPTION_KEY=SecurePassphraseForMcpDb2026!
-      - VAULT_ADDR=http://vault-test:8200
-      - VAULT_TOKEN=root-test-token
+      - MCG_MASTER_KEY=SecurePassphraseForMcpDb2026!
+      - MCG_VAULT_ADDR=http://vault-test:8200
+      - MCG_VAULT_TOKEN=root-test-token
       - Ldap__Server=ldap-test
       - Ldap__Port=636
       - Ldap__UseSsl=true

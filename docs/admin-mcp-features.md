@@ -1,8 +1,8 @@
 # Admin MCP Server Features
 
-The MCP Router embeds a virtual, in-process **Admin MCP Server**. This allows administrators to manage the router's configuration, servers, clients, policies, and diagnostics using the standard Model Context Protocol (MCP), effectively treating the router administration interface as just another MCP server.
+Model Context Gateway (MCG) embeds a virtual, in-process **Admin MCP Server**. This allows administrators to manage the gateway's configuration, servers, clients, policies, and diagnostics using the standard Model Context Protocol (MCP), effectively treating the gateway administration interface as just another MCP server.
 
-This server exposes 10 consolidated tools that cover 100% of the router's gateway administration and diagnostics flows.
+This server exposes 10 consolidated tools that cover 100% of the gateway's administration and diagnostics flows.
 
 ## Admin Tools Reference
 

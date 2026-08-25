@@ -4,7 +4,7 @@ using System.Text.Json;
 using Dapper;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     /// <summary>
     /// In-process virtual Admin MCP Server providing 10 consolidated entity tools
@@ -87,8 +87,6 @@ namespace McpRouter.Core.Routing
                 }
             }
 
-            var serverVersion = typeof(AdminMcpServer).Assembly.GetName().Version?.ToString(3) ?? "4.19.0";
-
             var result = (object)new
             {
                 protocolVersion = negotiatedVersion,
@@ -98,10 +96,10 @@ namespace McpRouter.Core.Routing
                 },
                 serverInfo = new
                 {
-                    name = "CSharp-MCP-Router-Admin",
-                    version = serverVersion
+                    name = GatewayMetadata.AdminServerName,
+                    version = GatewayMetadata.Version
                 },
-                instructions = "In-process virtual Admin MCP Server for managing the MCP Router configuration, servers, clients, policies, providers, settings, and diagnostics."
+                instructions = "In-process virtual Admin MCP Server for managing the Model Context Gateway configuration, servers, clients, policies, providers, settings, and diagnostics."
             };
 
             return Task.FromResult(result);
@@ -1375,7 +1373,7 @@ namespace McpRouter.Core.Routing
             }
 
             using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+            var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
             await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
             await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
 

@@ -1,4 +1,4 @@
-namespace McpRouter.Infrastructure.Secrets
+namespace ModelContextGateway.Infrastructure.Secrets
 {
     public class VaultUserSecretStore : IUserSecretStore
     {

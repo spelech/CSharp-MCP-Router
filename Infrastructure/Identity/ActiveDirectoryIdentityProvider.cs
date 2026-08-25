@@ -1,6 +1,6 @@
 using System.Security.Claims;
 
-namespace McpRouter.Infrastructure.Identity
+namespace ModelContextGateway.Infrastructure.Identity
 {
     public class ActiveDirectoryIdentityProvider : IIdentityProvider
     {

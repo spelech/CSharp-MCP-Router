@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     /// <summary>
     /// Partial class implementation providing request cancellation, client sampling request forwarding, and backend broadcast capabilities.

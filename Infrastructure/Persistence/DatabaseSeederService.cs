@@ -1,8 +1,8 @@
 using System.Data;
 using Dapper;
-using McpRouter.Infrastructure.Persistence.DatabaseSeeders;
+using ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders;
 
-namespace McpRouter.Infrastructure.Persistence
+namespace ModelContextGateway.Infrastructure.Persistence
 {
     public static class DatabaseSeederService
     {
@@ -18,16 +18,27 @@ namespace McpRouter.Infrastructure.Persistence
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             var provider = dbFactory.ProviderName.ToLowerInvariant();
 
+            var legacyDbPath = Path.Combine(AppContext.BaseDirectory, "data", "mcp_router.db");
+            var newDbPath = Path.Combine(AppContext.BaseDirectory, "data", "mcg.db");
+            if (File.Exists(legacyDbPath) && !File.Exists(newDbPath))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(newDbPath)!);
+                File.Copy(legacyDbPath, newDbPath);
+                logger.LogInformation("Migrated legacy database '{OldPath}' -> '{NewPath}'", legacyDbPath, newDbPath);
+            }
+
             logger.LogInformation("Initializing database via Dapper ({Provider})...", provider);
 
             var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
-            if (string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"]) && string.IsNullOrEmpty(configuration["ROUTER_MASTER_KEY"]))
+            if (string.IsNullOrEmpty(configuration["MCG_MASTER_KEY"])
+                && string.IsNullOrEmpty(configuration["MCG_SECRET"])
+                && string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"]))
             {
                 logger.LogInformation("Master encryption key resolved from persistent keyfile or auto-generated key.");
             }
             else if (encryptionKey.Length < 16)
             {
-                logger.LogCritical("SECURITY WARNING: The configured DB_ENCRYPTION_KEY is too short (< 16 characters).");
+                logger.LogCritical("SECURITY WARNING: The configured master encryption key is too short (< 16 characters).");
             }
 
             using var conn = dbFactory.CreateConnection();

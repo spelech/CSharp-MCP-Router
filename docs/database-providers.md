@@ -188,7 +188,7 @@ erDiagram
 SQLite is the zero-configuration embedded engine designed for single-node instances, developer workstations, and edge agent deployments.
 
 #### Engine Characteristics & Concurrency
-* **Embedded Storage**: Database resides in a single binary file on disk (default: `data/mcp_router.db`) or in-memory for ephemeral test runs (`Data Source=:memory:`).
+* **Embedded Storage**: Database resides in a single binary file on disk (default: `data/mcg.db`) or in-memory for ephemeral test runs (`Data Source=:memory:`).
 * **Write-Ahead Logging (WAL)**: SQLite operates with Write-Ahead Logging to support concurrent read operations while writes execute, preventing database lock contention.
 * **Type Handlers**: JSON arrays and complex collections (such as `Categories` and `ScopesJson`) are stored as serialized UTF-8 `TEXT` and mapped via custom Dapper `JsonListTypeHandler` instances.
 
@@ -346,7 +346,7 @@ The MCP Router implements authenticated envelope encryption for all sensitive se
 
 ```mermaid
 flowchart TD
-    ConfigEnv["Environment Variable<br><code>ROUTER_MASTER_KEY</code> / <code>DB_ENCRYPTION_KEY</code>"] --> DbKeyHelper["DbKeyHelper.ResolveDbEncryptionKey()"]
+    ConfigEnv["Environment Variable<br><code>MCG_MASTER_KEY</code> / <code>DB_ENCRYPTION_KEY</code>"] --> DbKeyHelper["DbKeyHelper.ResolveDbEncryptionKey()"]
     DbKeyHelper --> PBKDF2["PBKDF2 Key Derivation<br>SHA256, 600,000 Iterations<br>Salt: {Secret}_McpRouter_Salt_v2"]
     PBKDF2 --> DerivedKey["256-bit AES-GCM Key"]
     
@@ -365,7 +365,7 @@ flowchart TD
 
 ### 1. Key Resolution (`DbKeyHelper.cs`)
 Encryption keys are resolved during bootstrap via [`DbKeyHelper.ResolveDbEncryptionKey(configuration)`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-53/Infrastructure/Secrets/DbKeyHelper.cs):
-1. **Lookup Hierarchy**: Inspects `ROUTER_MASTER_KEY` first, falling back to `DB_ENCRYPTION_KEY`.
+1. **Lookup Hierarchy**: Inspects `MCG_MASTER_KEY` first, falling back to `DB_ENCRYPTION_KEY`.
 2. **Fail-Closed Security**: If both keys are missing or blank, startup terminates with a fatal `InvalidOperationException`. Self-generating ephemeral fallback keys is strictly disabled in production to prevent silent data loss upon container restart.
 3. **Thread-Safe Caching**: Key resolution uses double-checked locking to cache the resolved string in memory, minimizing configuration lookups.
 
@@ -386,7 +386,7 @@ Sensitive provider settings are stored in dedicated encrypted columns:
 
 ## 🛡️ Startup Schema Validation & Fail-Closed Integrity Checks
 
-To prevent runtime data corruption or silent failures caused by misconfigured schemas, the gateway executes a comprehensive validation pass on every startup ([`DatabaseSeederService.ValidateSchemaCompatibility`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-53/Infrastructure/Persistence/DatabaseSeederService.cs)):
+To prevent runtime data corruption or silent failures caused by misconfigured schemas, the gateway executes a comprehensive validation pass on every startup ([`DatabaseSeederService.ValidateSchemaCompatibility`](file:///containers/dev/csharp-mcp-router/Infrastructure/Persistence/DatabaseSeederService.cs)):
 
 ```mermaid
 sequenceDiagram
@@ -442,7 +442,7 @@ If any column, stored procedure, data type, or parameter convention is missing o
 
 #### Connection String Format
 ```ini
-ConnectionStrings__DefaultConnection=Data Source=/app/data/mcp_router.db;
+ConnectionStrings__DefaultConnection=Data Source=/app/data/mcg.db;
 ```
 
 #### Docker Compose Template (`docker-compose.sqlite.yml`)
@@ -450,21 +450,21 @@ ConnectionStrings__DefaultConnection=Data Source=/app/data/mcp_router.db;
 version: '3.8'
 
 services:
-  mcp-router:
-    image: ghcr.io/spelech/csharp-mcp-router:latest
-    container_name: mcp-router-sqlite
+  mcg:
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg-sqlite
     restart: unless-stopped
     ports:
       - "8080:8080"
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - DB_PROVIDER=sqlite
-      - ConnectionStrings__DefaultConnection=Data Source=/app/data/mcp_router.db;
-      - ROUTER_MASTER_KEY=base64_256bit_master_key_here_must_be_configured_at_rest==
+      - ConnectionStrings__DefaultConnection=Data Source=/app/data/mcg.db;
+      - MCG_MASTER_KEY=base64_256bit_master_key_here_must_be_configured_at_rest==
       - CORS_ALLOWED_ORIGINS=https://mcp.yourdomain.com
       - Oidc__TrustedProxies=10.0.0.10,127.0.0.1
     volumes:
-      - mcp_sqlite_data:/app/data
+      - mcg_sqlite_data:/app/data
       - ./certs/oauth_signing.pfx:/app/certs/oauth_signing.pfx:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
@@ -473,7 +473,7 @@ services:
       retries: 3
 
 volumes:
-  mcp_sqlite_data:
+  mcg_sqlite_data:
     driver: local
 ```
 
@@ -523,9 +523,9 @@ services:
       timeout: 5s
       retries: 5
 
-  mcp-router:
-    image: ghcr.io/spelech/csharp-mcp-router:latest
-    container_name: mcp-router-mssql
+  mcg:
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg-mssql
     restart: unless-stopped
     depends_on:
       sqlserver:
@@ -536,7 +536,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - DB_PROVIDER=mssql
       - ConnectionStrings__DefaultConnection=Server=tcp:sqlserver,1433;Database=McpEnterpriseDb;User ID=sa;Password=YourComplexPassword123!;TrustServerCertificate=True;
-      - ROUTER_MASTER_KEY=base64_256bit_master_key_here_must_be_configured_at_rest==
+      - MCG_MASTER_KEY=base64_256bit_master_key_here_must_be_configured_at_rest==
       - CORS_ALLOWED_ORIGINS=https://mcp.yourdomain.com
       - Oidc__TrustedProxies=10.0.0.10,127.0.0.1
     volumes:
@@ -598,9 +598,9 @@ services:
       timeout: 5s
       retries: 5
 
-  mcp-router:
-    image: ghcr.io/spelech/csharp-mcp-router:latest
-    container_name: mcp-router-mysql
+  mcg:
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg-mysql
     restart: unless-stopped
     depends_on:
       mysql:
@@ -611,7 +611,7 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - DB_PROVIDER=mysql
       - ConnectionStrings__DefaultConnection=Server=mysql;Port=3306;Database=McpEnterpriseDb;Uid=mcp_app;Pwd=YourComplexPassword123!;AllowUserVariables=True;
-      - ROUTER_MASTER_KEY=base64_256bit_master_key_here_must_be_configured_at_rest==
+      - MCG_MASTER_KEY=base64_256bit_master_key_here_must_be_configured_at_rest==
       - CORS_ALLOWED_ORIGINS=https://mcp.yourdomain.com
       - Oidc__TrustedProxies=10.0.0.10,127.0.0.1
     volumes:

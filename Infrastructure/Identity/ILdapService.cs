@@ -1,4 +1,4 @@
-namespace McpRouter.Infrastructure.Identity
+namespace ModelContextGateway.Infrastructure.Identity
 {
     public interface ILdapService
     {

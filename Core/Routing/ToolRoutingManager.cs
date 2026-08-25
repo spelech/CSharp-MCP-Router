@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     /// <summary>
     /// Manages backend tool listing, caching, namespaced routing tables, and tool invocation execution.

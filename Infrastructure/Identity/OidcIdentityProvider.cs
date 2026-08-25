@@ -1,4 +1,4 @@
-namespace McpRouter.Infrastructure.Identity
+namespace ModelContextGateway.Infrastructure.Identity
 {
     /// <summary>
     /// Pluggable identity provider that extracts authenticated user identities and roles from HTTP reverse proxy headers

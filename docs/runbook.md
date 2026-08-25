@@ -1,6 +1,6 @@
-# MCP Gateway Router: Operations Runbook
+# Model Context Gateway (MCG): Operations Runbook
 
-Production deployment, reverse proxy configuration, database backup/recovery, observability, health checks, and disaster recovery procedures for **CSharp-MCP-Router**.
+Production deployment, reverse proxy configuration, database backup/recovery, observability, health checks, and disaster recovery procedures for **Model Context Gateway (MCG)**.
 
 ---
 
@@ -14,9 +14,9 @@ Below is the standard production `docker-compose.yaml` configuration with persis
 version: "3.8"
 
 services:
-  mcp-router:
-    image: ghcr.io/spelech/csharp-mcp-router:latest
-    container_name: mcp-router
+  mcg:
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg
     restart: unless-stopped
     security_opt:
       - no-new-privileges:true
@@ -30,8 +30,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       - Database__Provider=SQLite
-      - Database__ConnectionString=Data Source=/data/mcp-router.db
-      - Security__MasterKey=${MCP_ROUTER_MASTER_KEY}
+      - Database__ConnectionString=Data Source=/data/mcg.db
+      - MCG_MASTER_KEY=${MCG_MASTER_KEY}
       - CORS_ALLOWED_ORIGINS=https://mcp.yourdomain.com,http://10.0.0.10:8026
       - EMBEDDING_MODEL_DIR=/data/models
     volumes:
@@ -50,9 +50,9 @@ services:
       - caddy.import_1=cloudflare
       - caddy.import_2=tinyauth
       - caddy.reverse_proxy={{upstreams 8080}}
-      - kuma.mcp-router.http.name=MCP Router Gateway
-      - kuma.mcp-router.http.url=http://mcp-router:8080/health
-      - kuma.mcp-router.http.group=Infrastructure
+      - kuma.mcg.http.name=Model Context Gateway
+      - kuma.mcg.http.url=http://mcg:8080/health
+      - kuma.mcg.http.group=Infrastructure
 
 networks:
   net_cloud:
@@ -69,30 +69,30 @@ networks:
 
 For bare-metal Linux deployments:
 
-Create `/etc/systemd/system/mcp-router.service`:
+Create `/etc/systemd/system/mcg.service`:
 ```ini
 [Unit]
-Description=CSharp MCP Router Gateway
+Description=Model Context Gateway (MCG)
 After=network.target network-online.target
 Wants=network-online.target
 
 [Service]
 Type=simple
-User=mcp-router
-Group=mcp-router
-WorkingDirectory=/opt/mcp-router
-ExecStart=/usr/bin/dotnet /opt/mcp-router/mcp-router.dll
+User=mcg
+Group=mcg
+WorkingDirectory=/opt/mcg
+ExecStart=/usr/bin/dotnet /opt/mcg/mcg.dll
 Restart=always
 RestartSec=10
 KillSignal=SIGINT
-SyslogIdentifier=mcp-router
+SyslogIdentifier=mcg
 
 Environment=ASPNETCORE_ENVIRONMENT=Production
 Environment=ASPNETCORE_URLS=http://0.0.0.0:8026
 Environment=Database__Provider=SQLite
-Environment=Database__ConnectionString=Data Source=/var/lib/mcp-router/mcp-router.db
-Environment=Security__MasterKey=your_64_char_hex_master_key_here
-Environment=EMBEDDING_MODEL_DIR=/var/lib/mcp-router/models
+Environment=Database__ConnectionString=Data Source=/var/lib/mcg/mcg.db
+Environment=MCG_MASTER_KEY=your_64_char_hex_master_key_here
+Environment=EMBEDDING_MODEL_DIR=/var/lib/mcg/models
 
 # Security sandbox
 ProtectSystem=full
@@ -107,8 +107,8 @@ WantedBy=multi-user.target
 Enable and start the service:
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now mcp-router
-sudo systemctl status mcp-router
+sudo systemctl enable --now mcg
+sudo systemctl status mcg
 ```
 
 ---
@@ -126,7 +126,7 @@ For Windows Server hosting and validation, the repository provides automation sc
 #### Quick IIS Deployment (PowerShell as Administrator):
 ```powershell
 # Deploy to IIS with Windows Authentication on Port 8080:
-.\scripts\windows\Deploy-IIS.ps1 -SiteName "McpRouter" -Port 8080 -EnableWindowsAuth
+.\scripts\windows\Deploy-IIS.ps1 -SiteName "ModelContextGateway" -Port 8080 -EnableWindowsAuth
 ```
 
 #### Quick Windows Service Lifecycle (PowerShell as Administrator):
@@ -142,7 +142,7 @@ For Windows Server hosting and validation, the repository provides automation sc
 
 ## 🔒 Reverse Proxy & SSL/TLS Configuration
 
-Because the router uses Server-Sent Events (`SSE`) for streaming JSON-RPC responses, reverse proxies must disable response buffering and preserve long-lived HTTP streams.
+Because the gateway uses Server-Sent Events (`SSE`) for streaming JSON-RPC responses, reverse proxies must disable response buffering and preserve long-lived HTTP streams.
 
 ### 1. Caddy Reverse Proxy (`Caddyfile`)
 
@@ -154,7 +154,7 @@ mcp.yourdomain.com {
     import forward_auth
 
     # Pass forward-auth user and group claims
-    reverse_proxy mcp-router:8080 {
+    reverse_proxy mcg:8080 {
         header_up Host {host}
         header_up X-Real-IP {remote_host}
         header_up X-Forwarded-For {remote_host}
@@ -210,28 +210,28 @@ server {
 
 ## 🗄️ Database Operations: Backup, Restore & Maintenance
 
-The router persistence tier manages 12 core tables across SQLite, MS SQL Server, and MySQL. For schema contracts and the complete Entity-Relationship Diagram, see [**Database Provider Support & Deployment Matrix (`docs/database-providers.md`)**](database-providers.md#unified-database-entity-relationship-diagram-erd).
+The gateway persistence tier manages 12 core tables across SQLite, MS SQL Server, and MySQL. For schema contracts and the complete Entity-Relationship Diagram, see [**Database Provider Support & Deployment Matrix (`docs/database-providers.md`)**](database-providers.md#unified-database-entity-relationship-diagram-erd).
 
-### 1. SQLite Provider (`Data Source=/data/mcp-router.db`)
+### 1. SQLite Provider (`Data Source=/data/mcg.db`)
 
 #### Safe Online Backup (Zero Downtime)
 SQLite locks during active transactions. Use the SQLite CLI online backup API to take a consistent snapshot:
 
 ```bash
 # Execute online backup without stopping the container
-docker compose exec mcp-router sqlite3 /data/mcp-router.db ".backup '/data/mcp-router-backup-$(date +%Y%m%d_%H%M%S).db'"
+docker compose exec mcg sqlite3 /data/mcg.db ".backup '/data/mcg-backup-$(date +%Y%m%d_%H%M%S).db'"
 ```
 
 #### Restoring SQLite Database
 ```bash
-# 1. Stop the router container
-docker compose stop mcp-router
+# 1. Stop the gateway container
+docker compose stop mcg
 
 # 2. Restore backup file
-cp /data/backups/mcp-router-backup-20260814.db /data/mcp-router.db
+cp /data/backups/mcg-backup-20260825.db /data/mcg.db
 
 # 3. Start container
-docker compose start mcp-router
+docker compose start mcg
 ```
 
 ---
@@ -240,19 +240,19 @@ docker compose start mcp-router
 
 #### Taking a Database Backup
 ```sql
-BACKUP DATABASE [McpRouter]
-TO DISK = N'/var/opt/mssql/backup/McpRouter_Full.bak'
+BACKUP DATABASE [ModelContextGateway]
+TO DISK = N'/var/opt/mssql/backup/ModelContextGateway_Full.bak'
 WITH FORMAT, INIT, COMPRESSION, STATS = 10;
 ```
 
 #### Restoring Database
 ```sql
 USE [master];
-ALTER DATABASE [McpRouter] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
-RESTORE DATABASE [McpRouter]
-FROM DISK = N'/var/opt/mssql/backup/McpRouter_Full.bak'
+ALTER DATABASE [ModelContextGateway] SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
+RESTORE DATABASE [ModelContextGateway]
+FROM DISK = N'/var/opt/mssql/backup/ModelContextGateway_Full.bak'
 WITH REPLACE;
-ALTER DATABASE [McpRouter] SET MULTI_USER;
+ALTER DATABASE [ModelContextGateway] SET MULTI_USER;
 ```
 
 ---
@@ -266,7 +266,7 @@ mysqldump -u mcp_user -p --single-transaction --routines --triggers --databases 
 
 #### Restoring Backup
 ```bash
-mysql -u mcp_user -p mcpmaster < /backups/mcpmaster_2026-08-14.sql
+mysql -u mcp_user -p mcpmaster < /backups/mcpmaster_2026-08-25.sql
 ```
 
 ---
@@ -283,8 +283,9 @@ curl -s http://10.0.0.10:8026/health | jq .
 Example JSON Response:
 ```json
 {
-  "status": "Healthy",
-  "version": "v4.12.2",
+  "status": "healthy",
+  "service": "ModelContextGateway",
+  "version": "5.0.0",
   "database": {
     "provider": "SQLite",
     "connected": true
@@ -304,10 +305,10 @@ Example JSON Response:
 
 ### 2. Prometheus Metrics (`GET /metrics`)
 Scrape Prometheus metrics for Grafana dashboards:
-* `mcp_router_active_sessions_total`: Current number of open client sessions.
-* `mcp_router_tool_execution_duration_seconds`: Histogram of tool execution latency.
-* `mcp_router_tool_executions_total{status="200"}`: Total tool execution count by status code.
-* `mcp_router_semantic_search_duration_seconds`: Latency of ONNX vector scoring.
+* `mcg_active_sessions_total`: Current number of open client sessions.
+* `mcg_tool_execution_duration_seconds`: Histogram of tool execution latency.
+* `mcg_tool_executions_total{status="200"}`: Total tool execution count by status code.
+* `mcg_semantic_search_duration_seconds`: Latency of ONNX vector scoring.
 
 ---
 
@@ -315,44 +316,44 @@ Scrape Prometheus metrics for Grafana dashboards:
 View live streaming container logs via Dozzle or Docker CLI:
 ```bash
 # Follow logs in real-time
-docker compose logs -f --tail=100 mcp-router
+docker compose logs -f --tail=100 mcg
 
 # Check for warnings or errors
-docker compose logs mcp-router | grep -E "WARN|FAIL|ERR"
+docker compose logs mcg | grep -E "WARN|FAIL|ERR"
 ```
 
-*Note: The router's built-in `PiiSanitizer` automatically scrubs Bearer tokens, passwords, and API keys before logging.*
+*Note: The gateway's built-in `PiiSanitizer` automatically scrubs Bearer tokens, passwords, and API keys before logging.*
 
 ---
 
 ## 🔄 Disaster Recovery & Secret Rotation
 
 ### 1. AES-256-GCM Master Key Rotation
-If the master encryption key (`Security__MasterKey`) must be rotated:
+If the master encryption key (`MCG_MASTER_KEY`) must be rotated:
 1. Export unencrypted backup or use the internal migration utility:
    ```bash
-   dotnet run --project mcp-router.csproj -- re-encrypt-master-key --old-key <OLD_HEX> --new-key <NEW_HEX>
+   dotnet run --project ModelContextGateway.csproj -- re-encrypt-master-key --old-key <OLD_HEX> --new-key <NEW_HEX>
    ```
-2. Update the `Security__MasterKey` environment variable in `docker-compose.yaml`.
-3. Restart the container: `docker compose up -d mcp-router`.
+2. Update the `MCG_MASTER_KEY` environment variable in `docker-compose.yaml`.
+3. Restart the container: `docker compose up -d mcg`.
 
 ### 2. HashiCorp Vault AppRole Credential Rotation
 1. Generate new `secret-id` in Vault:
    ```bash
-   vault write -f auth/approle/role/mcp-router/secret-id
+   vault write -f auth/approle/role/mcg/secret-id
    ```
-2. Navigate to **`Settings`** -> **`Secret Providers`** tab in the MCP Router UI.
+2. Navigate to **`Settings`** -> **`Secret Providers`** tab in the Model Context Gateway UI.
 3. Paste the new `Secret ID` and click **`Save Provider Settings`**.
-4. The router dynamically invalidates existing cached tokens and authenticates with the new credentials without dropping active client connections.
+4. The gateway dynamically invalidates existing cached tokens and authenticates with the new credentials without dropping active client connections.
 
 ### 3. Emergency Container Rollback
 If a newly deployed container version encounters issues:
 ```bash
 # 1. Update tag in docker-compose.yaml to previous stable release
-sed -i 's/v4.12.2/v4.12.1/g' docker-compose.yaml
+sed -i 's/v5.0.0/v4.35.0/g' docker-compose.yaml
 
 # 2. Re-create container
-docker compose up -d --force-recreate mcp-router
+docker compose up -d --force-recreate mcg
 
 # 3. Verify health
 curl -f http://localhost:8026/health

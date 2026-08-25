@@ -3,7 +3,7 @@ using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace McpRouter.Components.AppKeys
+namespace ModelContextGateway.Components.AppKeys
 {
     [ApiController]
     [Route("api/[controller]")]

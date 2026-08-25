@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace McpRouter.Infrastructure.Persistence
+namespace ModelContextGateway.Infrastructure.Persistence
 {
     public interface ISqlDialectStrategy
     {

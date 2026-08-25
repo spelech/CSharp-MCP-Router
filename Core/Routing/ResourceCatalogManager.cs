@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     /// <summary>
     /// Manages resource catalog searching and template pattern matching for MCP resources.

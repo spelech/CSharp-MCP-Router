@@ -51,7 +51,7 @@ jobs:
 
       - name: Build C# codebase
         if: matrix.language == 'csharp'
-        run: dotnet build McpRouter.slnx --configuration Release
+        run: dotnet build ModelContextGateway.slnx --configuration Release
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4

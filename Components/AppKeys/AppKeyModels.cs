@@ -1,4 +1,4 @@
-namespace McpRouter.Components.AppKeys
+namespace ModelContextGateway.Components.AppKeys
 {
     public class CreateAppKeyRequest
     {

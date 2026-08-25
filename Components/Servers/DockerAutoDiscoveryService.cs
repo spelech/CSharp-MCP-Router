@@ -2,7 +2,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using Dapper;
 
-namespace McpRouter.Components.Servers
+namespace ModelContextGateway.Components.Servers
 {
     public class DockerAutoDiscoveryService : BackgroundService
     {

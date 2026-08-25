@@ -10,7 +10,7 @@ describe('Header component', () => {
     mockApiResponse('/health', { version: '4.5.6', status: 'healthy' });
   });
 
-  it('renders title and version badge', async () => {
+  it('renders title, MCG badge, subtitle, and version badge', async () => {
     mockApiResponse('/api/me', {
       authenticated: true,
       username: 'admin',
@@ -21,7 +21,9 @@ describe('Header component', () => {
       render(<Header />);
     });
 
-    expect(screen.getByText('MCP Gateway')).toBeInTheDocument();
+    expect(screen.getByText('Model Context Gateway')).toBeInTheDocument();
+    expect(screen.getByText('MCG')).toBeInTheDocument();
+    expect(screen.getByText(/High-Performance MCP Aggregator & Semantic Gateway/i)).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText('v4.5.6')).toBeInTheDocument();
     });

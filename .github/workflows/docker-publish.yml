@@ -14,7 +14,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: spelech/csharp-mcp-router
+  IMAGE_NAME: spelech/model-context-gateway
 
 jobs:
   build-and-push:

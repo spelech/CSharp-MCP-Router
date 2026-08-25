@@ -175,10 +175,10 @@ To execute pairwise test theories and validation locally:
 
 ```bash
 # Run backend pairwise contract and integration theories
-CI=true dotnet test McpRouter.slnx --filter "FullyQualifiedName~PairwiseIntegrationMatrixTests"
+CI=true dotnet test ModelContextGateway.slnx --filter "FullyQualifiedName~PairwiseIntegrationMatrixTests"
 
 # Run all backend tests
-CI=true dotnet test McpRouter.slnx
+CI=true dotnet test ModelContextGateway.slnx
 
 # Run frontend lint, build, and E2E specs
 cd frontend

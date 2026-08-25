@@ -10,7 +10,7 @@ export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | n
   const settings = await apiRequest<any>('/api/settings');
   if (!settings) return null;
   return {
-    dashboardTitle: settings.dashboardTitle || 'MCP Gateway',
+    dashboardTitle: settings.dashboardTitle || 'Model Context Gateway',
     dashboardIcon: settings.dashboardIcon || 'fa-solid fa-network-wired',
     embeddingProvider: settings.embeddingProvider || 'local',
     embeddingModelDir: settings.embeddingModelDir || 'data/models',

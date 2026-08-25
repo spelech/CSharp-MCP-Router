@@ -1,16 +1,11 @@
-using System.Reflection;
-
-namespace McpRouter.Extensions
+namespace ModelContextGateway.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
-        private static readonly string AppVersion =
-            Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.6";
-
-        public static void ConfigureMcpRouterPipeline(this WebApplication app)
+        public static void ConfigureModelContextGatewayPipeline(this WebApplication app)
         {
             var config = app.Services.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
-            var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("McpRouter.Startup");
+            var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("ModelContextGateway.Startup");
 
             var requireTrusted = config.GetValue<bool>("Oidc:RequireTrustedProxy", true);
             if (!requireTrusted)
@@ -53,10 +48,10 @@ namespace McpRouter.Extensions
                 await next();
             });
 
-            app.UseMiddleware<McpRouter.Middleware.McpAuthorizationSpecMiddleware>();
+            app.UseMiddleware<ModelContextGateway.Middleware.McpAuthorizationSpecMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseMiddleware<McpRouter.Middleware.McpDualSpecMiddleware>();
+            app.UseMiddleware<ModelContextGateway.Middleware.McpDualSpecMiddleware>();
             app.MapControllers();
 
             // Request logging middleware (metadata only — never headers/body/query, which carry credentials)
@@ -84,10 +79,10 @@ namespace McpRouter.Extensions
             // ----------------------------------------------------
             // SYSTEM/HEALTH ENDPOINTS
             // ----------------------------------------------------
-            app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = AppVersion }));
-            app.MapGet("/api/config/branding", async (McpRouter.Infrastructure.Persistence.ISettingRepository settingsRepo) =>
+            app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = GatewayMetadata.DefaultName, version = GatewayMetadata.Version }));
+            app.MapGet("/api/config/branding", async (ModelContextGateway.Infrastructure.Persistence.ISettingRepository settingsRepo) =>
             {
-                var settings = await settingsRepo.GetSettingsAsync() ?? new McpRouter.Models.RouterSettings();
+                var settings = await settingsRepo.GetSettingsAsync() ?? new ModelContextGateway.Models.RouterSettings();
                 return Results.Ok(new
                 {
                     title = settings.DashboardTitle,

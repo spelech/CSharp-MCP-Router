@@ -65,7 +65,7 @@ The repository uses the following domain boundaries:
 │   ├── src/components/         # Domain-decomposed UI views, modals, and tabs
 │   ├── src/shared/stores/      # Zustand state management stores
 │   └── src/test/               # Vitest component, store, and unit test suites
-├── McpRouter.Tests/            # 500+ xUnit integration, security, and contract tests
+├── ModelContextGateway.Tests/   # 600+ xUnit integration, security, and contract tests
 ├── scripts/                    # Release verification, version bumping, and DB DDL scripts
 └── docs/                       # Architectural specifications and user guides
 ```
@@ -78,22 +78,22 @@ The repository uses the following domain boundaries:
 
 1. **Restore dependencies & build**:
    ```bash
-   dotnet restore McpRouter.slnx
-   dotnet build McpRouter.slnx --configuration Debug
+   dotnet restore ModelContextGateway.slnx
+   dotnet build ModelContextGateway.slnx --configuration Debug
    ```
 
 2. **Run the gateway locally**:
    ```bash
    # Runs on http://localhost:8080 with ephemeral SQLite database
-   dotnet run --project mcp-router.csproj
+   dotnet run --project ModelContextGateway.csproj
    ```
 
 3. **Configure environment overrides**:
    ```bash
    # Custom database path and admin bypass SID
-   ROUTER_DATABASE_PATH="./data/dev.db" \
-   ROUTER_MASTER_KEY="dev-master-key-32-chars-long!" \
-   dotnet run --project mcp-router.csproj
+   MCG_DATABASE_PATH="./data/dev.db" \
+   MCG_MASTER_KEY="dev-master-key-32-chars-long!" \
+   dotnet run --project ModelContextGateway.csproj
    ```
 
 ### Frontend (React 19 / Vite / TypeScript)
@@ -121,14 +121,14 @@ The repository uses the following domain boundaries:
 
 ### Backend Test Suite
 
-The C# suite includes 500+ unit, integration, and security contract tests:
+The C# suite includes 600+ unit, integration, and security contract tests:
 
 ```bash
 # Run all backend tests
-CI=true dotnet test McpRouter.slnx --configuration Release
+CI=true dotnet test ModelContextGateway.slnx --configuration Release
 
 # Collect code coverage
-CI=true dotnet test McpRouter.slnx --configuration Release --collect:"XPlat Code Coverage"
+CI=true dotnet test ModelContextGateway.slnx --configuration Release --collect:"XPlat Code Coverage"
 ```
 
 ### Frontend Vitest Suite
@@ -176,7 +176,7 @@ dotnet run --project scripts/CatalogGenerator -- --verify-only
 
 1. **C# Backend Formatting & Roslyn Analyzers**:
    ```bash
-   dotnet format McpRouter.slnx --verify-no-changes
+   dotnet format ModelContextGateway.slnx --verify-no-changes
    ```
    Rules are defined in `.editorconfig` and `Directory.Build.props`.
 
@@ -195,7 +195,7 @@ dotnet run --project scripts/CatalogGenerator -- --verify-only
 
 Every release, pull request, and commit to `main` must synchronize the version number across **four mandatory locations**:
 
-1. **`mcp-router.csproj`**:
+1. **`ModelContextGateway.csproj`**:
    - `<Version>X.Y.Z</Version>`
    - `<AssemblyVersion>X.Y.Z.0</AssemblyVersion>`
    - `<FileVersion>X.Y.Z.0</FileVersion>`
@@ -218,13 +218,13 @@ The release verification engine is located at `scripts/verify_release.py` with a
 
 ```
 ==================================================================
-  🛡️  MCP Router - Release & Quality Verification Engine  🛡️  
+  🛡️  Model Context Gateway - Release & Quality Verification Engine  🛡️  
 ==================================================================
   Repository Root: /containers/dev/csharp-mcp-router
 
 🏷️  1. Version Synchronization & Consistency
 ------------------------------------------------------------------
-  [PASS] Canonical Version (4.12.2) in mcp-router.csproj
+  [PASS] Canonical Version in ModelContextGateway.csproj
   [PASS] Csproj <AssemblyVersion> Alignment
   [PASS] Csproj <FileVersion> Alignment
   [PASS] React Store Fallback Version (frontend/src/shared/stores/useUserStore.ts)

@@ -1,4 +1,4 @@
-namespace McpRouter.Infrastructure.Identity
+namespace ModelContextGateway.Infrastructure.Identity
 {
     /// <summary>
     /// Represents the authenticated user's identity context, including username, auth type, and group SIDs.

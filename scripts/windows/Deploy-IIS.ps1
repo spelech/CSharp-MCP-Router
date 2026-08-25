@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Automated IIS Deployment and Configuration Script for C# MCP Router Gateway.
 
@@ -175,7 +175,7 @@ if (-not $SkipBuild -and -not $SkipFrontend) {
 # ---------------------------------------------------------------------------
 if (-not $SkipBuild) {
     Write-Step "Publishing Backend (.NET 10 Web App)..."
-    $csprojPath = Join-Path $RepoRoot "mcp-router.csproj"
+    $csprojPath = Join-Path $RepoRoot "ModelContextGateway.csproj"
     if (-not (Test-Path $csprojPath)) {
         Write-Error "Project file not found at $csprojPath."
         exit 1
@@ -333,7 +333,7 @@ while ($retryCount -lt $maxRetries -and -not $healthy) {
     try {
         Write-Host "Probing $healthUrl (Attempt $retryCount of $maxRetries)..." -ForegroundColor DarkGray
         $response = Invoke-RestMethod -Uri $healthUrl -Method Get -TimeoutSec 5 -ErrorAction Stop
-        if ($response.status -eq "healthy" -or $response.service -eq "McpRouter") {
+        if ($response.status -eq "healthy" -or $response.service -eq "ModelContextGateway") {
             $healthy = $true
             Write-Success "Health check passed! Response: $($response | ConvertTo-Json -Compress)"
         }

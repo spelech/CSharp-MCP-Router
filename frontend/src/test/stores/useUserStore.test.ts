@@ -8,7 +8,8 @@ describe('useUserStore', () => {
   it('should initialize with default values', () => {
     const state = useUserStore.getState();
     expect(state.user).toBeNull();
-    expect(state.version).toBe('4.5.6');
+    expect(state.version).toBe('5.0.0');
+    expect(state.service).toBe('ModelContextGateway');
     expect(state.isLoadingUser).toBe(false);
   });
 
@@ -79,22 +80,24 @@ describe('useUserStore', () => {
   });
 
   describe('loadVersion', () => {
-    it('successfully updates version from /health endpoint', async () => {
-      mockApiResponse('/health', { version: '4.10.2', status: 'healthy' });
+    it('successfully updates version and service from /health endpoint', async () => {
+      mockApiResponse('/health', { version: '5.1.0', service: 'ModelContextGateway', status: 'healthy' });
 
       await useUserStore.getState().loadVersion();
 
-      expect(useUserStore.getState().version).toBe('4.10.2');
+      expect(useUserStore.getState().version).toBe('5.1.0');
+      expect(useUserStore.getState().service).toBe('ModelContextGateway');
     });
 
     it('keeps existing fallback version on error', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      useUserStore.setState({ version: '4.5.6' });
+      useUserStore.setState({ version: '5.0.0', service: 'ModelContextGateway' });
       mockApiResponse('/health', 'Service Unavailable', 503, 'Service Unavailable');
 
       await useUserStore.getState().loadVersion();
 
-      expect(useUserStore.getState().version).toBe('4.5.6');
+      expect(useUserStore.getState().version).toBe('5.0.0');
+      expect(useUserStore.getState().service).toBe('ModelContextGateway');
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();
     });

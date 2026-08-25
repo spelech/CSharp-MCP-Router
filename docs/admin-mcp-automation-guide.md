@@ -1,29 +1,29 @@
 # Admin MCP Automation & Provider Configuration Guide
 
-This guide provides developers, DevOps engineers, and autonomous AI coding agents with the architectural blueprint, safe defaults, and automation playbooks to configure and provision **CSharp-MCP-Router** from a blank slate.
+This guide provides developers, DevOps engineers, and autonomous AI coding agents with the architectural blueprint, safe defaults, and automation playbooks to configure and provision **Model Context Gateway (MCG)** from a blank slate.
 
 ---
 
 ## 🚀 1. Architecture & Safe Defaults
 
-When `CSharp-MCP-Router` boots in a fresh environment without existing configuration databases, it automatically provisions a safe, zero-dependency baseline:
+When **Model Context Gateway** boots in a fresh environment without existing configuration databases, it automatically provisions a safe, zero-dependency baseline:
 
 ```
 +---------------------------------------------------------------------------------------+
-|                                    CSharp-MCP-Router                                  |
+|                                Model Context Gateway (MCG)                            |
 +---------------------------------------------------------------------------------------+
 |  Out-of-the-Box Safe Defaults:                                                        |
-|  - Database: SQLite (./data/mcp_router.db auto-created & migrated)                   |
-|  - Encryption: AES-256-GCM using ROUTER_MASTER_KEY                                    |
+|  - Database: SQLite (./data/mcg.db auto-created & migrated)                           |
+|  - Encryption: AES-256-GCM using MCG_MASTER_KEY                                       |
 |  - Network Trust: Loopback only (127.0.0.1, ::1) via Admin:StandaloneAllowedNetworks  |
-|  - Admin Key: mcp-global-admin-default-cli-key-99 (Owner: admin, Scopes: ["all"])    |
+|  - Admin Key: mcp-adm-prod-bootstrap-token-99 (Owner: admin, Scopes: ["all"])        |
 |  - Admin Endpoint: http://<host>:8080/admin/sse (JSON-RPC 2.0)                        |
 +---------------------------------------------------------------------------------------+
                                            |
                                            v
 +---------------------------------------------------------------------------------------+
 |                                Autonomous Automation                                  |
-|  - AI Agent Skill: .agents/skills/mcp-router-admin/SKILL.md                           |
+|  - AI Agent Skill: .agents/skills/mcg-admin/SKILL.md                                  |
 |  - Non-Interactive Scripts: cURL (Bash), PowerShell (Windows), Python                 |
 |  - 10 Consolidated MCP Tools covering 100% of Gateway Admin Operations                |
 +---------------------------------------------------------------------------------------+
@@ -33,17 +33,17 @@ When `CSharp-MCP-Router` boots in a fresh environment without existing configura
 
 | Parameter | Default Value | Description |
 | :--- | :--- | :--- |
-| **`DB_PROVIDER`** | `sqlite` | Default storage provider. Automatically creates `./data/mcp_router.db`. |
-| **Master Encryption Key** | `./data/.master.key` (Auto-Generated) or `ROUTER_MASTER_KEY` / `ROUTER_MASTER_KEY_FILE` | Master key used to encrypt all provider credentials and API tokens at rest (AES-256-GCM). |
+| **`DB_PROVIDER`** | `sqlite` | Default storage provider. Automatically creates `./data/mcg.db`. |
+| **Master Encryption Key** | `./data/.master.key` (Auto-Generated) or `MCG_MASTER_KEY` / `MCG_MASTER_KEY_FILE` | Master key used to encrypt all provider credentials and API tokens at rest (AES-256-GCM). |
 | **`Admin:StandaloneAllowedNetworks`** | `127.0.0.1, ::1` | CIDR allowlist for admin endpoints when no external IDP is configured. |
-| **Default Admin Key** | `mcp-global-admin-default-cli-key-99` | Seeded in DB on first boot to allow instant administrative connection. |
+| **Default Admin Key** | Seeded Base62 token (`mcp-adm-...`) | Seeded in DB on first boot to allow instant administrative connection. |
 | **`CORS_ALLOWED_ORIGINS`** | `http://localhost:3000, http://localhost:8080` | Allowed web dashboard CORS origins. |
 
 ---
 
 ## 🔑 2. Connecting to the Admin MCP Server
 
-The Admin MCP Server listens on `/admin/sse` (and accepts messages on `/admin/message`).
+The Admin MCP Server listens on `/admin/sse` or `/mcg-admin/sse` (and accepts messages on `/admin/message`).
 
 ### AI Agent Configuration (Claude, Cursor, Cline, Windsurf, Antigravity)
 
@@ -52,10 +52,10 @@ Add the following to your AI client configuration file:
 ```json
 {
   "mcpServers": {
-    "mcp-router-admin": {
+    "mcg-admin": {
       "url": "http://localhost:8080/admin/sse",
       "headers": {
-        "Authorization": "Bearer mcp-global-admin-default-cli-key-99"
+        "Authorization": "Bearer mcp-adm-bootstrap-token-99"
       }
     }
   }
@@ -120,7 +120,7 @@ Used when running behind Nginx, Traefik, Caddy, or an ingress controller that te
     "userHeader": "X-Forwarded-User",
     "groupsHeader": "X-Forwarded-Groups",
     "isEnabled": true,
-    "configJson": "{\"authority\":\"https://keycloak.internal.corp/realms/master\",\"clientId\":\"mcp-router\",\"requireHttps\":true,\"groupClaim\":\"groups\"}"
+    "configJson": "{\"authority\":\"https://keycloak.internal.corp/realms/master\",\"clientId\":\"mcg\",\"requireHttps\":true,\"groupClaim\":\"groups\"}"
   }
 }
 ```
@@ -154,7 +154,7 @@ Used when running behind Nginx, Traefik, Caddy, or an ingress controller that te
     "server": "dc01.internal.corp",
     "port": 636,
     "useSsl": true,
-    "bindDn": "CN=svc-mcp-router,OU=ServiceAccounts,DC=internal,DC=corp",
+    "bindDn": "CN=svc-mcg,OU=ServiceAccounts,DC=internal,DC=corp",
     "bindPassword": "ServiceAccountPassword123!"
   }
 }
@@ -169,7 +169,7 @@ Used when running behind Nginx, Traefik, Caddy, or an ingress controller that te
     "providerName": "ActiveDirectory",
     "displayName": "Corporate Active Directory",
     "isEnabled": true,
-    "configJson": "{\"server\":\"dc01.internal.corp\",\"port\":636,\"useSsl\":true,\"domain\":\"INTERNAL\",\"baseDn\":\"DC=internal,DC=corp\",\"bindDn\":\"CN=svc-mcp-router,OU=ServiceAccounts,DC=internal,DC=corp\",\"bindPassword\":\"ServiceAccountPassword123!\"}"
+    "configJson": "{\"server\":\"dc01.internal.corp\",\"port\":636,\"useSsl\":true,\"domain\":\"INTERNAL\",\"baseDn\":\"DC=internal,DC=corp\",\"bindDn\":\"CN=svc-mcg,OU=ServiceAccounts,DC=internal,DC=corp\",\"bindPassword\":\"ServiceAccountPassword123!\"}"
   }
 }
 ```
@@ -179,7 +179,7 @@ Used when running behind Nginx, Traefik, Caddy, or an ingress controller that te
 ### 3.2 Secret Providers (`save_secret` & `test_vault`)
 
 #### A. Built-in AES-256-GCM Master Key (Default)
-By default, all secrets (API keys, custom headers, tokens) associated with backend MCP servers are automatically encrypted at rest in the database using the 256-bit `ROUTER_MASTER_KEY`.
+By default, all secrets (API keys, custom headers, tokens) associated with backend MCP servers are automatically encrypted at rest in the database using the 256-bit `MCG_MASTER_KEY`.
 
 #### B. HashiCorp Vault KV v2 (AppRole Authentication)
 1. **Test Vault Connection**:
@@ -215,7 +215,7 @@ By default, all secrets (API keys, custom headers, tokens) associated with backe
 ## 👥 4. Group Mappings & Access Policies
 
 ### 4.1 Group Mappings (`manage_group_mappings`)
-Map external SSO groups, roles, or Active Directory domain SIDs to internal router roles:
+Map external SSO groups, roles, or Active Directory domain SIDs to internal gateway roles:
 
 ```json
 {
@@ -323,7 +323,7 @@ Directly verify backend tool execution through the gateway:
     "serverId": "github",
     "toolName": "search_repositories",
     "arguments": {
-      "query": "mcp-router"
+      "query": "model-context-gateway"
     }
   }
 }

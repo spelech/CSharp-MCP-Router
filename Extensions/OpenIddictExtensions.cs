@@ -1,10 +1,9 @@
 using System.Security.Claims;
-using McpRouter.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using OpenIddict.Validation.AspNetCore;
 
-namespace McpRouter.Extensions
+namespace ModelContextGateway.Extensions
 {
     public static class OpenIddictExtensions
     {
@@ -97,8 +96,18 @@ namespace McpRouter.Extensions
                     options.AllowAuthorizationCodeFlow();
                     options.AllowRefreshTokenFlow();
 
-                    var certPath = config["OpenIddict:CertificatePath"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PATH");
-                    var certPass = config["OpenIddict:CertificatePassword"] ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD");
+                    var certPath = config["MCG_JWT_CERT_PATH"]
+                        ?? config["MCG_OPENIDDICT_CERT_PATH"]
+                        ?? config["OpenIddict:CertificatePath"]
+                        ?? Environment.GetEnvironmentVariable("MCG_JWT_CERT_PATH")
+                        ?? Environment.GetEnvironmentVariable("MCG_OPENIDDICT_CERT_PATH")
+                        ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PATH");
+                    var certPass = config["MCG_JWT_CERT_PASSWORD"]
+                        ?? config["MCG_OPENIDDICT_CERT_PASSWORD"]
+                        ?? config["OpenIddict:CertificatePassword"]
+                        ?? Environment.GetEnvironmentVariable("MCG_JWT_CERT_PASSWORD")
+                        ?? Environment.GetEnvironmentVariable("MCG_OPENIDDICT_CERT_PASSWORD")
+                        ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD");
 
                     if (!string.IsNullOrEmpty(certPath) && System.IO.File.Exists(certPath))
                     {

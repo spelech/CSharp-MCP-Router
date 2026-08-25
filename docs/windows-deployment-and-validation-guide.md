@@ -6,7 +6,7 @@
 ![DPAPI Protected](https://img.shields.io/badge/Secrets-Registry%20DPAPI-orange?style=for-the-badge&logo=shield&logoColor=white)
 ![Living Catalog](https://img.shields.io/badge/Quality%20Gate-Verified%20Zero--Drift-green?style=for-the-badge)
 
-Comprehensive, production-grade guide for deploying, configuring, validating, and operating the **C# MCP Router Gateway (`CSharp-MCP-Router`)** natively on Microsoft Windows Server and Windows 10/11 environments.
+Comprehensive, production-grade guide for deploying, configuring, validating, and operating the **Model Context Gateway (MCG)** natively on Microsoft Windows Server and Windows 10/11 environments.
 
 ---
 
@@ -55,7 +55,7 @@ Comprehensive, production-grade guide for deploying, configuring, validating, an
 
 ### Architectural Topology & Gateway Model
 
-The `CSharp-MCP-Router` acts as an enterprise gateway and semantic proxy for the Model Context Protocol (MCP). On Windows Server, it natively bridges Windows infrastructure (Active Directory, DPAPI, IIS, Windows Services) with heterogeneous downstream MCP servers.
+The **Model Context Gateway (MCG)** acts as an enterprise gateway and semantic proxy for the Model Context Protocol (MCP). On Windows Server, it natively bridges Windows infrastructure (Active Directory, DPAPI, IIS, Windows Services) with heterogeneous downstream MCP servers.
 
 ```mermaid
 flowchart TD
@@ -249,7 +249,7 @@ The repository includes a comprehensive deployment automation script: [`scripts/
 .\scripts\windows\Deploy-IIS.ps1 -SiteName "McpRouter" -Port 80 -HostName "mcp.company.internal" -EnableWindowsAuth
 
 # Self-Contained Deployment to Custom Directory:
-.\scripts\windows\Deploy-IIS.ps1 -PhysicalPath "D:\Apps\McpRouter" -Port 8443 -SelfContained
+.\scripts\windows\Deploy-IIS.ps1 -PhysicalPath "D:\Apps\ModelContextGateway" -Port 8443 -SelfContained
 ```
 
 ---
@@ -274,7 +274,7 @@ The IIS deployment uses an optimized `web.config` file derived from [`scripts/wi
            Completely disables IIS response buffering so streaming chunks flush immediately.
       -->
       <aspNetCore processPath="dotnet"
-                  arguments=".\mcp-router.dll"
+                  arguments=".\mcg.dll"
                   stdoutLogEnabled="false"
                   stdoutLogFile=".\logs\stdout"
                   hostingModel="inprocess"
@@ -283,7 +283,7 @@ The IIS deployment uses an optimized `web.config` file derived from [`scripts/wi
           <environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" />
           <environmentVariable name="DB_PROVIDER" value="sqlite" />
           <!-- Optional: Uncomment for SQL Server Windows Authentication:
-          <environmentVariable name="ConnectionStrings__McpDatabase" value="Server=sql.domain.local;Database=McpRouterDb;Integrated Security=True;TrustServerCertificate=True;" />
+          <environmentVariable name="ConnectionStrings__McpDatabase" value="Server=sql.domain.local;Database=McpGatewayDb;Integrated Security=True;TrustServerCertificate=True;" />
           -->
         </environmentVariables>
       </aspNetCore>
@@ -343,9 +343,9 @@ To keep upstream connections persistently alive, configure the following IIS App
 1. **.NET CLR Version**: Set to `No Managed Code` (`""`). ANCM loads the .NET Core runtime directly.
 2. **Start Mode**: Set to `AlwaysRunning`. Prevents IIS from placing the worker process to sleep.
 3. **Idle Time-out**: Set to `0` (Disabled). Ensures the gateway remains active during quiet periods without dropping downstream MCP transport pipes.
-4. **Permissions**: The AppPool identity (`IIS AppPool\McpRouterAppPool`) must have read/write access to the deployment folder and the `logs` subdirectory:
+4. **Permissions**: The AppPool identity (`IIS AppPool\McgAppPool`) must have read/write access to the deployment folder and the `logs` subdirectory:
    ```powershell
-   icacls "C:\inetpub\mcp-router" /grant "IIS AppPool\McpRouterAppPool:(OI)(CI)M" /T /Q
+   icacls "C:\inetpub\mcg" /grant "IIS AppPool\McgAppPool:(OI)(CI)M" /T /Q
    ```
 
 ---
@@ -357,15 +357,15 @@ For air-gapped systems or environments where automated scripts cannot be run dir
 1. Build and publish the application:
    ```powershell
    cd frontend; npm run build; cd ..
-   dotnet publish mcp-router.csproj -c Release -o C:\inetpub\mcp-router
+   dotnet publish ModelContextGateway.csproj -c Release -o C:\inetpub\mcg
    ```
-2. Copy `scripts\windows\web.config.example` to `C:\inetpub\mcp-router\web.config`.
+2. Copy `scripts\windows\web.config.example` to `C:\inetpub\mcg\web.config`.
 3. Open **IIS Manager (`inetmgr`)**:
-   - Create Application Pool: `McpRouterAppPool` -> .NET CLR Version: `No Managed Code`.
+   - Create Application Pool: `McgAppPool` -> .NET CLR Version: `No Managed Code`.
    - In AppPool **Advanced Settings**: set `Start Mode` = `AlwaysRunning`, `Idle Time-out (minutes)` = `0`.
-   - Add Website: Site Name = `McpRouter`, Physical Path = `C:\inetpub\mcp-router`, Port = `8080`.
+   - Add Website: Site Name = `ModelContextGateway`, Physical Path = `C:\inetpub\mcg`, Port = `8080`.
    - Navigate to **Authentication**: Enable `Windows Authentication` and `Anonymous Authentication`.
-4. Grant filesystem permissions to `IIS AppPool\McpRouterAppPool`.
+4. Grant filesystem permissions to `IIS AppPool\McgAppPool`.
 
 ---
 
@@ -455,7 +455,7 @@ For local development, testing, or ad-hoc validation on Windows:
 
 ```powershell
 # Run from repository root in Development mode:
-dotnet run --project mcp-router.csproj --urls "http://localhost:5000"
+dotnet run --project ModelContextGateway.csproj --urls "http://localhost:5000"
 ```
 
 ### Command-Line Overrides & Ports
@@ -464,8 +464,8 @@ dotnet run --project mcp-router.csproj --urls "http://localhost:5000"
 # Run published binary in Production mode:
 $env:ASPNETCORE_ENVIRONMENT="Production"
 $env:DB_PROVIDER="sqlite"
-$env:ROUTER_SECRET="your_32_char_secure_hex_master_key_here"
-.\bin\Release\net10.0\win-x64\publish\mcp-router.exe --urls "http://0.0.0.0:8080"
+$env:MCG_MASTER_KEY="your_32_char_secure_hex_master_key_here"
+.\bin\Release\net10.0\win-x64\publish\mcg.exe --urls "http://0.0.0.0:8080"
 ```
 
 ---
@@ -752,20 +752,20 @@ Configure Prometheus to scrape `GET /metrics`:
 ### Logging Architecture (IIS, Stdout, Windows Event Log)
 
 1. **IIS W3C Logs**: Located at `C:\inetpub\logs\LogFiles\W3SVC*`.
-2. **ASP.NET Core Stdout Logs**: Enable in `web.config` (`stdoutLogEnabled="true"`) to log unhandled crashes to `C:\inetpub\mcp-router\logs\stdout\*.log`.
-3. **Windows Event Log**: Service startup events and catastrophic unhandled exceptions are logged under **Event Viewer -> Windows Logs -> Application** (Source: `IIS AspNetCore Module V2` or `McpRouter`).
+2. **ASP.NET Core Stdout Logs**: Enable in `web.config` (`stdoutLogEnabled="true"`) to log unhandled crashes to `C:\inetpub\mcg\logs\stdout\*.log`.
+3. **Windows Event Log**: Service startup events and catastrophic unhandled exceptions are logged under **Event Viewer -> Windows Logs -> Application** (Source: `IIS AspNetCore Module V2` or `ModelContextGateway`).
 
 ### Database Backup & Recovery on Windows
 
 1. **SQLite Provider**:
    ```powershell
    # Safe online backup without locking:
-   sqlite3 "C:\inetpub\mcp-router\mcp-router.db" ".backup 'C:\backups\mcp-router-backup.db'"
+   sqlite3 "C:\inetpub\mcg\mcg.db" ".backup 'C:\backups\mcg-backup.db'"
    ```
 2. **Microsoft SQL Server Provider**:
    ```sql
-   BACKUP DATABASE [McpRouterDb]
-   TO DISK = N'C:\backups\McpRouterDb_Full.bak'
+   BACKUP DATABASE [McpGatewayDb]
+   TO DISK = N'C:\backups\McpGatewayDb_Full.bak'
    WITH FORMAT, INIT, COMPRESSION, STATS = 10;
    ```
 
@@ -796,7 +796,7 @@ Configure Prometheus to scrape `GET /metrics`:
    - Secrets protected with `DataProtectionScope.CurrentUser` can only be decrypted by the user who encrypted them.
    - Secrets must be encrypted using `DataProtectionScope.LocalMachine` (default in `Set-RegistrySecrets.ps1 -Encrypt`).
 2. **Application Pool / Service Account Permissions**:
-   - When running under `IIS AppPool\McpRouterAppPool` or `NT AUTHORITY\NetworkService`, verify that the account has access to the machine key container (`C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys`).
+   - When running under `IIS AppPool\McgAppPool` or `NT AUTHORITY\NetworkService`, verify that the account has access to the machine key container (`C:\ProgramData\Microsoft\Crypto\RSA\MachineKeys`).
 
 ---
 
@@ -827,7 +827,7 @@ Configure Prometheus to scrape `GET /metrics`:
    ```powershell
    Get-NetTCPConnection -LocalPort 8080 | Select-Object LocalAddress, LocalPort, OwningProcess
    ```
-2. If another service is listening, either stop that service or reconfigure MCP Router to use an alternative port:
+2. If another service is listening, either stop that service or reconfigure gateway to use an alternative port:
    ```powershell
    .\scripts\windows\Setup-WindowsService.ps1 -Action Restart -Port 8090
    ```
@@ -845,4 +845,4 @@ Configure Prometheus to scrape `GET /metrics`:
    - Set .NET CLR Version in AppPool settings to `No Managed Code`.
 3. **Diagnose via Stdout Logs**:
    - Edit `web.config`: set `stdoutLogEnabled="true"`.
-   - Re-run the request and inspect the generated log in `C:\inetpub\mcp-router\logs\stdout\`.
+   - Re-run the request and inspect the generated log in `C:\inetpub\mcg\logs\stdout\`.

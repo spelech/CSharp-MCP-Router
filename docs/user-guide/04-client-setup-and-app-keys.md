@@ -109,11 +109,11 @@ For CLI coding agents and autonomous workflows:
 
 ```bash
 # Export environment variable
-export MCP_ROUTER_URL="http://10.0.0.10:8026/sse"
-export MCP_ROUTER_KEY="mcp_app_key_your_generated_secret_key_here"
+export MCG_URL="http://10.0.0.10:8026/sse"
+export MCG_KEY="mcp-adm-your_generated_secret_key_here"
 
 # Connect via Antigravity CLI
-agy mcp connect --url "$MCP_ROUTER_URL" --header "X-App-Key: $MCP_ROUTER_KEY"
+agy mcp connect --url "$MCG_URL" --header "X-App-Key: $MCG_KEY"
 ```
 
 ---

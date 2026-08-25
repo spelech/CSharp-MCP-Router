@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>mcg</AssemblyName>
+    <RootNamespace>ModelContextGateway</RootNamespace>
+    <Version>5.0.0</Version>
+    <AssemblyVersion>5.0.0</AssemblyVersion>
+    <FileVersion>5.0.0</FileVersion>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
+    <NoWarn>$(NoWarn);1591</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="ModelContextGateway.Tests\**" />
+    <Content Remove="ModelContextGateway.Tests\**" />
+    <EmbeddedResource Remove="ModelContextGateway.Tests\**" />
+    <None Remove="ModelContextGateway.Tests\**" />
+    <Compile Remove="scripts\**" />
+    <Content Remove="scripts\**" />
+    <EmbeddedResource Remove="scripts\**" />
+    <None Remove="scripts\**" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="OpenIddict.AspNetCore" Version="7.6.0" />
+    <PackageReference Include="OpenIddict.Quartz" Version="7.6.0" />
+    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="10.0.11" />
+    <PackageReference Include="SQLitePCLRaw.bundle_e_sqlcipher" Version="2.1.11" />
+    <PackageReference Include="Microsoft.ML.OnnxRuntime" Version="1.29.0" />
+    <PackageReference Include="Microsoft.ML.Tokenizers" Version="2.0.0" />
+    <PackageReference Include="Dapper" Version="2.1.79" />
+    <PackageReference Include="Microsoft.Data.SqlClient" Version="7.0.2" />
+    <PackageReference Include="Azure.Identity" Version="1.21.0" />
+    <PackageReference Include="Microsoft.Identity.Client" Version="4.88.0" />
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
+    <PackageReference Include="System.DirectoryServices.Protocols" Version="10.0.11" />
+    <PackageReference Include="VaultSharp" Version="1.17.5.1" />
+  </ItemGroup>
+
+</Project>

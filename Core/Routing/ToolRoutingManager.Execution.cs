@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using System.Text.Json;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     public partial class ToolRoutingManager
     {

@@ -1,6 +1,6 @@
-# Contributing to MCP Gateway Router
+# Contributing to Model Context Gateway (MCG)
 
-Thank you for your interest in contributing to **CSharp-MCP-Router**.
+Thank you for your interest in contributing to **Model Context Gateway (MCG)**.
 
 Please review this document to ensure a smooth development and review process.
 
@@ -35,11 +35,11 @@ Review the [**Developer Guide**](docs/developer-guide.md) for detailed environme
 
 ```bash
 # Clone the repository
-git clone https://github.com/spelech/CSharp-MCP-Router.git
-cd CSharp-MCP-Router
+git clone https://github.com/spelech/model-context-gateway.git
+cd model-context-gateway
 
 # Restore .NET dependencies
-dotnet restore McpRouter.slnx
+dotnet restore ModelContextGateway.slnx
 
 # Install frontend dependencies
 cd frontend && npm install && cd ..
@@ -96,7 +96,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) stand
 * **Major Bumps (e.g. `4.0.0` -> `5.0.0`)**: For breaking protocol or architectural redesigns.
 
 ### Files That MUST Be Updated Simultaneously:
-1. [`mcp-router.csproj`](mcp-router.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
+1. [`ModelContextGateway.csproj`](ModelContextGateway.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
 2. [`frontend/src/stores/useUserStore.ts`](frontend/src/stores/useUserStore.ts) (React fallback version string).
 3. [`CHANGELOG.md`](CHANGELOG.md) (Add a release entry to the Release Changelog table).
 4. [`README.md`](README.md) (Update the top-5 release preview table).
@@ -109,13 +109,13 @@ Before submitting a Pull Request, verify that all automated quality gates pass l
 
 ### 1. Backend Tests & Coverage
 ```bash
-CI=true dotnet test McpRouter.slnx --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
+CI=true dotnet test ModelContextGateway.slnx --configuration Release --verbosity normal --collect:"XPlat Code Coverage"
 ```
-* All 515+ tests must pass with 0 errors.
+* All 670+ tests must pass with 0 errors.
 
 ### 2. C# Formatting & Roslyn Analyzers
 ```bash
-dotnet format McpRouter.slnx --verify-no-changes
+dotnet format ModelContextGateway.slnx --verify-no-changes
 ```
 
 ### 3. Frontend Lint, Build, & Tests
@@ -138,7 +138,7 @@ dotnet run --project scripts/CatalogGenerator -- --verify-only
 
 ## 🧪 Test Requirement Annotations Rule
 
-All new or modified tests in C# (`McpRouter.Tests`), Vitest (`frontend/src/test`), and Playwright (`frontend/e2e`) **MUST** include structured requirement annotations:
+All new or modified tests in C# (`ModelContextGateway.Tests`), Vitest (`frontend/src/test`), and Playwright (`frontend/e2e`) **MUST** include structured requirement annotations:
 - **C#**: `[Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Description")]`
 - **TypeScript**: JSDoc `@requirement AUTH-01` block
 - **Naming Rule**: Requirement IDs must **NEVER** use `REQ-` prefixes. Use standard category codes (`AUTH-01`, `DB-01`, `GUARD-01`, `MCP-01`, `SEC-01`, `TRANS-01`, `UI-01`).
@@ -152,5 +152,5 @@ For comprehensive details on pipeline jobs, CodeQL SAST scanning, and integratio
 
 ## 📸 Screenshots & Documentation Standards
 
-* **Real Screenshots Standard**: **AI-generated mockups or placeholder assets are strictly prohibited** in documentation. All assets in `docs/assets/` must be captured from the live application using the automated screenshot tool (`take_screenshots.js`).
+* **Real Screenshots Standard**: **AI-generated mockups or placeholder assets are strictly prohibited** in documentation. All assets in `docs/assets/` must be captured from the live application using the automated screenshot tool (`scripts/capture_guide_screenshots.mjs` or `scripts/take_screenshots.js`).
 * **Documentation Currency**: Every new feature or API change must include updated documentation in `docs/` and corresponding user guide updates.

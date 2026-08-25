@@ -1,0 +1,49 @@
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning",
+      "ModelContextGateway": "Information"
+    }
+  },
+  "AllowedHosts": "*",
+  "DB_PROVIDER": "sqlite",
+  "ConnectionStrings": {
+    "DefaultConnection": "Data Source=data/mcg.db"
+  },
+  "MCG_ADMIN_AUTH_KEY": "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9",
+  "MCG_MASTER_KEY": "REPLACE_WITH_GENERATED_BASE64_256BIT_KEY",
+  "CORS_ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:8080",
+  "Admin": {
+    "GroupSid": "S-1-5-32-544",
+    "GroupName": "Domain Admins",
+    "Groups": [
+      "Domain Admins",
+      "full_admin",
+      "Administrators"
+    ],
+    "StandaloneAllowedNetworks": [
+      "127.0.0.1",
+      "::1",
+      "10.0.0.0/8",
+      "0.0.0.0/0"
+    ]
+  },
+  "Oidc": {
+    "TrustedProxies": "127.0.0.1,10.0.0.0/8",
+    "RequireTrustedProxy": false
+  },
+  "Identity": {
+    "HeaderAuth": {
+      "UserHeaders": [
+        "Remote-User",
+        "X-Forwarded-User"
+      ],
+      "GroupHeaders": [
+        "Remote-Groups",
+        "X-Forwarded-Groups",
+        "sso_groups"
+      ]
+    }
+  }
+}

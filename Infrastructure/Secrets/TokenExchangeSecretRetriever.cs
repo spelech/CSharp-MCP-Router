@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Microsoft.Extensions.Caching.Memory;
 
-namespace McpRouter.Infrastructure.Secrets
+namespace ModelContextGateway.Infrastructure.Secrets
 {
     public class TokenExchangeSecretRetriever : ISecretRetriever
     {

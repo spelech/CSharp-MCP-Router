@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace McpRouter.Infrastructure.Secrets
+namespace ModelContextGateway.Infrastructure.Secrets
 {
     public interface IDpapiProtector
     {

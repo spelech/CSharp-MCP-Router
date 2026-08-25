@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace McpRouter.Infrastructure.Secrets
+namespace ModelContextGateway.Infrastructure.Secrets
 {
     public static class SymmetricEncryptionHelper
     {
@@ -33,8 +33,8 @@ namespace McpRouter.Infrastructure.Secrets
 
         private static byte[] GetEncryptionKey(IConfiguration config)
         {
-            var secretString = config["ROUTER_SECRET"]
-                ?? config["ROUTER_MASTER_KEY"]
+            var secretString = config["MCG_SECRET"]
+                ?? config["MCG_MASTER_KEY"]
                 ?? DbKeyHelper.ResolveDbEncryptionKey(config);
 
             return DeriveKey(secretString);
@@ -146,7 +146,7 @@ namespace McpRouter.Infrastructure.Secrets
                 return true;
             }
 
-            var legacySecret = config["DB_ENCRYPTION_KEY"] ?? config["ROUTER_MASTER_KEY"];
+            var legacySecret = config["MCG_MASTER_KEY"] ?? config["MCG_SECRET"] ?? config["DB_ENCRYPTION_KEY"];
             if (!string.IsNullOrEmpty(legacySecret))
             {
                 var legacyKey = DeriveKey(legacySecret);

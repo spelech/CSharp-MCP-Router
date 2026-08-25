@@ -60,7 +60,7 @@ export const ClientSetupGuide: React.FC = () => {
       case 'vscode':
         return {
           "mcp.servers": {
-            "mcp-router": {
+            "model-context-gateway": {
               "type": "sse",
               "url": endpointUrl,
               "headers": {
@@ -79,7 +79,7 @@ export const ClientSetupGuide: React.FC = () => {
       default:
         return {
           "mcpServers": {
-            "mcp-router": {
+            "model-context-gateway": {
               "url": endpointUrl,
               "headers": {
                 "X-App-Key": effectiveKey
@@ -111,7 +111,7 @@ export const ClientSetupGuide: React.FC = () => {
             <i className="fa-solid fa-book"></i> Client Connection Guide
           </h2>
           <p style={{ color: 'var(--text-muted)', fontSize: '13px', margin: '4px 0 0 0' }}>
-            Connect your preferred AI client or IDE extension to the unified MCP Router gateway.
+            Connect your preferred AI client or IDE extension to the unified Model Context Gateway.
           </p>
         </div>
       </div>

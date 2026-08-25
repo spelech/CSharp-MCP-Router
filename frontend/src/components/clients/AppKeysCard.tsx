@@ -82,7 +82,7 @@ export const AppKeysCard: React.FC = () => {
     const sampleKey = `${keyPrefix}...[YOUR_FULL_KEY]`;
     const snippet = JSON.stringify({
       mcpServers: {
-        "mcp-router": {
+        "model-context-gateway": {
           url: "http://10.0.0.10:8026/sse",
           type: "sse",
           trust: true,

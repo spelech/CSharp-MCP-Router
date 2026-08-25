@@ -42,7 +42,7 @@ describe('Header Branding and Favicon Sync', () => {
     it('updates document.title and sets custom image favicon when icon is an image URL', () => {
       updateFaviconAndTitle('Custom Gateway', '/api/config/branding/logo');
 
-      expect(document.title).toBe('Custom Gateway - MCP Router');
+      expect(document.title).toBe('Custom Gateway - Model Context Gateway');
       const faviconLink = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
       expect(faviconLink).not.toBeNull();
       expect(faviconLink?.href).toContain('/api/config/branding/logo');
@@ -51,7 +51,7 @@ describe('Header Branding and Favicon Sync', () => {
     it('sets default title and generated SVG favicon when branding is null or uses FontAwesome icon', () => {
       updateFaviconAndTitle(null, 'fa-solid fa-bolt');
 
-      expect(document.title).toBe('MCP Router Gateway Dashboard');
+      expect(document.title).toBe('Model Context Gateway (MCG)');
       const faviconLink = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
       expect(faviconLink).not.toBeNull();
       expect(faviconLink?.href).toContain('data:image/svg+xml');
@@ -79,7 +79,7 @@ describe('Header Branding and Favicon Sync', () => {
       expect(img).toHaveAttribute('src', '/api/config/branding/logo');
       expect(img).toHaveClass('logo-icon');
       expect(img).toHaveClass('logo-img');
-      expect(document.title).toBe('Acme Gateway - MCP Router');
+      expect(document.title).toBe('Acme Gateway - Model Context Gateway');
     });
 
     it('renders FontAwesome i element when branding.icon is a FontAwesome class', async () => {
@@ -101,7 +101,7 @@ describe('Header Branding and Favicon Sync', () => {
       expect(icon).toHaveClass('fa-solid');
       expect(icon).toHaveClass('fa-bolt');
       expect(screen.queryByAltText('Logo')).toBeNull();
-      expect(document.title).toBe('Lightning MCP - MCP Router');
+      expect(document.title).toBe('Lightning MCP - Model Context Gateway');
     });
   });
 });

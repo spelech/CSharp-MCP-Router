@@ -1,4 +1,4 @@
-namespace McpRouter.Middleware
+namespace ModelContextGateway.Middleware
 {
     public class McpAuthorizationSpecMiddleware
     {

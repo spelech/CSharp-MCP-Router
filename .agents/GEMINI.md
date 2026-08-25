@@ -1,6 +1,6 @@
-# MCP Router AI Coding Agent Guidelines (GEMINI.md)
+# Model Context Gateway (MCG) AI Coding Agent Guidelines (GEMINI.md)
 
-This document dictates rules, practices, and guidelines that all AI coding assistants (such as Antigravity / AGY / Gemini) MUST follow when working on the `CSharp-MCP-Router` repository.
+This document dictates rules, practices, and guidelines that all AI coding assistants (such as Antigravity / AGY / Gemini) MUST follow when working on the `ModelContextGateway` repository.
 
 ---
 
@@ -38,23 +38,23 @@ The dashboard is built using a dark-mode glassmorphic design. When modifying the
 **AI-generated images or placeholder assets are strictly prohibited** in the documentation. All screenshots under `docs/assets/` must be captured from the actual, live-running application using the automated screenshot tool.
 
 ### How to capture actual screenshots:
-A Puppeteer script, [`take_screenshots.js`](file:///containers/mcp/router/take_screenshots.js), is included in the repository. Run it via Docker to easily capture actual screenshots:
+A Puppeteer script, [`take_screenshots.js`](file:///containers/dev/csharp-mcp-router/scripts/take_screenshots.js) (or Playwright script `scripts/capture_guide_screenshots.mjs`), is included in the repository. Run it via Docker to easily capture actual screenshots:
 
 ```bash
 docker run --rm --init --cap-add=SYS_ADMIN -u root \
   -e PUPPETEER_CACHE_DIR=/home/pptruser/.cache/puppeteer \
-  -e DASHBOARD_URL=http://mcp-router:8080/ \
+  -e DASHBOARD_URL=http://mcg:8080/ \
   -e SSO_USER=steve \
   -e SSO_GROUPS=full_admin,house_member \
   -e SSO_NAME="Steve Pelech" \
   --network net_cloud \
-  -v $(pwd)/take_screenshots.js:/home/pptruser/app/take_screenshots.js \
+  -v $(pwd)/scripts/take_screenshots.js:/home/pptruser/app/take_screenshots.js \
   -v $(pwd)/docs/assets:/home/pptruser/app/screenshots \
   ghcr.io/puppeteer/puppeteer:latest \
   node /home/pptruser/app/take_screenshots.js
 ```
 
-Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) on the `net_cloud` network before running the screenshot tool.
+Ensure `mcg` is rebuilt and running (`docker compose up -d mcg`) on the `net_cloud` network before running the screenshot tool.
 
 ---
 
@@ -73,13 +73,13 @@ Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) o
 ## 🏷️ 5. Mandatory Versioning & Documentation Rule
 
 **EVERY COMMIT OR MERGE TO `main` MUST BUMP THE VERSION NUMBER WITHOUT EXCEPTION.**
-- **Patch Bumps (e.g. `2.7.0` -> `2.7.1`)**: For bug fixes, performance optimizations, log refactoring, or minor UI tweaks.
-- **Minor Bumps (e.g. `2.7.0` -> `2.8.0`)**: For new features, API endpoints, schema changes, or architectural additions.
+- **Patch Bumps (e.g. `5.0.0` -> `5.0.1`)**: For bug fixes, performance optimizations, log refactoring, or minor UI tweaks.
+- **Minor Bumps (e.g. `5.0.0` -> `5.1.0`)**: For new features, API endpoints, schema changes, or architectural additions.
 - **Files That MUST Be Updated Simultaneously**:
-  1. [`mcp-router.csproj`](file:///containers/mcp/router/mcp-router.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
-  2. [`frontend/src/stores/useUserStore.ts`](file:///containers/mcp/router/frontend/src/stores/useUserStore.ts) (React fallback version).
-  3. [`CHANGELOG.md`](file:///containers/mcp/router/CHANGELOG.md) (Add release entry to full changelog table).
-  4. [`README.md`](file:///containers/mcp/router/README.md) (Update top-5 release preview table).
+  1. [`ModelContextGateway.csproj`](file:///containers/dev/csharp-mcp-router/ModelContextGateway.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
+  2. [`frontend/src/stores/useUserStore.ts`](file:///containers/dev/csharp-mcp-router/frontend/src/stores/useUserStore.ts) (React fallback version).
+  3. [`CHANGELOG.md`](file:///containers/dev/csharp-mcp-router/CHANGELOG.md) (Add release entry to full changelog table).
+  4. [`README.md`](file:///containers/dev/csharp-mcp-router/README.md) (Update top-5 release preview table).
 
 **MANDATORY ATOMIC COMMIT AND DOCS UPDATING PROCESS**:
 * Whenever an AI agent implements a bugfix or feature, they **MUST** update the documentation (e.g., `README.md`, `ARCHITECTURE.md`, or the `docs/` folder) to reflect those changes.
@@ -91,15 +91,15 @@ Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) o
   git tag v<version>
   git push origin v<version>
   ```
-* This triggers the automated `Build and Push Docker Image` GitHub Actions workflow to build and publish container images (`ghcr.io/spelech/csharp-mcp-router:latest`, `:<version>`, `:latest-full`, `:<version>-full`).
+* This triggers the automated `Build and Push Docker Image` GitHub Actions workflow to build and publish container images (`ghcr.io/spelech/model-context-gateway:latest`, `:<version>`, `:latest-full`, `:<version>-full`).
 
 **MANDATORY POST-RELEASE MCP STACK REFRESH**:
-* Once the release workflow publishes the container image, agents **MUST** pull and recreate the router in the live MCP stack:
+* Once the release workflow publishes the container image, agents **MUST** pull and recreate the gateway in the live MCP stack:
   ```bash
-  docker compose -f /containers/mcp/docker-compose.yaml pull mcp-router
-  docker compose -f /containers/mcp/docker-compose.yaml up -d mcp-router
+  docker compose -f /containers/mcp/docker-compose.yaml pull mcg
+  docker compose -f /containers/mcp/docker-compose.yaml up -d mcg
   ```
-* Verify live health: `curl -s http://localhost:8026/health` returns `{"status":"healthy","service":"McpRouter","version":"<version>"}`.
+* Verify live health: `curl -s http://localhost:8026/health` returns `{"status":"healthy","service":"ModelContextGateway","version":"<version>"}`.
 
 ---
 
@@ -108,8 +108,8 @@ Ensure `mcp-router` is rebuilt and running (`docker compose up -d mcp-router`) o
 **ALL NEW AND MODIFIED TESTS MUST BE ANNOTATED WITH FORMAL REQUIREMENT METADATA.**
 Every test proof across backend C# xUnit suites, frontend Vitest component suites, and Playwright E2E suites must trace directly to a requirement definition:
 
-* **C# Tests (`McpRouter.Tests`)**:
-  Must use the `[Requirement]` attribute from `McpRouter.Tests.Attributes`:
+* **C# Tests (`ModelContextGateway.Tests`)**:
+  Must use the `[Requirement]` attribute from `ModelContextGateway.Tests.Attributes`:
   ```csharp
   [Fact]
   [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Description statement.")]

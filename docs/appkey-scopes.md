@@ -1,6 +1,6 @@
 # AppKey Scopes & Authorization Guide
 
-This document details the **AppKey Scoping and Authorization Engine** in the `CSharp-MCP-Router`, covering scope grammar, normalization rules, the multi-stage authorization pipeline, capability enforcement matrices, cryptographic key lifecycle management, and least-privilege configuration recipes.
+This document details the **AppKey Scoping and Authorization Engine** in the **Model Context Gateway (MCG)**, covering scope grammar, normalization rules, the multi-stage authorization pipeline, capability enforcement matrices, cryptographic key lifecycle management, and least-privilege configuration recipes.
 
 ---
 
@@ -17,7 +17,7 @@ This document details the **AppKey Scoping and Authorization Engine** in the `CS
 
 ## 1. Overview & Security Architecture
 
-The MCP Router acts as an enterprise-grade gateway and semantic proxy that aggregates Model Context Protocol (MCP) servers (Docker, Home Assistant, Plex, Actual Budget, Databases, etc.) into a unified endpoint.
+The Model Context Gateway (MCG) acts as an enterprise-grade gateway and semantic proxy that aggregates Model Context Protocol (MCP) servers (Docker, Home Assistant, Plex, Actual Budget, Databases, etc.) into a unified endpoint.
 
 External callers authenticate via two primary vectors:
 - **Interactive SSO / Forward-Auth Sessions**: Web UI and reverse-proxy users authenticate via OIDC/Proxy headers (`Remote-User`, `Remote-Groups`, `Remote-User-Sid`) or Active Directory Windows SIDs.

@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using MySqlConnector;
 
-namespace McpRouter.Infrastructure.Persistence
+namespace ModelContextGateway.Infrastructure.Persistence
 {
     public interface IDbConnectionFactory
     {
@@ -24,16 +24,43 @@ namespace McpRouter.Infrastructure.Persistence
 
         public DbConnectionFactory(IConfiguration config)
         {
-            _provider = config["DB_PROVIDER"]?.ToLower() ?? "sqlite";
-            _connectionString = config.GetConnectionString("DefaultConnection")
-                ?? config.GetConnectionString("Sqlite")
-                ?? config["ConnectionStrings:DefaultConnection"]
-                ?? config["ConnectionStrings:Sqlite"]
-                ?? "";
+            _provider = (config["MCG_DATABASE_PROVIDER"]
+                ?? config["MCG_DB_PROVIDER"]
+                ?? config["DB_PROVIDER"]
+                ?? Environment.GetEnvironmentVariable("MCG_DATABASE_PROVIDER")
+                ?? Environment.GetEnvironmentVariable("MCG_DB_PROVIDER")
+                ?? Environment.GetEnvironmentVariable("DB_PROVIDER")
+                ?? "sqlite").ToLowerInvariant();
+
+            var explicitDbPath = config["MCG_DB_PATH"]
+                ?? config["MCG_DATABASE_PATH"]
+                ?? config["DATABASE_PATH"]
+                ?? Environment.GetEnvironmentVariable("MCG_DB_PATH")
+                ?? Environment.GetEnvironmentVariable("MCG_DATABASE_PATH");
+
+            if (!string.IsNullOrWhiteSpace(explicitDbPath))
+            {
+                _connectionString = $"Data Source={explicitDbPath};";
+            }
+            else
+            {
+                _connectionString = config.GetConnectionString("DefaultConnection")
+                    ?? config.GetConnectionString("Sqlite")
+                    ?? config["ConnectionStrings:DefaultConnection"]
+                    ?? config["ConnectionStrings:Sqlite"]
+                    ?? "";
+            }
 
             if (_provider == "sqlite" && string.IsNullOrEmpty(_connectionString))
             {
-                var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");
+                var legacyDbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");
+                var newDbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcg.db");
+                if (System.IO.File.Exists(legacyDbPath) && !System.IO.File.Exists(newDbPath))
+                {
+                    System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(newDbPath)!);
+                    System.IO.File.Copy(legacyDbPath, newDbPath);
+                }
+                var dbPath = System.IO.File.Exists(newDbPath) || !System.IO.File.Exists(legacyDbPath) ? newDbPath : legacyDbPath;
                 _connectionString = $"Data Source={dbPath};";
             }
         }

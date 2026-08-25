@@ -1,6 +1,6 @@
-# 🏛️ MCP Router Architecture
+# 🏛️ Model Context Gateway (MCG) Architecture
 
-This document summarizes the internal architecture, security mechanisms, design requirements, and subsystem flows of the **Model Context Protocol (MCP) Router Gateway**.
+This document summarizes the internal architecture, security mechanisms, design requirements, and subsystem flows of the **Model Context Gateway (MCG)**.
 
 > 📖 **Definitive Specification**: For architectural details, Mermaid sequence diagrams, component models, ERDs, and cryptographic specifications, see the [**Complete Enterprise Architecture Guide**](docs/architecture.md).
 
@@ -136,15 +136,15 @@ sequenceDiagram
 
 ---
 
-### 3. In-Process Virtual Admin MCP Server (`/admin`, `/router-admin`)
+### 3. In-Process Virtual Admin MCP Server (`/admin`, `/mcg-admin`)
 
-For autonomous AI agents and IDE extensions (Claude Desktop, Cursor, Cline, Windsurf) administering the router programmatically, the gateway hosts an in-process virtual MCP server (`AdminMcpServer`):
+For autonomous AI agents and IDE extensions (Claude Desktop, Cursor, Cline, Windsurf) administering the gateway programmatically, the gateway hosts an in-process virtual MCP server (`AdminMcpServer`):
 
 ```mermaid
 sequenceDiagram
     autonumber
     actor Agent as Autonomous Agent / IDE
-    participant Router as MCP Router (/admin)
+    participant Router as Model Context Gateway (/admin)
     participant AdminServer as AdminMcpServer (In-Process)
     participant Repos as Dapper Repositories
     participant Audit as AuditLogger
@@ -178,16 +178,16 @@ sequenceDiagram
 
 ## 🔑 Outbound Authentication & Identity Delegation
 
-To support enterprise security and Row-Level Security (RLS) in downstream MCP backends, the router implements advanced credential delegation capabilities detailed in the [Authentication End-to-End Support Matrix](docs/auth-flows/auth-support-matrix.md):
+To support enterprise security and Row-Level Security (RLS) in downstream MCP backends, the gateway implements advanced credential delegation capabilities detailed in the [Authentication End-to-End Support Matrix](docs/auth-flows/auth-support-matrix.md):
 
-1. **Identity-Header Propagation (Trusted Gateway Pattern)**: The router automatically injects the authenticated client's identity into outbound HTTP/SSE transport requests via the `X-Forwarded-User` header. This allows stateless backends to enforce RLS and audit trails without requiring complex multi-hop token flows.
-2. **Dynamic Auth Pass-Through & Rewriting**: Downstream tools requiring interactive challenges (e.g., Jira, ServiceNow) can securely trigger a 401 Challenge. The router intercepts this, issues a `dynamic_auth` prompt to the client (IDE/LLM), and propagates the resulting user-provided credential via the `X-Target-Auth` header.
-3. **OAuth2 / OIDC Token Exchange (On-Behalf-Of)**: For upstream backends requiring strict bearer JWTs, the router functions as a Confidential Client, seamlessly exchanging inbound AppKeys or SSO headers for downstream JWTs via the standard OAuth2 On-Behalf-Of flow.
-4. **NTLM / Kerberos Impersonation**: On Windows IIS native deployments, the Router utilizes `S4U2Proxy` (via `WindowsIdentity.RunImpersonatedAsync`) to assume the identity of the inbound Active Directory caller when invoking downstream enterprise SOAP/REST endpoints, ensuring seamless Single Sign-On (SSO) propagation.
+1. **Identity-Header Propagation (Trusted Gateway Pattern)**: The gateway automatically injects the authenticated client's identity into outbound HTTP/SSE transport requests via the `X-Forwarded-User` header. This allows stateless backends to enforce RLS and audit trails without requiring complex multi-hop token flows.
+2. **Dynamic Auth Pass-Through & Rewriting**: Downstream tools requiring interactive challenges (e.g., Jira, ServiceNow) can securely trigger a 401 Challenge. The gateway intercepts this, issues a `dynamic_auth` prompt to the client (IDE/LLM), and propagates the resulting user-provided credential via the `X-Target-Auth` header.
+3. **OAuth2 / OIDC Token Exchange (On-Behalf-Of)**: For upstream backends requiring strict bearer JWTs, the gateway functions as a Confidential Client, seamlessly exchanging inbound AppKeys or SSO headers for downstream JWTs via the standard OAuth2 On-Behalf-Of flow.
+4. **NTLM / Kerberos Impersonation**: On Windows IIS native deployments, the gateway utilizes `S4U2Proxy` (via `WindowsIdentity.RunImpersonatedAsync`) to assume the identity of the inbound Active Directory caller when invoking downstream enterprise SOAP/REST endpoints, ensuring seamless Single Sign-On (SSO) propagation.
 
 ## 📦 Batteries-Included Docker Runtime
 
-To natively execute Python, Node, and `uv` based MCP Servers via the `stdio` transport, the project provides a "batteries-included" Docker tag (`ghcr.io/org/mcp-router:latest-full`). This sidesteps the complexity of Sidecar container networking while preserving strict sub-process isolation.
+To natively execute Python, Node, and `uv` based MCP Servers via the `stdio` transport, the project provides a "batteries-included" Docker tag (`ghcr.io/spelech/model-context-gateway:latest-full`). This sidesteps the complexity of Sidecar container networking while preserving strict sub-process isolation.
 
 
 ## 🔒 4-Stage Authorization & Hybrid Standalone Pipeline

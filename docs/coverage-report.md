@@ -56,7 +56,7 @@ To generate and inspect the code coverage report locally:
 
 ### Backend .NET Suite:
 ```bash
-dotnet test McpRouter.Tests/McpRouter.Tests.csproj --collect:"XPlat Code Coverage"
+dotnet test ModelContextGateway.Tests/ModelContextGateway.Tests.csproj --collect:"XPlat Code Coverage"
 ```
 
 ### Frontend Vitest Suite:

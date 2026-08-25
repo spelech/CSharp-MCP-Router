@@ -1,6 +1,6 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
-namespace McpRouter.Components.Providers
+namespace ModelContextGateway.Components.Providers
 {
     public static class ProviderConfigSecurityHelper
     {

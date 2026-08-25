@@ -64,7 +64,7 @@ export const AppKeyModal: React.FC = () => {
     if (!createdResult?.plaintextKey) return '';
     return JSON.stringify({
       mcpServers: {
-        "mcp-router": {
+        "model-context-gateway": {
           url: "http://10.0.0.10:8026/sse",
           type: "sse",
           trust: true,

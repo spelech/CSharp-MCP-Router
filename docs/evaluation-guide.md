@@ -89,7 +89,7 @@ The **MCP Gateway Router** provides a single, hardened proxy between client appl
 
 ## 💎 Core Architectural Differentiators
 
-| Capability | Raw Direct Connections | Generic Reverse Proxy | **CSharp-MCP-Router** |
+| Capability | Raw Direct Connections | Generic Reverse Proxy | **Model Context Gateway (MCG)** |
 | :--- | :--- | :--- | :--- |
 | **Context Window Efficiency** | ❌ 100+ tools injected into every prompt (30k+ tokens) | ❌ Raw proxy passes full catalog through | ✅ **Meta-Mode**: Fixed 2 bootstrap tools; dynamic vector search |
 | **Semantic Discovery** | ❌ None (Linear LLM schema scan) | ❌ None | ✅ **Dual Engine**: In-process ONNX (`All-MiniLM-L6-v2`) or OpenAI API |
@@ -162,7 +162,7 @@ Incoming requests undergo a 4-stage evaluation pipeline:
 
 ## 📊 Evaluation Comparison Matrix
 
-| Evaluation Criteria | Direct Tool Integration | Node.js MCP Proxy | **CSharp-MCP-Router** |
+| Evaluation Criteria | Direct Tool Integration | Node.js MCP Proxy | **Model Context Gateway (MCG)** |
 | :--- | :--- | :--- | :--- |
 | **Runtime & Performance** | Subprocess per client | Node.js single thread | .NET 10 Kestrel async multi-threaded runtime |
 | **Memory Footprint** | ~50MB per process x N | ~80-120MB | ~45MB baseline (including embedded ONNX model) |

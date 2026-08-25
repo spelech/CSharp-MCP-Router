@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace McpRouter.Infrastructure.Identity
+namespace ModelContextGateway.Infrastructure.Identity
 {
     public static class TrustedProxyHelper
     {

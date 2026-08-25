@@ -1,13 +1,12 @@
-using System.Reflection;
 using System.Text.Json;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
-namespace McpRouter.Components.Capabilities
+namespace ModelContextGateway.Components.Capabilities
 {
     public static class ProxyEndpoints
     {
-        private static readonly string AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.6";
+        private static readonly string AppVersion = GatewayMetadata.Version;
 
         public static IEndpointRouteBuilder MapProxyEndpoints(this IEndpointRouteBuilder app)
         {
@@ -348,7 +347,7 @@ namespace McpRouter.Components.Capabilities
                                     prompts = new { listChanged = true },
                                     resources = new { subscribe = false, listChanged = true }
                                 },
-                                serverInfo = new { name = "McpRouterGateway", version = AppVersion }
+                                serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             }
                         };
                         var json = JsonSerializer.Serialize(response);
@@ -371,7 +370,7 @@ namespace McpRouter.Components.Capabilities
                                     prompts = new { listChanged = true },
                                     resources = new { subscribe = false, listChanged = true }
                                 },
-                                serverInfo = new { name = "McpRouterGateway", version = AppVersion }
+                                serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             }
                         };
                         var json = JsonSerializer.Serialize(response);
@@ -700,7 +699,7 @@ namespace McpRouter.Components.Capabilities
                     try
                     {
                         logger.LogDebug("Processing initial JSON-RPC message in POST /mcp body: {Body}", PiiSanitizer.SanitizePayload(requestBody));
-                        var serverName = "McpRouterGateway";
+                        var serverName = "ModelContextGateway";
                         if (!string.IsNullOrWhiteSpace(targetServerId))
                         {
                             var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
@@ -843,7 +842,7 @@ namespace McpRouter.Components.Capabilities
                                 },
                                 serverInfo = new
                                 {
-                                    name = "McpRouterGateway",
+                                    name = "ModelContextGateway",
                                     version = AppVersion
                                 }
                             }
@@ -870,7 +869,7 @@ namespace McpRouter.Components.Capabilities
                                 },
                                 serverInfo = new
                                 {
-                                    name = "McpRouterGateway",
+                                    name = "ModelContextGateway",
                                     version = AppVersion
                                 }
                             }

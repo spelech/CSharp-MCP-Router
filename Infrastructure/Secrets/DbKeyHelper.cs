@@ -4,7 +4,7 @@ using VaultSharp;
 using VaultSharp.V1.AuthMethods.AppRole;
 using VaultSharp.V1.AuthMethods.Token;
 
-namespace McpRouter.Infrastructure.Secrets
+namespace ModelContextGateway.Infrastructure.Secrets
 {
     public enum MasterKeySource
     {
@@ -56,7 +56,9 @@ namespace McpRouter.Infrastructure.Secrets
 
                 // 1. HashiCorp Vault Bootstrapping (if VAULT_ADDR or Vault:Address is configured or factory is set)
                 var vaultAddress = configuration["Vault:Address"]
+                    ?? configuration["MCG_VAULT_ADDR"]
                     ?? configuration["VAULT_ADDR"]
+                    ?? Environment.GetEnvironmentVariable("MCG_VAULT_ADDR")
                     ?? Environment.GetEnvironmentVariable("VAULT_ADDR");
 
                 if (!string.IsNullOrWhiteSpace(vaultAddress) || _vaultClientFactory != null)
@@ -71,9 +73,12 @@ namespace McpRouter.Infrastructure.Secrets
                 }
 
                 // 2. Direct Environment / Config Variables
-                var key = configuration["ROUTER_SECRET"]
-                    ?? configuration["ROUTER_MASTER_KEY"]
-                    ?? configuration["DB_ENCRYPTION_KEY"];
+                var key = configuration["MCG_MASTER_KEY"]
+                    ?? configuration["MCG_SECRET"]
+                    ?? configuration["DB_ENCRYPTION_KEY"]
+                    ?? Environment.GetEnvironmentVariable("MCG_MASTER_KEY")
+                    ?? Environment.GetEnvironmentVariable("MCG_SECRET")
+                    ?? Environment.GetEnvironmentVariable("DB_ENCRYPTION_KEY");
 
                 if (!string.IsNullOrWhiteSpace(key))
                 {
@@ -83,9 +88,12 @@ namespace McpRouter.Infrastructure.Secrets
                 }
 
                 // 3. Explicit File Path from Environment / Config (Docker / K8s file secrets)
-                var filePath = configuration["ROUTER_SECRET_FILE"]
-                    ?? configuration["ROUTER_MASTER_KEY_FILE"]
-                    ?? configuration["DB_ENCRYPTION_KEY_FILE"];
+                var filePath = configuration["MCG_MASTER_KEY_FILE"]
+                    ?? configuration["MCG_SECRET_FILE"]
+                    ?? configuration["DB_ENCRYPTION_KEY_FILE"]
+                    ?? Environment.GetEnvironmentVariable("MCG_MASTER_KEY_FILE")
+                    ?? Environment.GetEnvironmentVariable("MCG_SECRET_FILE")
+                    ?? Environment.GetEnvironmentVariable("DB_ENCRYPTION_KEY_FILE");
 
                 if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
                 {
@@ -101,6 +109,8 @@ namespace McpRouter.Infrastructure.Secrets
                 // 4. Standard Docker / Kubernetes Secrets Default Paths
                 var defaultDockerSecretPaths = new[]
                 {
+                    "/run/secrets/mcg_master_key",
+                    "/run/secrets/mcg_secret",
                     "/run/secrets/router_master_key",
                     "/run/secrets/router_secret",
                     "/run/secrets/master_key"
@@ -170,7 +180,7 @@ namespace McpRouter.Infrastructure.Secrets
                 {
                     throw new InvalidOperationException(
                         $"FATAL: Master encryption key is missing and failed to persist auto-generated key to '{keyFilePath}'. " +
-                        "Ensure the data directory is writable or configure 'ROUTER_MASTER_KEY' or 'ROUTER_MASTER_KEY_FILE'.", ex);
+                        "Ensure the data directory is writable or configure 'MCG_MASTER_KEY' or key file.", ex);
                 }
             }
         }
@@ -194,9 +204,9 @@ namespace McpRouter.Infrastructure.Secrets
                     throw new ArgumentException("Vault Address must use the HTTP or HTTPS scheme.");
                 }
 
-                var roleId = configuration["Vault:RoleId"] ?? configuration["VAULT_ROLE_ID"] ?? Environment.GetEnvironmentVariable("VAULT_ROLE_ID");
-                var secretId = configuration["Vault:SecretId"] ?? configuration["VAULT_SECRET_ID"] ?? Environment.GetEnvironmentVariable("VAULT_SECRET_ID");
-                var token = configuration["Vault:Token"] ?? configuration["VAULT_TOKEN"] ?? Environment.GetEnvironmentVariable("VAULT_TOKEN");
+                var roleId = configuration["Vault:RoleId"] ?? configuration["MCG_VAULT_ROLE_ID"] ?? configuration["VAULT_ROLE_ID"] ?? Environment.GetEnvironmentVariable("MCG_VAULT_ROLE_ID") ?? Environment.GetEnvironmentVariable("VAULT_ROLE_ID");
+                var secretId = configuration["Vault:SecretId"] ?? configuration["MCG_VAULT_SECRET_ID"] ?? configuration["VAULT_SECRET_ID"] ?? Environment.GetEnvironmentVariable("MCG_VAULT_SECRET_ID") ?? Environment.GetEnvironmentVariable("VAULT_SECRET_ID");
+                var token = configuration["Vault:Token"] ?? configuration["MCG_VAULT_TOKEN"] ?? configuration["VAULT_TOKEN"] ?? Environment.GetEnvironmentVariable("MCG_VAULT_TOKEN") ?? Environment.GetEnvironmentVariable("VAULT_TOKEN");
 
                 VaultSharp.V1.AuthMethods.IAuthMethodInfo authMethod;
                 if (!string.IsNullOrEmpty(roleId) && !string.IsNullOrEmpty(secretId))
@@ -221,8 +231,8 @@ namespace McpRouter.Infrastructure.Secrets
                 return null;
             }
 
-            var vaultPath = configuration["VAULT_MASTER_KEY_PATH"] ?? configuration["Vault:MasterKeyPath"] ?? "mcp-router/master-key";
-            var mountPoint = configuration["VAULT_MOUNT_POINT"] ?? configuration["Vault:MountPoint"] ?? "secret";
+            var vaultPath = configuration["MCG_VAULT_MASTER_KEY_PATH"] ?? configuration["VAULT_MASTER_KEY_PATH"] ?? configuration["Vault:MasterKeyPath"] ?? "mcg/master-key";
+            var mountPoint = configuration["MCG_VAULT_MOUNT_POINT"] ?? configuration["VAULT_MOUNT_POINT"] ?? configuration["Vault:MountPoint"] ?? "secret";
             if (vaultPath.Contains(':'))
             {
                 var parts = vaultPath.Split(':', 2);
@@ -230,7 +240,7 @@ namespace McpRouter.Infrastructure.Secrets
                 vaultPath = parts[1];
             }
 
-            var keyName = configuration["VAULT_MASTER_KEY_NAME"] ?? configuration["Vault:MasterKeyName"] ?? "master_key";
+            var keyName = configuration["MCG_VAULT_MASTER_KEY_NAME"] ?? configuration["VAULT_MASTER_KEY_NAME"] ?? configuration["Vault:MasterKeyName"] ?? "master_key";
 
             try
             {
@@ -270,10 +280,30 @@ namespace McpRouter.Infrastructure.Secrets
 
         public static string ResolveDataDirectory(IConfiguration configuration)
         {
-            var customDataDir = configuration["DATA_DIR"] ?? configuration["DataDir"];
+            var customDataDir = configuration["MCG_DATA_DIR"]
+                ?? configuration["DATA_DIR"]
+                ?? configuration["DataDir"]
+                ?? Environment.GetEnvironmentVariable("MCG_DATA_DIR")
+                ?? Environment.GetEnvironmentVariable("DATA_DIR");
+
             if (!string.IsNullOrWhiteSpace(customDataDir))
             {
                 return Path.GetFullPath(customDataDir);
+            }
+
+            var explicitDbPath = configuration["MCG_DB_PATH"]
+                ?? configuration["MCG_DATABASE_PATH"]
+                ?? configuration["DATABASE_PATH"]
+                ?? Environment.GetEnvironmentVariable("MCG_DB_PATH")
+                ?? Environment.GetEnvironmentVariable("MCG_DATABASE_PATH");
+
+            if (!string.IsNullOrWhiteSpace(explicitDbPath))
+            {
+                var dir = Path.GetDirectoryName(explicitDbPath);
+                if (!string.IsNullOrWhiteSpace(dir))
+                {
+                    return Path.GetFullPath(dir);
+                }
             }
 
             var connStr = configuration.GetConnectionString("DefaultConnection")

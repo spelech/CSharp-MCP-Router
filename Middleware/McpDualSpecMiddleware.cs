@@ -1,6 +1,6 @@
 using System.Text.Json.Nodes;
 
-namespace McpRouter.Middleware
+namespace ModelContextGateway.Middleware
 {
     /// <summary>
     /// Implements MCP 2026-07-28 Spec-Compliant Header Annotation and Dual-Spec Fallback.

@@ -1,11 +1,11 @@
-# MCP Router Gateway & Semantic Proxy
+# Model Context Gateway (MCG)
 
 <div align="center">
 
-![Version](https://img.shields.io/badge/version-v4.35.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.0.0-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
-![Tests](https://img.shields.io/badge/tests-620%20passing-2ea44f?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-672%20passing-2ea44f?style=for-the-badge)
 ![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
@@ -14,11 +14,11 @@
 
 ---
 
-**`csharp-mcp-router`** is a high-performance C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
+**Model Context Gateway (MCG)** is a high-performance C# ASP.NET Core gateway, OAuth 2.0 provider, and semantic proxy for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
 
 It aggregates hundreds of tools from isolated backend servers (Docker, Home Assistant, Plex, Actual Budget, Excel, custom APIs, STDIO subprocesses) and proxies them to AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) via a single unified connection.
 
-![MCP Router Gateway Dashboard](assets/dashboard.jpg)
+![Model Context Gateway Dashboard](assets/dashboard.jpg)
 
 ---
 
@@ -32,11 +32,11 @@ flowchart LR
         Agents["Autonomous Agents"]
     end
 
-    subgraph Gateway["MCP Router Gateway"]
+    subgraph Gateway["Model Context Gateway (MCG)"]
         Auth["OAuth / Reverse Proxy Auth / AppKey"]
         MetaMode["Meta-Mode Router\n(search_tools / execute_tool)"]
         Vector["Semantic Vector Search\n(Local ONNX / OpenAI)"]
-        AdminMCP["Admin MCP Server\n(/admin, /router-admin)"]
+        AdminMCP["Admin MCP Server\n(/admin, /mcg-admin)"]
         Secrets["Secret Providers\n(Vault / DPAPI / AES)"]
     end
 
@@ -58,7 +58,7 @@ flowchart LR
 
 * **🧠 Meta-Mode Dynamic Tool Filtering**: Exposes only `search_tools` and `execute_tool` on `/sse` by default, eliminating context window bloat in LLMs while dynamically discovering and routing across hundreds of backend tools on demand.
 * **🛡️ Multi-Tenant Auth & Zero-Config Standalone**: Native Active Directory LDAP / Kerberos, OIDC reverse proxy headers (`Remote-User`, `Remote-Groups` from Authentik, Authelia, Keycloak), scoped AppKeys (`mcp-adm-`, `mcp-usr-`, `mcp-srv-`), and trusted local loopback for personal home-labs.
-* **🤖 In-Process Admin MCP Control Plane (`/admin`, `/router-admin`)**: Autonomous AI agents can manage providers, servers, RBAC policies, group mappings, vector search, and personal AppKeys via standard MCP tool calls without manual UI operations.
+* **🤖 In-Process Admin MCP Control Plane (`/admin`, `/mcg-admin`)**: Autonomous AI agents can manage providers, servers, RBAC policies, group mappings, vector search, and personal AppKeys via standard MCP tool calls without manual UI operations.
 * **🔍 Dual-Provider Semantic Vector Search**: Local in-process CPU vector embeddings (`all-MiniLM-L6-v2` via `Microsoft.ML.Tokenizers`) or remote OpenAI-compatible API providers stored securely in SQLCipher/AES encrypted databases.
 * **🔐 Enterprise Secrets & Key Lifecycle**: Just-in-time secret retrieval from HashiCorp Vault (KV v2), Windows Registry (DPAPI), or Environment Variables with AES-256-GCM envelope encryption and dynamic master key rotation.
 * **🐳 Docker Label Auto-Discovery**: Mounts `/var/run/docker.sock` to dynamically discover and register containers with `mcp.enabled=true` labels with zero manual registration.
@@ -92,7 +92,7 @@ flowchart LR
 
     ---
 
-    Autonomous agent administration via the `mcp-router-admin` skill, control plane tools, and programmatic provisioning.
+    Autonomous agent administration via the `mcg-admin` skill, control plane tools, and programmatic provisioning.
 
 -   :material-book-open-page-variant: __[Official User Guide Suite](user-guide/README.md)__
 
@@ -148,27 +148,27 @@ flowchart LR
 
 ## ⚡ Quickstart: Zero-Config Startup
 
-Run the gateway container with zero required configuration. On first boot, the router automatically generates a 256-bit AES Master Key in `./data/.master.key` and initializes a secure SQLite database:
+Run the gateway container with zero required configuration. On first boot, the gateway automatically generates a 256-bit AES Master Key in `./data/.master.key` and initializes a secure SQLite database:
 
 === "Docker CLI"
 
     ```bash
     docker run -d \
-      --name mcp-router \
+      --name mcg \
       --restart unless-stopped \
       -p 8080:8080 \
       -v $(pwd)/data:/app/data \
       -v /var/run/docker.sock:/var/run/docker.sock \
-      ghcr.io/spelech/mcp-router:latest
+      ghcr.io/spelech/model-context-gateway:latest
     ```
 
 === "Docker Compose"
 
     ```yaml
     services:
-      mcp-router:
-        image: ghcr.io/spelech/mcp-router:latest
-        container_name: mcp-router
+      mcg:
+        image: ghcr.io/spelech/model-context-gateway:latest
+        container_name: mcg
         restart: unless-stopped
         ports:
           - "8080:8080"
@@ -177,15 +177,15 @@ Run the gateway container with zero required configuration. On first boot, the r
           - /var/run/docker.sock:/var/run/docker.sock
         environment:
           - DB_PROVIDER=sqlite
-          - ROUTER_ADMIN_KEY=mcp-adm-prod-bootstrap-token-99
+          - MCG_ADMIN_KEY=mcp-adm-prod-bootstrap-token-99
     ```
 
 ### Live Endpoints
 
 * **Web UI Dashboard**: [`http://localhost:8080/`](http://localhost:8080/)
-* **Health Check**: [`http://localhost:8080/health`](http://localhost:8080/health) &rarr; `{"status":"healthy","service":"McpRouter","version":"4.35.0"}`
+* **Health Check**: [`http://localhost:8080/health`](http://localhost:8080/health) &rarr; `{"status":"healthy","service":"ModelContextGateway","version":"5.0.0"}`
 * **Meta-Mode Gateway**: `http://localhost:8080/sse`
-* **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin`)
+* **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` / `GET /mcg-admin/sse`)
 * **Direct Backend Proxy**: `http://localhost:8080/{targetServerId}`
 
 ---
@@ -199,7 +199,7 @@ Run the gateway container with zero required configuration. On first boot, the r
     ```json
     {
       "mcpServers": {
-        "mcp-router": {
+        "mcg": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/sse"]
         }
@@ -212,7 +212,7 @@ Run the gateway container with zero required configuration. On first boot, the r
     ```json
     {
       "mcpServers": {
-        "mcp-router-admin": {
+        "mcg-admin": {
           "command": "npx",
           "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/admin"]
         }
@@ -225,7 +225,7 @@ Run the gateway container with zero required configuration. On first boot, the r
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "mcg": {
       "url": "http://localhost:8080/sse",
       "headers": {
         "Authorization": "Bearer mcp-usr-my-developer-token-123"
@@ -241,7 +241,7 @@ Run the gateway container with zero required configuration. On first boot, the r
 
 All features, security guardrails, and authentication flows are enforced by automated test suites:
 
-* **xUnit Backend Suite**: 620+ integration & unit tests ([`McpRouter.Tests`](developer-guide.md#backend-test-suite))
+* **xUnit Backend Suite**: 670+ integration & unit tests ([`ModelContextGateway.Tests`](developer-guide.md#backend-test-suite))
 * **Vitest Frontend Suite**: Component and state store test coverage ([`frontend/src/test`](developer-guide.md#frontend-vitest-suite))
 * **Playwright E2E Suite**: End-to-end browser automation ([`frontend/e2e`](developer-guide.md#end-to-end-testing-playwright))
 * **Living Requirements Matrix**: Zero-drift catalog generation via `dotnet run --project scripts/CatalogGenerator -- --verify-only` ([SRS Catalog](software-requirements-and-test-catalog.md))

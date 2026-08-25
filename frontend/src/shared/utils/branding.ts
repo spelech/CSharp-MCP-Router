@@ -48,7 +48,7 @@ export function updateFaviconAndTitle(title?: string | null, icon?: string | nul
   if (typeof document === 'undefined') return;
 
   const trimmedTitle = title ? title.trim() : '';
-  document.title = trimmedTitle ? `${trimmedTitle} - MCP Router` : 'MCP Router Gateway Dashboard';
+  document.title = trimmedTitle ? `${trimmedTitle} - Model Context Gateway` : 'Model Context Gateway (MCG)';
 
   let link = document.querySelector<HTMLLinkElement>("link[rel~='icon']");
   if (!link) {

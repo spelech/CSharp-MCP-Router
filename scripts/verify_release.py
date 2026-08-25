@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Release and Version Verification Engine (Issue #59)
-CSharp-MCP-Router
+Model Context Gateway (MCG)
 
 This script validates release integrity across four dimensions:
 1. Version synchronization (csproj, useUserStore.ts, CHANGELOG.md, README.md)
@@ -156,9 +156,11 @@ class ReleaseVerifier:
     def verify_versions(self) -> Optional[str]:
         self.print_section("1. Version Synchronization & Consistency", "🏷️")
 
-        csproj_path = self.repo_root / "mcp-router.csproj"
+        csproj_path = self.repo_root / "ModelContextGateway.csproj"
         if not csproj_path.exists():
-            self.record_check("Version", "mcp-router.csproj Exists", False, error=f"File not found: {csproj_path}")
+            csproj_path = self.repo_root / "mcp-router.csproj"
+        if not csproj_path.exists():
+            self.record_check("Version", "Project File Exists", False, error=f"File not found: ModelContextGateway.csproj")
             return None
 
         csproj_content = csproj_path.read_text(encoding="utf-8")
@@ -166,7 +168,7 @@ class ReleaseVerifier:
         # 1a. Extract <Version>
         v_match = re.search(r"<Version>(.*?)</Version>", csproj_content)
         if not v_match:
-            self.record_check("Version", "Csproj <Version> Tag", False, error="<Version> tag missing in mcp-router.csproj")
+            self.record_check("Version", "Csproj <Version> Tag", False, error=f"<Version> tag missing in {csproj_path.name}")
             return None
         canonical_version = v_match.group(1).strip()
 
@@ -175,7 +177,7 @@ class ReleaseVerifier:
         if not semver_match:
             self.record_check("Version", "Csproj SemVer Syntax", False, error=f"Version '{canonical_version}' does not match Semantic Versioning (X.Y.Z)")
             return None
-        self.record_check("Version", f"Canonical Version ({canonical_version}) in mcp-router.csproj", True, f"Found <Version>{canonical_version}</Version>")
+        self.record_check("Version", f"Canonical Version ({canonical_version}) in {csproj_path.name}", True, f"Found <Version>{canonical_version}</Version>")
 
         # 1b. Validate AssemblyVersion and FileVersion
         asm_match = re.search(r"<AssemblyVersion>(.*?)</AssemblyVersion>", csproj_content)
@@ -462,13 +464,15 @@ class ReleaseVerifier:
 
     def verify_backend_tests(self):
         self.print_section("3. Backend .NET Build & Test Verification", "🧪")
-        sln_path = self.repo_root / "McpRouter.slnx"
+        sln_path = self.repo_root / "ModelContextGateway.slnx"
         if not sln_path.exists():
-            self.record_check("Build & Tests", "McpRouter Solution Exists", False, error="McpRouter.slnx not found")
+            sln_path = self.repo_root / "McpRouter.slnx"
+        if not sln_path.exists():
+            self.record_check("Build & Tests", "Gateway Solution Exists", False, error="ModelContextGateway.slnx not found")
             return
 
         # Backend test command
-        cmd = ["dotnet", "test", "McpRouter.slnx", "--configuration", "Release"]
+        cmd = ["dotnet", "test", str(sln_path), "--configuration", "Release"]
         self._run_command(cmd, self.repo_root, ".NET Backend Test Suite (500+ tests)", env={"CI": "true"})
 
     def verify_frontend_quality(self):

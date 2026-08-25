@@ -324,7 +324,7 @@ Stores append-only, PII-sanitized audit trails of all tool calls, prompt evaluat
 
 ```mermaid
 graph TD
-    MasterKey["ROUTER_SECRET / DB_ENCRYPTION_KEY<br>(Environment / High-Entropy Fallback)"]
+    MasterKey["MCG_SECRET / DB_ENCRYPTION_KEY<br>(Environment / High-Entropy Fallback)"]
     KDF["PBKDF2 / Argon2id Key Derivation<br>(HMAC-SHA256, 100,000 Iterations)"]
     DerivedKey["256-Bit Symmetric Key"]
     AES["AES-256-GCM Authenticated Encryption<br>(96-Bit Nonce + 128-Bit Tag)"]

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Release & Quality Verification Script (Issue #59)
-# CSharp-MCP-Router
+# Model Context Gateway (MCG)
 # ==============================================================================
 set -euo pipefail
 

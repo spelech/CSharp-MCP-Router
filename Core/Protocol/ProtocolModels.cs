@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace McpRouter.Core.Protocol
+namespace ModelContextGateway.Core.Protocol
 {
     // Base JSON-RPC 2.0 Types
     public class JsonRpcMessage
@@ -140,7 +140,7 @@ namespace McpRouter.Core.Protocol
     public class McpInitializeParams
     {
         [JsonPropertyName("protocolVersion")]
-        public string ProtocolVersion { get; set; } = "2024-11-05";
+        public string ProtocolVersion { get; set; } = GatewayMetadata.ProtocolVersion;
 
         [JsonPropertyName("capabilities")]
         public JsonElement? Capabilities { get; set; }
@@ -152,9 +152,9 @@ namespace McpRouter.Core.Protocol
     public class McpClientInfo
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; } = "CSharp-MCP-Router";
+        public string Name { get; set; } = GatewayMetadata.DefaultName;
 
         [JsonPropertyName("version")]
-        public string Version { get; set; } = "0.4.0";
+        public string Version { get; set; } = GatewayMetadata.Version;
     }
 }

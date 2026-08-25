@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ModelContextGateway.csproj" />
+  <Project Path="ModelContextGateway.Tests/ModelContextGateway.Tests.csproj" />
+</Solution>

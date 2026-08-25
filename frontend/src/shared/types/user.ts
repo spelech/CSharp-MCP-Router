@@ -9,4 +9,5 @@ export interface UserInfo {
 export interface HealthInfo {
   status: string;
   version: string;
+  service?: string;
 }

@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace McpRouter.Infrastructure.Logging
+namespace ModelContextGateway.Infrastructure.Logging
 {
     public class LogEntry
     {

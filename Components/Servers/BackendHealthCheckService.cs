@@ -1,6 +1,6 @@
 using Dapper;
 
-namespace McpRouter.Components.Servers
+namespace ModelContextGateway.Components.Servers
 {
     /// <summary>
     /// Background hosted service that periodically probes downstream backend MCP servers and updates their health status.

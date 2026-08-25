@@ -2,7 +2,7 @@ using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace McpRouter.Components.Authorization
+namespace ModelContextGateway.Components.Authorization
 {
     [ApiController]
     [Route("api/[controller]")]

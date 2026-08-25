@@ -2,7 +2,7 @@ using System.Collections.Concurrent;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 
-namespace McpRouter.Components.Capabilities
+namespace ModelContextGateway.Components.Capabilities
 {
     public class SetMasterKeyRequest
     {
@@ -81,7 +81,19 @@ namespace McpRouter.Components.Capabilities
             app.MapPost("/admin/message", HandleAdminMessage)
                .RequireAuthorization("AdminPolicy");
 
-            // 4. /api/config/master-key (POST) guarded by AdminPolicy
+            // 4. /mcg-admin route aliases (GET/POST/HEAD) guarded by AdminPolicy
+            app.MapMethods("/mcg-admin", new[] { "GET", "POST", "HEAD" }, HandleAdminSse)
+               .RequireAuthorization("AdminPolicy");
+
+            // 5. /mcg-admin/sse (GET/POST/HEAD) guarded by AdminPolicy
+            app.MapMethods("/mcg-admin/sse", new[] { "GET", "POST", "HEAD" }, HandleAdminSse)
+               .RequireAuthorization("AdminPolicy");
+
+            // 6. /mcg-admin/message (POST) guarded by AdminPolicy
+            app.MapPost("/mcg-admin/message", HandleAdminMessage)
+               .RequireAuthorization("AdminPolicy");
+
+            // 7. /api/config/master-key (POST) guarded by AdminPolicy
             app.MapPost("/api/config/master-key", HandleSetMasterKey)
                .RequireAuthorization("AdminPolicy");
 
@@ -185,7 +197,8 @@ namespace McpRouter.Components.Capabilities
             }
 
             var host = httpContext.Request.Host.Value;
-            var absoluteUrl = $"{scheme}://{host}/admin/message?sessionId={sessionId}";
+            var endpointPrefix = httpContext.Request.Path.Value?.StartsWith("/mcg-admin", StringComparison.OrdinalIgnoreCase) == true ? "/mcg-admin" : "/admin";
+            var absoluteUrl = $"{scheme}://{host}{endpointPrefix}/message?sessionId={sessionId}";
 
             await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
             await httpContext.Response.Body.FlushAsync();

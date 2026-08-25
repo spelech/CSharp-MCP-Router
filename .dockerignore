@@ -4,7 +4,7 @@
 *.log
 data/*.db*
 data/*.key
-McpRouter.Tests
+ModelContextGateway.Tests
 TestResults
 node_modules
 wwwroot

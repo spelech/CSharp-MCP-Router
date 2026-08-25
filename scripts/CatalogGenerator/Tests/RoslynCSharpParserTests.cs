@@ -11,9 +11,9 @@ namespace CatalogGenerator.Tests
         {
             var source = @"
 using Xunit;
-using McpRouter.Tests.Attributes;
+using ModelContextGateway.Tests.Attributes;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class SampleTests
     {
@@ -41,7 +41,7 @@ namespace McpRouter.Tests
 
             var index = new CatalogIndex();
             var parser = new RoslynCSharpParser();
-            parser.ParseSource("McpRouter.Tests/SampleTests.cs", source, index);
+            parser.ParseSource("ModelContextGateway.Tests/SampleTests.cs", source, index);
 
             Assert.Equal(2, index.Requirements.Count);
 
@@ -51,7 +51,7 @@ namespace McpRouter.Tests
             Assert.Equal("Admin SID bypasses explicit deny policies", auth01.Description);
             Assert.Single(auth01.Proofs);
             Assert.Equal("AdminSid_Bypasses", auth01.Proofs[0].TestName);
-            Assert.Equal("McpRouter.Tests/SampleTests.cs", auth01.Proofs[0].FilePath);
+            Assert.Equal("ModelContextGateway.Tests/SampleTests.cs", auth01.Proofs[0].FilePath);
             Assert.Equal("Ensures admin SID overrides deny policies.", auth01.Proofs[0].Details);
 
             var guard01 = index.Requirements["GUARD-01"];
@@ -67,9 +67,9 @@ namespace McpRouter.Tests
         {
             var source = @"
 using Xunit;
-using McpRouter.Tests.Attributes;
+using ModelContextGateway.Tests.Attributes;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class FallbackTests
     {
@@ -87,7 +87,7 @@ namespace McpRouter.Tests
 
             var index = new CatalogIndex();
             var parser = new RoslynCSharpParser();
-            parser.ParseSource("McpRouter.Tests/FallbackTests.cs", source, index);
+            parser.ParseSource("ModelContextGateway.Tests/FallbackTests.cs", source, index);
 
             Assert.Single(index.Requirements);
             var req = index.Requirements["ROUTER-05"];
@@ -108,7 +108,7 @@ namespace McpRouter.Tests
                 var validFile = Path.Combine(tempDir, "Test1.cs");
                 File.WriteAllText(validFile, @"
 using Xunit;
-namespace McpRouter.Tests {
+namespace ModelContextGateway.Tests {
     public class T1 {
         [Fact]
         [Requirement(""DIR-01"", ""Dir test"")]
@@ -118,7 +118,7 @@ namespace McpRouter.Tests {
                 var binFile = Path.Combine(binDir, "Ignored.cs");
                 File.WriteAllText(binFile, @"
 using Xunit;
-namespace McpRouter.Tests {
+namespace ModelContextGateway.Tests {
     public class Ignored {
         [Fact]
         [Requirement(""BIN-01"", ""Should be ignored"")]
@@ -147,9 +147,9 @@ namespace McpRouter.Tests {
         {
             var source = @"
 using Xunit;
-using McpRouter.Tests.Attributes;
+using ModelContextGateway.Tests.Attributes;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class OverloadTests
     {
@@ -173,7 +173,7 @@ namespace McpRouter.Tests
 
             var index = new CatalogIndex();
             var parser = new RoslynCSharpParser();
-            parser.ParseSource("McpRouter.Tests/OverloadTests.cs", source, index);
+            parser.ParseSource("ModelContextGateway.Tests/OverloadTests.cs", source, index);
 
             Assert.Equal(4, index.Requirements.Count);
 

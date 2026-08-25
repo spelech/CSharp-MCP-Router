@@ -1,4 +1,4 @@
-namespace McpRouter.Components.Providers
+namespace ModelContextGateway.Components.Providers
 {
     public static class ProviderEndpoints
     {

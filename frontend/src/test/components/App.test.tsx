@@ -23,7 +23,8 @@ describe('App component', () => {
       render(<App />);
     });
 
-    expect(screen.getByText('MCP Gateway')).toBeInTheDocument();
+    expect(screen.getByText('Model Context Gateway')).toBeInTheDocument();
+    expect(screen.getByText('MCG')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /overview/i })).toHaveClass('active');
     expect(screen.getByRole('button', { name: /app keys & security/i })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /settings/i })).toBeInTheDocument();

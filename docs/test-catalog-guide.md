@@ -1,12 +1,12 @@
 # Software Requirements Specification (SRS) & Test Catalog Guide
 
-This guide describes the architecture, taxonomy, test annotation conventions, and generator workflows for the **MCP Router Software Requirements Specification (SRS) & Test Catalog**.
+This guide describes the architecture, taxonomy, test annotation conventions, and generator workflows for the **Model Context Gateway (MCG) Software Requirements Specification (SRS) & Test Catalog**.
 
 ---
 
 ## 🎯 1. Overview & Architecture
 
-The `CSharp-MCP-Router` repository employs an automated, living requirements-to-test traceability system. Rather than maintaining static, easily outdated requirements matrices in external documentation tools, software requirements and safety guardrails are annotated directly on test proofs in source code.
+The `ModelContextGateway` repository employs an automated, living requirements-to-test traceability system. Rather than maintaining static, easily outdated requirements matrices in external documentation tools, software requirements and safety guardrails are annotated directly on test proofs in source code.
 
 The **Catalog Generator** (`scripts/CatalogGenerator`) statically analyzes the codebase using Roslyn (.NET Compiler Platform) and TypeScript AST/regex scanning to extract all requirement definitions and test proofs across backend xUnit tests, frontend Vitest component tests, and Playwright end-to-end (E2E) suites.
 
@@ -14,7 +14,7 @@ The **Catalog Generator** (`scripts/CatalogGenerator`) statically analyzes the c
 +-------------------------------------------------------------------------------+
 |                             Test Suites Source                                |
 +-------------------------------------------------------------------------------+
-|  - McpRouter.Tests/*.cs         (Roslyn C# SyntaxTree [Requirement] Attribute)|
+|  - ModelContextGateway.Tests/*.cs (Roslyn C# SyntaxTree [Requirement] Attribute)|
 |  - frontend/src/test/**/*.tsx   (TypeScript / Vitest JSDoc @requirement)      |
 |  - frontend/e2e/**/*.ts         (Playwright E2E JSDoc @requirement)           |
 +-------------------------------------------------------------------------------+
@@ -72,10 +72,10 @@ Requirement IDs follow the naming convention `[CATEGORY-NN]` (e.g., `AUTH-01`, `
 
 ### 4.1 Backend C# (xUnit Tests)
 
-Use the `[Requirement]` attribute from the `McpRouter.Tests.Attributes` namespace on test methods:
+Use the `[Requirement]` attribute from the `ModelContextGateway.Tests.Attributes` namespace on test methods:
 
 ```csharp
-using McpRouter.Tests.Attributes;
+using ModelContextGateway.Tests.Attributes;
 using Xunit;
 
 public class StdioTransportTests
