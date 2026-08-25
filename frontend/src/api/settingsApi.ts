@@ -20,6 +20,7 @@ export async function fetchEmbeddingSettingsApi(): Promise<EmbeddingSettings | n
     allowOpenClientRegistration: settings.allowOpenClientRegistration ?? true,
     globalMaxKeys: settings.globalMaxKeys ?? 0,
     userMaxKeys: settings.userMaxKeys ?? 0,
+    masterKeySource: settings.masterKeySource,
   };
 }
 
@@ -132,3 +133,12 @@ export async function uploadBrandingLogo(file: File): Promise<{ url: string; suc
   });
   return result || { url: '', success: false };
 }
+
+export async function setMasterKeyApi(newKey: string): Promise<{ success: boolean; message?: string; keySource?: string; error?: string }> {
+  const result = await apiRequest<{ success: boolean; message?: string; keySource?: string; error?: string }>('/api/config/master-key', {
+    method: 'POST',
+    body: { newKey }
+  });
+  return result || { success: false, error: 'Failed to update master key.' };
+}
+

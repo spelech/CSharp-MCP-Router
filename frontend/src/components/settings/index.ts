@@ -6,4 +6,6 @@ export * from './CustomFilesTab';
 export * from './AccessControlTab';
 export * from './BackupsTab';
 export * from './CustomFileModal';
+export * from './MasterKeyModal';
 export * from './SettingsView';
+

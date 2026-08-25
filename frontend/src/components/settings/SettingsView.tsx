@@ -19,6 +19,7 @@ export const SettingsView: React.FC = () => {
     mappings,
     fetchEmbeddingSettings,
     saveEmbeddingSettings,
+    setMasterKey,
     fetchProviders,
     saveAuthProvider,
     saveSecretProvider,
@@ -97,9 +98,10 @@ export const SettingsView: React.FC = () => {
       {/* Subview 1: Vector & Search */}
       {activeSubview === 'search' && (
         <GeneralTab
-          key={embeddingSettings ? `${embeddingSettings.embeddingProvider}-${embeddingSettings.embeddingModelDir}-${embeddingSettings.embeddingApiUrl}` : 'loading'}
+          key={embeddingSettings ? `${embeddingSettings.embeddingProvider}-${embeddingSettings.embeddingModelDir}-${embeddingSettings.embeddingApiUrl}-${embeddingSettings.masterKeySource}` : 'loading'}
           settings={embeddingSettings}
           saveEmbeddingSettings={saveEmbeddingSettings}
+          setMasterKey={setMasterKey}
         />
       )}
 
