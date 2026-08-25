@@ -1,0 +1,247 @@
+# MCP Router Gateway & Semantic Proxy
+
+<div align="center">
+
+![Version](https://img.shields.io/badge/version-v4.35.0-orange?style=for-the-badge)
+![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
+![Tests](https://img.shields.io/badge/tests-620%20passing-2ea44f?style=for-the-badge)
+![Docker Ready](https://img.shields.io/badge/docker-ready-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
+![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
+
+</div>
+
+---
+
+**`csharp-mcp-router`** is a high-performance C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the [Model Context Protocol (MCP)](https://modelcontextprotocol.io).
+
+It aggregates hundreds of tools from isolated backend servers (Docker, Home Assistant, Plex, Actual Budget, Excel, custom APIs, STDIO subprocesses) and proxies them to AI clients (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) via a single unified connection.
+
+![MCP Router Gateway Dashboard](assets/dashboard.jpg)
+
+---
+
+## ⚡ Core Architecture Highlights
+
+```mermaid
+flowchart LR
+    subgraph Clients["AI Clients & IDEs"]
+        Claude["Claude Desktop"]
+        Cursor["Cursor / Windsurf"]
+        Agents["Autonomous Agents"]
+    end
+
+    subgraph Gateway["MCP Router Gateway"]
+        Auth["OAuth / Reverse Proxy Auth / AppKey"]
+        MetaMode["Meta-Mode Router\n(search_tools / execute_tool)"]
+        Vector["Semantic Vector Search\n(Local ONNX / OpenAI)"]
+        AdminMCP["Admin MCP Server\n(/admin, /router-admin)"]
+        Secrets["Secret Providers\n(Vault / DPAPI / AES)"]
+    end
+
+    subgraph Backends["Downstream MCP Servers"]
+        DockerSrv["Docker Containers\n(Auto-Discovery)"]
+        SSESrv["Remote SSE / HTTP Servers"]
+        StdioSrv["Subprocess STDIO\n(Node / Python / uv / bun)"]
+    end
+
+    Clients -->|Bearer / SSE| Auth
+    Auth --> MetaMode
+    Auth --> AdminMCP
+    MetaMode <--> Vector
+    MetaMode --> Secrets
+    Secrets --> DockerSrv
+    Secrets --> SSESrv
+    Secrets --> StdioSrv
+```
+
+* **🧠 Meta-Mode Dynamic Tool Filtering**: Exposes only `search_tools` and `execute_tool` on `/sse` by default, eliminating context window bloat in LLMs while dynamically discovering and routing across hundreds of backend tools on demand.
+* **🛡️ Multi-Tenant Auth & Zero-Config Standalone**: Native Active Directory LDAP / Kerberos, OIDC reverse proxy headers (`Remote-User`, `Remote-Groups` from Authentik, Authelia, Keycloak), scoped AppKeys (`mcp-adm-`, `mcp-usr-`, `mcp-srv-`), and trusted local loopback for personal home-labs.
+* **🤖 In-Process Admin MCP Control Plane (`/admin`, `/router-admin`)**: Autonomous AI agents can manage providers, servers, RBAC policies, group mappings, vector search, and personal AppKeys via standard MCP tool calls without manual UI operations.
+* **🔍 Dual-Provider Semantic Vector Search**: Local in-process CPU vector embeddings (`all-MiniLM-L6-v2` via `Microsoft.ML.Tokenizers`) or remote OpenAI-compatible API providers stored securely in SQLCipher/AES encrypted databases.
+* **🔐 Enterprise Secrets & Key Lifecycle**: Just-in-time secret retrieval from HashiCorp Vault (KV v2), Windows Registry (DPAPI), or Environment Variables with AES-256-GCM envelope encryption and dynamic master key rotation.
+* **🐳 Docker Label Auto-Discovery**: Mounts `/var/run/docker.sock` to dynamically discover and register containers with `mcp.enabled=true` labels with zero manual registration.
+* **🗄️ Multi-Database Support**: First-class stored procedure suites across SQLite, Microsoft SQL Server, and MySQL via Dapper.
+
+---
+
+## 🧭 Documentation Portal Navigation
+
+<div class="grid cards" markdown>
+
+-   :material-rocket-launch: __[Deployment & Getting Started](deployment-guide.md)__
+
+    ---
+
+    Blank-slate Docker, Docker Compose, Windows IIS setup, environment variables, master encryption keys, and zero-config deployment.
+
+-   :material-shield-account: __[Authentication & Identity Architecture](authentication-architecture.md)__
+
+    ---
+
+    Active Directory SIDs, OIDC reverse proxy SSO, standalone loopback trust, AppKey scopes, and token exchange flows.
+
+-   :material-cog-transfer: __[Enterprise Administration Guide](admin-guide.md)__
+
+    ---
+
+    Operational administration, provider configuration, group mappings, master key rotation, and system management.
+
+-   :material-robot: __[Admin MCP Automation Guide](admin-mcp-automation-guide.md)__
+
+    ---
+
+    Autonomous agent administration via the `mcp-router-admin` skill, control plane tools, and programmatic provisioning.
+
+-   :material-book-open-page-variant: __[Official User Guide Suite](user-guide/README.md)__
+
+    ---
+
+    Interactive dashboard walkthrough, server registration, RBAC management, client configuration, and test bench usage.
+
+-   :material-chef-hat: __[MCP Server Auth Cookbook](mcp-server-auth-cookbook.md)__
+
+    ---
+
+    Scenario-driven integration recipes for Bearer auth, Custom Headers, Vault, BYOK, Pass-Through, and Identity-Forwarding.
+
+-   :material-sitemap: __[Comprehensive Architecture](architecture.md)__
+
+    ---
+
+    Complete enterprise architecture specification, sequence diagrams, component models, and AES-256-GCM encryption pipelines.
+
+-   :material-database: __[Database Providers & Data Model](data-model.md)__
+
+    ---
+
+    Canonical 12-table ERD, dialect specifications for SQLite, MSSQL, and MySQL, stored procedures, and migration guide.
+
+-   :material-key-wireless: __[AppKey Scopes & Authorization](appkey-scopes.md)__
+
+    ---
+
+    Scope grammar (`*`, `server:*`, `category:*`, `tool:*`), evaluation pipeline, least-privilege personas, and token hashing.
+
+-   :material-safe: __[Secret Providers & Key Management](secret-providers.md)__
+
+    ---
+
+    HashiCorp Vault KV v2 JIT renewal, Windows DPAPI, Master Key lifecycle, and secure credential storage.
+
+-   :material-swap-horizontal: __[Downstream Transports Guide](transports.md)__
+
+    ---
+
+    SSE, HTTP/streamable, subprocess STDIO security policies, environment secret injection, and process tree isolation.
+
+-   :material-clipboard-check: __[SRS & Test Catalog](software-requirements-and-test-catalog.md)__
+
+    ---
+
+    Living Software Requirements Specification, requirement taxonomy (`AUTH`, `MCP`, `SEC`, `GUARD`), and test verification matrix.
+
+</div>
+
+---
+
+## ⚡ Quickstart: Zero-Config Startup
+
+Run the gateway container with zero required configuration. On first boot, the router automatically generates a 256-bit AES Master Key in `./data/.master.key` and initializes a secure SQLite database:
+
+=== "Docker CLI"
+
+    ```bash
+    docker run -d \
+      --name mcp-router \
+      --restart unless-stopped \
+      -p 8080:8080 \
+      -v $(pwd)/data:/app/data \
+      -v /var/run/docker.sock:/var/run/docker.sock \
+      ghcr.io/spelech/mcp-router:latest
+    ```
+
+=== "Docker Compose"
+
+    ```yaml
+    services:
+      mcp-router:
+        image: ghcr.io/spelech/mcp-router:latest
+        container_name: mcp-router
+        restart: unless-stopped
+        ports:
+          - "8080:8080"
+        volumes:
+          - ./data:/app/data
+          - /var/run/docker.sock:/var/run/docker.sock
+        environment:
+          - DB_PROVIDER=sqlite
+          - ROUTER_ADMIN_KEY=mcp-adm-prod-bootstrap-token-99
+    ```
+
+### Live Endpoints
+
+* **Web UI Dashboard**: [`http://localhost:8080/`](http://localhost:8080/)
+* **Health Check**: [`http://localhost:8080/health`](http://localhost:8080/health) &rarr; `{"status":"healthy","service":"McpRouter","version":"4.35.0"}`
+* **Meta-Mode Gateway**: `http://localhost:8080/sse`
+* **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin`)
+* **Direct Backend Proxy**: `http://localhost:8080/{targetServerId}`
+
+---
+
+## 🤖 Connecting AI Clients
+
+### 1. Claude Desktop (`claude_desktop_config.json`)
+
+=== "Meta-Mode Gateway (/sse)"
+
+    ```json
+    {
+      "mcpServers": {
+        "mcp-router": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/sse"]
+        }
+      }
+    }
+    ```
+
+=== "Admin Control Plane (/admin)"
+
+    ```json
+    {
+      "mcpServers": {
+        "mcp-router-admin": {
+          "command": "npx",
+          "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8080/admin"]
+        }
+      }
+    }
+    ```
+
+### 2. Cursor / Windsurf / Cline (`mcp.json` / `cline_mcp_settings.json`)
+
+```json
+{
+  "mcpServers": {
+    "mcp-router": {
+      "url": "http://localhost:8080/sse",
+      "headers": {
+        "Authorization": "Bearer mcp-usr-my-developer-token-123"
+      }
+    }
+  }
+}
+```
+
+---
+
+## 🛠️ Verification & Quality Assurance
+
+All features, security guardrails, and authentication flows are enforced by automated test suites:
+
+* **xUnit Backend Suite**: 620+ integration & unit tests ([`McpRouter.Tests`](developer-guide.md#running-tests))
+* **Vitest Frontend Suite**: Component and state store test coverage ([`frontend/src/test`](developer-guide.md#frontend-tests))
+* **Playwright E2E Suite**: End-to-end browser automation ([`frontend/e2e`](developer-guide.md#playwright-e2e-tests))
+* **Living Requirements Matrix**: Zero-drift catalog generation via `dotnet run --project scripts/CatalogGenerator -- --verify-only` ([SRS Catalog](software-requirements-and-test-catalog.md))
