@@ -44,6 +44,9 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore McpRouter.slnx
 
+      - name: Verify C# code formatting & style
+        run: dotnet format McpRouter.slnx --verify-no-changes
+
       - name: Build backend (Release)
         run: dotnet build McpRouter.slnx --configuration Release --no-restore
 
