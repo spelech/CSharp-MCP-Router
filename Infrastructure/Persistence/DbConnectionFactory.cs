@@ -1,8 +1,6 @@
-using System;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 
 namespace McpRouter.Infrastructure.Persistence

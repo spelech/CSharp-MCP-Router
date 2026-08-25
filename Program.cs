@@ -1,4 +1,3 @@
-using Microsoft.AspNetCore.Builder;
 using McpRouter.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);

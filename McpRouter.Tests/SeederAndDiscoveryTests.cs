@@ -1,21 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
-using System.Linq;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Core.Routing;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
+using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using Xunit;
-using Dapper;
 
 namespace McpRouter.Tests
 {
@@ -94,7 +82,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task DockerAutoDiscovery_ScanContainers_HandlesMissingSocketGracefully()
         {
-            var (sp, factory) = CreateServiceProvider();
+            var (sp, _) = CreateServiceProvider();
             var logger = NullLogger<DockerAutoDiscoveryService>.Instance;
 
             var discovery = new DockerAutoDiscoveryService(sp, logger);

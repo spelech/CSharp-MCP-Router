@@ -1,11 +1,5 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
-using McpRouter.Core.Protocol;
 
 namespace McpRouter.Core.Routing
 {
@@ -78,7 +72,10 @@ namespace McpRouter.Core.Routing
                             {
                                 resourceDict["uri"] = exposedUri;
                                 if (resourceDict.TryGetValue("name", out var nameVal))
+                                {
                                     resourceDict["name"] = $"[{item.ServerId}] {nameVal}";
+                                }
+
                                 serverResources.Add(resourceDict);
                                 allResources.Add(resourceDict);
                             }
@@ -106,9 +103,18 @@ namespace McpRouter.Core.Routing
                         var filename = Path.GetFileName(file);
                         var ext = Path.GetExtension(file).ToLowerInvariant();
                         var mimeType = "text/plain";
-                        if (ext == ".md") mimeType = "text/markdown";
-                        else if (ext == ".json") mimeType = "application/json";
-                        else if (ext == ".html") mimeType = "text/html";
+                        if (ext == ".md")
+                        {
+                            mimeType = "text/markdown";
+                        }
+                        else if (ext == ".json")
+                        {
+                            mimeType = "application/json";
+                        }
+                        else if (ext == ".html")
+                        {
+                            mimeType = "text/html";
+                        }
 
                         allResources.Add(new Dictionary<string, object> {
                             { "uri", "router://resources/" + filename },
@@ -207,7 +213,10 @@ namespace McpRouter.Core.Routing
                             {
                                 templateDict["uriTemplate"] = exposedTemplate;
                                 if (templateDict.TryGetValue("name", out var nameVal))
+                                {
                                     templateDict["name"] = $"[{item.ServerId}] {nameVal}";
+                                }
+
                                 serverTemplates.Add(templateDict);
                                 allTemplates.Add(templateDict);
                             }
@@ -266,9 +275,18 @@ namespace McpRouter.Core.Routing
                     {
                         var ext = Path.GetExtension(filePath).ToLowerInvariant();
                         var mimeType = "text/plain";
-                        if (ext == ".md") mimeType = "text/markdown";
-                        else if (ext == ".json") mimeType = "application/json";
-                        else if (ext == ".html") mimeType = "text/html";
+                        if (ext == ".md")
+                        {
+                            mimeType = "text/markdown";
+                        }
+                        else if (ext == ".json")
+                        {
+                            mimeType = "application/json";
+                        }
+                        else if (ext == ".html")
+                        {
+                            mimeType = "text/html";
+                        }
 
                         var text = File.ReadAllText(filePath);
                         return new

@@ -1,6 +1,6 @@
-using Xunit;
-using CatalogGenerator.Models;
 using CatalogGenerator.Emitters;
+using CatalogGenerator.Models;
+using Xunit;
 
 namespace CatalogGenerator.Tests
 {

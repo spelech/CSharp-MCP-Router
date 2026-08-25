@@ -1,6 +1,3 @@
-using System;
-using Microsoft.Extensions.Configuration;
-
 namespace McpRouter.Infrastructure.Secrets
 {
     public static class EncryptionKeyProvider

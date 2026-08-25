@@ -1,18 +1,6 @@
-using System;
 using System.Collections.Concurrent;
-using System.IO;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using McpRouter.Core.Protocol;
-using McpRouter.Core.Routing;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Logging;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Components.Capabilities
 {
@@ -180,7 +168,11 @@ namespace McpRouter.Components.Capabilities
                 httpContext.Request.Method, sessionId, System.Net.WebUtility.UrlEncode(callerUsername));
 
             var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
-            if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+            if (string.IsNullOrEmpty(scheme))
+            {
+                scheme = httpContext.Request.Scheme;
+            }
+
             var host = httpContext.Request.Host.Value;
             var absoluteUrl = $"{scheme}://{host}/admin/message?sessionId={sessionId}";
 
@@ -248,7 +240,10 @@ namespace McpRouter.Components.Capabilities
                 {
                     await Task.Delay(50);
                     session = GetSession(sessionId);
-                    if (session != null) break;
+                    if (session != null)
+                    {
+                        break;
+                    }
                 }
             }
 
@@ -277,7 +272,7 @@ namespace McpRouter.Components.Capabilities
                 }
 
                 var method = methodProp.GetString() ?? string.Empty;
-            logger.LogDebug("[JSON-RPC Admin Client -> Gateway] Method: {Method}", method?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
+                logger.LogDebug("[JSON-RPC Admin Client -> Gateway] Method: {Method}", method?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
                 var id = root.TryGetProperty("id", out var idProp) ? idProp.Clone() : (JsonElement?)null;
                 var identity = await identityProvider.ResolveIdentityAsync(httpContext);
                 var callerUsername = identity?.Username ?? session.CallerUsername ?? "admin";

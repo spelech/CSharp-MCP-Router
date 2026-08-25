@@ -1,8 +1,6 @@
-using System;
-using System.Linq;
-using Xunit;
-using McpRouter.Tests.Attributes;
 using CatalogGenerator.Models;
+using McpRouter.Tests.Attributes;
+using Xunit;
 
 namespace CatalogGenerator.Tests
 {

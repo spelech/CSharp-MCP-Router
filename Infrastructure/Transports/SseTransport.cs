@@ -1,25 +1,14 @@
-using System;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Components.Servers;
-using McpRouter.Models;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Infrastructure.Transports
 {
     public class SseTransport : ITransport
     {
         private readonly string? _passThroughToken;
-        private readonly string? _forwardedUser;
+        private readonly string? _forwardedUser;
+
         public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
         private readonly McpServer _server;
         private readonly HttpClient _httpClient;
@@ -31,8 +20,6 @@ namespace McpRouter.Infrastructure.Transports
         private string? _messageUrl;
         private TaskCompletionSource<string> _endpointTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
         private string _sessionId = Guid.NewGuid().ToString("N");
-        private Task? _readerTask;
-        private Task? _pingTask;
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -42,7 +29,8 @@ namespace McpRouter.Infrastructure.Transports
         public SseTransport(McpServer server, HttpClient httpClient, ILogger logger, JsonRpcStateManager stateManager, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, string? forwardedUser = null)
         {
             _passThroughToken = passThroughToken;
-            _forwardedUser = forwardedUser;
+            _forwardedUser = forwardedUser;
+
             _server = server;
             _httpClient = httpClient;
             _logger = logger;
@@ -55,8 +43,10 @@ namespace McpRouter.Infrastructure.Transports
             if (!string.IsNullOrEmpty(_passThroughToken) && (_server.AllowPassThroughAuth || _server.SecretProvider == "UserProvided"))
             {
                 return _passThroughToken;
-            }
-
+            }
+
+
+
             var provider = _server.SecretProvider ?? "None";
             if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
@@ -96,7 +86,7 @@ namespace McpRouter.Infrastructure.Transports
                 path = @"SOFTWARE\McpRouter\Secrets";
             }
 
-            string? secret = null;
+            string? secret;
             if (retriever is CompositeSecretRetriever composite)
             {
                 secret = await composite.GetSecretForProviderAsync(provider, path, field);
@@ -190,7 +180,7 @@ namespace McpRouter.Infrastructure.Transports
 
         public void StartReader(Func<JsonRpcMessage, Task> onMessageReceived)
         {
-            _readerTask = Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 while (!_cts.Token.IsCancellationRequested)
                 {
@@ -255,7 +245,10 @@ namespace McpRouter.Infrastructure.Transports
                         while (!_cts.Token.IsCancellationRequested)
                         {
                             var line = await reader.ReadLineAsync(_cts.Token);
-                            if (line == null) break;
+                            if (line == null)
+                            {
+                                break;
+                            }
 
                             if (line.StartsWith("event:"))
                             {
@@ -320,7 +313,7 @@ namespace McpRouter.Infrastructure.Transports
                 }
             });
 
-            _pingTask = Task.Run(async () =>
+            _ = Task.Run(async () =>
             {
                 while (!_cts.Token.IsCancellationRequested)
                 {
@@ -348,8 +341,16 @@ namespace McpRouter.Infrastructure.Transports
                 case JsonValueKind.String:
                     return element.GetString();
                 case JsonValueKind.Number:
-                    if (element.TryGetInt64(out long l)) return l;
-                    if (element.TryGetDouble(out double d)) return d;
+                    if (element.TryGetInt64(out long l))
+                    {
+                        return l;
+                    }
+
+                    if (element.TryGetDouble(out double d))
+                    {
+                        return d;
+                    }
+
                     return element.GetRawText();
                 case JsonValueKind.True:
                     return true;
@@ -433,7 +434,11 @@ namespace McpRouter.Infrastructure.Transports
                 }
 
                 await ApplyAuthAndCustomHeadersAsync(req);
-                if (!string.IsNullOrEmpty(targetAuthToken)) req.Headers.Add("X-Target-Auth", targetAuthToken);
+                if (!string.IsNullOrEmpty(targetAuthToken))
+                {
+                    req.Headers.Add("X-Target-Auth", targetAuthToken);
+                }
+
                 using var res = await _httpClient.SendAsync(req, _cts.Token);
                 res.EnsureSuccessStatusCode();
 
@@ -457,7 +462,10 @@ namespace McpRouter.Infrastructure.Transports
                 }
 
                 await ApplyAuthAndCustomHeadersAsync(req);
-                if (!string.IsNullOrEmpty(targetAuthToken)) req.Headers.Add("X-Target-Auth", targetAuthToken);
+                if (!string.IsNullOrEmpty(targetAuthToken))
+                {
+                    req.Headers.Add("X-Target-Auth", targetAuthToken);
+                }
 
                 _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(modifiedBody));
 
@@ -531,14 +539,20 @@ namespace McpRouter.Infrastructure.Transports
 
         public async Task SendNotificationAsync(string method, string bodyJson)
         {
-            if (_messageUrl == null) return;
+            if (_messageUrl == null)
+            {
+                return;
+            }
+
             var content = new StringContent(bodyJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
             req.Headers.Host = "localhost";
             await ApplyAuthAndCustomHeadersAsync(req);
             if (!string.IsNullOrEmpty(_sessionId))
+            {
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+            }
 
             using var res = await _httpClient.SendAsync(req, _cts.Token);
             res.EnsureSuccessStatusCode();
@@ -546,14 +560,20 @@ namespace McpRouter.Infrastructure.Transports
 
         public async Task SendResponseAsync(string responseJson)
         {
-            if (_messageUrl == null) return;
+            if (_messageUrl == null)
+            {
+                return;
+            }
+
             var content = new StringContent(responseJson, Encoding.UTF8, "application/json");
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
             req.Headers.Host = "localhost";
             await ApplyAuthAndCustomHeadersAsync(req);
             if (!string.IsNullOrEmpty(_sessionId))
+            {
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+            }
 
             using var res = await _httpClient.SendAsync(req, _cts.Token);
             res.EnsureSuccessStatusCode();

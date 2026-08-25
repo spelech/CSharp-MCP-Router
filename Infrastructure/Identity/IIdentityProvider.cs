@@ -1,8 +1,3 @@
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-
 namespace McpRouter.Infrastructure.Identity
 {
     /// <summary>
@@ -24,8 +19,16 @@ namespace McpRouter.Infrastructure.Identity
             get
             {
                 var list = new List<string>();
-                if (!string.IsNullOrEmpty(Sid)) list.Add(Sid);
-                if (Sids != null) list.AddRange(Sids);
+                if (!string.IsNullOrEmpty(Sid))
+                {
+                    list.Add(Sid);
+                }
+
+                if (Sids != null)
+                {
+                    list.AddRange(Sids);
+                }
+
                 return list.Distinct().ToList();
             }
         }

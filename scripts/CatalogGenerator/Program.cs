@@ -1,9 +1,6 @@
-using System;
-using System.IO;
-using System.Linq;
+using CatalogGenerator.Emitters;
 using CatalogGenerator.Models;
 using CatalogGenerator.Parsers;
-using CatalogGenerator.Emitters;
 
 namespace CatalogGenerator
 {

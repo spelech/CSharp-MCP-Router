@@ -1,25 +1,17 @@
-using System;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
-using McpRouter.Components.Clients;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 using OpenIddict.Abstractions;
-using Xunit;
-using McpRouter.Core.Routing;
-using McpRouter.Models;
-using Microsoft.Extensions.Configuration;
 
 namespace McpRouter.Tests
 {
     public class AuthorizationControllerTests
     {
-        
+
         [Fact]
         [McpRouter.Tests.Attributes.Requirement("AUTH-106", "SEC", McpRouter.Tests.Attributes.RequirementType.Negative, "Exchange throws InvalidOperationException when request is null.")]
         public async Task Exchange_ThrowsInvalidOperationException_WhenRequestNull()
@@ -37,7 +29,7 @@ namespace McpRouter.Tests
             await Assert.ThrowsAsync<InvalidOperationException>(() => controller.Exchange());
         }
 
-        
+
         [Fact]
         [McpRouter.Tests.Attributes.Requirement("AUTH-107", "SEC", McpRouter.Tests.Attributes.RequirementType.Positive, "RegisterClient successfully handles DCR requests when open DCR is enabled.")]
         public async Task RegisterClient_CreatesApplicationAndReturnsOk()
@@ -51,7 +43,7 @@ namespace McpRouter.Tests
             var mockLoggerFactory = new Mock<ILoggerFactory>();
             mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
             var mockServiceProvider = new Mock<IServiceProvider>();
-            
+
             var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), mockLoggerFactory.Object, mockServiceProvider.Object);
             embeddingServiceMock.Setup(m => m.GetSettings()).Returns(new RouterSettings { AllowOpenClientRegistration = true });
 

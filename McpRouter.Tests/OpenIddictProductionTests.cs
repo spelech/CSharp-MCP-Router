@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using McpRouter.Extensions;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -79,7 +74,9 @@ namespace McpRouter.Tests
             finally
             {
                 if (File.Exists(tempPfxPath))
+                {
                     File.Delete(tempPfxPath);
+                }
             }
         }
     }

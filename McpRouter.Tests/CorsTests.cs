@@ -1,15 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using FluentAssertions;
+using McpRouter.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
-using McpRouter.Extensions;
-using Xunit;
-using FluentAssertions;
 
 namespace McpRouter.Tests
 {
@@ -86,7 +81,10 @@ namespace McpRouter.Tests
             }
             finally
             {
-                if (File.Exists(tempCertPath)) File.Delete(tempCertPath);
+                if (File.Exists(tempCertPath))
+                {
+                    File.Delete(tempCertPath);
+                }
             }
         }
 

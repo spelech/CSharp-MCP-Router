@@ -1,19 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Middleware;
-using McpRouter.Models;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {

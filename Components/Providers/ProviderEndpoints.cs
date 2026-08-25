@@ -1,6 +1,3 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Routing;
-
 namespace McpRouter.Components.Providers
 {
     public static class ProviderEndpoints

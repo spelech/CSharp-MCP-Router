@@ -1,6 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
 using System.Text.RegularExpressions;
 using CatalogGenerator.Models;
 
@@ -15,14 +12,24 @@ namespace CatalogGenerator.Parsers
 
         public void ParseDirectory(string directoryPath, CatalogIndex index, string suiteName = "Frontend")
         {
-            if (!Directory.Exists(directoryPath)) return;
+            if (!Directory.Exists(directoryPath))
+            {
+                return;
+            }
 
             var files = Directory.GetFiles(directoryPath, "*.*", SearchOption.AllDirectories);
             foreach (var file in files)
             {
                 var ext = Path.GetExtension(file);
-                if (ext != ".ts" && ext != ".tsx" && ext != ".js") continue;
-                if (file.Contains("node_modules") || file.Contains(".next") || file.Contains("dist")) continue;
+                if (ext != ".ts" && ext != ".tsx" && ext != ".js")
+                {
+                    continue;
+                }
+
+                if (file.Contains("node_modules") || file.Contains(".next") || file.Contains("dist"))
+                {
+                    continue;
+                }
 
                 var code = File.ReadAllText(file);
                 ParseSource(file, code, index, suiteName);
@@ -39,7 +46,10 @@ namespace CatalogGenerator.Parsers
                 var testName = match.Groups["name"].Value.Trim();
 
                 var idMatch = Regex.Match(jsdoc, @"@(?:id|requirement|req)\s+([A-Za-z0-9\-_]+)", RegexOptions.IgnoreCase);
-                if (!idMatch.Success) continue;
+                if (!idMatch.Success)
+                {
+                    continue;
+                }
 
                 var id = idMatch.Groups[1].Value.Trim();
 

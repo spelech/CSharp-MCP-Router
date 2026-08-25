@@ -1,16 +1,7 @@
-using System;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Components.Clients;
-using McpRouter.Components.AppKeys;
-using McpRouter.Components.Providers;
-using McpRouter.Components.Authorization;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -108,7 +99,7 @@ namespace McpRouter.Tests
             // Mock table for sqlite emulation
             var controller = new PermissionsController(mockFactory.Object, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
             var policy = new McpAccessPolicy { TargetId = "target-mysql", RequiredGroup = "full_admin", IsAllowed = true };
-            
+
             // Note: Sqlite won't parse ON DUPLICATE KEY UPDATE so it will throw in sqlite engine,
             // which tests the 500 or execution path
             var result = await controller.SavePolicy(policy);
@@ -232,7 +223,7 @@ namespace McpRouter.Tests
             Assert.NotNull(result);
             Assert.Equal(500, result.StatusCode);
         }
-    
+
         [Fact]
         [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "Global deny policies with TargetId '*' and IsAllowed false must fail closed")]
         public async Task SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy()
@@ -240,7 +231,7 @@ namespace McpRouter.Tests
             var controller = new PermissionsController(_dbFactory, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object);
             var policy = new McpAccessPolicy { TargetId = "*", RequiredGroup = "admin", IsAllowed = false };
             var result = await controller.SavePolicy(policy) as BadRequestObjectResult;
-            
+
             Assert.NotNull(result);
             Assert.Equal(400, result.StatusCode);
         }

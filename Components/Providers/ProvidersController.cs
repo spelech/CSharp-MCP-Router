@@ -1,15 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Components.Providers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace McpRouter.Components.Providers
 {
@@ -87,7 +77,10 @@ namespace McpRouter.Components.Providers
             [FromServices] IAuditLogger auditLogger,
             [FromServices] IServiceProvider? serviceProvider = null)
         {
-            if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
+            if (string.IsNullOrEmpty(dto.ProviderName))
+            {
+                return BadRequest(new { error = "ProviderName is required" });
+            }
 
             var username = User?.Identity?.Name ?? "anonymous";
             try
@@ -149,8 +142,8 @@ namespace McpRouter.Components.Providers
             {
                 if (Uri.TryCreate(request.Address, UriKind.Absolute, out var uri))
                 {
-                    bool isLocalhost = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || 
-                                       uri.Host.Equals("127.0.0.1") || 
+                    bool isLocalhost = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                                       uri.Host.Equals("127.0.0.1") ||
                                        uri.Host.Equals("::1");
                     bool isSimpleHost = !uri.Host.Contains('.');
 
@@ -224,7 +217,10 @@ namespace McpRouter.Components.Providers
             [FromServices] IAuditLogger auditLogger,
             [FromServices] IServiceProvider? serviceProvider = null)
         {
-            if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
+            if (string.IsNullOrEmpty(dto.ProviderName))
+            {
+                return BadRequest(new { error = "ProviderName is required" });
+            }
 
             var username = User?.Identity?.Name ?? "anonymous";
             try
@@ -279,7 +275,10 @@ namespace McpRouter.Components.Providers
             [FromServices] IServiceProvider? serviceProvider = null)
         {
             var dtoList = dtos.ToList();
-            if (!dtoList.Any()) return BadRequest(new { error = "No providers provided" });
+            if (!dtoList.Any())
+            {
+                return BadRequest(new { error = "No providers provided" });
+            }
 
             if (!dtoList.Any(p => p.IsEnabled))
             {
@@ -293,9 +292,13 @@ namespace McpRouter.Components.Providers
 
                 foreach (var dto in dtoList)
                 {
-                    if (string.IsNullOrEmpty(dto.ProviderName)) return BadRequest(new { error = "ProviderName is required" });
+                    if (string.IsNullOrEmpty(dto.ProviderName))
+                    {
+                        return BadRequest(new { error = "ProviderName is required" });
+                    }
+
                     ProviderConfigSecurityHelper.ValidateAuthProviderConfig(dto);
-                    
+
                     var existing = existingProviders.FirstOrDefault(p =>
                         string.Equals(p.ProviderName, dto.ProviderName, StringComparison.OrdinalIgnoreCase));
                     if (existing != null && !string.IsNullOrEmpty(existing.ConfigJson))

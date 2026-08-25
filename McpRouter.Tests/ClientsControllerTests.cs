@@ -1,10 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Threading.Tasks;
+using Dapper;
+using FluentAssertions;
+using McpRouter.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -15,17 +14,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 using Moq;
-using Xunit;
-using FluentAssertions;
-using McpRouter.Components.Clients;
-using McpRouter.Components.AppKeys;
-using McpRouter.Components.Providers;
-using McpRouter.Components.Authorization;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Middleware;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
-using Dapper;
 
 namespace McpRouter.Tests
 {
@@ -93,7 +81,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task CreateClient_ReturnsOk_WithGeneratedCredentials()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
@@ -130,7 +118,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task DeleteClient_ReturnsNotFound_WhenAppDoesNotExist()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
@@ -144,7 +132,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task CreateThenAuthenticate_IntegrationTest_Succeeds()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
@@ -222,7 +210,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task InvalidPrefix_Test_ReturnsNoResult()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
@@ -256,7 +244,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task InvalidHash_Test_Fails()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
@@ -291,12 +279,12 @@ namespace McpRouter.Tests
         [Fact]
         public async Task Expired_Test_Fails()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var credentialService = new CredentialService(dbFactory);
 
             // Create expired credential manually or via helper
             var scopes = new List<string> { "all" };
-            var (appKey, plaintextKey) = await credentialService.CreateCredentialAsync(
+            var (_, plaintextKey) = await credentialService.CreateCredentialAsync(
                 "Expired App", "client-expired", "sid-expired", scopes, -1 // expired yesterday
             );
 
@@ -516,7 +504,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task CreateClient_WithExpiresInDays_SetsExpiration_AndEnforcesExpiredAuthentication()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
@@ -565,7 +553,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task GetClients_NeverLeaksRawBearerSecretOrEncryptedKey()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
@@ -601,10 +589,9 @@ namespace McpRouter.Tests
         [Fact]
         public async Task RevokeCredential_HandlesSqlServerNoCount_AndReturnsAccurateStatus()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var credentialService = new CredentialService(dbFactory);
-
-            var (appKey, plaintext) = await credentialService.CreateCredentialAsync(
+            var (appKey, _) = await credentialService.CreateCredentialAsync(
                 "Test Key", "test-user", "", new List<string> { "all" }, null
             );
 
@@ -623,7 +610,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task CredentialService_GeneratesHighEntropySelectorPrefix()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var credentialService = new CredentialService(dbFactory);
 
             var (appKey, plaintextKey) = await credentialService.CreateCredentialAsync(
@@ -642,7 +629,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task CreateClient_ReturnsBadRequest_WhenDisplayNameMissing()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
@@ -655,7 +642,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
             var credentialService = new CredentialService(dbFactory);
             var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);

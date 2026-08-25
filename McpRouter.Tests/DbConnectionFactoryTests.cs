@@ -1,11 +1,7 @@
-using System;
-using System.Collections.Generic;
-using McpRouter.Infrastructure.Persistence;
 using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
-using Xunit;
 
 namespace McpRouter.Tests
 {

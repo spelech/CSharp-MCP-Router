@@ -1,16 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Components.Authorization;
-using Microsoft.Extensions.DependencyInjection;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace McpRouter.Components.Clients
 {
@@ -62,7 +53,9 @@ namespace McpRouter.Components.Clients
         public async Task<IActionResult> CreateClient([FromBody] CreateClientModel model)
         {
             if (string.IsNullOrWhiteSpace(model.DisplayName))
+            {
                 return BadRequest("DisplayName is required.");
+            }
 
             var clientId = Guid.NewGuid().ToString("N");
             var scopes = model.Scopes ?? new List<string>();
@@ -97,7 +90,11 @@ namespace McpRouter.Components.Clients
             // Validate requested category scopes
             foreach (var scope in scopes)
             {
-                if (string.IsNullOrWhiteSpace(scope)) continue;
+                if (string.IsNullOrWhiteSpace(scope))
+                {
+                    continue;
+                }
+
                 var trimmed = scope.Trim();
                 if (trimmed.StartsWith("category:", StringComparison.OrdinalIgnoreCase))
                 {
@@ -157,7 +154,11 @@ namespace McpRouter.Components.Clients
                 var rawList = await conn.QueryAsync<string>("SELECT Categories FROM Servers WHERE Enabled = 1");
                 foreach (var rawCat in rawList)
                 {
-                    if (string.IsNullOrWhiteSpace(rawCat)) continue;
+                    if (string.IsNullOrWhiteSpace(rawCat))
+                    {
+                        continue;
+                    }
+
                     try
                     {
                         var list = JsonSerializer.Deserialize<List<string>>(rawCat);
@@ -165,14 +166,20 @@ namespace McpRouter.Components.Clients
                         {
                             foreach (var c in list)
                             {
-                                if (!string.IsNullOrWhiteSpace(c)) categories.Add(c.Trim());
+                                if (!string.IsNullOrWhiteSpace(c))
+                                {
+                                    categories.Add(c.Trim());
+                                }
                             }
                         }
                     }
                     catch
                     {
                         var parts = rawCat.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                        foreach (var p in parts) categories.Add(p);
+                        foreach (var p in parts)
+                        {
+                            categories.Add(p);
+                        }
                     }
                 }
             }

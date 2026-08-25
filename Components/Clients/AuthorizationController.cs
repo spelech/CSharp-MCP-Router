@@ -1,17 +1,11 @@
-using System;
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using System.Text.Json;
 using Microsoft.AspNetCore;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
-using System.Text.Json;
-
-using McpRouter.Infrastructure.Logging;
 
 namespace McpRouter.Components.Clients
 {
@@ -75,7 +69,7 @@ namespace McpRouter.Components.Clients
 
                 var identity = new ClaimsIdentity(result.Principal.Claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 identity.SetDestinations(static claim => new[] { OpenIddictConstants.Destinations.AccessToken });
-                
+
                 return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             }
 
@@ -107,7 +101,7 @@ namespace McpRouter.Components.Clients
             {
                 return BadRequest(new { error = "invalid_client", error_description = "The client application was not found." });
             }
-            
+
             var clientName = await _applicationManager.GetDisplayNameAsync(application) ?? request.ClientId!;
             var username = result.Principal.Identity?.Name ?? "Unknown";
 
@@ -130,7 +124,7 @@ namespace McpRouter.Components.Clients
 
             // Redirect to React App (GET)
             var qs = HttpContext.Request.QueryString.HasValue ? HttpContext.Request.QueryString.Value : "";
-            if (!qs.Contains("client_name=")) 
+            if (!qs.Contains("client_name="))
             {
                 var encodedName = Uri.EscapeDataString(clientName);
                 qs = string.IsNullOrEmpty(qs) ? $"?client_name={encodedName}" : $"{qs}&client_name={encodedName}";
@@ -145,7 +139,7 @@ namespace McpRouter.Components.Clients
         {
             var embeddingService = HttpContext.RequestServices.GetRequiredService<McpRouter.Core.Routing.DynamicEmbeddingService>();
             var settings = embeddingService.GetSettings();
-            
+
             if (!settings.AllowOpenClientRegistration)
             {
                 var authService = HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.Authorization.IAuthorizationService>();

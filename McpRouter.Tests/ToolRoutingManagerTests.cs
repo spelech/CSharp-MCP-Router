@@ -1,22 +1,8 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Core.Routing;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
-using Moq;
-using Xunit;
-using McpRouter.Tests.Attributes;
 using Dapper;
+using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Logging.Abstractions;
+using Moq;
 
 namespace McpRouter.Tests
 {
@@ -183,7 +169,7 @@ namespace McpRouter.Tests
                 (b, k, v) => b
             ));
         }
-    
+
         [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
         [Requirement("AUTH-105", "Dynamic Auth Target Pass-Through", Type = RequirementType.Positive, Category = "AUTH")]

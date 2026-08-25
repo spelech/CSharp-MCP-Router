@@ -1,9 +1,4 @@
-using System.Collections.Generic;
 using System.Text.Json;
-using System.Threading.Tasks;
-using McpRouter.Core.Routing;
-using McpRouter.Core.Routing;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -16,13 +11,20 @@ namespace McpRouter.Tests
             public Task<float[]> GetEmbeddingAsync(string text)
             {
                 if (text.Contains("docker"))
+                {
                     return Task.FromResult(new float[] { 1.0f, 0.0f });
+                }
+
                 return Task.FromResult(new float[] { 0.0f, 1.0f });
             }
 
             public double CosineSimilarity(float[] vector1, float[] vector2)
             {
-                if (vector1 == null || vector2 == null || vector1.Length != vector2.Length) return 0;
+                if (vector1 == null || vector2 == null || vector1.Length != vector2.Length)
+                {
+                    return 0;
+                }
+
                 float dot = 0, n1 = 0, n2 = 0;
                 for (int i = 0; i < vector1.Length; i++)
                 {

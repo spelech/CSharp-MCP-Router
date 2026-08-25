@@ -1,10 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Secrets;
 using Microsoft.Extensions.Caching.Memory;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {

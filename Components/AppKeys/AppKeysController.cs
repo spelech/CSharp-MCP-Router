@@ -1,21 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography;
 using System.Text.Json;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Components.Clients;
-using McpRouter.Components.Authorization;
-using McpRouter.Models;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.Extensions.DependencyInjection;
 using Dapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace McpRouter.Components.AppKeys
 {
@@ -263,7 +249,11 @@ namespace McpRouter.Components.AppKeys
                 // Validate category scopes
                 foreach (var scope in scopes)
                 {
-                    if (string.IsNullOrWhiteSpace(scope)) continue;
+                    if (string.IsNullOrWhiteSpace(scope))
+                    {
+                        continue;
+                    }
+
                     var trimmed = scope.Trim();
                     if (trimmed.StartsWith("category:", StringComparison.OrdinalIgnoreCase))
                     {
@@ -458,7 +448,11 @@ namespace McpRouter.Components.AppKeys
                     var rawList = await conn.QueryAsync<string>("SELECT Categories FROM Servers WHERE Enabled = 1");
                     foreach (var rawCat in rawList)
                     {
-                        if (string.IsNullOrWhiteSpace(rawCat)) continue;
+                        if (string.IsNullOrWhiteSpace(rawCat))
+                        {
+                            continue;
+                        }
+
                         try
                         {
                             var list = JsonSerializer.Deserialize<List<string>>(rawCat);
@@ -466,14 +460,20 @@ namespace McpRouter.Components.AppKeys
                             {
                                 foreach (var c in list)
                                 {
-                                    if (!string.IsNullOrWhiteSpace(c)) categories.Add(c.Trim());
+                                    if (!string.IsNullOrWhiteSpace(c))
+                                    {
+                                        categories.Add(c.Trim());
+                                    }
                                 }
                             }
                         }
                         catch
                         {
                             var parts = rawCat.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                            foreach (var p in parts) categories.Add(p);
+                            foreach (var p in parts)
+                            {
+                                categories.Add(p);
+                            }
                         }
                     }
                 }

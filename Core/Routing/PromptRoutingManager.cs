@@ -1,10 +1,5 @@
-using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Core.Routing
 {
@@ -62,7 +57,10 @@ namespace McpRouter.Core.Routing
                             {
                                 promptDict["name"] = exposedName;
                                 if (promptDict.TryGetValue("description", out var descVal))
+                                {
                                     promptDict["description"] = $"[{item.ServerId}] {descVal}";
+                                }
+
                                 serverPrompts.Add(promptDict);
                                 allPrompts.Add(promptDict);
                             }

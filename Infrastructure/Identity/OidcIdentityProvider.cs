@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-
 namespace McpRouter.Infrastructure.Identity
 {
     /// <summary>
@@ -90,11 +82,17 @@ namespace McpRouter.Infrastructure.Identity
 
             foreach (var h in configuredUserHeaders)
             {
-                if (!userHeadersList.Contains(h, StringComparer.OrdinalIgnoreCase)) userHeadersList.Add(h);
+                if (!userHeadersList.Contains(h, StringComparer.OrdinalIgnoreCase))
+                {
+                    userHeadersList.Add(h);
+                }
             }
             foreach (var h in configuredGroupHeaders)
             {
-                if (!groupHeadersList.Contains(h, StringComparer.OrdinalIgnoreCase)) groupHeadersList.Add(h);
+                if (!groupHeadersList.Contains(h, StringComparer.OrdinalIgnoreCase))
+                {
+                    groupHeadersList.Add(h);
+                }
             }
 
             string? user = null;

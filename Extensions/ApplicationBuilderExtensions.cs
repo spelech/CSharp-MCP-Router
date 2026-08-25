@@ -1,21 +1,4 @@
-using System;
-using System.IO;
-using System.Linq;
 using System.Reflection;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Components.Servers;
-using McpRouter.Components.Clients;
-using McpRouter.Components.AppKeys;
-using McpRouter.Components.Providers;
-using McpRouter.Components.Authorization;
-using McpRouter.Components.Capabilities;
 
 namespace McpRouter.Extensions
 {
@@ -102,9 +85,11 @@ namespace McpRouter.Extensions
             // SYSTEM/HEALTH ENDPOINTS
             // ----------------------------------------------------
             app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "McpRouter", version = AppVersion }));
-            app.MapGet("/api/config/branding", async (McpRouter.Infrastructure.Persistence.ISettingRepository settingsRepo) => {
+            app.MapGet("/api/config/branding", async (McpRouter.Infrastructure.Persistence.ISettingRepository settingsRepo) =>
+            {
                 var settings = await settingsRepo.GetSettingsAsync() ?? new McpRouter.Models.RouterSettings();
-                return Results.Ok(new {
+                return Results.Ok(new
+                {
                     title = settings.DashboardTitle,
                     icon = settings.DashboardIcon
                 });
@@ -112,9 +97,17 @@ namespace McpRouter.Extensions
             app.MapGet("/api/config/branding/logo", () =>
             {
                 var dir = Path.Combine(AppContext.BaseDirectory, "data", "branding");
-                if (!Directory.Exists(dir)) return Results.NotFound();
+                if (!Directory.Exists(dir))
+                {
+                    return Results.NotFound();
+                }
+
                 var file = Directory.GetFiles(dir, "logo.*").FirstOrDefault();
-                if (file == null) return Results.NotFound();
+                if (file == null)
+                {
+                    return Results.NotFound();
+                }
+
                 var ext = Path.GetExtension(file).ToLowerInvariant();
                 var contentType = ext switch
                 {

@@ -1,24 +1,21 @@
-using System.IO;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
-using Xunit;
 
 namespace McpRouter.Tests
 {
     public class EndpointAuthorizationTests
     {
         [Fact]
+        [Requirement("AUTH-QUERY-TOKEN-EXTRACTION", "AUTH", RequirementType.Positive, "Query string token middleware extracts access_token or token query parameter to Authorization header.")]
         public async Task QueryStringTokenMiddleware_Extracts_AccessToken_To_AuthorizationHeader()
         {
             var context = new DefaultHttpContext();
             context.Request.Path = "/sse";
             context.Request.QueryString = new QueryString("?access_token=secret_token_123");
 
-            bool nextCalled = false;
+            int callCount = 0;
             RequestDelegate next = (ctx) =>
             {
-                nextCalled = true;
+                callCount++;
                 return Task.CompletedTask;
             };
 
@@ -41,21 +38,22 @@ namespace McpRouter.Tests
 
             await middleware(context);
 
-            Assert.True(nextCalled);
+            Assert.Equal(1, callCount);
             Assert.Equal("Bearer secret_token_123", context.Request.Headers.Authorization);
         }
 
         [Fact]
+        [Requirement("AUTH-QUERY-TOKEN-EXTRACTION", "AUTH", RequirementType.Positive, "Query string token middleware extracts access_token or token query parameter to Authorization header.")]
         public async Task QueryStringTokenMiddleware_Extracts_Token_To_AuthorizationHeader()
         {
             var context = new DefaultHttpContext();
             context.Request.Path = "/sse";
             context.Request.QueryString = new QueryString("?token=another_secret_456");
 
-            bool nextCalled = false;
+            int callCount = 0;
             RequestDelegate next = (ctx) =>
             {
-                nextCalled = true;
+                callCount++;
                 return Task.CompletedTask;
             };
 
@@ -77,7 +75,7 @@ namespace McpRouter.Tests
 
             await middleware(context);
 
-            Assert.True(nextCalled);
+            Assert.Equal(1, callCount);
             Assert.Equal("Bearer another_secret_456", context.Request.Headers.Authorization);
         }
     }

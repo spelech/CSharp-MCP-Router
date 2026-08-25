@@ -1,9 +1,4 @@
-using System;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
-using McpRouter.Models;
-using McpRouter.Components.Authorization;
 
 namespace McpRouter.Core.Routing
 {
@@ -75,7 +70,11 @@ namespace McpRouter.Core.Routing
 
         public static double CalculateCosineSimilarity(float[] v1, float[] v2)
         {
-            if (v1 == null || v2 == null || v1.Length != v2.Length || v1.Length == 0) return 0;
+            if (v1 == null || v2 == null || v1.Length != v2.Length || v1.Length == 0)
+            {
+                return 0;
+            }
+
             double dotProduct = 0.0;
             double normA = 0.0;
             double normB = 0.0;
@@ -85,7 +84,11 @@ namespace McpRouter.Core.Routing
                 normA += Math.Pow(v1[i], 2);
                 normB += Math.Pow(v2[i], 2);
             }
-            if (normA == 0.0 || normB == 0.0) return 0.0;
+            if (normA == 0.0 || normB == 0.0)
+            {
+                return 0.0;
+            }
+
             return dotProduct / (Math.Sqrt(normA) * Math.Sqrt(normB));
         }
     }

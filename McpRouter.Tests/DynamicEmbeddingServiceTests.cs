@@ -1,19 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using Dapper;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
 using Moq;
-using Xunit;
-using Dapper;
 
 namespace McpRouter.Tests
 {
@@ -116,7 +106,7 @@ namespace McpRouter.Tests
         [Fact]
         public void ReloadSettings_UpdatesSettingsAndActiveService()
         {
-            var (provider, conn) = CreateServiceProvider();
+            var (provider, _) = CreateServiceProvider();
             var service = new DynamicEmbeddingService(new HttpClient(), NullLoggerFactory.Instance, provider);
 
             var newSettings = new RouterSettings
@@ -155,7 +145,7 @@ namespace McpRouter.Tests
         [Fact]
         public void CosineSimilarity_Calculates_Correct_Vector_Distance()
         {
-            var (provider, conn) = CreateServiceProvider();
+            var (provider, _) = CreateServiceProvider();
             var service = new DynamicEmbeddingService(new HttpClient(), NullLoggerFactory.Instance, provider);
 
             var v1 = new float[] { 1.0F, 0.0F, 0.0F };

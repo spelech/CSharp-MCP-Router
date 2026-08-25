@@ -13,7 +13,11 @@ namespace McpRouter.Infrastructure.Logging
 
         public static string SanitizePayload(string rawPayload)
         {
-            if (string.IsNullOrEmpty(rawPayload)) return rawPayload;
+            if (string.IsNullOrEmpty(rawPayload))
+            {
+                return rawPayload;
+            }
+
             var s = TokenRegex.Replace(rawPayload, "$1 [REDACTED]");
             s = HeaderRegex.Replace(s, m => m.Value.Split(':')[0] + ": [REDACTED]");
             s = KeyRegex.Replace(s, "\"$1\":\"[REDACTED]\"");

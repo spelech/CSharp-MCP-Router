@@ -1,26 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Components.Authorization;
-using McpRouter.Components.Servers;
-using McpRouter.Core.Protocol;
-using McpRouter.Core.Routing;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Components.Capabilities
 {
@@ -326,7 +307,11 @@ namespace McpRouter.Components.Capabilities
 
                 // Write SSE endpoint event
                 var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
-                if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+                if (string.IsNullOrEmpty(scheme))
+                {
+                    scheme = httpContext.Request.Scheme;
+                }
+
                 var host = httpContext.Request.Host.Value;
                 var absoluteUrl = $"{scheme}://{host}/message?sessionId={sessionId}";
                 await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
@@ -698,7 +683,11 @@ namespace McpRouter.Components.Capabilities
                 logger.LogInformation("New client /mcp SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
 
                 var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
-                if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+                if (string.IsNullOrEmpty(scheme))
+                {
+                    scheme = httpContext.Request.Scheme;
+                }
+
                 var host = httpContext.Request.Host.Value;
                 var absoluteUrl = $"{scheme}://{host}/mcp/message?sessionId={sessionId}";
                 await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
@@ -799,7 +788,10 @@ namespace McpRouter.Components.Capabilities
                     {
                         await Task.Delay(50);
                         session = sessionManager.GetSession(sessionId);
-                        if (session != null) break;
+                        if (session != null)
+                        {
+                            break;
+                        }
                     }
                 }
                 if (session == null)
@@ -1170,7 +1162,11 @@ namespace McpRouter.Components.Capabilities
 
                 var sessionId = Guid.NewGuid().ToString("N");
                 var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
-                if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+                if (string.IsNullOrEmpty(scheme))
+                {
+                    scheme = httpContext.Request.Scheme;
+                }
+
                 var host = httpContext.Request.Host.Value;
                 var absoluteUrl = $"{scheme}://{host}/admin/message?sessionId={sessionId}";
                 await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
@@ -1212,11 +1208,18 @@ namespace McpRouter.Components.Capabilities
                 httpContext.Response.Headers.CacheControl = "no-cache";
                 httpContext.Response.Headers.Connection = "keep-alive";
 
-                if (httpContext.Request.Method == "HEAD") return;
+                if (httpContext.Request.Method == "HEAD")
+                {
+                    return;
+                }
 
                 var sessionId = Guid.NewGuid().ToString("N");
                 var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
-                if (string.IsNullOrEmpty(scheme)) scheme = httpContext.Request.Scheme;
+                if (string.IsNullOrEmpty(scheme))
+                {
+                    scheme = httpContext.Request.Scheme;
+                }
+
                 var host = httpContext.Request.Host.Value;
                 var absoluteUrl = $"{scheme}://{host}/admin/message?sessionId={sessionId}";
                 await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");

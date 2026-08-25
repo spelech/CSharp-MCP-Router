@@ -1,13 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using McpRouter.Models;
-using McpRouter.Infrastructure.Secrets;
 
 namespace McpRouter.Core.Routing
 {
@@ -111,7 +102,7 @@ namespace McpRouter.Core.Routing
                     var retriever = _rootServices?.GetService<CompositeSecretRetriever>()
                         ?? _clientResponse?.HttpContext?.RequestServices?.GetService<CompositeSecretRetriever>();
                     string? passThroughToken = null;
-                    
+
                     var identity = await ResolveUserIdentityAsync(_clientResponse?.HttpContext);
                     string? forwardedUser = string.IsNullOrEmpty(identity.Username) ? null : identity.Username;
 
@@ -123,7 +114,10 @@ namespace McpRouter.Core.Routing
                         {
                             var secretJson = await userSecretStore.GetSecretAsync(identity.Username, server.Id);
                             if (string.IsNullOrEmpty(secretJson))
+                            {
                                 throw new Exception($"User credential required but not found for server '{server.Id}'");
+                            }
+
                             passThroughToken = secretJson;
                         }
                         else

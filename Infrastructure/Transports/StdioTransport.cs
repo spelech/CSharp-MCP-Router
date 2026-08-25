@@ -1,22 +1,12 @@
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Components.Servers;
-using McpRouter.Models;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Infrastructure.Transports
 {
     public class StdioTransport : ITransport
     {
-        private readonly string? _passThroughToken;
+        private readonly string? _passThroughToken;
+
         public TimeSpan RequestTimeout { get; set; } = TimeSpan.FromSeconds(15);
         private readonly McpServer _server;
         private readonly ILogger _logger;
@@ -39,7 +29,8 @@ namespace McpRouter.Infrastructure.Transports
 
         public StdioTransport(McpServer server, ILogger logger, JsonRpcStateManager stateManager, ISecretRetriever? secretRetriever = null, string? passThroughToken = null)
         {
-            _passThroughToken = passThroughToken;
+            _passThroughToken = passThroughToken;
+
             _server = server;
             _logger = logger;
             _stateManager = stateManager;
@@ -51,8 +42,10 @@ namespace McpRouter.Infrastructure.Transports
             if (!string.IsNullOrEmpty(_passThroughToken) && (_server.AllowPassThroughAuth || _server.SecretProvider == "UserProvided"))
             {
                 return _passThroughToken;
-            }
-
+            }
+
+
+
             var provider = _server.SecretProvider ?? "None";
             if (provider.Equals("None", StringComparison.OrdinalIgnoreCase))
             {
@@ -91,7 +84,7 @@ namespace McpRouter.Infrastructure.Transports
                 path = @"SOFTWARE\McpRouter\Secrets";
             }
 
-            string? secret = null;
+            string? secret;
             if (retriever is CompositeSecretRetriever composite)
             {
                 secret = await composite.GetSecretForProviderAsync(provider, path, field);
@@ -111,7 +104,11 @@ namespace McpRouter.Infrastructure.Transports
 
         private string SanitizeLogOutput(string? text)
         {
-            if (string.IsNullOrEmpty(text)) return text ?? string.Empty;
+            if (string.IsNullOrEmpty(text))
+            {
+                return text ?? string.Empty;
+            }
+
             var sanitized = PiiSanitizer.SanitizePayload(text);
             if (!string.IsNullOrEmpty(_resolvedSecret) && _resolvedSecret.Length > 2)
             {
@@ -127,7 +124,10 @@ namespace McpRouter.Infrastructure.Transports
         public static List<string> ParseCommandLine(string commandLine)
         {
             var args = new List<string>();
-            if (string.IsNullOrWhiteSpace(commandLine)) return args;
+            if (string.IsNullOrWhiteSpace(commandLine))
+            {
+                return args;
+            }
 
             var current = new StringBuilder();
             bool inQuotes = false;
@@ -296,7 +296,10 @@ namespace McpRouter.Infrastructure.Transports
                             break; // EOF reached
                         }
 
-                        if (string.IsNullOrWhiteSpace(line)) continue;
+                        if (string.IsNullOrWhiteSpace(line))
+                        {
+                            continue;
+                        }
 
                         try
                         {
@@ -451,7 +454,10 @@ namespace McpRouter.Infrastructure.Transports
 
         public async Task SendNotificationAsync(string method, string bodyJson)
         {
-            if (_process == null || _process.HasExited) return;
+            if (_process == null || _process.HasExited)
+            {
+                return;
+            }
 
             _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] [Notification] {Payload}", _server.Id, SanitizeLogOutput(bodyJson));
 
@@ -469,7 +475,10 @@ namespace McpRouter.Infrastructure.Transports
 
         public async Task SendResponseAsync(string responseJson)
         {
-            if (_process == null || _process.HasExited) return;
+            if (_process == null || _process.HasExited)
+            {
+                return;
+            }
 
             _logger.LogDebug("[JSON-RPC Gateway -> Backend {ServerId}] [Response] {Payload}", _server.Id, SanitizeLogOutput(responseJson));
 
@@ -521,7 +530,11 @@ namespace McpRouter.Infrastructure.Transports
 
         public void Dispose()
         {
-            if (_disposed) return;
+            if (_disposed)
+            {
+                return;
+            }
+
             _disposed = true;
 
             try
@@ -534,8 +547,15 @@ namespace McpRouter.Infrastructure.Transports
 
             // Wait for reader tasks to drain/complete
             var readerTasks = new List<Task>();
-            if (_readerTask != null) readerTasks.Add(_readerTask);
-            if (_stderrTask != null) readerTasks.Add(_stderrTask);
+            if (_readerTask != null)
+            {
+                readerTasks.Add(_readerTask);
+            }
+
+            if (_stderrTask != null)
+            {
+                readerTasks.Add(_stderrTask);
+            }
 
             if (readerTasks.Count > 0)
             {

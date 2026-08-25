@@ -1,11 +1,4 @@
-using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
 using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -56,7 +49,7 @@ namespace McpRouter.Tests
         public async Task GetEmbeddingAsync_ReturnsEmpty384Vector_ForEmptyString()
         {
             var settings = new RouterSettings { EmbeddingModelDir = "models/test" };
-            var service = new OnnxEmbeddingService(new HttpClient(), settings, NullLogger<OnnxEmbeddingService>.Instance);
+            _ = new OnnxEmbeddingService(new HttpClient(), settings, NullLogger<OnnxEmbeddingService>.Instance);
 
             // Verified zero-token path return length
             var emptyVector = new float[384];

@@ -1,9 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 
 namespace McpRouter.Infrastructure.Identity
 {
@@ -87,7 +82,7 @@ namespace McpRouter.Infrastructure.Identity
                 }
                 else
                 {
-                    if (proxy.Equals(ip.ToString(), StringComparison.OrdinalIgnoreCase) || 
+                    if (proxy.Equals(ip.ToString(), StringComparison.OrdinalIgnoreCase) ||
                         (IPAddress.TryParse(proxy, out var parsedIp) && parsedIp.Equals(ip)))
                     {
                         return true;
@@ -121,11 +116,20 @@ namespace McpRouter.Infrastructure.Identity
             if (bytes.Length == 4)
             {
                 // 10.0.0.0/8 (Homelab host & container network ranges)
-                if (bytes[0] == 10) return true;
+                if (bytes[0] == 10)
+                {
+                    return true;
+                }
                 // 172.16.0.0/12 (Standard Docker bridge & overlay networks)
-                if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) return true;
+                if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31)
+                {
+                    return true;
+                }
                 // 127.0.0.0/8
-                if (bytes[0] == 127) return true;
+                if (bytes[0] == 127)
+                {
+                    return true;
+                }
             }
             return false;
         }

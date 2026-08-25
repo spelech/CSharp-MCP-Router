@@ -1,6 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 namespace McpRouter.Components.Providers
@@ -34,19 +31,35 @@ namespace McpRouter.Components.Providers
 
         public static bool IsSensitiveKey(string keyName)
         {
-            if (string.IsNullOrWhiteSpace(keyName)) return false;
-            if (SensitiveKeyNames.Contains(keyName)) return true;
+            if (string.IsNullOrWhiteSpace(keyName))
+            {
+                return false;
+            }
+
+            if (SensitiveKeyNames.Contains(keyName))
+            {
+                return true;
+            }
+
             var lower = keyName.ToLowerInvariant();
             return lower.Contains("secret") || lower.Contains("token") || lower.Contains("password") || lower.Contains("apikey");
         }
 
         public static string? RedactConfigJson(string? configJson)
         {
-            if (string.IsNullOrWhiteSpace(configJson)) return configJson;
+            if (string.IsNullOrWhiteSpace(configJson))
+            {
+                return configJson;
+            }
+
             try
             {
                 var node = JsonNode.Parse(configJson);
-                if (node == null) return configJson;
+                if (node == null)
+                {
+                    return configJson;
+                }
+
                 RedactJsonNode(node);
                 return node.ToJsonString();
             }
@@ -63,7 +76,11 @@ namespace McpRouter.Components.Providers
                 var properties = obj.ToList();
                 foreach (var (propName, propVal) in properties)
                 {
-                    if (propVal == null) continue;
+                    if (propVal == null)
+                    {
+                        continue;
+                    }
+
                     if (IsSensitiveKey(propName))
                     {
                         if (propVal is JsonValue val && val.TryGetValue<string>(out var strVal))
@@ -100,21 +117,34 @@ namespace McpRouter.Components.Providers
             {
                 foreach (var item in arr)
                 {
-                    if (item != null) RedactJsonNode(item);
+                    if (item != null)
+                    {
+                        RedactJsonNode(item);
+                    }
                 }
             }
         }
 
         public static string? MergeWithExistingConfig(string? incomingConfigJson, string? existingDecryptedConfigJson)
         {
-            if (string.IsNullOrWhiteSpace(incomingConfigJson)) return incomingConfigJson;
-            if (string.IsNullOrWhiteSpace(existingDecryptedConfigJson)) return incomingConfigJson;
+            if (string.IsNullOrWhiteSpace(incomingConfigJson))
+            {
+                return incomingConfigJson;
+            }
+
+            if (string.IsNullOrWhiteSpace(existingDecryptedConfigJson))
+            {
+                return incomingConfigJson;
+            }
 
             try
             {
                 var incomingNode = JsonNode.Parse(incomingConfigJson) as JsonObject;
                 var existingNode = JsonNode.Parse(existingDecryptedConfigJson) as JsonObject;
-                if (incomingNode == null || existingNode == null) return incomingConfigJson;
+                if (incomingNode == null || existingNode == null)
+                {
+                    return incomingConfigJson;
+                }
 
                 MergeObjects(incomingNode, existingNode);
                 return incomingNode.ToJsonString();

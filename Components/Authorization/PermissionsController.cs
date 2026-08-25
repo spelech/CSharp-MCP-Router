@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Models;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 
 namespace McpRouter.Components.Authorization
 {
@@ -43,12 +37,19 @@ namespace McpRouter.Components.Authorization
             }
         }
 
-                [HttpPost("policies")]
+        [HttpPost("policies")]
         public async Task<IActionResult> SavePolicy([FromBody] McpAccessPolicy policy)
         {
-            if (string.IsNullOrEmpty(policy.TargetId)) return BadRequest(new { error = "TargetId is required" });
-            if (string.IsNullOrEmpty(policy.RequiredGroup)) return BadRequest(new { error = "RequiredGroup is required" });
-            
+            if (string.IsNullOrEmpty(policy.TargetId))
+            {
+                return BadRequest(new { error = "TargetId is required" });
+            }
+
+            if (string.IsNullOrEmpty(policy.RequiredGroup))
+            {
+                return BadRequest(new { error = "RequiredGroup is required" });
+            }
+
             if (policy.TargetId == "*" && !policy.IsAllowed)
             {
                 return BadRequest(new { error = "Cannot save a wildcard deny policy as it will cause a global lockout." });
@@ -147,8 +148,15 @@ namespace McpRouter.Components.Authorization
         [HttpPost("mappings")]
         public async Task<IActionResult> SaveMapping([FromBody] GroupMapping mapping)
         {
-            if (string.IsNullOrEmpty(mapping.ExternalId)) return BadRequest(new { error = "ExternalId is required" });
-            if (string.IsNullOrEmpty(mapping.InternalGroup)) return BadRequest(new { error = "InternalGroup is required" });
+            if (string.IsNullOrEmpty(mapping.ExternalId))
+            {
+                return BadRequest(new { error = "ExternalId is required" });
+            }
+
+            if (string.IsNullOrEmpty(mapping.InternalGroup))
+            {
+                return BadRequest(new { error = "InternalGroup is required" });
+            }
 
             if (string.IsNullOrEmpty(mapping.Id))
             {

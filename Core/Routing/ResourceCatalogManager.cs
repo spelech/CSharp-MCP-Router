@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace McpRouter.Core.Routing
 {
@@ -35,13 +31,27 @@ namespace McpRouter.Core.Routing
 
                 if (res is Dictionary<string, object> dict)
                 {
-                    if (dict.TryGetValue("name", out var n)) name = n?.ToString() ?? "";
-                    if (dict.TryGetValue("description", out var d)) description = d?.ToString() ?? "";
+                    if (dict.TryGetValue("name", out var n))
+                    {
+                        name = n?.ToString() ?? "";
+                    }
+
+                    if (dict.TryGetValue("description", out var d))
+                    {
+                        description = d?.ToString() ?? "";
+                    }
                 }
                 else if (res is JsonElement je)
                 {
-                    if (je.TryGetProperty("name", out var n)) name = n.GetString() ?? "";
-                    if (je.TryGetProperty("description", out var d)) description = d.GetString() ?? "";
+                    if (je.TryGetProperty("name", out var n))
+                    {
+                        name = n.GetString() ?? "";
+                    }
+
+                    if (je.TryGetProperty("description", out var d))
+                    {
+                        description = d.GetString() ?? "";
+                    }
                 }
 
                 if (name.Contains(queryLower, StringComparison.OrdinalIgnoreCase) ||

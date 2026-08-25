@@ -1,37 +1,35 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text.Encodings.Web;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Microsoft.Extensions.Configuration;
-using McpRouter.Models;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Secrets;
 using Dapper;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.Extensions.Options;
 
 namespace McpRouter.Middleware
 {
     public class AppKeyAuthenticationHandler : AuthenticationHandler<AuthenticationSchemeOptions>
     {
         private readonly IDbConnectionFactory _dbFactory;
-        private readonly IConfiguration _config;
+
+        public AppKeyAuthenticationHandler(
+            IOptionsMonitor<AuthenticationSchemeOptions> options,
+            ILoggerFactory logger,
+            UrlEncoder encoder,
+            IDbConnectionFactory dbFactory)
+            : base(options, logger, encoder)
+        {
+            _dbFactory = dbFactory;
+        }
 
         public AppKeyAuthenticationHandler(
             IOptionsMonitor<AuthenticationSchemeOptions> options,
             ILoggerFactory logger,
             UrlEncoder encoder,
             IDbConnectionFactory dbFactory,
-            IConfiguration config)
-            : base(options, logger, encoder)
+            IConfiguration? config)
+            : this(options, logger, encoder, dbFactory)
         {
-            _dbFactory = dbFactory;
-            _config = config;
         }
 
         protected override async Task<AuthenticateResult> HandleAuthenticateAsync()

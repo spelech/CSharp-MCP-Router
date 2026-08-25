@@ -1,22 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.IO;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Persistence.DatabaseSeeders;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Core.Routing;
-using McpRouter.Models;
 using Dapper;
+using McpRouter.Infrastructure.Persistence.DatabaseSeeders;
 
 namespace McpRouter.Infrastructure.Persistence
 {
@@ -35,7 +19,7 @@ namespace McpRouter.Infrastructure.Persistence
             var provider = dbFactory.ProviderName.ToLowerInvariant();
 
             logger.LogInformation("Initializing database via Dapper ({Provider})...", provider);
-            
+
             var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
             if (string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"]) && string.IsNullOrEmpty(configuration["ROUTER_MASTER_KEY"]))
             {
@@ -143,16 +127,55 @@ namespace McpRouter.Infrastructure.Persistence
             if (settingsExists)
             {
                 var cols = conn.Query<string>("SELECT name FROM pragma_table_info('Settings');").ToHashSet(StringComparer.OrdinalIgnoreCase);
-                if (!cols.Contains("DashboardTitle")) conn.Execute("ALTER TABLE Settings ADD COLUMN DashboardTitle TEXT DEFAULT 'MCP Gateway';");
-                if (!cols.Contains("DashboardIcon")) conn.Execute("ALTER TABLE Settings ADD COLUMN DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired';");
-                if (!cols.Contains("EmbeddingProvider")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingProvider TEXT;");
-                if (!cols.Contains("EmbeddingApiUrl")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiUrl TEXT;");
-                if (!cols.Contains("EmbeddingApiKey")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiKey TEXT;");
-                if (!cols.Contains("EmbeddingApiModel")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiModel TEXT;");
-                if (!cols.Contains("EmbeddingModelDir")) conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingModelDir TEXT;");
-                if (!cols.Contains("GlobalMaxKeys")) conn.Execute("ALTER TABLE Settings ADD COLUMN GlobalMaxKeys INTEGER DEFAULT 100;");
-                if (!cols.Contains("UserMaxKeys")) conn.Execute("ALTER TABLE Settings ADD COLUMN UserMaxKeys INTEGER DEFAULT 5;");
-                if (!cols.Contains("UserSecretStorage")) conn.Execute("ALTER TABLE Settings ADD COLUMN UserSecretStorage TEXT DEFAULT 'Database';");
+                if (!cols.Contains("DashboardTitle"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN DashboardTitle TEXT DEFAULT 'MCP Gateway';");
+                }
+
+                if (!cols.Contains("DashboardIcon"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired';");
+                }
+
+                if (!cols.Contains("EmbeddingProvider"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingProvider TEXT;");
+                }
+
+                if (!cols.Contains("EmbeddingApiUrl"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiUrl TEXT;");
+                }
+
+                if (!cols.Contains("EmbeddingApiKey"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiKey TEXT;");
+                }
+
+                if (!cols.Contains("EmbeddingApiModel"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingApiModel TEXT;");
+                }
+
+                if (!cols.Contains("EmbeddingModelDir"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN EmbeddingModelDir TEXT;");
+                }
+
+                if (!cols.Contains("GlobalMaxKeys"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN GlobalMaxKeys INTEGER DEFAULT 100;");
+                }
+
+                if (!cols.Contains("UserMaxKeys"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN UserMaxKeys INTEGER DEFAULT 5;");
+                }
+
+                if (!cols.Contains("UserSecretStorage"))
+                {
+                    conn.Execute("ALTER TABLE Settings ADD COLUMN UserSecretStorage TEXT DEFAULT 'Database';");
+                }
             }
 
             // 4. AppKeys.OwnerSid and AppKeys.KeyType
@@ -160,8 +183,15 @@ namespace McpRouter.Infrastructure.Persistence
             if (appKeysExists)
             {
                 var cols = conn.Query<string>("SELECT name FROM pragma_table_info('AppKeys');").ToHashSet(StringComparer.OrdinalIgnoreCase);
-                if (!cols.Contains("OwnerSid")) conn.Execute("ALTER TABLE AppKeys ADD COLUMN OwnerSid TEXT DEFAULT '';");
-                if (!cols.Contains("KeyType")) conn.Execute("ALTER TABLE AppKeys ADD COLUMN KeyType TEXT DEFAULT 'personal';");
+                if (!cols.Contains("OwnerSid"))
+                {
+                    conn.Execute("ALTER TABLE AppKeys ADD COLUMN OwnerSid TEXT DEFAULT '';");
+                }
+
+                if (!cols.Contains("KeyType"))
+                {
+                    conn.Execute("ALTER TABLE AppKeys ADD COLUMN KeyType TEXT DEFAULT 'personal';");
+                }
             }
 
             // 5. Legacy McpServers -> Servers
@@ -178,22 +208,85 @@ namespace McpRouter.Infrastructure.Persistence
             if (serversExists)
             {
                 var serversCols = conn.Query<string>("SELECT name FROM pragma_table_info('Servers');").ToHashSet(StringComparer.OrdinalIgnoreCase);
-                if (!serversCols.Contains("Enabled")) conn.Execute("ALTER TABLE Servers ADD COLUMN Enabled INTEGER DEFAULT 1;");
-                if (!serversCols.Contains("Hidden")) conn.Execute("ALTER TABLE Servers ADD COLUMN Hidden INTEGER DEFAULT 0;");
-                if (!serversCols.Contains("Type")) conn.Execute("ALTER TABLE Servers ADD COLUMN Type TEXT DEFAULT 'sse';");
-                if (!serversCols.Contains("SecretProvider")) conn.Execute("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None';");
-                if (!serversCols.Contains("SecretItemKey")) conn.Execute("ALTER TABLE Servers ADD COLUMN SecretItemKey TEXT NULL;");
-                if (!serversCols.Contains("SecretMount")) conn.Execute("ALTER TABLE Servers ADD COLUMN SecretMount TEXT NULL;");
-                if (!serversCols.Contains("SecretPath")) conn.Execute("ALTER TABLE Servers ADD COLUMN SecretPath TEXT NULL;");
-                if (!serversCols.Contains("SecretField")) conn.Execute("ALTER TABLE Servers ADD COLUMN SecretField TEXT NULL;");
-                if (!serversCols.Contains("AuthShape")) conn.Execute("ALTER TABLE Servers ADD COLUMN AuthShape TEXT DEFAULT 'bearer';");
-                if (!serversCols.Contains("CustomHeaderName")) conn.Execute("ALTER TABLE Servers ADD COLUMN CustomHeaderName TEXT NULL;");
-                if (!serversCols.Contains("Categories")) conn.Execute("ALTER TABLE Servers ADD COLUMN Categories TEXT DEFAULT '[]';");
-                if (!serversCols.Contains("ApiKey")) conn.Execute("ALTER TABLE Servers ADD COLUMN ApiKey TEXT NULL;");
-                if (!serversCols.Contains("HeadersJson")) conn.Execute("ALTER TABLE Servers ADD COLUMN HeadersJson TEXT NULL;");
-                if (!serversCols.Contains("AutoDiscovered")) conn.Execute("ALTER TABLE Servers ADD COLUMN AutoDiscovered INTEGER DEFAULT 0;");
-                if (!serversCols.Contains("AllowPassThroughAuth")) conn.Execute("ALTER TABLE Servers ADD COLUMN AllowPassThroughAuth INTEGER DEFAULT 0;");
-                if (!serversCols.Contains("DynamicAuthPrompt")) conn.Execute("ALTER TABLE Servers ADD COLUMN DynamicAuthPrompt TEXT NULL;");
+                if (!serversCols.Contains("Enabled"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN Enabled INTEGER DEFAULT 1;");
+                }
+
+                if (!serversCols.Contains("Hidden"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN Hidden INTEGER DEFAULT 0;");
+                }
+
+                if (!serversCols.Contains("Type"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN Type TEXT DEFAULT 'sse';");
+                }
+
+                if (!serversCols.Contains("SecretProvider"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN SecretProvider TEXT DEFAULT 'None';");
+                }
+
+                if (!serversCols.Contains("SecretItemKey"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN SecretItemKey TEXT NULL;");
+                }
+
+                if (!serversCols.Contains("SecretMount"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN SecretMount TEXT NULL;");
+                }
+
+                if (!serversCols.Contains("SecretPath"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN SecretPath TEXT NULL;");
+                }
+
+                if (!serversCols.Contains("SecretField"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN SecretField TEXT NULL;");
+                }
+
+                if (!serversCols.Contains("AuthShape"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN AuthShape TEXT DEFAULT 'bearer';");
+                }
+
+                if (!serversCols.Contains("CustomHeaderName"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN CustomHeaderName TEXT NULL;");
+                }
+
+                if (!serversCols.Contains("Categories"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN Categories TEXT DEFAULT '[]';");
+                }
+
+                if (!serversCols.Contains("ApiKey"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN ApiKey TEXT NULL;");
+                }
+
+                if (!serversCols.Contains("HeadersJson"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN HeadersJson TEXT NULL;");
+                }
+
+                if (!serversCols.Contains("AutoDiscovered"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN AutoDiscovered INTEGER DEFAULT 0;");
+                }
+
+                if (!serversCols.Contains("AllowPassThroughAuth"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN AllowPassThroughAuth INTEGER DEFAULT 0;");
+                }
+
+                if (!serversCols.Contains("DynamicAuthPrompt"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN DynamicAuthPrompt TEXT NULL;");
+                }
             }
         }
 
@@ -472,22 +565,85 @@ namespace McpRouter.Infrastructure.Persistence
                     SELECT COLUMN_NAME FROM information_schema.columns 
                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Servers';").ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-                if (!serversCols.Contains("Enabled")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `Enabled` TINYINT(1) NOT NULL DEFAULT 1;");
-                if (!serversCols.Contains("Hidden")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `Hidden` TINYINT(1) NOT NULL DEFAULT 0;");
-                if (!serversCols.Contains("Type")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `Type` VARCHAR(20) NOT NULL DEFAULT 'sse';");
-                if (!serversCols.Contains("SecretProvider")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretProvider` VARCHAR(50) NOT NULL DEFAULT 'None';");
-                if (!serversCols.Contains("SecretItemKey")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretItemKey` VARCHAR(100) NULL;");
-                if (!serversCols.Contains("SecretMount")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretMount` VARCHAR(100) NULL;");
-                if (!serversCols.Contains("SecretPath")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretPath` VARCHAR(250) NULL;");
-                if (!serversCols.Contains("SecretField")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretField` VARCHAR(100) NULL;");
-                if (!serversCols.Contains("AuthShape")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `AuthShape` VARCHAR(20) NOT NULL DEFAULT 'bearer';");
-                if (!serversCols.Contains("CustomHeaderName")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `CustomHeaderName` VARCHAR(100) NULL;");
-                if (!serversCols.Contains("Categories")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `Categories` LONGTEXT NOT NULL;");
-                if (!serversCols.Contains("ApiKey")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `ApiKey` LONGTEXT NULL;");
-                if (!serversCols.Contains("HeadersJson")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `HeadersJson` LONGTEXT NULL;");
-                if (!serversCols.Contains("AutoDiscovered")) conn.Execute("ALTER TABLE `Servers` ADD COLUMN `AutoDiscovered` TINYINT(1) NOT NULL DEFAULT 0;");
-                if (!serversCols.Contains("AllowPassThroughAuth")) conn.Execute("ALTER TABLE Servers ADD COLUMN AllowPassThroughAuth INTEGER DEFAULT 0;");
-                if (!serversCols.Contains("DynamicAuthPrompt")) conn.Execute("ALTER TABLE Servers ADD COLUMN DynamicAuthPrompt TEXT NULL;");
+                if (!serversCols.Contains("Enabled"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `Enabled` TINYINT(1) NOT NULL DEFAULT 1;");
+                }
+
+                if (!serversCols.Contains("Hidden"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `Hidden` TINYINT(1) NOT NULL DEFAULT 0;");
+                }
+
+                if (!serversCols.Contains("Type"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `Type` VARCHAR(20) NOT NULL DEFAULT 'sse';");
+                }
+
+                if (!serversCols.Contains("SecretProvider"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretProvider` VARCHAR(50) NOT NULL DEFAULT 'None';");
+                }
+
+                if (!serversCols.Contains("SecretItemKey"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretItemKey` VARCHAR(100) NULL;");
+                }
+
+                if (!serversCols.Contains("SecretMount"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretMount` VARCHAR(100) NULL;");
+                }
+
+                if (!serversCols.Contains("SecretPath"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretPath` VARCHAR(250) NULL;");
+                }
+
+                if (!serversCols.Contains("SecretField"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `SecretField` VARCHAR(100) NULL;");
+                }
+
+                if (!serversCols.Contains("AuthShape"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `AuthShape` VARCHAR(20) NOT NULL DEFAULT 'bearer';");
+                }
+
+                if (!serversCols.Contains("CustomHeaderName"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `CustomHeaderName` VARCHAR(100) NULL;");
+                }
+
+                if (!serversCols.Contains("Categories"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `Categories` LONGTEXT NOT NULL;");
+                }
+
+                if (!serversCols.Contains("ApiKey"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `ApiKey` LONGTEXT NULL;");
+                }
+
+                if (!serversCols.Contains("HeadersJson"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `HeadersJson` LONGTEXT NULL;");
+                }
+
+                if (!serversCols.Contains("AutoDiscovered"))
+                {
+                    conn.Execute("ALTER TABLE `Servers` ADD COLUMN `AutoDiscovered` TINYINT(1) NOT NULL DEFAULT 0;");
+                }
+
+                if (!serversCols.Contains("AllowPassThroughAuth"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN AllowPassThroughAuth INTEGER DEFAULT 0;");
+                }
+
+                if (!serversCols.Contains("DynamicAuthPrompt"))
+                {
+                    conn.Execute("ALTER TABLE Servers ADD COLUMN DynamicAuthPrompt TEXT NULL;");
+                }
             }
 
             var settingsTableExists = conn.ExecuteScalar<int>(@"
@@ -500,15 +656,50 @@ namespace McpRouter.Infrastructure.Persistence
                     SELECT COLUMN_NAME FROM information_schema.columns 
                     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'Settings';").ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-                if (!settingsCols.Contains("DashboardTitle")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `DashboardTitle` VARCHAR(200) NOT NULL DEFAULT 'MCP Gateway';");
-                if (!settingsCols.Contains("DashboardIcon")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `DashboardIcon` VARCHAR(100) NOT NULL DEFAULT 'fa-solid fa-network-wired';");
-                if (!settingsCols.Contains("EmbeddingProvider")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingProvider` VARCHAR(50) NULL;");
-                if (!settingsCols.Contains("EmbeddingApiUrl")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiUrl` VARCHAR(500) NULL;");
-                if (!settingsCols.Contains("EmbeddingApiKey")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiKey` LONGTEXT NULL;");
-                if (!settingsCols.Contains("EmbeddingApiModel")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiModel` VARCHAR(100) NULL;");
-                if (!settingsCols.Contains("EmbeddingModelDir")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingModelDir` VARCHAR(500) NULL;");
-                if (!settingsCols.Contains("GlobalMaxKeys")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `GlobalMaxKeys` INT NOT NULL DEFAULT 100;");
-                if (!settingsCols.Contains("UserMaxKeys")) conn.Execute("ALTER TABLE `Settings` ADD COLUMN `UserMaxKeys` INT NOT NULL DEFAULT 5;");
+                if (!settingsCols.Contains("DashboardTitle"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `DashboardTitle` VARCHAR(200) NOT NULL DEFAULT 'MCP Gateway';");
+                }
+
+                if (!settingsCols.Contains("DashboardIcon"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `DashboardIcon` VARCHAR(100) NOT NULL DEFAULT 'fa-solid fa-network-wired';");
+                }
+
+                if (!settingsCols.Contains("EmbeddingProvider"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingProvider` VARCHAR(50) NULL;");
+                }
+
+                if (!settingsCols.Contains("EmbeddingApiUrl"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiUrl` VARCHAR(500) NULL;");
+                }
+
+                if (!settingsCols.Contains("EmbeddingApiKey"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiKey` LONGTEXT NULL;");
+                }
+
+                if (!settingsCols.Contains("EmbeddingApiModel"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingApiModel` VARCHAR(100) NULL;");
+                }
+
+                if (!settingsCols.Contains("EmbeddingModelDir"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `EmbeddingModelDir` VARCHAR(500) NULL;");
+                }
+
+                if (!settingsCols.Contains("GlobalMaxKeys"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `GlobalMaxKeys` INT NOT NULL DEFAULT 100;");
+                }
+
+                if (!settingsCols.Contains("UserMaxKeys"))
+                {
+                    conn.Execute("ALTER TABLE `Settings` ADD COLUMN `UserMaxKeys` INT NOT NULL DEFAULT 5;");
+                }
             }
 
             // 2. Migrate Tools.ServerId if INT to VARCHAR(100)

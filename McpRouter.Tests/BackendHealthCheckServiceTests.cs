@@ -1,20 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
-using System.Threading;
-using System.Threading.Tasks;
+using Dapper;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using McpRouter.Core;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
 using Moq;
-using Xunit;
-using Dapper;
 
 namespace McpRouter.Tests
 {
@@ -141,7 +130,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var server = new McpServer
             {
                 Id = "test-3",
@@ -238,7 +227,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var server = new McpServer
             {
                 Id = "stdio-invalid",
@@ -269,7 +258,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task ProbeServerAsync_Sets_Connected_For_Custom_Server()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var server = new McpServer
             {
                 Id = "custom-server",

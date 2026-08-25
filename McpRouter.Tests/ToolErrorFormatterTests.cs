@@ -1,8 +1,4 @@
-using System;
 using System.Text.Json;
-using McpRouter.Core.Routing;
-using McpRouter.Models;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -52,11 +48,26 @@ namespace McpRouter.Tests
             var suggestion = ToolErrorFormatter.GetActionableSuggestion(errorMsg, "test_tool", "server1");
             Assert.NotNull(suggestion);
 
-            if (category == "auth") Assert.Contains("Authentication/Authorization failure", suggestion);
-            else if (category == "timeout") Assert.Contains("timed out", suggestion);
-            else if (category == "connection") Assert.Contains("Network connection refused", suggestion);
-            else if (category == "argument") Assert.Contains("Invalid arguments", suggestion);
-            else Assert.Contains("unexpected error occurred", suggestion);
+            if (category == "auth")
+            {
+                Assert.Contains("Authentication/Authorization failure", suggestion);
+            }
+            else if (category == "timeout")
+            {
+                Assert.Contains("timed out", suggestion);
+            }
+            else if (category == "connection")
+            {
+                Assert.Contains("Network connection refused", suggestion);
+            }
+            else if (category == "argument")
+            {
+                Assert.Contains("Invalid arguments", suggestion);
+            }
+            else
+            {
+                Assert.Contains("unexpected error occurred", suggestion);
+            }
         }
     }
 }

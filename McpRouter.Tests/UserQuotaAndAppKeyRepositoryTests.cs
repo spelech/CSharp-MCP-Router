@@ -1,20 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Components.AppKeys;
 using McpRouter.Extensions;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Models;
-using McpRouter.Tests.Attributes;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -35,7 +25,13 @@ namespace McpRouter.Tests
             public void Close() { }
             public IDbCommand CreateCommand() => _inner.CreateCommand();
             public void Dispose() { }
-            public void Open() { if (_inner.State != ConnectionState.Open) _inner.Open(); }
+            public void Open()
+            {
+                if (_inner.State != ConnectionState.Open)
+                {
+                    _inner.Open();
+                }
+            }
         }
 
         private readonly SqliteConnection _rawConnection;

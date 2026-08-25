@@ -1,6 +1,3 @@
-using System.Threading.Tasks;
-using McpRouter.Models;
-
 namespace McpRouter.Core.Routing
 {
     public interface IEmbeddingService

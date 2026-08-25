@@ -1,11 +1,5 @@
-using System;
-using System.Linq;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Persistence;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
 using VaultSharp;
 using VaultSharp.V1.AuthMethods.AppRole;
 using VaultSharp.V1.AuthMethods.Token;
@@ -130,7 +124,10 @@ namespace McpRouter.Infrastructure.Secrets
                                     root.TryGetProperty("mount", out mProp))
                                 {
                                     var m = mProp.GetString();
-                                    if (!string.IsNullOrWhiteSpace(m)) mountPath = m;
+                                    if (!string.IsNullOrWhiteSpace(m))
+                                    {
+                                        mountPath = m;
+                                    }
                                 }
                             }
                         }
@@ -207,10 +204,13 @@ namespace McpRouter.Infrastructure.Secrets
             }
 
             var client = await EnsureVaultClientAsync();
-            if (client == null) return null;
+            if (client == null)
+            {
+                return null;
+            }
 
             // 2. Perform JIT renewal check on token TTL
-            long ttlSeconds = 1200;
+            long ttlSeconds;
             try
             {
                 var tokenInfoSecret = await client.V1.Auth.Token.LookupSelfAsync();
@@ -231,7 +231,10 @@ namespace McpRouter.Infrastructure.Secrets
             if (ttlSeconds < 300) // Under 5 minutes remaining (or force re-login on exception/0)
             {
                 client = await EnsureVaultClientAsync(forceRecreate: true);
-                if (client == null) return null;
+                if (client == null)
+                {
+                    return null;
+                }
             }
 
             try

@@ -1,16 +1,7 @@
-using System;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Components.Clients;
-using McpRouter.Components.AppKeys;
-using McpRouter.Components.Providers;
-using McpRouter.Components.Authorization;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Logging;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -320,14 +311,14 @@ namespace McpRouter.Tests
             Assert.NotNull(failResult);
             Assert.Equal(200, failResult.StatusCode);
         }
-    
+
         [Fact]
         [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "Batch save of authentication providers must fail closed if all providers are disabled")]
         public async Task SaveAuthProvidersBatch_ReturnsBadRequest_WhenAllProvidersDisabled()
         {
             var mockAudit = new Mock<IAuditLogger>();
             var controller = new ProvidersController(_dbRepo, _dbRepo);
-            
+
             var dtos = new System.Collections.Generic.List<AuthProviderDto>
             {
                 new AuthProviderDto { ProviderName = "ad", IsEnabled = false },
@@ -339,7 +330,7 @@ namespace McpRouter.Tests
             Assert.NotNull(result);
             Assert.Equal(400, result.StatusCode);
         }
-    
+
         [Fact]
         public async Task SaveSecretProvider_HttpUrl_AllowedForLocalhost()
         {
@@ -405,5 +396,5 @@ namespace McpRouter.Tests
             var badRequest = Assert.IsType<BadRequestObjectResult>(result);
             Assert.Contains("must use the HTTPS scheme", badRequest.Value!.ToString());
         }
-}
+    }
 }

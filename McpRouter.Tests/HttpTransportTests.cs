@@ -1,13 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Security;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Infrastructure.Transports;
-using McpRouter.Models;
 using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
 
 namespace McpRouter.Tests
 {

@@ -1,7 +1,3 @@
-using System;
-using System.Threading.Tasks;
-using McpRouter.Core.Protocol;
-
 namespace McpRouter.Infrastructure.Transports
 {
     public interface ITransport : IDisposable

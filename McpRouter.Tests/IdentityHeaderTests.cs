@@ -1,13 +1,6 @@
-using System.Net.Http;
-using System.Threading.Tasks;
-using Xunit;
-using Moq.Protected;
-using Moq;
 using Microsoft.Extensions.Logging;
-using McpRouter.Infrastructure.Transports;
-using McpRouter.Components.Servers;
-using McpRouter.Core.Protocol;
-using McpRouter.Tests.Attributes;
+using Moq;
+using Moq.Protected;
 
 namespace McpRouter.Tests
 {
@@ -19,7 +12,7 @@ namespace McpRouter.Tests
         {
             var server = new McpServer { Id = "test-server", Type = "http", Url = "http://localhost/mcp" };
             var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
-            
+
             HttpRequestMessage? capturedRequest = null;
             handlerMock.Protected()
                 .Setup<Task<HttpResponseMessage>>(
@@ -35,11 +28,11 @@ namespace McpRouter.Tests
 
             var httpClient = new HttpClient(handlerMock.Object);
             var logger = Mock.Of<ILogger>();
-            
+
             var transport = new HttpTransport(server, httpClient, logger, null, null, null, "testuser@domain.com");
-            
+
             await transport.SendRequestAsync("test/method", "{}");
-            
+
             Assert.NotNull(capturedRequest);
             Assert.True(capturedRequest.Headers.Contains("X-Forwarded-User"));
             var values = capturedRequest.Headers.GetValues("X-Forwarded-User");
