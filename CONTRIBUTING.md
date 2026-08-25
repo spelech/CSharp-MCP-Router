@@ -96,7 +96,7 @@ We follow the [Conventional Commits](https://www.conventionalcommits.org/) stand
 * **Major Bumps (e.g. `4.0.0` -> `5.0.0`)**: For breaking protocol or architectural redesigns.
 
 ### Files That MUST Be Updated Simultaneously:
-1. [`mcp-router.csproj`](mcp-router.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
+1. [`ModelContextGateway.csproj`](ModelContextGateway.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
 2. [`frontend/src/stores/useUserStore.ts`](frontend/src/stores/useUserStore.ts) (React fallback version string).
 3. [`CHANGELOG.md`](CHANGELOG.md) (Add a release entry to the Release Changelog table).
 4. [`README.md`](README.md) (Update the top-5 release preview table).

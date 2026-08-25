@@ -42,18 +42,18 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore dependencies
-        run: dotnet restore McpRouter.slnx
+        run: dotnet restore ModelContextGateway.slnx
 
       - name: Verify C# code formatting & style
-        run: dotnet format McpRouter.slnx --verify-no-changes
+        run: dotnet format ModelContextGateway.slnx --verify-no-changes
 
       - name: Build backend (Release)
-        run: dotnet build McpRouter.slnx --configuration Release --no-restore
+        run: dotnet build ModelContextGateway.slnx --configuration Release --no-restore
 
       - name: Run unit & integration tests with coverage
         env:
           CI: "true"
-        run: dotnet test McpRouter.slnx --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults --logger "trx;LogFileName=test_results.trx"
+        run: dotnet test ModelContextGateway.slnx --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage" --results-directory ./TestResults --logger "trx;LogFileName=test_results.trx"
 
       - name: Publish test results & coverage
         if: always()
@@ -138,15 +138,15 @@ jobs:
           npm run build
 
       - name: Build backend application
-        run: dotnet build McpRouter.slnx --configuration Release
+        run: dotnet build ModelContextGateway.slnx --configuration Release
 
-      - name: Start MCP Router & execute integration smoke checks
+      - name: Start Model Context Gateway & execute integration smoke checks
         run: |
           mkdir -p ./smoke-run
           ASPNETCORE_ENVIRONMENT=Development \
           ASPNETCORE_URLS="http://127.0.0.1:5199" \
-          ROUTER_DATABASE_PATH="./smoke-run/smoke.db" \
-          dotnet bin/Release/net10.0/mcp-router.dll > ./smoke-run/server.log 2>&1 &
+          MCG_DATABASE_PATH="./smoke-run/smoke.db" \
+          dotnet bin/Release/net10.0/mcg.dll > ./smoke-run/server.log 2>&1 &
           APP_PID=$!
           echo "APP_PID=$APP_PID" >> $GITHUB_ENV
 
@@ -267,6 +267,6 @@ jobs:
         with:
           context: .
           push: false
-          tags: mcp-router:ci-check
+          tags: mcg:ci-check
           cache-from: type=gha
           cache-to: type=gha,mode=max

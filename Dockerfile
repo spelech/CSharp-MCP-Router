@@ -12,18 +12,23 @@ WORKDIR /source
 ENV CI=true
 
 # Copy csproj, props and restore dependencies
-COPY mcp-router.csproj Directory.Build.props ./
-RUN dotnet restore mcp-router.csproj
+COPY ModelContextGateway.csproj Directory.Build.props ./
+RUN dotnet restore ModelContextGateway.csproj
 
 # Copy source and publish
 COPY . ./
 # Copy built frontend assets to wwwroot
 COPY --from=frontend-build /wwwroot ./wwwroot
-RUN dotnet publish mcp-router.csproj -c Release -o /app
+RUN dotnet publish ModelContextGateway.csproj -c Release -o /app
 
 # Stage 3: Standard runtime image
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 WORKDIR /app
+
+LABEL org.opencontainers.image.title="Model Context Gateway (MCG)"
+LABEL org.opencontainers.image.description="High-performance ASP.NET Core gateway router for the Model Context Protocol (MCP)"
+LABEL org.opencontainers.image.source="https://github.com/spelech/model-context-gateway"
+LABEL org.opencontainers.image.licenses="MIT"
 
 # Install native dependencies for SQLite / SQLCipher bundle if any
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -41,7 +46,7 @@ ENV ASPNETCORE_URLS=http://+:8080 \
     ASPNETCORE_ENVIRONMENT=Production
 
 # Run the app
-ENTRYPOINT ["dotnet", "mcp-router.dll"]
+ENTRYPOINT ["./mcg"]
 
 # Stage 4: "Batteries-Included" full runtime image for STDIO backends
 FROM runtime AS runtime-full
