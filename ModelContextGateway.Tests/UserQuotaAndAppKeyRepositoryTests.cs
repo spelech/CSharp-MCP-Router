@@ -1,6 +1,5 @@
 using System.Data;
 using Dapper;
-using ModelContextGateway.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;

@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-25T17:57:18.5165269Z",
+    "generatedAt": "2026-08-25T18:29:32.0907299Z",
     "totalRequirements": 133,
     "positiveCount": 110,
     "guardrailCount": 23,
@@ -49,42 +49,42 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
-          "lineNumber": 14,
+          "lineNumber": 13,
           "testName": "AdminPolicy_Allows_Principal_With_AdminGroupName",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
-          "lineNumber": 48,
+          "lineNumber": 47,
           "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
-          "lineNumber": 82,
+          "lineNumber": 81,
           "testName": "AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
-          "lineNumber": 117,
+          "lineNumber": 116,
           "testName": "AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs",
-          "lineNumber": 17,
+          "lineNumber": 16,
           "testName": "AdminPolicy_Denies_StandardRole_Without_AdminSid",
           "details": "Verifies that users with standard/unconfigured role names lacking explicit Admin SID claim or Admin Group are denied by AdminPolicy."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs",
-          "lineNumber": 59,
+          "lineNumber": 58,
           "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
           "details": "Verifies that principals with the configured Admin SID are granted administrative policy access."
         },
@@ -170,7 +170,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
-          "lineNumber": 147,
+          "lineNumber": 146,
           "testName": "AppKeyRepository_SaveAndGet_PersistsKeyTypeAndFilters",
           "details": null
         },
@@ -419,7 +419,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 80,
+          "lineNumber": 79,
           "testName": "AppKey_WithAdminScope_GrantsAdminAccess",
           "details": null
         }
@@ -435,7 +435,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 256,
+          "lineNumber": 255,
           "testName": "IsAdmin_AppKeyScopes_InHttpContextItems_ReturnsTrue",
           "details": null
         }
@@ -451,7 +451,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 141,
+          "lineNumber": 140,
           "testName": "AppKey_WithWildcardScope_GrantsAdminAccess",
           "details": null
         }
@@ -483,21 +483,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
-          "lineNumber": 187,
+          "lineNumber": 186,
           "testName": "Startup_SeedsCustomAdminKey_WhenConfigured",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
-          "lineNumber": 239,
+          "lineNumber": 238,
           "testName": "Startup_SeedsCustomAdminKey_WhenMcpAdminKeyConfigured",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
-          "lineNumber": 290,
+          "lineNumber": 289,
           "testName": "Startup_UpdatesAdminKeyHash_WhenEnvironmentKeyChanges",
           "details": null
         }
@@ -726,7 +726,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 177,
+          "lineNumber": 176,
           "testName": "AdminPolicy_StandaloneMode_LoopbackIp_PassesAdminPolicy",
           "details": null
         }
@@ -742,7 +742,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 36,
+          "lineNumber": 35,
           "testName": "IsAdmin_StandaloneMode_CustomCidr_ReturnsTrue",
           "details": null
         }
@@ -758,7 +758,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 15,
+          "lineNumber": 14,
           "testName": "IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue",
           "details": null
         }
@@ -964,35 +964,35 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
-          "lineNumber": 86,
+          "lineNumber": 85,
           "testName": "UserQuotaRepository_SetAndGet_ReturnsPersistedQuota",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
-          "lineNumber": 99,
+          "lineNumber": 98,
           "testName": "UserQuotaRepository_GetAll_ReturnsAllUserQuotas",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
-          "lineNumber": 118,
+          "lineNumber": 117,
           "testName": "UserQuotaRepository_Update_UpdatesExistingQuota",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
-          "lineNumber": 133,
+          "lineNumber": 132,
           "testName": "UserQuotaRepository_Delete_RemovesQuota",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
-          "lineNumber": 200,
+          "lineNumber": 199,
           "testName": "DependencyInjection_RegistersIUserQuotaRepository",
           "details": null
         }
@@ -1109,7 +1109,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 225,
+          "lineNumber": 224,
           "testName": "AdminPolicy_ExternalIdpConfigured_LoopbackIp_RequiresCredentials",
           "details": null
         }
@@ -1125,7 +1125,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 201,
+          "lineNumber": 200,
           "testName": "AdminPolicy_StandaloneMode_ExternalUntrustedIp_FailsAdminPolicy",
           "details": null
         }
@@ -1141,7 +1141,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
-          "lineNumber": 58,
+          "lineNumber": 57,
           "testName": "IsAdmin_StandaloneMode_UntrustedIp_ReturnsFalse",
           "details": null
         }

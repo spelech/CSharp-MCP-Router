@@ -40,7 +40,7 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (12):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L242`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L242) (`Pairwise_AppKeyScopes_RestrictsAccessPrecisely`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L147`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L147) (`AppKeyRepository_SaveAndGet_PersistsKeyTypeAndFilters`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L146`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L146) (`AppKeyRepository_SaveAndGet_PersistsKeyTypeAndFilters`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L194`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L194) (`AppKeysController_CreateAppKey_ValidCategory_Succeeds`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L278`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L278) (`ClientsController_CreateClient_ValidCategory_Succeeds`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L361`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L361) (`ClientSession_CategoryScope_AuthorizesMatchingServerTools_AndDeniesOthers`)
@@ -109,19 +109,19 @@
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L80`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L80) (`AppKey_WithAdminScope_GrantsAdminAccess`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L79`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L79) (`AppKey_WithAdminScope_GrantsAdminAccess`)
 
 ### `[AUTH-APPKEY-ITEMS-SCOPE-ALLOW]` SecurityValidationHelper recognizes admin scopes in HttpContext.Items.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L256`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L256) (`IsAdmin_AppKeyScopes_InHttpContextItems_ReturnsTrue`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L255`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L255) (`IsAdmin_AppKeyScopes_InHttpContextItems_ReturnsTrue`)
 
 ### `[AUTH-APPKEY-WILDCARD-SCOPE-ALLOW]` AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L141`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L141) (`AppKey_WithWildcardScope_GrantsAdminAccess`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L140`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L140) (`AppKey_WithWildcardScope_GrantsAdminAccess`)
 
 ### `[AUTH-COMPACT-APPKEY-TAXONOMY]` Generates compact ~32-character Base62 AppKeys with semantic prefixes.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -133,9 +133,9 @@
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L187`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L187) (`Startup_SeedsCustomAdminKey_WhenConfigured`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L239`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L239) (`Startup_SeedsCustomAdminKey_WhenMcpAdminKeyConfigured`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L290`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L290) (`Startup_UpdatesAdminKeyHash_WhenEnvironmentKeyChanges`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L186`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L186) (`Startup_SeedsCustomAdminKey_WhenConfigured`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L238`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L238) (`Startup_SeedsCustomAdminKey_WhenMcpAdminKeyConfigured`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L289`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L289) (`Startup_UpdatesAdminKeyHash_WhenEnvironmentKeyChanges`)
 
 ### `[AUTH-PERSONAL-APPKEY-LIST]` Non-admin users can view their personal App Keys
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -176,19 +176,19 @@
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L177`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L177) (`AdminPolicy_StandaloneMode_LoopbackIp_PassesAdminPolicy`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L176`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L176) (`AdminPolicy_StandaloneMode_LoopbackIp_PassesAdminPolicy`)
 
 ### `[AUTH-STANDALONE-CUSTOM-CIDR-ALLOW]` Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L36`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L36) (`IsAdmin_StandaloneMode_CustomCidr_ReturnsTrue`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L35) (`IsAdmin_StandaloneMode_CustomCidr_ReturnsTrue`)
 
 ### `[AUTH-STANDALONE-LOOPBACK-ALLOW]` Standalone mode without external IDP grants admin access to loopback IP addresses.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L15`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L15) (`IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L14`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L14) (`IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue`)
 
 ### `[AUTH-SYSTEM-APPKEY-SEPARATION]` System keys are distinct and require admin permissions
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -236,11 +236,11 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (6):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L29`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L29) (`Sqlite_UpgradeMigration_FromLegacySchema_PreservesDataAndPassesValidation`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L86`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L86) (`UserQuotaRepository_SetAndGet_ReturnsPersistedQuota`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L99`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L99) (`UserQuotaRepository_GetAll_ReturnsAllUserQuotas`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L118`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L118) (`UserQuotaRepository_Update_UpdatesExistingQuota`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L133`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L133) (`UserQuotaRepository_Delete_RemovesQuota`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L200`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L200) (`DependencyInjection_RegistersIUserQuotaRepository`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L85`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L85) (`UserQuotaRepository_SetAndGet_ReturnsPersistedQuota`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L98`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L98) (`UserQuotaRepository_GetAll_ReturnsAllUserQuotas`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L117`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L117) (`UserQuotaRepository_Update_UpdatesExistingQuota`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L132`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L132) (`UserQuotaRepository_Delete_RemovesQuota`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L199`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs#L199) (`DependencyInjection_RegistersIUserQuotaRepository`)
 
 ### `[DB-02]` MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly
 * **Category:** `DB` (Multi-Database Persistence & Migrations)
@@ -792,12 +792,12 @@
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (15):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L14`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L14) (`AdminPolicy_Allows_Principal_With_AdminGroupName`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L48`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L48) (`AdminPolicy_Allows_Principal_With_AdminSid`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L82`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L82) (`AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L117`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L117) (`AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L17`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L17) (`AdminPolicy_Denies_StandardRole_Without_AdminSid`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L59`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L59) (`AdminPolicy_Allows_Principal_With_AdminSid`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L13`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L13) (`AdminPolicy_Allows_Principal_With_AdminGroupName`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L47`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L47) (`AdminPolicy_Allows_Principal_With_AdminSid`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L81`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L81) (`AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L116`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L116) (`AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L16`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L16) (`AdminPolicy_Denies_StandardRole_Without_AdminSid`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs#L58) (`AdminPolicy_Allows_Principal_With_AdminSid`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L255`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L255) (`AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L220`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L220) (`SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L238`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs#L238) (`SecurityValidationHelper_IsAdmin_AllowsAdminGroupName`)
@@ -826,19 +826,19 @@
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L225`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L225) (`AdminPolicy_ExternalIdpConfigured_LoopbackIp_RequiresCredentials`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L224`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L224) (`AdminPolicy_ExternalIdpConfigured_LoopbackIp_RequiresCredentials`)
 
 ### `[AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY]` AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L201`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L201) (`AdminPolicy_StandaloneMode_ExternalUntrustedIp_FailsAdminPolicy`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L200`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L200) (`AdminPolicy_StandaloneMode_ExternalUntrustedIp_FailsAdminPolicy`)
 
 ### `[AUTH-STANDALONE-EXTERNAL-DENY]` Standalone mode denies admin access to non-whitelisted external IPs without an Admin AppKey.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L58) (`IsAdmin_StandaloneMode_UntrustedIp_ReturnsFalse`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57) (`IsAdmin_StandaloneMode_UntrustedIp_ReturnsFalse`)
 
 ### `[GUARD-01]` Null or empty capability targets must immediately fail closed and return unauthorized
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
@@ -995,7 +995,7 @@
 | :--- | :---: | :--- | :--- | :--- | :--- |
 | `AUTH-001` | Positive | `AUTH` | Verify DatabaseUserSecretStore encrypts and decrypts secret correctly. | [`UserSecretStoreTests.cs:L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserSecretStoreTests.cs#L8) | Backend xUnit |
 | `AUTH-002` | Positive | `AUTH` | Verify UserCredentialsController returns configured server IDs. | [`UserCredentialsControllerTests.cs:L11`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserCredentialsControllerTests.cs#L11) | Backend xUnit |
-| `AUTH-01` | **Guardrail** | `AUTH` | AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin) | [`AdminPolicyHybridAuthTests.cs:L14`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L14) | Backend xUnit |
+| `AUTH-01` | **Guardrail** | `AUTH` | AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin) | [`AdminPolicyHybridAuthTests.cs:L13`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs#L13) | Backend xUnit |
 | `AUTH-02` | Positive | `AUTH` | AppKey scopes restrict access precisely across all MCP capabilities and backend targets | [`PairwiseIntegrationMatrixTests.cs:L242`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L242) | Backend xUnit |
 | `AUTH-03` | Positive | `AUTH` | SSO identity and group mappings resolve Windows SIDs and OIDC claims to internal access roles | [`PairwiseIntegrationMatrixTests.cs:L319`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L319) | Backend xUnit |
 | `AUTH-04` | Positive | `AUTH` | ActiveDirectoryIdentityProvider extracts Windows caller SIDs and security groups via IWindowsIdentityAccessor and augments with LDAP | [`ActiveDirectoryWindowsIdentityTests.cs:L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs#L12) | Backend xUnit |
@@ -1005,19 +1005,19 @@
 | `AUTH-105` | Positive | `AUTH` | Dynamic Auth Target Pass-Through | [`ToolRoutingManagerTests.cs:L173`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L173) | Backend xUnit |
 | `AUTH-109` | Positive | `AUTH` | ConsentView properly renders the client name from query string and builds correct form action. | [`ConsentView.test.tsx:L16`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx#L16) | Frontend Vitest |
 | `AUTH-110` | Positive | `AUTH` | CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0. | [`AppKeysControllerTests.cs:L339`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L339) | Backend xUnit |
-| `AUTH-APPKEY-ADMIN-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with admin scope grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L80`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L80) | Backend xUnit |
-| `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L256`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L256) | Backend xUnit |
-| `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L141`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L141) | Backend xUnit |
+| `AUTH-APPKEY-ADMIN-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with admin scope grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L79`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L79) | Backend xUnit |
+| `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L255`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L255) | Backend xUnit |
+| `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L140`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L140) | Backend xUnit |
 | `AUTH-COMPACT-APPKEY-TAXONOMY` | Positive | `AUTH` | Generates compact ~32-character Base62 AppKeys with semantic prefixes. | [`AppKeyAuthenticationTests.cs:L409`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L409) | Backend xUnit |
-| `AUTH-CUSTOM-ADMIN-KEY-SEEDING` | Positive | `AUTH` | Seeds custom ROUTER_ADMIN_KEY when provided in configuration. | [`DatabaseSeederServiceTests.cs:L187`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L187) | Backend xUnit |
+| `AUTH-CUSTOM-ADMIN-KEY-SEEDING` | Positive | `AUTH` | Seeds custom ROUTER_ADMIN_KEY when provided in configuration. | [`DatabaseSeederServiceTests.cs:L186`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L186) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-CREATE` | **Guardrail** | `AUTH` | Non-admin users can create personal App Keys up to quota | [`AppKeysControllerTests.cs:L191`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L191) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-LIST` | Positive | `AUTH` | Non-admin users can view their personal App Keys | [`AppKeysControllerTests.cs:L125`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L125) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE` | Positive | `AUTH` | Custom user quotas override default limit | [`AppKeysControllerTests.cs:L223`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L223) | Backend xUnit |
 | `AUTH-PREFIX-EXTRACTION` | Positive | `AUTH` | ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately. | [`AppKeyAuthenticationTests.cs:L443`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L443) | Backend xUnit |
 | `AUTH-QUERY-TOKEN-EXTRACTION` | Positive | `AUTH` | Query string token middleware extracts access_token or token query parameter to Authorization header. | [`EndpointAuthorizationTests.cs:L7`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EndpointAuthorizationTests.cs#L7) | Backend xUnit |
-| `AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW` | Positive | `AUTH` | AdminPolicy succeeds in standalone mode for unauthenticated loopback requests. | [`StandaloneAdminAuthTests.cs:L177`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L177) | Backend xUnit |
-| `AUTH-STANDALONE-CUSTOM-CIDR-ALLOW` | Positive | `AUTH` | Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges. | [`StandaloneAdminAuthTests.cs:L36`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L36) | Backend xUnit |
-| `AUTH-STANDALONE-LOOPBACK-ALLOW` | Positive | `AUTH` | Standalone mode without external IDP grants admin access to loopback IP addresses. | [`StandaloneAdminAuthTests.cs:L15`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L15) | Backend xUnit |
+| `AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW` | Positive | `AUTH` | AdminPolicy succeeds in standalone mode for unauthenticated loopback requests. | [`StandaloneAdminAuthTests.cs:L176`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L176) | Backend xUnit |
+| `AUTH-STANDALONE-CUSTOM-CIDR-ALLOW` | Positive | `AUTH` | Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges. | [`StandaloneAdminAuthTests.cs:L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L35) | Backend xUnit |
+| `AUTH-STANDALONE-LOOPBACK-ALLOW` | Positive | `AUTH` | Standalone mode without external IDP grants admin access to loopback IP addresses. | [`StandaloneAdminAuthTests.cs:L14`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L14) | Backend xUnit |
 | `AUTH-SYSTEM-APPKEY-SEPARATION` | Positive | `AUTH` | System keys are distinct and require admin permissions | [`AppKeysControllerTests.cs:L151`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L151) | Backend xUnit |
 | `UI-120` | Positive | `AUTH` | RBAC and SID mapping administration UI allows configuring role policies and SID associations | [`rbac-enforcement-flow.spec.ts:L1`](file:////containers/dev/csharp-mcp-router/frontend/e2e/rbac-enforcement-flow.spec.ts#L1) | Playwright E2E |
 | `UI-125` | Positive | `AUTH` | Admin role renders full administrative dashboard and server management controls | [`multi-user-matrix.spec.ts:L1`](file:////containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts#L1) | Playwright E2E |
@@ -1028,9 +1028,9 @@
 | `DOC-SETUP-SKILL-MIRROR` | Positive | `DOC` | The mcg-setup skill and templates are mirrored 1:1 in .agents/skills/mcg-setup/ | [`SetupSkillTests.cs:L152`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L152) | Backend xUnit |
 | `DOC-SETUP-SKILL-TEMPLATES` | Positive | `DOC` | All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/model-context-gateway | [`SetupSkillTests.cs:L98`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L98) | Backend xUnit |
 | `DOC-SETUP-SKILL-WORKFLOW` | Positive | `DOC` | mcg-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration | [`SetupSkillTests.cs:L44`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L44) | Backend xUnit |
-| `AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK` | **Guardrail** | `GUARD` | When an external IDP is configured, anonymous loopback requests do not bypass authentication. | [`StandaloneAdminAuthTests.cs:L225`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L225) | Backend xUnit |
-| `AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY` | **Guardrail** | `GUARD` | AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode. | [`StandaloneAdminAuthTests.cs:L201`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L201) | Backend xUnit |
-| `AUTH-STANDALONE-EXTERNAL-DENY` | **Guardrail** | `GUARD` | Standalone mode denies admin access to non-whitelisted external IPs without an Admin AppKey. | [`StandaloneAdminAuthTests.cs:L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L58) | Backend xUnit |
+| `AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK` | **Guardrail** | `GUARD` | When an external IDP is configured, anonymous loopback requests do not bypass authentication. | [`StandaloneAdminAuthTests.cs:L224`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L224) | Backend xUnit |
+| `AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY` | **Guardrail** | `GUARD` | AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode. | [`StandaloneAdminAuthTests.cs:L200`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L200) | Backend xUnit |
+| `AUTH-STANDALONE-EXTERNAL-DENY` | **Guardrail** | `GUARD` | Standalone mode denies admin access to non-whitelisted external IPs without an Admin AppKey. | [`StandaloneAdminAuthTests.cs:L57`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L57) | Backend xUnit |
 | `GUARD-01` | **Guardrail** | `GUARD` | Null or empty capability targets must immediately fail closed and return unauthorized | [`PairwiseIntegrationMatrixTests.cs:L468`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468) | Backend xUnit |
 | `GUARD-02` | **Guardrail** | `GUARD` | SSE transport fails closed with SecurityException when secret provider resolution fails | [`SseTransportTests.cs:L32`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs#L32) | Backend xUnit |
 | `GUARD-03` | **Guardrail** | `GUARD` | STDIO transport rejects commands with shell metacharacters or dangerous commands | [`StdioTransportTests.cs:L104`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs#L104) | Backend xUnit |

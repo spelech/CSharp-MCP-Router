@@ -1,5 +1,4 @@
 using System.Text;
-using ModelContextGateway.Middleware;
 using Microsoft.AspNetCore.Http;
 
 namespace ModelContextGateway.Tests

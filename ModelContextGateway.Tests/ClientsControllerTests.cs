@@ -3,7 +3,6 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using Dapper;
 using FluentAssertions;
-using ModelContextGateway.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;

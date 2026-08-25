@@ -1,7 +1,6 @@
 using System.Net;
 using System.Text.Json;
 using FluentAssertions;
-using ModelContextGateway.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;

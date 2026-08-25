@@ -1,6 +1,5 @@
 using System.Net;
 using System.Security.Claims;
-using ModelContextGateway.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
