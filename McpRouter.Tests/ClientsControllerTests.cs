@@ -617,13 +617,13 @@ namespace McpRouter.Tests
                 "High Entropy App", "client-high-entropy", "", new List<string> { "all" }, null
             );
 
-            // Prefix format: mcp-global-{32 hex chars} (length: 11 + 32 = 43)
-            appKey.KeyPrefix.Should().StartWith("mcp-global-");
-            appKey.KeyPrefix.Length.Should().Be(43);
+            // Prefix format: mcp-glb-{8 Base62 chars} (length: 8 + 8 = 16)
+            appKey.KeyPrefix.Should().StartWith("mcp-glb-");
+            appKey.KeyPrefix.Length.Should().Be(16);
 
-            // Plaintext format: mcp-global-{32 hex chars}-{64 hex chars}
+            // Plaintext format: mcp-glb-{8 Base62 chars}-{16 Base62 chars}
             plaintextKey.Should().StartWith(appKey.KeyPrefix + "-");
-            plaintextKey.Length.Should().Be(43 + 1 + 64); // 108 characters
+            plaintextKey.Length.Should().Be(16 + 1 + 16); // 33 characters
         }
 
         [Fact]
