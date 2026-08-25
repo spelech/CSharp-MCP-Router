@@ -183,5 +183,151 @@ namespace McpRouter.Tests
             Assert.True(authResult.Succeeded, authResult.Failure?.Message);
             Assert.Equal("legacyuser", authResult.Principal?.Identity?.Name);
         }
+
+        [Fact]
+        [Requirement("AUTH-CUSTOM-ADMIN-KEY-SEEDING", "AUTH", RequirementType.Positive, "Seeds custom ROUTER_ADMIN_KEY when provided in configuration.")]
+        public async Task Startup_SeedsCustomAdminKey_WhenConfigured()
+        {
+            var (conn, factory) = CreateDbFactory();
+            var customKey = "mcp-adm-CustomKey123-Secret999";
+            var inMemoryConfig = new Dictionary<string, string?>
+            {
+                { "ROUTER_ADMIN_KEY", customKey },
+                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
+
+            var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(config);
+            services.AddSingleton(factory);
+            services.AddLogging();
+            var sp = services.BuildServiceProvider();
+
+            DatabaseSeederService.SeedDatabase(sp, config);
+
+            var keyPrefix = AppKeyAuthenticationHandler.ExtractKeyPrefix(customKey);
+            var appKey = conn.QueryFirstOrDefault<AppKey>("SELECT * FROM AppKeys WHERE KeyPrefix = @KeyPrefix;", new { KeyPrefix = keyPrefix });
+            Assert.NotNull(appKey);
+            Assert.Equal("admin", appKey.Username);
+            Assert.Equal("system", appKey.KeyType);
+
+            var optionsMonitorMock = new Mock<IOptionsMonitor<AuthenticationSchemeOptions>>();
+            optionsMonitorMock.Setup(o => o.Get(It.IsAny<string>())).Returns(new AuthenticationSchemeOptions());
+
+            var handler = new AppKeyAuthenticationHandler(
+                optionsMonitorMock.Object,
+                NullLoggerFactory.Instance,
+                UrlEncoder.Default,
+                factory,
+                config
+            );
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers["Authorization"] = $"Bearer {customKey}";
+            httpContext.RequestServices = sp;
+
+            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
+            await handler.InitializeAsync(scheme, httpContext);
+
+            var authResult = await handler.AuthenticateAsync();
+            Assert.True(authResult.Succeeded, authResult.Failure?.Message);
+            Assert.Equal("admin", authResult.Principal?.Identity?.Name);
+            Assert.True(authResult.Principal?.IsInRole("Administrator"));
+            Assert.True(authResult.Principal?.HasClaim("Scope", "admin"));
+        }
+
+        [Fact]
+        [Requirement("AUTH-CUSTOM-ADMIN-KEY-SEEDING", "AUTH", RequirementType.Positive, "Seeds custom MCP_ADMIN_KEY alias when provided in configuration.")]
+        public async Task Startup_SeedsCustomAdminKey_WhenMcpAdminKeyConfigured()
+        {
+            var (conn, factory) = CreateDbFactory();
+            var customKey = "mcp-adm-AliasKey888-Secret777";
+            var inMemoryConfig = new Dictionary<string, string?>
+            {
+                { "MCP_ADMIN_KEY", customKey },
+                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
+
+            var services = new ServiceCollection();
+            services.AddSingleton<IConfiguration>(config);
+            services.AddSingleton(factory);
+            services.AddLogging();
+            var sp = services.BuildServiceProvider();
+
+            DatabaseSeederService.SeedDatabase(sp, config);
+
+            var keyPrefix = AppKeyAuthenticationHandler.ExtractKeyPrefix(customKey);
+            var appKey = conn.QueryFirstOrDefault<AppKey>("SELECT * FROM AppKeys WHERE KeyPrefix = @KeyPrefix;", new { KeyPrefix = keyPrefix });
+            Assert.NotNull(appKey);
+            Assert.Equal("admin", appKey.Username);
+            Assert.Equal("system", appKey.KeyType);
+
+            var optionsMonitorMock = new Mock<IOptionsMonitor<AuthenticationSchemeOptions>>();
+            optionsMonitorMock.Setup(o => o.Get(It.IsAny<string>())).Returns(new AuthenticationSchemeOptions());
+
+            var handler = new AppKeyAuthenticationHandler(
+                optionsMonitorMock.Object,
+                NullLoggerFactory.Instance,
+                UrlEncoder.Default,
+                factory,
+                config
+            );
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Request.Headers["Authorization"] = $"Bearer {customKey}";
+            httpContext.RequestServices = sp;
+
+            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
+            await handler.InitializeAsync(scheme, httpContext);
+
+            var authResult = await handler.AuthenticateAsync();
+            Assert.True(authResult.Succeeded, authResult.Failure?.Message);
+            Assert.Equal("admin", authResult.Principal?.Identity?.Name);
+            Assert.True(authResult.Principal?.IsInRole("Administrator"));
+        }
+
+        [Fact]
+        [Requirement("AUTH-CUSTOM-ADMIN-KEY-SEEDING", "AUTH", RequirementType.Positive, "Updates admin key hash when configuration key changes with same prefix.")]
+        public void Startup_UpdatesAdminKeyHash_WhenEnvironmentKeyChanges()
+        {
+            var (conn, factory) = CreateDbFactory();
+            var initialKey = "mcp-adm-Prefix123-SecretOld";
+            var inMemoryConfig1 = new Dictionary<string, string?>
+            {
+                { "ROUTER_ADMIN_KEY", initialKey },
+                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
+            };
+            var config1 = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig1).Build();
+
+            var services1 = new ServiceCollection();
+            services1.AddSingleton<IConfiguration>(config1);
+            services1.AddSingleton(factory);
+            services1.AddLogging();
+            DatabaseSeederService.SeedDatabase(services1.BuildServiceProvider(), config1);
+
+            var keyPrefix = AppKeyAuthenticationHandler.ExtractKeyPrefix(initialKey);
+            var initialRow = conn.QueryFirstOrDefault<AppKey>("SELECT * FROM AppKeys WHERE KeyPrefix = @KeyPrefix;", new { KeyPrefix = keyPrefix });
+            Assert.NotNull(initialRow);
+
+            var updatedKey = "mcp-adm-Prefix123-SecretNew";
+            var inMemoryConfig2 = new Dictionary<string, string?>
+            {
+                { "ROUTER_ADMIN_KEY", updatedKey },
+                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
+            };
+            var config2 = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig2).Build();
+
+            var services2 = new ServiceCollection();
+            services2.AddSingleton<IConfiguration>(config2);
+            services2.AddSingleton(factory);
+            services2.AddLogging();
+            DatabaseSeederService.SeedDatabase(services2.BuildServiceProvider(), config2);
+
+            var updatedRow = conn.QueryFirstOrDefault<AppKey>("SELECT * FROM AppKeys WHERE KeyPrefix = @KeyPrefix;", new { KeyPrefix = keyPrefix });
+            Assert.NotNull(updatedRow);
+            Assert.Equal(initialRow.Id, updatedRow.Id);
+            Assert.NotEqual(initialRow.EncryptedKey, updatedRow.EncryptedKey);
+        }
     }
 }

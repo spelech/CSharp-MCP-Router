@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **122 Requirements Verified** across **272 Test Proofs** (99 Functional Capabilities, 23 Safety Guardrails).
+> **Catalog Statistics:** **124 Requirements Verified** across **276 Test Proofs** (101 Functional Capabilities, 23 Safety Guardrails).
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **26** | 24 | 2 | 84 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **28** | 26 | 2 | 88 proofs |
 | **`CORE`** | CORE | **1** | 1 | 0 | 9 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 10 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
@@ -129,6 +129,14 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L409`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L409) (`CreateCredentialAsync_GeneratesCompactKeysWithSemanticPrefixes`)
 
+### `[AUTH-CUSTOM-ADMIN-KEY-SEEDING]` Seeds custom ROUTER_ADMIN_KEY when provided in configuration.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (3):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs#L187`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs#L187) (`Startup_SeedsCustomAdminKey_WhenConfigured`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs#L239`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs#L239) (`Startup_SeedsCustomAdminKey_WhenMcpAdminKeyConfigured`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs#L290`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs#L290) (`Startup_UpdatesAdminKeyHash_WhenEnvironmentKeyChanges`)
+
 ### `[AUTH-PERSONAL-APPKEY-LIST]` Non-admin users can view their personal App Keys
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
@@ -150,6 +158,12 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L71`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L71) (`updates form state when settings prop changes`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L222`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L222) (`manages custom user quotas in admin quotas tab`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L135`](file:////containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts#L135) (`Admin Context: configures custom user quota override`)
+
+### `[AUTH-PREFIX-EXTRACTION]` ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L443`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L443) (`ExtractKeyPrefix_ExtractsSemanticAndLegacyPrefixesAccurately`)
 
 ### `[AUTH-QUERY-TOKEN-EXTRACTION]` Query string token middleware extracts access_token or token query parameter to Authorization header.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -934,9 +948,11 @@
 | `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L256`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L256) | Backend xUnit |
 | `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L141`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L141) | Backend xUnit |
 | `AUTH-COMPACT-APPKEY-TAXONOMY` | Positive | `AUTH` | Generates compact ~32-character Base62 AppKeys with semantic prefixes. | [`AppKeyAuthenticationTests.cs:L409`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L409) | Backend xUnit |
+| `AUTH-CUSTOM-ADMIN-KEY-SEEDING` | Positive | `AUTH` | Seeds custom ROUTER_ADMIN_KEY when provided in configuration. | [`DatabaseSeederServiceTests.cs:L187`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs#L187) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-CREATE` | **Guardrail** | `AUTH` | Non-admin users can create personal App Keys up to quota | [`AppKeysControllerTests.cs:L191`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L191) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-LIST` | Positive | `AUTH` | Non-admin users can view their personal App Keys | [`AppKeysControllerTests.cs:L125`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L125) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE` | Positive | `AUTH` | Custom user quotas override default limit | [`AppKeysControllerTests.cs:L223`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L223) | Backend xUnit |
+| `AUTH-PREFIX-EXTRACTION` | Positive | `AUTH` | ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately. | [`AppKeyAuthenticationTests.cs:L443`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L443) | Backend xUnit |
 | `AUTH-QUERY-TOKEN-EXTRACTION` | Positive | `AUTH` | Query string token middleware extracts access_token or token query parameter to Authorization header. | [`EndpointAuthorizationTests.cs:L7`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EndpointAuthorizationTests.cs#L7) | Backend xUnit |
 | `AUTH-STANDALONE-ADMINPOLICY-LOOPBACK-ALLOW` | Positive | `AUTH` | AdminPolicy succeeds in standalone mode for unauthenticated loopback requests. | [`StandaloneAdminAuthTests.cs:L177`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L177) | Backend xUnit |
 | `AUTH-STANDALONE-CUSTOM-CIDR-ALLOW` | Positive | `AUTH` | Standalone mode grants admin access to client IPs matching Admin:StandaloneAllowedNetworks CIDR ranges. | [`StandaloneAdminAuthTests.cs:L36`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L36) | Backend xUnit |
