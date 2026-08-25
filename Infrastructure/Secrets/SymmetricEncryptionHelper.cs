@@ -8,7 +8,7 @@ namespace McpRouter.Infrastructure.Secrets
         private static readonly object KeyLock = new object();
         private static (string secretString, byte[] key)? _cachedKey;
 
-        private static byte[] DeriveKey(string secretString)
+        public static byte[] DeriveKey(string secretString)
         {
             if (_cachedKey.HasValue && _cachedKey.Value.secretString == secretString)
             {
@@ -40,16 +40,14 @@ namespace McpRouter.Infrastructure.Secrets
             return DeriveKey(secretString);
         }
 
-        public static string Encrypt(string plaintext, IConfiguration config)
+        public static string EncryptWithKeyBytes(string plaintext, byte[] keyBytes)
         {
             if (string.IsNullOrEmpty(plaintext))
             {
                 return plaintext;
             }
 
-            var keyBytes = GetEncryptionKey(config);
             var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
-
             var nonce = RandomNumberGenerator.GetBytes(12);
             var tag = new byte[16];
             var ciphertextBytes = new byte[plaintextBytes.Length];
@@ -64,6 +62,59 @@ namespace McpRouter.Infrastructure.Secrets
             Buffer.BlockCopy(ciphertextBytes, 0, result, nonce.Length + tag.Length, ciphertextBytes.Length);
 
             return Convert.ToBase64String(result);
+        }
+
+        public static string EncryptWithKey(string plaintext, string secretString)
+        {
+            var keyBytes = DeriveKey(secretString);
+            return EncryptWithKeyBytes(plaintext, keyBytes);
+        }
+
+        public static string Encrypt(string plaintext, IConfiguration config)
+        {
+            var keyBytes = GetEncryptionKey(config);
+            return EncryptWithKeyBytes(plaintext, keyBytes);
+        }
+
+        public static bool TryDecryptWithKeyBytes(string ciphertext, byte[] keyBytes, out string plaintext)
+        {
+            plaintext = ciphertext;
+            if (string.IsNullOrEmpty(ciphertext))
+            {
+                return true;
+            }
+
+            byte[] fullCipher;
+            try
+            {
+                fullCipher = Convert.FromBase64String(ciphertext);
+            }
+            catch
+            {
+                return true; // Not valid base64 -> treat as raw plaintext
+            }
+
+            if (fullCipher.Length < 28) // 12 nonce + 16 tag minimum
+            {
+                return true; // Payload too short -> treat as raw plaintext
+            }
+
+            return TryDecryptPayload(fullCipher, keyBytes, out plaintext);
+        }
+
+        public static bool TryDecryptWithKey(string ciphertext, string secretString, out string plaintext)
+        {
+            var keyBytes = DeriveKey(secretString);
+            return TryDecryptWithKeyBytes(ciphertext, keyBytes, out plaintext);
+        }
+
+        public static string DecryptWithKey(string ciphertext, string secretString)
+        {
+            if (TryDecryptWithKey(ciphertext, secretString, out var plaintext))
+            {
+                return plaintext;
+            }
+            return string.Empty;
         }
 
         public static bool TryDecrypt(string ciphertext, IConfiguration config, out string plaintext)

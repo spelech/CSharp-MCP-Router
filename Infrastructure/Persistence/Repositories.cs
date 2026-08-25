@@ -3,6 +3,11 @@ using Dapper;
 
 namespace McpRouter.Infrastructure.Persistence
 {
+    public interface IMasterKeyManager
+    {
+        Task ReencryptDatabaseSecretsAsync(string newMasterKey);
+    }
+
     public interface ISettingRepository
     {
         Task<RouterSettings?> GetSettingsAsync();
@@ -71,7 +76,8 @@ namespace McpRouter.Infrastructure.Persistence
         ISecretProviderRepository,
         IAuthProviderRepository,
         IUserCredentialRepository,
-        IUserQuotaRepository
+        IUserQuotaRepository,
+        IMasterKeyManager
     {
         private readonly IDbConnectionFactory _dbFactory;
         private readonly IConfiguration? _config;
@@ -740,6 +746,179 @@ namespace McpRouter.Infrastructure.Persistence
             await conn.ExecuteAsync(
                 "DELETE FROM UserQuotas WHERE Username = @Username;",
                 new { Username = username });
+        }
+
+        // ==========================================
+        // IMasterKeyManager
+        // ==========================================
+        public async Task ReencryptDatabaseSecretsAsync(string newMasterKey)
+        {
+            if (string.IsNullOrWhiteSpace(newMasterKey))
+            {
+                throw new ArgumentException("New master key cannot be null or empty.", nameof(newMasterKey));
+            }
+
+            var trimmedNewKey = newMasterKey.Trim();
+            if (trimmedNewKey.Length < 16)
+            {
+                throw new ArgumentException("New master key must be at least 16 characters long.", nameof(newMasterKey));
+            }
+
+            if (DbKeyHelper.ActiveKeySource == MasterKeySource.External || DbKeyHelper.ActiveKeySource == MasterKeySource.Vault)
+            {
+                throw new InvalidOperationException($"Cannot set custom master key when key source is managed externally ({DbKeyHelper.ActiveKeySource}).");
+            }
+
+            var config = _config ?? new ConfigurationBuilder().Build();
+            var currentKey = DbKeyHelper.ResolveDbEncryptionKey(config);
+
+            var oldKeyBytes = SymmetricEncryptionHelper.DeriveKey(currentKey);
+            var newKeyBytes = SymmetricEncryptionHelper.DeriveKey(trimmedNewKey);
+
+            using var conn = _dbFactory.CreateConnection();
+            conn.Open();
+            using var tx = conn.BeginTransaction();
+            try
+            {
+                // 1. SecretProviders
+                if (await TableExistsAsync(conn, tx, "SecretProviders"))
+                {
+                    var secretProviders = (await conn.QueryAsync<SecretProviderReencryptRow>(
+                        "SELECT ProviderName, EncryptedConfigJson FROM SecretProviders;",
+                        transaction: tx)).ToList();
+
+                    foreach (var sp in secretProviders)
+                    {
+                        if (!string.IsNullOrEmpty(sp.EncryptedConfigJson))
+                        {
+                            if (SymmetricEncryptionHelper.TryDecryptWithKeyBytes(sp.EncryptedConfigJson, oldKeyBytes, out var plainConfig))
+                            {
+                                var reEncrypted = SymmetricEncryptionHelper.EncryptWithKeyBytes(plainConfig, newKeyBytes);
+                                await conn.ExecuteAsync(
+                                    "UPDATE SecretProviders SET EncryptedConfigJson = @EncryptedConfigJson WHERE ProviderName = @ProviderName;",
+                                    new { EncryptedConfigJson = reEncrypted, sp.ProviderName },
+                                    transaction: tx);
+                            }
+                        }
+                    }
+                }
+
+                // 2. AuthProviderConfigs
+                if (await TableExistsAsync(conn, tx, "AuthProviderConfigs"))
+                {
+                    var authProviders = (await conn.QueryAsync<AuthProviderReencryptRow>(
+                        "SELECT ProviderName, EncryptedConfigJson FROM AuthProviderConfigs;",
+                        transaction: tx)).ToList();
+
+                    foreach (var ap in authProviders)
+                    {
+                        if (!string.IsNullOrEmpty(ap.EncryptedConfigJson))
+                        {
+                            if (SymmetricEncryptionHelper.TryDecryptWithKeyBytes(ap.EncryptedConfigJson, oldKeyBytes, out var plainConfig))
+                            {
+                                var reEncrypted = SymmetricEncryptionHelper.EncryptWithKeyBytes(plainConfig, newKeyBytes);
+                                await conn.ExecuteAsync(
+                                    "UPDATE AuthProviderConfigs SET EncryptedConfigJson = @EncryptedConfigJson WHERE ProviderName = @ProviderName;",
+                                    new { EncryptedConfigJson = reEncrypted, ap.ProviderName },
+                                    transaction: tx);
+                            }
+                        }
+                    }
+                }
+
+                // 3. UserServerCredentials (UserSecrets)
+                if (await TableExistsAsync(conn, tx, "UserServerCredentials"))
+                {
+                    var userSecrets = (await conn.QueryAsync<UserCredentialReencryptRow>(
+                        "SELECT Id, EncryptedSecretJson FROM UserServerCredentials;",
+                        transaction: tx)).ToList();
+
+                    foreach (var us in userSecrets)
+                    {
+                        if (!string.IsNullOrEmpty(us.EncryptedSecretJson))
+                        {
+                            if (SymmetricEncryptionHelper.TryDecryptWithKeyBytes(us.EncryptedSecretJson, oldKeyBytes, out var plainSecret))
+                            {
+                                var reEncrypted = SymmetricEncryptionHelper.EncryptWithKeyBytes(plainSecret, newKeyBytes);
+                                await conn.ExecuteAsync(
+                                    "UPDATE UserServerCredentials SET EncryptedSecretJson = @EncryptedSecretJson WHERE Id = @Id;",
+                                    new { EncryptedSecretJson = reEncrypted, us.Id },
+                                    transaction: tx);
+                            }
+                        }
+                    }
+                }
+
+                // 4. Update ./data/.master.key file
+                string dataDir = DbKeyHelper.ResolveDataDirectory(config);
+                Directory.CreateDirectory(dataDir);
+                var keyFilePath = Path.Combine(dataDir, ".master.key");
+                File.WriteAllText(keyFilePath, trimmedNewKey);
+
+                if (!OperatingSystem.IsWindows())
+                {
+                    try
+                    {
+                        File.SetUnixFileMode(keyFilePath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+                    }
+                    catch
+                    {
+                        // Ignored on file systems without POSIX permissions support
+                    }
+                }
+
+                tx.Commit();
+
+                // 5. Update in-memory cache and key source
+                DbKeyHelper.SetCachedKey(trimmedNewKey, MasterKeySource.Configured);
+            }
+            catch
+            {
+                tx.Rollback();
+                throw;
+            }
+        }
+
+        private async Task<bool> TableExistsAsync(IDbConnection conn, IDbTransaction tx, string tableName)
+        {
+            var provider = _dbFactory.ProviderName.ToLowerInvariant();
+            if (provider == "sqlite")
+            {
+                return await conn.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name=@tableName;",
+                    new { tableName }, transaction: tx) > 0;
+            }
+            else if (provider == "mssql")
+            {
+                return await conn.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM sys.tables WHERE name=@tableName;",
+                    new { tableName }, transaction: tx) > 0;
+            }
+            else if (provider == "mysql")
+            {
+                return await conn.ExecuteScalarAsync<int>(
+                    "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = DATABASE() AND table_name = @tableName;",
+                    new { tableName }, transaction: tx) > 0;
+            }
+            return true;
+        }
+
+        private class SecretProviderReencryptRow
+        {
+            public string ProviderName { get; set; } = "";
+            public string? EncryptedConfigJson { get; set; }
+        }
+
+        private class AuthProviderReencryptRow
+        {
+            public string ProviderName { get; set; } = "";
+            public string? EncryptedConfigJson { get; set; }
+        }
+
+        private class UserCredentialReencryptRow
+        {
+            public string Id { get; set; } = "";
+            public string? EncryptedSecretJson { get; set; }
         }
     }
 }

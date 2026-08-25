@@ -27,6 +27,7 @@ namespace McpRouter.Core.Routing
         private readonly HttpClient _httpClient;
         private readonly IConfiguration? _configuration;
         private readonly ILogger<AdminMcpServer>? _logger;
+        private readonly IMasterKeyManager? _masterKeyManager;
 
         private const string DefaultProtocolVersion = "2026-07-28";
         private const string LegacyProtocolVersion = "2024-11-05";
@@ -46,7 +47,8 @@ namespace McpRouter.Core.Routing
             ILdapService? ldapService = null,
             HttpClient? httpClient = null,
             IConfiguration? configuration = null,
-            ILogger<AdminMcpServer>? logger = null)
+            ILogger<AdminMcpServer>? logger = null,
+            IMasterKeyManager? masterKeyManager = null)
         {
             _serverRepository = serverRepository;
             _appKeyRepository = appKeyRepository;
@@ -63,6 +65,7 @@ namespace McpRouter.Core.Routing
             _httpClient = httpClient ?? new HttpClient();
             _configuration = configuration;
             _logger = logger;
+            _masterKeyManager = masterKeyManager;
         }
 
         /// <summary>
@@ -1306,6 +1309,46 @@ namespace McpRouter.Core.Routing
                         return rows;
                     }
 
+                case "set_master_key":
+                    {
+                        var newKey = args.TryGetProperty("newKey", out var nkProp) ? nkProp.GetString() :
+                                     args.TryGetProperty("masterKey", out var mkProp) ? mkProp.GetString() :
+                                     args.TryGetProperty("key", out var kProp) ? kProp.GetString() : null;
+
+                        if (string.IsNullOrWhiteSpace(newKey))
+                        {
+                            throw new ArgumentException("Parameter 'newKey' is required for action 'set_master_key'.");
+                        }
+
+                        var trimmedKey = newKey.Trim();
+                        if (trimmedKey.Length < 16)
+                        {
+                            throw new ArgumentException("Master key must be at least 16 characters long.");
+                        }
+
+                        if (DbKeyHelper.ActiveKeySource == MasterKeySource.External || DbKeyHelper.ActiveKeySource == MasterKeySource.Vault)
+                        {
+                            throw new InvalidOperationException($"Cannot set custom master key when key source is managed externally ({DbKeyHelper.ActiveKeySource}).");
+                        }
+
+                        var masterKeyManager = _masterKeyManager ?? new DatabaseRepository(_dbFactory, _configuration);
+                        await masterKeyManager.ReencryptDatabaseSecretsAsync(trimmedKey);
+
+                        await _auditLogger.LogAdminActionAsync(
+                            callerUsername,
+                            "masterkey.reencrypt",
+                            "MasterKey",
+                            "Re-encrypted database secrets and updated master key.",
+                            true);
+
+                        return new
+                        {
+                            success = true,
+                            message = "Master encryption key updated and database secrets successfully re-encrypted.",
+                            keySource = DbKeyHelper.ActiveKeySource.ToString()
+                        };
+                    }
+
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_system.");
             }
@@ -1812,19 +1855,20 @@ namespace McpRouter.Core.Routing
                 new
                 {
                     name = "manage_system",
-                    description = "Router system diagnostics, runtime metrics, logs, and audit trail.",
+                    description = "Router system diagnostics, runtime metrics, logs, audit trail, and master encryption key management.",
                     inputSchema = new
                     {
                         type = "object",
                         properties = new
                         {
-                            action = new { type = "string", @enum = new[] { "diagnostics", "get_logs", "clear_logs", "query_audit" }, description = "Action to execute" },
+                            action = new { type = "string", @enum = new[] { "diagnostics", "get_logs", "clear_logs", "query_audit", "set_master_key" }, description = "Action to execute" },
                             limit = new { type = "integer", description = "Maximum log entries to return" },
                             user = new { type = "string", description = "Filter audit logs by user" },
                             server = new { type = "string", description = "Filter audit logs by server" },
                             since = new { type = "string", description = "Filter audit logs since timestamp" },
                             take = new { type = "integer", description = "Audit query page size" },
-                            skip = new { type = "integer", description = "Audit query page offset" }
+                            skip = new { type = "integer", description = "Audit query page offset" },
+                            newKey = new { type = "string", description = "New master encryption key (required for set_master_key)" }
                         },
                         required = new[] { "action" }
                     }

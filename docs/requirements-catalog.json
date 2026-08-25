@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-25T04:11:34.8997733Z",
-    "totalRequirements": 124,
-    "positiveCount": 101,
+    "generatedAt": "2026-08-25T04:25:09.4512208Z",
+    "totalRequirements": 129,
+    "positiveCount": 106,
     "guardrailCount": 23,
-    "totalProofs": 276
+    "totalProofs": 286
   },
   "requirements": [
     {
@@ -1196,7 +1196,7 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "SSE transport fails closed with SecurityException when secret provider resolution fails",
-      "proofCount": 7,
+      "proofCount": 8,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1211,6 +1211,13 @@
           "lineNumber": 53,
           "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
           "details": "Ensures SSE transport fails closed when no secret retriever is registered."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 283,
+          "testName": "ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenVaultFails",
+          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -2361,7 +2368,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
-          "lineNumber": 62,
+          "lineNumber": 63,
           "testName": "ResolveDbEncryptionKey_AutoGeneratesAndPersistsKey_WhenBlankSlate",
           "details": null
         }
@@ -2377,7 +2384,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
-          "lineNumber": 27,
+          "lineNumber": 28,
           "testName": "ResolveDbEncryptionKey_ReturnsConfiguredEnvKey_WhenPresent",
           "details": null
         }
@@ -2393,7 +2400,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
-          "lineNumber": 122,
+          "lineNumber": 123,
           "testName": "ResolveDbEncryptionKey_FileSecretTakesPrecedenceOverKeyFile",
           "details": null
         }
@@ -2409,7 +2416,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
-          "lineNumber": 44,
+          "lineNumber": 45,
           "testName": "ResolveDbEncryptionKey_ReturnsFileSecret_WhenKeyFileSpecified",
           "details": null
         }
@@ -2425,7 +2432,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
-          "lineNumber": 100,
+          "lineNumber": 101,
           "testName": "ResolveDbEncryptionKey_EnvVarTakesPrecedenceOverFileSecretAndKeyFile",
           "details": null
         }
@@ -2441,8 +2448,116 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
-          "lineNumber": 82,
+          "lineNumber": 83,
           "testName": "ResolveDbEncryptionKey_LoadsExistingKeyFile_OnSubsequentBoot",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEYSOURCE-DETECTION",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Correctly identifies KeySource origin for environment, file, and auto-generated keys.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 144,
+          "testName": "ResolveDbEncryptionKey_IdentifiesKeySourceAccurately",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-KEYSOURCE-SETCACHEDKEY",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "SetCachedKey sets in-memory encryption key and updates ActiveKeySource.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 314,
+          "testName": "SetCachedKey_UpdatesCachedKeyAndActiveKeySource",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-MASTERKEY-ATOMIC-REENCRYPTION",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Atomically re-encrypts database credentials when setting a custom master key.",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs",
+          "lineNumber": 142,
+          "testName": "SetMasterKey_AtomicallyReEncryptsDatabaseCredentials",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs",
+          "lineNumber": 241,
+          "testName": "SetMasterKey_RejectsWhenKeySourceIsExternalOrVault",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs",
+          "lineNumber": 259,
+          "testName": "AdminMcpServer_ManageSystem_SetMasterKey_ReencryptsCleanly",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs",
+          "lineNumber": 338,
+          "testName": "SetMasterKey_RejectsInvalidOrShortKeys",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 446,
+          "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-VAULT-BOOTSTRAPPING",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Bootstraps master encryption key directly from HashiCorp Vault when VAULT_ADDR is configured.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 191,
+          "testName": "ResolveDbEncryptionKey_BootstrapsFromVault_WhenVaultConfigured",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "SEC-VAULT-CUSTOM-PATH",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Bootstraps master key from Vault using custom mount path and secret key name.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 236,
+          "testName": "ResolveDbEncryptionKey_BootstrapsFromVault_WithCustomPathAndKeyName",
           "details": null
         }
       ]
