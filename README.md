@@ -73,9 +73,10 @@ docker run -d \
 
 ### Out-of-the-Box Safe Defaults
 * **Auto-Generated Master Key**: Automatically created and stored in `./data/.master.key` (with `chmod 0600`) so credentials remain encrypted at rest with zero plaintext env vars.
+* **Compact Base62 AppKeys**: Semantic, high-entropy ~32-character tokens (`mcp-adm-`, `mcp-glb-`, `mcp-{domain}-`, `mcp-usr-`, `mcp-srv-`).
 * **SQLite Database**: Automatically created and migrated at `./data/mcp_router.db`.
 * **Standalone Security**: Local loopback (`127.0.0.1`, `::1`) is trusted as `Administrator` for the Web Dashboard (`http://localhost:8080`).
-* **Pre-Seeded Admin Key**: Seeds `mcp-global-admin-default-cli-key-99` for remote AI agents and DevOps scripts to automate configuration via the Admin MCP Server (`/admin/sse` or `POST /admin`).
+* **Declarative Admin Key**: Seed custom keys via `ROUTER_ADMIN_KEY` or connect with the auto-generated `mcp-adm-` admin key for remote AI agents and DevOps scripts to automate configuration via the Admin MCP Server (`/admin/sse` or `POST /admin`).
 * **Instant Automation**: Use the **`mcp-router-admin`** skill (`.agents/skills/mcp-router-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Entra ID, Active Directory, Vault, embeddings, and backend servers. See [**docs/deployment-guide.md**](docs/deployment-guide.md#minimal-blank-slate-startup-zero-config-or-file-secrets).
 
 ---
@@ -183,7 +184,7 @@ Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can dir
     "mcp-router-admin": {
       "url": "http://localhost:8026/admin",
       "headers": {
-        "Authorization": "Bearer mcp-admin-key-here"
+        "Authorization": "Bearer mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
       }
     }
   }
@@ -217,7 +218,7 @@ The router features a hybrid administrative authorization engine supporting both
 * **When Active**: Whenever no external identity provider (Active Directory LDAP or OIDC Reverse Proxy) is configured.
 * **Local Loopback (`127.0.0.1`, `::1`)**: By default, connections originating from localhost/loopback are granted local administrative privileges automatically without requiring an SSO provider or password.
 * **Private LAN / Docker Subnets (Central Gateway)**: Configure `Admin:StandaloneAllowedNetworks` in `appsettings.json` or environment variables (e.g. `ADMIN__STANDALONE_ALLOWED_NETWORKS__0="10.0.0.0/8"` or `"0.0.0.0/0"` for open private LANs) to grant admin access to your local network.
-* **External Clients**: Requests originating from outside the allowed subnets require an Admin AppKey (such as the default CLI key `mcp-global-admin-default-cli-key-99` or custom generated keys).
+* **External Clients**: Requests originating from outside the allowed subnets require an Admin AppKey (such as `ROUTER_ADMIN_KEY`, a compact `mcp-adm-` key, or custom generated keys).
 
 ### 2. Enterprise IDP Mode (Active Directory & OIDC Reverse Proxy)
 * **Active Directory (Windows Authentication / LDAP)**: Users whose SID matches `Admin:GroupSid` (default: `S-1-5-32-544` / Local Administrators) or domain admin groups are granted full gateway administration.

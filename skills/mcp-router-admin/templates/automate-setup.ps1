@@ -2,11 +2,11 @@
 .SYNOPSIS
     CSharp-MCP-Router Automated Provisioning Script for Windows & IIS Environments.
 .EXAMPLE
-    .\automate-setup.ps1 -RouterUrl "http://localhost:8080" -AdminKey "mcp-global-admin-default-cli-key-99"
+    .\automate-setup.ps1 -RouterUrl "http://localhost:8080" -AdminKey "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
 #>
 param(
     [string]$RouterUrl = "http://localhost:8080",
-    [string]$AdminKey = "mcp-global-admin-default-cli-key-99"
+    [string]$AdminKey = "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
 )
 
 $ErrorActionPreference = "Stop"

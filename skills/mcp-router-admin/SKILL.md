@@ -19,7 +19,7 @@ When `CSharp-MCP-Router` starts in a new environment, it initializes with secure
 | :--- | :--- | :--- |
 | **Database** | SQLite (`./data/mcp_router.db`) | Zero external database dependencies required. Auto-seeded on startup. |
 | **Master Key** | `./data/.master.key` (Auto-Generated) or `ROUTER_MASTER_KEY` / `ROUTER_MASTER_KEY_FILE` | Encrypts sensitive credentials at rest in the DB (AES-256-GCM). Auto-generated if unset. |
-| **Default Admin Key** | `mcp-global-admin-default-cli-key-99` | Scoped to `["all"]` for user `admin`. Seeded automatically in the database. |
+| **Admin AppKey** | `mcp-adm-` (Compact Base62) or `ROUTER_ADMIN_KEY` | Scoped to `["all", "admin"]` for user `admin`. Seeded automatically in the database or configured via `ROUTER_ADMIN_KEY`. Legacy fallback: `mcp-global-admin-default-cli-key-99`. |
 | **Network Trust** | `127.0.0.1, ::1` (Loopback) | Configurable via `Admin:StandaloneAllowedNetworks` for LAN/CIDR subnets. |
 | **Admin Endpoint** | `http://<host>:8080/admin/sse` | MCP SSE transport for administrative JSON-RPC tool calling. |
 
@@ -29,7 +29,7 @@ When `CSharp-MCP-Router` starts in a new environment, it initializes with secure
 
 ```
                    [Connect to /admin/sse]
-                    (Bearer Default Admin Key)
+                    (Bearer Admin AppKey)
                               │
                               ▼
                  Phase 1: Gateway Diagnostics
@@ -78,14 +78,14 @@ When `CSharp-MCP-Router` starts in a new environment, it initializes with secure
 ## Phase 1: Gateway Connection & Diagnostics
 
 ### 1.1 Connect to Admin MCP Server
-Configure your client with the gateway's `/admin/sse` endpoint and the admin bearer token:
+Configure your client with the gateway's `/admin/sse` endpoint and the admin bearer token (e.g. compact `mcp-adm-` key):
 ```json
 {
   "mcpServers": {
     "mcp-router-admin": {
       "url": "http://localhost:8080/admin/sse",
       "headers": {
-        "Authorization": "Bearer mcp-global-admin-default-cli-key-99"
+        "Authorization": "Bearer mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
       }
     }
   }
@@ -151,6 +151,18 @@ No extra provider needed. All backend credentials stored via `manage_servers` ar
     "authMethod": "approle",
     "roleId": "11111111-2222-3333-4444-555555555555",
     "secretId": "66666666-7777-8888-9999-000000000000"
+  }
+}
+```
+
+### 2.2 Dynamic Master Key Setting & Database Re-Encryption
+When running on an auto-generated keyfile (`./data/.master.key`), administrators can set a permanent custom Master Key with atomic database re-encryption:
+```json
+{
+  "tool": "manage_system",
+  "arguments": {
+    "action": "set_master_key",
+    "newKey": "YourSecure32CharacterMasterKeyHere123"
   }
 }
 ```
@@ -338,6 +350,7 @@ For local Ollama embeddings:
   }
 }
 ```
+Returns a compact ~32-character Base62 AppKey with semantic prefix (e.g. `mcp-glb-R4t8W1yU-9pM2nQ6sD8fH3jK5`, `mcp-adm-...`, `mcp-devops-...`, `mcp-usr-...`, `mcp-srv-...`).
 
 ---
 

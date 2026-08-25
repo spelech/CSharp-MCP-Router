@@ -11,6 +11,7 @@
   "ConnectionStrings": {
     "DefaultConnection": "Data Source=data/mcp_router.db"
   },
+  "ROUTER_ADMIN_KEY": "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9",
   "ROUTER_MASTER_KEY": "REPLACE_WITH_GENERATED_BASE64_256BIT_KEY",
   "CORS_ALLOWED_ORIGINS": "http://localhost:3000,http://localhost:8080",
   "Admin": {

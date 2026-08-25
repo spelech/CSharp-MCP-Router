@@ -3,12 +3,12 @@
 # CSharp-MCP-Router Automated Provisioning Script (JSON-RPC over /admin)
 # ==============================================================================
 # Usage:
-#   ROUTER_URL="http://localhost:8080" ADMIN_KEY="mcp-global-admin-default-cli-key-99" ./automate-setup.sh
+#   ROUTER_URL="http://localhost:8080" ADMIN_KEY="mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9" ./automate-setup.sh
 # ==============================================================================
 set -euo pipefail
 
 ROUTER_URL="${ROUTER_URL:-http://localhost:8080}"
-ADMIN_KEY="${ADMIN_KEY:-mcp-global-admin-default-cli-key-99}"
+ADMIN_KEY="${ADMIN_KEY:-mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9}"
 
 echo "========================================================"
 echo " Starting MCP Router Automated Provisioning"
