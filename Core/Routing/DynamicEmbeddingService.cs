@@ -1,6 +1,6 @@
 using Dapper;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     public class DynamicEmbeddingService : IEmbeddingService
     {

@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace McpRouter.Components.Capabilities
+namespace ModelContextGateway.Components.Capabilities
 {
     public class TestToolCallModel
     {

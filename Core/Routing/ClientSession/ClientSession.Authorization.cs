@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Dapper;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     /// <summary>
     /// Partial class implementation providing RBAC policy authorization, user identity resolution, and invocation audit logging.

@@ -1,6 +1,6 @@
 using Dapper;
 
-namespace McpRouter.Infrastructure.Persistence
+namespace ModelContextGateway.Infrastructure.Persistence
 {
     public class JsonListTypeHandler : SqlMapper.TypeHandler<List<string>>
     {

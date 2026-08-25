@@ -1,5 +1,3 @@
-using McpRouter.Extensions;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.AddMcpRouterServices();

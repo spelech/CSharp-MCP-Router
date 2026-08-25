@@ -3,7 +3,7 @@ using System.Security.Cryptography;
 using System.Text.Json;
 using Dapper;
 
-namespace McpRouter.Components.Clients
+namespace ModelContextGateway.Components.Clients
 {
     public interface ICredentialService
     {

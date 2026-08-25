@@ -1,7 +1,7 @@
 using System.Runtime.CompilerServices;
 using Dapper;
 
-namespace McpRouter.Models
+namespace ModelContextGateway.Models
 {
     internal static class DapperTypeHandlerInitializer
     {
@@ -10,7 +10,7 @@ namespace McpRouter.Models
         {
             try
             {
-                SqlMapper.AddTypeHandler(new McpRouter.Infrastructure.Persistence.JsonListTypeHandler());
+                SqlMapper.AddTypeHandler(new ModelContextGateway.Infrastructure.Persistence.JsonListTypeHandler());
             }
             catch { }
         }

@@ -1,4 +1,4 @@
-namespace McpRouter.Infrastructure.Transports
+namespace ModelContextGateway.Infrastructure.Transports
 {
     public interface ITransport : IDisposable
     {

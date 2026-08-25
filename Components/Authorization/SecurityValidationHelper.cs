@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace McpRouter.Components.Authorization
+namespace ModelContextGateway.Components.Authorization
 {
     public static class SecurityValidationHelper
     {
@@ -383,7 +383,7 @@ namespace McpRouter.Components.Authorization
                                                        uri.Host.Equals("::1");
                                     bool isSimpleHost = !uri.Host.Contains('.');
 
-                                    if (!isLocalhost && !isSimpleHost && !McpRouter.Components.Authorization.SecurityValidationHelper.IsPrivateOrLoopback(val))
+                                    if (!isLocalhost && !isSimpleHost && !ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsPrivateOrLoopback(val))
                                     {
                                         throw new ArgumentException($"URL field '{prop.Name}' must use the HTTPS scheme.");
                                     }

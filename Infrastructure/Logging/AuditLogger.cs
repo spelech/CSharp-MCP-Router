@@ -1,7 +1,7 @@
 using System.Data;
 using Dapper;
 
-namespace McpRouter.Infrastructure.Logging
+namespace ModelContextGateway.Infrastructure.Logging
 {
     public interface IAuditLogger
     {

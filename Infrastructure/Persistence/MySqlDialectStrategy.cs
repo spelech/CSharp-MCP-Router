@@ -1,7 +1,7 @@
 using System.Data;
 using Dapper;
 
-namespace McpRouter.Infrastructure.Persistence
+namespace ModelContextGateway.Infrastructure.Persistence
 {
     public class MySqlDialectStrategy : ISqlDialectStrategy
     {

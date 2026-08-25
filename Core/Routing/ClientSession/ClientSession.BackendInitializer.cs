@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     /// <summary>
     /// Partial class implementation handling downstream MCP backend connection management, auto-initialization, and retry loops.

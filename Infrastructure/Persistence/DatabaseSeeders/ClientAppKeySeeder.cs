@@ -2,9 +2,8 @@ using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using Dapper;
-using McpRouter.Middleware;
 
-namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
+namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
 {
     public static class ClientAppKeySeeder
     {

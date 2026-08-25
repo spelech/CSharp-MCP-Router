@@ -1,8 +1,8 @@
 using System.Data;
 using Dapper;
-using McpRouter.Infrastructure.Persistence.DatabaseSeeders;
+using ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders;
 
-namespace McpRouter.Infrastructure.Persistence
+namespace ModelContextGateway.Infrastructure.Persistence
 {
     public static class DatabaseSeederService
     {
@@ -17,6 +17,15 @@ namespace McpRouter.Infrastructure.Persistence
             var dbFactory = scope.ServiceProvider.GetRequiredService<IDbConnectionFactory>();
             var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
             var provider = dbFactory.ProviderName.ToLowerInvariant();
+
+            var legacyDbPath = Path.Combine(AppContext.BaseDirectory, "data", "mcp_router.db");
+            var newDbPath = Path.Combine(AppContext.BaseDirectory, "data", "mcg.db");
+            if (File.Exists(legacyDbPath) && !File.Exists(newDbPath))
+            {
+                Directory.CreateDirectory(Path.GetDirectoryName(newDbPath)!);
+                File.Copy(legacyDbPath, newDbPath);
+                logger.LogInformation("Migrated legacy database '{OldPath}' -> '{NewPath}'", legacyDbPath, newDbPath);
+            }
 
             logger.LogInformation("Initializing database via Dapper ({Provider})...", provider);
 

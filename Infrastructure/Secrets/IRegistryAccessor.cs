@@ -1,6 +1,6 @@
 using Microsoft.Win32;
 
-namespace McpRouter.Infrastructure.Secrets
+namespace ModelContextGateway.Infrastructure.Secrets
 {
     public interface IRegistryAccessor
     {

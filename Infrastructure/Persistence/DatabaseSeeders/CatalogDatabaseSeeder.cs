@@ -1,7 +1,7 @@
 using System.Text.Json;
 using Dapper;
 
-namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
+namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
 {
     public static class CatalogDatabaseSeeder
     {

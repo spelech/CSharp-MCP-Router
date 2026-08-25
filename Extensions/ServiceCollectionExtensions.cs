@@ -1,4 +1,4 @@
-namespace McpRouter.Extensions
+namespace ModelContextGateway.Extensions
 {
     public static class ServiceCollectionExtensions
     {
@@ -131,7 +131,7 @@ namespace McpRouter.Extensions
                     sp.GetService<ILogger<TokenExchangeSecretRetriever>>()
                 ));
             builder.Services.AddSingleton<CompositeSecretRetriever>();
-            builder.Services.AddSingleton<McpRouter.Infrastructure.Secrets.IUserSecretStore, McpRouter.Infrastructure.Secrets.DatabaseUserSecretStore>();
+            builder.Services.AddSingleton<ModelContextGateway.Infrastructure.Secrets.IUserSecretStore, ModelContextGateway.Infrastructure.Secrets.DatabaseUserSecretStore>();
 
             // Register Observability & Audit Logger
             builder.Services.AddSingleton<IAuditLogger, AuditLogger>();
@@ -224,6 +224,11 @@ namespace McpRouter.Extensions
                     }
                 });
             });
+        }
+
+        public static void AddModelContextGatewayServices(this WebApplicationBuilder builder)
+        {
+            builder.AddMcpRouterServices();
         }
     }
 }

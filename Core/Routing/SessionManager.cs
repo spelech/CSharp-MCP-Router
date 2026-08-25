@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using Dapper;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     public partial class SessionManager
     {

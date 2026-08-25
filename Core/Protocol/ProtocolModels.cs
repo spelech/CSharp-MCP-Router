@@ -1,7 +1,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace McpRouter.Core.Protocol
+namespace ModelContextGateway.Core.Protocol
 {
     // Base JSON-RPC 2.0 Types
     public class JsonRpcMessage

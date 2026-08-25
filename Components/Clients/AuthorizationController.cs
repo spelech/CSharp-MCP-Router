@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
 
-namespace McpRouter.Components.Clients
+namespace ModelContextGateway.Components.Clients
 {
     public class AuthorizationController : Controller
     {
@@ -137,7 +137,7 @@ namespace McpRouter.Components.Clients
         [Produces("application/json")]
         public async Task<IActionResult> RegisterClient([FromBody] JsonElement metadata)
         {
-            var embeddingService = HttpContext.RequestServices.GetRequiredService<McpRouter.Core.Routing.DynamicEmbeddingService>();
+            var embeddingService = HttpContext.RequestServices.GetRequiredService<ModelContextGateway.Core.Routing.DynamicEmbeddingService>();
             var settings = embeddingService.GetSettings();
 
             if (!settings.AllowOpenClientRegistration)

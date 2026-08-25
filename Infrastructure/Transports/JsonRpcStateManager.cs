@@ -1,6 +1,6 @@
 using System.Collections.Concurrent;
 
-namespace McpRouter.Infrastructure.Transports
+namespace ModelContextGateway.Infrastructure.Transports
 {
     public class PendingRequestTcs : TaskCompletionSource<JsonRpcResponse>
     {

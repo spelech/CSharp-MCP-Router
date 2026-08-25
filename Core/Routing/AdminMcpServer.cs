@@ -4,7 +4,7 @@ using System.Text.Json;
 using Dapper;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     /// <summary>
     /// In-process virtual Admin MCP Server providing 10 consolidated entity tools

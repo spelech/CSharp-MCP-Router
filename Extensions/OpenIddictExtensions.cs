@@ -1,10 +1,9 @@
 using System.Security.Claims;
-using McpRouter.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using OpenIddict.Validation.AspNetCore;
 
-namespace McpRouter.Extensions
+namespace ModelContextGateway.Extensions
 {
     public static class OpenIddictExtensions
     {

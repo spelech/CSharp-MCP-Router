@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace McpRouter.Models
+namespace ModelContextGateway.Models
 {
     public class RouterSettings
     {

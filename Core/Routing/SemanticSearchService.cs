@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     /// <summary>
     /// Provides hybrid keyword and vector semantic search scoring across backend MCP tools.

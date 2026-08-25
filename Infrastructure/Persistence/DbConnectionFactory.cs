@@ -3,7 +3,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.Data.Sqlite;
 using MySqlConnector;
 
-namespace McpRouter.Infrastructure.Persistence
+namespace ModelContextGateway.Infrastructure.Persistence
 {
     public interface IDbConnectionFactory
     {
@@ -33,7 +33,14 @@ namespace McpRouter.Infrastructure.Persistence
 
             if (_provider == "sqlite" && string.IsNullOrEmpty(_connectionString))
             {
-                var dbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");
+                var legacyDbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcp_router.db");
+                var newDbPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "data", "mcg.db");
+                if (System.IO.File.Exists(legacyDbPath) && !System.IO.File.Exists(newDbPath))
+                {
+                    System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(newDbPath)!);
+                    System.IO.File.Copy(legacyDbPath, newDbPath);
+                }
+                var dbPath = System.IO.File.Exists(newDbPath) || !System.IO.File.Exists(legacyDbPath) ? newDbPath : legacyDbPath;
                 _connectionString = $"Data Source={dbPath};";
             }
         }

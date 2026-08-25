@@ -1,4 +1,4 @@
-namespace McpRouter.Components.Servers
+namespace ModelContextGateway.Components.Servers
 {
     public class McpServer
     {

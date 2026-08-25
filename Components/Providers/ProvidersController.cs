@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace McpRouter.Components.Providers
+namespace ModelContextGateway.Components.Providers
 {
     [ApiController]
     [Route("api/[controller]")]
@@ -147,7 +147,7 @@ namespace McpRouter.Components.Providers
                                        uri.Host.Equals("::1");
                     bool isSimpleHost = !uri.Host.Contains('.');
 
-                    if (!isLocalhost && !isSimpleHost && !McpRouter.Components.Authorization.SecurityValidationHelper.IsPrivateOrLoopback(request.Address))
+                    if (!isLocalhost && !isSimpleHost && !ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsPrivateOrLoopback(request.Address))
                     {
                         return BadRequest(new { success = false, error = "Vault Address must use the HTTPS scheme in production for non-local addresses." });
                     }
@@ -321,8 +321,8 @@ namespace McpRouter.Components.Providers
                 var sp = serviceProvider ?? HttpContext?.RequestServices;
                 if (sp != null)
                 {
-                    var ldapService = sp.GetService<McpRouter.Infrastructure.Identity.ILdapService>();
-                    if (ldapService is McpRouter.Infrastructure.Identity.LdapActiveDirectoryService ldapAd)
+                    var ldapService = sp.GetService<ModelContextGateway.Infrastructure.Identity.ILdapService>();
+                    if (ldapService is ModelContextGateway.Infrastructure.Identity.LdapActiveDirectoryService ldapAd)
                     {
                         ldapAd.Reload();
                     }

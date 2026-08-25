@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace McpRouter.Infrastructure.Logging
+namespace ModelContextGateway.Infrastructure.Logging
 {
     public static class PiiSanitizer
     {

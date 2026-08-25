@@ -1,4 +1,4 @@
-namespace McpRouter.Components.Authorization
+namespace ModelContextGateway.Components.Authorization
 {
     public static class PolicyEndpoints
     {

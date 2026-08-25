@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace McpRouter.Components.AppKeys
+namespace ModelContextGateway.Components.AppKeys
 {
     public class UserQuota
     {

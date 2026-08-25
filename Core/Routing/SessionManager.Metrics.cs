@@ -1,4 +1,4 @@
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     public partial class SessionManager
     {

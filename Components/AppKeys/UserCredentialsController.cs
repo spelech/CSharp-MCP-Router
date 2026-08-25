@@ -2,7 +2,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace McpRouter.Components.AppKeys
+namespace ModelContextGateway.Components.AppKeys
 {
     public class SaveCredentialRequest
     {

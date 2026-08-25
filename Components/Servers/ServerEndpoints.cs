@@ -2,7 +2,7 @@ using System.Text.Json;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
 
-namespace McpRouter.Components.Servers
+namespace ModelContextGateway.Components.Servers
 {
     public static class ServerEndpoints
     {

@@ -1,4 +1,4 @@
-namespace McpRouter.Components.Clients
+namespace ModelContextGateway.Components.Clients
 {
     public static class ClientEndpoints
     {

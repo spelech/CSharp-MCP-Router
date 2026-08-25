@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace McpRouter.Core.Routing
+namespace ModelContextGateway.Core.Routing
 {
     public class ApiEmbeddingService : IEmbeddingService
     {
