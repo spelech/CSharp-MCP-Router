@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **124 Requirements Verified** across **276 Test Proofs** (101 Functional Capabilities, 23 Safety Guardrails).
+> **Catalog Statistics:** **129 Requirements Verified** across **286 Test Proofs** (106 Functional Capabilities, 23 Safety Guardrails).
 
 ---
 
@@ -13,9 +13,9 @@
 | **`CORE`** | CORE | **1** | 1 | 0 | 9 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 10 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 34 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 35 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **36** | 36 | 0 | 37 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **20** | 17 | 3 | 29 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **25** | 22 | 3 | 38 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **14** | 12 | 2 | 56 proofs |
 
@@ -571,37 +571,71 @@
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L62`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L62) (`ResolveDbEncryptionKey_AutoGeneratesAndPersistsKey_WhenBlankSlate`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L63`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L63) (`ResolveDbEncryptionKey_AutoGeneratesAndPersistsKey_WhenBlankSlate`)
 
 ### `[SEC-KEYFILE-ENV-PRECEDENCE]` Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L27`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L27) (`ResolveDbEncryptionKey_ReturnsConfiguredEnvKey_WhenPresent`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L28`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L28) (`ResolveDbEncryptionKey_ReturnsConfiguredEnvKey_WhenPresent`)
 
 ### `[SEC-KEYFILE-FILE-OVER-KEYFILE]` Explicit file secrets take precedence over persistent .master.key files.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L122`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L122) (`ResolveDbEncryptionKey_FileSecretTakesPrecedenceOverKeyFile`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L123`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L123) (`ResolveDbEncryptionKey_FileSecretTakesPrecedenceOverKeyFile`)
 
 ### `[SEC-KEYFILE-FILE-SECRET]` File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L44`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L44) (`ResolveDbEncryptionKey_ReturnsFileSecret_WhenKeyFileSpecified`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L45`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L45) (`ResolveDbEncryptionKey_ReturnsFileSecret_WhenKeyFileSpecified`)
 
 ### `[SEC-KEYFILE-HIERARCHY-PRECEDENCE]` Explicit environment variables take precedence over file secrets and keyfiles.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L100`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L100) (`ResolveDbEncryptionKey_EnvVarTakesPrecedenceOverFileSecretAndKeyFile`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L101`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L101) (`ResolveDbEncryptionKey_EnvVarTakesPrecedenceOverFileSecretAndKeyFile`)
 
 ### `[SEC-KEYFILE-RELOAD]` Existing .master.key file is loaded across gateway restarts without key mutation.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L82`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L82) (`ResolveDbEncryptionKey_LoadsExistingKeyFile_OnSubsequentBoot`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L83`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L83) (`ResolveDbEncryptionKey_LoadsExistingKeyFile_OnSubsequentBoot`)
+
+### `[SEC-KEYSOURCE-DETECTION]` Correctly identifies KeySource origin for environment, file, and auto-generated keys.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L144`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L144) (`ResolveDbEncryptionKey_IdentifiesKeySourceAccurately`)
+
+### `[SEC-KEYSOURCE-SETCACHEDKEY]` SetCachedKey sets in-memory encryption key and updates ActiveKeySource.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L314`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L314) (`SetCachedKey_UpdatesCachedKeyAndActiveKeySource`)
+
+### `[SEC-MASTERKEY-ATOMIC-REENCRYPTION]` Atomically re-encrypts database credentials when setting a custom master key.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (5):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs#L142`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs#L142) (`SetMasterKey_AtomicallyReEncryptsDatabaseCredentials`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs#L241`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs#L241) (`SetMasterKey_RejectsWhenKeySourceIsExternalOrVault`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs#L259`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs#L259) (`AdminMcpServer_ManageSystem_SetMasterKey_ReencryptsCleanly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs#L338`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs#L338) (`SetMasterKey_RejectsInvalidOrShortKeys`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/PipelineIntegrationTests.cs#L446`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/PipelineIntegrationTests.cs#L446) (`Pipeline_POST_MasterKey_RejectsWhenExternalKeySource`)
+
+### `[SEC-VAULT-BOOTSTRAPPING]` Bootstraps master encryption key directly from HashiCorp Vault when VAULT_ADDR is configured.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L191`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L191) (`ResolveDbEncryptionKey_BootstrapsFromVault_WhenVaultConfigured`)
+
+### `[SEC-VAULT-CUSTOM-PATH]` Bootstraps master key from Vault using custom mount path and secret key name.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L236`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L236) (`ResolveDbEncryptionKey_BootstrapsFromVault_WithCustomPathAndKeyName`)
 
 ### `[TRANS-01]` SSE transport resolves static plaintext API keys when provider is None
 * **Category:** `TRANS` (Transports (SSE, HTTP, STDIO, Proxy))
@@ -793,9 +827,10 @@
 ### `[GUARD-02]` SSE transport fails closed with SecurityException when secret provider resolution fails
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (7):**
+* **Verification Proofs (8):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L32`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L32) (`ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L53`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L53) (`ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L283`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L283) (`ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenVaultFails`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L394`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L394) (`StdioTransport_ShouldFailClosed_WhenSecretResolutionFails`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L31`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L31) (`ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L54`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L54) (`ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered`)
@@ -1033,12 +1068,17 @@
 | `SEC-KEY-PROVIDER-CONFIG` | Positive | `SEC` | EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or ROUTER_SECRET. | [`EncryptionKeyProviderTests.cs:L28`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L28) | Backend xUnit |
 | `SEC-KEY-PROVIDER-FALLBACK` | Positive | `SEC` | EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when ROUTER_SECRET is unconfigured. | [`EncryptionKeyProviderTests.cs:L70`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L70) | Backend xUnit |
 | `SEC-KEY-PROVIDER-SECRET` | Positive | `SEC` | EncryptionKeyProvider returns configured ROUTER_SECRET. | [`EncryptionKeyProviderTests.cs:L56`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/EncryptionKeyProviderTests.cs#L56) | Backend xUnit |
-| `SEC-KEYFILE-AUTOGEN` | Positive | `SEC` | Blank-slate initialization auto-generates a 256-bit base64 master key and persists it to .master.key. | [`DbKeyHelperTests.cs:L62`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L62) | Backend xUnit |
-| `SEC-KEYFILE-ENV-PRECEDENCE` | Positive | `SEC` | Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles. | [`DbKeyHelperTests.cs:L27`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L27) | Backend xUnit |
-| `SEC-KEYFILE-FILE-OVER-KEYFILE` | Positive | `SEC` | Explicit file secrets take precedence over persistent .master.key files. | [`DbKeyHelperTests.cs:L122`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L122) | Backend xUnit |
-| `SEC-KEYFILE-FILE-SECRET` | Positive | `SEC` | File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved. | [`DbKeyHelperTests.cs:L44`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L44) | Backend xUnit |
-| `SEC-KEYFILE-HIERARCHY-PRECEDENCE` | Positive | `SEC` | Explicit environment variables take precedence over file secrets and keyfiles. | [`DbKeyHelperTests.cs:L100`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L100) | Backend xUnit |
-| `SEC-KEYFILE-RELOAD` | Positive | `SEC` | Existing .master.key file is loaded across gateway restarts without key mutation. | [`DbKeyHelperTests.cs:L82`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L82) | Backend xUnit |
+| `SEC-KEYFILE-AUTOGEN` | Positive | `SEC` | Blank-slate initialization auto-generates a 256-bit base64 master key and persists it to .master.key. | [`DbKeyHelperTests.cs:L63`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L63) | Backend xUnit |
+| `SEC-KEYFILE-ENV-PRECEDENCE` | Positive | `SEC` | Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles. | [`DbKeyHelperTests.cs:L28`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L28) | Backend xUnit |
+| `SEC-KEYFILE-FILE-OVER-KEYFILE` | Positive | `SEC` | Explicit file secrets take precedence over persistent .master.key files. | [`DbKeyHelperTests.cs:L123`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L123) | Backend xUnit |
+| `SEC-KEYFILE-FILE-SECRET` | Positive | `SEC` | File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved. | [`DbKeyHelperTests.cs:L45`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L45) | Backend xUnit |
+| `SEC-KEYFILE-HIERARCHY-PRECEDENCE` | Positive | `SEC` | Explicit environment variables take precedence over file secrets and keyfiles. | [`DbKeyHelperTests.cs:L101`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L101) | Backend xUnit |
+| `SEC-KEYFILE-RELOAD` | Positive | `SEC` | Existing .master.key file is loaded across gateway restarts without key mutation. | [`DbKeyHelperTests.cs:L83`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L83) | Backend xUnit |
+| `SEC-KEYSOURCE-DETECTION` | Positive | `SEC` | Correctly identifies KeySource origin for environment, file, and auto-generated keys. | [`DbKeyHelperTests.cs:L144`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L144) | Backend xUnit |
+| `SEC-KEYSOURCE-SETCACHEDKEY` | Positive | `SEC` | SetCachedKey sets in-memory encryption key and updates ActiveKeySource. | [`DbKeyHelperTests.cs:L314`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L314) | Backend xUnit |
+| `SEC-MASTERKEY-ATOMIC-REENCRYPTION` | Positive | `SEC` | Atomically re-encrypts database credentials when setting a custom master key. | [`MasterKeyReEncryptionTests.cs:L142`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/MasterKeyReEncryptionTests.cs#L142) | Backend xUnit |
+| `SEC-VAULT-BOOTSTRAPPING` | Positive | `SEC` | Bootstraps master encryption key directly from HashiCorp Vault when VAULT_ADDR is configured. | [`DbKeyHelperTests.cs:L191`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L191) | Backend xUnit |
+| `SEC-VAULT-CUSTOM-PATH` | Positive | `SEC` | Bootstraps master key from Vault using custom mount path and secret key name. | [`DbKeyHelperTests.cs:L236`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/DbKeyHelperTests.cs#L236) | Backend xUnit |
 | `TRANS-01` | Positive | `TRANS` | SSE transport resolves static plaintext API keys when provider is None | [`SseTransportTests.cs:L11`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/SseTransportTests.cs#L11) | Backend xUnit |
 | `TRANS-02` | Positive | `TRANS` | HTTP stateless transport resolves static API keys when secret provider is None | [`HttpTransportTests.cs:L11`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/HttpTransportTests.cs#L11) | Backend xUnit |
 | `TRANS-03` | Positive | `TRANS` | STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls | [`StdioTransportTests.cs:L49`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StdioTransportTests.cs#L49) | Backend xUnit |

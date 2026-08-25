@@ -4,6 +4,13 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace McpRouter.Components.Capabilities
 {
+    public class SetMasterKeyRequest
+    {
+        public string? NewKey { get; set; }
+        public string? MasterKey { get; set; }
+        public string? Key { get; set; }
+    }
+
     /// <summary>
     /// Represents an active Admin SSE client session.
     /// </summary>
@@ -72,6 +79,10 @@ namespace McpRouter.Components.Capabilities
 
             // 3. /admin/message (POST) guarded by AdminPolicy
             app.MapPost("/admin/message", HandleAdminMessage)
+               .RequireAuthorization("AdminPolicy");
+
+            // 4. /api/config/master-key (POST) guarded by AdminPolicy
+            app.MapPost("/api/config/master-key", HandleSetMasterKey)
                .RequireAuthorization("AdminPolicy");
 
             return app;
@@ -297,6 +308,72 @@ namespace McpRouter.Components.Capabilities
             {
                 logger.LogError(ex, "Error processing admin message for sessionId {SessionId}", sessionId);
                 return Results.Problem("An unexpected error occurred.");
+            }
+        }
+
+        private static async Task<IResult> HandleSetMasterKey(
+            HttpContext httpContext,
+            [FromBody] SetMasterKeyRequest request,
+            [FromServices] IMasterKeyManager masterKeyManager,
+            [FromServices] IAuditLogger auditLogger,
+            [FromServices] CompositeIdentityProvider identityProvider,
+            ILogger<Program> logger)
+        {
+            var identity = await identityProvider.ResolveIdentityAsync(httpContext);
+            var callerUsername = identity?.Username ?? httpContext.User?.Identity?.Name ?? "admin";
+
+            var newKey = request?.NewKey ?? request?.MasterKey ?? request?.Key;
+
+            if (string.IsNullOrWhiteSpace(newKey))
+            {
+                return Results.BadRequest(new { error = "New master key cannot be empty." });
+            }
+
+            var trimmedKey = newKey.Trim();
+
+            if (trimmedKey.Length < 16)
+            {
+                return Results.BadRequest(new { error = "Master key must be at least 16 characters long." });
+            }
+
+            if (DbKeyHelper.ActiveKeySource == MasterKeySource.External || DbKeyHelper.ActiveKeySource == MasterKeySource.Vault)
+            {
+                return Results.BadRequest(new { error = $"Cannot update master key when key source is managed externally ({DbKeyHelper.ActiveKeySource})." });
+            }
+
+            try
+            {
+                await masterKeyManager.ReencryptDatabaseSecretsAsync(trimmedKey);
+
+                await auditLogger.LogAdminActionAsync(
+                    callerUsername,
+                    "masterkey.reencrypt",
+                    "MasterKey",
+                    "Re-encrypted database secrets and updated master key.",
+                    true);
+
+                return Results.Ok(new
+                {
+                    success = true,
+                    message = "Master encryption key updated and database secrets successfully re-encrypted.",
+                    keySource = DbKeyHelper.ActiveKeySource.ToString()
+                });
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Failed to re-encrypt database secrets with new master key.");
+                await auditLogger.LogAdminActionAsync(
+                    callerUsername,
+                    "masterkey.reencrypt",
+                    "MasterKey",
+                    "Failed to re-encrypt database secrets.",
+                    false,
+                    ex.Message);
+
+                return Results.Problem(
+                    detail: ex.Message,
+                    statusCode: StatusCodes.Status500InternalServerError,
+                    title: "Database Re-encryption Failed");
             }
         }
     }
