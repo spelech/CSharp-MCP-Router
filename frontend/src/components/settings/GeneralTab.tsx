@@ -17,7 +17,7 @@ export const GeneralTab: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingS
 };
 
 const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSettings, setMasterKey }) => {
-  const [dashboardTitle, setDashboardTitle] = useState(settings?.dashboardTitle ?? 'MCP Gateway');
+  const [dashboardTitle, setDashboardTitle] = useState(settings?.dashboardTitle ?? 'Model Context Gateway');
   const [dashboardIcon, setDashboardIcon] = useState(settings?.dashboardIcon ?? 'fa-solid fa-network-wired');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -227,7 +227,7 @@ const GeneralTabForm: React.FC<GeneralTabProps> = ({ settings, saveEmbeddingSett
               <input
                 type="text"
                 id="settings-dashboard-title"
-                placeholder="MCP Gateway"
+                placeholder="Model Context Gateway"
                 value={dashboardTitle}
                 onChange={(e) => setDashboardTitle(e.target.value)}
               />

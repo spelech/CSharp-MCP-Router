@@ -43,9 +43,17 @@ export const Header: React.FC = () => {
           <i className={`${branding?.icon || 'fa-solid fa-network-wired'} logo-icon`}></i>
         )}
         <div className="header-title">
-          <h1>{branding?.title || 'MCP Gateway'}</h1>
-          <span className="badge badge-primary" id="version-badge">
-            v{version}
+          <div className="header-title-main" style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+            <h1>{branding?.title || 'Model Context Gateway'}</h1>
+            <span className="badge badge-secondary" id="mcg-badge">
+              MCG
+            </span>
+            <span className="badge badge-primary" id="version-badge">
+              v{version}
+            </span>
+          </div>
+          <span className="header-subtitle" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--text-muted)' }}>
+            High-Performance MCP Aggregator &amp; Semantic Gateway
           </span>
         </div>
       </div>

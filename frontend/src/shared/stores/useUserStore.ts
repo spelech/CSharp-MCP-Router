@@ -5,6 +5,7 @@ import { UserInfo } from '../types';
 export interface UserStore {
   user: UserInfo | null;
   version: string;
+  service: string;
   isLoadingUser: boolean;
   loadUser: () => Promise<void>;
   loadVersion: () => Promise<void>;
@@ -12,7 +13,8 @@ export interface UserStore {
 
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
-  version: '4.36.0', // fallback default
+  version: '5.0.0', // fallback default
+  service: 'ModelContextGateway',
   isLoadingUser: false,
   loadUser: async () => {
     set({ isLoadingUser: true });
@@ -27,8 +29,13 @@ export const useUserStore = create<UserStore>((set) => ({
   loadVersion: async () => {
     try {
       const data = await getHealth();
-      if (data && data.version) {
-        set({ version: data.version });
+      if (data) {
+        if (data.version) {
+          set({ version: data.version });
+        }
+        if (data.service) {
+          set({ service: data.service });
+        }
       }
     } catch (e) {
       console.error('Error loading version:', e);

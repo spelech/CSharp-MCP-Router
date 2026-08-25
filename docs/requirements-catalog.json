@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-25T17:22:22.4197691Z",
+    "generatedAt": "2026-08-25T17:31:00.5014608Z",
     "totalRequirements": 133,
     "positiveCount": 110,
     "guardrailCount": 23,
@@ -599,7 +599,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx",
-          "lineNumber": 80,
+          "lineNumber": 81,
           "testName": "renders role-adaptive UI for non-admin user",
           "details": null
         },
@@ -816,7 +816,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx",
-          "lineNumber": 35,
+          "lineNumber": 36,
           "testName": "switches between tabs on navigation click",
           "details": null
         },
