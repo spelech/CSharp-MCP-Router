@@ -25,7 +25,7 @@ test.describe('Full UI Flow: STDIO Transport + Env Variable Secret Provider', ()
     await expect(serverModal.modal).toBeVisible();
 
     // 3. Fill STDIO server details with Env provider pointing to real mock_stdio.js
-    const mockStdioPath = process.env.MOCK_STDIO_COMMAND || 'node /containers/dev/csharp-mcp-router/McpRouter.Tests/mock_stdio.js';
+    const mockStdioPath = process.env.MOCK_STDIO_COMMAND || 'node /containers/dev/csharp-mcp-router/ModelContextGateway.Tests/mock_stdio.js';
     await serverModal.fillServerForm({
       id: 'stdio_env_mock',
       name: 'STDIO Env Mock',

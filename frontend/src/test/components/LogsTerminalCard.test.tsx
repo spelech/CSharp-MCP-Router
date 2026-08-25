@@ -11,14 +11,14 @@ describe('LogsTerminalCard Component', () => {
       id: '1',
       timestamp: '2026-08-14T20:00:00Z',
       level: 2, // INFO
-      category: 'McpRouter.Core.Routing',
+      category: 'ModelContextGateway.Core.Routing',
       message: 'Gateway session started',
     },
     {
       id: '2',
       timestamp: '2026-08-14T20:01:00Z',
       level: 4, // ERROR
-      category: 'McpRouter.Infrastructure.Secrets',
+      category: 'ModelContextGateway.Infrastructure.Secrets',
       message: 'Failed to reach secret provider',
       exception: 'HttpRequestException: Connection refused',
     },
@@ -26,7 +26,7 @@ describe('LogsTerminalCard Component', () => {
       id: '3',
       timestamp: '2026-08-14T20:02:00Z',
       level: 2,
-      category: 'McpRouter.Core.Transport',
+      category: 'ModelContextGateway.Core.Transport',
       message: '[JSON-RPC Client -> Gateway] {"jsonrpc":"2.0","method":"tools/list","id":1}',
     },
   ];
