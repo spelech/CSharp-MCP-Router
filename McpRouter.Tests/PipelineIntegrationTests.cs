@@ -447,9 +447,18 @@ namespace McpRouter.Tests
         [Requirement("SEC-MASTERKEY-ATOMIC-REENCRYPTION", "SEC", RequirementType.Positive, "Rejects POST /api/config/master-key when key source is external.")]
         public async Task Pipeline_POST_MasterKey_RejectsWhenExternalKeySource()
         {
-            var client = CreateAuthenticatedClient();
-            var response = await client.PostAsJsonAsync("/api/config/master-key", new { newKey = "NewConfiguredMasterKey1234567890123456789012==" });
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            var origKeySource = DbKeyHelper.ActiveKeySource;
+            try
+            {
+                DbKeyHelper.ActiveKeySource = MasterKeySource.External;
+                var client = CreateAuthenticatedClient();
+                var response = await client.PostAsJsonAsync("/api/config/master-key", new { newKey = "NewConfiguredMasterKey1234567890123456789012==" });
+                Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            }
+            finally
+            {
+                DbKeyHelper.ActiveKeySource = origKeySource;
+            }
         }
     }
 }
