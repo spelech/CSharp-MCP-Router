@@ -10,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class UnifiedMcpAuthorizationTests : IDisposable
     {

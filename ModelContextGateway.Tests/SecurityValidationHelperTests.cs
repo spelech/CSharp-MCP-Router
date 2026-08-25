@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class SecurityValidationHelperTests
     {

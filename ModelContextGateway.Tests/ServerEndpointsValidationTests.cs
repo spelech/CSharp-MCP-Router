@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class ServerEndpointsValidationTests
     {

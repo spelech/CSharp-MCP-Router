@@ -9,7 +9,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class MockHttpMessageHandler : HttpMessageHandler
     {
@@ -78,7 +78,7 @@ namespace McpRouter.Tests
                     b.PrimaryHandler = new SocketsHttpHandler
                     {
                         AllowAutoRedirect = false,
-                        ConnectCallback = McpRouter.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback
+                        ConnectCallback = ModelContextGateway.Components.Authorization.SecurityValidationHelper.ValidatingConnectCallback
                     };
                 });
             });

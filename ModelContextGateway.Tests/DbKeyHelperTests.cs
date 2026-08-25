@@ -3,7 +3,7 @@ using Moq;
 
 [assembly: CollectionBehavior(DisableTestParallelization = true)]
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class DbKeyHelperTests : IDisposable
     {
@@ -211,7 +211,7 @@ namespace McpRouter.Tests
                 }
             };
 
-            mockKv2.Setup(k => k.ReadSecretAsync("mcp-router/master-key", null, "secret", null))
+            mockKv2.Setup(k => k.ReadSecretAsync("mcg/master-key", null, "secret", null))
                 .ReturnsAsync(secretData);
             mockKv.Setup(k => k.V2).Returns(mockKv2.Object);
             mockSecrets.Setup(s => s.KeyValue).Returns(mockKv.Object);

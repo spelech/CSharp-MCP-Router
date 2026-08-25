@@ -1,4 +1,4 @@
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class EnvironmentSecretRetrieverTests
     {

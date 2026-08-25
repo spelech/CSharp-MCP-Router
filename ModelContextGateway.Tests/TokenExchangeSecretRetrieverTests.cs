@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using Moq.Protected;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class TokenExchangeSecretRetrieverTests
     {

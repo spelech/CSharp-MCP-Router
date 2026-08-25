@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class DockerAutoDiscoveryServiceTests
     {
@@ -67,8 +67,8 @@ namespace McpRouter.Tests
             var discoveryService = new DockerAutoDiscoveryService(serviceProvider, NullLogger<DockerAutoDiscoveryService>.Instance);
             Assert.NotNull(discoveryService);
 
-            bool isBlocked1 = McpRouter.Components.Authorization.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("127.0.0.1"), Array.Empty<string>());
-            bool isBlocked2 = McpRouter.Components.Authorization.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("169.254.169.254"), Array.Empty<string>());
+            bool isBlocked1 = ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("127.0.0.1"), Array.Empty<string>());
+            bool isBlocked2 = ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsBlockedIp(System.Net.IPAddress.Parse("169.254.169.254"), Array.Empty<string>());
 
             Assert.True(isBlocked1);
             Assert.True(isBlocked2);

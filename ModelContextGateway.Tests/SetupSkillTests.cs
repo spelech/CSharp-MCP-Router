@@ -1,14 +1,14 @@
 using System.Text.Json;
 using System.Text.RegularExpressions;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class SetupSkillTests
     {
         private static string GetRepoRootDir()
         {
             var rootDir = Directory.GetCurrentDirectory();
-            while (!File.Exists(Path.Combine(rootDir, "mcp-router.csproj")) && Directory.GetParent(rootDir) != null)
+            while (!File.Exists(Path.Combine(rootDir, "ModelContextGateway.csproj")) && Directory.GetParent(rootDir) != null)
             {
                 rootDir = Directory.GetParent(rootDir)!.FullName;
             }

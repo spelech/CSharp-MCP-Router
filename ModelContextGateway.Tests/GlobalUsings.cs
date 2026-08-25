@@ -13,4 +13,4 @@ global using ModelContextGateway.Infrastructure.Secrets;
 global using ModelContextGateway.Infrastructure.Transports;
 global using ModelContextGateway.Middleware;
 global using ModelContextGateway.Models;
-global using McpRouter.Tests.Attributes;
+global using ModelContextGateway.Tests.Attributes;

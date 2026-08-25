@@ -6,7 +6,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class UserQuotaAndAppKeyRepositoryTests : IDisposable
     {

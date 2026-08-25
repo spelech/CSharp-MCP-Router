@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Configuration;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     [Collection("DbKeyTests")]
     public class EncryptionKeyProviderTests : IDisposable

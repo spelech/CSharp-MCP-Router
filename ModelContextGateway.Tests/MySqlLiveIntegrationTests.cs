@@ -2,7 +2,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class MySqlLiveIntegrationTests
     {

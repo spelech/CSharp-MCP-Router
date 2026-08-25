@@ -2,7 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class SessionManagerTests
     {

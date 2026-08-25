@@ -1,6 +1,6 @@
 using System.Text.Json;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class SemanticSearchServiceTests
     {

@@ -1,6 +1,6 @@
 using Xunit.Sdk;
 
-namespace McpRouter.Tests.Attributes
+namespace ModelContextGateway.Tests.Attributes
 {
     public enum RequirementType
     {

@@ -11,7 +11,7 @@ namespace CatalogGenerator.Tests
         {
             var index = new CatalogIndex();
             index.AddOrMergeProof("AUTH-01", "AUTH", RequirementType.Positive, "Admin SID bypasses all policies",
-                new TestCaseProof("Backend xUnit", "McpRouter.Tests/AdminTests.cs", 34, "AdminSid_Bypasses"));
+                new TestCaseProof("Backend xUnit", "ModelContextGateway.Tests/AdminTests.cs", 34, "AdminSid_Bypasses"));
             index.AddOrMergeProof("GUARD-01", "GUARD", RequirementType.Negative, "Expired keys fail closed",
                 new TestCaseProof("Playwright E2E", "frontend/e2e/rbac.spec.ts", 45, "denies expired key"));
 
@@ -29,7 +29,7 @@ namespace CatalogGenerator.Tests
         {
             var index = new CatalogIndex();
             index.AddOrMergeProof("AUTH-01", "AUTH", RequirementType.Positive, "Admin SID bypass",
-                new TestCaseProof("Backend xUnit", "McpRouter.Tests/AdminTests.cs", 34, "AdminSid_Bypasses"));
+                new TestCaseProof("Backend xUnit", "ModelContextGateway.Tests/AdminTests.cs", 34, "AdminSid_Bypasses"));
 
             var json = JsonEmitter.Emit(index);
 

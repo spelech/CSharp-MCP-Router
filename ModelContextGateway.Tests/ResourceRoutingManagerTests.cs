@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class ResourceRoutingManagerTests
     {

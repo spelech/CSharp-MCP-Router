@@ -2,7 +2,7 @@ using System.Text;
 using ModelContextGateway.Middleware;
 using Microsoft.AspNetCore.Http;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class McpDualSpecMiddlewareTests
     {

@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 using Moq;
 using VaultSharp;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class VaultAppRoleAndRenewalTests
     {

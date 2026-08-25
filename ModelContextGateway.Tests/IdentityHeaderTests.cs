@@ -2,7 +2,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Moq.Protected;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class IdentityHeaderTests
     {

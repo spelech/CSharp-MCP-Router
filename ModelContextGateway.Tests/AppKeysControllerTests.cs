@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class AppKeysControllerTests : IDisposable
     {
@@ -95,7 +95,7 @@ namespace McpRouter.Tests
         {
             var repo = new DatabaseRepository(_dbFactory);
             var credSvc = new CredentialService(_dbFactory);
-            var controller = new AppKeysController(repo, repo, _config, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object, credSvc, repo);
+            var controller = new AppKeysController(repo, repo, _config, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object, credSvc, repo);
 
             var services = new ServiceCollection();
             services.AddSingleton(_config);
@@ -449,7 +449,7 @@ namespace McpRouter.Tests
 
             var failingRepo = new DatabaseRepository(failingFactory.Object);
             var failingCredSvc = new CredentialService(failingFactory.Object);
-            var controller = new AppKeysController(failingRepo, failingRepo, _config, new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>().Object, failingCredSvc, failingRepo);
+            var controller = new AppKeysController(failingRepo, failingRepo, _config, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object, failingCredSvc, failingRepo);
             var services = new ServiceCollection();
             services.AddSingleton(_config);
             services.AddLogging();

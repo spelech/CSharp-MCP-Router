@@ -3,7 +3,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using MySqlConnector;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class DbConnectionFactoryTests
     {

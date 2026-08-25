@@ -3,7 +3,7 @@ using Dapper;
 using Microsoft.Data.Sqlite;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class EmbeddingServiceTests
     {

@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class FineGrainedRbacTests : IDisposable
     {
@@ -55,7 +55,7 @@ namespace McpRouter.Tests
             var composite = new CompositeIdentityProvider(new[] { mockProvider.Object });
             services.AddSingleton(composite);
 
-            var mockAuditLogger = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+            var mockAuditLogger = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
             services.AddSingleton(mockAuditLogger.Object);
 
             var realConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {

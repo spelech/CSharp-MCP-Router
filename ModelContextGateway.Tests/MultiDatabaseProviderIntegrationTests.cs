@@ -2,7 +2,7 @@ using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class MultiDatabaseProviderIntegrationTests
     {

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class ProvidersControllerTests : IDisposable
     {
@@ -336,8 +336,8 @@ namespace McpRouter.Tests
         {
             var mockAudit = new Mock<IAuditLogger>();
             var mockServiceProvider = new Mock<IServiceProvider>();
-            mockServiceProvider.Setup(x => x.GetService(typeof(System.Collections.Generic.IEnumerable<McpRouter.Infrastructure.Secrets.ISecretRetriever>)))
-                .Returns(new System.Collections.Generic.List<McpRouter.Infrastructure.Secrets.ISecretRetriever>());
+            mockServiceProvider.Setup(x => x.GetService(typeof(System.Collections.Generic.IEnumerable<ModelContextGateway.Infrastructure.Secrets.ISecretRetriever>)))
+                .Returns(new System.Collections.Generic.List<ModelContextGateway.Infrastructure.Secrets.ISecretRetriever>());
             var controller = new ProvidersController(_dbRepo, _dbRepo);
             var dto = new SecretProviderDto
             {
@@ -359,8 +359,8 @@ namespace McpRouter.Tests
         {
             var mockAudit = new Mock<IAuditLogger>();
             var mockServiceProvider = new Mock<IServiceProvider>();
-            mockServiceProvider.Setup(x => x.GetService(typeof(System.Collections.Generic.IEnumerable<McpRouter.Infrastructure.Secrets.ISecretRetriever>)))
-                .Returns(new System.Collections.Generic.List<McpRouter.Infrastructure.Secrets.ISecretRetriever>());
+            mockServiceProvider.Setup(x => x.GetService(typeof(System.Collections.Generic.IEnumerable<ModelContextGateway.Infrastructure.Secrets.ISecretRetriever>)))
+                .Returns(new System.Collections.Generic.List<ModelContextGateway.Infrastructure.Secrets.ISecretRetriever>());
             var controller = new ProvidersController(_dbRepo, _dbRepo);
             var dto = new SecretProviderDto
             {
@@ -382,8 +382,8 @@ namespace McpRouter.Tests
         {
             var mockAudit = new Mock<IAuditLogger>();
             var mockServiceProvider = new Mock<IServiceProvider>();
-            mockServiceProvider.Setup(x => x.GetService(typeof(System.Collections.Generic.IEnumerable<McpRouter.Infrastructure.Secrets.ISecretRetriever>)))
-                .Returns(new System.Collections.Generic.List<McpRouter.Infrastructure.Secrets.ISecretRetriever>());
+            mockServiceProvider.Setup(x => x.GetService(typeof(System.Collections.Generic.IEnumerable<ModelContextGateway.Infrastructure.Secrets.ISecretRetriever>)))
+                .Returns(new System.Collections.Generic.List<ModelContextGateway.Infrastructure.Secrets.ISecretRetriever>());
             var controller = new ProvidersController(_dbRepo, _dbRepo);
             var dto = new SecretProviderDto
             {

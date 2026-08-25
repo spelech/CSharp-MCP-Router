@@ -6,7 +6,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class CorsTests
     {

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class PipelineIntegrationFactory : WebApplicationFactory<Program>
     {

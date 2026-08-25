@@ -1,6 +1,6 @@
 using Microsoft.Extensions.Logging.Abstractions;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class OnnxEmbeddingServiceTests
     {

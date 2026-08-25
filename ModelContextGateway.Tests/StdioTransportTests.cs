@@ -1,7 +1,7 @@
 using Microsoft.Extensions.Logging;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class StdioTransportTests
     {
@@ -25,11 +25,11 @@ namespace McpRouter.Tests
             var paths = new[]
             {
                 "mock_stdio.js",
-                "McpRouter.Tests/mock_stdio.js",
-                "../McpRouter.Tests/mock_stdio.js",
-                "../../McpRouter.Tests/mock_stdio.js",
-                "../../../McpRouter.Tests/mock_stdio.js",
-                "../../../../McpRouter.Tests/mock_stdio.js"
+                "ModelContextGateway.Tests/mock_stdio.js",
+                "../ModelContextGateway.Tests/mock_stdio.js",
+                "../../ModelContextGateway.Tests/mock_stdio.js",
+                "../../../ModelContextGateway.Tests/mock_stdio.js",
+                "../../../../ModelContextGateway.Tests/mock_stdio.js"
             };
 
             foreach (var path in paths)

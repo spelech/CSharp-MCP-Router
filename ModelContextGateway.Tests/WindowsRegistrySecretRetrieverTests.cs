@@ -5,7 +5,7 @@ using Moq;
 
 #pragma warning disable CA1416
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class WindowsRegistrySecretRetrieverTests
     {

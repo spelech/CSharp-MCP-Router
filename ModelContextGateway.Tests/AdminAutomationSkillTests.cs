@@ -4,14 +4,14 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class AdminAutomationSkillTests
     {
         private static string GetRepoRootDir()
         {
             var rootDir = Directory.GetCurrentDirectory();
-            while (!File.Exists(Path.Combine(rootDir, "mcp-router.csproj")) && Directory.GetParent(rootDir) != null)
+            while (!File.Exists(Path.Combine(rootDir, "ModelContextGateway.csproj")) && Directory.GetParent(rootDir) != null)
             {
                 rootDir = Directory.GetParent(rootDir)!.FullName;
             }
@@ -352,8 +352,8 @@ namespace McpRouter.Tests
         [Requirement("SEC-GATEWAY-ZERO-CONFIG-BOOT", "SEC", RequirementType.Positive, "Gateway boots from a blank slate with zero master key environment variables, auto-generates .master.key, and serves health and admin endpoints.")]
         public async Task Gateway_BlankSlate_WithoutMasterKeyEnv_AutoGeneratesKeyFileAndBootsSuccessfully()
         {
-            McpRouter.Infrastructure.Secrets.DbKeyHelper.ResetCache();
-            McpRouter.Infrastructure.Secrets.EncryptionKeyProvider.ResetCache();
+            ModelContextGateway.Infrastructure.Secrets.DbKeyHelper.ResetCache();
+            ModelContextGateway.Infrastructure.Secrets.EncryptionKeyProvider.ResetCache();
 
             var tempDir = Path.Combine(Path.GetTempPath(), $"mcp_zero_config_{Guid.NewGuid():N}");
             Directory.CreateDirectory(tempDir);

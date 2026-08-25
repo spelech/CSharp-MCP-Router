@@ -5,7 +5,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class AppKeyAuthenticationTests : IDisposable
     {
@@ -214,7 +214,7 @@ namespace McpRouter.Tests
             var brokenFactoryMock = new Mock<IDbConnectionFactory>();
             brokenFactoryMock.Setup(f => f.CreateConnection()).Throws(new InvalidOperationException("Failed to open connection"));
 
-            var logger = new McpRouter.Infrastructure.Logging.AuditLogger(brokenFactoryMock.Object);
+            var logger = new ModelContextGateway.Infrastructure.Logging.AuditLogger(brokenFactoryMock.Object);
 
             await Assert.ThrowsAsync<InvalidOperationException>(async () =>
             {
@@ -328,7 +328,7 @@ namespace McpRouter.Tests
             var optionsMonitorMock = new Mock<Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions>>();
             optionsMonitorMock.Setup(o => o.Get(It.IsAny<string>())).Returns(new Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions());
 
-            var handler = new McpRouter.Middleware.AppKeyAuthenticationHandler(
+            var handler = new ModelContextGateway.Middleware.AppKeyAuthenticationHandler(
                 optionsMonitorMock.Object,
                 Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory.Instance,
                 System.Text.Encodings.Web.UrlEncoder.Default,
@@ -338,7 +338,7 @@ namespace McpRouter.Tests
 
             var context = new DefaultHttpContext();
             context.Request.Headers["X-App-Key"] = keyString;
-            var scheme = new Microsoft.AspNetCore.Authentication.AuthenticationScheme("AppKey", null, typeof(McpRouter.Middleware.AppKeyAuthenticationHandler));
+            var scheme = new Microsoft.AspNetCore.Authentication.AuthenticationScheme("AppKey", null, typeof(ModelContextGateway.Middleware.AppKeyAuthenticationHandler));
             await handler.InitializeAsync(scheme, context);
 
             var result = await handler.AuthenticateAsync();
@@ -349,8 +349,8 @@ namespace McpRouter.Tests
             Assert.False(result.Principal.HasClaim("Scope", "admin"));
 
             // Verify SecurityValidationHelper.IsAdmin returns false
-            var identity = new McpRouter.Infrastructure.Identity.UserIdentityContext("alice", "AppKey", new List<string>());
-            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, _config, context));
+            var identity = new ModelContextGateway.Infrastructure.Identity.UserIdentityContext("alice", "AppKey", new List<string>());
+            Assert.False(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, _config, context));
         }
 
         [Fact]
@@ -381,7 +381,7 @@ namespace McpRouter.Tests
             var optionsMonitorMock = new Mock<Microsoft.Extensions.Options.IOptionsMonitor<Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions>>();
             optionsMonitorMock.Setup(o => o.Get(It.IsAny<string>())).Returns(new Microsoft.AspNetCore.Authentication.AuthenticationSchemeOptions());
 
-            var handler = new McpRouter.Middleware.AppKeyAuthenticationHandler(
+            var handler = new ModelContextGateway.Middleware.AppKeyAuthenticationHandler(
                 optionsMonitorMock.Object,
                 Microsoft.Extensions.Logging.Abstractions.NullLoggerFactory.Instance,
                 System.Text.Encodings.Web.UrlEncoder.Default,
@@ -391,7 +391,7 @@ namespace McpRouter.Tests
 
             var context = new DefaultHttpContext();
             context.Request.Headers["X-App-Key"] = keyString;
-            var scheme = new Microsoft.AspNetCore.Authentication.AuthenticationScheme("AppKey", null, typeof(McpRouter.Middleware.AppKeyAuthenticationHandler));
+            var scheme = new Microsoft.AspNetCore.Authentication.AuthenticationScheme("AppKey", null, typeof(ModelContextGateway.Middleware.AppKeyAuthenticationHandler));
             await handler.InitializeAsync(scheme, context);
 
             var result = await handler.AuthenticateAsync();
@@ -402,8 +402,8 @@ namespace McpRouter.Tests
             Assert.True(result.Principal.HasClaim("Scope", "admin"));
 
             // Verify SecurityValidationHelper.IsAdmin returns true
-            var identity = new McpRouter.Infrastructure.Identity.UserIdentityContext("system", "AppKey", new List<string>());
-            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, _config, context));
+            var identity = new ModelContextGateway.Infrastructure.Identity.UserIdentityContext("system", "AppKey", new List<string>());
+            Assert.True(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, _config, context));
         }
 
         [Fact]
@@ -453,7 +453,7 @@ namespace McpRouter.Tests
         [Requirement("AUTH-PREFIX-EXTRACTION", "AUTH", RequirementType.Positive, "ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately.")]
         public void ExtractKeyPrefix_ExtractsSemanticAndLegacyPrefixesAccurately(string token, string expectedPrefix)
         {
-            var prefix = McpRouter.Middleware.AppKeyAuthenticationHandler.ExtractKeyPrefix(token);
+            var prefix = ModelContextGateway.Middleware.AppKeyAuthenticationHandler.ExtractKeyPrefix(token);
             Assert.Equal(expectedPrefix, prefix);
         }
     }

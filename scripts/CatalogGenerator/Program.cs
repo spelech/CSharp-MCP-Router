@@ -9,11 +9,11 @@ namespace CatalogGenerator
         public static int Main(string[] args)
         {
             Console.WriteLine("=================================================");
-            Console.WriteLine(" MCP Router Software Requirements Catalog Engine ");
+            Console.WriteLine(" Model Context Gateway Software Requirements Catalog Engine ");
             Console.WriteLine("=================================================");
 
             var rootDir = Directory.GetCurrentDirectory();
-            while (!File.Exists(Path.Combine(rootDir, "mcp-router.csproj")) && Directory.GetParent(rootDir) != null)
+            while (!File.Exists(Path.Combine(rootDir, "ModelContextGateway.csproj")) && Directory.GetParent(rootDir) != null)
             {
                 rootDir = Directory.GetParent(rootDir)!.FullName;
             }
@@ -25,7 +25,7 @@ namespace CatalogGenerator
 
             // 1. Parse C# tests
             var csParser = new RoslynCSharpParser();
-            var csTestDir = Path.Combine(rootDir, "McpRouter.Tests");
+            var csTestDir = Path.Combine(rootDir, "ModelContextGateway.Tests");
             if (Directory.Exists(csTestDir))
             {
                 Console.WriteLine($"[INFO] Scanning C# xUnit tests in {csTestDir}...");

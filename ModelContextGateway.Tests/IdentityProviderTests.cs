@@ -3,7 +3,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class IdentityProviderTests
     {
@@ -231,8 +231,8 @@ namespace McpRouter.Tests
             var adminIdentity = new UserIdentityContext("admin_user", "Test", new List<string> { "regular_users" }, Sid: "", Sids: new List<string> { "S-1-5-32-544" });
             var nonAdminIdentity = new UserIdentityContext("user", "Test", new List<string> { "regular_users" }, Sid: "", Sids: new List<string> { "S-1-5-21-999" });
 
-            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(adminIdentity, config));
-            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(nonAdminIdentity, config));
+            Assert.True(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(adminIdentity, config));
+            Assert.False(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(nonAdminIdentity, config));
         }
 
         [Fact]
@@ -246,7 +246,7 @@ namespace McpRouter.Tests
             var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
 
             var identity = new UserIdentityContext("admin_user", "HeaderAuth", new List<string> { "full_admin", "devops" });
-            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
+            Assert.True(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
         }
 
         [Fact]
@@ -260,10 +260,10 @@ namespace McpRouter.Tests
             var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
 
             var identity = new UserIdentityContext("alice", "HeaderAuth", new List<string> { "house_member" });
-            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
+            Assert.False(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
 
             var guestIdentity = new UserIdentityContext("guest", "HeaderAuth", new List<string> { "full_admin" });
-            Assert.False(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(guestIdentity, config));
+            Assert.False(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(guestIdentity, config));
         }
 
         [Fact]
@@ -278,7 +278,7 @@ namespace McpRouter.Tests
             var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
 
             var identity = new UserIdentityContext("bob", "HeaderAuth", new List<string> { "DevOps_Admins", "developers" });
-            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
+            Assert.True(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
         }
 
         [Fact]
@@ -293,7 +293,7 @@ namespace McpRouter.Tests
 
             var identity = new UserIdentityContext("charlie", "HeaderAuth", new List<string> { "Oidc_Admins" });
             var mappedGroups = new List<string> { "full_admin" };
-            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config, mappedGroups));
+            Assert.True(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config, mappedGroups));
         }
 
         [Fact]
@@ -316,7 +316,7 @@ namespace McpRouter.Tests
 
             Assert.Equal("admin", identity.Username);
             Assert.Empty(identity.AllSids);
-            Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
+            Assert.True(ModelContextGateway.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, config));
         }
 
         [Fact]
@@ -358,7 +358,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [McpRouter.Tests.Attributes.Requirement("SEC-03", "Ensure TrustedProxyHelper supports CIDR ranges in XFF validation", Type = McpRouter.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
+        [ModelContextGateway.Tests.Attributes.Requirement("SEC-03", "Ensure TrustedProxyHelper supports CIDR ranges in XFF validation", Type = ModelContextGateway.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
         public void TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted()
         {
             var context = new DefaultHttpContext();
@@ -417,7 +417,7 @@ namespace McpRouter.Tests
         }
 
         [Fact]
-        [McpRouter.Tests.Attributes.Requirement("SEC-03", "Ensure TrustedProxyHelper supports CIDR ranges for proxy validation", Type = McpRouter.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
+        [ModelContextGateway.Tests.Attributes.Requirement("SEC-03", "Ensure TrustedProxyHelper supports CIDR ranges for proxy validation", Type = ModelContextGateway.Tests.Attributes.RequirementType.Positive, Category = "SEC")]
         public void TrustedProxyHelper_ConfiguredProxyTrusted_CIDR()
         {
             var configDict = new Dictionary<string, string?>

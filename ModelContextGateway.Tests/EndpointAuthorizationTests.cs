@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Http;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class EndpointAuthorizationTests
     {

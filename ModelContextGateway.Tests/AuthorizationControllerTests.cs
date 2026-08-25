@@ -7,17 +7,17 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using OpenIddict.Abstractions;
 
-namespace McpRouter.Tests
+namespace ModelContextGateway.Tests
 {
     public class AuthorizationControllerTests
     {
 
         [Fact]
-        [McpRouter.Tests.Attributes.Requirement("AUTH-106", "SEC", McpRouter.Tests.Attributes.RequirementType.Negative, "Exchange throws InvalidOperationException when request is null.")]
+        [ModelContextGateway.Tests.Attributes.Requirement("AUTH-106", "SEC", ModelContextGateway.Tests.Attributes.RequirementType.Negative, "Exchange throws InvalidOperationException when request is null.")]
         public async Task Exchange_ThrowsInvalidOperationException_WhenRequestNull()
         {
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
-            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
             var controller = new AuthorizationController(mockAppManager.Object, mockAudit.Object)
             {
                 ControllerContext = new ControllerContext
@@ -31,13 +31,13 @@ namespace McpRouter.Tests
 
 
         [Fact]
-        [McpRouter.Tests.Attributes.Requirement("AUTH-107", "SEC", McpRouter.Tests.Attributes.RequirementType.Positive, "RegisterClient successfully handles DCR requests when open DCR is enabled.")]
+        [ModelContextGateway.Tests.Attributes.Requirement("AUTH-107", "SEC", ModelContextGateway.Tests.Attributes.RequirementType.Positive, "RegisterClient successfully handles DCR requests when open DCR is enabled.")]
         public async Task RegisterClient_CreatesApplicationAndReturnsOk()
         {
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
             mockAppManager.Setup(m => m.CreateAsync(It.IsAny<OpenIddictApplicationDescriptor>(), default))
                           .ReturnsAsync(new object());
-            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
 
             // Mock embedding service and settings
             var mockLoggerFactory = new Mock<ILoggerFactory>();
@@ -69,11 +69,11 @@ namespace McpRouter.Tests
             mockAppManager.Verify(m => m.CreateAsync(It.Is<OpenIddictApplicationDescriptor>(d => d.DisplayName == "IntegrationTestApp"), default), Times.Once);
         }
         [Fact]
-        [McpRouter.Tests.Attributes.Requirement("AUTH-108", "SEC", McpRouter.Tests.Attributes.RequirementType.Negative, "Authorize throws InvalidOperationException when OIDC request is null.")]
+        [ModelContextGateway.Tests.Attributes.Requirement("AUTH-108", "SEC", ModelContextGateway.Tests.Attributes.RequirementType.Negative, "Authorize throws InvalidOperationException when OIDC request is null.")]
         public async Task Authorize_ThrowsInvalidOperationException_WhenRequestNull()
         {
             var mockAppManager = new Mock<IOpenIddictApplicationManager>();
-            var mockAudit = new Mock<McpRouter.Infrastructure.Logging.IAuditLogger>();
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
             var controller = new AuthorizationController(mockAppManager.Object, mockAudit.Object)
             {
                 ControllerContext = new ControllerContext
