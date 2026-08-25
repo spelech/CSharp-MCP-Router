@@ -1,21 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.Data;
 using System.Security.Claims;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Moq;
-using Xunit;
-using McpRouter.Infrastructure.Logging;
-using System.Net.Http;
-using McpRouter.Core.Routing;
-using McpRouter.Tests.Attributes;
 
 namespace McpRouter.Tests
 {

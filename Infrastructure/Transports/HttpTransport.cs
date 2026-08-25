@@ -1,17 +1,6 @@
-using System;
-using System.Collections.Concurrent;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Components.Servers;
-using McpRouter.Models;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Infrastructure.Transports
 {
@@ -107,7 +96,7 @@ namespace McpRouter.Infrastructure.Transports
                 path = @"SOFTWARE\McpRouter\Secrets";
             }
 
-            string? secret = null;
+            string? secret;
             if (retriever is CompositeSecretRetriever composite)
             {
                 secret = await composite.GetSecretForProviderAsync(provider, path, field);
@@ -217,7 +206,9 @@ namespace McpRouter.Infrastructure.Transports
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
             if (!string.IsNullOrEmpty(_sessionId))
+            {
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+            }
 
             await ApplyAuthAndCustomHeadersAsync(req);
 
@@ -278,9 +269,13 @@ namespace McpRouter.Infrastructure.Transports
             resp.EnsureSuccessStatusCode();
 
             if (resp.Headers.TryGetValues("Mcp-Session-Id", out var sVals))
+            {
                 _sessionId = sVals.FirstOrDefault() ?? _sessionId;
+            }
             else if (resp.Content.Headers.TryGetValues("Mcp-Session-Id", out var scVals))
+            {
                 _sessionId = scVals.FirstOrDefault() ?? _sessionId;
+            }
 
             string responseBody = string.Empty;
             using (var stream = await resp.Content.ReadAsStreamAsync(linked.Token))

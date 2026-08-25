@@ -1,7 +1,6 @@
-using System.IO;
-using Xunit;
 using CatalogGenerator.Models;
 using CatalogGenerator.Parsers;
+using Xunit;
 
 namespace CatalogGenerator.Tests
 {

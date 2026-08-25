@@ -1,25 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Components.Servers;
-using McpRouter.Core.Routing;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Models;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Components.Capabilities
 {
@@ -55,7 +36,11 @@ namespace McpRouter.Components.Capabilities
             {
                 LogBuffer.Clear();
                 var audit = ctx.RequestServices.GetService<IAuditLogger>();
-                if (audit != null) await audit.LogAdminActionAsync(ctx.User?.Identity?.Name ?? "unknown", "logs.clear", "InMemoryLogBuffer", "", true);
+                if (audit != null)
+                {
+                    await audit.LogAdminActionAsync(ctx.User?.Identity?.Name ?? "unknown", "logs.clear", "InMemoryLogBuffer", "", true);
+                }
+
                 return Results.Ok(new { success = true });
             });
 
@@ -86,7 +71,11 @@ namespace McpRouter.Components.Capabilities
                 }
                 var rows = await conn.QueryAsync(sql, new { user, server, since, take, skip });
                 var audit = ctx.RequestServices.GetService<IAuditLogger>();
-                if (audit != null) await audit.LogAdminActionAsync(ctx.User?.Identity?.Name ?? "unknown", "audit.query", "AuditLogs", "", true);
+                if (audit != null)
+                {
+                    await audit.LogAdminActionAsync(ctx.User?.Identity?.Name ?? "unknown", "audit.query", "AuditLogs", "", true);
+                }
+
                 return Results.Ok(rows);
             });
 
@@ -113,16 +102,22 @@ namespace McpRouter.Components.Capabilities
             api.MapPost("/api/config/branding/logo", async (HttpRequest request, [FromServices] ISettingRepository settingsRepo, [FromServices] DynamicEmbeddingService embeddingService, [FromServices] IAuditLogger auditLogger, HttpContext httpContext) =>
             {
                 if (!request.HasFormContentType || request.Form.Files.Count == 0)
+                {
                     return Results.BadRequest(new { error = "No file uploaded" });
+                }
 
                 var file = request.Form.Files[0];
                 if (file.Length > 2 * 1024 * 1024)
+                {
                     return Results.BadRequest(new { error = "File size exceeds 2MB limit" });
+                }
 
                 var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
                 var allowedExtensions = new[] { ".png", ".jpg", ".jpeg", ".svg", ".ico", ".webp" };
                 if (!allowedExtensions.Contains(ext))
+                {
                     return Results.BadRequest(new { error = "Unsupported image format" });
+                }
 
                 var dir = Path.Combine(AppContext.BaseDirectory, "data", "branding");
                 Directory.CreateDirectory(dir);
@@ -191,7 +186,10 @@ namespace McpRouter.Components.Capabilities
 
                 foreach (var server in servers)
                 {
-                    if (server.Type == "custom") continue;
+                    if (server.Type == "custom")
+                    {
+                        continue;
+                    }
 
                     var cached = sessionManager.GetServerToolsCache(server.Id);
                     if (cached != null)
@@ -346,7 +344,11 @@ namespace McpRouter.Components.Capabilities
 
                 foreach (var server in servers)
                 {
-                    if (server.Type == "custom") continue;
+                    if (server.Type == "custom")
+                    {
+                        continue;
+                    }
+
                     var cached = sessionManager.GetServerToolsCache(server.Id);
                     if (cached != null)
                     {
@@ -435,7 +437,11 @@ namespace McpRouter.Components.Capabilities
 
                 foreach (var server in servers)
                 {
-                    if (server.Type == "custom") continue;
+                    if (server.Type == "custom")
+                    {
+                        continue;
+                    }
+
                     var cached = sessionManager.GetServerPromptsCache(server.Id);
                     if (cached != null)
                     {
@@ -556,9 +562,18 @@ namespace McpRouter.Components.Capabilities
                             var filename = Path.GetFileName(file);
                             var ext = Path.GetExtension(file).ToLowerInvariant();
                             var mimeType = "text/plain";
-                            if (ext == ".md") mimeType = "text/markdown";
-                            else if (ext == ".json") mimeType = "application/json";
-                            else if (ext == ".html") mimeType = "text/html";
+                            if (ext == ".md")
+                            {
+                                mimeType = "text/markdown";
+                            }
+                            else if (ext == ".json")
+                            {
+                                mimeType = "application/json";
+                            }
+                            else if (ext == ".html")
+                            {
+                                mimeType = "text/html";
+                            }
 
                             allResources.Add(new Dictionary<string, object> {
                                 { "uri", "router://resources/" + filename },
@@ -588,7 +603,11 @@ namespace McpRouter.Components.Capabilities
 
                 foreach (var server in servers)
                 {
-                    if (server.Type == "custom") continue;
+                    if (server.Type == "custom")
+                    {
+                        continue;
+                    }
+
                     var cachedRes = sessionManager.GetServerResourcesCache(server.Id);
                     var cachedTemp = sessionManager.GetServerResourceTemplatesCache(server.Id);
                     if (cachedRes != null && cachedTemp != null)
@@ -642,8 +661,15 @@ namespace McpRouter.Components.Capabilities
                         {
                             var newlyCachedRes = sessionManager.GetServerResourcesCache(server.Id);
                             var newlyCachedTemp = sessionManager.GetServerResourceTemplatesCache(server.Id);
-                            if (newlyCachedRes != null) allResources.AddRange(newlyCachedRes);
-                            if (newlyCachedTemp != null) allTemplates.AddRange(newlyCachedTemp);
+                            if (newlyCachedRes != null)
+                            {
+                                allResources.AddRange(newlyCachedRes);
+                            }
+
+                            if (newlyCachedTemp != null)
+                            {
+                                allTemplates.AddRange(newlyCachedTemp);
+                            }
                         }
                     }
                     finally
@@ -870,14 +896,28 @@ namespace McpRouter.Components.Capabilities
 
             api.MapGet("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name, ILogger<Program> logger) =>
             {
-                if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
+                if (type != "prompts" && type != "resources")
+                {
+                    return Results.BadRequest("Invalid type");
+                }
+
                 var cleanName = SanitizeFileName(name);
-                if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
+                if (string.IsNullOrEmpty(cleanName))
+                {
+                    return Results.BadRequest("Invalid file name");
+                }
 
                 var dir = GetCustomFilesDirectory(type);
                 var filePath = Path.GetFullPath(Path.Combine(dir, Path.GetFileName(cleanName)));
-                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase)) return Results.BadRequest("Invalid file path");
-                if (!File.Exists(filePath)) return Results.NotFound("File not found");
+                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase))
+                {
+                    return Results.BadRequest("Invalid file path");
+                }
+
+                if (!File.Exists(filePath))
+                {
+                    return Results.NotFound("File not found");
+                }
 
                 try
                 {
@@ -893,16 +933,27 @@ namespace McpRouter.Components.Capabilities
 
             api.MapPost("/api/custom-files/{type}/{name}", async ([FromRoute] string type, [FromRoute] string name, [FromBody] JsonElement body, ILogger<Program> logger) =>
             {
-                if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
+                if (type != "prompts" && type != "resources")
+                {
+                    return Results.BadRequest("Invalid type");
+                }
+
                 var cleanName = SanitizeFileName(name);
-                if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
+                if (string.IsNullOrEmpty(cleanName))
+                {
+                    return Results.BadRequest("Invalid file name");
+                }
 
                 if (type == "prompts" && !cleanName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                 {
                     cleanName += ".json";
                 }
 
-                if (!body.TryGetProperty("content", out var contentProp)) return Results.BadRequest("Missing content field");
+                if (!body.TryGetProperty("content", out var contentProp))
+                {
+                    return Results.BadRequest("Missing content field");
+                }
+
                 var content = contentProp.GetString() ?? "";
 
                 if (type == "prompts")
@@ -920,7 +971,10 @@ namespace McpRouter.Components.Capabilities
 
                 var dir = GetCustomFilesDirectory(type);
                 var filePath = Path.GetFullPath(Path.Combine(dir, Path.GetFileName(cleanName)));
-                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase)) return Results.BadRequest("Invalid file path");
+                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase))
+                {
+                    return Results.BadRequest("Invalid file path");
+                }
 
                 try
                 {
@@ -936,14 +990,28 @@ namespace McpRouter.Components.Capabilities
 
             api.MapDelete("/api/custom-files/{type}/{name}", ([FromRoute] string type, [FromRoute] string name, ILogger<Program> logger) =>
             {
-                if (type != "prompts" && type != "resources") return Results.BadRequest("Invalid type");
+                if (type != "prompts" && type != "resources")
+                {
+                    return Results.BadRequest("Invalid type");
+                }
+
                 var cleanName = SanitizeFileName(name);
-                if (string.IsNullOrEmpty(cleanName)) return Results.BadRequest("Invalid file name");
+                if (string.IsNullOrEmpty(cleanName))
+                {
+                    return Results.BadRequest("Invalid file name");
+                }
 
                 var dir = GetCustomFilesDirectory(type);
                 var filePath = Path.GetFullPath(Path.Combine(dir, Path.GetFileName(cleanName)));
-                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase)) return Results.BadRequest("Invalid file path");
-                if (!File.Exists(filePath)) return Results.NotFound("File not found");
+                if (!filePath.StartsWith(Path.GetFullPath(dir), StringComparison.OrdinalIgnoreCase))
+                {
+                    return Results.BadRequest("Invalid file path");
+                }
+
+                if (!File.Exists(filePath))
+                {
+                    return Results.NotFound("File not found");
+                }
 
                 try
                 {

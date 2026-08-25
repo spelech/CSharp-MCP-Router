@@ -1,16 +1,8 @@
-using Microsoft.Extensions.DependencyInjection;
-using McpRouter.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
-using Microsoft.Extensions.Configuration;
-using OpenIddict.Validation.AspNetCore;
+using McpRouter.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using McpRouter.Middleware;
-using McpRouter.Components.Authorization;
-using Microsoft.Extensions.Hosting;
+using OpenIddict.Validation.AspNetCore;
 
 namespace McpRouter.Extensions
 {
@@ -63,7 +55,7 @@ namespace McpRouter.Extensions
                         }
 
                         var adminSid = cfg?["Admin:GroupSid"] ?? "S-1-5-32-544";
-                        
+
                         var configuredAdminGroups = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
                         var singleGroupName = cfg?["Admin:GroupName"];
                         if (!string.IsNullOrWhiteSpace(singleGroupName))
@@ -82,7 +74,10 @@ namespace McpRouter.Extensions
                         {
                             foreach (var g in adminGroupsSection)
                             {
-                                if (!string.IsNullOrWhiteSpace(g)) configuredAdminGroups.Add(g.Trim());
+                                if (!string.IsNullOrWhiteSpace(g))
+                                {
+                                    configuredAdminGroups.Add(g.Trim());
+                                }
                             }
                         }
 

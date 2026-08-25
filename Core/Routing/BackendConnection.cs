@@ -1,20 +1,10 @@
-using System;
 using System.Collections.Concurrent;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Infrastructure.Transports;
-using McpRouter.Core.Protocol;
-using McpRouter.Components.Servers;
-using McpRouter.Models;
 
 namespace McpRouter.Core.Routing
 {
     public class BackendConnection : IDisposable
     {
-        private readonly McpServer _server;
         private readonly ITransport _transport;
         private readonly JsonRpcStateManager _stateManager;
 
@@ -28,7 +18,6 @@ namespace McpRouter.Core.Routing
 
         public BackendConnection(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, string? forwardedUser = null)
         {
-            _server = server;
             _stateManager = new JsonRpcStateManager();
 
             if (server.Type == "http" || server.Type == "custom" || server.Type == "streamable")
@@ -89,11 +78,17 @@ namespace McpRouter.Core.Routing
         public async Task<JsonRpcResponse> CallMethodAsync(string method, object parameters, string? overrideId = null)
         {
             if (_transport is SseTransport sse)
+            {
                 return await sse.CallMethodAsync(method, parameters, overrideId);
+            }
             else if (_transport is HttpTransport http)
+            {
                 return await http.CallMethodAsync(method, parameters, overrideId);
+            }
             else if (_transport is StdioTransport stdio)
+            {
                 return await stdio.CallMethodAsync(method, parameters, overrideId);
+            }
 
             throw new NotSupportedException();
         }

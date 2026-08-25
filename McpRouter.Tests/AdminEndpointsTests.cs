@@ -1,20 +1,9 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using McpRouter;
-using McpRouter.Tests.Attributes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -93,7 +82,11 @@ namespace McpRouter.Tests
             while (endpointLine == null)
             {
                 var line = await reader.ReadLineAsync(sseCts.Token);
-                if (line == null) break;
+                if (line == null)
+                {
+                    break;
+                }
+
                 if (line.StartsWith("data: "))
                 {
                     endpointLine = line.Substring("data: ".Length).Trim();
@@ -131,7 +124,11 @@ namespace McpRouter.Tests
             while (messageData == null)
             {
                 var line = await reader.ReadLineAsync(sseCts.Token);
-                if (line == null) break;
+                if (line == null)
+                {
+                    break;
+                }
+
                 if (line.StartsWith("data: "))
                 {
                     messageData = line.Substring("data: ".Length).Trim();
@@ -245,7 +242,11 @@ namespace McpRouter.Tests
             while (endpointLine == null)
             {
                 var line = await reader.ReadLineAsync(sseCts.Token);
-                if (line == null) break;
+                if (line == null)
+                {
+                    break;
+                }
+
                 if (line.StartsWith("data: "))
                 {
                     endpointLine = line.Substring("data: ".Length).Trim();
@@ -273,7 +274,11 @@ namespace McpRouter.Tests
             while (messageData == null)
             {
                 var line = await reader.ReadLineAsync(sseCts.Token);
-                if (line == null) break;
+                if (line == null)
+                {
+                    break;
+                }
+
                 if (line.StartsWith("data: "))
                 {
                     messageData = line.Substring("data: ".Length).Trim();
@@ -305,7 +310,11 @@ namespace McpRouter.Tests
             while (endpointLine == null)
             {
                 var line = await reader.ReadLineAsync(sseCts.Token);
-                if (line == null) break;
+                if (line == null)
+                {
+                    break;
+                }
+
                 if (line.StartsWith("data: "))
                 {
                     endpointLine = line.Substring("data: ".Length).Trim();
@@ -339,7 +348,11 @@ namespace McpRouter.Tests
             while (messageData == null)
             {
                 var line = await reader.ReadLineAsync(sseCts.Token);
-                if (line == null) break;
+                if (line == null)
+                {
+                    break;
+                }
+
                 if (line.StartsWith("data: "))
                 {
                     messageData = line.Substring("data: ".Length).Trim();

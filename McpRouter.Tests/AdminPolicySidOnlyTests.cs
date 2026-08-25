@@ -1,15 +1,11 @@
-using System.Collections.Generic;
 using System.Security.Claims;
-using System.Threading.Tasks;
+using McpRouter.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Moq;
-using Xunit;
-using McpRouter.Extensions;
-using McpRouter.Tests.Attributes;
 
 namespace McpRouter.Tests
 {

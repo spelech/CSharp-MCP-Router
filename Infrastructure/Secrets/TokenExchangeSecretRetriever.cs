@@ -1,14 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Persistence;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Infrastructure.Secrets
 {
@@ -368,22 +359,34 @@ namespace McpRouter.Infrastructure.Secrets
     {
         public static SecretProviderDto? FindProvider(this IEnumerable<SecretProviderDto> list, string name)
         {
-            if (list == null) return null;
+            if (list == null)
+            {
+                return null;
+            }
+
             foreach (var p in list)
             {
                 if (string.Equals(p.ProviderName, name, StringComparison.OrdinalIgnoreCase))
+                {
                     return p;
+                }
             }
             return null;
         }
 
         public static AuthProviderDto? FindAuthProvider(this IEnumerable<AuthProviderDto> list, string name)
         {
-            if (list == null) return null;
+            if (list == null)
+            {
+                return null;
+            }
+
             foreach (var p in list)
             {
                 if (string.Equals(p.ProviderName, name, StringComparison.OrdinalIgnoreCase))
+                {
                     return p;
+                }
             }
             return null;
         }

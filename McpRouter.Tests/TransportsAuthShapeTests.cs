@@ -1,14 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Reflection;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging.Abstractions;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Infrastructure.Transports;
-using McpRouter.Models;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -205,28 +197,29 @@ namespace McpRouter.Tests
             await Assert.ThrowsAsync<System.Security.SecurityException>(() => transport.ResolveTokenAsync());
         }
 
-    [Fact]
-    [Requirement("AUTH-06", "AUTH", RequirementType.Positive, "Transports use passThroughToken when AllowPassThroughAuth is true")]
-    public async Task Transports_Use_PassThroughToken_If_Allowed()
-    {
-        var server = new McpServer { Id = "test", AllowPassThroughAuth = true };
-        var transport = new HttpTransport(server, new HttpClient(), NullLogger<HttpTransport>.Instance, null, "secret-token-123");
-        var token = await transport.ResolveTokenAsync();
-        Assert.Equal("secret-token-123", token);
-    }
-
-    [Fact]
-    public async Task HttpTransport_SendRequestAsync_Throws_When_Impersonation_Missing_WindowsIdentity()
-    {
-        var server = new McpServer
+        [Fact]
+        [Requirement("AUTH-06", "AUTH", RequirementType.Positive, "Transports use passThroughToken when AllowPassThroughAuth is true")]
+        public async Task Transports_Use_PassThroughToken_If_Allowed()
         {
-            Id = "impersonate-srv",
-            Url = "http://localhost:5000/mcp",
-            AuthShape = "impersonation"
-        };
-        var transport = new HttpTransport(server, new HttpClient(), NullLogger<HttpTransport>.Instance, null, null, null);
+            var server = new McpServer { Id = "test", AllowPassThroughAuth = true };
+            var transport = new HttpTransport(server, new HttpClient(), NullLogger<HttpTransport>.Instance, null, "secret-token-123");
+            var token = await transport.ResolveTokenAsync();
+            Assert.Equal("secret-token-123", token);
+        }
 
-        var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => transport.SendRequestAsync("ping", "{\"jsonrpc\":\"2.0\",\"method\":\"ping\",\"id\":1}"));
-        Assert.Contains("Kerberos impersonation failed", ex.Message);
+        [Fact]
+        public async Task HttpTransport_SendRequestAsync_Throws_When_Impersonation_Missing_WindowsIdentity()
+        {
+            var server = new McpServer
+            {
+                Id = "impersonate-srv",
+                Url = "http://localhost:5000/mcp",
+                AuthShape = "impersonation"
+            };
+            var transport = new HttpTransport(server, new HttpClient(), NullLogger<HttpTransport>.Instance, null, null, null);
+
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => transport.SendRequestAsync("ping", "{\"jsonrpc\":\"2.0\",\"method\":\"ping\",\"id\":1}"));
+            Assert.Contains("Kerberos impersonation failed", ex.Message);
+        }
     }
-}}
+}

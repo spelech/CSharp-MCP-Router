@@ -1,12 +1,6 @@
-using System;
-using System.IO;
-using System.Net.Http;
-using System.Threading.Tasks;
-using Microsoft.Extensions.Logging;
 using Microsoft.ML.OnnxRuntime;
 using Microsoft.ML.OnnxRuntime.Tensors;
 using Microsoft.ML.Tokenizers;
-using McpRouter.Models;
 
 namespace McpRouter.Core.Routing
 {
@@ -56,7 +50,10 @@ namespace McpRouter.Core.Routing
 
         private async Task EnsureInitializedAsync()
         {
-            if (_session != null && _tokenizer != null) return;
+            if (_session != null && _tokenizer != null)
+            {
+                return;
+            }
 
             if (!Directory.Exists(_modelDir))
             {
@@ -105,7 +102,10 @@ namespace McpRouter.Core.Routing
             var tokens = _tokenizer!.EncodeToIds(text);
 
             int seqLength = tokens.Count;
-            if (seqLength == 0) return new float[384];
+            if (seqLength == 0)
+            {
+                return new float[384];
+            }
 
             if (seqLength <= 512)
             {

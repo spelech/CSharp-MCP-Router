@@ -1,14 +1,3 @@
-using System;
-using System.IO;
-using System.Net.Http;
-using System.Text.Json;
-using System.Threading.Tasks;
-using System.Linq;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Models;
 using Dapper;
 
 namespace McpRouter.Core.Routing
@@ -157,7 +146,9 @@ namespace McpRouter.Core.Routing
             }
 
             if (vector1 == null || vector2 == null || vector1.Length != vector2.Length || vector1.Length == 0)
+            {
                 return 0.0;
+            }
 
             double dotProduct = 0.0;
             double norm1 = 0.0;
@@ -170,7 +161,11 @@ namespace McpRouter.Core.Routing
                 norm2 += vector2[i] * vector2[i];
             }
 
-            if (norm1 == 0.0 || norm2 == 0.0) return 0.0;
+            if (norm1 == 0.0 || norm2 == 0.0)
+            {
+                return 0.0;
+            }
+
             return dotProduct / (Math.Sqrt(norm1) * Math.Sqrt(norm2));
         }
 

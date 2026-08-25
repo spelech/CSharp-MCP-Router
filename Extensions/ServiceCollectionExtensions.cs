@@ -1,22 +1,3 @@
-using System;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Net.Sockets;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Builder;
-using McpRouter.Models;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Core.Routing;
-using McpRouter.Components.Servers;
-using McpRouter.Components.Clients;
-using McpRouter.Components.Authorization;
-
 namespace McpRouter.Extensions
 {
     public static class ServiceCollectionExtensions
@@ -40,10 +21,20 @@ namespace McpRouter.Extensions
                     var implFactory = sd.ImplementationFactory;
 
                     bool isInMemory = false;
-                    if (implType != null && implType.Name.Contains("InMemoryLoggerProvider")) isInMemory = true;
-                    if (implInstance != null && implInstance.GetType().Name.Contains("InMemoryLoggerProvider")) isInMemory = true;
+                    if (implType != null && implType.Name.Contains("InMemoryLoggerProvider"))
+                    {
+                        isInMemory = true;
+                    }
 
-                    if (isInMemory) continue;
+                    if (implInstance != null && implInstance.GetType().Name.Contains("InMemoryLoggerProvider"))
+                    {
+                        isInMemory = true;
+                    }
+
+                    if (isInMemory)
+                    {
+                        continue;
+                    }
 
                     if (implInstance != null)
                     {

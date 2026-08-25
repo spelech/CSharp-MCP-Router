@@ -1,11 +1,6 @@
-using System;
-using System.Net.Http;
-using McpRouter;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using Xunit;
-using McpRouter.Tests.Attributes;
 
 namespace McpRouter.Tests
 {

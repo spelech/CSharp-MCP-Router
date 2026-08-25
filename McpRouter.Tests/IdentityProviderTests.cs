@@ -1,13 +1,7 @@
-using System.Collections.Generic;
-using System.Security.Principal;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Tests.Attributes;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -439,7 +433,7 @@ namespace McpRouter.Tests
             var proxyCtx2 = new DefaultHttpContext();
             proxyCtx2.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("10.5.5.5");
             Assert.True(TrustedProxyHelper.IsTrustedProxy(proxyCtx2, config));
-            
+
             var proxyCtx3 = new DefaultHttpContext();
             proxyCtx3.Connection.RemoteIpAddress = System.Net.IPAddress.Parse("172.16.0.5");
             Assert.True(TrustedProxyHelper.IsTrustedProxy(proxyCtx3, config));

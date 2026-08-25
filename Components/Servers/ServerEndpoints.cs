@@ -1,20 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Core.Routing;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Logging;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Components.Servers
 {
@@ -36,19 +22,47 @@ namespace McpRouter.Components.Servers
                     {
                         var idStr = Convert.ToString(s.Id) ?? string.Empty;
                         bool isEnabled = false;
-                        if (s.Enabled is long longEnabled) isEnabled = longEnabled != 0L;
-                        else if (s.Enabled is bool boolEnabled) isEnabled = boolEnabled;
-                        else if (s.Enabled != null) isEnabled = Convert.ToBoolean(s.Enabled);
+                        if (s.Enabled is long longEnabled)
+                        {
+                            isEnabled = longEnabled != 0L;
+                        }
+                        else if (s.Enabled is bool boolEnabled)
+                        {
+                            isEnabled = boolEnabled;
+                        }
+                        else if (s.Enabled != null)
+                        {
+                            isEnabled = Convert.ToBoolean(s.Enabled);
+                        }
 
                         bool isAllowPass = false;
-                        if (s.AllowPassThroughAuth is long longAllowPass) isAllowPass = longAllowPass != 0L;
-                        else if (s.AllowPassThroughAuth is bool boolAllowPass) isAllowPass = boolAllowPass;
-                        else if (s.AllowPassThroughAuth != null) isAllowPass = Convert.ToBoolean(s.AllowPassThroughAuth);
+                        if (s.AllowPassThroughAuth is long longAllowPass)
+                        {
+                            isAllowPass = longAllowPass != 0L;
+                        }
+                        else if (s.AllowPassThroughAuth is bool boolAllowPass)
+                        {
+                            isAllowPass = boolAllowPass;
+                        }
+                        else if (s.AllowPassThroughAuth != null)
+                        {
+                            isAllowPass = Convert.ToBoolean(s.AllowPassThroughAuth);
+                        }
 
                         bool isHidden = false;
-                        if (s.Hidden is long longHidden) isHidden = longHidden != 0L;
-                        else if (s.Hidden is bool boolHidden) isHidden = boolHidden;
-                        else if (s.Hidden != null) isHidden = Convert.ToBoolean(s.Hidden);
+                        if (s.Hidden is long longHidden)
+                        {
+                            isHidden = longHidden != 0L;
+                        }
+                        else if (s.Hidden is bool boolHidden)
+                        {
+                            isHidden = boolHidden;
+                        }
+                        else if (s.Hidden != null)
+                        {
+                            isHidden = Convert.ToBoolean(s.Hidden);
+                        }
+
                         var catStr = (string?)s.Categories ?? "[]";
                         List<string> categories;
                         try { categories = JsonSerializer.Deserialize<List<string>>(catStr) ?? new(); }
@@ -132,7 +146,10 @@ namespace McpRouter.Components.Servers
                 server.Enabled = update.Enabled;
                 server.Hidden = update.Hidden;
 
-                if (!string.IsNullOrEmpty(update.DisplayName)) server.DisplayName = update.DisplayName;
+                if (!string.IsNullOrEmpty(update.DisplayName))
+                {
+                    server.DisplayName = update.DisplayName;
+                }
 
                 var allowedTypes = new[] { "sse", "http", "streamable", "stdio", "custom" };
                 var targetType = (server.Type ?? "sse").ToLowerInvariant();
@@ -169,13 +186,40 @@ namespace McpRouter.Components.Servers
 
                 server.Type = targetType;
                 server.Url = targetUrl;
-                if (update.SecretProvider != null) server.SecretProvider = update.SecretProvider;
-                if (update.SecretItemKey != null) server.SecretItemKey = update.SecretItemKey;
-                if (!string.IsNullOrEmpty(update.AuthShape)) server.AuthShape = update.AuthShape;
-                if (update.CustomHeaderName != null) server.CustomHeaderName = update.CustomHeaderName;
-                if (update.Categories != null) server.Categories = update.Categories;
-                if (!string.IsNullOrWhiteSpace(update.ApiKey)) server.ApiKey = update.ApiKey;
-                if (update.HeadersJson != null) server.HeadersJson = update.HeadersJson;
+                if (update.SecretProvider != null)
+                {
+                    server.SecretProvider = update.SecretProvider;
+                }
+
+                if (update.SecretItemKey != null)
+                {
+                    server.SecretItemKey = update.SecretItemKey;
+                }
+
+                if (!string.IsNullOrEmpty(update.AuthShape))
+                {
+                    server.AuthShape = update.AuthShape;
+                }
+
+                if (update.CustomHeaderName != null)
+                {
+                    server.CustomHeaderName = update.CustomHeaderName;
+                }
+
+                if (update.Categories != null)
+                {
+                    server.Categories = update.Categories;
+                }
+
+                if (!string.IsNullOrWhiteSpace(update.ApiKey))
+                {
+                    server.ApiKey = update.ApiKey;
+                }
+
+                if (update.HeadersJson != null)
+                {
+                    server.HeadersJson = update.HeadersJson;
+                }
 
                 var catJson = JsonSerializer.Serialize(server.Categories ?? new());
                 await conn.ExecuteAsync(@"UPDATE Servers SET DisplayName = @DisplayName, Url = @Url, Enabled = @Enabled, Hidden = @Hidden, Type = @Type,
@@ -304,7 +348,10 @@ namespace McpRouter.Components.Servers
             {
                 using var conn = dbFactory.CreateConnection();
                 var server = await conn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @id", new { id });
-                if (server == null) return Results.NotFound(new { error = "Server not found" });
+                if (server == null)
+                {
+                    return Results.NotFound(new { error = "Server not found" });
+                }
 
                 var sessionId = "inspect-" + id + "-" + Guid.NewGuid().ToString("N")[..8];
                 var tools = new List<object>();

@@ -1,12 +1,6 @@
-using System;
-using System.Collections.Generic;
 using System.Text.Json;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.DependencyInjection;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Infrastructure.Identity;
 
 namespace McpRouter.Components.AppKeys
 {
@@ -66,7 +60,7 @@ namespace McpRouter.Components.AppKeys
             try
             {
                 string secretJsonString;
-                
+
                 // If they passed a string, use it. If they passed an object, serialize it.
                 if (request.SecretJson.ValueKind == JsonValueKind.String)
                 {

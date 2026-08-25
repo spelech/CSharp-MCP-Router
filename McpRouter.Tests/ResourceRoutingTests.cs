@@ -1,10 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using McpRouter.Core.Routing;
-using Microsoft.Extensions.Logging.Abstractions;
-using Xunit;
-
 namespace McpRouter.Tests
 {
     public class ResourceRoutingTests

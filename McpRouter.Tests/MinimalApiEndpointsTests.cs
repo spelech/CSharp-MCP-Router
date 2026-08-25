@@ -1,15 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Models;
-using McpRouter.Infrastructure.Secrets;
-using Moq;
-using Xunit;
 using Dapper;
+using Microsoft.Data.Sqlite;
+using Moq;
 
 namespace McpRouter.Tests
 {
@@ -51,7 +42,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task GetServers_Returns_Server_List()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (conn, _) = CreateDbFactory();
             conn.Execute("INSERT INTO Servers (Id, DisplayName, Url, Enabled) VALUES ('srv1', 'Server 1', 'http://localhost:1111/sse', 1)");
 
             var servers = (await conn.QueryAsync<McpServer>("SELECT * FROM Servers")).ToList();
@@ -63,7 +54,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task Post_Put_Delete_Server_Lifecycle_Works()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (conn, _) = CreateDbFactory();
 
             // 1. Create Server
             var newServer = new McpServer

@@ -1,18 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text.Json;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
 using Dapper;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Components.Authorization;
-using McpRouter.Core.Protocol;
 
 namespace McpRouter.Core.Routing
 {
@@ -99,16 +86,24 @@ namespace McpRouter.Core.Routing
             if (targetId.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
             {
                 if (Uri.TryCreate(targetId, UriKind.Absolute, out var parsedUri))
+                {
                     serverId = parsedUri.Host;
+                }
                 else
+                {
                     serverId = targetId.Substring("mcp://".Length).Split('/')[0];
+                }
             }
             else if (targetId.StartsWith("logs://", StringComparison.OrdinalIgnoreCase))
             {
                 if (Uri.TryCreate(targetId, UriKind.Absolute, out var parsedUri))
+                {
                     serverId = parsedUri.Host;
+                }
                 else
+                {
                     serverId = targetId.Substring("logs://".Length).Split('/')[0];
+                }
             }
             else if (targetId.StartsWith("router://", StringComparison.OrdinalIgnoreCase))
             {
@@ -264,7 +259,10 @@ namespace McpRouter.Core.Routing
                 }
 
                 var externalIds = identity.GroupNames.Concat(identity.AllSids).Distinct().ToList();
-                if (!string.IsNullOrEmpty(identity.Username) && !externalIds.Contains(identity.Username)) externalIds.Add(identity.Username);
+                if (!string.IsNullOrEmpty(identity.Username) && !externalIds.Contains(identity.Username))
+                {
+                    externalIds.Add(identity.Username);
+                }
 
                 var mappedGroups = new List<string>();
                 try
@@ -342,7 +340,10 @@ namespace McpRouter.Core.Routing
 
         private async Task<List<string>> GetServerCategoriesAsync(string serverId, HttpContext? httpContext)
         {
-            if (string.IsNullOrWhiteSpace(serverId)) return new List<string>();
+            if (string.IsNullOrWhiteSpace(serverId))
+            {
+                return new List<string>();
+            }
 
             var services = httpContext?.RequestServices ?? _clientResponse?.HttpContext?.RequestServices ?? _rootServices;
             var dbFactory = services?.GetService<IDbConnectionFactory>();
@@ -366,7 +367,10 @@ namespace McpRouter.Core.Routing
                         catch
                         {
                             var parts = rawCat.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
-                            if (parts.Count > 0) return parts;
+                            if (parts.Count > 0)
+                            {
+                                return parts;
+                            }
                         }
                     }
                 }
@@ -395,11 +399,21 @@ namespace McpRouter.Core.Routing
                 try
                 {
                     using var doc = JsonDocument.Parse(JsonSerializer.Serialize(item));
-                    if (doc.RootElement.TryGetProperty(idProp, out var p)) id = p.GetString();
+                    if (doc.RootElement.TryGetProperty(idProp, out var p))
+                    {
+                        id = p.GetString();
+                    }
                 }
                 catch { /* fall through to fail-closed exclude */ }
-                if (string.IsNullOrEmpty(id)) continue;                       // can't identify → exclude
-                if (await IsUserAuthorizedAsync(method, id, httpContext)) allowed.Add(item);
+                if (string.IsNullOrEmpty(id))
+                {
+                    continue;                       // can't identify → exclude
+                }
+
+                if (await IsUserAuthorizedAsync(method, id, httpContext))
+                {
+                    allowed.Add(item);
+                }
             }
             return allowed;
         }
@@ -437,16 +451,24 @@ namespace McpRouter.Core.Routing
                 if (itemName.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
                 {
                     if (Uri.TryCreate(itemName, UriKind.Absolute, out var parsedUri))
+                    {
                         serverId = parsedUri.Host;
+                    }
                     else
+                    {
                         serverId = itemName.Substring("mcp://".Length).Split('/')[0];
+                    }
                 }
                 else if (itemName.StartsWith("logs://", StringComparison.OrdinalIgnoreCase))
                 {
                     if (Uri.TryCreate(itemName, UriKind.Absolute, out var parsedUri))
+                    {
                         serverId = parsedUri.Host;
+                    }
                     else
+                    {
                         serverId = itemName.Substring("logs://".Length).Split('/')[0];
+                    }
                 }
                 else if (itemName.StartsWith("router://", StringComparison.OrdinalIgnoreCase))
                 {

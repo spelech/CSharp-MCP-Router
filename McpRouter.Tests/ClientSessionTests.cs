@@ -1,21 +1,10 @@
-using System;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Security.Claims;
-using System.Text.Json;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -70,7 +59,7 @@ namespace McpRouter.Tests
         [Fact]
         public async Task ClientSession_InitializationAndLifecycle_ExecutesSuccessfully()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var logger = NullLogger<ClientSession>.Instance;
             var httpContext = CreateMockHttpContext(dbFactory);
 

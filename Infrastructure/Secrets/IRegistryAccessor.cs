@@ -1,4 +1,3 @@
-using System;
 using Microsoft.Win32;
 
 namespace McpRouter.Infrastructure.Secrets
@@ -12,7 +11,10 @@ namespace McpRouter.Infrastructure.Secrets
     {
         public object? GetValue(string subKeyPath, string valueName)
         {
-            if (!OperatingSystem.IsWindows()) return null;
+            if (!OperatingSystem.IsWindows())
+            {
+                return null;
+            }
 #pragma warning disable CA1416
             try
             {

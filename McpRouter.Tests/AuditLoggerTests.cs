@@ -1,11 +1,6 @@
-using System;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Logging;
 using Microsoft.Data.Sqlite;
 using Moq;
-using Xunit;
 
 namespace McpRouter.Tests
 {

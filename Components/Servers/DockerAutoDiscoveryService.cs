@@ -1,18 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Net.Sockets;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using McpRouter.Models;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Components.Authorization;
 using Dapper;
 
 namespace McpRouter.Components.Servers
@@ -98,12 +85,16 @@ namespace McpRouter.Components.Servers
             var discoveredServers = new List<McpServer>();
 
             if (rootElement.ValueKind != JsonValueKind.Array)
+            {
                 return discoveredServers;
+            }
 
             foreach (var container in rootElement.EnumerateArray())
             {
                 if (!container.TryGetProperty("Labels", out var labelsProp) || labelsProp.ValueKind != JsonValueKind.Object)
+                {
                     continue;
+                }
 
                 // Check if mcp.enabled is true
                 bool mcpEnabled = false;
@@ -114,17 +105,23 @@ namespace McpRouter.Components.Servers
                 }
 
                 if (!mcpEnabled)
+                {
                     continue;
+                }
 
                 // Parse ID
                 if (!labelsProp.TryGetProperty("mcp.id", out var idProp) || string.IsNullOrWhiteSpace(idProp.GetString()))
+                {
                     continue;
+                }
 
                 var id = idProp.GetString()!.Trim();
 
                 // Parse Port
                 if (!labelsProp.TryGetProperty("mcp.port", out var portProp) || string.IsNullOrWhiteSpace(portProp.GetString()))
+                {
                     continue;
+                }
 
                 var port = portProp.GetString()!.Trim();
 
@@ -140,7 +137,9 @@ namespace McpRouter.Components.Servers
                 }
 
                 if (string.IsNullOrEmpty(containerName))
+                {
                     continue;
+                }
 
                 // Optional Display Name
                 string displayName = id;
@@ -161,7 +160,10 @@ namespace McpRouter.Components.Servers
                 if (labelsProp.TryGetProperty("mcp.path", out var pathProp) && !string.IsNullOrWhiteSpace(pathProp.GetString()))
                 {
                     path = pathProp.GetString()!.Trim();
-                    if (!path.StartsWith("/")) path = "/" + path;
+                    if (!path.StartsWith("/"))
+                    {
+                        path = "/" + path;
+                    }
                 }
 
                 // Optional Categories

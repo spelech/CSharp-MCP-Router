@@ -1,5 +1,3 @@
-using System.Threading.Tasks;
-
 namespace McpRouter.Infrastructure.Secrets
 {
     public interface ISecretRetriever

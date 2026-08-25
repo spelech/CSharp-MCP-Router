@@ -1,6 +1,3 @@
-using System;
-using Microsoft.Extensions.Logging;
-
 namespace McpRouter.Infrastructure.Logging
 {
     public class SanitizingLoggerProvider : ILoggerProvider

@@ -1,11 +1,8 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
-using System.Threading.Tasks;
+using Dapper;
+using McpRouter.Middleware;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Data.Sqlite;
@@ -13,15 +10,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Core.Routing;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Middleware;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
 using Moq;
-using Xunit;
-using Dapper;
 
 namespace McpRouter.Tests
 {

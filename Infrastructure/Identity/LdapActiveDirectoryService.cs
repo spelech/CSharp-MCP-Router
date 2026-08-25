@@ -1,15 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.DirectoryServices.Protocols;
-using System.Linq;
 using System.Net;
 using System.Text;
 using System.Text.Json;
-using System.Threading.Tasks;
-using McpRouter.Infrastructure.Persistence;
 using Microsoft.Extensions.Caching.Memory;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Infrastructure.Identity
 {
@@ -232,7 +225,11 @@ namespace McpRouter.Infrastructure.Identity
 
         public static string EscapeLdapFilter(string filter)
         {
-            if (string.IsNullOrEmpty(filter)) return string.Empty;
+            if (string.IsNullOrEmpty(filter))
+            {
+                return string.Empty;
+            }
+
             var sb = new StringBuilder(filter.Length);
             foreach (char c in filter)
             {
@@ -251,11 +248,17 @@ namespace McpRouter.Infrastructure.Identity
 
         public static string ConvertSidBytesToString(byte[] bytes)
         {
-            if (bytes == null || bytes.Length < 8) return string.Empty;
+            if (bytes == null || bytes.Length < 8)
+            {
+                return string.Empty;
+            }
 
             byte revision = bytes[0];
             byte subAuthorityCount = bytes[1];
-            if (bytes.Length < 8 + subAuthorityCount * 4) return string.Empty;
+            if (bytes.Length < 8 + subAuthorityCount * 4)
+            {
+                return string.Empty;
+            }
 
             long authority = 0;
             for (int i = 2; i <= 7; i++)

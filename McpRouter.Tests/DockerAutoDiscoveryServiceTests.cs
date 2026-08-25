@@ -1,20 +1,11 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
+using Dapper;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
 using Moq;
-using Xunit;
-using Dapper;
 
 namespace McpRouter.Tests
 {
@@ -54,7 +45,7 @@ namespace McpRouter.Tests
         [Fact]
         public void Service_Initializes_With_Valid_Dependencies()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var services = new ServiceCollection();
             services.AddSingleton(dbFactory);
             var serviceProvider = services.BuildServiceProvider();
@@ -66,7 +57,7 @@ namespace McpRouter.Tests
         [Fact]
         public void DockerDiscovery_SkipsContainer_ResolvingToPrivateIp()
         {
-            var (conn, dbFactory) = CreateDbFactory();
+            var (_, dbFactory) = CreateDbFactory();
             var services = new ServiceCollection();
             services.AddSingleton(dbFactory);
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();

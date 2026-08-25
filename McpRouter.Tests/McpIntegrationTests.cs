@@ -1,27 +1,13 @@
-using System;
-using System.IO;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
-using Moq;
-using Xunit;
-using FluentAssertions;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Persistence;
 using Dapper;
+using FluentAssertions;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using McpRouter;
-using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace McpRouter.Tests
 {
@@ -250,7 +236,11 @@ namespace McpRouter.Tests
                         n1 += v1[i] * v1[i];
                         n2 += v2[i] * v2[i];
                     }
-                    if (n1 == 0 || n2 == 0) return 0.0;
+                    if (n1 == 0 || n2 == 0)
+                    {
+                        return 0.0;
+                    }
+
                     return dot / (Math.Sqrt(n1) * Math.Sqrt(n2));
                 });
 
@@ -1057,8 +1047,15 @@ namespace McpRouter.Tests
             }
             finally
             {
-                if (File.Exists(promptPath)) File.Delete(promptPath);
-                if (File.Exists(resourcePath)) File.Delete(resourcePath);
+                if (File.Exists(promptPath))
+                {
+                    File.Delete(promptPath);
+                }
+
+                if (File.Exists(resourcePath))
+                {
+                    File.Delete(resourcePath);
+                }
             }
         }
 

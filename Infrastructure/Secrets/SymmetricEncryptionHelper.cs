@@ -1,8 +1,5 @@
-using System;
-using System.IO;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Configuration;
 
 namespace McpRouter.Infrastructure.Secrets
 {
@@ -45,7 +42,10 @@ namespace McpRouter.Infrastructure.Secrets
 
         public static string Encrypt(string plaintext, IConfiguration config)
         {
-            if (string.IsNullOrEmpty(plaintext)) return plaintext;
+            if (string.IsNullOrEmpty(plaintext))
+            {
+                return plaintext;
+            }
 
             var keyBytes = GetEncryptionKey(config);
             var plaintextBytes = Encoding.UTF8.GetBytes(plaintext);
@@ -69,7 +69,10 @@ namespace McpRouter.Infrastructure.Secrets
         public static bool TryDecrypt(string ciphertext, IConfiguration config, out string plaintext)
         {
             plaintext = ciphertext;
-            if (string.IsNullOrEmpty(ciphertext)) return true;
+            if (string.IsNullOrEmpty(ciphertext))
+            {
+                return true;
+            }
 
             byte[] fullCipher;
             try

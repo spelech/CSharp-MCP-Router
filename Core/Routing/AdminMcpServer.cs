@@ -1,28 +1,7 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Components.AppKeys;
-using McpRouter.Components.Authorization;
-using McpRouter.Components.Clients;
-using McpRouter.Components.Providers;
-using McpRouter.Components.Servers;
-using McpRouter.Core.Protocol;
-using McpRouter.Infrastructure.Identity;
-using McpRouter.Infrastructure.Logging;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Secrets;
-using McpRouter.Models;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace McpRouter.Core.Routing
@@ -293,152 +272,167 @@ namespace McpRouter.Core.Routing
             switch (action.ToLowerInvariant())
             {
                 case "list":
-                {
-                    var rawServers = (await _serverRepository.GetServersAsync()).ToList();
-                    var statuses = _sessionManager.BackendStatuses;
-
-                    return rawServers.Select(s =>
                     {
-                        var idStr = s.Id ?? string.Empty;
-                        statuses.TryGetValue(idStr, out var status);
+                        var rawServers = (await _serverRepository.GetServersAsync()).ToList();
+                        var statuses = _sessionManager.BackendStatuses;
 
+                        return rawServers.Select(s =>
+                        {
+                            var idStr = s.Id ?? string.Empty;
+                            statuses.TryGetValue(idStr, out var status);
+
+                            return new
+                            {
+                                s.Id,
+                                s.DisplayName,
+                                s.Url,
+                                s.Enabled,
+                                s.Hidden,
+                                Type = s.Type ?? "sse",
+                                Categories = s.Categories ?? new List<string>(),
+                                SecretProvider = s.SecretProvider ?? "None",
+                                s.SecretItemKey,
+                                AuthShape = s.AuthShape ?? "bearer",
+                                s.CustomHeaderName,
+                                HasApiKey = !string.IsNullOrEmpty(s.ApiKey),
+                                ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
+                                ConnectionAttempts = status?.Attempts ?? 0,
+                                ConnectionError = status?.Error ?? string.Empty
+                            };
+                        }).ToList();
+                    }
+
+                case "get":
+                    {
+                        var id = GetRequiredStringProperty(args, "id");
+                        var server = await _serverRepository.GetServerByIdAsync(id);
+                        if (server == null)
+                        {
+                            throw new KeyNotFoundException($"Server '{id}' not found.");
+                        }
+
+                        _sessionManager.BackendStatuses.TryGetValue(id, out var status);
                         return new
                         {
-                            s.Id,
-                            s.DisplayName,
-                            s.Url,
-                            s.Enabled,
-                            s.Hidden,
-                            Type = s.Type ?? "sse",
-                            Categories = s.Categories ?? new List<string>(),
-                            SecretProvider = s.SecretProvider ?? "None",
-                            s.SecretItemKey,
-                            AuthShape = s.AuthShape ?? "bearer",
-                            s.CustomHeaderName,
-                            HasApiKey = !string.IsNullOrEmpty(s.ApiKey),
-                            ConnectionStatus = s.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
+                            server.Id,
+                            server.DisplayName,
+                            server.Url,
+                            server.Enabled,
+                            server.Hidden,
+                            Type = server.Type ?? "sse",
+                            Categories = server.Categories ?? new List<string>(),
+                            SecretProvider = server.SecretProvider ?? "None",
+                            server.SecretItemKey,
+                            AuthShape = server.AuthShape ?? "bearer",
+                            server.CustomHeaderName,
+                            HasApiKey = !string.IsNullOrEmpty(server.ApiKey),
+                            ConnectionStatus = server.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
                             ConnectionAttempts = status?.Attempts ?? 0,
                             ConnectionError = status?.Error ?? string.Empty
                         };
-                    }).ToList();
-                }
-
-                case "get":
-                {
-                    var id = GetRequiredStringProperty(args, "id");
-                    var server = await _serverRepository.GetServerByIdAsync(id);
-                    if (server == null) throw new KeyNotFoundException($"Server '{id}' not found.");
-
-                    _sessionManager.BackendStatuses.TryGetValue(id, out var status);
-                    return new
-                    {
-                        server.Id,
-                        server.DisplayName,
-                        server.Url,
-                        server.Enabled,
-                        server.Hidden,
-                        Type = server.Type ?? "sse",
-                        Categories = server.Categories ?? new List<string>(),
-                        SecretProvider = server.SecretProvider ?? "None",
-                        server.SecretItemKey,
-                        AuthShape = server.AuthShape ?? "bearer",
-                        server.CustomHeaderName,
-                        HasApiKey = !string.IsNullOrEmpty(server.ApiKey),
-                        ConnectionStatus = server.Enabled ? (status?.Status ?? "Disconnected") : "Disabled",
-                        ConnectionAttempts = status?.Attempts ?? 0,
-                        ConnectionError = status?.Error ?? string.Empty
-                    };
-                }
+                    }
 
                 case "create":
-                {
-                    var server = ParseServerFromArgs(args);
-                    if (string.IsNullOrWhiteSpace(server.Id))
                     {
-                        server.Id = Guid.NewGuid().ToString("N")[..8];
+                        var server = ParseServerFromArgs(args);
+                        if (string.IsNullOrWhiteSpace(server.Id))
+                        {
+                            server.Id = Guid.NewGuid().ToString("N")[..8];
+                        }
+
+                        ValidateServerConfig(server);
+
+                        await _serverRepository.SaveServerAsync(server);
+                        _sessionManager.ResetAll();
+
+                        return new { success = true, server };
                     }
-
-                    ValidateServerConfig(server);
-
-                    await _serverRepository.SaveServerAsync(server);
-                    _sessionManager.ResetAll();
-
-                    return new { success = true, server };
-                }
 
                 case "update":
-                {
-                    var id = GetRequiredStringProperty(args, "id");
-                    var existing = await _serverRepository.GetServerByIdAsync(id);
-                    if (existing == null) throw new KeyNotFoundException($"Server '{id}' not found.");
+                    {
+                        var id = GetRequiredStringProperty(args, "id");
+                        var existing = await _serverRepository.GetServerByIdAsync(id);
+                        if (existing == null)
+                        {
+                            throw new KeyNotFoundException($"Server '{id}' not found.");
+                        }
 
-                    UpdateServerFromArgs(existing, args);
-                    ValidateServerConfig(existing);
+                        UpdateServerFromArgs(existing, args);
+                        ValidateServerConfig(existing);
 
-                    await _serverRepository.SaveServerAsync(existing);
-                    _sessionManager.RemoveServerCache(id);
-                    _sessionManager.ResetAll();
+                        await _serverRepository.SaveServerAsync(existing);
+                        _sessionManager.RemoveServerCache(id);
+                        _sessionManager.ResetAll();
 
-                    return new { success = true, server = existing };
-                }
+                        return new { success = true, server = existing };
+                    }
 
                 case "delete":
-                {
-                    var id = GetRequiredStringProperty(args, "id");
-                    var existing = await _serverRepository.GetServerByIdAsync(id);
-                    if (existing == null) throw new KeyNotFoundException($"Server '{id}' not found.");
+                    {
+                        var id = GetRequiredStringProperty(args, "id");
+                        var existing = await _serverRepository.GetServerByIdAsync(id);
+                        if (existing == null)
+                        {
+                            throw new KeyNotFoundException($"Server '{id}' not found.");
+                        }
 
-                    await _serverRepository.DeleteServerAsync(id);
-                    _sessionManager.RemoveServerCache(id);
-                    _sessionManager.ResetAll();
+                        await _serverRepository.DeleteServerAsync(id);
+                        _sessionManager.RemoveServerCache(id);
+                        _sessionManager.ResetAll();
 
-                    return new { success = true, id };
-                }
+                        return new { success = true, id };
+                    }
 
                 case "toggle":
-                {
-                    var id = GetRequiredStringProperty(args, "id");
-                    var existing = await _serverRepository.GetServerByIdAsync(id);
-                    if (existing == null) throw new KeyNotFoundException($"Server '{id}' not found.");
-
-                    if (args.TryGetProperty("enabled", out var enabledProp) && (enabledProp.ValueKind == JsonValueKind.True || enabledProp.ValueKind == JsonValueKind.False))
                     {
-                        existing.Enabled = enabledProp.GetBoolean();
-                    }
-                    else
-                    {
-                        existing.Enabled = !existing.Enabled;
-                    }
+                        var id = GetRequiredStringProperty(args, "id");
+                        var existing = await _serverRepository.GetServerByIdAsync(id);
+                        if (existing == null)
+                        {
+                            throw new KeyNotFoundException($"Server '{id}' not found.");
+                        }
 
-                    await _serverRepository.SaveServerAsync(existing);
-                    _sessionManager.RemoveServerCache(id);
-                    _sessionManager.ResetAll();
+                        if (args.TryGetProperty("enabled", out var enabledProp) && (enabledProp.ValueKind == JsonValueKind.True || enabledProp.ValueKind == JsonValueKind.False))
+                        {
+                            existing.Enabled = enabledProp.GetBoolean();
+                        }
+                        else
+                        {
+                            existing.Enabled = !existing.Enabled;
+                        }
 
-                    return new { success = true, id, enabled = existing.Enabled };
-                }
+                        await _serverRepository.SaveServerAsync(existing);
+                        _sessionManager.RemoveServerCache(id);
+                        _sessionManager.ResetAll();
+
+                        return new { success = true, id, enabled = existing.Enabled };
+                    }
 
                 case "reconnect":
-                {
-                    var id = GetRequiredStringProperty(args, "id");
-                    var existing = await _serverRepository.GetServerByIdAsync(id);
-                    if (existing == null) throw new KeyNotFoundException($"Server '{id}' not found.");
-
-                    await _healthCheckService.ProbeServerAsync(existing);
-
-                    var activeSessions = _sessionManager.GetActiveSessions();
-                    foreach (var session in activeSessions)
                     {
-                        session.StartInitializationForBackend(id);
+                        var id = GetRequiredStringProperty(args, "id");
+                        var existing = await _serverRepository.GetServerByIdAsync(id);
+                        if (existing == null)
+                        {
+                            throw new KeyNotFoundException($"Server '{id}' not found.");
+                        }
+
+                        await _healthCheckService.ProbeServerAsync(existing);
+
+                        var activeSessions = _sessionManager.GetActiveSessions();
+                        foreach (var session in activeSessions)
+                        {
+                            session.StartInitializationForBackend(id);
+                        }
+
+                        return new { success = true, message = $"Reconnection triggered for server {existing.DisplayName}" };
                     }
 
-                    return new { success = true, message = $"Reconnection triggered for server {existing.DisplayName}" };
-                }
-
                 case "reconnect_all":
-                {
-                    await _healthCheckService.ProbeAllServersAsync();
-                    return new { success = true, message = "Reconnection triggered for all servers." };
-                }
+                    {
+                        await _healthCheckService.ProbeAllServersAsync();
+                        return new { success = true, message = "Reconnection triggered for all servers." };
+                    }
 
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_servers.");
@@ -453,98 +447,104 @@ namespace McpRouter.Core.Routing
             switch (action.ToLowerInvariant())
             {
                 case "list":
-                {
-                    string? usernameFilter = args.TryGetProperty("username", out var uProp) ? uProp.GetString() : null;
-                    var keys = await _appKeyRepository.GetAppKeysAsync(usernameFilter, isAdmin: true, currentUser: callerUsername);
-
-                    return keys.Select(k => new
                     {
-                        k.Id,
-                        k.Name,
-                        k.Username,
-                        k.KeyPrefix,
-                        Scopes = DeserializeScopes(k.ScopesJson),
-                        k.ExpiresAt,
-                        k.CreatedAt
-                    }).ToList();
-                }
+                        string? usernameFilter = args.TryGetProperty("username", out var uProp) ? uProp.GetString() : null;
+                        var keys = await _appKeyRepository.GetAppKeysAsync(usernameFilter, isAdmin: true, currentUser: callerUsername);
+
+                        return keys.Select(k => new
+                        {
+                            k.Id,
+                            k.Name,
+                            k.Username,
+                            k.KeyPrefix,
+                            Scopes = DeserializeScopes(k.ScopesJson),
+                            k.ExpiresAt,
+                            k.CreatedAt
+                        }).ToList();
+                    }
 
                 case "get_limits":
-                {
-                    var targetUser = args.TryGetProperty("username", out var uProp) ? (uProp.GetString() ?? callerUsername) : callerUsername;
-                    var settings = await _settingRepository.GetSettingsAsync();
-
-                    int globalMax = settings?.GlobalMaxKeys ?? 0;
-                    int userMax = settings?.UserMaxKeys ?? 0;
-                    int totalActiveKeys = await _appKeyRepository.GetTotalActiveKeysAsync();
-                    int userActiveKeys = await _appKeyRepository.GetUserActiveKeysAsync(targetUser);
-
-                    return new
                     {
-                        globalMax,
-                        userMax,
-                        totalActiveKeys,
-                        userActiveKeys
-                    };
-                }
+                        var targetUser = args.TryGetProperty("username", out var uProp) ? (uProp.GetString() ?? callerUsername) : callerUsername;
+                        var settings = await _settingRepository.GetSettingsAsync();
+
+                        int globalMax = settings?.GlobalMaxKeys ?? 0;
+                        int userMax = settings?.UserMaxKeys ?? 0;
+                        int totalActiveKeys = await _appKeyRepository.GetTotalActiveKeysAsync();
+                        int userActiveKeys = await _appKeyRepository.GetUserActiveKeysAsync(targetUser);
+
+                        return new
+                        {
+                            globalMax,
+                            userMax,
+                            totalActiveKeys,
+                            userActiveKeys
+                        };
+                    }
 
                 case "create":
-                {
-                    var name = GetRequiredStringProperty(args, "name");
-                    var targetUser = args.TryGetProperty("username", out var uProp) && !string.IsNullOrWhiteSpace(uProp.GetString())
-                        ? uProp.GetString()!
-                        : callerUsername;
-
-                    var ownerSid = "";
-                    if (!targetUser.Equals(callerUsername, StringComparison.OrdinalIgnoreCase) && _ldapService != null)
                     {
-                        try
+                        var name = GetRequiredStringProperty(args, "name");
+                        var targetUser = args.TryGetProperty("username", out var uProp) && !string.IsNullOrWhiteSpace(uProp.GetString())
+                            ? uProp.GetString()!
+                            : callerUsername;
+
+                        var ownerSid = "";
+                        if (!targetUser.Equals(callerUsername, StringComparison.OrdinalIgnoreCase) && _ldapService != null)
                         {
-                            var targetSids = await _ldapService.ResolveUserSidsAsync(targetUser);
-                            ownerSid = targetSids.FirstOrDefault() ?? "";
+                            try
+                            {
+                                var targetSids = await _ldapService.ResolveUserSidsAsync(targetUser);
+                                ownerSid = targetSids.FirstOrDefault() ?? "";
+                            }
+                            catch { }
                         }
-                        catch { }
+
+                        var scopes = new List<string> { "all" };
+                        if (args.TryGetProperty("scopes", out var scopesProp) && scopesProp.ValueKind == JsonValueKind.Array)
+                        {
+                            scopes = scopesProp.EnumerateArray().Select(s => s.GetString()).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s!).ToList();
+                            if (scopes.Count == 0)
+                            {
+                                scopes.Add("all");
+                            }
+                        }
+
+                        int? expiresInDays = args.TryGetProperty("expiresInDays", out var expProp) && expProp.TryGetInt32(out var d) ? d : null;
+
+                        var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
+                            name,
+                            targetUser,
+                            ownerSid,
+                            scopes,
+                            expiresInDays
+                        );
+
+                        return new
+                        {
+                            appKey.Id,
+                            appKey.Name,
+                            appKey.Username,
+                            appKey.KeyPrefix,
+                            PlaintextKey = plaintextKey,
+                            Scopes = scopes,
+                            appKey.ExpiresAt,
+                            appKey.CreatedAt
+                        };
                     }
-
-                    var scopes = new List<string> { "all" };
-                    if (args.TryGetProperty("scopes", out var scopesProp) && scopesProp.ValueKind == JsonValueKind.Array)
-                    {
-                        scopes = scopesProp.EnumerateArray().Select(s => s.GetString()).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s!).ToList();
-                        if (scopes.Count == 0) scopes.Add("all");
-                    }
-
-                    int? expiresInDays = args.TryGetProperty("expiresInDays", out var expProp) && expProp.TryGetInt32(out var d) ? d : null;
-
-                    var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
-                        name,
-                        targetUser,
-                        ownerSid,
-                        scopes,
-                        expiresInDays
-                    );
-
-                    return new
-                    {
-                        appKey.Id,
-                        appKey.Name,
-                        appKey.Username,
-                        appKey.KeyPrefix,
-                        PlaintextKey = plaintextKey,
-                        Scopes = scopes,
-                        appKey.ExpiresAt,
-                        appKey.CreatedAt
-                    };
-                }
 
                 case "revoke":
-                {
-                    var id = GetRequiredStringProperty(args, "id");
-                    var appKey = await _appKeyRepository.GetAppKeyByIdAsync(id);
-                    if (appKey == null) throw new KeyNotFoundException($"AppKey '{id}' not found.");
+                    {
+                        var id = GetRequiredStringProperty(args, "id");
+                        var appKey = await _appKeyRepository.GetAppKeyByIdAsync(id);
+                        if (appKey == null)
+                        {
+                            throw new KeyNotFoundException($"AppKey '{id}' not found.");
+                        }
 
-                    await _credentialService.RevokeCredentialAsync(id);
-                    return new { success = true, id };
-                }
+                        await _credentialService.RevokeCredentialAsync(id);
+                        return new { success = true, id };
+                    }
 
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_appkeys.");
@@ -559,78 +559,81 @@ namespace McpRouter.Core.Routing
             switch (action.ToLowerInvariant())
             {
                 case "list":
-                {
-                    using var conn = _dbFactory.CreateConnection();
-                    var keys = await conn.QueryAsync<dynamic>("SELECT Id, Name, Username, KeyPrefix, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys");
-
-                    return keys.Select(k =>
                     {
-                        var scopesJson = Convert.ToString(k.ScopesJson) ?? "[]";
-                        List<string> scopes;
-                        try { scopes = JsonSerializer.Deserialize<List<string>>(scopesJson) ?? new List<string>(); }
-                        catch { scopes = new List<string>(); }
+                        using var conn = _dbFactory.CreateConnection();
+                        var keys = await conn.QueryAsync<dynamic>("SELECT Id, Name, Username, KeyPrefix, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys");
+
+                        return keys.Select(k =>
+                        {
+                            var scopesJson = Convert.ToString(k.ScopesJson) ?? "[]";
+                            List<string> scopes;
+                            try { scopes = JsonSerializer.Deserialize<List<string>>(scopesJson) ?? new List<string>(); }
+                            catch { scopes = new List<string>(); }
+
+                            return new
+                            {
+                                Id = Convert.ToString(k.Id),
+                                ClientId = Convert.ToString(k.Username) ?? Convert.ToString(k.KeyPrefix),
+                                DisplayName = Convert.ToString(k.Name) ?? "App Key",
+                                Scopes = scopes,
+                                ExpiresAt = k.ExpiresAt != null ? (DateTime?)Convert.ToDateTime(k.ExpiresAt) : null,
+                                CreatedAt = k.CreatedAt != null ? (DateTime?)Convert.ToDateTime(k.CreatedAt) : null,
+                                IsDynamic = false
+                            };
+                        }).ToList();
+                    }
+
+                case "register":
+                    {
+                        var displayName = GetRequiredStringProperty(args, "displayName");
+                        var clientId = Guid.NewGuid().ToString("N");
+
+                        var scopes = new List<string>();
+                        if (args.TryGetProperty("scopes", out var scopesProp) && scopesProp.ValueKind == JsonValueKind.Array)
+                        {
+                            scopes = scopesProp.EnumerateArray().Select(s => s.GetString()).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s!).ToList();
+                        }
+
+                        int? expiresInDays = args.TryGetProperty("expiresInDays", out var expProp) && expProp.TryGetInt32(out var d) ? d : null;
+
+                        var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
+                            displayName,
+                            clientId,
+                            string.Empty,
+                            scopes,
+                            expiresInDays
+                        );
 
                         return new
                         {
-                            Id = Convert.ToString(k.Id),
-                            ClientId = Convert.ToString(k.Username) ?? Convert.ToString(k.KeyPrefix),
-                            DisplayName = Convert.ToString(k.Name) ?? "App Key",
-                            Scopes = scopes,
-                            ExpiresAt = k.ExpiresAt != null ? (DateTime?)Convert.ToDateTime(k.ExpiresAt) : null,
-                            CreatedAt = k.CreatedAt != null ? (DateTime?)Convert.ToDateTime(k.CreatedAt) : null,
-                            IsDynamic = false
+                            Id = appKey.Id,
+                            ClientId = clientId,
+                            ClientSecret = plaintextKey,
+                            DisplayName = displayName,
+                            ExpiresAt = appKey.ExpiresAt
                         };
-                    }).ToList();
-                }
-
-                case "register":
-                {
-                    var displayName = GetRequiredStringProperty(args, "displayName");
-                    var clientId = Guid.NewGuid().ToString("N");
-
-                    var scopes = new List<string>();
-                    if (args.TryGetProperty("scopes", out var scopesProp) && scopesProp.ValueKind == JsonValueKind.Array)
-                    {
-                        scopes = scopesProp.EnumerateArray().Select(s => s.GetString()).Where(s => !string.IsNullOrWhiteSpace(s)).Select(s => s!).ToList();
                     }
-
-                    int? expiresInDays = args.TryGetProperty("expiresInDays", out var expProp) && expProp.TryGetInt32(out var d) ? d : null;
-
-                    var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
-                        displayName,
-                        clientId,
-                        string.Empty,
-                        scopes,
-                        expiresInDays
-                    );
-
-                    return new
-                    {
-                        Id = appKey.Id,
-                        ClientId = clientId,
-                        ClientSecret = plaintextKey,
-                        DisplayName = displayName,
-                        ExpiresAt = appKey.ExpiresAt
-                    };
-                }
 
                 case "delete":
-                {
-                    var id = GetRequiredStringProperty(args, "id");
-                    var success = await _credentialService.RevokeCredentialAsync(id);
-                    if (!success)
                     {
-                        using var conn = _dbFactory.CreateConnection();
-                        var appKey = await conn.QueryFirstOrDefaultAsync<AppKey>("SELECT * FROM AppKeys WHERE Username = @Id OR Id = @Id;", new { Id = id });
-                        if (appKey != null)
+                        var id = GetRequiredStringProperty(args, "id");
+                        var success = await _credentialService.RevokeCredentialAsync(id);
+                        if (!success)
                         {
-                            success = await _credentialService.RevokeCredentialAsync(appKey.Id);
+                            using var conn = _dbFactory.CreateConnection();
+                            var appKey = await conn.QueryFirstOrDefaultAsync<AppKey>("SELECT * FROM AppKeys WHERE Username = @Id OR Id = @Id;", new { Id = id });
+                            if (appKey != null)
+                            {
+                                success = await _credentialService.RevokeCredentialAsync(appKey.Id);
+                            }
                         }
-                    }
-                    if (!success) throw new KeyNotFoundException($"Client '{id}' not found.");
+                        if (!success)
+                        {
+                            throw new KeyNotFoundException($"Client '{id}' not found.");
+                        }
 
-                    return new { success = true, id };
-                }
+                        return new { success = true, id };
+                    }
 
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_clients.");
@@ -645,56 +648,56 @@ namespace McpRouter.Core.Routing
             switch (action.ToLowerInvariant())
             {
                 case "list":
-                {
-                    using var conn = _dbFactory.CreateConnection();
-                    const string sql = "SELECT Id, TargetId, RequiredGroup, IsAllowed FROM AccessPolicies;";
-                    var policies = (await conn.QueryAsync<McpAccessPolicy>(sql)).ToList();
-                    return policies;
-                }
-
-                case "save":
-                {
-                    var targetId = GetRequiredStringProperty(args, "targetId");
-                    var requiredGroup = GetRequiredStringProperty(args, "requiredGroup");
-                    bool isAllowed = !args.TryGetProperty("isAllowed", out var allowProp) || allowProp.GetBoolean();
-
-                    if (targetId == "*" && !isAllowed)
                     {
-                        throw new InvalidOperationException("Cannot save a wildcard deny policy as it will cause a global lockout.");
+                        using var conn = _dbFactory.CreateConnection();
+                        const string sql = "SELECT Id, TargetId, RequiredGroup, IsAllowed FROM AccessPolicies;";
+                        var policies = (await conn.QueryAsync<McpAccessPolicy>(sql)).ToList();
+                        return policies;
                     }
 
-                    var id = args.TryGetProperty("id", out var idProp) && !string.IsNullOrWhiteSpace(idProp.GetString())
-                        ? idProp.GetString()!
-                        : Guid.NewGuid().ToString("N");
-
-                    var policy = new McpAccessPolicy
+                case "save":
                     {
-                        Id = id,
-                        TargetId = targetId,
-                        RequiredGroup = requiredGroup,
-                        IsAllowed = isAllowed
-                    };
+                        var targetId = GetRequiredStringProperty(args, "targetId");
+                        var requiredGroup = GetRequiredStringProperty(args, "requiredGroup");
+                        bool isAllowed = !args.TryGetProperty("isAllowed", out var allowProp) || allowProp.GetBoolean();
 
-                    using var conn = _dbFactory.CreateConnection();
-                    if (_dbFactory.ProviderName.Equals("sqlite", StringComparison.OrdinalIgnoreCase))
-                    {
-                        const string sql = @"
+                        if (targetId == "*" && !isAllowed)
+                        {
+                            throw new InvalidOperationException("Cannot save a wildcard deny policy as it will cause a global lockout.");
+                        }
+
+                        var id = args.TryGetProperty("id", out var idProp) && !string.IsNullOrWhiteSpace(idProp.GetString())
+                            ? idProp.GetString()!
+                            : Guid.NewGuid().ToString("N");
+
+                        var policy = new McpAccessPolicy
+                        {
+                            Id = id,
+                            TargetId = targetId,
+                            RequiredGroup = requiredGroup,
+                            IsAllowed = isAllowed
+                        };
+
+                        using var conn = _dbFactory.CreateConnection();
+                        if (_dbFactory.ProviderName.Equals("sqlite", StringComparison.OrdinalIgnoreCase))
+                        {
+                            const string sql = @"
                             INSERT INTO AccessPolicies (Id, TargetId, RequiredGroup, IsAllowed)
                             VALUES (@Id, @TargetId, @RequiredGroup, @IsAllowed)
                             ON CONFLICT(Id) DO UPDATE SET TargetId = @TargetId, RequiredGroup = @RequiredGroup, IsAllowed = @IsAllowed;";
-                        await conn.ExecuteAsync(sql, policy);
-                    }
-                    else if (_dbFactory.ProviderName.Equals("mysql", StringComparison.OrdinalIgnoreCase))
-                    {
-                        const string mysqlSql = @"
+                            await conn.ExecuteAsync(sql, policy);
+                        }
+                        else if (_dbFactory.ProviderName.Equals("mysql", StringComparison.OrdinalIgnoreCase))
+                        {
+                            const string mysqlSql = @"
                             INSERT INTO AccessPolicies (Id, TargetId, RequiredGroup, IsAllowed)
                             VALUES (@Id, @TargetId, @RequiredGroup, @IsAllowed)
                             ON DUPLICATE KEY UPDATE TargetId = VALUES(TargetId), RequiredGroup = VALUES(RequiredGroup), IsAllowed = VALUES(IsAllowed);";
-                        await conn.ExecuteAsync(mysqlSql, policy);
-                    }
-                    else
-                    {
-                        const string mssqlSql = @"
+                            await conn.ExecuteAsync(mysqlSql, policy);
+                        }
+                        else
+                        {
+                            const string mssqlSql = @"
                             MERGE AccessPolicies AS target
                             USING (SELECT @Id AS Id) AS source
                             ON (target.Id = source.Id)
@@ -703,19 +706,19 @@ namespace McpRouter.Core.Routing
                             WHEN NOT MATCHED THEN
                                 INSERT (Id, TargetId, RequiredGroup, IsAllowed)
                                 VALUES (@Id, @TargetId, @RequiredGroup, @IsAllowed);";
-                        await conn.ExecuteAsync(mssqlSql, policy);
+                            await conn.ExecuteAsync(mssqlSql, policy);
+                        }
+
+                        return new { success = true, policy };
                     }
 
-                    return new { success = true, policy };
-                }
-
                 case "delete":
-                {
-                    var id = GetRequiredStringProperty(args, "id");
-                    using var conn = _dbFactory.CreateConnection();
-                    await conn.ExecuteAsync("DELETE FROM AccessPolicies WHERE Id = @Id;", new { Id = id });
-                    return new { success = true, id };
-                }
+                    {
+                        var id = GetRequiredStringProperty(args, "id");
+                        using var conn = _dbFactory.CreateConnection();
+                        await conn.ExecuteAsync("DELETE FROM AccessPolicies WHERE Id = @Id;", new { Id = id });
+                        return new { success = true, id };
+                    }
 
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_policies.");
@@ -730,48 +733,48 @@ namespace McpRouter.Core.Routing
             switch (action.ToLowerInvariant())
             {
                 case "list":
-                {
-                    using var conn = _dbFactory.CreateConnection();
-                    const string sql = "SELECT Id, ExternalId, InternalGroup FROM GroupMappings;";
-                    var mappings = (await conn.QueryAsync<GroupMapping>(sql)).ToList();
-                    return mappings;
-                }
+                    {
+                        using var conn = _dbFactory.CreateConnection();
+                        const string sql = "SELECT Id, ExternalId, InternalGroup FROM GroupMappings;";
+                        var mappings = (await conn.QueryAsync<GroupMapping>(sql)).ToList();
+                        return mappings;
+                    }
 
                 case "save":
-                {
-                    var externalId = GetRequiredStringProperty(args, "externalId");
-                    var internalGroup = GetRequiredStringProperty(args, "internalGroup");
-                    var id = args.TryGetProperty("id", out var idProp) && !string.IsNullOrWhiteSpace(idProp.GetString())
-                        ? idProp.GetString()!
-                        : Guid.NewGuid().ToString("N");
-
-                    var mapping = new GroupMapping
                     {
-                        Id = id,
-                        ExternalId = externalId,
-                        InternalGroup = internalGroup
-                    };
+                        var externalId = GetRequiredStringProperty(args, "externalId");
+                        var internalGroup = GetRequiredStringProperty(args, "internalGroup");
+                        var id = args.TryGetProperty("id", out var idProp) && !string.IsNullOrWhiteSpace(idProp.GetString())
+                            ? idProp.GetString()!
+                            : Guid.NewGuid().ToString("N");
 
-                    using var conn = _dbFactory.CreateConnection();
-                    if (_dbFactory.ProviderName.Equals("sqlite", StringComparison.OrdinalIgnoreCase))
-                    {
-                        const string sql = @"
+                        var mapping = new GroupMapping
+                        {
+                            Id = id,
+                            ExternalId = externalId,
+                            InternalGroup = internalGroup
+                        };
+
+                        using var conn = _dbFactory.CreateConnection();
+                        if (_dbFactory.ProviderName.Equals("sqlite", StringComparison.OrdinalIgnoreCase))
+                        {
+                            const string sql = @"
                             INSERT INTO GroupMappings (Id, ExternalId, InternalGroup)
                             VALUES (@Id, @ExternalId, @InternalGroup)
                             ON CONFLICT(Id) DO UPDATE SET ExternalId = @ExternalId, InternalGroup = @InternalGroup;";
-                        await conn.ExecuteAsync(sql, mapping);
-                    }
-                    else if (_dbFactory.ProviderName.Equals("mysql", StringComparison.OrdinalIgnoreCase))
-                    {
-                        const string mysqlSql = @"
+                            await conn.ExecuteAsync(sql, mapping);
+                        }
+                        else if (_dbFactory.ProviderName.Equals("mysql", StringComparison.OrdinalIgnoreCase))
+                        {
+                            const string mysqlSql = @"
                             INSERT INTO GroupMappings (Id, ExternalId, InternalGroup)
                             VALUES (@Id, @ExternalId, @InternalGroup)
                             ON DUPLICATE KEY UPDATE ExternalId = VALUES(ExternalId), InternalGroup = VALUES(InternalGroup);";
-                        await conn.ExecuteAsync(mysqlSql, mapping);
-                    }
-                    else
-                    {
-                        const string mssqlSql = @"
+                            await conn.ExecuteAsync(mysqlSql, mapping);
+                        }
+                        else
+                        {
+                            const string mssqlSql = @"
                             MERGE GroupMappings AS target
                             USING (SELECT @Id AS Id) AS source
                             ON (target.Id = source.Id)
@@ -780,19 +783,19 @@ namespace McpRouter.Core.Routing
                             WHEN NOT MATCHED THEN
                                 INSERT (Id, ExternalId, InternalGroup)
                                 VALUES (@Id, @ExternalId, @InternalGroup);";
-                        await conn.ExecuteAsync(mssqlSql, mapping);
+                            await conn.ExecuteAsync(mssqlSql, mapping);
+                        }
+
+                        return new { success = true, mapping };
                     }
 
-                    return new { success = true, mapping };
-                }
-
                 case "delete":
-                {
-                    var id = GetRequiredStringProperty(args, "id");
-                    using var conn = _dbFactory.CreateConnection();
-                    await conn.ExecuteAsync("DELETE FROM GroupMappings WHERE Id = @Id;", new { Id = id });
-                    return new { success = true, id };
-                }
+                    {
+                        var id = GetRequiredStringProperty(args, "id");
+                        using var conn = _dbFactory.CreateConnection();
+                        await conn.ExecuteAsync("DELETE FROM GroupMappings WHERE Id = @Id;", new { Id = id });
+                        return new { success = true, id };
+                    }
 
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_group_mappings.");
@@ -807,182 +810,182 @@ namespace McpRouter.Core.Routing
             switch (action.ToLowerInvariant())
             {
                 case "list":
-                {
-                    var type = args.TryGetProperty("type", out var tProp) ? tProp.GetString() : "all";
+                    {
+                        var type = args.TryGetProperty("type", out var tProp) ? tProp.GetString() : "all";
 
-                    var secretProviders = (await _secretProviderRepository.GetSecretProvidersAsync()).ToList();
-                    foreach (var p in secretProviders)
-                    {
-                        p.ConfigJson = ProviderConfigSecurityHelper.RedactConfigJson(p.ConfigJson);
-                    }
+                        var secretProviders = (await _secretProviderRepository.GetSecretProvidersAsync()).ToList();
+                        foreach (var p in secretProviders)
+                        {
+                            p.ConfigJson = ProviderConfigSecurityHelper.RedactConfigJson(p.ConfigJson);
+                        }
 
-                    var authProviders = (await _authProviderRepository.GetAuthProvidersAsync()).ToList();
-                    foreach (var p in authProviders)
-                    {
-                        p.ConfigJson = ProviderConfigSecurityHelper.RedactConfigJson(p.ConfigJson);
-                    }
+                        var authProviders = (await _authProviderRepository.GetAuthProvidersAsync()).ToList();
+                        foreach (var p in authProviders)
+                        {
+                            p.ConfigJson = ProviderConfigSecurityHelper.RedactConfigJson(p.ConfigJson);
+                        }
 
-                    if (type?.Equals("secrets", StringComparison.OrdinalIgnoreCase) == true)
-                    {
-                        return secretProviders;
-                    }
-                    if (type?.Equals("auth", StringComparison.OrdinalIgnoreCase) == true)
-                    {
-                        return authProviders;
-                    }
+                        if (type?.Equals("secrets", StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            return secretProviders;
+                        }
+                        if (type?.Equals("auth", StringComparison.OrdinalIgnoreCase) == true)
+                        {
+                            return authProviders;
+                        }
 
-                    return new
-                    {
-                        secretProviders,
-                        authProviders
-                    };
-                }
+                        return new
+                        {
+                            secretProviders,
+                            authProviders
+                        };
+                    }
 
                 case "save_secret":
-                {
-                    var providerName = GetRequiredStringProperty(args, "providerName");
-                    var displayName = args.TryGetProperty("displayName", out var dProp) ? dProp.GetString() ?? providerName : providerName;
-                    var configJson = args.TryGetProperty("configJson", out var cProp) ? cProp.GetString() ?? "{}" : "{}";
-                    bool isEnabled = !args.TryGetProperty("isEnabled", out var eProp) || eProp.GetBoolean();
-
-                    var dto = new SecretProviderDto
                     {
-                        ProviderName = providerName,
-                        DisplayName = displayName,
-                        ConfigJson = configJson,
-                        IsEnabled = isEnabled
-                    };
+                        var providerName = GetRequiredStringProperty(args, "providerName");
+                        var displayName = args.TryGetProperty("displayName", out var dProp) ? dProp.GetString() ?? providerName : providerName;
+                        var configJson = args.TryGetProperty("configJson", out var cProp) ? cProp.GetString() ?? "{}" : "{}";
+                        bool isEnabled = !args.TryGetProperty("isEnabled", out var eProp) || eProp.GetBoolean();
 
-                    ProviderConfigSecurityHelper.ValidateSecretProviderConfig(dto);
+                        var dto = new SecretProviderDto
+                        {
+                            ProviderName = providerName,
+                            DisplayName = displayName,
+                            ConfigJson = configJson,
+                            IsEnabled = isEnabled
+                        };
 
-                    var existingProviders = await _secretProviderRepository.GetSecretProvidersAsync();
-                    var existing = existingProviders?.FirstOrDefault(p =>
-                        string.Equals(p.ProviderName, dto.ProviderName, StringComparison.OrdinalIgnoreCase));
-                    if (existing != null && !string.IsNullOrEmpty(existing.ConfigJson))
-                    {
-                        dto.ConfigJson = ProviderConfigSecurityHelper.MergeWithExistingConfig(dto.ConfigJson, existing.ConfigJson);
+                        ProviderConfigSecurityHelper.ValidateSecretProviderConfig(dto);
+
+                        var existingProviders = await _secretProviderRepository.GetSecretProvidersAsync();
+                        var existing = existingProviders?.FirstOrDefault(p =>
+                            string.Equals(p.ProviderName, dto.ProviderName, StringComparison.OrdinalIgnoreCase));
+                        if (existing != null && !string.IsNullOrEmpty(existing.ConfigJson))
+                        {
+                            dto.ConfigJson = ProviderConfigSecurityHelper.MergeWithExistingConfig(dto.ConfigJson, existing.ConfigJson);
+                        }
+
+                        await _secretProviderRepository.SaveSecretProviderAsync(dto);
+                        return new { success = true, providerName = dto.ProviderName };
                     }
-
-                    await _secretProviderRepository.SaveSecretProviderAsync(dto);
-                    return new { success = true, providerName = dto.ProviderName };
-                }
 
                 case "test_vault":
-                {
-                    var address = GetRequiredStringProperty(args, "address");
-                    var authMethodName = args.TryGetProperty("authMethod", out var amProp) ? amProp.GetString() : "token";
-                    var token = args.TryGetProperty("token", out var tokProp) ? tokProp.GetString() : null;
-                    var roleId = args.TryGetProperty("roleId", out var rProp) ? rProp.GetString() : null;
-                    var secretId = args.TryGetProperty("secretId", out var sProp) ? sProp.GetString() : null;
-
-                    try
                     {
-                        VaultSharp.V1.AuthMethods.IAuthMethodInfo authMethod;
-                        if (string.Equals(authMethodName, "approle", StringComparison.OrdinalIgnoreCase) ||
-                            (!string.IsNullOrEmpty(roleId) && !string.IsNullOrEmpty(secretId)))
-                        {
-                            if (string.IsNullOrEmpty(roleId) || string.IsNullOrEmpty(secretId))
-                            {
-                                throw new ArgumentException("Vault AppRole requires both RoleId and SecretId.");
-                            }
-                            authMethod = new VaultSharp.V1.AuthMethods.AppRole.AppRoleAuthMethodInfo(roleId, secretId);
-                        }
-                        else
-                        {
-                            if (string.IsNullOrEmpty(token))
-                            {
-                                throw new ArgumentException("Vault Token is required for token authentication.");
-                            }
-                            authMethod = new VaultSharp.V1.AuthMethods.Token.TokenAuthMethodInfo(token);
-                        }
+                        var address = GetRequiredStringProperty(args, "address");
+                        var authMethodName = args.TryGetProperty("authMethod", out var amProp) ? amProp.GetString() : "token";
+                        var token = args.TryGetProperty("token", out var tokProp) ? tokProp.GetString() : null;
+                        var roleId = args.TryGetProperty("roleId", out var rProp) ? rProp.GetString() : null;
+                        var secretId = args.TryGetProperty("secretId", out var sProp) ? sProp.GetString() : null;
 
-                        var settings = new VaultSharp.VaultClientSettings(address, authMethod);
-                        var client = new VaultSharp.VaultClient(settings);
-                        var tokenInfo = await client.V1.Auth.Token.LookupSelfAsync();
+                        try
+                        {
+                            VaultSharp.V1.AuthMethods.IAuthMethodInfo authMethod;
+                            if (string.Equals(authMethodName, "approle", StringComparison.OrdinalIgnoreCase) ||
+                                (!string.IsNullOrEmpty(roleId) && !string.IsNullOrEmpty(secretId)))
+                            {
+                                if (string.IsNullOrEmpty(roleId) || string.IsNullOrEmpty(secretId))
+                                {
+                                    throw new ArgumentException("Vault AppRole requires both RoleId and SecretId.");
+                                }
+                                authMethod = new VaultSharp.V1.AuthMethods.AppRole.AppRoleAuthMethodInfo(roleId, secretId);
+                            }
+                            else
+                            {
+                                if (string.IsNullOrEmpty(token))
+                                {
+                                    throw new ArgumentException("Vault Token is required for token authentication.");
+                                }
+                                authMethod = new VaultSharp.V1.AuthMethods.Token.TokenAuthMethodInfo(token);
+                            }
 
-                        return new { success = true, message = $"Vault authentication successful. Token TTL: {tokenInfo?.Data?.TimeToLive ?? 0}s." };
+                            var settings = new VaultSharp.VaultClientSettings(address, authMethod);
+                            var client = new VaultSharp.VaultClient(settings);
+                            var tokenInfo = await client.V1.Auth.Token.LookupSelfAsync();
+
+                            return new { success = true, message = $"Vault authentication successful. Token TTL: {tokenInfo?.Data?.TimeToLive ?? 0}s." };
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.LogError(ex, "Vault connection failed.");
+                            return new { success = false, error = "Vault connection failed." };
+                        }
                     }
-                    catch (Exception ex)
-                    {
-                        _logger?.LogError(ex, "Vault connection failed.");
-                return new { success = false, error = "Vault connection failed." };
-                    }
-                }
 
                 case "save_auth":
-                {
-                    var providerName = GetRequiredStringProperty(args, "providerName");
-                    var displayName = args.TryGetProperty("displayName", out var dProp) ? dProp.GetString() ?? providerName : providerName;
-                    var userHeader = args.TryGetProperty("userHeader", out var uProp) ? uProp.GetString() ?? "Remote-User" : "Remote-User";
-                    var groupsHeader = args.TryGetProperty("groupsHeader", out var gProp) ? gProp.GetString() ?? "Remote-Groups" : "Remote-Groups";
-                    var configJson = args.TryGetProperty("configJson", out var cProp) ? cProp.GetString() ?? "{}" : "{}";
-                    bool isEnabled = !args.TryGetProperty("isEnabled", out var eProp) || eProp.GetBoolean();
-
-                    var dto = new AuthProviderDto
                     {
-                        ProviderName = providerName,
-                        DisplayName = displayName,
-                        UserHeader = userHeader,
-                        GroupsHeader = groupsHeader,
-                        ConfigJson = configJson,
-                        IsEnabled = isEnabled
-                    };
+                        var providerName = GetRequiredStringProperty(args, "providerName");
+                        var displayName = args.TryGetProperty("displayName", out var dProp) ? dProp.GetString() ?? providerName : providerName;
+                        var userHeader = args.TryGetProperty("userHeader", out var uProp) ? uProp.GetString() ?? "Remote-User" : "Remote-User";
+                        var groupsHeader = args.TryGetProperty("groupsHeader", out var gProp) ? gProp.GetString() ?? "Remote-Groups" : "Remote-Groups";
+                        var configJson = args.TryGetProperty("configJson", out var cProp) ? cProp.GetString() ?? "{}" : "{}";
+                        bool isEnabled = !args.TryGetProperty("isEnabled", out var eProp) || eProp.GetBoolean();
 
-                    ProviderConfigSecurityHelper.ValidateAuthProviderConfig(dto);
-
-                    var existingProviders = await _authProviderRepository.GetAuthProvidersAsync();
-                    var existing = existingProviders?.FirstOrDefault(p =>
-                        string.Equals(p.ProviderName, dto.ProviderName, StringComparison.OrdinalIgnoreCase));
-                    if (existing != null && !string.IsNullOrEmpty(existing.ConfigJson))
-                    {
-                        dto.ConfigJson = ProviderConfigSecurityHelper.MergeWithExistingConfig(dto.ConfigJson, existing.ConfigJson);
-                    }
-
-                    await _authProviderRepository.SaveAuthProviderAsync(dto);
-
-                    if (_ldapService is LdapActiveDirectoryService ldapAd)
-                    {
-                        ldapAd.Reload();
-                    }
-
-                    return new { success = true, providerName = dto.ProviderName };
-                }
-
-                case "test_ldap":
-                {
-                    var server = GetRequiredStringProperty(args, "server");
-                    int port = args.TryGetProperty("port", out var pProp) && pProp.TryGetInt32(out var portVal) ? portVal : 636;
-                    bool useSsl = args.TryGetProperty("useSsl", out var sslProp) ? sslProp.GetBoolean() : (port == 636);
-                    var bindDn = args.TryGetProperty("bindDn", out var bdProp) ? bdProp.GetString() : null;
-                    var bindPassword = args.TryGetProperty("bindPassword", out var bpProp) ? bpProp.GetString() : null;
-
-                    if (port == 389 && !useSsl)
-                    {
-                        throw new ArgumentException("LDAP over plaintext (port 389) is disabled for security. Use LDAPS port 636 or set useSsl=true.");
-                    }
-
-                    try
-                    {
-                        var identifier = new System.DirectoryServices.Protocols.LdapDirectoryIdentifier(server, port);
-                        System.Net.NetworkCredential? credential = null;
-                        if (!string.IsNullOrEmpty(bindDn) && !string.IsNullOrEmpty(bindPassword))
+                        var dto = new AuthProviderDto
                         {
-                            credential = new System.Net.NetworkCredential(bindDn, bindPassword);
+                            ProviderName = providerName,
+                            DisplayName = displayName,
+                            UserHeader = userHeader,
+                            GroupsHeader = groupsHeader,
+                            ConfigJson = configJson,
+                            IsEnabled = isEnabled
+                        };
+
+                        ProviderConfigSecurityHelper.ValidateAuthProviderConfig(dto);
+
+                        var existingProviders = await _authProviderRepository.GetAuthProvidersAsync();
+                        var existing = existingProviders?.FirstOrDefault(p =>
+                            string.Equals(p.ProviderName, dto.ProviderName, StringComparison.OrdinalIgnoreCase));
+                        if (existing != null && !string.IsNullOrEmpty(existing.ConfigJson))
+                        {
+                            dto.ConfigJson = ProviderConfigSecurityHelper.MergeWithExistingConfig(dto.ConfigJson, existing.ConfigJson);
                         }
 
-                        using var connection = new System.DirectoryServices.Protocols.LdapConnection(identifier, credential, System.DirectoryServices.Protocols.AuthType.Basic);
-                        connection.SessionOptions.ProtocolVersion = 3;
-                        connection.SessionOptions.SecureSocketLayer = useSsl;
-                        connection.Bind();
+                        await _authProviderRepository.SaveAuthProviderAsync(dto);
 
-                        return new { success = true, message = $"LDAP bind successful to '{server}:{port}'." };
+                        if (_ldapService is LdapActiveDirectoryService ldapAd)
+                        {
+                            ldapAd.Reload();
+                        }
+
+                        return new { success = true, providerName = dto.ProviderName };
                     }
-                    catch (Exception ex)
+
+                case "test_ldap":
                     {
-                        _logger?.LogError(ex, "LDAP connection/bind failed.");
-                return new { success = false, error = "LDAP connection/bind failed." };
+                        var server = GetRequiredStringProperty(args, "server");
+                        int port = args.TryGetProperty("port", out var pProp) && pProp.TryGetInt32(out var portVal) ? portVal : 636;
+                        bool useSsl = args.TryGetProperty("useSsl", out var sslProp) ? sslProp.GetBoolean() : (port == 636);
+                        var bindDn = args.TryGetProperty("bindDn", out var bdProp) ? bdProp.GetString() : null;
+                        var bindPassword = args.TryGetProperty("bindPassword", out var bpProp) ? bpProp.GetString() : null;
+
+                        if (port == 389 && !useSsl)
+                        {
+                            throw new ArgumentException("LDAP over plaintext (port 389) is disabled for security. Use LDAPS port 636 or set useSsl=true.");
+                        }
+
+                        try
+                        {
+                            var identifier = new System.DirectoryServices.Protocols.LdapDirectoryIdentifier(server, port);
+                            System.Net.NetworkCredential? credential = null;
+                            if (!string.IsNullOrEmpty(bindDn) && !string.IsNullOrEmpty(bindPassword))
+                            {
+                                credential = new System.Net.NetworkCredential(bindDn, bindPassword);
+                            }
+
+                            using var connection = new System.DirectoryServices.Protocols.LdapConnection(identifier, credential, System.DirectoryServices.Protocols.AuthType.Basic);
+                            connection.SessionOptions.ProtocolVersion = 3;
+                            connection.SessionOptions.SecureSocketLayer = useSsl;
+                            connection.Bind();
+
+                            return new { success = true, message = $"LDAP bind successful to '{server}:{port}'." };
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger?.LogError(ex, "LDAP connection/bind failed.");
+                            return new { success = false, error = "LDAP connection/bind failed." };
+                        }
                     }
-                }
 
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_providers.");
@@ -997,37 +1000,79 @@ namespace McpRouter.Core.Routing
             switch (action.ToLowerInvariant())
             {
                 case "get":
-                {
-                    var settings = _dynamicEmbeddingService.GetSettings();
-                    return Task.FromResult<object>(settings);
-                }
+                    {
+                        var settings = _dynamicEmbeddingService.GetSettings();
+                        return Task.FromResult<object>(settings);
+                    }
 
                 case "update":
-                {
-                    var current = _dynamicEmbeddingService.GetSettings();
-
-                    if (args.TryGetProperty("settings", out var settingsProp) && settingsProp.ValueKind == JsonValueKind.Object)
                     {
-                        var parsed = JsonSerializer.Deserialize<RouterSettings>(settingsProp.GetRawText());
-                        if (parsed != null) current = parsed;
-                    }
-                    else
-                    {
-                        if (args.TryGetProperty("dashboardTitle", out var dtProp)) current.DashboardTitle = dtProp.GetString() ?? current.DashboardTitle;
-                        if (args.TryGetProperty("dashboardIcon", out var diProp)) current.DashboardIcon = diProp.GetString() ?? current.DashboardIcon;
-                        if (args.TryGetProperty("embeddingProvider", out var epProp)) current.EmbeddingProvider = epProp.GetString() ?? current.EmbeddingProvider;
-                        if (args.TryGetProperty("embeddingApiUrl", out var eauProp)) current.EmbeddingApiUrl = eauProp.GetString() ?? current.EmbeddingApiUrl;
-                        if (args.TryGetProperty("embeddingApiKey", out var eakProp)) current.EmbeddingApiKey = eakProp.GetString() ?? current.EmbeddingApiKey;
-                        if (args.TryGetProperty("embeddingApiModel", out var eamProp)) current.EmbeddingApiModel = eamProp.GetString() ?? current.EmbeddingApiModel;
-                        if (args.TryGetProperty("embeddingModelDir", out var emdProp)) current.EmbeddingModelDir = emdProp.GetString() ?? current.EmbeddingModelDir;
-                        if (args.TryGetProperty("globalMaxKeys", out var gmkProp) && gmkProp.TryGetInt32(out var gmk)) current.GlobalMaxKeys = gmk;
-                        if (args.TryGetProperty("userMaxKeys", out var umkProp) && umkProp.TryGetInt32(out var umk)) current.UserMaxKeys = umk;
-                        if (args.TryGetProperty("allowOpenClientRegistration", out var aocrProp)) current.AllowOpenClientRegistration = aocrProp.GetBoolean();
-                    }
+                        var current = _dynamicEmbeddingService.GetSettings();
 
-                    _dynamicEmbeddingService.SaveSettings(current);
-                    return Task.FromResult<object>(new { success = true, settings = _dynamicEmbeddingService.GetSettings() });
-                }
+                        if (args.TryGetProperty("settings", out var settingsProp) && settingsProp.ValueKind == JsonValueKind.Object)
+                        {
+                            var parsed = JsonSerializer.Deserialize<RouterSettings>(settingsProp.GetRawText());
+                            if (parsed != null)
+                            {
+                                current = parsed;
+                            }
+                        }
+                        else
+                        {
+                            if (args.TryGetProperty("dashboardTitle", out var dtProp))
+                            {
+                                current.DashboardTitle = dtProp.GetString() ?? current.DashboardTitle;
+                            }
+
+                            if (args.TryGetProperty("dashboardIcon", out var diProp))
+                            {
+                                current.DashboardIcon = diProp.GetString() ?? current.DashboardIcon;
+                            }
+
+                            if (args.TryGetProperty("embeddingProvider", out var epProp))
+                            {
+                                current.EmbeddingProvider = epProp.GetString() ?? current.EmbeddingProvider;
+                            }
+
+                            if (args.TryGetProperty("embeddingApiUrl", out var eauProp))
+                            {
+                                current.EmbeddingApiUrl = eauProp.GetString() ?? current.EmbeddingApiUrl;
+                            }
+
+                            if (args.TryGetProperty("embeddingApiKey", out var eakProp))
+                            {
+                                current.EmbeddingApiKey = eakProp.GetString() ?? current.EmbeddingApiKey;
+                            }
+
+                            if (args.TryGetProperty("embeddingApiModel", out var eamProp))
+                            {
+                                current.EmbeddingApiModel = eamProp.GetString() ?? current.EmbeddingApiModel;
+                            }
+
+                            if (args.TryGetProperty("embeddingModelDir", out var emdProp))
+                            {
+                                current.EmbeddingModelDir = emdProp.GetString() ?? current.EmbeddingModelDir;
+                            }
+
+                            if (args.TryGetProperty("globalMaxKeys", out var gmkProp) && gmkProp.TryGetInt32(out var gmk))
+                            {
+                                current.GlobalMaxKeys = gmk;
+                            }
+
+                            if (args.TryGetProperty("userMaxKeys", out var umkProp) && umkProp.TryGetInt32(out var umk))
+                            {
+                                current.UserMaxKeys = umk;
+                            }
+
+                            if (args.TryGetProperty("allowOpenClientRegistration", out var aocrProp))
+                            {
+                                current.AllowOpenClientRegistration = aocrProp.GetBoolean();
+                            }
+                        }
+
+                        _dynamicEmbeddingService.SaveSettings(current);
+                        return Task.FromResult<object>(new { success = true, settings = _dynamicEmbeddingService.GetSettings() });
+                    }
 
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_settings.");
@@ -1042,104 +1087,131 @@ namespace McpRouter.Core.Routing
             switch (action.ToLowerInvariant())
             {
                 case "list":
-                {
-                    var typeFilter = args.TryGetProperty("type", out var tProp) ? tProp.GetString() : "all";
-                    var types = typeFilter?.ToLowerInvariant() switch
                     {
-                        "prompts" => new[] { "prompts" },
-                        "resources" => new[] { "resources" },
-                        _ => new[] { "prompts", "resources" }
-                    };
-
-                    var result = new List<object>();
-                    foreach (var type in types)
-                    {
-                        var dir = GetCustomFilesDirectory(type);
-                        if (Directory.Exists(dir))
+                        var typeFilter = args.TryGetProperty("type", out var tProp) ? tProp.GetString() : "all";
+                        var types = typeFilter?.ToLowerInvariant() switch
                         {
-                            foreach (var file in Directory.GetFiles(dir))
+                            "prompts" => new[] { "prompts" },
+                            "resources" => new[] { "resources" },
+                            _ => new[] { "prompts", "resources" }
+                        };
+
+                        var result = new List<object>();
+                        foreach (var type in types)
+                        {
+                            var dir = GetCustomFilesDirectory(type);
+                            if (Directory.Exists(dir))
                             {
-                                var info = new FileInfo(file);
-                                result.Add(new
+                                foreach (var file in Directory.GetFiles(dir))
                                 {
-                                    type,
-                                    name = info.Name,
-                                    sizeBytes = info.Length,
-                                    lastModified = info.LastWriteTimeUtc
-                                });
+                                    var info = new FileInfo(file);
+                                    result.Add(new
+                                    {
+                                        type,
+                                        name = info.Name,
+                                        sizeBytes = info.Length,
+                                        lastModified = info.LastWriteTimeUtc
+                                    });
+                                }
                             }
                         }
+                        return result;
                     }
-                    return result;
-                }
 
                 case "get":
-                {
-                    var type = GetRequiredStringProperty(args, "type");
-                    var name = GetRequiredStringProperty(args, "name");
+                    {
+                        var type = GetRequiredStringProperty(args, "type");
+                        var name = GetRequiredStringProperty(args, "name");
 
-                    if (type != "prompts" && type != "resources") throw new ArgumentException("Type must be 'prompts' or 'resources'.");
-                    var cleanName = SanitizeFileName(name);
-                    if (string.IsNullOrEmpty(cleanName)) throw new ArgumentException("Invalid file name.");
+                        if (type != "prompts" && type != "resources")
+                        {
+                            throw new ArgumentException("Type must be 'prompts' or 'resources'.");
+                        }
 
-                    var dir = GetCustomFilesDirectory(type);
-                    var filePath = Path.Combine(dir, cleanName);
-                    if (!File.Exists(filePath)) throw new FileNotFoundException($"Custom file '{cleanName}' not found.");
+                        var cleanName = SanitizeFileName(name);
+                        if (string.IsNullOrEmpty(cleanName))
+                        {
+                            throw new ArgumentException("Invalid file name.");
+                        }
 
-                    var text = await File.ReadAllTextAsync(filePath);
-                    return new { type, name = cleanName, content = text };
-                }
+                        var dir = GetCustomFilesDirectory(type);
+                        var filePath = Path.Combine(dir, cleanName);
+                        if (!File.Exists(filePath))
+                        {
+                            throw new FileNotFoundException($"Custom file '{cleanName}' not found.");
+                        }
+
+                        var text = await File.ReadAllTextAsync(filePath);
+                        return new { type, name = cleanName, content = text };
+                    }
 
                 case "save":
-                {
-                    var type = GetRequiredStringProperty(args, "type");
-                    var name = GetRequiredStringProperty(args, "name");
-                    var content = GetRequiredStringProperty(args, "content");
-
-                    if (type != "prompts" && type != "resources") throw new ArgumentException("Type must be 'prompts' or 'resources'.");
-                    var cleanName = SanitizeFileName(name);
-                    if (string.IsNullOrEmpty(cleanName)) throw new ArgumentException("Invalid file name.");
-
-                    if (type == "prompts" && !cleanName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
                     {
-                        cleanName += ".json";
-                    }
+                        var type = GetRequiredStringProperty(args, "type");
+                        var name = GetRequiredStringProperty(args, "name");
+                        var content = GetRequiredStringProperty(args, "content");
 
-                    if (type == "prompts")
-                    {
-                        try
+                        if (type != "prompts" && type != "resources")
                         {
-                            using var doc = JsonDocument.Parse(content);
+                            throw new ArgumentException("Type must be 'prompts' or 'resources'.");
                         }
-                        catch (Exception ex)
+
+                        var cleanName = SanitizeFileName(name);
+                        if (string.IsNullOrEmpty(cleanName))
                         {
-                            throw new ArgumentException($"Invalid JSON format for prompt template: {ex.Message}");
+                            throw new ArgumentException("Invalid file name.");
                         }
+
+                        if (type == "prompts" && !cleanName.EndsWith(".json", StringComparison.OrdinalIgnoreCase))
+                        {
+                            cleanName += ".json";
+                        }
+
+                        if (type == "prompts")
+                        {
+                            try
+                            {
+                                using var doc = JsonDocument.Parse(content);
+                            }
+                            catch (Exception ex)
+                            {
+                                throw new ArgumentException($"Invalid JSON format for prompt template: {ex.Message}");
+                            }
+                        }
+
+                        var dir = GetCustomFilesDirectory(type);
+                        var filePath = Path.Combine(dir, cleanName);
+                        await File.WriteAllTextAsync(filePath, content);
+
+                        return new { success = true, type, name = cleanName };
                     }
-
-                    var dir = GetCustomFilesDirectory(type);
-                    var filePath = Path.Combine(dir, cleanName);
-                    await File.WriteAllTextAsync(filePath, content);
-
-                    return new { success = true, type, name = cleanName };
-                }
 
                 case "delete":
-                {
-                    var type = GetRequiredStringProperty(args, "type");
-                    var name = GetRequiredStringProperty(args, "name");
+                    {
+                        var type = GetRequiredStringProperty(args, "type");
+                        var name = GetRequiredStringProperty(args, "name");
 
-                    if (type != "prompts" && type != "resources") throw new ArgumentException("Type must be 'prompts' or 'resources'.");
-                    var cleanName = SanitizeFileName(name);
-                    if (string.IsNullOrEmpty(cleanName)) throw new ArgumentException("Invalid file name.");
+                        if (type != "prompts" && type != "resources")
+                        {
+                            throw new ArgumentException("Type must be 'prompts' or 'resources'.");
+                        }
 
-                    var dir = GetCustomFilesDirectory(type);
-                    var filePath = Path.Combine(dir, cleanName);
-                    if (!File.Exists(filePath)) throw new FileNotFoundException($"Custom file '{cleanName}' not found.");
+                        var cleanName = SanitizeFileName(name);
+                        if (string.IsNullOrEmpty(cleanName))
+                        {
+                            throw new ArgumentException("Invalid file name.");
+                        }
 
-                    File.Delete(filePath);
-                    return new { success = true, type, name = cleanName };
-                }
+                        var dir = GetCustomFilesDirectory(type);
+                        var filePath = Path.Combine(dir, cleanName);
+                        if (!File.Exists(filePath))
+                        {
+                            throw new FileNotFoundException($"Custom file '{cleanName}' not found.");
+                        }
+
+                        File.Delete(filePath);
+                        return new { success = true, type, name = cleanName };
+                    }
 
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_custom_files.");
@@ -1154,85 +1226,85 @@ namespace McpRouter.Core.Routing
             switch (action.ToLowerInvariant())
             {
                 case "diagnostics":
-                {
-                    var proc = Process.GetCurrentProcess();
-                    int fdCount = 0;
-
-                    if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
                     {
-                        try
+                        var proc = Process.GetCurrentProcess();
+                        int fdCount = 0;
+
+                        if (System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux))
                         {
-                            fdCount = Directory.GetFiles($"/proc/{proc.Id}/fd").Length;
+                            try
+                            {
+                                fdCount = Directory.GetFiles($"/proc/{proc.Id}/fd").Length;
+                            }
+                            catch { }
                         }
-                        catch { }
-                    }
 
-                    return new
-                    {
-                        activeSessions = _sessionManager.ActiveSessionsCount,
-                        workingSet64 = proc.WorkingSet64,
-                        handleCount = fdCount > 0 ? fdCount : proc.HandleCount,
-                        machineName = Environment.MachineName,
-                        osVersion = Environment.OSVersion.ToString(),
-                        processUptime = (DateTime.UtcNow - proc.StartTime.ToUniversalTime()).ToString(@"d\.hh\:mm\:ss")
-                    };
-                }
+                        return new
+                        {
+                            activeSessions = _sessionManager.ActiveSessionsCount,
+                            workingSet64 = proc.WorkingSet64,
+                            handleCount = fdCount > 0 ? fdCount : proc.HandleCount,
+                            machineName = Environment.MachineName,
+                            osVersion = Environment.OSVersion.ToString(),
+                            processUptime = (DateTime.UtcNow - proc.StartTime.ToUniversalTime()).ToString(@"d\.hh\:mm\:ss")
+                        };
+                    }
 
                 case "get_logs":
-                {
-                    int limit = args.TryGetProperty("limit", out var lProp) && lProp.TryGetInt32(out var l) ? l : 100;
-                    var logs = LogBuffer.GetLogs();
-                    if (limit > 0 && logs.Count > limit)
                     {
-                        logs = logs.TakeLast(limit).ToList();
+                        int limit = args.TryGetProperty("limit", out var lProp) && lProp.TryGetInt32(out var l) ? l : 100;
+                        var logs = LogBuffer.GetLogs();
+                        if (limit > 0 && logs.Count > limit)
+                        {
+                            logs = logs.TakeLast(limit).ToList();
+                        }
+                        return logs;
                     }
-                    return logs;
-                }
 
                 case "clear_logs":
-                {
-                    LogBuffer.Clear();
-                    return new { success = true, message = "In-memory log buffer cleared." };
-                }
-
-                case "query_audit":
-                {
-                    string? user = args.TryGetProperty("user", out var uProp) ? uProp.GetString() : null;
-                    string? server = args.TryGetProperty("server", out var sProp) ? sProp.GetString() : null;
-                    DateTime? since = null;
-                    if (args.TryGetProperty("since", out var sincProp) && DateTime.TryParse(sincProp.GetString(), out var parsedDate))
                     {
-                        since = parsedDate;
+                        LogBuffer.Clear();
+                        return new { success = true, message = "In-memory log buffer cleared." };
                     }
 
-                    int take = args.TryGetProperty("take", out var tProp) && tProp.TryGetInt32(out var tVal) ? tVal : 50;
-                    int skip = args.TryGetProperty("skip", out var skProp) && skProp.TryGetInt32(out var skVal) ? skVal : 0;
-                    take = Math.Clamp(take, 1, 1000);
-
-                    using var conn = _dbFactory.CreateConnection();
-                    string sql;
-                    if (_dbFactory.ProviderName.Equals("mssql", StringComparison.OrdinalIgnoreCase))
+                case "query_audit":
                     {
-                        sql = @"SELECT RequestId, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage, Timestamp
+                        string? user = args.TryGetProperty("user", out var uProp) ? uProp.GetString() : null;
+                        string? server = args.TryGetProperty("server", out var sProp) ? sProp.GetString() : null;
+                        DateTime? since = null;
+                        if (args.TryGetProperty("since", out var sincProp) && DateTime.TryParse(sincProp.GetString(), out var parsedDate))
+                        {
+                            since = parsedDate;
+                        }
+
+                        int take = args.TryGetProperty("take", out var tProp) && tProp.TryGetInt32(out var tVal) ? tVal : 50;
+                        int skip = args.TryGetProperty("skip", out var skProp) && skProp.TryGetInt32(out var skVal) ? skVal : 0;
+                        take = Math.Clamp(take, 1, 1000);
+
+                        using var conn = _dbFactory.CreateConnection();
+                        string sql;
+                        if (_dbFactory.ProviderName.Equals("mssql", StringComparison.OrdinalIgnoreCase))
+                        {
+                            sql = @"SELECT RequestId, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage, Timestamp
                                 FROM AuditLogs
                                 WHERE (@user   IS NULL OR UserPrincipalName = @user)
                                   AND (@server IS NULL OR ServerCodeName = @server)
                                   AND (@since  IS NULL OR Timestamp >= @since)
                                 ORDER BY Timestamp DESC OFFSET @skip ROWS FETCH NEXT @take ROWS ONLY;";
-                    }
-                    else
-                    {
-                        sql = @"SELECT RequestId, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage, Timestamp
+                        }
+                        else
+                        {
+                            sql = @"SELECT RequestId, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, StatusCode, ExecutionTimeMs, ErrorMessage, Timestamp
                                 FROM AuditLogs
                                 WHERE (@user   IS NULL OR UserPrincipalName = @user)
                                   AND (@server IS NULL OR ServerCodeName = @server)
                                   AND (@since  IS NULL OR Timestamp >= @since)
                                 ORDER BY Timestamp DESC LIMIT @take OFFSET @skip;";
-                    }
+                        }
 
-                    var rows = (await conn.QueryAsync(sql, new { user, server, since, take, skip })).ToList();
-                    return rows;
-                }
+                        var rows = (await conn.QueryAsync(sql, new { user, server, since, take, skip })).ToList();
+                        return rows;
+                    }
 
                 default:
                     throw new ArgumentException($"Invalid action '{action}' for manage_system.");
@@ -1246,7 +1318,10 @@ namespace McpRouter.Core.Routing
             var toolName = GetRequiredStringProperty(args, "toolName");
 
             var server = await _serverRepository.GetServerByIdAsync(serverId);
-            if (server == null) throw new KeyNotFoundException($"Server '{serverId}' not found.");
+            if (server == null)
+            {
+                throw new KeyNotFoundException($"Server '{serverId}' not found.");
+            }
 
             using var conn = new BackendConnection(server, _httpClient, _logger ?? (ILogger)NullLogger.Instance, null);
             if (server.Type != "http" && server.Type != "streamable")
@@ -1332,7 +1407,10 @@ namespace McpRouter.Core.Routing
             if (element.ValueKind == JsonValueKind.Object && element.TryGetProperty(propName, out var prop))
             {
                 var val = prop.GetString();
-                if (!string.IsNullOrWhiteSpace(val)) return val;
+                if (!string.IsNullOrWhiteSpace(val))
+                {
+                    return val;
+                }
             }
             throw new ArgumentException($"Missing required argument: '{propName}'");
         }
@@ -1343,21 +1421,71 @@ namespace McpRouter.Core.Routing
             if (args.TryGetProperty("server", out var sProp) && sProp.ValueKind == JsonValueKind.Object)
             {
                 var deserialized = JsonSerializer.Deserialize<McpServer>(sProp.GetRawText());
-                if (deserialized != null) server = deserialized;
+                if (deserialized != null)
+                {
+                    server = deserialized;
+                }
             }
 
-            if (args.TryGetProperty("id", out var idProp) && !string.IsNullOrWhiteSpace(idProp.GetString())) server.Id = idProp.GetString()!;
-            if (args.TryGetProperty("displayName", out var dnProp) && !string.IsNullOrWhiteSpace(dnProp.GetString())) server.DisplayName = dnProp.GetString()!;
-            if (args.TryGetProperty("url", out var urlProp) && !string.IsNullOrWhiteSpace(urlProp.GetString())) server.Url = urlProp.GetString()!;
-            if (args.TryGetProperty("type", out var typeProp) && !string.IsNullOrWhiteSpace(typeProp.GetString())) server.Type = typeProp.GetString()!;
-            if (args.TryGetProperty("enabled", out var enProp)) server.Enabled = enProp.GetBoolean();
-            if (args.TryGetProperty("hidden", out var hidProp)) server.Hidden = hidProp.GetBoolean();
-            if (args.TryGetProperty("secretProvider", out var spProp)) server.SecretProvider = spProp.GetString() ?? "None";
-            if (args.TryGetProperty("secretItemKey", out var sikProp)) server.SecretItemKey = sikProp.GetString();
-            if (args.TryGetProperty("authShape", out var asProp)) server.AuthShape = asProp.GetString() ?? "bearer";
-            if (args.TryGetProperty("customHeaderName", out var chnProp)) server.CustomHeaderName = chnProp.GetString();
-            if (args.TryGetProperty("apiKey", out var akProp)) server.ApiKey = akProp.GetString();
-            if (args.TryGetProperty("headersJson", out var hjProp)) server.HeadersJson = hjProp.GetString();
+            if (args.TryGetProperty("id", out var idProp) && !string.IsNullOrWhiteSpace(idProp.GetString()))
+            {
+                server.Id = idProp.GetString()!;
+            }
+
+            if (args.TryGetProperty("displayName", out var dnProp) && !string.IsNullOrWhiteSpace(dnProp.GetString()))
+            {
+                server.DisplayName = dnProp.GetString()!;
+            }
+
+            if (args.TryGetProperty("url", out var urlProp) && !string.IsNullOrWhiteSpace(urlProp.GetString()))
+            {
+                server.Url = urlProp.GetString()!;
+            }
+
+            if (args.TryGetProperty("type", out var typeProp) && !string.IsNullOrWhiteSpace(typeProp.GetString()))
+            {
+                server.Type = typeProp.GetString()!;
+            }
+
+            if (args.TryGetProperty("enabled", out var enProp))
+            {
+                server.Enabled = enProp.GetBoolean();
+            }
+
+            if (args.TryGetProperty("hidden", out var hidProp))
+            {
+                server.Hidden = hidProp.GetBoolean();
+            }
+
+            if (args.TryGetProperty("secretProvider", out var spProp))
+            {
+                server.SecretProvider = spProp.GetString() ?? "None";
+            }
+
+            if (args.TryGetProperty("secretItemKey", out var sikProp))
+            {
+                server.SecretItemKey = sikProp.GetString();
+            }
+
+            if (args.TryGetProperty("authShape", out var asProp))
+            {
+                server.AuthShape = asProp.GetString() ?? "bearer";
+            }
+
+            if (args.TryGetProperty("customHeaderName", out var chnProp))
+            {
+                server.CustomHeaderName = chnProp.GetString();
+            }
+
+            if (args.TryGetProperty("apiKey", out var akProp))
+            {
+                server.ApiKey = akProp.GetString();
+            }
+
+            if (args.TryGetProperty("headersJson", out var hjProp))
+            {
+                server.HeadersJson = hjProp.GetString();
+            }
 
             if (args.TryGetProperty("categories", out var catProp) && catProp.ValueKind == JsonValueKind.Array)
             {
@@ -1389,17 +1517,60 @@ namespace McpRouter.Core.Routing
                 }
             }
 
-            if (args.TryGetProperty("displayName", out var dnProp) && !string.IsNullOrWhiteSpace(dnProp.GetString())) server.DisplayName = dnProp.GetString()!;
-            if (args.TryGetProperty("url", out var urlProp) && !string.IsNullOrWhiteSpace(urlProp.GetString())) server.Url = urlProp.GetString()!;
-            if (args.TryGetProperty("type", out var typeProp) && !string.IsNullOrWhiteSpace(typeProp.GetString())) server.Type = typeProp.GetString()!;
-            if (args.TryGetProperty("enabled", out var enProp)) server.Enabled = enProp.GetBoolean();
-            if (args.TryGetProperty("hidden", out var hidProp)) server.Hidden = hidProp.GetBoolean();
-            if (args.TryGetProperty("secretProvider", out var spProp)) server.SecretProvider = spProp.GetString() ?? server.SecretProvider;
-            if (args.TryGetProperty("secretItemKey", out var sikProp)) server.SecretItemKey = sikProp.GetString();
-            if (args.TryGetProperty("authShape", out var asProp)) server.AuthShape = asProp.GetString() ?? server.AuthShape;
-            if (args.TryGetProperty("customHeaderName", out var chnProp)) server.CustomHeaderName = chnProp.GetString();
-            if (args.TryGetProperty("apiKey", out var akProp)) server.ApiKey = akProp.GetString();
-            if (args.TryGetProperty("headersJson", out var hjProp)) server.HeadersJson = hjProp.GetString();
+            if (args.TryGetProperty("displayName", out var dnProp) && !string.IsNullOrWhiteSpace(dnProp.GetString()))
+            {
+                server.DisplayName = dnProp.GetString()!;
+            }
+
+            if (args.TryGetProperty("url", out var urlProp) && !string.IsNullOrWhiteSpace(urlProp.GetString()))
+            {
+                server.Url = urlProp.GetString()!;
+            }
+
+            if (args.TryGetProperty("type", out var typeProp) && !string.IsNullOrWhiteSpace(typeProp.GetString()))
+            {
+                server.Type = typeProp.GetString()!;
+            }
+
+            if (args.TryGetProperty("enabled", out var enProp))
+            {
+                server.Enabled = enProp.GetBoolean();
+            }
+
+            if (args.TryGetProperty("hidden", out var hidProp))
+            {
+                server.Hidden = hidProp.GetBoolean();
+            }
+
+            if (args.TryGetProperty("secretProvider", out var spProp))
+            {
+                server.SecretProvider = spProp.GetString() ?? server.SecretProvider;
+            }
+
+            if (args.TryGetProperty("secretItemKey", out var sikProp))
+            {
+                server.SecretItemKey = sikProp.GetString();
+            }
+
+            if (args.TryGetProperty("authShape", out var asProp))
+            {
+                server.AuthShape = asProp.GetString() ?? server.AuthShape;
+            }
+
+            if (args.TryGetProperty("customHeaderName", out var chnProp))
+            {
+                server.CustomHeaderName = chnProp.GetString();
+            }
+
+            if (args.TryGetProperty("apiKey", out var akProp))
+            {
+                server.ApiKey = akProp.GetString();
+            }
+
+            if (args.TryGetProperty("headersJson", out var hjProp))
+            {
+                server.HeadersJson = hjProp.GetString();
+            }
 
             if (args.TryGetProperty("categories", out var catProp) && catProp.ValueKind == JsonValueKind.Array)
             {

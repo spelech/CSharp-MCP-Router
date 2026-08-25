@@ -1,13 +1,7 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using McpRouter.Infrastructure.Identity;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
 
 namespace McpRouter.Components.Authorization
 {
@@ -21,7 +15,10 @@ namespace McpRouter.Components.Authorization
         /// </summary>
         public static bool IsBlockedIp(IPAddress ip, string[]? allowedIpRanges)
         {
-            if (ip == null) return true;
+            if (ip == null)
+            {
+                return true;
+            }
 
             // Unmap IPv4-mapped IPv6 address to IPv4 for accurate evaluation
             if (ip.IsIPv4MappedToIPv6)
@@ -44,22 +41,72 @@ namespace McpRouter.Components.Authorization
             // 2. Check if IP falls into any blocked ranges
             if (ip.AddressFamily == AddressFamily.InterNetwork)
             {
-                if (IPAddress.IsLoopback(ip) || IsInSubnet(ip, "127.0.0.0/8")) return true; // Loopback
-                if (IsInSubnet(ip, "10.0.0.0/8")) return true;       // Private Class A
-                if (IsInSubnet(ip, "172.16.0.0/12")) return true;   // Private Class B (172.16.0.0 - 172.31.255.255)
-                if (IsInSubnet(ip, "192.168.0.0/16")) return true;  // Private Class C
-                if (IsInSubnet(ip, "169.254.0.0/16")) return true;  // Link-local (APIPA)
-                if (IsInSubnet(ip, "100.64.0.0/10")) return true;   // CGNAT (Carrier-Grade NAT)
-                if (IsInSubnet(ip, "224.0.0.0/4")) return true;     // Multicast
-                if (IsInSubnet(ip, "0.0.0.0/8")) return true;       // Current network / Broadcast
+                if (IPAddress.IsLoopback(ip) || IsInSubnet(ip, "127.0.0.0/8"))
+                {
+                    return true; // Loopback
+                }
+
+                if (IsInSubnet(ip, "10.0.0.0/8"))
+                {
+                    return true;       // Private Class A
+                }
+
+                if (IsInSubnet(ip, "172.16.0.0/12"))
+                {
+                    return true;   // Private Class B (172.16.0.0 - 172.31.255.255)
+                }
+
+                if (IsInSubnet(ip, "192.168.0.0/16"))
+                {
+                    return true;  // Private Class C
+                }
+
+                if (IsInSubnet(ip, "169.254.0.0/16"))
+                {
+                    return true;  // Link-local (APIPA)
+                }
+
+                if (IsInSubnet(ip, "100.64.0.0/10"))
+                {
+                    return true;   // CGNAT (Carrier-Grade NAT)
+                }
+
+                if (IsInSubnet(ip, "224.0.0.0/4"))
+                {
+                    return true;     // Multicast
+                }
+
+                if (IsInSubnet(ip, "0.0.0.0/8"))
+                {
+                    return true;       // Current network / Broadcast
+                }
             }
             else if (ip.AddressFamily == AddressFamily.InterNetworkV6)
             {
-                if (IPAddress.IsLoopback(ip) || IsInSubnet(ip, "::1/128")) return true; // IPv6 Loopback
-                if (ip.IsIPv6LinkLocal || IsInSubnet(ip, "fe80::/10")) return true;    // IPv6 Link-local
-                if (ip.IsIPv6Multicast || IsInSubnet(ip, "ff00::/8")) return true;    // IPv6 Multicast
-                if (IsInSubnet(ip, "fc00::/7")) return true;                         // IPv6 Unique Local Address (ULA fc00::/7)
-                if (IsInSubnet(ip, "::/128")) return true;                            // IPv6 Unspecified address
+                if (IPAddress.IsLoopback(ip) || IsInSubnet(ip, "::1/128"))
+                {
+                    return true; // IPv6 Loopback
+                }
+
+                if (ip.IsIPv6LinkLocal || IsInSubnet(ip, "fe80::/10"))
+                {
+                    return true;    // IPv6 Link-local
+                }
+
+                if (ip.IsIPv6Multicast || IsInSubnet(ip, "ff00::/8"))
+                {
+                    return true;    // IPv6 Multicast
+                }
+
+                if (IsInSubnet(ip, "fc00::/7"))
+                {
+                    return true;                         // IPv6 Unique Local Address (ULA fc00::/7)
+                }
+
+                if (IsInSubnet(ip, "::/128"))
+                {
+                    return true;                            // IPv6 Unspecified address
+                }
             }
 
             return false;
@@ -70,7 +117,10 @@ namespace McpRouter.Components.Authorization
         /// </summary>
         public static bool IsInSubnet(IPAddress ip, string cidrOrIp)
         {
-            if (ip == null || string.IsNullOrWhiteSpace(cidrOrIp)) return false;
+            if (ip == null || string.IsNullOrWhiteSpace(cidrOrIp))
+            {
+                return false;
+            }
 
             if (ip.IsIPv4MappedToIPv6)
             {
@@ -120,14 +170,18 @@ namespace McpRouter.Components.Authorization
             for (int i = 0; i < fullBytes; i++)
             {
                 if (ipBytes[i] != targetBytes[i])
+                {
                     return false;
+                }
             }
 
             if (remainingBits > 0)
             {
                 byte mask = (byte)(0xFF << (8 - remainingBits));
                 if ((ipBytes[fullBytes] & mask) != (targetBytes[fullBytes] & mask))
+                {
                     return false;
+                }
             }
 
             return true;
@@ -135,7 +189,10 @@ namespace McpRouter.Components.Authorization
 
         public static bool IsPrivateOrLoopback(string url)
         {
-            if (string.IsNullOrWhiteSpace(url)) return false;
+            if (string.IsNullOrWhiteSpace(url))
+            {
+                return false;
+            }
 
             // Ensure schema is HTTP or HTTPS
             if (!Uri.TryCreate(url, UriKind.Absolute, out var uri))
@@ -155,7 +212,10 @@ namespace McpRouter.Components.Authorization
             try
             {
                 var addresses = Dns.GetHostAddresses(host);
-                if (addresses == null || addresses.Length == 0) return false;
+                if (addresses == null || addresses.Length == 0)
+                {
+                    return false;
+                }
 
                 return addresses.Any(IsPrivateOrLoopbackAddress);
             }
@@ -177,13 +237,25 @@ namespace McpRouter.Components.Authorization
             {
                 byte[] bytes = ipAddress.GetAddressBytes();
                 // 10.0.0.0/8
-                if (bytes[0] == 10) return true;
+                if (bytes[0] == 10)
+                {
+                    return true;
+                }
                 // 172.16.0.0/12
-                if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31) return true;
+                if (bytes[0] == 172 && bytes[1] >= 16 && bytes[1] <= 31)
+                {
+                    return true;
+                }
                 // 192.168.0.0/16
-                if (bytes[0] == 192 && bytes[1] == 168) return true;
+                if (bytes[0] == 192 && bytes[1] == 168)
+                {
+                    return true;
+                }
                 // 169.254.0.0/16 (Link-local)
-                if (bytes[0] == 169 && bytes[1] == 254) return true;
+                if (bytes[0] == 169 && bytes[1] == 254)
+                {
+                    return true;
+                }
             }
             else if (ipAddress.AddressFamily == AddressFamily.InterNetworkV6)
             {
@@ -194,7 +266,10 @@ namespace McpRouter.Components.Authorization
 
                 byte[] bytes = ipAddress.GetAddressBytes();
                 // Unique Local Address (fc00::/7)
-                if ((bytes[0] & 0xFE) == 0xFC) return true;
+                if ((bytes[0] & 0xFE) == 0xFC)
+                {
+                    return true;
+                }
             }
 
             return false;
@@ -202,13 +277,20 @@ namespace McpRouter.Components.Authorization
 
         public static bool IsValidServerId(string serverId)
         {
-            if (string.IsNullOrWhiteSpace(serverId)) return false;
+            if (string.IsNullOrWhiteSpace(serverId))
+            {
+                return false;
+            }
+
             return ServerIdRegex.IsMatch(serverId);
         }
 
         public static bool ValidateToolOrPromptName(string name, IEnumerable<string> validServerIds)
         {
-            if (string.IsNullOrWhiteSpace(name)) return false;
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                return false;
+            }
 
             // Allow native router tools and prompts
             if (name == "search_tools" || name == "execute_tool" || name.StartsWith("router__"))
@@ -236,7 +318,10 @@ namespace McpRouter.Components.Authorization
 
         public static bool ValidateResourceUri(string uri, IEnumerable<string> validServerIds)
         {
-            if (string.IsNullOrWhiteSpace(uri)) return false;
+            if (string.IsNullOrWhiteSpace(uri))
+            {
+                return false;
+            }
 
             // Allow native/local resources
             if (uri.StartsWith("router://") || uri.StartsWith("logs://"))
@@ -272,7 +357,10 @@ namespace McpRouter.Components.Authorization
 
         public static void ValidateJsonUrlsRequireHttps(string? json)
         {
-            if (string.IsNullOrWhiteSpace(json)) return;
+            if (string.IsNullOrWhiteSpace(json))
+            {
+                return;
+            }
 
             try
             {
@@ -290,8 +378,8 @@ namespace McpRouter.Components.Authorization
                             {
                                 if (Uri.TryCreate(val, UriKind.Absolute, out var uri))
                                 {
-                                    bool isLocalhost = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) || 
-                                                       uri.Host.Equals("127.0.0.1") || 
+                                    bool isLocalhost = uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase) ||
+                                                       uri.Host.Equals("127.0.0.1") ||
                                                        uri.Host.Equals("::1");
                                     bool isSimpleHost = !uri.Host.Contains('.');
 
@@ -300,7 +388,7 @@ namespace McpRouter.Components.Authorization
                                         throw new ArgumentException($"URL field '{prop.Name}' must use the HTTPS scheme.");
                                     }
                                 }
-                                else 
+                                else
                                 {
                                     throw new ArgumentException($"URL field '{prop.Name}' must use the HTTPS scheme.");
                                 }
@@ -321,7 +409,10 @@ namespace McpRouter.Components.Authorization
         /// </summary>
         public static bool IsStandaloneAdminNetwork(IPAddress? clientIp, IConfiguration? config)
         {
-            if (clientIp == null) return false;
+            if (clientIp == null)
+            {
+                return false;
+            }
 
             var effectiveIp = clientIp.IsIPv4MappedToIPv6 ? clientIp.MapToIPv4() : clientIp;
 
@@ -332,7 +423,10 @@ namespace McpRouter.Components.Authorization
             {
                 foreach (var net in sectionValues)
                 {
-                    if (!string.IsNullOrWhiteSpace(net)) networks.Add(net.Trim());
+                    if (!string.IsNullOrWhiteSpace(net))
+                    {
+                        networks.Add(net.Trim());
+                    }
                 }
             }
 
@@ -425,7 +519,10 @@ namespace McpRouter.Components.Authorization
             {
                 foreach (var g in adminGroupsSection)
                 {
-                    if (!string.IsNullOrWhiteSpace(g)) configuredAdminGroups.Add(g.Trim());
+                    if (!string.IsNullOrWhiteSpace(g))
+                    {
+                        configuredAdminGroups.Add(g.Trim());
+                    }
                 }
             }
 

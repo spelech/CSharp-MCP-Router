@@ -1,11 +1,8 @@
-using System;
-using System.IO;
-using System.Linq;
 using System.Xml.Linq;
+using CatalogGenerator.Models;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using CatalogGenerator.Models;
 
 namespace CatalogGenerator.Parsers
 {
@@ -13,7 +10,10 @@ namespace CatalogGenerator.Parsers
     {
         public void ParseDirectory(string directoryPath, CatalogIndex index)
         {
-            if (!Directory.Exists(directoryPath)) return;
+            if (!Directory.Exists(directoryPath))
+            {
+                return;
+            }
 
             var files = Directory.GetFiles(directoryPath, "*.cs", SearchOption.AllDirectories);
             foreach (var file in files)
@@ -47,7 +47,10 @@ namespace CatalogGenerator.Parsers
                     .Where(a => a.Name.ToString().Contains("Requirement"))
                     .ToList();
 
-                if (!reqAttributes.Any()) continue;
+                if (!reqAttributes.Any())
+                {
+                    continue;
+                }
 
                 var lineSpan = tree.GetLineSpan(method.Span);
                 var lineNumber = lineSpan.StartLinePosition.Line + 1;
@@ -56,13 +59,22 @@ namespace CatalogGenerator.Parsers
 
                 foreach (var attr in reqAttributes)
                 {
-                    if (attr.ArgumentList == null || attr.ArgumentList.Arguments.Count == 0) continue;
+                    if (attr.ArgumentList == null || attr.ArgumentList.Arguments.Count == 0)
+                    {
+                        continue;
+                    }
 
                     var positionalArgs = attr.ArgumentList.Arguments.Where(a => a.NameEquals == null).ToList();
-                    if (positionalArgs.Count == 0) continue;
+                    if (positionalArgs.Count == 0)
+                    {
+                        continue;
+                    }
 
                     var idArg = ExtractStringValue(positionalArgs[0].Expression);
-                    if (string.IsNullOrWhiteSpace(idArg)) continue;
+                    if (string.IsNullOrWhiteSpace(idArg))
+                    {
+                        continue;
+                    }
 
                     var type = RequirementType.Positive;
                     var category = idArg.Contains('-') ? idArg.Substring(0, idArg.IndexOf('-')) : "GENERAL";
@@ -142,7 +154,10 @@ namespace CatalogGenerator.Parsers
                 .OfType<DocumentationCommentTriviaSyntax>()
                 .FirstOrDefault();
 
-            if (trivia == null) return null;
+            if (trivia == null)
+            {
+                return null;
+            }
 
             var xmlString = trivia.ToString();
             try
@@ -176,7 +191,10 @@ namespace CatalogGenerator.Parsers
         private static RequirementType ParseRequirementType(string text)
         {
             if (text.Contains("Negative") || text.Contains("Guardrail"))
+            {
                 return RequirementType.Negative;
+            }
+
             return RequirementType.Positive;
         }
     }

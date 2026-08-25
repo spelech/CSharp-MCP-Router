@@ -1,28 +1,12 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Net.Http;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
-using Moq;
-using Xunit;
-using FluentAssertions;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
-using McpRouter;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
 using System.Net;
+using System.Text.Json;
+using FluentAssertions;
 using McpRouter.Extensions;
-using McpRouter.Components.Authorization;
-using McpRouter.Infrastructure.Transports;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace McpRouter.Tests
 {

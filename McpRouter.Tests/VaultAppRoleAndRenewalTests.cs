@@ -1,17 +1,8 @@
-using System;
-using System.Collections.Generic;
 using System.Security;
-using System.Threading.Tasks;
-using McpRouter.Components.Providers;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Secrets;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Moq;
 using VaultSharp;
-using VaultSharp.V1.AuthMethods.Token;
-using VaultSharp.V1.Commons;
-using Xunit;
 
 namespace McpRouter.Tests
 {

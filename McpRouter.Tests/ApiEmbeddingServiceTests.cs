@@ -1,10 +1,3 @@
-using System;
-using System.Net.Http;
-using System.Threading.Tasks;
-using McpRouter.Models;
-using McpRouter.Core.Routing;
-using Xunit;
-
 namespace McpRouter.Tests
 {
     public class ApiEmbeddingServiceTests

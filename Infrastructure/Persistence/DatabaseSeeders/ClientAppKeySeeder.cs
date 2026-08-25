@@ -1,15 +1,5 @@
-using System;
-using System.Data;
-using System.IO;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
-using McpRouter.Models;
-using McpRouter.Components.AppKeys;
-using McpRouter.Infrastructure.Persistence;
-using McpRouter.Infrastructure.Secrets;
 using Dapper;
 
 namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
@@ -44,7 +34,10 @@ namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
                     var appKeys = conn.Query<AppKey>("SELECT Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys").ToList();
                     foreach (var key in appKeys)
                     {
-                        if (string.IsNullOrEmpty(key.EncryptedKey)) continue;
+                        if (string.IsNullOrEmpty(key.EncryptedKey))
+                        {
+                            continue;
+                        }
 
                         bool isHashed = key.EncryptedKey.Length == 64
                             && key.EncryptedKey.All(c => (c >= '0' && c <= '9') || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F'));
@@ -148,12 +141,18 @@ namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
 
         private static string DecryptLegacyAppKey(string ciphertext, IConfiguration configuration)
         {
-            if (string.IsNullOrEmpty(ciphertext)) return string.Empty;
+            if (string.IsNullOrEmpty(ciphertext))
+            {
+                return string.Empty;
+            }
 
             try
             {
                 var fullCipher = Convert.FromBase64String(ciphertext);
-                if (fullCipher.Length < 16) return string.Empty;
+                if (fullCipher.Length < 16)
+                {
+                    return string.Empty;
+                }
 
                 var secretString = configuration["ROUTER_SECRET"]
                     ?? configuration["ROUTER_MASTER_KEY"]

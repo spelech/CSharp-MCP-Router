@@ -1,15 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using Dapper;
-using McpRouter.Models;
-using McpRouter.Components.Servers;
-using McpRouter.Components.AppKeys;
-using McpRouter.Components.Providers;
-using McpRouter.Infrastructure.Secrets;
-using Microsoft.Extensions.Configuration;
 
 namespace McpRouter.Infrastructure.Persistence
 {
@@ -548,7 +538,7 @@ namespace McpRouter.Infrastructure.Persistence
                 }, commandType: CommandType.StoredProcedure);
             }
         }
-    
+
         public async Task SaveAuthProvidersBatchAsync(IEnumerable<AuthProviderDto> dtos)
         {
             using var conn = _dbFactory.CreateConnection();

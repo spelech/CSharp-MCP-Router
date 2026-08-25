@@ -1,19 +1,10 @@
-using System;
-using System.Collections.Generic;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
-using McpRouter;
-using McpRouter.Tests.Attributes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Xunit;
 
 namespace McpRouter.Tests
 {
@@ -247,7 +238,8 @@ namespace McpRouter.Tests
             var client = CreateAuthenticatedClient();
 
             // Write custom branding
-            var postSetRes = await client.PostAsJsonAsync("/api/settings", new { 
+            var postSetRes = await client.PostAsJsonAsync("/api/settings", new
+            {
                 dashboardTitle = "New Dashboard Title",
                 dashboardIcon = "fa-solid fa-star",
                 embeddingProvider = "local"

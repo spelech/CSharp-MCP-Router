@@ -1,12 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
-using McpRouter.Models;
-using McpRouter.Components.Servers;
-using McpRouter.Infrastructure.Persistence;
 using Dapper;
 
 namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders

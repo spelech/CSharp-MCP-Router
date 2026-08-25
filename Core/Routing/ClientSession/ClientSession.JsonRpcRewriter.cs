@@ -1,6 +1,4 @@
-using System;
 using System.Text.Json;
-using Microsoft.Extensions.Logging;
 
 namespace McpRouter.Core.Routing
 {
@@ -16,7 +14,10 @@ namespace McpRouter.Core.Routing
                     CommentHandling = JsonCommentHandling.Skip
                 };
                 var node = System.Text.Json.Nodes.JsonNode.Parse(body, null, docOptions);
-                if (node == null) return body;
+                if (node == null)
+                {
+                    return body;
+                }
 
                 if (node is System.Text.Json.Nodes.JsonObject obj)
                 {
