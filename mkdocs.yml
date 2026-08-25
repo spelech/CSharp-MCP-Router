@@ -1,9 +1,9 @@
-site_name: CSharp-MCP-Router
+site_name: Model Context Gateway (MCG)
 site_description: Enterprise C# ASP.NET Core Gateway Router, OAuth 2.0 Provider, and Semantic Proxy for the Model Context Protocol (MCP).
 site_author: Steve Pelech
-site_url: https://spelech.github.io/csharp-mcp-router/
-repo_url: https://github.com/spelech/csharp-mcp-router
-repo_name: spelech/csharp-mcp-router
+site_url: https://spelech.github.io/model-context-gateway/
+repo_url: https://github.com/spelech/model-context-gateway
+repo_name: spelech/model-context-gateway
 edit_uri: blob/main/docs/
 
 docs_dir: docs

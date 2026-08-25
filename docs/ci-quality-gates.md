@@ -57,10 +57,10 @@ The primary CI pipeline runs on pull requests and pushes to `main`. It uses conc
 | :--- | :--- | :--- |
 | **`release-verification`** | Enforces version synchronization across C# project metadata, React store defaults, CHANGELOG, and README, while validating 100% of internal documentation links and anchors. | `python3 scripts/verify_release.py --skip-tests --ci` |
 | **`living-catalog-verification`** | Validates that [`docs/software-requirements-and-test-catalog.md`](software-requirements-and-test-catalog.md) and [`docs/requirements-catalog.json`](requirements-catalog.json) have zero drift against test code annotations. | `dotnet run --project scripts/CatalogGenerator -- --verify-only` |
-| **`backend`** | Compiles the C# codebase on .NET 10 (`Release`), runs 500+ xUnit integration & unit tests, and captures coverage data. | `CI=true dotnet test McpRouter.slnx --configuration Release --verbosity normal --collect:"XPlat Code Coverage"` |
+| **`backend`** | Compiles the C# codebase on .NET 10 (`Release`), runs 600+ xUnit integration & unit tests, and captures coverage data. | `CI=true dotnet test ModelContextGateway.slnx --configuration Release --verbosity normal --collect:"XPlat Code Coverage"` |
 | **`frontend`** | Sets up Node.js 22 LTS, enforces strict zero-warning ESLint checks, compiles the Vite TypeScript React 19 SPA, and executes Vitest test suites. | `cd frontend && npm ci && npm run lint && npm run build && npm test` |
 | **`integration-smoke`** | Boots the compiled Release binary on an ephemeral Kestrel port with an isolated SQLite test database, verifying `GET /health`, authenticated admin API access, AppKey generation/authentication, and MCP SSE protocol tool discovery. Logs are uploaded automatically on failure. | Runs smoke test probe suite against live local instance. |
-| **`docker-check`** | Validates the multi-stage `Dockerfile` build integrity via Docker Buildx in dry-run mode (`push: false`) without publishing. | `docker build -t mcp-router:ci-check .` |
+| **`docker-check`** | Validates the multi-stage `Dockerfile` build integrity via Docker Buildx in dry-run mode (`push: false`) without publishing. | `docker build -t mcg:ci-check .` |
 
 ---
 
@@ -85,7 +85,7 @@ Runs on pull requests to detect newly introduced vulnerable dependencies, licens
 
 Dependabot is configured to check weekly for security patches and version updates across four distinct package ecosystems:
 
-1. **NuGet (`/`)**: .NET package references in `mcp-router.csproj` and `McpRouter.Tests.csproj`.
+1. **NuGet (`/`)**: .NET package references in `ModelContextGateway.csproj` and `ModelContextGateway.Tests.csproj`.
 2. **npm (`/frontend`)**: Node.js dependencies and devDependencies in `frontend/package.json`.
 3. **GitHub Actions (`/`)**: Action versions in `.github/workflows/`.
 4. **Docker (`/`)**: Base image dependencies in `Dockerfile`.
@@ -94,7 +94,7 @@ Dependabot is configured to check weekly for security patches and version update
 
 ### 5. Gated Container Publishing (`.github/workflows/docker-publish.yml`)
 
-Production container publishing to `ghcr.io/spelech/csharp-mcp-router` is strictly gated:
+Production container publishing to `ghcr.io/spelech/model-context-gateway` is strictly gated:
 - **`main` branch builds**: Triggered via `workflow_run` only after the `CI Quality Gates` workflow completes with status `success`.
 - **Release tags**: Publishes semver-tagged images (`v*.*.*`) upon tagged git releases.
 - **Manual dispatch**: Maintains `workflow_dispatch` support for emergency operator overrides.
@@ -142,7 +142,7 @@ Individual sub-system validations can also be run directly:
 
 ```bash
 # 1. Run backend tests
-CI=true dotnet test McpRouter.slnx --configuration Release
+CI=true dotnet test ModelContextGateway.slnx --configuration Release
 
 # 2. Run frontend lint, build, and test
 cd frontend
@@ -152,5 +152,5 @@ npm test
 cd ..
 
 # 3. Validate Docker build syntax
-docker build -t mcp-router:local-check .
+docker build -t mcg:local-check .
 ```

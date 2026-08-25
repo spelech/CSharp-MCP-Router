@@ -1,14 +1,14 @@
 # Test Coverage & Reliability Evaluation Report
 
 **Date:** 2026-08-17 (Updated Post-Windows IIS & DPAPI Validation)  
-**Project:** CSharp MCP Router Gateway (`/containers/dev/csharp-mcp-router`) & Standalone Media MCP (`/containers/dev/csharp-media-mcp`)  
-**Scope:** Backend .NET Unit & Integration Suite (`McpRouter.Tests`), Standalone Media Server (`MediaMcp.Tests`), Frontend Vitest Suite (`frontend/src/test`), Playwright E2E Suite (`frontend/e2e`), and Windows Native Environment Diagnostics (`scripts/windows/Test-WindowsEnvironment.ps1`).
+**Project:** Model Context Gateway (`/containers/dev/csharp-mcp-router`) & Standalone Media MCP (`/containers/dev/csharp-media-mcp`)  
+**Scope:** Backend .NET Unit & Integration Suite (`ModelContextGateway.Tests`), Standalone Media Server (`MediaMcp.Tests`), Frontend Vitest Suite (`frontend/src/test`), Playwright E2E Suite (`frontend/e2e`), and Windows Native Environment Diagnostics (`scripts/windows/Test-WindowsEnvironment.ps1`).
 
 ---
 
 ## 1. Executive Confidence & Coverage Summary
 
-Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 integration, and DPAPI validation cycle, the test suite across the C# MCP Router Gateway and Standalone Media MCP is **exceptionally robust, modular, and enterprise-ready**, providing **high overall confidence (98–99%)** for production homelab, enterprise Active Directory, Windows Server IIS, and multi-cloud container workloads.
+Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 integration, and DPAPI validation cycle, the test suite across Model Context Gateway and Standalone Media MCP is **exceptionally robust, modular, and enterprise-ready**, providing **high overall confidence (98–99%)** for production homelab, enterprise Active Directory, Windows Server IIS, and multi-cloud container workloads.
 
 ### Key Milestones Completed:
 1. **Frontend Coverage Elevated to $\ge 90.5\%$ Across All Components (Overall 92.7%)**:
@@ -38,7 +38,7 @@ Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 inte
    - **Live MySQL 8.0 Integration Suite** (`MySqlLiveIntegrationTests.cs`): 100% live verified against `mcp-mysql-test:33066` executing stored procedures (`sp_SaveAppKey`, `sp_GetAppKeys`, `sp_SaveSecretProvider`, `sp_SaveAuthProvider`).
 3. **Windows Native IIS In-Process & DPAPI Validation**:
    - Deployed and validated native IIS In-Process ANCM v2 hosting with unbuffered streaming SSE (`responseBufferLimit="0"`) on port 8085 connected to Microsoft SQL Server 2022 and HashiCorp Vault.
-   - Verified end-to-end DPAPI `LocalMachine` machine-level encryption and dynamic runtime decryption from `HKLM:\SOFTWARE\McpRouter\Secrets` into downstream HTTP/SSE/STDIO transports.
+   - Verified end-to-end DPAPI `LocalMachine` machine-level encryption and dynamic runtime decryption from `HKLM:\SOFTWARE\ModelContextGateway\Secrets` into downstream HTTP/SSE/STDIO transports.
    - Verified Active Directory & Windows Integrated Authentication (Kerberos/NTLM caller SIDs, group token extraction, and builtin administrator SID `S-1-5-32-544` mapping).
    - Automated Windows diagnostic runner `Test-WindowsEnvironment.ps1` completed **18 of 18 checks passing (100%)**.
 4. **Media Tools Decoupling & Docker Auto-Discovery**:
@@ -71,7 +71,7 @@ Following the comprehensive Windows host deployment, IIS In-Process ANCM v2 inte
 
 | Layer | Test Count | Code Coverage | Confidence Level | Key Strengths & Current Blind Spots |
 | :--- | :--- | :--- | :--- | :--- |
-| **.NET Backend Router (`McpRouter.Tests`)** | **544 passing tests** (71 test files) | **65.5% Lines**<br>**59.3% Branches** | **High (99%)** | **Strong:** Core routing, dynamic session management, RBAC enforcement, Vault/AD secrets resolution, DPAPI machine protection, Windows Identity SIDs, token buckets, and live MSSQL/MySQL/SQLite persistence. |
+| **.NET Backend (`ModelContextGateway.Tests`)** | **672 passing tests** | **65.5% Lines**<br>**59.3% Branches** | **High (99%)** | **Strong:** Core routing, dynamic session management, RBAC enforcement, Vault/AD secrets resolution, DPAPI machine protection, Windows Identity SIDs, token buckets, and live MSSQL/MySQL/SQLite persistence. |
 | **Windows Diagnostic Tool (`Test-WindowsEnvironment.ps1`)** | **18 automated checks** | **100% Pass** | **High (99%)** | **Strong:** Prerequisites, elevated token, DPAPI roundtrip, Registry write/read, Windows Identity extraction, S-1-5-32-544 mapping, living catalog synchronization, Vitest frontend execution. |
 | **.NET Standalone Media MCP (`MediaMcp.Tests`)** | **28 passing tests** (4 test files) | **89.1% Lines**<br>**84.6% Branches** | **High (98%)** | **Strong:** Full protocol emulation (SSE endpoint + message dispatching, direct HTTP `/mcp`), Plex client XML/JSON parsing, Overseerr client API handling, tool argument validation. |
 | **Frontend Unit (`Vitest` / React 19)** | **174 passing tests** (29 test files) | **92.7% Lines**<br>**83.3% Branches** | **High (98%)** | **Strong:** Zustand store state transitions, `AppKeysCard` (100%), `ToolTesterCard` (100%), `ServerInspectModal` (100%), `ServerCard` (99.1%), `DashboardView` (96.6%), `SecretProvidersTab` (96.8%), `CustomFileModal` (90.8%), `ServerModal` (98.5%), `AppKeyModal` (99.3%), `ClientModal` (97.9%), `IdentityAuthTab` (97.0%), `SharedComponents` (100%). |
@@ -127,7 +127,7 @@ The architecture provides pluggable secrets management via `ISecretRetriever`, `
 
 ### Windows Native Subsystems & IIS In-Process ANCM Validation
 * **ANCM v2 Schema Precision**: Live verified that ASP.NET Core Module v2 (ANCM v2 `10.0.11`) runs in-process inside `w3wp.exe` with unbuffered Server-Sent Events configured via `<handlerSettings><handlerSetting name="responseBufferLimit" value="0" /></handlerSettings>`.
-* **DPAPI Machine Encryption**: Validated that `WindowsDpapiProtector` utilizes Windows Cryptographic API `ProtectedData.Protect` / `Unprotect` with `DataProtectionScope.LocalMachine`. Secrets stored as `REG_BINARY` in `HKLM:\SOFTWARE\McpRouter\Secrets` are dynamically retrieved and injected into outbound downstream MCP requests without plaintext disk exposure.
+* **DPAPI Machine Encryption**: Validated that `WindowsDpapiProtector` utilizes Windows Cryptographic API `ProtectedData.Protect` / `Unprotect` with `DataProtectionScope.LocalMachine`. Secrets stored as `REG_BINARY` in `HKLM:\SOFTWARE\ModelContextGateway\Secrets` are dynamically retrieved and injected into outbound downstream MCP requests without plaintext disk exposure.
 * **Windows Identity & S-1-5-32-544 Mapping**: Verified `IWindowsIdentityAccessor` and `ActiveDirectoryIdentityProvider` extracting Windows caller token SIDs and matching the Builtin Administrators SID `S-1-5-32-544` for administrative RBAC bypass.
 * **Automated Diagnostic Quality Gate**: `Test-WindowsEnvironment.ps1` executes 18 automated validation probes across prerequisites, registry security, DPAPI roundtrip, xUnit test suite, Vitest suite, and living requirements catalog.
 

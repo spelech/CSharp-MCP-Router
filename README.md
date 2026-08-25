@@ -1,7 +1,7 @@
-# MCP Router Gateway & Semantic Proxy
+# Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v4.36.0-orange?style=for-the-badge)
-[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/csharp-mcp-router/)
+![Version](https://img.shields.io/badge/version-v5.0.0-orange?style=for-the-badge)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-672%20passing-2ea44f?style=for-the-badge)
@@ -9,21 +9,21 @@
 ![React 19](https://img.shields.io/badge/frontend-Vite%20React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black)
 ![License](https://img.shields.io/badge/license-Apache--2.0-blue?style=for-the-badge)
 
-A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the **Model Context Protocol (MCP)**. 
+An enterprise C# ASP.NET Core gateway, OAuth 2.0 provider, and semantic proxy for the **Model Context Protocol (MCP)**. 
 
-`mcp-router` aggregates backend MCP servers (Docker, Plex, Home Assistant, Actual Budget, Excel) and proxies them to clients via a single unified connection.
+**Model Context Gateway (MCG)** aggregates backend MCP servers (Docker, Plex, Home Assistant, Actual Budget, Excel) and proxies them to clients via a single unified connection.
 
-📖 **Documentation Portal:** [https://spelech.github.io/csharp-mcp-router/](https://spelech.github.io/csharp-mcp-router/)
+📖 **Documentation Portal:** [https://spelech.github.io/model-context-gateway/](https://spelech.github.io/model-context-gateway/)
 
-![MCP Router Gateway Dashboard](docs/assets/dashboard.jpg)
+![Model Context Gateway Dashboard](docs/assets/dashboard.jpg)
 
 ---
 
 ## 🌟 Key Features
 
-* **Admin MCP Server & Control Plane (`/admin`, `/router-admin`)**: In-process virtual MCP server providing 10 consolidated entity management tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`) allowing autonomous AI agents (Claude Desktop, Cursor, Cline, Windsurf) to manage router configuration directly via MCP protocol with hybrid standalone network auth and audit logging.
-* **Universal Admin Automation Skill (`mcp-router-admin`)**: Specialized [AgentSkills.io](https://agentskills.io) skill enabling AI agents to programmatically provision Auth providers (Authentik, Keycloak, Entra ID, Active Directory LDAPS), Secret stores (Vault KV v2, AES-256-GCM Master Key, DPAPI), RBAC policies, group mappings, embeddings, backend servers, and client keys from a blank slate with zero UI clicking (see [docs/admin-mcp-automation-guide.md](docs/admin-mcp-automation-guide.md)).
-* **Universal Setup Skill (`mcp-router-setup`)**: Self-contained [AgentSkills.io](https://agentskills.io)-compliant skill enabling any AI assistant to bootstrap and configure the router across Docker Compose and Windows IIS with zero source code cloning.
+* **Admin MCP Server & Control Plane (`/admin`, `/mcg-admin`)**: In-process virtual MCP server providing 10 consolidated entity management tools (`manage_servers`, `manage_appkeys`, `manage_clients`, `manage_policies`, `manage_group_mappings`, `manage_providers`, `manage_settings`, `manage_custom_files`, `manage_system`, `test_tool_call`) allowing autonomous AI agents (Claude Desktop, Cursor, Cline, Windsurf) to manage gateway configuration directly via MCP protocol with hybrid standalone network auth and audit logging.
+* **Universal Admin Automation Skill (`mcg-admin`)**: Specialized [AgentSkills.io](https://agentskills.io) skill enabling AI agents to programmatically provision Auth providers (Authentik, Keycloak, Entra ID, Active Directory LDAPS), Secret stores (Vault KV v2, AES-256-GCM Master Key, DPAPI), RBAC policies, group mappings, embeddings, backend servers, and client keys from a blank slate with zero UI clicking (see [docs/admin-mcp-automation-guide.md](docs/admin-mcp-automation-guide.md)).
+* **Universal Setup Skill (`mcg-setup`)**: Self-contained [AgentSkills.io](https://agentskills.io)-compliant skill enabling any AI assistant to bootstrap and configure the gateway across Docker Compose and Windows IIS with zero source code cloning.
 * **MCP 2026-07-28 Spec Support**: Spec-compliant header annotation; routing is body/path based (`Mcp-Method` & `Mcp-Name`) via `McpDualSpecMiddleware` with legacy JSON body fallback.
 * **Dynamic Docker Auto-Discovery**: Mounts `/var/run/docker.sock` to automatically discover and register backend MCP containers labeled with `mcp.enabled=true`, `mcp.id`, `mcp.port`, and `mcp.categories` (see [docs/features-guide.md](docs/features-guide.md#method-d-dynamic-docker-label-auto-discovery-mcp-labels)).
 * **Pluggable Identity Providers**: Dual authentication support for **Active Directory** (Kerberos/NTLM Windows SIDs) and **OIDC / Reverse Proxy Headers** (`Remote-User`, `Remote-Groups` headers from Authentik, Authelia, PocketID, Keycloak, etc.).
@@ -50,10 +50,10 @@ A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the
 * **OAuth 2.0 Security & CORS Config:** Integrates a lightweight OAuth 2.0 authorization server for secure API access. Leverages strict, configurable CORS protection with `CORS_ALLOWED_ORIGINS` to prevent cross-origin request hijacking / forgery vulnerabilities.
 * **Enterprise Identity Delegation**:
   * **X-Forwarded-User Propagation (Trusted Gateway Pattern)**: Automatically injects the inbound authenticated user's identity into downstream HTTP/SSE backend requests for seamless Row-Level Security (RLS) enforcement.
-  * **Kerberos / NTLM Impersonation**: For native Windows IIS deployments, the router utilizes `S4U2Proxy` to assume the inbound caller's Active Directory identity when communicating with downstream enterprise endpoints.
+  * **Kerberos / NTLM Impersonation**: For native Windows IIS deployments, the gateway utilizes `S4U2Proxy` to assume the inbound caller's Active Directory identity when communicating with downstream enterprise endpoints.
   * **OAuth2 / OIDC On-Behalf-Of**: Acts as a Confidential Client to dynamically mint/exchange tokens with identity providers (Azure AD, Okta, Authentik) on behalf of the user.
   * **Dynamic Auth Pass-Through**: Issues `dynamic_auth` prompts directly to the client (IDE/LLM) when downstream services require interactive challenges.
-* **Batteries-Included Docker**: `ghcr.io/org/mcp-router:latest-full` tag provides pre-installed Node.js, Python 3, `uv`, and `bun` environments for natively executing `stdio` sub-process servers without sidecar networking complexity.
+* **Batteries-Included Docker**: `ghcr.io/spelech/model-context-gateway:latest-full` tag provides pre-installed Node.js, Python 3, `uv`, and `bun` environments for natively executing `stdio` sub-process servers without sidecar networking complexity.
 
 * **Built-in Web Dashboard:** A responsive, dark-mode, glassmorphic UI to monitor connected clients, stats, and backend health status.
 
@@ -61,26 +61,26 @@ A C# ASP.NET Core gateway router, OAuth 2.0 provider, and semantic proxy for the
 
 ## ⚡ Quickstart: Zero-Config Blank-Slate Deployment
 
-You can spin up `CSharp-MCP-Router` with **zero required environment variables**. On first launch, the router automatically generates a 256-bit master key saved to `./data/.master.key` and initializes safe defaults:
+You can spin up **Model Context Gateway** with **zero required environment variables**. On first launch, the gateway automatically generates a 256-bit master key saved to `./data/.master.key` and initializes safe defaults:
 
 ```bash
 docker run -d \
-  --name mcp-router \
+  --name mcg \
   -p 8080:8080 \
   -v $(pwd)/data:/app/data \
   -v /var/run/docker.sock:/var/run/docker.sock \
-  ghcr.io/spelech/mcp-router:latest
+  ghcr.io/spelech/model-context-gateway:latest
 ```
 
-*(Alternatively, mount a Docker/Kubernetes file secret with `-e ROUTER_MASTER_KEY_FILE=/run/secrets/my_key` or pass `-e ROUTER_MASTER_KEY="<key>"`).*
+*(Alternatively, mount a Docker/Kubernetes file secret with `-e MCG_MASTER_KEY_FILE=/run/secrets/my_key` or pass `-e MCG_MASTER_KEY="<key>"`).*
 
 ### Out-of-the-Box Safe Defaults
 * **Auto-Generated Master Key**: Automatically created and stored in `./data/.master.key` (with `chmod 0600`) so credentials remain encrypted at rest with zero plaintext env vars.
 * **Compact Base62 AppKeys**: Semantic, high-entropy ~32-character tokens (`mcp-adm-`, `mcp-glb-`, `mcp-{domain}-`, `mcp-usr-`, `mcp-srv-`).
-* **SQLite Database**: Automatically created and migrated at `./data/mcp_router.db`.
+* **SQLite Database**: Automatically created and migrated at `./data/mcg.db`.
 * **Standalone Security**: Local loopback (`127.0.0.1`, `::1`) is trusted as `Administrator` for the Web Dashboard (`http://localhost:8080`).
-* **Declarative Admin Key**: Seed custom keys via `ROUTER_ADMIN_KEY` or connect with the auto-generated `mcp-adm-` admin key for remote AI agents and DevOps scripts to automate configuration via the Admin MCP Server (`/admin/sse` or `POST /admin`).
-* **Instant Automation**: Use the **`mcp-router-admin`** skill (`.agents/skills/mcp-router-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Entra ID, Active Directory, Vault, embeddings, and backend servers. See [**docs/deployment-guide.md**](docs/deployment-guide.md#minimal-blank-slate-startup-zero-config-or-file-secrets).
+* **Declarative Admin Key**: Seed custom keys via `MCG_ADMIN_KEY` (or legacy `ROUTER_ADMIN_KEY`) or connect with the auto-generated `mcp-adm-` admin key for remote AI agents and DevOps scripts to automate configuration via the Admin MCP Server (`/admin/sse` or `POST /admin`).
+* **Instant Automation**: Use the **`mcg-admin`** skill (`.agents/skills/mcg-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Entra ID, Active Directory, Vault, embeddings, and backend servers. See [**docs/deployment-guide.md**](docs/deployment-guide.md#minimal-blank-slate-startup-zero-config-or-file-secrets).
 
 ---
 
@@ -165,14 +165,14 @@ When using agentic coding assistants connected to the main `/sse` gateway:
 2. **Namespaced Execution**: After `search_tools` returns matching namespaced tools (e.g. `docker__restart_container`), the agent must invoke it via `execute_tool(name, arguments)`.
 3. **Semantic Knowledge Retrieval (`notes-rag`)**: AI agents **MUST** query the `notes-rag` service first (using the `search_notes` tool) for system architecture or setup questions before attempting to grep the filesystem.
 
-### 2. Autonomous Router Administration (Admin MCP Server)
-Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can directly manage router configuration by connecting to `/admin` or `/router-admin`:
+### 2. Autonomous Gateway Administration (Admin MCP Server)
+Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can directly manage gateway configuration by connecting to `/admin` or `/mcg-admin`:
 
 #### Claude Desktop (`claude_desktop_config.json`)
 ```json
 {
   "mcpServers": {
-    "mcp-router-admin": {
+    "mcg-admin": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/client-sse", "http://localhost:8026/admin"]
     }
@@ -184,7 +184,7 @@ Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can dir
 ```json
 {
   "mcpServers": {
-    "mcp-router-admin": {
+    "mcg-admin": {
       "url": "http://localhost:8026/admin",
       "headers": {
         "Authorization": "Bearer mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
@@ -195,18 +195,18 @@ Autonomous agents (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) can dir
 ```
 
 ### 3. Universal Agent Setup Skill (Zero-Clone Bootstrapping)
-Equip any AI assistant (Antigravity, Claude Code, Cursor, Cline, Windsurf, Copilot CLI) to install, configure, and bootstrap the router for Docker Compose or Windows Server IIS without cloning or compiling source code:
+Equip any AI assistant (Antigravity, Claude Code, Cursor, Cline, Windsurf, Copilot CLI) to install, configure, and bootstrap the gateway for Docker Compose or Windows Server IIS without cloning or compiling source code:
 
 ```bash
-mkdir -p .agents/skills/mcp-router-setup && curl -fsSL https://raw.githubusercontent.com/spelech/csharp-mcp-router/main/skills/mcp-router-setup/SKILL.md -o .agents/skills/mcp-router-setup/SKILL.md
+mkdir -p .agents/skills/mcg-setup && curl -fsSL https://raw.githubusercontent.com/spelech/model-context-gateway/main/skills/mcg-setup/SKILL.md -o .agents/skills/mcg-setup/SKILL.md
 ```
 
-Once installed, simply prompt your agent: *"Set up MCP router for my environment"* or *"Deploy MCP router on Docker/IIS"*. The skill automatically:
+Once installed, simply prompt your agent: *"Set up Model Context Gateway for my environment"* or *"Deploy MCG on Docker/IIS"*. The skill automatically:
 - Probes host environment capabilities (OS, Docker daemon socket, HashiCorp Vault, Active Directory domain).
 - Guides deployment target selection (**Docker Compose** or **Windows IIS**).
 - Clarifies trade-offs between **Environment Variables** (`.env`) vs. **Web UI & Database** (dynamic hot-reloading).
 - Configures network topology (**Standalone / Home-Lab** with SQLite vs. **Enterprise** with AD/OIDC + MSSQL/MySQL/Vault).
-- Generates cryptographically secure 256-bit `ROUTER_MASTER_KEY` values and production configuration files (`docker-compose.yml`, `web.config`, `.env`, `appsettings.Production.json`).
+- Generates cryptographically secure 256-bit `MCG_MASTER_KEY` values and production configuration files (`docker-compose.yml`, `web.config`, `.env`, `appsettings.Production.json`).
 - Verifies gateway health (`/health`, `/sse`) and outputs client configuration snippets.
 
 ---
@@ -215,13 +215,13 @@ Once installed, simply prompt your agent: *"Set up MCP router for my environment
 
 > **Note:** For a detailed breakdown of end-to-end credential passing, Kerberos limitations, and Pass-Through routing constraints, see the [Authentication End-to-End Support Matrix](docs/auth-flows/auth-support-matrix.md).
 
-The router features a hybrid administrative authorization engine supporting both isolated bare-metal developers and massive enterprise Active Directory forests.:
+The gateway features a hybrid administrative authorization engine supporting both isolated bare-metal developers and massive enterprise Active Directory forests.:
 
 ### 1. Standalone Mode (Zero-Config / Personal / Private Network)
 * **When Active**: Whenever no external identity provider (Active Directory LDAP or OIDC Reverse Proxy) is configured.
 * **Local Loopback (`127.0.0.1`, `::1`)**: By default, connections originating from localhost/loopback are granted local administrative privileges automatically without requiring an SSO provider or password.
 * **Private LAN / Docker Subnets (Central Gateway)**: Configure `Admin:StandaloneAllowedNetworks` in `appsettings.json` or environment variables (e.g. `ADMIN__STANDALONE_ALLOWED_NETWORKS__0="10.0.0.0/8"` or `"0.0.0.0/0"` for open private LANs) to grant admin access to your local network.
-* **External Clients**: Requests originating from outside the allowed subnets require an Admin AppKey (such as `ROUTER_ADMIN_KEY`, a compact `mcp-adm-` key, or custom generated keys).
+* **External Clients**: Requests originating from outside the allowed subnets require an Admin AppKey (such as `MCG_ADMIN_KEY`, a compact `mcp-adm-` key, or custom generated keys).
 
 ### 2. Enterprise IDP Mode (Active Directory & OIDC Reverse Proxy)
 * **Active Directory (Windows Authentication / LDAP)**: Users whose SID matches `Admin:GroupSid` (default: `S-1-5-32-544` / Local Administrators) or domain admin groups are granted full gateway administration.
@@ -237,11 +237,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v4.36.0`** | 2026-08-25 | docs(portal): introduce Material for MkDocs documentation portal (`https://spelech.github.io/csharp-mcp-router/`), automated GitHub Pages deployment workflow, comprehensive navigation structure, and purge of agent plan artifacts |
+| **`v5.0.0`** | 2026-08-25 | feat(rebrand): major project rebrand to Model Context Gateway (MCG), binary/assembly renamed to `mcg`/`mcg.dll`, unified environment variables (`MCG_*` with backward-compatible `ROUTER_*` fallbacks), updated endpoints (`/admin`, `/mcg-admin`), AgentSkills.io skills (`mcg-admin`, `mcg-setup`), and documentation portal (`https://spelech.github.io/model-context-gateway/`) |
+| **`v4.36.0`** | 2026-08-25 | docs(portal): introduce Material for MkDocs documentation portal (`https://spelech.github.io/model-context-gateway/`), automated GitHub Pages deployment workflow, comprehensive navigation structure, and purge of agent plan artifacts |
 | **`v4.35.0`** | 2026-08-24 | feat(security): compact Base62 AppKeys with semantic prefix taxonomy (`mcp-adm-`, `mcp-glb-`, `mcp-{domain}-`, `mcp-usr-`, `mcp-srv-`), custom `ROUTER_ADMIN_KEY` seeding, Master Key `KeySource` tracking, Vault bootstrapping, and Web UI dynamic re-encryption |
 | **`v4.34.4`** | 2026-08-24 | chore(formatting): standardize C# formatting with `.editorconfig`, enforce CI `dotnet format --verify-no-changes` quality gate, and codebase housekeeping |
 | **`v4.34.3`** | 2026-08-24 | chore(hygiene): repository cleanup removing straggler patch scripts, subagent artifacts, and updating `.gitignore` with report/test output patterns |
-| **`v4.34.2`** | 2026-08-24 | docs(auth): introduce comprehensive MCP Server Authentication & Integration Cookbook (`docs/mcp-server-auth-cookbook.md`) with 11 scenario-driven recipes, decision matrix, and copy-paste recipes for Bearer, Custom Headers, Basic Auth, Query Params, STDIO, Vault, DPAPI, BYOK, Pass-Through, and Identity-Forwarding |
 ---
 
 ## 🧪 Code Coverage & Quality Gates
@@ -277,7 +277,7 @@ Run the unified verification engine locally before creating pull requests:
 - **Analysis Policy**: Rules are configured via `Directory.Build.props` at the workspace root, applying implicit usings, nullable context, deterministic builds, and latest-recommended Roslyn analyzers.
 - **Verification Command**:
   ```bash
-  dotnet format McpRouter.slnx --verify-no-changes
+  dotnet format ModelContextGateway.slnx --verify-no-changes
   ```
 
 ### TypeScript / React Frontend (ESLint Flat Config)

@@ -28,7 +28,7 @@ async function capture() {
   });
 
   const page = await context.newPage();
-  const baseUrl = process.env.ROUTER_URL || 'http://localhost:8088';
+  const baseUrl = process.env.MCG_URL || process.env.GATEWAY_URL || process.env.ROUTER_URL || 'http://localhost:8088';
 
   // 1. Dashboard Overview
   console.log('Capturing Dashboard Overview...');
