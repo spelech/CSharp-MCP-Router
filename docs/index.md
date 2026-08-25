@@ -112,7 +112,7 @@ flowchart LR
 
     Complete enterprise architecture specification, sequence diagrams, component models, and AES-256-GCM encryption pipelines.
 
--   :material-database: __[Database Providers & Data Model](data-model.md)__
+-   :material-database: __[Database Providers & Data Model](database-providers.md)__
 
     ---
 
