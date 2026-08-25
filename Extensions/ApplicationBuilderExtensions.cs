@@ -1,12 +1,7 @@
-using System.Reflection;
-
 namespace ModelContextGateway.Extensions
 {
     public static class ApplicationBuilderExtensions
     {
-        private static readonly string AppVersion =
-            Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "5.0.0";
-
         public static void ConfigureModelContextGatewayPipeline(this WebApplication app)
         {
             var config = app.Services.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
@@ -84,7 +79,7 @@ namespace ModelContextGateway.Extensions
             // ----------------------------------------------------
             // SYSTEM/HEALTH ENDPOINTS
             // ----------------------------------------------------
-            app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = "ModelContextGateway", version = AppVersion }));
+            app.MapGet("/health", () => Results.Ok(new { status = "healthy", service = GatewayMetadata.DefaultName, version = GatewayMetadata.Version }));
             app.MapGet("/api/config/branding", async (ModelContextGateway.Infrastructure.Persistence.ISettingRepository settingsRepo) =>
             {
                 var settings = await settingsRepo.GetSettingsAsync() ?? new ModelContextGateway.Models.RouterSettings();

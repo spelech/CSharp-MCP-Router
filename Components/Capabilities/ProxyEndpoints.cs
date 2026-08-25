@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Text.Json;
 using Dapper;
 using Microsoft.AspNetCore.Mvc;
@@ -7,7 +6,7 @@ namespace ModelContextGateway.Components.Capabilities
 {
     public static class ProxyEndpoints
     {
-        private static readonly string AppVersion = Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "1.6.6";
+        private static readonly string AppVersion = GatewayMetadata.Version;
 
         public static IEndpointRouteBuilder MapProxyEndpoints(this IEndpointRouteBuilder app)
         {

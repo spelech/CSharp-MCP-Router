@@ -19,7 +19,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     if (_initializeTask == null)
                     {
-                        var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"ModelContextGatewayAuto\",\"version\":\"5.0.0\"}}}";
+                        var initReq = GatewayMetadata.BuildInitializeRequest();
                         _initializeTask = Task.Run(async () => await InitializeBackendsAsync(initReq));
                     }
                 }
@@ -46,7 +46,7 @@ namespace ModelContextGateway.Core.Routing
                     var finalRequest = initializeRequest;
                     if (initializeRequest.Contains("server/discover"))
                     {
-                        finalRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"ModelContextGatewayAuto\",\"version\":\"5.0.0\"}}}";
+                        finalRequest = GatewayMetadata.BuildInitializeRequest();
                     }
                     _initializeTask = Task.Run(async () => await InitializeBackendsAsync(finalRequest));
                 }
@@ -183,7 +183,7 @@ namespace ModelContextGateway.Core.Routing
                     using (var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5)))
                     {
                         var initReq = string.IsNullOrEmpty(_lastInitializeRequest)
-                            ? "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"ModelContextGatewayAuto\",\"version\":\"5.0.0\"}}}"
+                            ? GatewayMetadata.BuildInitializeRequest()
                             : _lastInitializeRequest;
                         var resp = await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
                         if (resp.Error != null)

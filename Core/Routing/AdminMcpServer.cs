@@ -87,8 +87,6 @@ namespace ModelContextGateway.Core.Routing
                 }
             }
 
-            var serverVersion = typeof(AdminMcpServer).Assembly.GetName().Version?.ToString(3) ?? "4.19.0";
-
             var result = (object)new
             {
                 protocolVersion = negotiatedVersion,
@@ -98,8 +96,8 @@ namespace ModelContextGateway.Core.Routing
                 },
                 serverInfo = new
                 {
-                    name = "Model-Context-Gateway-Admin",
-                    version = serverVersion
+                    name = GatewayMetadata.AdminServerName,
+                    version = GatewayMetadata.Version
                 },
                 instructions = "In-process virtual Admin MCP Server for managing the Model Context Gateway configuration, servers, clients, policies, providers, settings, and diagnostics."
             };
@@ -1375,7 +1373,7 @@ namespace ModelContextGateway.Core.Routing
             }
 
             using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"5.0.0\"}}}";
+            var initReq = GatewayMetadata.BuildTestBenchInitializeRequest();
             await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
             await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
 

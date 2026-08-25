@@ -140,7 +140,7 @@ namespace ModelContextGateway.Core.Protocol
     public class McpInitializeParams
     {
         [JsonPropertyName("protocolVersion")]
-        public string ProtocolVersion { get; set; } = "2024-11-05";
+        public string ProtocolVersion { get; set; } = GatewayMetadata.ProtocolVersion;
 
         [JsonPropertyName("capabilities")]
         public JsonElement? Capabilities { get; set; }
@@ -152,9 +152,9 @@ namespace ModelContextGateway.Core.Protocol
     public class McpClientInfo
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; } = "ModelContextGateway";
+        public string Name { get; set; } = GatewayMetadata.DefaultName;
 
         [JsonPropertyName("version")]
-        public string Version { get; set; } = "5.0.0";
+        public string Version { get; set; } = GatewayMetadata.Version;
     }
 }

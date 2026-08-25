@@ -4,6 +4,7 @@ global using ModelContextGateway.Components.Capabilities;
 global using ModelContextGateway.Components.Clients;
 global using ModelContextGateway.Components.Providers;
 global using ModelContextGateway.Components.Servers;
+global using ModelContextGateway.Core;
 global using ModelContextGateway.Core.Protocol;
 global using ModelContextGateway.Core.Routing;
 global using ModelContextGateway.Extensions;
