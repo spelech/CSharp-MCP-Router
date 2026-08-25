@@ -28,7 +28,11 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
             // AppKey Hashing Migration: migrate legacy AES-CBC encrypted AppKeys to SHA-256 hashes (gated by RUN_KEY_MIGRATION flag)
             try
             {
-                var runKeyMigration = configuration["KeyMigration:Enabled"] ?? configuration["RUN_KEY_MIGRATION"] ?? Environment.GetEnvironmentVariable("RUN_KEY_MIGRATION");
+                var runKeyMigration = configuration["MCG_RUN_KEY_MIGRATION"]
+                    ?? configuration["KeyMigration:Enabled"]
+                    ?? configuration["RUN_KEY_MIGRATION"]
+                    ?? Environment.GetEnvironmentVariable("MCG_RUN_KEY_MIGRATION")
+                    ?? Environment.GetEnvironmentVariable("RUN_KEY_MIGRATION");
                 if (string.Equals(runKeyMigration, "true", StringComparison.OrdinalIgnoreCase))
                 {
                     using var conn = dbFactory.CreateConnection();
@@ -62,7 +66,7 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
                 }
                 else
                 {
-                    logger.LogInformation("AppKey legacy-key migration skipped. Set RUN_KEY_MIGRATION=true for a one-time migration.");
+                    logger.LogInformation("AppKey legacy-key migration skipped. Set MCG_RUN_KEY_MIGRATION=true for a one-time migration.");
                 }
             }
             catch (Exception exKeyMig)
@@ -70,11 +74,15 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
                 logger.LogWarning(exKeyMig, "AppKey hashing migration warning");
             }
 
-            // Seed Admin AppKey from environment (ROUTER_ADMIN_KEY / MCP_ADMIN_KEY) or default CLI key if none exists
+            // Seed Admin AppKey from environment (MCG_ADMIN_AUTH_KEY / MCG_ADMIN_KEY / ROUTER_ADMIN_KEY / MCP_ADMIN_KEY) or default CLI key if none exists
             try
             {
-                var customAdminKey = configuration["ROUTER_ADMIN_KEY"]
+                var customAdminKey = configuration["MCG_ADMIN_AUTH_KEY"]
+                    ?? configuration["MCG_ADMIN_KEY"]
+                    ?? configuration["ROUTER_ADMIN_KEY"]
                     ?? configuration["MCP_ADMIN_KEY"]
+                    ?? Environment.GetEnvironmentVariable("MCG_ADMIN_AUTH_KEY")
+                    ?? Environment.GetEnvironmentVariable("MCG_ADMIN_KEY")
                     ?? Environment.GetEnvironmentVariable("ROUTER_ADMIN_KEY")
                     ?? Environment.GetEnvironmentVariable("MCP_ADMIN_KEY");
 
@@ -215,7 +223,9 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
                     return string.Empty;
                 }
 
-                var secretString = configuration["ROUTER_SECRET"]
+                var secretString = configuration["MCG_SECRET"]
+                    ?? configuration["MCG_MASTER_KEY"]
+                    ?? configuration["ROUTER_SECRET"]
                     ?? configuration["ROUTER_MASTER_KEY"]
                     ?? DbKeyHelper.ResolveDbEncryptionKey(configuration);
 
@@ -245,4 +255,3 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
         }
     }
 }
-

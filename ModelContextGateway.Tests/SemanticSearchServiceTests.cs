@@ -35,7 +35,7 @@ namespace McpRouter.Tests
                 return dot / (System.Math.Sqrt(n1) * System.Math.Sqrt(n2));
             }
 
-            public void ReloadSettings(McpRouter.Models.RouterSettings settings) { }
+            public void ReloadSettings(RouterSettings settings) { }
         }
 
         [Fact]

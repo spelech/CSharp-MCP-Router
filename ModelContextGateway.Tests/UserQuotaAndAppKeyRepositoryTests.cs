@@ -1,6 +1,6 @@
 using System.Data;
 using Dapper;
-using McpRouter.Extensions;
+using ModelContextGateway.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;

@@ -98,10 +98,10 @@ namespace ModelContextGateway.Core.Routing
                 },
                 serverInfo = new
                 {
-                    name = "CSharp-MCP-Router-Admin",
+                    name = "Model-Context-Gateway-Admin",
                     version = serverVersion
                 },
-                instructions = "In-process virtual Admin MCP Server for managing the MCP Router configuration, servers, clients, policies, providers, settings, and diagnostics."
+                instructions = "In-process virtual Admin MCP Server for managing the Model Context Gateway configuration, servers, clients, policies, providers, settings, and diagnostics."
             };
 
             return Task.FromResult(result);

@@ -30,13 +30,17 @@ namespace ModelContextGateway.Infrastructure.Persistence
             logger.LogInformation("Initializing database via Dapper ({Provider})...", provider);
 
             var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
-            if (string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"]) && string.IsNullOrEmpty(configuration["ROUTER_MASTER_KEY"]))
+            if (string.IsNullOrEmpty(configuration["MCG_MASTER_KEY"])
+                && string.IsNullOrEmpty(configuration["MCG_SECRET"])
+                && string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"])
+                && string.IsNullOrEmpty(configuration["ROUTER_MASTER_KEY"])
+                && string.IsNullOrEmpty(configuration["ROUTER_SECRET"]))
             {
                 logger.LogInformation("Master encryption key resolved from persistent keyfile or auto-generated key.");
             }
             else if (encryptionKey.Length < 16)
             {
-                logger.LogCritical("SECURITY WARNING: The configured DB_ENCRYPTION_KEY is too short (< 16 characters).");
+                logger.LogCritical("SECURITY WARNING: The configured master encryption key is too short (< 16 characters).");
             }
 
             using var conn = dbFactory.CreateConnection();

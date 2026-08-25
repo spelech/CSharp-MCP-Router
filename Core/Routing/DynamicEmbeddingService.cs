@@ -37,7 +37,7 @@ namespace ModelContextGateway.Core.Routing
             {
                 if (SecurityValidationHelper.IsPrivateOrLoopback(newSettings.EmbeddingApiUrl))
                 {
-                    var allowPrivate = Environment.GetEnvironmentVariable("ALLOW_PRIVATE_IPS") == "true";
+                    var allowPrivate = (Environment.GetEnvironmentVariable("MCG_ALLOW_PRIVATE_IPS") ?? Environment.GetEnvironmentVariable("ALLOW_PRIVATE_IPS")) == "true";
                     if (!allowPrivate)
                     {
                         throw new ArgumentException("Embedding URL points to a blocked private or loopback IP range.");

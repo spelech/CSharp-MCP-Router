@@ -10,6 +10,15 @@ namespace ModelContextGateway.Extensions
             builder.Logging.AddDebug();
             builder.Logging.AddProvider(new InMemoryLoggerProvider());
 
+            var logLevelStr = builder.Configuration["MCG_LOG_LEVEL"]
+                ?? builder.Configuration["LOG_LEVEL"]
+                ?? Environment.GetEnvironmentVariable("MCG_LOG_LEVEL")
+                ?? Environment.GetEnvironmentVariable("LOG_LEVEL");
+            if (!string.IsNullOrEmpty(logLevelStr) && Enum.TryParse<LogLevel>(logLevelStr, true, out var minLevel))
+            {
+                builder.Logging.SetMinimumLevel(minLevel);
+            }
+
             // Decorate Console and Debug providers with SanitizingLoggerProvider to sanitize all logs
             for (int i = 0; i < builder.Services.Count; i++)
             {
@@ -193,8 +202,11 @@ namespace ModelContextGateway.Extensions
             {
                 options.AddDefaultPolicy(policy =>
                 {
-                    var allowedOriginsValue = builder.Configuration["CORS_ALLOWED_ORIGINS"]
-                        ?? builder.Configuration["AllowedOrigins"];
+                    var allowedOriginsValue = builder.Configuration["MCG_CORS_ALLOWED_ORIGINS"]
+                        ?? builder.Configuration["CORS_ALLOWED_ORIGINS"]
+                        ?? builder.Configuration["AllowedOrigins"]
+                        ?? Environment.GetEnvironmentVariable("MCG_CORS_ALLOWED_ORIGINS")
+                        ?? Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS");
 
                     if (!string.IsNullOrWhiteSpace(allowedOriginsValue))
                     {

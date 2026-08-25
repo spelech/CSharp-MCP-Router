@@ -1,5 +1,5 @@
 using System.Text;
-using McpRouter.Middleware;
+using ModelContextGateway.Middleware;
 using Microsoft.AspNetCore.Http;
 
 namespace McpRouter.Tests

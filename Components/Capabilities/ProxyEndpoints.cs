@@ -348,7 +348,7 @@ namespace ModelContextGateway.Components.Capabilities
                                     prompts = new { listChanged = true },
                                     resources = new { subscribe = false, listChanged = true }
                                 },
-                                serverInfo = new { name = "McpRouterGateway", version = AppVersion }
+                                serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             }
                         };
                         var json = JsonSerializer.Serialize(response);
@@ -371,7 +371,7 @@ namespace ModelContextGateway.Components.Capabilities
                                     prompts = new { listChanged = true },
                                     resources = new { subscribe = false, listChanged = true }
                                 },
-                                serverInfo = new { name = "McpRouterGateway", version = AppVersion }
+                                serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             }
                         };
                         var json = JsonSerializer.Serialize(response);
@@ -700,7 +700,7 @@ namespace ModelContextGateway.Components.Capabilities
                     try
                     {
                         logger.LogDebug("Processing initial JSON-RPC message in POST /mcp body: {Body}", PiiSanitizer.SanitizePayload(requestBody));
-                        var serverName = "McpRouterGateway";
+                        var serverName = "ModelContextGateway";
                         if (!string.IsNullOrWhiteSpace(targetServerId))
                         {
                             var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
@@ -843,7 +843,7 @@ namespace ModelContextGateway.Components.Capabilities
                                 },
                                 serverInfo = new
                                 {
-                                    name = "McpRouterGateway",
+                                    name = "ModelContextGateway",
                                     version = AppVersion
                                 }
                             }
@@ -870,7 +870,7 @@ namespace ModelContextGateway.Components.Capabilities
                                 },
                                 serverInfo = new
                                 {
-                                    name = "McpRouterGateway",
+                                    name = "ModelContextGateway",
                                     version = AppVersion
                                 }
                             }

@@ -33,7 +33,9 @@ namespace ModelContextGateway.Infrastructure.Secrets
 
         private static byte[] GetEncryptionKey(IConfiguration config)
         {
-            var secretString = config["ROUTER_SECRET"]
+            var secretString = config["MCG_SECRET"]
+                ?? config["MCG_MASTER_KEY"]
+                ?? config["ROUTER_SECRET"]
                 ?? config["ROUTER_MASTER_KEY"]
                 ?? DbKeyHelper.ResolveDbEncryptionKey(config);
 
@@ -146,7 +148,7 @@ namespace ModelContextGateway.Infrastructure.Secrets
                 return true;
             }
 
-            var legacySecret = config["DB_ENCRYPTION_KEY"] ?? config["ROUTER_MASTER_KEY"];
+            var legacySecret = config["MCG_MASTER_KEY"] ?? config["MCG_SECRET"] ?? config["DB_ENCRYPTION_KEY"] ?? config["ROUTER_MASTER_KEY"] ?? config["ROUTER_SECRET"];
             if (!string.IsNullOrEmpty(legacySecret))
             {
                 var legacyKey = DeriveKey(legacySecret);

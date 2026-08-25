@@ -143,7 +143,7 @@ namespace McpRouter.Tests
             Assert.Equal("2026-07-28", protoProp.GetString());
             Assert.True(resultProp.TryGetProperty("serverInfo", out var serverInfoProp));
             Assert.True(serverInfoProp.TryGetProperty("name", out var nameProp));
-            Assert.Equal("CSharp-MCP-Router-Admin", nameProp.GetString());
+            Assert.Equal("Model-Context-Gateway-Admin", nameProp.GetString());
         }
 
         [Fact]

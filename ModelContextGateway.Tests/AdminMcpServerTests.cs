@@ -201,7 +201,7 @@ namespace McpRouter.Tests
             var jsonDefault = JsonSerializer.Serialize(initResultDefault);
             using var docDefault = JsonDocument.Parse(jsonDefault);
             Assert.Equal("2026-07-28", docDefault.RootElement.GetProperty("protocolVersion").GetString());
-            Assert.Equal("CSharp-MCP-Router-Admin", docDefault.RootElement.GetProperty("serverInfo").GetProperty("name").GetString());
+            Assert.Equal("Model-Context-Gateway-Admin", docDefault.RootElement.GetProperty("serverInfo").GetProperty("name").GetString());
 
             // Backward compatibility negotiation to 2024-11-05
             var params2024 = JsonDocument.Parse("{\"protocolVersion\":\"2024-11-05\"}").RootElement;

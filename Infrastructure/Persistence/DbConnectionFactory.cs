@@ -24,12 +24,34 @@ namespace ModelContextGateway.Infrastructure.Persistence
 
         public DbConnectionFactory(IConfiguration config)
         {
-            _provider = config["DB_PROVIDER"]?.ToLower() ?? "sqlite";
-            _connectionString = config.GetConnectionString("DefaultConnection")
-                ?? config.GetConnectionString("Sqlite")
-                ?? config["ConnectionStrings:DefaultConnection"]
-                ?? config["ConnectionStrings:Sqlite"]
-                ?? "";
+            _provider = (config["MCG_DATABASE_PROVIDER"]
+                ?? config["MCG_DB_PROVIDER"]
+                ?? config["DB_PROVIDER"]
+                ?? Environment.GetEnvironmentVariable("MCG_DATABASE_PROVIDER")
+                ?? Environment.GetEnvironmentVariable("MCG_DB_PROVIDER")
+                ?? Environment.GetEnvironmentVariable("DB_PROVIDER")
+                ?? "sqlite").ToLowerInvariant();
+
+            var explicitDbPath = config["MCG_DB_PATH"]
+                ?? config["MCG_DATABASE_PATH"]
+                ?? config["ROUTER_DATABASE_PATH"]
+                ?? config["DATABASE_PATH"]
+                ?? Environment.GetEnvironmentVariable("MCG_DB_PATH")
+                ?? Environment.GetEnvironmentVariable("MCG_DATABASE_PATH")
+                ?? Environment.GetEnvironmentVariable("ROUTER_DATABASE_PATH");
+
+            if (!string.IsNullOrWhiteSpace(explicitDbPath))
+            {
+                _connectionString = $"Data Source={explicitDbPath};";
+            }
+            else
+            {
+                _connectionString = config.GetConnectionString("DefaultConnection")
+                    ?? config.GetConnectionString("Sqlite")
+                    ?? config["ConnectionStrings:DefaultConnection"]
+                    ?? config["ConnectionStrings:Sqlite"]
+                    ?? "";
+            }
 
             if (_provider == "sqlite" && string.IsNullOrEmpty(_connectionString))
             {

@@ -139,7 +139,7 @@ namespace ModelContextGateway.Infrastructure.Secrets
                 }
 
                 // 2. Fall back to static IConfiguration / Environment variables
-                address ??= _config["Vault:Address"] ?? _config["VAULT_ADDR"] ?? Environment.GetEnvironmentVariable("VAULT_ADDR");
+                address ??= _config["MCG_VAULT_ADDR"] ?? _config["Vault:Address"] ?? _config["VAULT_ADDR"] ?? Environment.GetEnvironmentVariable("MCG_VAULT_ADDR") ?? Environment.GetEnvironmentVariable("VAULT_ADDR");
                 if (string.IsNullOrEmpty(address))
                 {
                     _vaultClient = null;
@@ -151,9 +151,9 @@ namespace ModelContextGateway.Infrastructure.Secrets
                     throw new ArgumentException("Vault Address must use the HTTP or HTTPS scheme.");
                 }
 
-                roleId ??= _config["Vault:RoleId"];
-                secretId ??= _config["Vault:SecretId"];
-                token ??= _config["Vault:Token"] ?? _config["VAULT_TOKEN"] ?? Environment.GetEnvironmentVariable("VAULT_TOKEN");
+                roleId ??= _config["MCG_VAULT_ROLE_ID"] ?? _config["Vault:RoleId"] ?? _config["VAULT_ROLE_ID"] ?? Environment.GetEnvironmentVariable("MCG_VAULT_ROLE_ID") ?? Environment.GetEnvironmentVariable("VAULT_ROLE_ID");
+                secretId ??= _config["MCG_VAULT_SECRET_ID"] ?? _config["Vault:SecretId"] ?? _config["VAULT_SECRET_ID"] ?? Environment.GetEnvironmentVariable("MCG_VAULT_SECRET_ID") ?? Environment.GetEnvironmentVariable("VAULT_SECRET_ID");
+                token ??= _config["MCG_VAULT_TOKEN"] ?? _config["Vault:Token"] ?? _config["VAULT_TOKEN"] ?? Environment.GetEnvironmentVariable("MCG_VAULT_TOKEN") ?? Environment.GetEnvironmentVariable("VAULT_TOKEN");
 
                 _defaultMountPoint = mountPath;
 

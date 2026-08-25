@@ -22,7 +22,7 @@ namespace ModelContextGateway.Core.Routing
         {
             if (SecurityValidationHelper.IsPrivateOrLoopback(_settings.EmbeddingApiUrl))
             {
-                var allowPrivate = Environment.GetEnvironmentVariable("ALLOW_PRIVATE_IPS") == "true";
+                var allowPrivate = (Environment.GetEnvironmentVariable("MCG_ALLOW_PRIVATE_IPS") ?? Environment.GetEnvironmentVariable("ALLOW_PRIVATE_IPS")) == "true";
                 if (!allowPrivate)
                 {
                     throw new InvalidOperationException("Access to private or loopback IP ranges is blocked for security reasons.");

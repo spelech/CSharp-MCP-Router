@@ -1,7 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using FluentAssertions;
-using McpRouter.Extensions;
+using ModelContextGateway.Extensions;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
@@ -466,7 +466,7 @@ namespace McpRouter.Tests
 
             // Act
             // Start initialization, which connects, starts reader, and handles messages
-            var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpRouterGatewayAuto\",\"version\":\"0.4.0\"}}}";
+            var defaultInitRequest = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"auto-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"ModelContextGatewayAuto\",\"version\":\"0.4.0\"}}}";
             await session.InitializeBackendsAsync(defaultInitRequest);
 
             // Wait a moment for background reader to process the notification and write to the response
