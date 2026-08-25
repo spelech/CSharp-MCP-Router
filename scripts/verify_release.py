@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Release and Version Verification Engine (Issue #59)
-CSharp-MCP-Router
+Model Context Gateway (MCG)
 
 This script validates release integrity across four dimensions:
 1. Version synchronization (csproj, useUserStore.ts, CHANGELOG.md, README.md)

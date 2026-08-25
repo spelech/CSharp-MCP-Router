@@ -2,8 +2,8 @@
 <configuration>
   <system.webServer>
     <!--
-      ASP.NET Core Module v2 (ANCM) Configuration for C# MCP Router Gateway
-      =====================================================================
+      ASP.NET Core Module v2 (ANCM) Configuration for Model Context Gateway (MCG)
+      ============================================================================
       Prerequisites:
         1. .NET 10.0 Windows Hosting Bundle or ASP.NET Core Module v2 installed on IIS.
         2. IIS Application Pool configured with .NET CLR Version: "No Managed Code".

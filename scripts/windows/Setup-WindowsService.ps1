@@ -146,7 +146,7 @@ function Probe-Health {
         $retryCount++
         try {
             $response = Invoke-RestMethod -Uri $healthUrl -Method Get -TimeoutSec 4 -ErrorAction Stop
-            if ($response.status -eq "healthy" -or $response.service -eq "McpRouter") {
+            if ($response.status -eq "healthy" -or $response.service -eq "ModelContextGateway") {
                 $healthy = $true
                 Write-Success "Health check passed! Response: $($response | ConvertTo-Json -Compress)"
             }
