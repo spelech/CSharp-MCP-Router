@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    CSharp-MCP-Router Automated Provisioning Script for Windows & IIS Environments.
+    Model Context Gateway (MCG) Automated Provisioning Script for Windows & IIS Environments.
 .EXAMPLE
     .\automate-setup.ps1 -RouterUrl "http://localhost:8080" -AdminKey "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
 #>
@@ -12,7 +12,7 @@ param(
 $ErrorActionPreference = "Stop"
 
 Write-Host "========================================================" -ForegroundColor Cyan
-Write-Host " Starting MCP Router Windows / IIS Automated Provisioning" -ForegroundColor Cyan
+Write-Host " Starting Model Context Gateway Windows / IIS Automated Provisioning" -ForegroundColor Cyan
 Write-Host " Target: $RouterUrl" -ForegroundColor Cyan
 Write-Host "========================================================" -ForegroundColor Cyan
 
@@ -54,7 +54,7 @@ $adConfig = @{
     useSsl = $true
     domain = "INTERNAL"
     baseDn = "DC=internal,DC=corp"
-    bindDn = "CN=svc-mcp,OU=ServiceAccounts,DC=internal,DC=corp"
+    bindDn = "CN=svc-mcg,OU=ServiceAccounts,DC=internal,DC=corp"
     bindPassword = "StrongPassword123!"
 } | ConvertTo-Json -Compress
 

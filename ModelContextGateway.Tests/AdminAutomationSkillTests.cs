@@ -19,11 +19,11 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-ADMIN-SKILL-FRONTMATTER", "MCP", RequirementType.Positive, "mcp-router-admin skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters")]
+        [Requirement("MCP-ADMIN-SKILL-FRONTMATTER", "MCP", RequirementType.Positive, "mcg-admin skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters")]
         public void Skill_Frontmatter_IsValidAndWithinCharacterLimit()
         {
             var root = GetRepoRootDir();
-            var skillPath = Path.Combine(root, "skills", "mcp-router-admin", "SKILL.md");
+            var skillPath = Path.Combine(root, "skills", "mcg-admin", "SKILL.md");
 
             Assert.True(File.Exists(skillPath), $"Expected skill file at {skillPath} to exist.");
 
@@ -36,7 +36,7 @@ namespace ModelContextGateway.Tests
             var frontmatter = match.Groups[1].Value.Trim();
             Assert.True(frontmatter.Length < 1024, $"Frontmatter length ({frontmatter.Length}) must be under 1024 characters.");
 
-            Assert.Matches(@"name:\s*mcp-router-admin", frontmatter);
+            Assert.Matches(@"name:\s*mcg-admin", frontmatter);
 
             var descMatch = Regex.Match(frontmatter, @"description:\s*(.+)", RegexOptions.Singleline);
             Assert.True(descMatch.Success, "Frontmatter must contain a description field.");
@@ -45,11 +45,11 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-ADMIN-SKILL-WORKFLOW", "MCP", RequirementType.Positive, "mcp-router-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification")]
+        [Requirement("MCP-ADMIN-SKILL-WORKFLOW", "MCP", RequirementType.Positive, "mcg-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification")]
         public void Skill_ContainsAllRequiredPhasesAndProviderCookbooks()
         {
             var root = GetRepoRootDir();
-            var skillPath = Path.Combine(root, "skills", "mcp-router-admin", "SKILL.md");
+            var skillPath = Path.Combine(root, "skills", "mcg-admin", "SKILL.md");
             Assert.True(File.Exists(skillPath));
 
             var content = File.ReadAllText(skillPath);
@@ -101,11 +101,11 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-ADMIN-SKILL-TEMPLATES", "MCP", RequirementType.Positive, "All mcp-router-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation")]
+        [Requirement("MCP-ADMIN-SKILL-TEMPLATES", "MCP", RequirementType.Positive, "All mcg-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation")]
         public void Templates_AllExistAndAreValidJsonOrScripts()
         {
             var root = GetRepoRootDir();
-            var templatesDir = Path.Combine(root, "skills", "mcp-router-admin", "templates");
+            var templatesDir = Path.Combine(root, "skills", "mcg-admin", "templates");
             Assert.True(Directory.Exists(templatesDir), $"Templates directory {templatesDir} must exist.");
 
             var jsonTemplateFiles = new[]
@@ -145,12 +145,12 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-ADMIN-SKILL-MIRROR", "MCP", RequirementType.Positive, "mcp-router-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories")]
+        [Requirement("MCP-ADMIN-SKILL-MIRROR", "MCP", RequirementType.Positive, "mcg-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories")]
         public void Skill_MirroredInAgentsDirectory()
         {
             var root = GetRepoRootDir();
-            var sourceSkill = Path.Combine(root, "skills", "mcp-router-admin", "SKILL.md");
-            var targetSkill = Path.Combine(root, ".agents", "skills", "mcp-router-admin", "SKILL.md");
+            var sourceSkill = Path.Combine(root, "skills", "mcg-admin", "SKILL.md");
+            var targetSkill = Path.Combine(root, ".agents", "skills", "mcg-admin", "SKILL.md");
 
             Assert.True(File.Exists(sourceSkill), "Source SKILL.md must exist.");
             Assert.True(File.Exists(targetSkill), "Mirrored SKILL.md in .agents must exist.");
@@ -159,8 +159,8 @@ namespace ModelContextGateway.Tests
             var targetContent = File.ReadAllText(targetSkill);
             Assert.Equal(sourceContent, targetContent);
 
-            var sourceTemplatesDir = Path.Combine(root, "skills", "mcp-router-admin", "templates");
-            var targetTemplatesDir = Path.Combine(root, ".agents", "skills", "mcp-router-admin", "templates");
+            var sourceTemplatesDir = Path.Combine(root, "skills", "mcg-admin", "templates");
+            var targetTemplatesDir = Path.Combine(root, ".agents", "skills", "mcg-admin", "templates");
 
             Assert.True(Directory.Exists(targetTemplatesDir), "Mirrored templates directory in .agents must exist.");
 
@@ -168,7 +168,7 @@ namespace ModelContextGateway.Tests
             {
                 var fileName = Path.GetFileName(file);
                 var targetFile = Path.Combine(targetTemplatesDir, fileName);
-                Assert.True(File.Exists(targetFile), $"Expected mirrored template {fileName} to exist in .agents/skills/mcp-router-admin/templates/");
+                Assert.True(File.Exists(targetFile), $"Expected mirrored template {fileName} to exist in .agents/skills/mcg-admin/templates/");
                 Assert.Equal(File.ReadAllText(file), File.ReadAllText(targetFile));
             }
         }
@@ -178,7 +178,7 @@ namespace ModelContextGateway.Tests
         public async Task EndToEnd_BlankSlateProvisioning_ConfiguresAllEntitiesViaAdminTools()
         {
             var root = GetRepoRootDir();
-            var templatesDir = Path.Combine(root, "skills", "mcp-router-admin", "templates");
+            var templatesDir = Path.Combine(root, "skills", "mcg-admin", "templates");
 
             var tempDbFile = Path.Combine(Path.GetTempPath(), $"mcp_admin_auto_{Guid.NewGuid():N}.db");
             try

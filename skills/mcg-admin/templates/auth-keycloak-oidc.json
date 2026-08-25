@@ -6,7 +6,7 @@
   "isEnabled": true,
   "configJson": {
     "authority": "https://keycloak.internal.corp/realms/master",
-    "clientId": "mcp-router",
+    "clientId": "mcg",
     "clientSecret": "REPLACE_WITH_KEYCLOAK_CLIENT_SECRET",
     "requireHttps": true,
     "groupClaim": "groups"

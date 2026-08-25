@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# CSharp-MCP-Router Automated Provisioning Script (JSON-RPC over /admin)
+# Model Context Gateway (MCG) Automated Provisioning Script (JSON-RPC over /admin)
 # ==============================================================================
 # Usage:
 #   ROUTER_URL="http://localhost:8080" ADMIN_KEY="mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9" ./automate-setup.sh
@@ -11,7 +11,7 @@ ROUTER_URL="${ROUTER_URL:-http://localhost:8080}"
 ADMIN_KEY="${ADMIN_KEY:-mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9}"
 
 echo "========================================================"
-echo " Starting MCP Router Automated Provisioning"
+echo " Starting Model Context Gateway Automated Provisioning"
 echo " Target: ${ROUTER_URL}"
 echo "========================================================"
 
@@ -90,5 +90,5 @@ KEY_RESP=$(call_admin_tool "manage_appkeys" "${KEY_CONFIG}")
 echo "AppKey response: ${KEY_RESP}"
 
 echo "========================================================"
-echo " MCP Router Automated Provisioning Completed Successfully"
+echo " Model Context Gateway Automated Provisioning Completed Successfully"
 echo "========================================================"

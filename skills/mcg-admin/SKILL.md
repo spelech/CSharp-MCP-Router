@@ -1,27 +1,27 @@
 ---
-name: mcp-router-admin
-description: Use when configuring, managing, provisioning, or automating CSharp-MCP-Router settings, authentication providers (Authentik, Keycloak, Entra ID, Active Directory, Cloudflare Access), secret providers (HashiCorp Vault, AES Master Key, DPAPI), access policies, group mappings, backend servers, or client keys via the Admin MCP Server (/admin/sse).
+name: mcg-admin
+description: Use when configuring, managing, provisioning, or automating Model Context Gateway (MCG) settings, authentication providers (Authentik, Keycloak, Entra ID, Active Directory, Cloudflare Access), secret providers (HashiCorp Vault, AES Master Key, DPAPI), access policies, group mappings, backend servers, or client keys via the Admin MCP Server (/admin/sse or /mcg-admin/sse).
 ---
 
-# Universal Admin MCP Automation Skill (`mcp-router-admin`)
+# Universal Admin MCP Automation Skill (`mcg-admin`)
 
 ## Overview
 
-**CSharp-MCP-Router** includes a built-in, encrypted database-backed **Admin MCP Server** (`/admin/sse`) exposing 10 consolidated tools. This skill equips autonomous AI coding agents and DevOps engineers to configure, manage, and verify any gateway deployment from a blank slate without manual UI interaction.
+**Model Context Gateway (MCG)** includes a built-in, encrypted database-backed **Admin MCP Server** (`/admin/sse` or `/mcg-admin/sse`) exposing 10 consolidated tools. This skill equips autonomous AI coding agents and DevOps engineers to configure, manage, and verify any gateway deployment from a blank slate without manual UI interaction.
 
 ---
 
 ## Blank-Slate Safe Defaults
 
-When `CSharp-MCP-Router` starts in a new environment, it initializes with secure out-of-the-box defaults:
+When `Model Context Gateway (MCG)` starts in a new environment, it initializes with secure out-of-the-box defaults:
 
 | Component | Default Configuration | Notes |
 | :--- | :--- | :--- |
-| **Database** | SQLite (`./data/mcp_router.db`) | Zero external database dependencies required. Auto-seeded on startup. |
+| **Database** | SQLite (`./data/mcg.db`) | Zero external database dependencies required. Auto-seeded on startup. |
 | **Master Key** | `./data/.master.key` (Auto-Generated) or `ROUTER_MASTER_KEY` / `ROUTER_MASTER_KEY_FILE` | Encrypts sensitive credentials at rest in the DB (AES-256-GCM). Auto-generated if unset. |
-| **Admin AppKey** | `mcp-adm-` (Compact Base62) or `ROUTER_ADMIN_KEY` | Scoped to `["all", "admin"]` for user `admin`. Seeded automatically in the database or configured via `ROUTER_ADMIN_KEY`. Legacy fallback: `mcp-global-admin-default-cli-key-99`. |
+| **Admin AppKey** | `mcp-adm-` (Compact Base62) or `ROUTER_ADMIN_KEY` | Scoped to `["all", "admin"]`. Seeded automatically in the database or configured via `ROUTER_ADMIN_KEY`. Legacy fallback: `mcp-global-admin-default-cli-key-99`. |
 | **Network Trust** | `127.0.0.1, ::1` (Loopback) | Configurable via `Admin:StandaloneAllowedNetworks` for LAN/CIDR subnets. |
-| **Admin Endpoint** | `http://<host>:8080/admin/sse` | MCP SSE transport for administrative JSON-RPC tool calling. |
+| **Admin Endpoint** | `http://<host>:8080/admin/sse` or `/mcg-admin/sse` | MCP SSE transport for administrative JSON-RPC tool calling. |
 
 ---
 
@@ -78,11 +78,11 @@ When `CSharp-MCP-Router` starts in a new environment, it initializes with secure
 ## Phase 1: Gateway Connection & Diagnostics
 
 ### 1.1 Connect to Admin MCP Server
-Configure your client with the gateway's `/admin/sse` endpoint and the admin bearer token (e.g. compact `mcp-adm-` key):
+Configure your client with the gateway's `/admin/sse` (or `/mcg-admin/sse`) endpoint and the admin bearer token (e.g. compact `mcp-adm-` key):
 ```json
 {
   "mcpServers": {
-    "mcp-router-admin": {
+    "mcg-admin": {
       "url": "http://localhost:8080/admin/sse",
       "headers": {
         "Authorization": "Bearer mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
@@ -122,7 +122,7 @@ No extra provider needed. All backend credentials stored via `manage_servers` ar
     "providerName": "HashiCorpVault",
     "displayName": "Enterprise Vault KV",
     "isEnabled": true,
-    "configJson": "{\"address\":\"https://vault.internal.corp:8200\",\"authMethod\":\"token\",\"token\":\"s.yourVaultToken\",\"mountPath\":\"secret\"}"
+    "configJson": "{"address":"https://vault.internal.corp:8200","authMethod":"token","token":"s.yourVaultToken","mountPath":"secret"}"
   }
 }
 ```
@@ -136,7 +136,7 @@ No extra provider needed. All backend credentials stored via `manage_servers` ar
     "providerName": "HashiCorpVault",
     "displayName": "Production AppRole Vault",
     "isEnabled": true,
-    "configJson": "{\"address\":\"https://vault.internal.corp:8200\",\"authMethod\":\"approle\",\"roleId\":\"11111111-2222-3333-4444-555555555555\",\"secretId\":\"66666666-7777-8888-9999-000000000000\",\"mountPath\":\"secret\"}"
+    "configJson": "{"address":"https://vault.internal.corp:8200","authMethod":"approle","roleId":"11111111-2222-3333-4444-555555555555","secretId":"66666666-7777-8888-9999-000000000000","mountPath":"secret"}"
   }
 }
 ```
@@ -184,7 +184,7 @@ Configure single sign-on, reverse proxy forward-auth, or enterprise directory in
     "userHeader": "Remote-User",
     "groupsHeader": "Remote-Groups",
     "isEnabled": true,
-    "configJson": "{\"trustedProxies\":[\"127.0.0.1\",\"10.0.0.0/8\",\"172.16.0.0/12\",\"192.168.0.0/16\"]}"
+    "configJson": "{"trustedProxies":["127.0.0.1","10.0.0.0/8","172.16.0.0/12","192.168.0.0/16"],"requireTrustedProxy":true}"
   }
 }
 ```
@@ -200,7 +200,7 @@ Configure single sign-on, reverse proxy forward-auth, or enterprise directory in
     "userHeader": "X-Forwarded-User",
     "groupsHeader": "X-Forwarded-Groups",
     "isEnabled": true,
-    "configJson": "{\"authority\":\"https://keycloak.internal.corp/realms/master\",\"clientId\":\"mcp-router\",\"requireHttps\":true}"
+    "configJson": "{"authority":"https://keycloak.internal.corp/realms/master","clientId":"mcg","requireHttps":true}"
   }
 }
 ```
@@ -216,7 +216,7 @@ Configure single sign-on, reverse proxy forward-auth, or enterprise directory in
     "userHeader": "Remote-User",
     "groupsHeader": "Remote-Groups",
     "isEnabled": true,
-    "configJson": "{\"tenantId\":\"00000000-0000-0000-0000-000000000000\",\"clientId\":\"11111111-1111-1111-1111-111111111111\",\"groupClaim\":\"groups\"}"
+    "configJson": "{"tenantId":"00000000-0000-0000-0000-000000000000","clientId":"11111111-1111-1111-1111-111111111111","groupClaim":"groups"}"
   }
 }
 ```
@@ -230,7 +230,7 @@ Configure single sign-on, reverse proxy forward-auth, or enterprise directory in
     "providerName": "ActiveDirectory",
     "displayName": "Corporate Active Directory",
     "isEnabled": true,
-    "configJson": "{\"server\":\"dc01.internal.corp\",\"port\":636,\"useSsl\":true,\"domain\":\"INTERNAL\",\"baseDn\":\"DC=internal,DC=corp\",\"bindDn\":\"CN=svc-mcp,OU=ServiceAccounts,DC=internal,DC=corp\",\"bindPassword\":\"StrongPassword123!\"}"
+    "configJson": "{"server":"dc01.internal.corp","port":636,"useSsl":true,"domain":"INTERNAL","baseDn":"DC=internal,DC=corp","bindDn":"CN=svc-mcg,OU=ServiceAccounts,DC=internal,DC=corp","bindPassword":"StrongPassword123!"}"
   }
 }
 ```
@@ -244,7 +244,7 @@ Configure single sign-on, reverse proxy forward-auth, or enterprise directory in
     "server": "dc01.internal.corp",
     "port": 636,
     "useSsl": true,
-    "bindDn": "CN=svc-mcp,OU=ServiceAccounts,DC=internal,DC=corp",
+    "bindDn": "CN=svc-mcg,OU=ServiceAccounts,DC=internal,DC=corp",
     "bindPassword": "StrongPassword123!"
   }
 }
@@ -292,7 +292,7 @@ Configure semantic tool search embeddings (OpenAI, Azure, Ollama, ONNX):
   "tool": "manage_settings",
   "arguments": {
     "action": "update",
-    "dashboardTitle": "Enterprise MCP Gateway",
+    "dashboardTitle": "Model Context Gateway",
     "embeddingProvider": "OpenAI",
     "embeddingApiUrl": "https://api.openai.com/v1",
     "embeddingApiKey": "sk-proj-...",

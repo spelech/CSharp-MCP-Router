@@ -1,7 +1,7 @@
 services:
-  mcp-router:
-    image: ghcr.io/spelech/mcp-router:latest
-    container_name: mcp-router
+  mcg:
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg
     restart: unless-stopped
     ports:
       - "8080:8080"

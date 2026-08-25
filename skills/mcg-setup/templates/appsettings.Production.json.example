@@ -3,13 +3,13 @@
     "LogLevel": {
       "Default": "Information",
       "Microsoft.AspNetCore": "Warning",
-      "McpRouter": "Information"
+      "ModelContextGateway": "Information"
     }
   },
   "AllowedHosts": "*",
   "DB_PROVIDER": "sqlite",
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=data/mcp_router.db"
+    "DefaultConnection": "Data Source=data/mcg.db"
   },
   "ROUTER_ADMIN_KEY": "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9",
   "ROUTER_MASTER_KEY": "REPLACE_WITH_GENERATED_BASE64_256BIT_KEY",

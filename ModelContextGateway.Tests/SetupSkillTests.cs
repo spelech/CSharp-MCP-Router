@@ -16,11 +16,11 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DOC-SETUP-SKILL-FRONTMATTER", "DOC", RequirementType.Positive, "mcp-router-setup skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters")]
+        [Requirement("DOC-SETUP-SKILL-FRONTMATTER", "DOC", RequirementType.Positive, "mcg-setup skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters")]
         public void Skill_Frontmatter_IsValidAndWithinCharacterLimit()
         {
             var root = GetRepoRootDir();
-            var skillPath = Path.Combine(root, "skills", "mcp-router-setup", "SKILL.md");
+            var skillPath = Path.Combine(root, "skills", "mcg-setup", "SKILL.md");
 
             Assert.True(File.Exists(skillPath), $"Expected skill file at {skillPath} to exist.");
 
@@ -33,7 +33,7 @@ namespace ModelContextGateway.Tests
             var frontmatter = match.Groups[1].Value.Trim();
             Assert.True(frontmatter.Length < 1024, $"Frontmatter length ({frontmatter.Length}) must be under 1024 characters.");
 
-            Assert.Matches(@"name:\s*mcp-router-setup", frontmatter);
+            Assert.Matches(@"name:\s*mcg-setup", frontmatter);
 
             var descMatch = Regex.Match(frontmatter, @"description:\s*(.+)", RegexOptions.Singleline);
             Assert.True(descMatch.Success, "Frontmatter must contain a description field.");
@@ -42,11 +42,11 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DOC-SETUP-SKILL-WORKFLOW", "DOC", RequirementType.Positive, "mcp-router-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration")]
+        [Requirement("DOC-SETUP-SKILL-WORKFLOW", "DOC", RequirementType.Positive, "mcg-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration")]
         public void Skill_ContainsAllRequiredPhasesAndComparisons()
         {
             var root = GetRepoRootDir();
-            var skillPath = Path.Combine(root, "skills", "mcp-router-setup", "SKILL.md");
+            var skillPath = Path.Combine(root, "skills", "mcg-setup", "SKILL.md");
             Assert.True(File.Exists(skillPath));
 
             var content = File.ReadAllText(skillPath);
@@ -96,11 +96,11 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DOC-SETUP-SKILL-TEMPLATES", "DOC", RequirementType.Positive, "All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/mcp-router")]
+        [Requirement("DOC-SETUP-SKILL-TEMPLATES", "DOC", RequirementType.Positive, "All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/model-context-gateway")]
         public void Templates_AreValidAndContainRequiredDirectives()
         {
             var root = GetRepoRootDir();
-            var templatesDir = Path.Combine(root, "skills", "mcp-router-setup", "templates");
+            var templatesDir = Path.Combine(root, "skills", "mcg-setup", "templates");
             Assert.True(Directory.Exists(templatesDir), $"Templates directory {templatesDir} must exist.");
 
             // 1. docker-compose.yml
@@ -108,7 +108,7 @@ namespace ModelContextGateway.Tests
             Assert.True(File.Exists(composePath));
             var composeContent = File.ReadAllText(composePath);
             Assert.NotEmpty(composeContent);
-            Assert.Contains("ghcr.io/spelech/mcp-router", composeContent);
+            Assert.Contains("ghcr.io/spelech/model-context-gateway", composeContent);
             Assert.Contains("ROUTER_MASTER_KEY", composeContent);
             Assert.Contains("DB_PROVIDER", composeContent);
             Assert.Contains("Admin__StandaloneAllowedNetworks", composeContent);
@@ -150,12 +150,12 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DOC-SETUP-SKILL-MIRROR", "DOC", RequirementType.Positive, "The mcp-router-setup skill and templates are mirrored 1:1 in .agents/skills/mcp-router-setup/")]
+        [Requirement("DOC-SETUP-SKILL-MIRROR", "DOC", RequirementType.Positive, "The mcg-setup skill and templates are mirrored 1:1 in .agents/skills/mcg-setup/")]
         public void Skill_MirroredInAgentsDirectory()
         {
             var root = GetRepoRootDir();
-            var primarySkillDir = Path.Combine(root, "skills", "mcp-router-setup");
-            var mirroredSkillDir = Path.Combine(root, ".agents", "skills", "mcp-router-setup");
+            var primarySkillDir = Path.Combine(root, "skills", "mcg-setup");
+            var mirroredSkillDir = Path.Combine(root, ".agents", "skills", "mcg-setup");
 
             Assert.True(Directory.Exists(mirroredSkillDir), $"Mirrored skill directory {mirroredSkillDir} must exist.");
 

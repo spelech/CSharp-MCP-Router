@@ -8,7 +8,7 @@
     "useSsl": true,
     "domain": "INTERNAL",
     "baseDn": "DC=internal,DC=corp",
-    "bindDn": "CN=svc-mcp-router,OU=ServiceAccounts,DC=internal,DC=corp",
+    "bindDn": "CN=svc-mcg,OU=ServiceAccounts,DC=internal,DC=corp",
     "bindPassword": "REPLACE_WITH_SERVICE_ACCOUNT_PASSWORD"
   }
 }

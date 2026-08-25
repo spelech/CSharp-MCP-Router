@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-25T17:31:00.5014608Z",
+    "generatedAt": "2026-08-25T17:38:43.6244389Z",
     "totalRequirements": 133,
     "positiveCount": 110,
     "guardrailCount": 23,
@@ -1039,7 +1039,7 @@
       "id": "DOC-SETUP-SKILL-FRONTMATTER",
       "category": "DOC",
       "type": "Positive",
-      "description": "mcp-router-setup skill frontmatter is valid YAML, specifies name, description starting with \u0027Use when...\u0027, and length is under 1024 characters",
+      "description": "mcg-setup skill frontmatter is valid YAML, specifies name, description starting with \u0027Use when...\u0027, and length is under 1024 characters",
       "proofCount": 1,
       "proofs": [
         {
@@ -1055,7 +1055,7 @@
       "id": "DOC-SETUP-SKILL-MIRROR",
       "category": "DOC",
       "type": "Positive",
-      "description": "The mcp-router-setup skill and templates are mirrored 1:1 in .agents/skills/mcp-router-setup/",
+      "description": "The mcg-setup skill and templates are mirrored 1:1 in .agents/skills/mcg-setup/",
       "proofCount": 1,
       "proofs": [
         {
@@ -1071,7 +1071,7 @@
       "id": "DOC-SETUP-SKILL-TEMPLATES",
       "category": "DOC",
       "type": "Positive",
-      "description": "All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/mcp-router",
+      "description": "All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/model-context-gateway",
       "proofCount": 1,
       "proofs": [
         {
@@ -1087,7 +1087,7 @@
       "id": "DOC-SETUP-SKILL-WORKFLOW",
       "category": "DOC",
       "type": "Positive",
-      "description": "mcp-router-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration",
+      "description": "mcg-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration",
       "proofCount": 1,
       "proofs": [
         {
@@ -1835,7 +1835,7 @@
       "id": "MCP-ADMIN-SKILL-FRONTMATTER",
       "category": "MCP",
       "type": "Positive",
-      "description": "mcp-router-admin skill frontmatter is valid YAML, specifies name, description starting with \u0027Use when...\u0027, and length is under 1024 characters",
+      "description": "mcg-admin skill frontmatter is valid YAML, specifies name, description starting with \u0027Use when...\u0027, and length is under 1024 characters",
       "proofCount": 1,
       "proofs": [
         {
@@ -1851,7 +1851,7 @@
       "id": "MCP-ADMIN-SKILL-MIRROR",
       "category": "MCP",
       "type": "Positive",
-      "description": "mcp-router-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories",
+      "description": "mcg-admin skill files and templates are identically mirrored between skills/ and .agents/skills/ directories",
       "proofCount": 1,
       "proofs": [
         {
@@ -1867,7 +1867,7 @@
       "id": "MCP-ADMIN-SKILL-TEMPLATES",
       "category": "MCP",
       "type": "Positive",
-      "description": "All mcp-router-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation",
+      "description": "All mcg-admin scaffold templates exist, are non-empty, and contain valid JSON or scripts for Authentik, Keycloak, Entra, ActiveDirectory, Cloudflare, Vault, Embeddings, Docker, and shell automation",
       "proofCount": 1,
       "proofs": [
         {
@@ -1883,7 +1883,7 @@
       "id": "MCP-ADMIN-SKILL-WORKFLOW",
       "category": "MCP",
       "type": "Positive",
-      "description": "mcp-router-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification",
+      "description": "mcg-admin skill contains all 7 administration phases including diagnostics, secrets, auth providers, RBAC/group mappings, settings/embeddings, servers/clients, and live tool verification",
       "proofCount": 1,
       "proofs": [
         {

@@ -1,15 +1,15 @@
 ---
-name: mcp-router-setup
-description: Use when installing, configuring, deploying, or bootstrapping the CSharp-MCP-Router gateway in a new or existing environment (Docker, Docker Compose, or Windows IIS) for personal home-lab or enterprise use.
+name: mcg-setup
+description: Use when installing, configuring, deploying, or bootstrapping the Model Context Gateway (MCG) in a new or existing environment (Docker, Docker Compose, or Windows IIS) for personal home-lab or enterprise use.
 ---
 
-# Universal MCP Router Setup (`mcp-router-setup`)
+# Universal Model Context Gateway Setup (`mcg-setup`)
 
 ## Overview
 
-**CSharp-MCP-Router** is a high-performance ASP.NET Core gateway and proxy for the Model Context Protocol (MCP). It aggregates multiple backend MCP servers, exposes a token-efficient **Meta-Mode** (`/sse`) with `search_tools` and `execute_tool` to prevent context window bloat, and provides an encrypted database-backed **Admin MCP Server** (`/admin`) and Web UI for hot-reloading configurations at runtime.
+**Model Context Gateway (MCG)** is a high-performance ASP.NET Core gateway and proxy for the Model Context Protocol (MCP). It aggregates multiple backend MCP servers, exposes a token-efficient **Meta-Mode** (`/sse`) with `search_tools` and `execute_tool` to prevent context window bloat, and provides an encrypted database-backed **Admin MCP Server** (`/admin` or `/mcg-admin`) and Web UI for hot-reloading configurations at runtime.
 
-This skill provides an autonomous 6-phase decision and bootstrapping engine to install and configure the router in any environment without needing to clone or compile source code.
+This skill provides an autonomous 6-phase decision and bootstrapping engine to install and configure the gateway in any environment without needing to clone or compile source code.
 
 ---
 
@@ -17,7 +17,7 @@ This skill provides an autonomous 6-phase decision and bootstrapping engine to i
 
 ```
                          [Start Setup]
-                               │
+                                │
                 ┌──────────────┴──────────────┐
                 ▼                             ▼
        [Docker / Containers]          [Windows Server IIS]
@@ -25,7 +25,7 @@ This skill provides an autonomous 6-phase decision and bootstrapping engine to i
         Phase 1 & 2: Probe            Phase 1 & 2: Probe
                 │                             │
                 └──────────────┬──────────────┘
-                               ▼
+                                ▼
                Phase 3: Configuration Paradigm
                 ┌──────────────┴──────────────┐
                 ▼                             ▼
@@ -33,7 +33,7 @@ This skill provides an autonomous 6-phase decision and bootstrapping engine to i
        (Static / 12-Factor)          (Dynamic Hot-Reload)
                 │                             │
                 └──────────────┬──────────────┘
-                               ▼
+                                ▼
                Phase 4: Identity & Network Mode
                 ┌──────────────┴──────────────┐
                 ▼                             ▼
@@ -41,24 +41,24 @@ This skill provides an autonomous 6-phase decision and bootstrapping engine to i
        (Loopback / LAN CIDR)          (SSO / Forward-Auth)
                 │                             │
                 └──────────────┬──────────────┘
-                               ▼
+                                ▼
                Phase 5: Generate Artifacts
                (256-bit Key, Compose / IIS)
-                               ▼
+                                ▼
                Phase 6: Health & Client Setup
                (Claude, Cursor, Cline, Windsurf)
 ```
 
 ### Trigger Conditions & Use Cases
-- User wants to install, deploy, or configure `CSharp-MCP-Router` from scratch.
-- Deploying the router via Docker Compose, Docker CLI, or Windows IIS.
+- User wants to install, deploy, or configure `Model Context Gateway (MCG)` from scratch.
+- Deploying the gateway via Docker Compose, Docker CLI, or Windows IIS.
 - Connecting AI IDEs (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) to an aggregated MCP gateway.
 - Setting up standalone home-lab routing or enterprise SSO/AD authentication.
 - Troubleshooting missing `ROUTER_MASTER_KEY`, 403 network access, or client connection errors.
 
 ### When NOT to Use
-- Connecting to an individual, standalone MCP server directly without an aggregator or router.
-- Modifying router source code or writing C# unit tests (refer to repository developer guides instead).
+- Connecting to an individual, standalone MCP server directly without an aggregator or gateway.
+- Modifying gateway source code or writing C# unit tests (refer to repository developer guides instead).
 
 ---
 
@@ -72,14 +72,14 @@ Run the appropriate detection commands for the platform:
 
 ```bash
 # 1. OS & Architecture Detection
-uname -s -m 2>/dev/null || echo "$OS"
+uname -s -m 2>/dev/null || echo ""
 
 # 2. Docker Daemon Availability
 docker info >/dev/null 2>&1 && echo "DOCKER_AVAILABLE=true" || echo "DOCKER_AVAILABLE=false"
 test -e /var/run/docker.sock && echo "DOCKER_SOCK_FOUND=true" || echo "DOCKER_SOCK_FOUND=false"
 
 # 3. Vault & Secret Store Detection
-if [ -n "$VAULT_ADDR" ]; then echo "VAULT_DETECTED=$VAULT_ADDR"; fi
+if [ -n "" ]; then echo "VAULT_DETECTED="; fi
 
 # 4. Windows Active Directory Context (PowerShell / Windows)
 # In PowerShell:
@@ -124,7 +124,7 @@ Explain the trade-offs between static environment variable configuration and dyn
 Select the identity and network access tier based on deployment scope:
 
 ### Option A: Personal / Home-Lab (Standalone Mode)
-- **Database**: SQLite (`./data/mcp_router.db`).
+- **Database**: SQLite (`./data/mcg.db`).
 - **Network Restriction**: Restrict admin UI and admin tools to local loopback or local LAN CIDR subnets using `Admin:StandaloneAllowedNetworks`.
 - **Authentication**: Admin AppKey (`Authorization: Bearer mcp-...` or `X-App-Key` header) for external agent access, local IP network trust for Web UI.
 
@@ -154,9 +154,9 @@ Before generating deployment manifests, prompt the user for their desired admini
      - `mcp-srv-`: Scoped to an individual target backend server.
 
 2. **Master Encryption Key Options**:
-   The router encrypts database credentials using a 256-bit key. You have four flexible options:
+   The gateway encrypts database credentials using a 256-bit key. You have four flexible options:
    - **Auto-Generated Persistent Keyfile** *(Default & Recommended)*: Omit `ROUTER_MASTER_KEY` and the gateway will auto-generate and store `./data/.master.key` (with `chmod 0600`) on first boot.
-   - **Vault Master Key Bootstrapping**: If `VAULT_ADDR` is configured, the gateway boots its master key directly from HashiCorp Vault (`secret/data/mcp-router/master-key`).
+   - **Vault Master Key Bootstrapping**: If `VAULT_ADDR` is configured, the gateway boots its master key directly from HashiCorp Vault (`secret/data/mcg/master-key`).
    - **File Secret / Docker Secrets**: Set `ROUTER_MASTER_KEY_FILE=/run/secrets/router_master_key`.
    - **Explicit Environment Variable**: Generate a 256-bit Base64 key:
 
@@ -176,9 +176,9 @@ $bytes = New-Object byte[] 32; [System.Security.Cryptography.RandomNumberGenerat
 #### `docker-compose.yml`
 ```yaml
 services:
-  mcp-router:
-    image: ghcr.io/spelech/mcp-router:latest
-    container_name: mcp-router
+  mcg:
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg
     restart: unless-stopped
     ports:
       - "8080:8080"
@@ -230,7 +230,7 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
     <handlers>
       <add name="aspNetCore" path="*" verb="*" modules="AspNetCoreModuleV2" resourceType="Unspecified" />
     </handlers>
-    <aspNetCore processPath="dotnet" arguments=".\mcp-router.dll" stdoutLogEnabled="false" stdoutLogFile=".\logs\stdout" hostingModel="inprocess">
+    <aspNetCore processPath="dotnet" arguments=".\mcg.dll" stdoutLogEnabled="false" stdoutLogFile=".\logs\stdout" hostingModel="inprocess">
       <environmentVariables>
         <environmentVariable name="ASPNETCORE_ENVIRONMENT" value="Production" />
         <environmentVariable name="responseBufferLimit" value="0" />
@@ -251,13 +251,14 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
   "Logging": {
     "LogLevel": {
       "Default": "Information",
-      "Microsoft.AspNetCore": "Warning"
+      "Microsoft.AspNetCore": "Warning",
+      "ModelContextGateway": "Information"
     }
   },
   "AllowedHosts": "*",
   "DB_PROVIDER": "sqlite",
   "ConnectionStrings": {
-    "DefaultConnection": "Data Source=data/mcp_router.db"
+    "DefaultConnection": "Data Source=data/mcg.db"
   },
   "ROUTER_ADMIN_KEY": "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9",
   "Admin": {
@@ -275,7 +276,7 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
 
 ### 6.1 Service Launch & Verification
 
-Start the router service and verify health endpoints:
+Start the gateway service and verify health endpoints:
 
 ```bash
 # Docker Compose Launch
@@ -303,7 +304,7 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "mcg": {
       "command": "npx",
       "args": ["-y", "mcp-proxy", "http://localhost:8080/sse"]
     }
@@ -315,7 +316,7 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "mcg": {
       "url": "http://localhost:8080/sse",
       "headers": {
         "Authorization": "Bearer mcp-glb-R4t8W1yU-9pM2nQ6sD8fH3jK5"
@@ -329,7 +330,7 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "mcg": {
       "url": "http://localhost:8080/sse",
       "transport": "sse",
       "headers": {
@@ -344,7 +345,7 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "mcg": {
       "serverUrl": "http://localhost:8080/sse",
       "headers": {
         "Authorization": "Bearer mcp-glb-R4t8W1yU-9pM2nQ6sD8fH3jK5"
@@ -354,12 +355,12 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
 }
 ```
 
-#### Autonomous Agent Router Administration (`Admin MCP Server`)
+#### Autonomous Agent Gateway Administration (`Admin MCP Server`)
 To allow an AI agent to manage, add, edit, or delete backend MCP servers, auth providers, secret stores, and access policies dynamically:
 ```json
 {
   "mcpServers": {
-    "mcp-router-admin": {
+    "mcg-admin": {
       "url": "http://localhost:8080/admin/sse",
       "headers": {
         "Authorization": "Bearer mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
@@ -371,7 +372,7 @@ To allow an AI agent to manage, add, edit, or delete backend MCP servers, auth p
 
 > [!TIP]
 > **Next Step: Automated Provider Provisioning**
-> Once the gateway is deployed and running, use the **`mcp-router-admin`** skill (`.agents/skills/mcp-router-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Microsoft Entra ID, Active Directory, HashiCorp Vault, semantic search embeddings, access policies, and backend servers.
+> Once the gateway is deployed and running, use the **`mcg-admin`** skill (`.agents/skills/mcg-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Microsoft Entra ID, Active Directory, HashiCorp Vault, semantic search embeddings, access policies, and backend servers.
 
 ---
 
@@ -381,7 +382,7 @@ To allow an AI agent to manage, add, edit, or delete backend MCP servers, auth p
 | :--- | :--- | :--- |
 | **Container restarts immediately / Key error** | Corrupted or inaccessible master key | Ensure `./data` directory has write permissions (`chmod 777 data` or `chmod 0600 data/.master.key`) or specify a valid 256-bit key via `ROUTER_MASTER_KEY` / `ROUTER_MASTER_KEY_FILE`. |
 | **`403 Forbidden` on Web UI or Admin endpoints** | Client IP not in standalone allowed list or missing Admin AppKey | Add client IP/CIDR (e.g. `192.168.1.0/24`) to `Admin__StandaloneAllowedNetworks__*` or supply `Authorization: Bearer mcp-adm-...`. |
-| **Docker MCP servers fail to spawn** | Router container cannot access Docker daemon | Ensure `- /var/run/docker.sock:/var/run/docker.sock` volume is mounted and permissions allow read/write. |
+| **Docker MCP servers fail to spawn** | Gateway container cannot access Docker daemon | Ensure `- /var/run/docker.sock:/var/run/docker.sock` volume is mounted and permissions allow read/write. |
 | **SSE streams disconnect or buffer indefinitely in IIS** | IIS response buffering delays text/event-stream chunks | Ensure `<environmentVariable name="responseBufferLimit" value="0" />` is present in `web.config`. |
 | **OIDC / Reverse Proxy returns unauthorized** | Missing or stripped forward-auth headers | Verify proxy passes `Remote-User` and `Remote-Groups` headers and upstream IP is in `Oidc:TrustedProxies`. |
 | **Database file permission errors on Linux** | SQLite volume `./data` owned by root | Run `mkdir -p data && chmod 777 data` before starting container. |
@@ -398,7 +399,7 @@ KEY=$(openssl rand -base64 32) && echo "ROUTER_MASTER_KEY=$KEY"
 docker compose up -d
 
 # Check Logs
-docker compose logs -f mcp-router
+docker compose logs -f mcg
 
 # Probe Meta-Mode Tools List
 curl -s http://localhost:8080/health
