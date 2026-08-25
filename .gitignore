@@ -36,3 +36,5 @@ data/.docker/
 diagnostics-report.json
 .worktrees/
 .superpowers/
+docs/plans/
+docs/superpowers/
