@@ -1,6 +1,6 @@
 # CI Quality Gates & Security Workflows
 
-This document describes the continuous integration (CI), security scanning, automated dependency maintenance, and quality gates implemented for the `CSharp-MCP-Router` repository.
+This document describes the continuous integration (CI), security scanning, automated dependency maintenance, and quality gates implemented for the **Model Context Gateway (MCG)** repository.
 
 ---
 

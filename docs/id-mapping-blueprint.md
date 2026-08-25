@@ -2,7 +2,7 @@
 
 This blueprint maps the unannotated test domains to their respective requirement IDs.
 
-- **Backend C# Tests** (`McpRouter.Tests/*.cs`):
+- **Backend C# Tests** (`ModelContextGateway.Tests/*.cs`):
   - Rate limiting tests -> `[Requirement("RATE-01", "GUARD", RequirementType.Negative, "Rate limiting restricts excessive requests")]`
   - Config validation tests -> `[Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Config validation rejects missing schemas")]`
   - Audit logging tests -> `[Requirement("SEC-03", "SEC", RequirementType.Positive, "Audit logging securely records actions")]`

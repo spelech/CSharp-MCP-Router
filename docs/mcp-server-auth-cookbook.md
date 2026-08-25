@@ -2,7 +2,7 @@
 
 ### *"If Your Backend MCP Server Requires X ➔ Here Is Exact Setup Y"*
 
-This guide provides a practical, scenario-driven decision matrix and copy-paste recipes for connecting any backend Model Context Protocol (MCP) server to the **CSharp-MCP-Router Gateway**, regardless of how that backend requires authentication.
+This guide provides a practical, scenario-driven decision matrix and copy-paste recipes for connecting any backend Model Context Protocol (MCP) server to **Model Context Gateway (MCG)**, regardless of how that backend requires authentication.
 
 ---
 
@@ -201,7 +201,7 @@ Find the authentication mechanism your downstream MCP server requires in the lef
 ```
 
 > [!TIP]
-> When running in Docker, use the **`ghcr.io/spelech/csharp-mcp-router:latest-full`** container image, which comes pre-installed with Node.js 22, Python 3.12, `uv`, and `bun` for running `stdio` tools out of the box.
+> When running in Docker, use the **`ghcr.io/spelech/model-context-gateway:latest-full`** container image, which comes pre-installed with Node.js 22, Python 3.12, `uv`, and `bun` for running `stdio` tools out of the box.
 
 ---
 

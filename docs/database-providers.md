@@ -188,7 +188,7 @@ erDiagram
 SQLite is the zero-configuration embedded engine designed for single-node instances, developer workstations, and edge agent deployments.
 
 #### Engine Characteristics & Concurrency
-* **Embedded Storage**: Database resides in a single binary file on disk (default: `data/mcp_router.db`) or in-memory for ephemeral test runs (`Data Source=:memory:`).
+* **Embedded Storage**: Database resides in a single binary file on disk (default: `data/mcg.db`) or in-memory for ephemeral test runs (`Data Source=:memory:`).
 * **Write-Ahead Logging (WAL)**: SQLite operates with Write-Ahead Logging to support concurrent read operations while writes execute, preventing database lock contention.
 * **Type Handlers**: JSON arrays and complex collections (such as `Categories` and `ScopesJson`) are stored as serialized UTF-8 `TEXT` and mapped via custom Dapper `JsonListTypeHandler` instances.
 

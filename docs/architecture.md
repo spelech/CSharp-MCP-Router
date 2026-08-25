@@ -1168,13 +1168,13 @@ For complete setup guides, AppRole configuration commands, and DPAPI registry re
 
 ### Verification & Test Suite Execution
 
-All architectural contracts, concurrency guarantees, and security policies are validated by the comprehensive 515-test automated test suite:
+All architectural contracts, concurrency guarantees, and security policies are validated by the comprehensive automated test suite:
 
 ```bash
 # Execute full C# test suite in CI mode:
-CI=true dotnet test McpRouter.slnx
+CI=true dotnet test ModelContextGateway.slnx
 ```
 
 ---
 
-*Document Version: `v4.12.3` | Maintained by the MCP Router Core Architecture Group.*
+*Document Version: `v5.0.0` | Maintained by the Model Context Gateway Architecture Group.*
