@@ -1,6 +1,6 @@
 # MCP Router Gateway & Semantic Proxy
 
-![Version](https://img.shields.io/badge/version-v4.34.3-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v4.34.4-orange?style=for-the-badge)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
 ![Tests](https://img.shields.io/badge/tests-620%20passing-2ea44f?style=for-the-badge)
@@ -233,11 +233,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v4.34.4`** | 2026-08-24 | chore(formatting): standardize C# formatting with `.editorconfig`, enforce CI `dotnet format --verify-no-changes` quality gate, and codebase housekeeping |
 | **`v4.34.3`** | 2026-08-24 | chore(hygiene): repository cleanup removing straggler patch scripts, subagent artifacts, and updating `.gitignore` with report/test output patterns |
 | **`v4.34.2`** | 2026-08-24 | docs(auth): introduce comprehensive MCP Server Authentication & Integration Cookbook (`docs/mcp-server-auth-cookbook.md`) with 11 scenario-driven recipes, decision matrix, and copy-paste recipes for Bearer, Custom Headers, Basic Auth, Query Params, STDIO, Vault, DPAPI, BYOK, Pass-Through, and Identity-Forwarding |
 | **`v4.34.1`** | 2026-08-24 | docs(user-guide): comprehensive overhaul and cleanup of user guides, removing outdated manual approval references, synchronizing Settings tabs, documenting JSON-RPC console, user quotas, and My MCP Servers |
 | **`v4.34.0`** | 2026-08-23 | feat(skills): introduce universal `mcp-router-admin` automation skill, blank-slate safe defaults documentation, provider scaffolding templates (Authentik, Keycloak, Entra ID, Active Directory LDAPS, Cloudflare, Vault, Embeddings), and comprehensive DevOps automation guide |
-| **`v4.33.0`** | 2026-08-22 | feat(testing): integrate playwright-layout-inspector for spatial layout auditing, eliminate background DOM collisions, enhance interactive touch targets and focus rings |
 ---
 
 ## 🧪 Code Coverage & Quality Gates
