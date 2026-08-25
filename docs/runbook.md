@@ -80,8 +80,8 @@ Wants=network-online.target
 Type=simple
 User=mcp-router
 Group=mcp-router
-WorkingDirectory=/opt/mcp-router
-ExecStart=/usr/bin/dotnet /opt/mcp-router/mcp-router.dll
+WorkingDirectory=/opt/mcg
+ExecStart=/usr/bin/dotnet /opt/mcg/mcg.dll
 Restart=always
 RestartSec=10
 KillSignal=SIGINT
@@ -331,7 +331,7 @@ docker compose logs mcp-router | grep -E "WARN|FAIL|ERR"
 If the master encryption key (`Security__MasterKey`) must be rotated:
 1. Export unencrypted backup or use the internal migration utility:
    ```bash
-   dotnet run --project mcp-router.csproj -- re-encrypt-master-key --old-key <OLD_HEX> --new-key <NEW_HEX>
+   dotnet run --project ModelContextGateway.csproj -- re-encrypt-master-key --old-key <OLD_HEX> --new-key <NEW_HEX>
    ```
 2. Update the `Security__MasterKey` environment variable in `docker-compose.yaml`.
 3. Restart the container: `docker compose up -d mcp-router`.

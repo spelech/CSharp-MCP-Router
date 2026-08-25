@@ -21,7 +21,7 @@
       - stdoutLogEnabled="false": Set to "true" to troubleshoot startup failures; logs output to .\logs\stdout.
     -->
     <aspNetCore processPath="dotnet"
-                arguments=".\mcp-router.dll"
+                arguments=".\mcg.dll"
                 stdoutLogEnabled="false"
                 stdoutLogFile=".\logs\stdout"
                 hostingModel="inprocess">

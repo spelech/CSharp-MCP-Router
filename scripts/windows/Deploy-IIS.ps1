@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Automated IIS Deployment and Configuration Script for C# MCP Router Gateway.
 
@@ -175,7 +175,7 @@ if (-not $SkipBuild -and -not $SkipFrontend) {
 # ---------------------------------------------------------------------------
 if (-not $SkipBuild) {
     Write-Step "Publishing Backend (.NET 10 Web App)..."
-    $csprojPath = Join-Path $RepoRoot "mcp-router.csproj"
+    $csprojPath = Join-Path $RepoRoot "ModelContextGateway.csproj"
     if (-not (Test-Path $csprojPath)) {
         Write-Error "Project file not found at $csprojPath."
         exit 1

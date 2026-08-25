@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Windows Service Management Script for C# MCP Router Gateway.
 
@@ -200,7 +200,7 @@ switch ($Action) {
         # 2. Publish backend
         if (-not $SkipBuild) {
             Write-Step "Publishing Backend to '$InstallDir'..."
-            $csprojPath = Join-Path $RepoRoot "mcp-router.csproj"
+            $csprojPath = Join-Path $RepoRoot "ModelContextGateway.csproj"
             if (-not (Test-Path $csprojPath)) {
                 Write-Error "Project file not found at $csprojPath."
                 exit 1
@@ -253,15 +253,15 @@ switch ($Action) {
 
         # 5. Register Windows Service
         Write-Step "Registering Windows Service with Service Control Manager (SCM)..."
-        $exePath = Join-Path $InstallDir "mcp-router.exe"
+        $exePath = Join-Path $InstallDir "mcg.exe"
         if (-not (Test-Path $exePath)) {
             # Fallback for dotnet dll execution if exe is not present
-            $dllPath = Join-Path $InstallDir "mcp-router.dll"
+            $dllPath = Join-Path $InstallDir "mcg.dll"
             if (Test-Path $dllPath) {
                 $dotnetPath = (Get-Command dotnet).Source
                 $binPath = "`"$dotnetPath`" `"$dllPath`" --urls `"$Urls`""
             } else {
-                Write-Error "Could not find mcp-router.exe or mcp-router.dll in '$InstallDir'."
+                Write-Error "Could not find mcg.exe or mcg.dll in '$InstallDir'."
                 exit 1
             }
         } else {

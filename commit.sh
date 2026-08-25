@@ -10,7 +10,7 @@ if [ -z "$1" ]; then
 fi
 
 echo "🔍 Validating project build..."
-dotnet build McpRouter.slnx --configuration Release
+dotnet build ModelContextGateway.slnx --configuration Release
 
 echo "🔄 Running automated version bump..."
 python3 scripts/bump_version.py "$1"

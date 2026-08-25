@@ -1,4 +1,4 @@
-﻿<#
+<#
 .SYNOPSIS
     Automated Diagnostic and Verification Runner for Windows Hosts (C# MCP Router).
 
@@ -9,7 +9,7 @@
     2. Windows Registry: HKLM\SOFTWARE\McpRouter\Secrets read, write, and cleanup permissions.
     3. DPAPI Cryptography: Machine-scope Protect/Unprotect matching WindowsRegistrySecretRetriever.
     4. Windows Identity: Current identity, User SID, Group SIDs, S-1-5-32-544 (Builtin Administrators).
-    5. C# Backend Test Suite: Execution of dotnet test McpRouter.slnx.
+    5. C# Backend Test Suite: Execution of dotnet test ModelContextGateway.slnx.
     6. Requirements Catalog: Zero-drift verification via scripts/CatalogGenerator.
     7. Frontend Unit Tests: Optional execution of Vitest suite.
 
@@ -87,7 +87,7 @@ if (-not $RepoRoot) {
     if (-not $scriptDir) { $scriptDir = $PSScriptRoot }
     if (-not $scriptDir) { $scriptDir = (Get-Location).Path }
     $RepoRoot = Resolve-Path (Join-Path $scriptDir "..\..") -ErrorAction SilentlyContinue
-    if (-not $RepoRoot -or -not (Test-Path (Join-Path $RepoRoot "mcp-router.csproj"))) {
+    if (-not $RepoRoot -or -not (Test-Path (Join-Path $RepoRoot "ModelContextGateway.csproj"))) {
         $RepoRoot = (Get-Location).Path
     }
 }
@@ -453,10 +453,10 @@ if ($isWin) {
 # ---------------------------------------------------------------------------
 # 5. Automated Backend Test Suite Execution (dotnet test)
 # ---------------------------------------------------------------------------
-Write-Section "5. Automated Backend Test Suite (dotnet test McpRouter.slnx)"
+Write-Section "5. Automated Backend Test Suite (dotnet test ModelContextGateway.slnx)"
 
 if (-not $SkipTests) {
-    $solutionPath = Join-Path $RepoRoot "McpRouter.slnx"
+    $solutionPath = Join-Path $RepoRoot "ModelContextGateway.slnx"
     if (-not (Test-Path $solutionPath)) {
         $solutionPath = Join-Path $RepoRoot "mcp-router.sln"
     }
