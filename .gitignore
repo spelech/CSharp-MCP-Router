@@ -38,3 +38,7 @@ diagnostics-report.json
 .superpowers/
 docs/plans/
 docs/superpowers/
+
+# Python virtual environments & MkDocs build directory
+.venv*/
+site/

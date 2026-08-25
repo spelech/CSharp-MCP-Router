@@ -241,7 +241,7 @@ Run the gateway container with zero required configuration. On first boot, the r
 
 All features, security guardrails, and authentication flows are enforced by automated test suites:
 
-* **xUnit Backend Suite**: 620+ integration & unit tests ([`McpRouter.Tests`](developer-guide.md#running-tests))
-* **Vitest Frontend Suite**: Component and state store test coverage ([`frontend/src/test`](developer-guide.md#frontend-tests))
-* **Playwright E2E Suite**: End-to-end browser automation ([`frontend/e2e`](developer-guide.md#playwright-e2e-tests))
+* **xUnit Backend Suite**: 620+ integration & unit tests ([`McpRouter.Tests`](developer-guide.md#backend-test-suite))
+* **Vitest Frontend Suite**: Component and state store test coverage ([`frontend/src/test`](developer-guide.md#frontend-vitest-suite))
+* **Playwright E2E Suite**: End-to-end browser automation ([`frontend/e2e`](developer-guide.md#end-to-end-testing-playwright))
 * **Living Requirements Matrix**: Zero-drift catalog generation via `dotnet run --project scripts/CatalogGenerator -- --verify-only` ([SRS Catalog](software-requirements-and-test-catalog.md))

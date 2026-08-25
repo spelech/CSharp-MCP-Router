@@ -6,22 +6,22 @@ This document defines setup instructions, architectural conventions, coding guid
 
 ## 📑 Table of Contents
 
-- [Prerequisites & Development Environment](#prerequisites--development-environment)
-- [Repository Structure & Architecture Conventions](#repository-structure--architecture-conventions)
+- [Prerequisites & Development Environment](#prerequisites-development-environment)
+- [Repository Structure & Architecture Conventions](#repository-structure-architecture-conventions)
 - [Local Development Workflow](#local-development-workflow)
   - [Backend (.NET 10 C#)](#backend-net-10-c)
-  - [Frontend (React 19 / Vite / TypeScript)](#frontend-react-19--vite--typescript)
-- [Automated Testing & Code Coverage](#automated-testing--code-coverage)
+  - [Frontend (React 19 / Vite / TypeScript)](#frontend-react-19-vite-typescript)
+- [Automated Testing & Code Coverage](#automated-testing-code-coverage)
   - [Backend Test Suite](#backend-test-suite)
   - [Frontend Vitest Suite](#frontend-vitest-suite)
   - [End-to-End Testing (Playwright)](#end-to-end-testing-playwright)
-- [Formatting, Linting & Static Analysis](#formatting-linting--static-analysis)
-- [Version Synchronization & Release Verification](#version-synchronization--release-verification)
+- [Formatting, Linting & Static Analysis](#formatting-linting-static-analysis)
+- [Version Synchronization & Release Verification](#version-synchronization-release-verification)
   - [Mandatory Version Synchronization Contract](#mandatory-version-synchronization-contract)
   - [Release Verification Script (`verify-release.sh`)](#release-verification-script-verify-releasesh)
-  - [CLI Flags & Options Reference](#cli-flags--options-reference)
-  - [Automated Version Bumping & Atomic Commits](#automated-version-bumping--atomic-commits)
-- [Continuous Integration & Quality Gates](#continuous-integration--quality-gates)
+  - [CLI Flags & Options Reference](#cli-flags-options-reference)
+  - [Automated Version Bumping & Atomic Commits](#automated-version-bumping-atomic-commits)
+- [Continuous Integration & Quality Gates](#continuous-integration-quality-gates)
 
 ---
 
@@ -209,7 +209,7 @@ Every release, pull request, and commit to `main` must synchronize the version n
 
 ### Release Verification Script (`verify-release.sh`)
 
-The release verification engine is located at [`scripts/verify_release.py`](../scripts/verify_release.py) with a bash wrapper [`scripts/verify-release.sh`](../scripts/verify-release.sh).
+The release verification engine is located at `scripts/verify_release.py` with a bash wrapper `scripts/verify-release.sh`.
 
 ```bash
 # 🛡️ Run full verification suite (versions, links, tests, builds)
@@ -283,7 +283,7 @@ Bump the version and commit atomically:
 
 The script executes the following:
 1. Validates the .NET project build.
-2. Invokes [`scripts/bump_version.py`](../scripts/bump_version.py) to increment the version (minor for `feat:`/breaking changes, patch for `fix:`/`docs:`).
+2. Invokes `scripts/bump_version.py` to increment the version (minor for `feat:`/breaking changes, patch for `fix:`/`docs:`).
 3. Synchronizes all version references (`.csproj`, `useUserStore.ts`, `CHANGELOG.md`, `README.md`).
 4. Creates a clean, atomic git commit.
 

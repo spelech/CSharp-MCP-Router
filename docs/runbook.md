@@ -118,10 +118,10 @@ sudo systemctl status mcp-router
 For Windows Server hosting and validation, the repository provides automation scripts and operational documentation:
 
 - **Comprehensive Guide**: [**Windows Deployment, Enterprise Hosting & Validation Guide (`docs/windows-deployment-and-validation-guide.md`)**](windows-deployment-and-validation-guide.md)
-- **IIS In-Process Automation**: [`scripts/windows/Deploy-IIS.ps1`](../scripts/windows/Deploy-IIS.ps1) (configures `No Managed Code`, `AlwaysRunning`, unbuffered SSE streaming with `responseBufferLimit="0"`, and Windows Authentication).
-- **Windows Service Automation**: [`scripts/windows/Setup-WindowsService.ps1`](../scripts/windows/Setup-WindowsService.ps1) (registers SCM auto-restart recovery triggers and service lifecycle).
-- **Secret Management**: [`scripts/windows/Set-RegistrySecrets.ps1`](../scripts/windows/Set-RegistrySecrets.ps1) (DPAPI machine encryption for registry keys).
-- **Diagnostic Runner**: [`scripts/windows/Test-WindowsEnvironment.ps1`](../scripts/windows/Test-WindowsEnvironment.ps1) (end-to-end environment validation).
+- **IIS In-Process Automation**: `scripts/windows/Deploy-IIS.ps1` (configures `No Managed Code`, `AlwaysRunning`, unbuffered SSE streaming with `responseBufferLimit="0"`, and Windows Authentication).
+- **Windows Service Automation**: `scripts/windows/Setup-WindowsService.ps1` (registers SCM auto-restart recovery triggers and service lifecycle).
+- **Secret Management**: `scripts/windows/Set-RegistrySecrets.ps1` (DPAPI machine encryption for registry keys).
+- **Diagnostic Runner**: `scripts/windows/Test-WindowsEnvironment.ps1` (end-to-end environment validation).
 
 #### Quick IIS Deployment (PowerShell as Administrator):
 ```powershell
