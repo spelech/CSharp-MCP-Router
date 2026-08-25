@@ -1,4 +1,0 @@
-<Solution>
-  <Project Path="mcp-router.csproj" />
-  <Project Path="McpRouter.Tests/McpRouter.Tests.csproj" />
-</Solution>
