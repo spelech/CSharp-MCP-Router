@@ -56,7 +56,7 @@ namespace McpRouter.Tests
 
             // Blank-slate Safe Defaults
             Assert.Contains("Safe Defaults", content);
-            Assert.Contains("mcp-global-admin-default-cli-key-99", content);
+            Assert.Contains("mcp-adm-", content);
             Assert.Contains("ROUTER_MASTER_KEY", content);
 
             // Phase 1: Gateway Diagnostics
@@ -137,11 +137,11 @@ namespace McpRouter.Tests
             // Shell & PowerShell automation scripts
             var bashScript = Path.Combine(templatesDir, "automate-setup.sh");
             Assert.True(File.Exists(bashScript));
-            Assert.Contains("mcp-global-admin-default-cli-key-99", File.ReadAllText(bashScript));
+            Assert.Contains("mcp-adm-", File.ReadAllText(bashScript));
 
             var psScript = Path.Combine(templatesDir, "automate-setup.ps1");
             Assert.True(File.Exists(psScript));
-            Assert.Contains("mcp-global-admin-default-cli-key-99", File.ReadAllText(psScript));
+            Assert.Contains("mcp-adm-", File.ReadAllText(psScript));
         }
 
         [Fact]

@@ -139,12 +139,26 @@ Select the identity and network access tier based on deployment scope:
 
 ## Phase 5: Artifact Generation & Secrets Scaffolding
 
-### 5.1 Master Key Options
+### 5.1 Interactive Admin Key & Master Key Configuration
 
-The router encrypts database credentials using a 256-bit key. You have three flexible options:
-1. **Auto-Generated Persistent Keyfile** *(Default)*: Omit `ROUTER_MASTER_KEY` and the gateway will auto-generate and store `./data/.master.key` on first boot.
-2. **File Secret / Docker Secrets**: Set `ROUTER_MASTER_KEY_FILE=/run/secrets/router_master_key`.
-3. **Explicit Environment Variable**: Generate a 256-bit Base64 key:
+Before generating deployment manifests, prompt the user for their desired administrative key and master key strategy:
+
+1. **Interactive Admin AppKey Prompt**:
+   > *"Enter your desired Admin Key for agent/API access (or press Enter to auto-generate a compact key like `mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9`):"*
+   - Sets `ROUTER_ADMIN_KEY` in `.env` / container environment.
+   - Uses concise, high-entropy Base62 keys (~32 characters) following the semantic taxonomy:
+     - `mcp-adm-`: System Administrator with full gateway control (`all`, `admin`).
+     - `mcp-glb-`: Global tool execution across all backend servers.
+     - `mcp-{domain}-` / `mcp-grp-`: Restricted to a specific group or domain (e.g., `mcp-devops-`).
+     - `mcp-usr-`: Personal user key tied to a specific username or SID.
+     - `mcp-srv-`: Scoped to an individual target backend server.
+
+2. **Master Encryption Key Options**:
+   The router encrypts database credentials using a 256-bit key. You have four flexible options:
+   - **Auto-Generated Persistent Keyfile** *(Default & Recommended)*: Omit `ROUTER_MASTER_KEY` and the gateway will auto-generate and store `./data/.master.key` (with `chmod 0600`) on first boot.
+   - **Vault Master Key Bootstrapping**: If `VAULT_ADDR` is configured, the gateway boots its master key directly from HashiCorp Vault (`secret/data/mcp-router/master-key`).
+   - **File Secret / Docker Secrets**: Set `ROUTER_MASTER_KEY_FILE=/run/secrets/router_master_key`.
+   - **Explicit Environment Variable**: Generate a 256-bit Base64 key:
 
 ```bash
 # Linux / macOS / Bash
@@ -170,7 +184,9 @@ services:
       - "8080:8080"
     environment:
       - DB_PROVIDER=${DB_PROVIDER:-sqlite}
-      # Optional: Auto-generated to ./data/.master.key if omitted
+      # Admin Key: compact ~32-char token (or leave blank to auto-generate default)
+      - ROUTER_ADMIN_KEY=${ROUTER_ADMIN_KEY:-mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9}
+      # Optional: Auto-generated to ./data/.master.key on first boot if omitted
       # - ROUTER_MASTER_KEY=${ROUTER_MASTER_KEY}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
       - Admin__StandaloneAllowedNetworks__0=${STANDALONE_ALLOWED_NETWORK:-127.0.0.1}
@@ -190,7 +206,10 @@ services:
 
 #### `.env`
 ```ini
-# Core Secrets (Generated 256-bit Key)
+# Admin API & Agent Access Key (Compact Base62 ~32-char key)
+ROUTER_ADMIN_KEY=mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9
+
+# Core Secrets (Optional: auto-generated to ./data/.master.key if omitted)
 ROUTER_MASTER_KEY=REPLACE_WITH_GENERATED_BASE64_KEY
 
 # Database Configuration
@@ -240,6 +259,7 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
   "ConnectionStrings": {
     "DefaultConnection": "Data Source=data/mcp_router.db"
   },
+  "ROUTER_ADMIN_KEY": "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9",
   "Admin": {
     "StandaloneAllowedNetworks": [
       "127.0.0.1",
@@ -296,7 +316,10 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
 {
   "mcpServers": {
     "mcp-router": {
-      "url": "http://localhost:8080/sse"
+      "url": "http://localhost:8080/sse",
+      "headers": {
+        "Authorization": "Bearer mcp-glb-R4t8W1yU-9pM2nQ6sD8fH3jK5"
+      }
     }
   }
 }
@@ -308,7 +331,10 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
   "mcpServers": {
     "mcp-router": {
       "url": "http://localhost:8080/sse",
-      "transport": "sse"
+      "transport": "sse",
+      "headers": {
+        "Authorization": "Bearer mcp-glb-R4t8W1yU-9pM2nQ6sD8fH3jK5"
+      }
     }
   }
 }
@@ -319,7 +345,10 @@ Provide ready-to-use configuration JSON for the user's AI assistants:
 {
   "mcpServers": {
     "mcp-router": {
-      "serverUrl": "http://localhost:8080/sse"
+      "serverUrl": "http://localhost:8080/sse",
+      "headers": {
+        "Authorization": "Bearer mcp-glb-R4t8W1yU-9pM2nQ6sD8fH3jK5"
+      }
     }
   }
 }
@@ -333,7 +362,7 @@ To allow an AI agent to manage, add, edit, or delete backend MCP servers, auth p
     "mcp-router-admin": {
       "url": "http://localhost:8080/admin/sse",
       "headers": {
-        "Authorization": "Bearer mcp-global-admin-default-cli-key-99"
+        "Authorization": "Bearer mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9"
       }
     }
   }
@@ -350,8 +379,8 @@ To allow an AI agent to manage, add, edit, or delete backend MCP servers, auth p
 
 | Symptom / Error | Root Cause | Solution |
 | :--- | :--- | :--- |
-| **Container restarts immediately / Key error** | Missing or malformed `ROUTER_MASTER_KEY` | Generate a 256-bit base64 key with `openssl rand -base64 32` and set it in `.env`. |
-| **`403 Forbidden` on Web UI or Admin endpoints** | Client IP not allowed in Standalone Mode | Add client IP or CIDR (e.g. `192.168.1.0/24` or `0.0.0.0/0`) to `Admin__StandaloneAllowedNetworks__*`. |
+| **Container restarts immediately / Key error** | Corrupted or inaccessible master key | Ensure `./data` directory has write permissions (`chmod 777 data` or `chmod 0600 data/.master.key`) or specify a valid 256-bit key via `ROUTER_MASTER_KEY` / `ROUTER_MASTER_KEY_FILE`. |
+| **`403 Forbidden` on Web UI or Admin endpoints** | Client IP not in standalone allowed list or missing Admin AppKey | Add client IP/CIDR (e.g. `192.168.1.0/24`) to `Admin__StandaloneAllowedNetworks__*` or supply `Authorization: Bearer mcp-adm-...`. |
 | **Docker MCP servers fail to spawn** | Router container cannot access Docker daemon | Ensure `- /var/run/docker.sock:/var/run/docker.sock` volume is mounted and permissions allow read/write. |
 | **SSE streams disconnect or buffer indefinitely in IIS** | IIS response buffering delays text/event-stream chunks | Ensure `<environmentVariable name="responseBufferLimit" value="0" />` is present in `web.config`. |
 | **OIDC / Reverse Proxy returns unauthorized** | Missing or stripped forward-auth headers | Verify proxy passes `Remote-User` and `Remote-Groups` headers and upstream IP is in `Oidc:TrustedProxies`. |
