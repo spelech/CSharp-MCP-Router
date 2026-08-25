@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-25T04:04:10.0419946Z",
-    "totalRequirements": 122,
-    "positiveCount": 99,
+    "generatedAt": "2026-08-25T04:11:34.8997733Z",
+    "totalRequirements": 124,
+    "positiveCount": 101,
     "guardrailCount": 23,
-    "totalProofs": 272
+    "totalProofs": 276
   },
   "requirements": [
     {
@@ -474,6 +474,36 @@
       ]
     },
     {
+      "id": "AUTH-CUSTOM-ADMIN-KEY-SEEDING",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Seeds custom ROUTER_ADMIN_KEY when provided in configuration.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs",
+          "lineNumber": 187,
+          "testName": "Startup_SeedsCustomAdminKey_WhenConfigured",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs",
+          "lineNumber": 239,
+          "testName": "Startup_SeedsCustomAdminKey_WhenMcpAdminKeyConfigured",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/DatabaseSeederServiceTests.cs",
+          "lineNumber": 290,
+          "testName": "Startup_UpdatesAdminKeyHash_WhenEnvironmentKeyChanges",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "AUTH-PERSONAL-APPKEY-CREATE",
       "category": "AUTH",
       "type": "Negative",
@@ -643,6 +673,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 135,
           "testName": "Admin Context: configures custom user quota override",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-PREFIX-EXTRACTION",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs",
+          "lineNumber": 443,
+          "testName": "ExtractKeyPrefix_ExtractsSemanticAndLegacyPrefixesAccurately",
           "details": null
         }
       ]

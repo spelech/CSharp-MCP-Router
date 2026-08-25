@@ -439,5 +439,22 @@ namespace McpRouter.Tests
             Assert.StartsWith(grpKey.KeyPrefix, grpPlain);
             Assert.InRange(grpPlain.Length, 32, 38);
         }
+
+        [Theory]
+        [InlineData("mcp-adm-a1B2c3D4-9z8y7x6w5v4u3t2s", "mcp-adm-a1B2c3D4")]
+        [InlineData("mcp-glb-12345678-abcdefghijklmnop", "mcp-glb-12345678")]
+        [InlineData("mcp-usr-abcdefgh-1234567890123456", "mcp-usr-abcdefgh")]
+        [InlineData("mcp-srv-docker01-1234567890123456", "mcp-srv-docker01")]
+        [InlineData("mcp-devops-team001-1234567890123456", "mcp-devops-team001")]
+        [InlineData("mcp-adm-CustomKey123-Secret999", "mcp-adm-CustomKey123")]
+        [InlineData("mcp-global-admin-default-cli-key-99", "mcp-global-admin")]
+        [InlineData("mcp-all-personalkeytest123456789", "mcp-all-personal")]
+        [InlineData("mcp-legacykey12345678901234567890", "mcp-legacykey123")]
+        [Requirement("AUTH-PREFIX-EXTRACTION", "AUTH", RequirementType.Positive, "ExtractKeyPrefix parses semantic prefixes, Base62 selectors, and legacy tokens accurately.")]
+        public void ExtractKeyPrefix_ExtractsSemanticAndLegacyPrefixesAccurately(string token, string expectedPrefix)
+        {
+            var prefix = McpRouter.Middleware.AppKeyAuthenticationHandler.ExtractKeyPrefix(token);
+            Assert.Equal(expectedPrefix, prefix);
+        }
     }
 }

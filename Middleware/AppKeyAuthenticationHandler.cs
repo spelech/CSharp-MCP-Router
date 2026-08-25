@@ -65,22 +65,7 @@ namespace McpRouter.Middleware
 
             try
             {
-                // Extract selector prefix: for high-entropy tokens formatted as mcp-{scopeSlug}-{selector}-{secret},
-                // prefix is mcp-{scopeSlug}-{selector}. Fallback safely for backward-compatible/test formats.
-                string prefix;
-                var parts = token.Split('-');
-                if (parts.Length >= 4 && parts[0] == "mcp")
-                {
-                    prefix = $"{parts[0]}-{parts[1]}-{parts[2]}";
-                }
-                else if (parts.Length == 3 && parts[0] == "mcp" && parts[2].Length >= 32)
-                {
-                    prefix = $"{parts[0]}-{parts[1]}-{parts[2].Substring(0, 32)}";
-                }
-                else
-                {
-                    prefix = token.Length > 16 ? token.Substring(0, 16) : token;
-                }
+                string prefix = ExtractKeyPrefix(token);
 
                 using var conn = _dbFactory.CreateConnection();
                 AppKey? appKey = null;
@@ -191,6 +176,28 @@ namespace McpRouter.Middleware
             {
                 Logger.LogError(ex, "Error validating App Key.");
                 return AuthenticateResult.Fail("Error validating App Key.");
+            }
+        }
+
+        public static string ExtractKeyPrefix(string token)
+        {
+            if (string.IsNullOrEmpty(token))
+            {
+                return string.Empty;
+            }
+
+            var parts = token.Split('-');
+            if (parts.Length >= 4 && parts[0] == "mcp")
+            {
+                return $"{parts[0]}-{parts[1]}-{parts[2]}";
+            }
+            else if (parts.Length == 3 && parts[0] == "mcp" && parts[2].Length >= 32)
+            {
+                return $"{parts[0]}-{parts[1]}-{parts[2].Substring(0, 32)}";
+            }
+            else
+            {
+                return token.Length > 16 ? token.Substring(0, 16) : token;
             }
         }
     }

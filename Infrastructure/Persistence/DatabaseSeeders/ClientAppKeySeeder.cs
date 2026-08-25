@@ -1,6 +1,8 @@
+using System.Data;
 using System.Security.Cryptography;
 using System.Text;
 using Dapper;
+using McpRouter.Middleware;
 
 namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
 {
@@ -69,73 +71,133 @@ namespace McpRouter.Infrastructure.Persistence.DatabaseSeeders
                 logger.LogWarning(exKeyMig, "AppKey hashing migration warning");
             }
 
-            // Seed Default Admin AppKey for CLI / system clients if none exists
+            // Seed Admin AppKey from environment (ROUTER_ADMIN_KEY / MCP_ADMIN_KEY) or default CLI key if none exists
             try
             {
+                var customAdminKey = configuration["ROUTER_ADMIN_KEY"]
+                    ?? configuration["MCP_ADMIN_KEY"]
+                    ?? Environment.GetEnvironmentVariable("ROUTER_ADMIN_KEY")
+                    ?? Environment.GetEnvironmentVariable("MCP_ADMIN_KEY");
+
                 using var conn = dbFactory.CreateConnection();
-                const string checkPrefix = "mcp-global-admin";
-                var existingKey = conn.QueryFirstOrDefault<string>("SELECT Id FROM AppKeys WHERE KeyPrefix = @KeyPrefix;", new { KeyPrefix = checkPrefix });
-                if (string.IsNullOrEmpty(existingKey))
+
+                if (!string.IsNullOrWhiteSpace(customAdminKey))
                 {
-                    const string defaultPlaintextKey = "mcp-global-admin-default-cli-key-99";
+                    var trimmedKey = customAdminKey.Trim();
+                    var keyPrefix = AppKeyAuthenticationHandler.ExtractKeyPrefix(trimmedKey);
+
                     using var sha256 = SHA256.Create();
-                    var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(defaultPlaintextKey));
+                    var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(trimmedKey));
                     var hashedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
 
-                    var defaultKey = new AppKey
-                    {
-                        Id = Guid.NewGuid().ToString("N"),
-                        Name = "CLI Default Admin Key",
-                        Username = "admin",
-                        OwnerSid = string.Empty,
-                        KeyType = "system",
-                        KeyPrefix = checkPrefix,
-                        EncryptedKey = hashedKey,
-                        ScopesJson = "[\"all\"]",
-                        ExpiresAt = null,
-                        CreatedAt = DateTime.UtcNow
-                    };
+                    var existingKey = conn.QueryFirstOrDefault<AppKey>(
+                        "SELECT * FROM AppKeys WHERE KeyPrefix = @KeyPrefix;",
+                        new { KeyPrefix = keyPrefix });
 
-                    if (dbFactory.ProviderName == "sqlite")
+                    if (existingKey == null)
                     {
-                        const string insertSql = @"
-                            INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
-                            VALUES (@Id, @Name, @Username, @OwnerSid, @KeyType, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
-                        conn.Execute(insertSql, defaultKey);
-                    }
-                    else if (dbFactory.ProviderName == "mysql")
-                    {
-                        conn.Execute("sp_SaveAppKey", new
+                        var adminKey = new AppKey
                         {
-                            p_Id = defaultKey.Id,
-                            p_Name = defaultKey.Name,
-                            p_Username = defaultKey.Username,
-                            p_KeyPrefix = defaultKey.KeyPrefix,
-                            p_EncryptedKey = defaultKey.EncryptedKey,
-                            p_OwnerSid = defaultKey.OwnerSid ?? "",
-                            p_ExpiresAt = defaultKey.ExpiresAt
-                        }, commandType: System.Data.CommandType.StoredProcedure);
+                            Id = Guid.NewGuid().ToString("N"),
+                            Name = "Configured Admin Key",
+                            Username = "admin",
+                            OwnerSid = string.Empty,
+                            KeyType = "system",
+                            KeyPrefix = keyPrefix,
+                            EncryptedKey = hashedKey,
+                            ScopesJson = "[\"all\",\"admin\"]",
+                            ExpiresAt = null,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        SaveAppKeyToDb(conn, dbFactory.ProviderName, adminKey);
+                        logger.LogInformation("Seeded custom Admin AppKey from environment configuration for 'admin' (Prefix: {Prefix}).", keyPrefix);
                     }
-                    else
+                    else if (!string.Equals(existingKey.EncryptedKey, hashedKey, StringComparison.OrdinalIgnoreCase))
                     {
-                        conn.Execute("sp_SaveAppKey", new
-                        {
-                            defaultKey.Id,
-                            defaultKey.Name,
-                            defaultKey.Username,
-                            defaultKey.KeyPrefix,
-                            defaultKey.EncryptedKey,
-                            defaultKey.ScopesJson,
-                            defaultKey.OwnerSid,
-                            defaultKey.ExpiresAt
-                        }, commandType: System.Data.CommandType.StoredProcedure);
+                        conn.Execute(
+                            "UPDATE AppKeys SET EncryptedKey = @EncryptedKey, ScopesJson = '[\"all\",\"admin\"]', KeyType = 'system' WHERE Id = @Id;",
+                            new { EncryptedKey = hashedKey, existingKey.Id });
+                        logger.LogInformation("Updated Admin AppKey hash from environment configuration for 'admin' (Prefix: {Prefix}).", keyPrefix);
                     }
-                    logger.LogInformation("Seeded default CLI Admin AppKey for 'admin'.");
+                }
+                else
+                {
+                    const string checkPrefix = "mcp-global-admin";
+                    var existingKey = conn.QueryFirstOrDefault<string>(
+                        "SELECT Id FROM AppKeys WHERE KeyPrefix = @KeyPrefix;",
+                        new { KeyPrefix = checkPrefix });
+
+                    if (string.IsNullOrEmpty(existingKey))
+                    {
+                        const string defaultPlaintextKey = "mcp-global-admin-default-cli-key-99";
+                        using var sha256 = SHA256.Create();
+                        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(defaultPlaintextKey));
+                        var hashedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
+
+                        var defaultKey = new AppKey
+                        {
+                            Id = Guid.NewGuid().ToString("N"),
+                            Name = "CLI Default Admin Key",
+                            Username = "admin",
+                            OwnerSid = string.Empty,
+                            KeyType = "system",
+                            KeyPrefix = checkPrefix,
+                            EncryptedKey = hashedKey,
+                            ScopesJson = "[\"all\",\"admin\"]",
+                            ExpiresAt = null,
+                            CreatedAt = DateTime.UtcNow
+                        };
+
+                        SaveAppKeyToDb(conn, dbFactory.ProviderName, defaultKey);
+                        logger.LogInformation("Seeded default CLI Admin AppKey for 'admin'.");
+                    }
                 }
             }
             catch (Exception exSeedKey)
             {
                 logger.LogWarning(exSeedKey, "Default AppKey seeder warning");
+            }
+        }
+
+        private static void SaveAppKeyToDb(IDbConnection conn, string providerName, AppKey key)
+        {
+            if (providerName == "sqlite")
+            {
+                const string insertSql = @"
+                    INSERT INTO AppKeys (Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt)
+                    VALUES (@Id, @Name, @Username, @OwnerSid, @KeyType, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt, @CreatedAt);";
+                conn.Execute(insertSql, key);
+            }
+            else if (providerName == "mysql")
+            {
+                conn.Execute("sp_SaveAppKey", new
+                {
+                    p_Id = key.Id,
+                    p_Name = key.Name,
+                    p_Username = key.Username,
+                    p_KeyPrefix = key.KeyPrefix,
+                    p_EncryptedKey = key.EncryptedKey,
+                    p_ScopesJson = key.ScopesJson,
+                    p_OwnerSid = key.OwnerSid ?? "",
+                    p_KeyType = string.IsNullOrEmpty(key.KeyType) ? "system" : key.KeyType,
+                    p_ExpiresAt = key.ExpiresAt
+                }, commandType: CommandType.StoredProcedure);
+            }
+            else
+            {
+                conn.Execute("sp_SaveAppKey", new
+                {
+                    key.Id,
+                    key.Name,
+                    key.Username,
+                    KeyType = string.IsNullOrEmpty(key.KeyType) ? "system" : key.KeyType,
+                    key.KeyPrefix,
+                    key.EncryptedKey,
+                    key.ScopesJson,
+                    key.OwnerSid,
+                    key.ExpiresAt
+                }, commandType: CommandType.StoredProcedure);
             }
         }
 
