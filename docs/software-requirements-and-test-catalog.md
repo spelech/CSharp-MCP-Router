@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **121 Requirements Verified** across **271 Test Proofs** (98 Functional Capabilities, 23 Safety Guardrails).
+> **Catalog Statistics:** **122 Requirements Verified** across **272 Test Proofs** (99 Functional Capabilities, 23 Safety Guardrails).
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **25** | 23 | 2 | 83 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **26** | 24 | 2 | 84 proofs |
 | **`CORE`** | CORE | **1** | 1 | 0 | 9 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **2** | 2 | 0 | 10 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
@@ -123,6 +123,12 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L141`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L141) (`AppKey_WithWildcardScope_GrantsAdminAccess`)
 
+### `[AUTH-COMPACT-APPKEY-TAXONOMY]` Generates compact ~32-character Base62 AppKeys with semantic prefixes.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L409`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L409) (`CreateCredentialAsync_GeneratesCompactKeysWithSemanticPrefixes`)
+
 ### `[AUTH-PERSONAL-APPKEY-LIST]` Non-admin users can view their personal App Keys
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
@@ -175,8 +181,8 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (10):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L151`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L151) (`SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L295`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L295) (`PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L348`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L348) (`SystemAppKey_WithAdminScope_GrantsAdministratorRole`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L303`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L303) (`PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L356`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L356) (`SystemAppKey_WithAdminScope_GrantsAdministratorRole`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L216`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L216) (`switches keyTypeTab between personal and system`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L250`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L250) (`fetches system-filtered app keys via query parameters`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L15`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L15) (`renders header, navigation tabs, and default overview dashboard for admin user`)
@@ -927,6 +933,7 @@
 | `AUTH-APPKEY-ADMIN-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with admin scope grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L80`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L80) | Backend xUnit |
 | `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L256`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L256) | Backend xUnit |
 | `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L141`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/StandaloneAdminAuthTests.cs#L141) | Backend xUnit |
+| `AUTH-COMPACT-APPKEY-TAXONOMY` | Positive | `AUTH` | Generates compact ~32-character Base62 AppKeys with semantic prefixes. | [`AppKeyAuthenticationTests.cs:L409`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs#L409) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-CREATE` | **Guardrail** | `AUTH` | Non-admin users can create personal App Keys up to quota | [`AppKeysControllerTests.cs:L191`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L191) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-LIST` | Positive | `AUTH` | Non-admin users can view their personal App Keys | [`AppKeysControllerTests.cs:L125`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L125) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE` | Positive | `AUTH` | Custom user quotas override default limit | [`AppKeysControllerTests.cs:L223`](file:////containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeysControllerTests.cs#L223) | Backend xUnit |

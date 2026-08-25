@@ -20,11 +20,17 @@ namespace McpRouter.Components.Clients
 
     public class CredentialService : ICredentialService
     {
+        private const string Base62Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         private readonly IDbConnectionFactory _dbFactory;
 
         public CredentialService(IDbConnectionFactory dbFactory)
         {
             _dbFactory = dbFactory;
+        }
+
+        private static string GenerateBase62String(int length)
+        {
+            return RandomNumberGenerator.GetString(Base62Chars, length);
         }
 
         public async Task<(AppKey AppKey, string PlaintextKey)> CreateCredentialAsync(
@@ -36,36 +42,49 @@ namespace McpRouter.Components.Clients
             string keyType = "personal")
         {
             var scopesList = scopes ?? new List<string> { "all" };
-            var scopeSlug = "global";
-            if (scopesList.Any(s => s.StartsWith("server:", StringComparison.OrdinalIgnoreCase)))
+            string prefix;
+
+            bool isAdmin = string.Equals(keyType, "system", StringComparison.OrdinalIgnoreCase) ||
+                           scopesList.Any(s => string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase));
+
+            if (isAdmin)
             {
-                scopeSlug = "server";
+                prefix = "mcp-adm-";
+            }
+            else if (scopesList.Any(s => string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) || string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
+            {
+                prefix = "mcp-glb-";
+            }
+            else if (scopesList.Any(s => s.StartsWith("server:", StringComparison.OrdinalIgnoreCase)))
+            {
+                prefix = "mcp-srv-";
             }
             else if (scopesList.Any(s => s.StartsWith("group:", StringComparison.OrdinalIgnoreCase)))
             {
-                scopeSlug = "group";
+                var groupScope = scopesList.First(s => s.StartsWith("group:", StringComparison.OrdinalIgnoreCase));
+                var domain = groupScope.Substring("group:".Length).Trim().ToLowerInvariant();
+                prefix = !string.IsNullOrEmpty(domain) ? $"mcp-{domain}-" : "mcp-grp-";
             }
-            else if (scopesList.Any(s => s.StartsWith("tool:", StringComparison.OrdinalIgnoreCase)))
+            else if (scopesList.Any(s => s.StartsWith("category:", StringComparison.OrdinalIgnoreCase)))
             {
-                scopeSlug = "tool";
+                var catScope = scopesList.First(s => s.StartsWith("category:", StringComparison.OrdinalIgnoreCase));
+                var cat = catScope.Substring("category:".Length).Trim().ToLowerInvariant();
+                prefix = !string.IsNullOrEmpty(cat) ? $"mcp-{cat}-" : "mcp-grp-";
+            }
+            else
+            {
+                prefix = "mcp-usr-";
             }
 
             const int maxRetries = 3;
             for (int attempt = 0; attempt < maxRetries; attempt++)
             {
-                // Generate high-entropy 128-bit (16 bytes = 32 hex chars) selector and 256-bit (32 bytes = 64 hex chars) secret
-                var selectorBytes = new byte[16];
-                var secretBytes = new byte[32];
-                using (var rng = RandomNumberGenerator.Create())
-                {
-                    rng.GetBytes(selectorBytes);
-                    rng.GetBytes(secretBytes);
-                }
-                var selector = Convert.ToHexString(selectorBytes).ToLowerInvariant();
-                var secret = Convert.ToHexString(secretBytes).ToLowerInvariant();
+                // Generate compact ~32-character Base62 key: 8-char selector (~48 bits entropy) + 16-char secret (~95 bits entropy)
+                var selector = GenerateBase62String(8);
+                var secret = GenerateBase62String(16);
 
-                var prefix = $"mcp-{scopeSlug}-{selector}";
-                var plaintextKey = $"{prefix}-{secret}";
+                var keyPrefix = $"{prefix}{selector}";
+                var plaintextKey = $"{keyPrefix}-{secret}";
 
                 // Store a secure one-way SHA-256 hash of the full plaintext key
                 using var sha256 = SHA256.Create();
@@ -79,7 +98,7 @@ namespace McpRouter.Components.Clients
                     Username = username,
                     OwnerSid = ownerSid ?? string.Empty,
                     KeyType = string.IsNullOrEmpty(keyType) ? "personal" : keyType,
-                    KeyPrefix = prefix,
+                    KeyPrefix = keyPrefix,
                     EncryptedKey = encryptedKey,
                     ScopesJson = JsonSerializer.Serialize(scopesList),
                     ExpiresAt = expiresInDays.HasValue ? DateTime.UtcNow.AddDays(expiresInDays.Value) : null,
@@ -91,10 +110,10 @@ namespace McpRouter.Components.Clients
                 // Check for selector collision before insertion
                 var collision = await conn.ExecuteScalarAsync<int>(
                     "SELECT COUNT(*) FROM AppKeys WHERE KeyPrefix = @KeyPrefix;",
-                    new { KeyPrefix = prefix });
+                    new { KeyPrefix = keyPrefix });
                 if (collision > 0)
                 {
-                    continue; // Retry with fresh random bytes
+                    continue; // Retry with fresh random Base62 tokens
                 }
 
                 try

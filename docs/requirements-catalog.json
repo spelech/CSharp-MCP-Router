@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-25T02:46:26.3183682Z",
-    "totalRequirements": 121,
-    "positiveCount": 98,
+    "generatedAt": "2026-08-25T04:04:10.0419946Z",
+    "totalRequirements": 122,
+    "positiveCount": 99,
     "guardrailCount": 23,
-    "totalProofs": 271
+    "totalProofs": 272
   },
   "requirements": [
     {
@@ -458,6 +458,22 @@
       ]
     },
     {
+      "id": "AUTH-COMPACT-APPKEY-TAXONOMY",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Generates compact ~32-character Base62 AppKeys with semantic prefixes.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs",
+          "lineNumber": 409,
+          "testName": "CreateCredentialAsync_GeneratesCompactKeysWithSemanticPrefixes",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "AUTH-PERSONAL-APPKEY-CREATE",
       "category": "AUTH",
       "type": "Negative",
@@ -719,14 +735,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs",
-          "lineNumber": 295,
+          "lineNumber": 303,
           "testName": "PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/McpRouter.Tests/AppKeyAuthenticationTests.cs",
-          "lineNumber": 348,
+          "lineNumber": 356,
           "testName": "SystemAppKey_WithAdminScope_GrantsAdministratorRole",
           "details": null
         },

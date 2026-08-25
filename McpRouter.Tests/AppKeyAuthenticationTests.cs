@@ -9,17 +9,19 @@ namespace McpRouter.Tests
 {
     public class AppKeyAuthenticationTests : IDisposable
     {
-        private readonly SqliteConnection _connection;
+        private readonly string _connectionString;
+        private readonly SqliteConnection _masterConnection;
         private readonly IDbConnectionFactory _dbFactory;
         private readonly IConfiguration _config;
 
         public AppKeyAuthenticationTests()
         {
-            _connection = new SqliteConnection("Filename=:memory:");
-            _connection.Open();
+            _connectionString = $"Data Source=AppKeyAuthTests_{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
+            _masterConnection = new SqliteConnection(_connectionString);
+            _masterConnection.Open();
 
             // Create required tables for testing
-            _connection.Execute(@"
+            _masterConnection.Execute(@"
                 CREATE TABLE IF NOT EXISTS Settings (
                     Id TEXT PRIMARY KEY,
                     EmbeddingProvider TEXT,
@@ -34,6 +36,7 @@ namespace McpRouter.Tests
                     Id TEXT PRIMARY KEY,
                     Name TEXT,
                     Username TEXT,
+                    OwnerSid TEXT,
                     KeyPrefix TEXT,
                     EncryptedKey TEXT,
                     ScopesJson TEXT DEFAULT '[]',
@@ -43,10 +46,15 @@ namespace McpRouter.Tests
                 );");
 
             // Seed default settings row
-            _connection.Execute("INSERT INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 100, 5);");
+            _masterConnection.Execute("INSERT INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 100, 5);");
 
             var mockFactory = new Mock<IDbConnectionFactory>();
-            mockFactory.Setup(f => f.CreateConnection()).Returns(_connection);
+            mockFactory.Setup(f => f.CreateConnection()).Returns(() =>
+            {
+                var conn = new SqliteConnection(_connectionString);
+                conn.Open();
+                return conn;
+            });
             mockFactory.Setup(f => f.ProviderName).Returns("sqlite");
             _dbFactory = mockFactory.Object;
 
@@ -58,7 +66,7 @@ namespace McpRouter.Tests
 
         public void Dispose()
         {
-            _connection.Dispose();
+            _masterConnection.Dispose();
         }
 
         [Fact]
@@ -91,13 +99,13 @@ namespace McpRouter.Tests
                 ScopesJson = "[\"all\"]"
             };
 
-            await _connection.ExecuteAsync(@"
+            await _masterConnection.ExecuteAsync(@"
                 INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson)
                 VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson);",
                 key);
 
             // Lookup by prefix
-            var retrieved = await _connection.QueryFirstOrDefaultAsync<AppKey>(
+            var retrieved = await _masterConnection.QueryFirstOrDefaultAsync<AppKey>(
                 "SELECT * FROM AppKeys WHERE KeyPrefix = @KeyPrefix;",
                 new { KeyPrefix = prefix });
 
@@ -123,12 +131,12 @@ namespace McpRouter.Tests
                 ExpiresAt = DateTime.UtcNow.AddMinutes(-5) // Expired 5 minutes ago
             };
 
-            await _connection.ExecuteAsync(@"
+            await _masterConnection.ExecuteAsync(@"
                 INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt)
                 VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @ExpiresAt);",
                 expiredKey);
 
-            var retrieved = await _connection.QueryFirstOrDefaultAsync<AppKey>(
+            var retrieved = await _masterConnection.QueryFirstOrDefaultAsync<AppKey>(
                 "SELECT * FROM AppKeys WHERE Id = @Id;",
                 new { Id = "expired-id" });
 
@@ -152,21 +160,21 @@ namespace McpRouter.Tests
                     EncryptedKey = "encrypted",
                     ScopesJson = "[\"all\"]"
                 };
-                await _connection.ExecuteAsync(@"
+                await _masterConnection.ExecuteAsync(@"
                     INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson)
                     VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson);",
                     key);
             }
 
             // Count Alice's active keys
-            int count = await _connection.ExecuteScalarAsync<int>(
+            int count = await _masterConnection.ExecuteScalarAsync<int>(
                 "SELECT COUNT(*) FROM AppKeys WHERE Username = @Username;",
                 new { Username = "alice" });
 
             Assert.Equal(5, count);
 
             // Fetch limits setting using RouterSettings typed model
-            var settings = await _connection.QueryFirstOrDefaultAsync<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default';");
+            var settings = await _masterConnection.QueryFirstOrDefaultAsync<RouterSettings>("SELECT * FROM Settings WHERE Id = 'default';");
             Assert.NotNull(settings);
             int maxKeys = settings.UserMaxKeys;
 
@@ -312,7 +320,7 @@ namespace McpRouter.Tests
                 KeyType = "personal"
             };
 
-            await _connection.ExecuteAsync(@"
+            await _masterConnection.ExecuteAsync(@"
                 INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, KeyType)
                 VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @KeyType);",
                 key);
@@ -365,7 +373,7 @@ namespace McpRouter.Tests
                 KeyType = "system"
             };
 
-            await _connection.ExecuteAsync(@"
+            await _masterConnection.ExecuteAsync(@"
                 INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson, KeyType)
                 VALUES (@Id, @Name, @Username, @KeyPrefix, @EncryptedKey, @ScopesJson, @KeyType);",
                 key);
@@ -396,6 +404,40 @@ namespace McpRouter.Tests
             // Verify SecurityValidationHelper.IsAdmin returns true
             var identity = new McpRouter.Infrastructure.Identity.UserIdentityContext("system", "AppKey", new List<string>());
             Assert.True(McpRouter.Components.Authorization.SecurityValidationHelper.IsAdmin(identity, _config, context));
+        }
+
+        [Fact]
+        [Requirement("AUTH-COMPACT-APPKEY-TAXONOMY", "AUTH", RequirementType.Positive, "Generates compact ~32-character Base62 AppKeys with semantic prefixes.")]
+        public async Task CreateCredentialAsync_GeneratesCompactKeysWithSemanticPrefixes()
+        {
+            var credService = new CredentialService(_dbFactory);
+
+            // 1. Admin key
+            var (adminKey, adminPlain) = await credService.CreateCredentialAsync("Admin", "admin", "SID", new List<string> { "all", "admin" }, null, "system");
+            Assert.StartsWith("mcp-adm-", adminPlain);
+            Assert.StartsWith(adminKey.KeyPrefix, adminPlain);
+            Assert.InRange(adminPlain.Length, 32, 38);
+
+            // 2. Global key
+            var (glbKey, glbPlain) = await credService.CreateCredentialAsync("Global", "user1", "SID", new List<string> { "all" }, null, "personal");
+            Assert.StartsWith("mcp-glb-", glbPlain);
+            Assert.StartsWith(glbKey.KeyPrefix, glbPlain);
+
+            // 3. User / personal key
+            var (usrKey, usrPlain) = await credService.CreateCredentialAsync("User", "user1", "SID", new List<string> { "mcp:read" }, null, "personal");
+            Assert.StartsWith("mcp-usr-", usrPlain);
+            Assert.StartsWith(usrKey.KeyPrefix, usrPlain);
+
+            // 4. Server-scoped key
+            var (srvKey, srvPlain) = await credService.CreateCredentialAsync("Server", "user1", "SID", new List<string> { "server:docker" }, null, "personal");
+            Assert.StartsWith("mcp-srv-", srvPlain);
+            Assert.StartsWith(srvKey.KeyPrefix, srvPlain);
+
+            // 5. Domain / group-scoped key
+            var (grpKey, grpPlain) = await credService.CreateCredentialAsync("Domain", "user1", "SID", new List<string> { "group:devops" }, null, "personal");
+            Assert.StartsWith("mcp-devops-", grpPlain);
+            Assert.StartsWith(grpKey.KeyPrefix, grpPlain);
+            Assert.InRange(grpPlain.Length, 32, 38);
         }
     }
 }
