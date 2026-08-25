@@ -1375,7 +1375,7 @@ namespace ModelContextGateway.Core.Routing
             }
 
             using var ctsInit = new CancellationTokenSource(TimeSpan.FromSeconds(5));
-            var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"0.4.0\"}}}";
+            var initReq = "{\"jsonrpc\":\"2.0\",\"method\":\"initialize\",\"id\":\"test-init\",\"params\":{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{},\"clientInfo\":{\"name\":\"McpTestBench\",\"version\":\"5.0.0\"}}}";
             await conn.SendRequestAsync("initialize", initReq).WaitAsync(ctsInit.Token);
             await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
 

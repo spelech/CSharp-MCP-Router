@@ -152,9 +152,9 @@ namespace ModelContextGateway.Core.Protocol
     public class McpClientInfo
     {
         [JsonPropertyName("name")]
-        public string Name { get; set; } = "CSharp-MCP-Router";
+        public string Name { get; set; } = "ModelContextGateway";
 
         [JsonPropertyName("version")]
-        public string Version { get; set; } = "0.4.0";
+        public string Version { get; set; } = "5.0.0";
     }
 }
