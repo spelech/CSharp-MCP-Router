@@ -17,5 +17,7 @@ namespace McpRouter.Models
         public int UserMaxKeys { get; set; } = 0; // 0 = unlimited
         public string UserSecretStorage { get; set; } = "Database"; // "Database" or "Vault"
         public bool AllowOpenClientRegistration { get; set; } = true;
+        public string MasterKeySource => DbKeyHelper.ActiveKeySource.ToString();
     }
 }
+

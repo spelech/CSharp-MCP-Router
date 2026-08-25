@@ -20,6 +20,7 @@ import {
   fetchCustomFileContentApi,
   saveCustomFileApi,
   deleteCustomFileApi,
+  setMasterKeyApi,
 } from '../api/settingsApi';
 import {
   fetchPoliciesApi,
@@ -67,6 +68,7 @@ interface SettingsStore {
   // Actions
   fetchEmbeddingSettings: () => Promise<void>;
   saveEmbeddingSettings: (settings: EmbeddingSettings) => Promise<boolean>;
+  setMasterKey: (newKey: string) => Promise<{ success: boolean; message?: string; error?: string }>;
 
   fetchProviders: () => Promise<void>;
   saveAuthProvider: (provider: AuthProviderConfig) => Promise<void>;
@@ -150,6 +152,25 @@ export const useSettingsStore = create<SettingsStore>((set, get) => ({
       return false;
     } finally {
       set({ isSavingSettings: false });
+    }
+  },
+
+  setMasterKey: async (newKey: string) => {
+    try {
+      const res = await setMasterKeyApi(newKey);
+      if (res && res.success) {
+        showToast(res.message || 'Master encryption key updated and database re-encrypted successfully.', 'success');
+        await get().fetchEmbeddingSettings();
+        return { success: true, message: res.message };
+      } else {
+        const errorMsg = res?.error || res?.message || 'Failed to update master key.';
+        showToast(errorMsg, 'error');
+        return { success: false, error: errorMsg };
+      }
+    } catch (err: any) {
+      const errorMsg = err?.message || 'Failed to update master key.';
+      showToast(errorMsg, 'error');
+      return { success: false, error: errorMsg };
     }
   },
 
