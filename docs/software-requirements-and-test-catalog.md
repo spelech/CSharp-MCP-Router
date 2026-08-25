@@ -129,12 +129,12 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L409`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L409) (`CreateCredentialAsync_GeneratesCompactKeysWithSemanticPrefixes`)
 
-### `[AUTH-CUSTOM-ADMIN-KEY-SEEDING]` Seeds custom ROUTER_ADMIN_KEY when provided in configuration.
+### `[AUTH-CUSTOM-ADMIN-KEY-SEEDING]` Seeds custom MCG_ADMIN_AUTH_KEY when provided in configuration.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (3):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L186`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L186) (`Startup_SeedsCustomAdminKey_WhenConfigured`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L238`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L238) (`Startup_SeedsCustomAdminKey_WhenMcpAdminKeyConfigured`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L238`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L238) (`Startup_SeedsCustomAdminKey_WhenMcgAdminKeyConfigured`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L289`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L289) (`Startup_UpdatesAdminKeyHash_WhenEnvironmentKeyChanges`)
 
 ### `[AUTH-PERSONAL-APPKEY-LIST]` Non-admin users can view their personal App Keys
@@ -263,7 +263,7 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L152`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L152) (`Skill_MirroredInAgentsDirectory`)
 
-### `[DOC-SETUP-SKILL-TEMPLATES]` All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/model-context-gateway
+### `[DOC-SETUP-SKILL-TEMPLATES]` All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, MCG_MASTER_KEY, and ghcr.io/spelech/model-context-gateway
 * **Category:** `DOC` (DOC)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
@@ -549,19 +549,19 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L42`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L42) (`GetDbEncryptionKey_AutoGenerates_WhenUnconfigured`)
 
-### `[SEC-KEY-PROVIDER-CONFIG]` EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or ROUTER_SECRET.
+### `[SEC-KEY-PROVIDER-CONFIG]` EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or MCG_SECRET.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L28`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L28) (`GetDbEncryptionKey_UsesConfig_WhenProvided`)
 
-### `[SEC-KEY-PROVIDER-FALLBACK]` EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when ROUTER_SECRET is unconfigured.
+### `[SEC-KEY-PROVIDER-FALLBACK]` EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when MCG_SECRET is unconfigured.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L70`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L70) (`GetRouterSecret_FallsBackToDbEncryptionKey_WhenDbEncryptionKeyProvided`)
 
-### `[SEC-KEY-PROVIDER-SECRET]` EncryptionKeyProvider returns configured ROUTER_SECRET.
+### `[SEC-KEY-PROVIDER-SECRET]` EncryptionKeyProvider returns configured MCG_SECRET.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
@@ -573,7 +573,7 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L63`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L63) (`ResolveDbEncryptionKey_AutoGeneratesAndPersistsKey_WhenBlankSlate`)
 
-### `[SEC-KEYFILE-ENV-PRECEDENCE]` Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles.
+### `[SEC-KEYFILE-ENV-PRECEDENCE]` Explicit environment variables MCG_MASTER_KEY or MCG_SECRET take precedence over keyfiles.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
@@ -585,7 +585,7 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L123`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L123) (`ResolveDbEncryptionKey_FileSecretTakesPrecedenceOverKeyFile`)
 
-### `[SEC-KEYFILE-FILE-SECRET]` File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved.
+### `[SEC-KEYFILE-FILE-SECRET]` File-based secrets configured via MCG_MASTER_KEY_FILE or standard Docker secrets paths are resolved.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
@@ -1009,7 +1009,7 @@
 | `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L255`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L255) | Backend xUnit |
 | `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L140`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L140) | Backend xUnit |
 | `AUTH-COMPACT-APPKEY-TAXONOMY` | Positive | `AUTH` | Generates compact ~32-character Base62 AppKeys with semantic prefixes. | [`AppKeyAuthenticationTests.cs:L409`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L409) | Backend xUnit |
-| `AUTH-CUSTOM-ADMIN-KEY-SEEDING` | Positive | `AUTH` | Seeds custom ROUTER_ADMIN_KEY when provided in configuration. | [`DatabaseSeederServiceTests.cs:L186`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L186) | Backend xUnit |
+| `AUTH-CUSTOM-ADMIN-KEY-SEEDING` | Positive | `AUTH` | Seeds custom MCG_ADMIN_AUTH_KEY when provided in configuration. | [`DatabaseSeederServiceTests.cs:L186`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L186) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-CREATE` | **Guardrail** | `AUTH` | Non-admin users can create personal App Keys up to quota | [`AppKeysControllerTests.cs:L191`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L191) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-LIST` | Positive | `AUTH` | Non-admin users can view their personal App Keys | [`AppKeysControllerTests.cs:L125`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L125) | Backend xUnit |
 | `AUTH-PERSONAL-APPKEY-QUOTA-OVERRIDE` | Positive | `AUTH` | Custom user quotas override default limit | [`AppKeysControllerTests.cs:L223`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L223) | Backend xUnit |
@@ -1026,7 +1026,7 @@
 | `DB-02` | Positive | `DB` | MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly | [`DatabaseSchemaUpgradeAndContractTests.cs:L311`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs#L311) | Backend xUnit |
 | `DOC-SETUP-SKILL-FRONTMATTER` | Positive | `DOC` | mcg-setup skill frontmatter is valid YAML, specifies name, description starting with 'Use when...', and length is under 1024 characters | [`SetupSkillTests.cs:L18`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L18) | Backend xUnit |
 | `DOC-SETUP-SKILL-MIRROR` | Positive | `DOC` | The mcg-setup skill and templates are mirrored 1:1 in .agents/skills/mcg-setup/ | [`SetupSkillTests.cs:L152`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L152) | Backend xUnit |
-| `DOC-SETUP-SKILL-TEMPLATES` | Positive | `DOC` | All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/model-context-gateway | [`SetupSkillTests.cs:L98`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L98) | Backend xUnit |
+| `DOC-SETUP-SKILL-TEMPLATES` | Positive | `DOC` | All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, MCG_MASTER_KEY, and ghcr.io/spelech/model-context-gateway | [`SetupSkillTests.cs:L98`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L98) | Backend xUnit |
 | `DOC-SETUP-SKILL-WORKFLOW` | Positive | `DOC` | mcg-setup skill contains all 6 required setup phases including environment probing, hosting platforms, env vs UI trade-offs, identity/network topology, artifact generation, and health/client configuration | [`SetupSkillTests.cs:L44`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs#L44) | Backend xUnit |
 | `AUTH-EXTERNAL-IDP-DENIES-ANONYMOUS-LOOPBACK` | **Guardrail** | `GUARD` | When an external IDP is configured, anonymous loopback requests do not bypass authentication. | [`StandaloneAdminAuthTests.cs:L224`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L224) | Backend xUnit |
 | `AUTH-STANDALONE-ADMINPOLICY-EXTERNAL-DENY` | **Guardrail** | `GUARD` | AdminPolicy rejects unauthenticated requests from non-whitelisted external IPs in standalone mode. | [`StandaloneAdminAuthTests.cs:L200`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L200) | Backend xUnit |
@@ -1091,13 +1091,13 @@
 | `SEC-ADMIN-AUDIT-REDACTION` | Positive | `SEC` | AdminMcpServer redacts sensitive secrets from argument payloads before recording audit logs. | [`AdminMcpServerTests.cs:L609`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L609) | Backend xUnit |
 | `SEC-GATEWAY-ZERO-CONFIG-BOOT` | Positive | `SEC` | Gateway boots from a blank slate with zero master key environment variables, auto-generates .master.key, and serves health and admin endpoints. | [`AdminAutomationSkillTests.cs:L351`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminAutomationSkillTests.cs#L351) | Backend xUnit |
 | `SEC-KEY-PROVIDER-AUTOGEN` | Positive | `SEC` | EncryptionKeyProvider delegates to DbKeyHelper to auto-generate master key when unconfigured. | [`EncryptionKeyProviderTests.cs:L42`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L42) | Backend xUnit |
-| `SEC-KEY-PROVIDER-CONFIG` | Positive | `SEC` | EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or ROUTER_SECRET. | [`EncryptionKeyProviderTests.cs:L28`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L28) | Backend xUnit |
-| `SEC-KEY-PROVIDER-FALLBACK` | Positive | `SEC` | EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when ROUTER_SECRET is unconfigured. | [`EncryptionKeyProviderTests.cs:L70`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L70) | Backend xUnit |
-| `SEC-KEY-PROVIDER-SECRET` | Positive | `SEC` | EncryptionKeyProvider returns configured ROUTER_SECRET. | [`EncryptionKeyProviderTests.cs:L56`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L56) | Backend xUnit |
+| `SEC-KEY-PROVIDER-CONFIG` | Positive | `SEC` | EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or MCG_SECRET. | [`EncryptionKeyProviderTests.cs:L28`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L28) | Backend xUnit |
+| `SEC-KEY-PROVIDER-FALLBACK` | Positive | `SEC` | EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when MCG_SECRET is unconfigured. | [`EncryptionKeyProviderTests.cs:L70`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L70) | Backend xUnit |
+| `SEC-KEY-PROVIDER-SECRET` | Positive | `SEC` | EncryptionKeyProvider returns configured MCG_SECRET. | [`EncryptionKeyProviderTests.cs:L56`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs#L56) | Backend xUnit |
 | `SEC-KEYFILE-AUTOGEN` | Positive | `SEC` | Blank-slate initialization auto-generates a 256-bit base64 master key and persists it to .master.key. | [`DbKeyHelperTests.cs:L63`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L63) | Backend xUnit |
-| `SEC-KEYFILE-ENV-PRECEDENCE` | Positive | `SEC` | Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles. | [`DbKeyHelperTests.cs:L28`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L28) | Backend xUnit |
+| `SEC-KEYFILE-ENV-PRECEDENCE` | Positive | `SEC` | Explicit environment variables MCG_MASTER_KEY or MCG_SECRET take precedence over keyfiles. | [`DbKeyHelperTests.cs:L28`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L28) | Backend xUnit |
 | `SEC-KEYFILE-FILE-OVER-KEYFILE` | Positive | `SEC` | Explicit file secrets take precedence over persistent .master.key files. | [`DbKeyHelperTests.cs:L123`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L123) | Backend xUnit |
-| `SEC-KEYFILE-FILE-SECRET` | Positive | `SEC` | File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved. | [`DbKeyHelperTests.cs:L45`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L45) | Backend xUnit |
+| `SEC-KEYFILE-FILE-SECRET` | Positive | `SEC` | File-based secrets configured via MCG_MASTER_KEY_FILE or standard Docker secrets paths are resolved. | [`DbKeyHelperTests.cs:L45`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L45) | Backend xUnit |
 | `SEC-KEYFILE-HIERARCHY-PRECEDENCE` | Positive | `SEC` | Explicit environment variables take precedence over file secrets and keyfiles. | [`DbKeyHelperTests.cs:L101`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L101) | Backend xUnit |
 | `SEC-KEYFILE-RELOAD` | Positive | `SEC` | Existing .master.key file is loaded across gateway restarts without key mutation. | [`DbKeyHelperTests.cs:L83`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L83) | Backend xUnit |
 | `SEC-KEYSOURCE-DETECTION` | Positive | `SEC` | Correctly identifies KeySource origin for environment, file, and auto-generated keys. | [`DbKeyHelperTests.cs:L144`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs#L144) | Backend xUnit |

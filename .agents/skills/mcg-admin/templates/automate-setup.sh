@@ -3,16 +3,16 @@
 # Model Context Gateway (MCG) Automated Provisioning Script (JSON-RPC over /admin)
 # ==============================================================================
 # Usage:
-#   ROUTER_URL="http://localhost:8080" ADMIN_KEY="mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9" ./automate-setup.sh
+#   MCG_URL="http://localhost:8080" ADMIN_KEY="mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9" ./automate-setup.sh
 # ==============================================================================
 set -euo pipefail
 
-ROUTER_URL="${ROUTER_URL:-http://localhost:8080}"
+MCG_URL="${MCG_URL:-http://localhost:8080}"
 ADMIN_KEY="${ADMIN_KEY:-mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9}"
 
 echo "========================================================"
 echo " Starting Model Context Gateway Automated Provisioning"
-echo " Target: ${ROUTER_URL}"
+echo " Target: ${MCG_URL}"
 echo "========================================================"
 
 call_admin_tool() {
@@ -33,7 +33,7 @@ call_admin_tool() {
 EOF
 )
 
-  curl -s -f -X POST "${ROUTER_URL}/admin" \
+  curl -s -f -X POST "${MCG_URL}/admin" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer ${ADMIN_KEY}" \
     -d "${payload}"

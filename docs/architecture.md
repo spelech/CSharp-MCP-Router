@@ -1104,7 +1104,7 @@ Sensitive database columns (e.g. `AppKeys.EncryptedKey`, `SecretProviders.Encryp
 1. **Nonce Generation**: A cryptographically secure 12-byte random nonce is generated for every encryption operation using `RandomNumberGenerator.GetBytes(12)`.
 2. **Authenticated Tagging**: AesGcm computes a 16-byte authentication tag over the ciphertext, guaranteeing tamper detection and payload integrity.
 3. **Master Key Derivation (PBKDF2)**:
-   - Derives a 256-bit key from `ROUTER_SECRET`, `ROUTER_MASTER_KEY`, or `DB_ENCRYPTION_KEY`.
+   - Derives a 256-bit key from `MCG_SECRET`, `MCG_MASTER_KEY`, or `DB_ENCRYPTION_KEY`.
    - Uses `Rfc2898DeriveBytes.Pbkdf2` with **600,000 iterations** of **SHA-256** and a deployment-specific salt (`_McpRouter_Salt_v2`).
 
 ### Pluggable Retrievers & Dynamic Reload Without Restart

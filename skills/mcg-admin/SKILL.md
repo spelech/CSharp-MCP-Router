@@ -18,8 +18,8 @@ When `Model Context Gateway (MCG)` starts in a new environment, it initializes w
 | Component | Default Configuration | Notes |
 | :--- | :--- | :--- |
 | **Database** | SQLite (`./data/mcg.db`) | Zero external database dependencies required. Auto-seeded on startup. |
-| **Master Key** | `./data/.master.key` (Auto-Generated) or `ROUTER_MASTER_KEY` / `ROUTER_MASTER_KEY_FILE` | Encrypts sensitive credentials at rest in the DB (AES-256-GCM). Auto-generated if unset. |
-| **Admin AppKey** | `mcp-adm-` (Compact Base62) or `ROUTER_ADMIN_KEY` | Scoped to `["all", "admin"]`. Seeded automatically in the database or configured via `ROUTER_ADMIN_KEY`. Legacy fallback: `mcp-global-admin-default-cli-key-99`. |
+| **Master Key** | `./data/.master.key` (Auto-Generated) or `MCG_MASTER_KEY` / `MCG_MASTER_KEY_FILE` | Encrypts sensitive credentials at rest in the DB (AES-256-GCM). Auto-generated if unset. |
+| **Admin AppKey** | `mcp-adm-` (Compact Base62) or `MCG_ADMIN_AUTH_KEY` / `MCG_ADMIN_KEY` | Scoped to `["all", "admin"]`. Seeded automatically in the database or configured via `MCG_ADMIN_AUTH_KEY` / `MCG_ADMIN_KEY`. Legacy fallback: `mcp-global-admin-default-cli-key-99`. |
 | **Network Trust** | `127.0.0.1, ::1` (Loopback) | Configurable via `Admin:StandaloneAllowedNetworks` for LAN/CIDR subnets. |
 | **Admin Endpoint** | `http://<host>:8080/admin/sse` or `/mcg-admin/sse` | MCP SSE transport for administrative JSON-RPC tool calling. |
 
@@ -111,7 +111,7 @@ Inspect current active sessions, OS version, process uptime, and memory usage.
 Configure where backend API keys, tokens, and credentials are encrypted and stored.
 
 ### Option A: Built-in Master Key (AES-256-GCM / Default)
-No extra provider needed. All backend credentials stored via `manage_servers` are automatically encrypted at rest using `ROUTER_MASTER_KEY`.
+No extra provider needed. All backend credentials stored via `manage_servers` are automatically encrypted at rest using `MCG_MASTER_KEY`.
 
 ### Option B: HashiCorp Vault KV v2 (Token Auth)
 ```json

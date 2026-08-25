@@ -204,7 +204,7 @@ namespace ModelContextGateway.Tests
             builder.Environment.EnvironmentName = "Development";
             builder.Configuration["DB_PROVIDER"] = "sqlite";
             builder.Configuration["ConnectionStrings:DefaultConnection"] = "Data Source=:memory:;";
-            builder.AddMcpRouterServices();
+            builder.AddModelContextGatewayServices();
 
             using var app = builder.Build();
             var quotaRepo = app.Services.GetService<IUserQuotaRepository>();

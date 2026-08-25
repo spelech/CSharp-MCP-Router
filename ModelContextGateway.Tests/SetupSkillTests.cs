@@ -80,7 +80,7 @@ namespace ModelContextGateway.Tests
             // Phase 5: Artifact Generation & Secrets Scaffolding
             Assert.Contains("Phase 5", content);
             Assert.Contains("Artifact Generation", content);
-            Assert.Contains("ROUTER_MASTER_KEY", content);
+            Assert.Contains("MCG_MASTER_KEY", content);
             Assert.Contains("openssl rand -base64 32", content);
 
             // Phase 6: Health Verification & Client Setup
@@ -96,7 +96,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("DOC-SETUP-SKILL-TEMPLATES", "DOC", RequirementType.Positive, "All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/model-context-gateway")]
+        [Requirement("DOC-SETUP-SKILL-TEMPLATES", "DOC", RequirementType.Positive, "All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, MCG_MASTER_KEY, and ghcr.io/spelech/model-context-gateway")]
         public void Templates_AreValidAndContainRequiredDirectives()
         {
             var root = GetRepoRootDir();
@@ -109,7 +109,7 @@ namespace ModelContextGateway.Tests
             var composeContent = File.ReadAllText(composePath);
             Assert.NotEmpty(composeContent);
             Assert.Contains("ghcr.io/spelech/model-context-gateway", composeContent);
-            Assert.Contains("ROUTER_MASTER_KEY", composeContent);
+            Assert.Contains("MCG_MASTER_KEY", composeContent);
             Assert.Contains("DB_PROVIDER", composeContent);
             Assert.Contains("Admin__StandaloneAllowedNetworks", composeContent);
             Assert.Contains("/var/run/docker.sock", composeContent);
@@ -129,7 +129,7 @@ namespace ModelContextGateway.Tests
             Assert.True(File.Exists(envPath));
             var envContent = File.ReadAllText(envPath);
             Assert.NotEmpty(envContent);
-            Assert.Contains("ROUTER_MASTER_KEY", envContent);
+            Assert.Contains("MCG_MASTER_KEY", envContent);
             Assert.Contains("DB_PROVIDER", envContent);
             Assert.Contains("STANDALONE_ALLOWED_NETWORK", envContent);
             Assert.Contains("CORS_ALLOWED_ORIGINS", envContent);
@@ -143,7 +143,7 @@ namespace ModelContextGateway.Tests
             using var jsonDoc = JsonDocument.Parse(appsettingsContent);
             var rootElem = jsonDoc.RootElement;
             Assert.True(rootElem.TryGetProperty("DB_PROVIDER", out _));
-            Assert.True(rootElem.TryGetProperty("ROUTER_MASTER_KEY", out _));
+            Assert.True(rootElem.TryGetProperty("MCG_MASTER_KEY", out _));
             Assert.True(rootElem.TryGetProperty("Admin", out var adminElem));
             Assert.True(adminElem.TryGetProperty("StandaloneAllowedNetworks", out var netElem));
             Assert.Equal(JsonValueKind.Array, netElem.ValueKind);

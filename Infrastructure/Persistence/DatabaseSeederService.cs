@@ -32,9 +32,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
             var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
             if (string.IsNullOrEmpty(configuration["MCG_MASTER_KEY"])
                 && string.IsNullOrEmpty(configuration["MCG_SECRET"])
-                && string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"])
-                && string.IsNullOrEmpty(configuration["ROUTER_MASTER_KEY"])
-                && string.IsNullOrEmpty(configuration["ROUTER_SECRET"]))
+                && string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"]))
             {
                 logger.LogInformation("Master encryption key resolved from persistent keyfile or auto-generated key.");
             }

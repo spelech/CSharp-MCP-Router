@@ -75,13 +75,9 @@ namespace ModelContextGateway.Infrastructure.Secrets
                 // 2. Direct Environment / Config Variables
                 var key = configuration["MCG_MASTER_KEY"]
                     ?? configuration["MCG_SECRET"]
-                    ?? configuration["ROUTER_SECRET"]
-                    ?? configuration["ROUTER_MASTER_KEY"]
                     ?? configuration["DB_ENCRYPTION_KEY"]
                     ?? Environment.GetEnvironmentVariable("MCG_MASTER_KEY")
                     ?? Environment.GetEnvironmentVariable("MCG_SECRET")
-                    ?? Environment.GetEnvironmentVariable("ROUTER_SECRET")
-                    ?? Environment.GetEnvironmentVariable("ROUTER_MASTER_KEY")
                     ?? Environment.GetEnvironmentVariable("DB_ENCRYPTION_KEY");
 
                 if (!string.IsNullOrWhiteSpace(key))
@@ -94,13 +90,9 @@ namespace ModelContextGateway.Infrastructure.Secrets
                 // 3. Explicit File Path from Environment / Config (Docker / K8s file secrets)
                 var filePath = configuration["MCG_MASTER_KEY_FILE"]
                     ?? configuration["MCG_SECRET_FILE"]
-                    ?? configuration["ROUTER_SECRET_FILE"]
-                    ?? configuration["ROUTER_MASTER_KEY_FILE"]
                     ?? configuration["DB_ENCRYPTION_KEY_FILE"]
                     ?? Environment.GetEnvironmentVariable("MCG_MASTER_KEY_FILE")
                     ?? Environment.GetEnvironmentVariable("MCG_SECRET_FILE")
-                    ?? Environment.GetEnvironmentVariable("ROUTER_SECRET_FILE")
-                    ?? Environment.GetEnvironmentVariable("ROUTER_MASTER_KEY_FILE")
                     ?? Environment.GetEnvironmentVariable("DB_ENCRYPTION_KEY_FILE");
 
                 if (!string.IsNullOrWhiteSpace(filePath) && File.Exists(filePath))
@@ -188,7 +180,7 @@ namespace ModelContextGateway.Infrastructure.Secrets
                 {
                     throw new InvalidOperationException(
                         $"FATAL: Master encryption key is missing and failed to persist auto-generated key to '{keyFilePath}'. " +
-                        "Ensure the data directory is writable or configure 'MCG_MASTER_KEY', 'ROUTER_MASTER_KEY', or key file.", ex);
+                        "Ensure the data directory is writable or configure 'MCG_MASTER_KEY' or key file.", ex);
                 }
             }
         }
@@ -301,7 +293,6 @@ namespace ModelContextGateway.Infrastructure.Secrets
 
             var explicitDbPath = configuration["MCG_DB_PATH"]
                 ?? configuration["MCG_DATABASE_PATH"]
-                ?? configuration["ROUTER_DATABASE_PATH"]
                 ?? configuration["DATABASE_PATH"]
                 ?? Environment.GetEnvironmentVariable("MCG_DB_PATH")
                 ?? Environment.GetEnvironmentVariable("MCG_DATABASE_PATH");

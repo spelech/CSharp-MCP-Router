@@ -10,7 +10,7 @@ namespace ModelContextGateway.Tests
         public async Task DatabaseUserSecretStore_SavesAndRetrieves_Secret()
         {
             // Arrange
-            var config = new ConfigurationBuilder().AddInMemoryCollection(new[] { new System.Collections.Generic.KeyValuePair<string, string?>("ROUTER_MASTER_KEY", "12345678901234567890123456789012") }).Build();
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new[] { new System.Collections.Generic.KeyValuePair<string, string?>("MCG_MASTER_KEY", "12345678901234567890123456789012") }).Build();
             var mockRepo = new Mock<IUserCredentialRepository>();
             UserCredentialDto? savedDto = null;
             mockRepo.Setup(r => r.SaveCredentialAsync(It.IsAny<UserCredentialDto>())).Callback<UserCredentialDto>(d => savedDto = d).Returns(Task.CompletedTask);

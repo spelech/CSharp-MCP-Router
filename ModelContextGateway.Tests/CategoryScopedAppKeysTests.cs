@@ -90,7 +90,7 @@ namespace ModelContextGateway.Tests
             var configDict = new Dictionary<string, string?>
             {
                 { "DB_ENCRYPTION_KEY", "SuperSecureDatabaseKey123!" },
-                { "ROUTER_SECRET", "SuperSecretRouterToken456!" },
+                { "MCG_SECRET", "SuperSecretRouterToken456!" },
                 { "Oidc:TrustedProxies", "127.0.0.1,::1" },
                 { "Admin:GroupSid", "full_admin" },
                 { "TrustForwardedHeaders", "true" }

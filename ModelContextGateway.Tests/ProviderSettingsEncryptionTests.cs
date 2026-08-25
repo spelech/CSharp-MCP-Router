@@ -43,7 +43,7 @@ namespace ModelContextGateway.Tests
             _config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" },
-                { "ROUTER_MASTER_KEY", "TestSecretKey1234567890123456789012" }
+                { "MCG_MASTER_KEY", "TestSecretKey1234567890123456789012" }
             }).Build();
 
             DbKeyHelper.ResetCache();

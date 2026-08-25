@@ -28,7 +28,7 @@ namespace ModelContextGateway.Tests
             builder.Configuration.AddInMemoryCollection(inMemoryConfig);
 
             // Act
-            builder.AddMcpRouterServices();
+            builder.AddModelContextGatewayServices();
             var app = builder.Build();
 
             // Assert
@@ -68,7 +68,7 @@ namespace ModelContextGateway.Tests
                 builder.Configuration.AddInMemoryCollection(inMemoryConfig);
 
                 // Act
-                builder.AddMcpRouterServices();
+                builder.AddModelContextGatewayServices();
                 var app = builder.Build();
 
                 // Assert
@@ -99,7 +99,7 @@ namespace ModelContextGateway.Tests
             builder.Configuration.AddInMemoryCollection(inMemoryConfig);
 
             // Act
-            builder.AddMcpRouterServices();
+            builder.AddModelContextGatewayServices();
             var app = builder.Build();
 
             // Assert
@@ -127,7 +127,7 @@ namespace ModelContextGateway.Tests
             builder.Configuration.AddInMemoryCollection(inMemoryConfig);
 
             // Act
-            builder.AddMcpRouterServices();
+            builder.AddModelContextGatewayServices();
             var app = builder.Build();
 
             // Assert

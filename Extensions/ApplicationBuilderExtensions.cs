@@ -7,7 +7,7 @@ namespace ModelContextGateway.Extensions
         private static readonly string AppVersion =
             Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "5.0.0";
 
-        public static void ConfigureMcpRouterPipeline(this WebApplication app)
+        public static void ConfigureModelContextGatewayPipeline(this WebApplication app)
         {
             var config = app.Services.GetRequiredService<Microsoft.Extensions.Configuration.IConfiguration>();
             var logger = app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("ModelContextGateway.Startup");
@@ -203,11 +203,6 @@ namespace ModelContextGateway.Extensions
             app.MapAppKeyEndpoints();
             app.MapProviderEndpoints();
             app.MapPolicyEndpoints();
-        }
-
-        public static void ConfigureModelContextGatewayPipeline(this WebApplication app)
-        {
-            app.ConfigureMcpRouterPipeline();
         }
     }
 }

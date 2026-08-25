@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-25T18:29:32.0907299Z",
+    "generatedAt": "2026-08-25T18:58:40.6390202Z",
     "totalRequirements": 133,
     "positiveCount": 110,
     "guardrailCount": 23,
@@ -477,7 +477,7 @@
       "id": "AUTH-CUSTOM-ADMIN-KEY-SEEDING",
       "category": "AUTH",
       "type": "Positive",
-      "description": "Seeds custom ROUTER_ADMIN_KEY when provided in configuration.",
+      "description": "Seeds custom MCG_ADMIN_AUTH_KEY when provided in configuration.",
       "proofCount": 3,
       "proofs": [
         {
@@ -491,7 +491,7 @@
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
           "lineNumber": 238,
-          "testName": "Startup_SeedsCustomAdminKey_WhenMcpAdminKeyConfigured",
+          "testName": "Startup_SeedsCustomAdminKey_WhenMcgAdminKeyConfigured",
           "details": null
         },
         {
@@ -1071,7 +1071,7 @@
       "id": "DOC-SETUP-SKILL-TEMPLATES",
       "category": "DOC",
       "type": "Positive",
-      "description": "All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, ROUTER_MASTER_KEY, and ghcr.io/spelech/model-context-gateway",
+      "description": "All scaffold templates exist, are non-empty, and contain required directives such as responseBufferLimit, MCG_MASTER_KEY, and ghcr.io/spelech/model-context-gateway",
       "proofCount": 1,
       "proofs": [
         {
@@ -2314,7 +2314,7 @@
       "id": "SEC-KEY-PROVIDER-CONFIG",
       "category": "SEC",
       "type": "Positive",
-      "description": "EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or ROUTER_SECRET.",
+      "description": "EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or MCG_SECRET.",
       "proofCount": 1,
       "proofs": [
         {
@@ -2330,7 +2330,7 @@
       "id": "SEC-KEY-PROVIDER-FALLBACK",
       "category": "SEC",
       "type": "Positive",
-      "description": "EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when ROUTER_SECRET is unconfigured.",
+      "description": "EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when MCG_SECRET is unconfigured.",
       "proofCount": 1,
       "proofs": [
         {
@@ -2346,7 +2346,7 @@
       "id": "SEC-KEY-PROVIDER-SECRET",
       "category": "SEC",
       "type": "Positive",
-      "description": "EncryptionKeyProvider returns configured ROUTER_SECRET.",
+      "description": "EncryptionKeyProvider returns configured MCG_SECRET.",
       "proofCount": 1,
       "proofs": [
         {
@@ -2378,7 +2378,7 @@
       "id": "SEC-KEYFILE-ENV-PRECEDENCE",
       "category": "SEC",
       "type": "Positive",
-      "description": "Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles.",
+      "description": "Explicit environment variables MCG_MASTER_KEY or MCG_SECRET take precedence over keyfiles.",
       "proofCount": 1,
       "proofs": [
         {
@@ -2410,7 +2410,7 @@
       "id": "SEC-KEYFILE-FILE-SECRET",
       "category": "SEC",
       "type": "Positive",
-      "description": "File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved.",
+      "description": "File-based secrets configured via MCG_MASTER_KEY_FILE or standard Docker secrets paths are resolved.",
       "proofCount": 1,
       "proofs": [
         {

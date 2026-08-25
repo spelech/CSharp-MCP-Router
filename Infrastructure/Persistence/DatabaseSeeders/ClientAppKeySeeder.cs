@@ -74,17 +74,13 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
                 logger.LogWarning(exKeyMig, "AppKey hashing migration warning");
             }
 
-            // Seed Admin AppKey from environment (MCG_ADMIN_AUTH_KEY / MCG_ADMIN_KEY / ROUTER_ADMIN_KEY / MCP_ADMIN_KEY) or default CLI key if none exists
+            // Seed Admin AppKey from environment (MCG_ADMIN_AUTH_KEY / MCG_ADMIN_KEY) or default CLI key if none exists
             try
             {
                 var customAdminKey = configuration["MCG_ADMIN_AUTH_KEY"]
                     ?? configuration["MCG_ADMIN_KEY"]
-                    ?? configuration["ROUTER_ADMIN_KEY"]
-                    ?? configuration["MCP_ADMIN_KEY"]
                     ?? Environment.GetEnvironmentVariable("MCG_ADMIN_AUTH_KEY")
-                    ?? Environment.GetEnvironmentVariable("MCG_ADMIN_KEY")
-                    ?? Environment.GetEnvironmentVariable("ROUTER_ADMIN_KEY")
-                    ?? Environment.GetEnvironmentVariable("MCP_ADMIN_KEY");
+                    ?? Environment.GetEnvironmentVariable("MCG_ADMIN_KEY");
 
                 using var conn = dbFactory.CreateConnection();
 
@@ -225,8 +221,6 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
 
                 var secretString = configuration["MCG_SECRET"]
                     ?? configuration["MCG_MASTER_KEY"]
-                    ?? configuration["ROUTER_SECRET"]
-                    ?? configuration["ROUTER_MASTER_KEY"]
                     ?? DbKeyHelper.ResolveDbEncryptionKey(configuration);
 
                 byte[] keyBytes;

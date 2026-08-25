@@ -346,7 +346,7 @@ The MCP Router implements authenticated envelope encryption for all sensitive se
 
 ```mermaid
 flowchart TD
-    ConfigEnv["Environment Variable<br><code>ROUTER_MASTER_KEY</code> / <code>DB_ENCRYPTION_KEY</code>"] --> DbKeyHelper["DbKeyHelper.ResolveDbEncryptionKey()"]
+    ConfigEnv["Environment Variable<br><code>MCG_MASTER_KEY</code> / <code>DB_ENCRYPTION_KEY</code>"] --> DbKeyHelper["DbKeyHelper.ResolveDbEncryptionKey()"]
     DbKeyHelper --> PBKDF2["PBKDF2 Key Derivation<br>SHA256, 600,000 Iterations<br>Salt: {Secret}_McpRouter_Salt_v2"]
     PBKDF2 --> DerivedKey["256-bit AES-GCM Key"]
     
@@ -365,7 +365,7 @@ flowchart TD
 
 ### 1. Key Resolution (`DbKeyHelper.cs`)
 Encryption keys are resolved during bootstrap via [`DbKeyHelper.ResolveDbEncryptionKey(configuration)`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-53/Infrastructure/Secrets/DbKeyHelper.cs):
-1. **Lookup Hierarchy**: Inspects `ROUTER_MASTER_KEY` first, falling back to `DB_ENCRYPTION_KEY`.
+1. **Lookup Hierarchy**: Inspects `MCG_MASTER_KEY` first, falling back to `DB_ENCRYPTION_KEY`.
 2. **Fail-Closed Security**: If both keys are missing or blank, startup terminates with a fatal `InvalidOperationException`. Self-generating ephemeral fallback keys is strictly disabled in production to prevent silent data loss upon container restart.
 3. **Thread-Safe Caching**: Key resolution uses double-checked locking to cache the resolved string in memory, minimizing configuration lookups.
 

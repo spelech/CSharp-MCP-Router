@@ -102,7 +102,7 @@ namespace ModelContextGateway.Tests
 
             var inMemoryConfig = new Dictionary<string, string?>
             {
-                { "ROUTER_SECRET", routerSecret },
+                { "MCG_SECRET", routerSecret },
                 { "DB_ENCRYPTION_KEY", routerSecret },
                 { "RUN_KEY_MIGRATION", "true" }
             };
@@ -184,14 +184,14 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-CUSTOM-ADMIN-KEY-SEEDING", "AUTH", RequirementType.Positive, "Seeds custom ROUTER_ADMIN_KEY when provided in configuration.")]
+        [Requirement("AUTH-CUSTOM-ADMIN-KEY-SEEDING", "AUTH", RequirementType.Positive, "Seeds custom MCG_ADMIN_AUTH_KEY when provided in configuration.")]
         public async Task Startup_SeedsCustomAdminKey_WhenConfigured()
         {
             var (conn, factory) = CreateDbFactory();
             var customKey = "mcp-adm-CustomKey123-Secret999";
             var inMemoryConfig = new Dictionary<string, string?>
             {
-                { "ROUTER_ADMIN_KEY", customKey },
+                { "MCG_ADMIN_AUTH_KEY", customKey },
                 { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
@@ -236,14 +236,14 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("AUTH-CUSTOM-ADMIN-KEY-SEEDING", "AUTH", RequirementType.Positive, "Seeds custom MCP_ADMIN_KEY alias when provided in configuration.")]
-        public async Task Startup_SeedsCustomAdminKey_WhenMcpAdminKeyConfigured()
+        [Requirement("AUTH-CUSTOM-ADMIN-KEY-SEEDING", "AUTH", RequirementType.Positive, "Seeds custom MCG_ADMIN_KEY alias when provided in configuration.")]
+        public async Task Startup_SeedsCustomAdminKey_WhenMcgAdminKeyConfigured()
         {
             var (conn, factory) = CreateDbFactory();
             var customKey = "mcp-adm-AliasKey888-Secret777";
             var inMemoryConfig = new Dictionary<string, string?>
             {
-                { "MCP_ADMIN_KEY", customKey },
+                { "MCG_ADMIN_KEY", customKey },
                 { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
             };
             var config = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig).Build();
@@ -294,7 +294,7 @@ namespace ModelContextGateway.Tests
             var initialKey = "mcp-adm-Prefix123-SecretOld";
             var inMemoryConfig1 = new Dictionary<string, string?>
             {
-                { "ROUTER_ADMIN_KEY", initialKey },
+                { "MCG_ADMIN_AUTH_KEY", initialKey },
                 { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
             };
             var config1 = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig1).Build();
@@ -312,7 +312,7 @@ namespace ModelContextGateway.Tests
             var updatedKey = "mcp-adm-Prefix123-SecretNew";
             var inMemoryConfig2 = new Dictionary<string, string?>
             {
-                { "ROUTER_ADMIN_KEY", updatedKey },
+                { "MCG_ADMIN_AUTH_KEY", updatedKey },
                 { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
             };
             var config2 = new ConfigurationBuilder().AddInMemoryCollection(inMemoryConfig2).Build();

@@ -26,7 +26,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-KEY-PROVIDER-CONFIG", "SEC", RequirementType.Positive, "EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or ROUTER_SECRET.")]
+        [Requirement("SEC-KEY-PROVIDER-CONFIG", "SEC", RequirementType.Positive, "EncryptionKeyProvider returns configured DB_ENCRYPTION_KEY or MCG_SECRET.")]
         public void GetDbEncryptionKey_UsesConfig_WhenProvided()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -54,13 +54,13 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-KEY-PROVIDER-SECRET", "SEC", RequirementType.Positive, "EncryptionKeyProvider returns configured ROUTER_SECRET.")]
+        [Requirement("SEC-KEY-PROVIDER-SECRET", "SEC", RequirementType.Positive, "EncryptionKeyProvider returns configured MCG_SECRET.")]
         public void GetRouterSecret_UsesConfig_WhenProvided()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DATA_DIR", _tempDataDir },
-                { "ROUTER_SECRET", "ConfiguredRouterSecret123!" }
+                { "MCG_SECRET", "ConfiguredRouterSecret123!" }
             }).Build();
 
             var secret = EncryptionKeyProvider.GetRouterSecret(config);
@@ -68,7 +68,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-KEY-PROVIDER-FALLBACK", "SEC", RequirementType.Positive, "EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when ROUTER_SECRET is unconfigured.")]
+        [Requirement("SEC-KEY-PROVIDER-FALLBACK", "SEC", RequirementType.Positive, "EncryptionKeyProvider falls back to DB_ENCRYPTION_KEY when MCG_SECRET is unconfigured.")]
         public void GetRouterSecret_FallsBackToDbEncryptionKey_WhenDbEncryptionKeyProvided()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

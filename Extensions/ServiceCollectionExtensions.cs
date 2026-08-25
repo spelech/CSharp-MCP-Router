@@ -2,7 +2,7 @@ namespace ModelContextGateway.Extensions
 {
     public static class ServiceCollectionExtensions
     {
-        public static void AddMcpRouterServices(this WebApplicationBuilder builder)
+        public static void AddModelContextGatewayServices(this WebApplicationBuilder builder)
         {
             // Add logging
             builder.Logging.ClearProviders();
@@ -236,11 +236,6 @@ namespace ModelContextGateway.Extensions
                     }
                 });
             });
-        }
-
-        public static void AddModelContextGatewayServices(this WebApplicationBuilder builder)
-        {
-            builder.AddMcpRouterServices();
         }
     }
 }

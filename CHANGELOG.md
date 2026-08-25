@@ -8,7 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v5.0.0`** | 2026-08-25 | feat(rebrand): major project rebrand to Model Context Gateway (MCG), binary/assembly renamed to `mcg`/`mcg.dll`, unified environment variables (`MCG_*` with backward-compatible `ROUTER_*` fallbacks), updated endpoints (`/admin`, `/mcg-admin`), AgentSkills.io skills (`mcg-admin`, `mcg-setup`), and documentation portal (`https://spelech.github.io/model-context-gateway/`) |
+| **`v5.0.0`** | 2026-08-25 | feat(rebrand): major project rebrand to Model Context Gateway (MCG), binary/assembly renamed to `mcg`/`mcg.dll`, clean cutover to `MCG_*` environment variables and configuration keys (removed legacy `ROUTER_*` fallbacks), updated endpoints (`/admin`, `/mcg-admin`), AgentSkills.io skills (`mcg-admin`, `mcg-setup`), and documentation portal (`https://spelech.github.io/model-context-gateway/`) |
 | **`v4.36.0`** | 2026-08-25 | docs(portal): introduce Material for MkDocs documentation portal (`https://spelech.github.io/model-context-gateway/`), automated GitHub Pages deployment workflow, comprehensive navigation structure, and purge of agent plan artifacts |
 | **`v4.35.0`** | 2026-08-24 | feat(security): compact Base62 AppKeys with semantic prefix taxonomy (`mcp-adm-`, `mcp-glb-`, `mcp-{domain}-`, `mcp-usr-`, `mcp-srv-`), custom `ROUTER_ADMIN_KEY` seeding, Master Key `KeySource` tracking, Vault bootstrapping, and Web UI dynamic re-encryption |
 | **`v4.34.4`** | 2026-08-24 | chore(formatting): standardize C# formatting with `.editorconfig`, enforce CI `dotnet format --verify-no-changes` quality gate, and codebase housekeeping |

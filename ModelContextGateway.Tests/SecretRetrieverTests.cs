@@ -5,7 +5,7 @@ namespace ModelContextGateway.Tests
         [Fact]
         public async Task EnvironmentSecretRetriever_ReturnsEnvVariable_WhenExists()
         {
-            const string envKey = "TEST_MCP_ROUTER_SECRET_VAR";
+            const string envKey = "TEST_MCG_SECRET_VAR";
             const string envVal = "SuperSecret123!";
             Environment.SetEnvironmentVariable(envKey, envVal);
 

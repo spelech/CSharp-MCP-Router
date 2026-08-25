@@ -54,7 +54,7 @@ This skill provides an autonomous 6-phase decision and bootstrapping engine to i
 - Deploying the gateway via Docker Compose, Docker CLI, or Windows IIS.
 - Connecting AI IDEs (Claude Desktop, Cursor, Cline, Windsurf, Antigravity) to an aggregated MCP gateway.
 - Setting up standalone home-lab routing or enterprise SSO/AD authentication.
-- Troubleshooting missing `ROUTER_MASTER_KEY`, 403 network access, or client connection errors.
+- Troubleshooting missing `MCG_MASTER_KEY`, 403 network access, or client connection errors.
 
 ### When NOT to Use
 - Connecting to an individual, standalone MCP server directly without an aggregator or gateway.
@@ -145,7 +145,7 @@ Before generating deployment manifests, prompt the user for their desired admini
 
 1. **Interactive Admin AppKey Prompt**:
    > *"Enter your desired Admin Key for agent/API access (or press Enter to auto-generate a compact key like `mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9`):"*
-   - Sets `ROUTER_ADMIN_KEY` in `.env` / container environment.
+   - Sets `MCG_ADMIN_AUTH_KEY` (or `MCG_ADMIN_KEY`) in `.env` / container environment.
    - Uses concise, high-entropy Base62 keys (~32 characters) following the semantic taxonomy:
      - `mcp-adm-`: System Administrator with full gateway control (`all`, `admin`).
      - `mcp-glb-`: Global tool execution across all backend servers.
@@ -155,9 +155,9 @@ Before generating deployment manifests, prompt the user for their desired admini
 
 2. **Master Encryption Key Options**:
    The gateway encrypts database credentials using a 256-bit key. You have four flexible options:
-   - **Auto-Generated Persistent Keyfile** *(Default & Recommended)*: Omit `ROUTER_MASTER_KEY` and the gateway will auto-generate and store `./data/.master.key` (with `chmod 0600`) on first boot.
+   - **Auto-Generated Persistent Keyfile** *(Default & Recommended)*: Omit `MCG_MASTER_KEY` and the gateway will auto-generate and store `./data/.master.key` (with `chmod 0600`) on first boot.
    - **Vault Master Key Bootstrapping**: If `VAULT_ADDR` is configured, the gateway boots its master key directly from HashiCorp Vault (`secret/data/mcg/master-key`).
-   - **File Secret / Docker Secrets**: Set `ROUTER_MASTER_KEY_FILE=/run/secrets/router_master_key`.
+   - **File Secret / Docker Secrets**: Set `MCG_MASTER_KEY_FILE=/run/secrets/mcg_master_key`.
    - **Explicit Environment Variable**: Generate a 256-bit Base64 key:
 
 ```bash
@@ -185,9 +185,9 @@ services:
     environment:
       - DB_PROVIDER=${DB_PROVIDER:-sqlite}
       # Admin Key: compact ~32-char token (or leave blank to auto-generate default)
-      - ROUTER_ADMIN_KEY=${ROUTER_ADMIN_KEY:-mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9}
+      - MCG_ADMIN_AUTH_KEY=${MCG_ADMIN_AUTH_KEY:-mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9}
       # Optional: Auto-generated to ./data/.master.key on first boot if omitted
-      # - ROUTER_MASTER_KEY=${ROUTER_MASTER_KEY}
+      # - MCG_MASTER_KEY=${MCG_MASTER_KEY}
       - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
       - Admin__StandaloneAllowedNetworks__0=${STANDALONE_ALLOWED_NETWORK:-127.0.0.1}
       - Admin__StandaloneAllowedNetworks__1=::1
@@ -207,10 +207,10 @@ services:
 #### `.env`
 ```ini
 # Admin API & Agent Access Key (Compact Base62 ~32-char key)
-ROUTER_ADMIN_KEY=mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9
+MCG_ADMIN_AUTH_KEY=mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9
 
 # Core Secrets (Optional: auto-generated to ./data/.master.key if omitted)
-ROUTER_MASTER_KEY=REPLACE_WITH_GENERATED_BASE64_KEY
+MCG_MASTER_KEY=REPLACE_WITH_GENERATED_BASE64_KEY
 
 # Database Configuration
 DB_PROVIDER=sqlite
@@ -260,7 +260,7 @@ CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:8080
   "ConnectionStrings": {
     "DefaultConnection": "Data Source=data/mcg.db"
   },
-  "ROUTER_ADMIN_KEY": "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9",
+  "MCG_ADMIN_AUTH_KEY": "mcp-adm-Xk9L2mPq-7vN3wZ8aB1cE4fG9",
   "Admin": {
     "StandaloneAllowedNetworks": [
       "127.0.0.1",
@@ -380,7 +380,7 @@ To allow an AI agent to manage, add, edit, or delete backend MCP servers, auth p
 
 | Symptom / Error | Root Cause | Solution |
 | :--- | :--- | :--- |
-| **Container restarts immediately / Key error** | Corrupted or inaccessible master key | Ensure `./data` directory has write permissions (`chmod 777 data` or `chmod 0600 data/.master.key`) or specify a valid 256-bit key via `ROUTER_MASTER_KEY` / `ROUTER_MASTER_KEY_FILE`. |
+| **Container restarts immediately / Key error** | Corrupted or inaccessible master key | Ensure `./data` directory has write permissions (`chmod 777 data` or `chmod 0600 data/.master.key`) or specify a valid 256-bit key via `MCG_MASTER_KEY` / `MCG_MASTER_KEY_FILE`. |
 | **`403 Forbidden` on Web UI or Admin endpoints** | Client IP not in standalone allowed list or missing Admin AppKey | Add client IP/CIDR (e.g. `192.168.1.0/24`) to `Admin__StandaloneAllowedNetworks__*` or supply `Authorization: Bearer mcp-adm-...`. |
 | **Docker MCP servers fail to spawn** | Gateway container cannot access Docker daemon | Ensure `- /var/run/docker.sock:/var/run/docker.sock` volume is mounted and permissions allow read/write. |
 | **SSE streams disconnect or buffer indefinitely in IIS** | IIS response buffering delays text/event-stream chunks | Ensure `<environmentVariable name="responseBufferLimit" value="0" />` is present in `web.config`. |
@@ -393,7 +393,7 @@ To allow an AI agent to manage, add, edit, or delete backend MCP servers, auth p
 
 ```bash
 # Generate 256-bit Key
-KEY=$(openssl rand -base64 32) && echo "ROUTER_MASTER_KEY=$KEY"
+KEY=$(openssl rand -base64 32) && echo "MCG_MASTER_KEY=$KEY"
 
 # Start Gateway
 docker compose up -d

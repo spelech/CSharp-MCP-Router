@@ -57,7 +57,7 @@ namespace ModelContextGateway.Tests
             // Blank-slate Safe Defaults
             Assert.Contains("Safe Defaults", content);
             Assert.Contains("mcp-adm-", content);
-            Assert.Contains("ROUTER_MASTER_KEY", content);
+            Assert.Contains("MCG_MASTER_KEY", content);
 
             // Phase 1: Gateway Diagnostics
             Assert.Contains("Phase 1", content);

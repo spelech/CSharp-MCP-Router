@@ -30,8 +30,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
       - Database__Provider=SQLite
-      - Database__ConnectionString=Data Source=/data/mcp-router.db
-      - Security__MasterKey=${MCP_ROUTER_MASTER_KEY}
+      - Database__ConnectionString=Data Source=/data/mcg.db
+      - Security__MasterKey=${MCG_MASTER_KEY}
       - CORS_ALLOWED_ORIGINS=https://mcp.yourdomain.com,http://10.0.0.10:8026
       - EMBEDDING_MODEL_DIR=/data/models
     volumes:

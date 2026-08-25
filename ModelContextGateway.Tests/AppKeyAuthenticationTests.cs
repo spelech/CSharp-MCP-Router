@@ -60,7 +60,7 @@ namespace ModelContextGateway.Tests
 
             var configMock = new Mock<IConfiguration>();
             configMock.Setup(c => c["DB_ENCRYPTION_KEY"]).Returns("SuperSecureDatabaseKey123!");
-            configMock.Setup(c => c["ROUTER_SECRET"]).Returns("SuperSecretRouterToken456!");
+            configMock.Setup(c => c["MCG_SECRET"]).Returns("SuperSecretRouterToken456!");
             _config = configMock.Object;
         }
 

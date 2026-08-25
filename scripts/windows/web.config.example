@@ -44,9 +44,9 @@
         -->
 
         <!--
-          Router Master Symmetric Key (Minimum 32 characters for AES-256-GCM / HMAC):
+          Gateway Master Symmetric Key (Minimum 32 characters for AES-256-GCM / HMAC):
           Uncomment to provide explicitly, or utilize DPAPI machine-encrypted keys in the Windows Registry.
-          <environmentVariable name="ROUTER_SECRET" value="YOUR_SECURE_PRODUCTION_ROUTER_SECRET_KEY_32_CHARS_MIN" />
+          <environmentVariable name="MCG_SECRET" value="YOUR_SECURE_PRODUCTION_MCG_SECRET_KEY_32_CHARS_MIN" />
         -->
 
         <!--

@@ -1,11 +1,11 @@
 import http from 'http';
 
-const ROUTER_URL = process.env.ROUTER_URL || 'http://localhost:8080';
+const MCG_URL = process.env.MCG_URL || 'http://localhost:8080';
 const CONCURRENT_CLIENTS = 20;
 const SOAK_DURATION_MS = 30000; // 30 seconds
 
 async function getDiagnostics() {
-    const res = await fetch(`${ROUTER_URL}/api/diagnostics`, {
+    const res = await fetch(`${MCG_URL}/api/diagnostics`, {
         headers: {
             'Remote-User': 'admin',
             'Remote-Groups': 'full_admin'
@@ -21,7 +21,7 @@ async function runClient(durationMs) {
         let abortController = new AbortController();
         try {
             // Establish SSE connection
-            const req = http.request(`${ROUTER_URL}/sse`, {
+            const req = http.request(`${MCG_URL}/sse`, {
                 method: 'GET',
                 headers: { 
                     'Accept': 'text/event-stream',
@@ -41,7 +41,7 @@ async function runClient(durationMs) {
                             if (match && match[1]) {
                                 const parsed = JSON.parse(match[1]);
                                 if (parsed.endpoint) {
-                                    const url = new URL(parsed.endpoint, ROUTER_URL);
+                                    const url = new URL(parsed.endpoint, MCG_URL);
                                     sessionId = url.searchParams.get('sessionId');
                                 }
                             }
@@ -64,7 +64,7 @@ async function runClient(durationMs) {
             if (sessionId) {
                 // Send a request
                 try {
-                    await fetch(`${ROUTER_URL}/message?sessionId=${sessionId}`, {
+                    await fetch(`${MCG_URL}/message?sessionId=${sessionId}`, {
                         method: 'POST',
                         headers: { 
                             'Content-Type': 'application/json',
@@ -93,7 +93,7 @@ async function runClient(durationMs) {
 }
 
 async function main() {
-    console.log(`Starting soak test against ${ROUTER_URL} for ${SOAK_DURATION_MS}ms with ${CONCURRENT_CLIENTS} clients...`);
+    console.log(`Starting soak test against ${MCG_URL} for ${SOAK_DURATION_MS}ms with ${CONCURRENT_CLIENTS} clients...`);
     
     let initialDiag;
     try {

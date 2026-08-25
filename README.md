@@ -79,7 +79,7 @@ docker run -d \
 * **Compact Base62 AppKeys**: Semantic, high-entropy ~32-character tokens (`mcp-adm-`, `mcp-glb-`, `mcp-{domain}-`, `mcp-usr-`, `mcp-srv-`).
 * **SQLite Database**: Automatically created and migrated at `./data/mcg.db`.
 * **Standalone Security**: Local loopback (`127.0.0.1`, `::1`) is trusted as `Administrator` for the Web Dashboard (`http://localhost:8080`).
-* **Declarative Admin Key**: Seed custom keys via `MCG_ADMIN_KEY` (or legacy `ROUTER_ADMIN_KEY`) or connect with the auto-generated `mcp-adm-` admin key for remote AI agents and DevOps scripts to automate configuration via the Admin MCP Server (`/admin/sse` or `POST /admin`).
+* **Declarative Admin Key**: Seed custom keys via `MCG_ADMIN_AUTH_KEY` / `MCG_ADMIN_KEY` or connect with the auto-generated `mcp-adm-` admin key for remote AI agents and DevOps scripts to automate configuration via the Admin MCP Server (`/admin/sse` or `POST /admin`).
 * **Instant Automation**: Use the **`mcg-admin`** skill (`.agents/skills/mcg-admin/SKILL.md`) to autonomously configure Authentik, Keycloak, Entra ID, Active Directory, Vault, embeddings, and backend servers. See [**docs/deployment-guide.md**](docs/deployment-guide.md#minimal-blank-slate-startup-zero-config-or-file-secrets).
 
 ---
@@ -237,7 +237,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
-| **`v5.0.0`** | 2026-08-25 | feat(rebrand): major project rebrand to Model Context Gateway (MCG), binary/assembly renamed to `mcg`/`mcg.dll`, unified environment variables (`MCG_*` with backward-compatible `ROUTER_*` fallbacks), updated endpoints (`/admin`, `/mcg-admin`), AgentSkills.io skills (`mcg-admin`, `mcg-setup`), and documentation portal (`https://spelech.github.io/model-context-gateway/`) |
+| **`v5.0.0`** | 2026-08-25 | feat(rebrand): major project rebrand to Model Context Gateway (MCG), binary/assembly renamed to `mcg`/`mcg.dll`, clean cutover to `MCG_*` environment variables and configuration keys (removed legacy `ROUTER_*` fallbacks), updated endpoints (`/admin`, `/mcg-admin`), AgentSkills.io skills (`mcg-admin`, `mcg-setup`), and documentation portal (`https://spelech.github.io/model-context-gateway/`) |
 | **`v4.36.0`** | 2026-08-25 | docs(portal): introduce Material for MkDocs documentation portal (`https://spelech.github.io/model-context-gateway/`), automated GitHub Pages deployment workflow, comprehensive navigation structure, and purge of agent plan artifacts |
 | **`v4.35.0`** | 2026-08-24 | feat(security): compact Base62 AppKeys with semantic prefix taxonomy (`mcp-adm-`, `mcp-glb-`, `mcp-{domain}-`, `mcp-usr-`, `mcp-srv-`), custom `ROUTER_ADMIN_KEY` seeding, Master Key `KeySource` tracking, Vault bootstrapping, and Web UI dynamic re-encryption |
 | **`v4.34.4`** | 2026-08-24 | chore(formatting): standardize C# formatting with `.editorconfig`, enforce CI `dotnet format --verify-no-changes` quality gate, and codebase housekeeping |

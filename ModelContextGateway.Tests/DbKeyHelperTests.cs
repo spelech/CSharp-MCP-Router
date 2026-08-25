@@ -26,13 +26,13 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-KEYFILE-ENV-PRECEDENCE", "SEC", RequirementType.Positive, "Explicit environment variables ROUTER_MASTER_KEY or ROUTER_SECRET take precedence over keyfiles.")]
+        [Requirement("SEC-KEYFILE-ENV-PRECEDENCE", "SEC", RequirementType.Positive, "Explicit environment variables MCG_MASTER_KEY or MCG_SECRET take precedence over keyfiles.")]
         public void ResolveDbEncryptionKey_ReturnsConfiguredEnvKey_WhenPresent()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DATA_DIR", _tempDataDir },
-                { "ROUTER_MASTER_KEY", "ConfiguredEnvMasterKey1234567890123456789012==" }
+                { "MCG_MASTER_KEY", "ConfiguredEnvMasterKey1234567890123456789012==" }
             }).Build();
 
             var resolvedKey = DbKeyHelper.ResolveDbEncryptionKey(config);
@@ -43,7 +43,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("SEC-KEYFILE-FILE-SECRET", "SEC", RequirementType.Positive, "File-based secrets configured via ROUTER_MASTER_KEY_FILE or standard Docker secrets paths are resolved.")]
+        [Requirement("SEC-KEYFILE-FILE-SECRET", "SEC", RequirementType.Positive, "File-based secrets configured via MCG_MASTER_KEY_FILE or standard Docker secrets paths are resolved.")]
         public void ResolveDbEncryptionKey_ReturnsFileSecret_WhenKeyFileSpecified()
         {
             var secretFile = Path.Combine(_tempDataDir, "docker_secret.txt");
@@ -52,7 +52,7 @@ namespace ModelContextGateway.Tests
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DATA_DIR", _tempDataDir },
-                { "ROUTER_MASTER_KEY_FILE", secretFile }
+                { "MCG_MASTER_KEY_FILE", secretFile }
             }).Build();
 
             var resolvedKey = DbKeyHelper.ResolveDbEncryptionKey(config);
@@ -111,8 +111,8 @@ namespace ModelContextGateway.Tests
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DATA_DIR", _tempDataDir },
-                { "ROUTER_MASTER_KEY_FILE", secretFile },
-                { "ROUTER_MASTER_KEY", "WinningEnvMasterKey12345678901234567890123==" }
+                { "MCG_MASTER_KEY_FILE", secretFile },
+                { "MCG_MASTER_KEY", "WinningEnvMasterKey12345678901234567890123==" }
             }).Build();
 
             var resolvedKey = DbKeyHelper.ResolveDbEncryptionKey(config);
@@ -133,7 +133,7 @@ namespace ModelContextGateway.Tests
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DATA_DIR", _tempDataDir },
-                { "ROUTER_MASTER_KEY_FILE", secretFile }
+                { "MCG_MASTER_KEY_FILE", secretFile }
             }).Build();
 
             var resolvedKey = DbKeyHelper.ResolveDbEncryptionKey(config);
@@ -149,7 +149,7 @@ namespace ModelContextGateway.Tests
             DbKeyHelper.ResetCache();
             var envConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
-                { "ROUTER_MASTER_KEY", "TestEnvKey1234567890123456789012==" }
+                { "MCG_MASTER_KEY", "TestEnvKey1234567890123456789012==" }
             }).Build();
             DbKeyHelper.ResolveDbEncryptionKey(envConfig);
             Assert.Equal(MasterKeySource.External, DbKeyHelper.ActiveKeySource);
@@ -161,7 +161,7 @@ namespace ModelContextGateway.Tests
             var fileConfig = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
             {
                 { "DATA_DIR", _tempDataDir },
-                { "ROUTER_MASTER_KEY_FILE", secretFile }
+                { "MCG_MASTER_KEY_FILE", secretFile }
             }).Build();
             DbKeyHelper.ResolveDbEncryptionKey(fileConfig);
             Assert.Equal(MasterKeySource.SecretFile, DbKeyHelper.ActiveKeySource);

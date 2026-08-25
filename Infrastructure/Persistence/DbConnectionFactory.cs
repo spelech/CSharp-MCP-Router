@@ -34,11 +34,9 @@ namespace ModelContextGateway.Infrastructure.Persistence
 
             var explicitDbPath = config["MCG_DB_PATH"]
                 ?? config["MCG_DATABASE_PATH"]
-                ?? config["ROUTER_DATABASE_PATH"]
                 ?? config["DATABASE_PATH"]
                 ?? Environment.GetEnvironmentVariable("MCG_DB_PATH")
-                ?? Environment.GetEnvironmentVariable("MCG_DATABASE_PATH")
-                ?? Environment.GetEnvironmentVariable("ROUTER_DATABASE_PATH");
+                ?? Environment.GetEnvironmentVariable("MCG_DATABASE_PATH");
 
             if (!string.IsNullOrWhiteSpace(explicitDbPath))
             {

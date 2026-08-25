@@ -6,11 +6,11 @@ if (!string.IsNullOrEmpty(port) && string.IsNullOrEmpty(builder.Configuration["A
     builder.WebHost.UseUrls($"http://*:{port}");
 }
 
-builder.AddMcpRouterServices();
+builder.AddModelContextGatewayServices();
 
 var app = builder.Build();
 
-app.ConfigureMcpRouterPipeline();
+app.ConfigureModelContextGatewayPipeline();
 
 app.Run();
 

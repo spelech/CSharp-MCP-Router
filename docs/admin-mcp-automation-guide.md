@@ -179,7 +179,7 @@ Used when running behind Nginx, Traefik, Caddy, or an ingress controller that te
 ### 3.2 Secret Providers (`save_secret` & `test_vault`)
 
 #### A. Built-in AES-256-GCM Master Key (Default)
-By default, all secrets (API keys, custom headers, tokens) associated with backend MCP servers are automatically encrypted at rest in the database using the 256-bit `MCG_MASTER_KEY` (or legacy `ROUTER_MASTER_KEY`).
+By default, all secrets (API keys, custom headers, tokens) associated with backend MCP servers are automatically encrypted at rest in the database using the 256-bit `MCG_MASTER_KEY`.
 
 #### B. HashiCorp Vault KV v2 (AppRole Authentication)
 1. **Test Vault Connection**:

@@ -710,7 +710,7 @@ namespace ModelContextGateway.Tests
             builder1.Configuration["Security:AllowedIpRanges:1"] = "";
             builder1.Configuration["Security:AllowedIpRanges:2"] = "";
             builder1.Configuration["Security:AllowedIpRanges:3"] = "";
-            builder1.AddMcpRouterServices();
+            builder1.AddModelContextGatewayServices();
             var app1 = builder1.Build();
             var clientFactory1 = app1.Services.GetRequiredService<IHttpClientFactory>();
             var client1 = clientFactory1.CreateClient();
@@ -722,7 +722,7 @@ namespace ModelContextGateway.Tests
             var builder2 = WebApplication.CreateBuilder();
             builder2.Environment.EnvironmentName = "Development";
             builder2.Configuration["Security:AllowedIpRanges:0"] = "127.0.0.1";
-            builder2.AddMcpRouterServices();
+            builder2.AddModelContextGatewayServices();
             var app2 = builder2.Build();
             var clientFactory2 = app2.Services.GetRequiredService<IHttpClientFactory>();
             var client2 = clientFactory2.CreateClient();
