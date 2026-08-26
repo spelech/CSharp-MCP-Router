@@ -41,7 +41,7 @@ namespace ModelContextGateway.Components.AppKeys
 
         private bool IsAdmin(UserIdentityContext identity)
         {
-            return SecurityValidationHelper.IsAdmin(identity, _config);
+            return SecurityValidationHelper.IsAdmin(identity, _config, HttpContext);
         }
 
         [HttpGet]
