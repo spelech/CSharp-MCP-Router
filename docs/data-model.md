@@ -1,6 +1,6 @@
 # 📊 Canonical Data Model & Database ERD
 
-This document provides the complete, canonical data model and Entity-Relationship Diagram (ERD) for the **C# MCP Router Gateway & Semantic Proxy**. It documents all 12 core database entities, relationship cardinalities, column constraints, indexing strategies, multi-dialect support (SQLite SQLCipher, MS SQL Server, MySQL), and data protection models.
+This document provides the complete, canonical data model and Entity-Relationship Diagram (ERD) for the **C# Model Context Gateway (MCG) & Semantic Proxy**. It documents all 12 core database entities, relationship cardinalities, column constraints, indexing strategies, multi-dialect support (SQLite SQLCipher, MS SQL Server, MySQL), and data protection models.
 
 For dialect-specific SQL migrations and connection string setups, see [database-providers.md](database-providers.md). For end-to-end system architecture and data flow sequences, see [architecture.md](architecture.md).
 

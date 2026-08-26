@@ -1,10 +1,10 @@
-# MCP Router Admin Guide
+# 🛡️ Model Context Gateway (MCG) Admin Guide
 
-Welcome to the MCP Router Administration Guide. This document details the administrative procedures for managing backend server connections, configuring Role-Based Access Control (RBAC) policies, and managing secret and authentication providers.
+Welcome to the Model Context Gateway (MCG) Administration Guide. This document details the administrative procedures for managing backend server connections, configuring Role-Based Access Control (RBAC) policies, and managing secret and authentication providers.
 
 ## Server Connections
 
-The MCP Router acts as a gateway connecting to multiple backend MCP servers. As an administrator, you configure and maintain these connections.
+Model Context Gateway (MCG) acts as a gateway connecting to multiple backend MCP servers. As an administrator, you configure and maintain these connections.
 
 ### Managing Servers
 Servers can be managed via the Admin Dashboard or directly via the Admin MCP Server's tools.
@@ -16,7 +16,7 @@ Servers can be managed via the Admin Dashboard or directly via the Admin MCP Ser
 
 ## Access Control & Policies
 
-The MCP Router supports granular Role-Based Access Control (RBAC) to ensure that only authorized clients and users can invoke specific tools or access specific servers.
+Model Context Gateway (MCG) supports granular Role-Based Access Control (RBAC) to ensure that only authorized clients and users can invoke specific tools or access specific servers.
 
 ### Managing Policies
 Policies determine whether a specific identity is allowed or denied access to a target.

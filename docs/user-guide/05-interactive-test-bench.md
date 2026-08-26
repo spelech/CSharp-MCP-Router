@@ -102,14 +102,14 @@ Evaluate parameterized prompt templates exposed by backend servers or custom fil
 | Prompt Template: [ summarize_architecture ▾               ]                   |
 |                                                                               |
 | Arguments:                                                                    |
-|   Topic (*):     [ CSharp-MCP-Router Security Hardening                     ] |
+|   Topic (*):     [ Model Context Gateway Security Hardening                     ] |
 |   Max Length:    [ 500                                                      ] |
 |                                                                               |
 | [ 📑 Render Prompt ]                                                          |
 +-------------------------------------------------------------------------------+
 | Rendered Messages:                                                            |
 | [System]: "You are an expert systems architect reviewing homelab security..." |
-| [User]:   "Summarize the architecture for CSharp-MCP-Router Security..."      |
+| [User]:   "Summarize the architecture for Model Context Gateway Security..."      |
 +-------------------------------------------------------------------------------+
 ```
 

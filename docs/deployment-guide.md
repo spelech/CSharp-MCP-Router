@@ -132,7 +132,7 @@ docker run --env-file .env -v mcg-data:/data -p 8080:8080 <image>
 
 ## 📂 Database Providers & Schema Initialization
 
-The MCP Router supports SQL Server, MySQL/MariaDB, and SQLite. For comprehensive dialect specifications, envelope encryption details, fail-closed validation contracts, and Docker Compose configurations, see the [**Database Provider Support & Deployment Matrix Guide**](database-providers.md).
+Model Context Gateway (MCG) supports SQL Server, MySQL/MariaDB, and SQLite. For comprehensive dialect specifications, envelope encryption details, fail-closed validation contracts, and Docker Compose configurations, see the [**Database Provider Support & Deployment Matrix Guide**](database-providers.md).
 
 When configuring MS SQL Server or MySQL, execute the database scripts in the exact sequence described below to initialize the database and stored procedures.
 

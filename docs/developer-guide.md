@@ -1,6 +1,6 @@
 # Developer & Contributor Guide
 
-This document defines setup instructions, architectural conventions, coding guidelines, testing protocols, version management rules, and release verification workflows for the **MCP Router Gateway & Semantic Proxy**.
+This document defines setup instructions, architectural conventions, coding guidelines, testing protocols, version management rules, and release verification workflows for the **Model Context Gateway (MCG) & Semantic Proxy**.
 
 ---
 

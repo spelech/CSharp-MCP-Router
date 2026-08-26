@@ -1,4 +1,4 @@
-# 🏛️ MCP Router Enterprise Architecture Guide & System Specification
+# 🏛️ Model Context Gateway (MCG) Enterprise Architecture Guide & System Specification
 
 The **Model Context Protocol (MCP) Router Gateway & Semantic Proxy** is a C# ASP.NET Core gateway, OAuth 2.0 provider, and protocol multiplexer. It consolidates downstream MCP servers (e.g., Docker, Home Assistant, SQL databases, cloud APIs) into a unified, secure entry point for LLMs, IDEs, and autonomous agents.
 
@@ -54,13 +54,13 @@ This document is the **architectural specification**, detailing system context, 
 
 ## 1. Executive Summary & Architectural Tenets
 
-The MCP Router Gateway solves the **Context Explosion & Security Fragmentation Problem** in large-scale MCP deployments. Connecting directly to many independent MCP servers causes:
+The Model Context Gateway (MCG) solves the **Context Explosion & Security Fragmentation Problem** in large-scale MCP deployments. Connecting directly to many independent MCP servers causes:
 1. **Context Window Saturation**: Loading schemas for 300+ tools exhausts tokens.
 2. **Tool Selection Confusion**: Overlapping tool names cause hallucinations and errors.
 3. **Security & Credential Sprawl**: Plaintext credentials across client configurations are vulnerabilities.
 4. **Lack of Centralized Audit & Governance**: Enterprise compliance requires unified auditing, identity attribution, PII redaction, and access control.
 
-To address these challenges, the MCP Router enforces seven **core architectural tenets**:
+To address these challenges, Model Context Gateway (MCG) enforces seven **core architectural tenets**:
 
 ```
 +---------------------------------------------------------------------------------------------------+
@@ -102,7 +102,7 @@ To address these challenges, the MCP Router enforces seven **core architectural 
 
 ### Client Ecosystem & Ingress
 
-The MCP Router supports:
+Model Context Gateway (MCG) supports:
 
 * **Cursor IDE**: Connects over Server-Sent Events (`/sse`) or target proxy routes (`/{serverId}`) using MCP extension settings.
 * **Claude Desktop**: Configured via `claude_desktop_config.json` connecting to SSE or local CLI bridges.

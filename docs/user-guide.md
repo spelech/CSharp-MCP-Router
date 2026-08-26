@@ -1,6 +1,6 @@
-# MCP Router User Guide
+# 📖 Model Context Gateway (MCG) User Guide
 
-Welcome to the user guide for the MCP Router. This guide helps you manage your user profile, create and manage application keys (AppKeys), and utilize the Interactive Test Bench for testing backend MCP tools.
+Welcome to the user guide for the Model Context Gateway (MCG). This guide helps you manage your user profile, create and manage application keys (AppKeys), and utilize the Interactive Test Bench for testing backend MCP tools.
 
 ## Managing Your Profile
 
@@ -15,7 +15,7 @@ Your profile defines limits on the number of Application Keys you are allowed to
 
 ## Managing App Keys
 
-Application Keys (AppKeys) act as credentials for authenticating with the MCP Router. You can manage your AppKeys under the credentials section of your dashboard.
+Application Keys (AppKeys) act as credentials for authenticating with Model Context Gateway (MCG). You can manage your AppKeys under the credentials section of your dashboard.
 
 ### Creating an App Key
 1. Click on **Create App Key**.

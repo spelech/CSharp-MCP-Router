@@ -1,6 +1,6 @@
 # 🧩 Deployment & Authentication Support Matrix
 
-This matrix outlines the supported combinations of hosting environments, authentication providers, and downstream delegation methods for the MCP Router.
+This matrix outlines the supported combinations of hosting environments, authentication providers, and downstream delegation methods for Model Context Gateway (MCG).
 
 ## 🏗️ Hosting & Authentication Matrix
 
@@ -15,7 +15,7 @@ This matrix outlines the supported combinations of hosting environments, authent
 
 ## 🔑 Authentication Context Limitations
 
-Depending on how a client authenticates to the MCP Router, different capabilities and downstream restrictions apply.
+Depending on how a client authenticates to Model Context Gateway (MCG), different capabilities and downstream restrictions apply.
 
 ### 1. Reverse Proxy (OIDC / Header Auth)
 * **Bound Context:** Human User.

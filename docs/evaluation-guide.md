@@ -1,4 +1,4 @@
-# MCP Gateway Router: Evaluation & Product Overview Guide
+# Model Context Gateway (MCG): Evaluation & Product Overview Guide
 
 C# ASP.NET Core gateway router, semantic proxy, and authorization control plane for the **Model Context Protocol (MCP)**.
 
@@ -53,9 +53,9 @@ Clients manage mixes of local subprocesses (`stdio`), Server-Sent Events streams
 
 ---
 
-## 🚀 The Solution: MCP Gateway Router
+## 🚀 The Solution: Model Context Gateway (MCG)
 
-The **MCP Gateway Router** provides a single, hardened proxy between client applications and backend MCP services.
+The **Model Context Gateway (MCG)** provides a single, hardened proxy between client applications and backend MCP services.
 
 ```
                               UNIFIED CONTROL PLANE
@@ -67,7 +67,7 @@ The **MCP Gateway Router** provides a single, hardened proxy between client appl
               \                      |                      /
                v                     v                     v
    +-----------------------------------------------------------------------+
-   |                     MCP GATEWAY ROUTER (ASP.NET Core)                 |
+   |                  MODEL CONTEXT GATEWAY (ASP.NET Core)                 |
    |                                                                       |
    |  [ 4-Stage RBAC & AppKeys ]           [ AES-256-GCM Secret Resolvers ]|
    |  [ In-Process ONNX Embeddings ]       [ Zero-Leakage STDIO Isolation ]|
@@ -116,7 +116,7 @@ Instead of returning 100+ tools via `tools/list`, the router returns two dynamic
 sequenceDiagram
     autonumber
     actor LLM as Client / AI Agent
-    participant GW as MCP Router (/sse)
+    participant GW as Model Context Gateway (MCG) (/sse)
     participant VEC as Local ONNX Engine
     participant BE as Backend Server (Docker)
 

@@ -1,6 +1,6 @@
 # 04. Client Setup & App Key Management
 
-The **MCP Gateway Router** enables AI coding assistants, IDEs, and autonomous agent frameworks to connect securely using standard Model Context Protocol (MCP) clients, secured by cryptographically hashed, scoped **AppKeys**.
+The **Model Context Gateway (MCG)** enables AI coding assistants, IDEs, and autonomous agent frameworks to connect securely using standard Model Context Protocol (MCP) clients, secured by cryptographically hashed, scoped **AppKeys**.
 
 ---
 

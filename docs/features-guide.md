@@ -1,12 +1,12 @@
-# MCP Router Features Guide
+# 🚀 Model Context Gateway (MCG) Features Guide
 
-This guide details the features of the MCP Router.
+This guide details the features of the Model Context Gateway (MCG).
 
 ---
 
 ## 🖥️ 1. Dynamic Server Management
 
-The MCP Router supports four methods to manage backend Model Context Protocol (MCP) servers:
+Model Context Gateway (MCG) supports four methods to manage backend Model Context Protocol (MCP) servers:
 
 ### Method A: Web UI Dashboard (Recommended)
 Manage servers dynamically without restarting the gateway:
@@ -211,7 +211,7 @@ Configure via the Settings panel:
 
 ## 🔐 5. Authentication, Group Mapping & Unified MCP Capability Authorization
 
-The MCP Router implements a **Unified Authorization Pipeline** across MCP capabilities:
+Model Context Gateway (MCG) implements a **Unified Authorization Pipeline** across MCP capabilities:
 - **Tools**: `tools/list`, `tools/call`
 - **Prompts**: `prompts/list`, `prompts/get`
 - **Resources**: `resources/list`, `resources/read`, `resources/templates/list`

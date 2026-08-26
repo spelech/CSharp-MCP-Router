@@ -72,7 +72,7 @@ flowchart TD
             W3WP["w3wp.exe (Worker Process)"]
         end
 
-        subgraph CoreEngine["MCP Router ASP.NET Core Engine (.NET 10)"]
+        subgraph CoreEngine["Model Context Gateway ASP.NET Core Engine (.NET 10)"]
             AuthPipeline["ActiveDirectoryIdentityProvider\n(IWindowsIdentityAccessor)"]
             SecretEngine["WindowsRegistrySecretRetriever\n(IDpapiProtector)"]
             RoutingEngine["ToolRoutingManager\n(Meta-Mode & Semantic Search)"]
@@ -413,7 +413,7 @@ The repository provides the lifecycle management script: [`scripts/windows/Setup
 | :--- | :--- | :--- | :--- |
 | `-Action` | string | *(Mandatory)* | `Install`, `Uninstall`, `Start`, `Stop`, `Restart`, `Status`. |
 | `-ServiceName` | string | `"McpRouter"` | Unique service name in SCM. |
-| `-DisplayName` | string | `"MCP Router Gateway Service"` | User-friendly display name. |
+| `-DisplayName` | string | `"Model Context Gateway (MCG) Service"` | User-friendly display name. |
 | `-InstallDir` | string | `"C:\Program Files\McpRouter"` | Target directory for published binaries. |
 | `-Port` | int | `8080` | Port for ASP.NET Core Kestrel HTTP listener. |
 | `-Urls` | string | `"http://0.0.0.0:8080"` | Complete URL bindings. |
@@ -592,7 +592,7 @@ Validate that API keys and credentials can be securely stored in the Windows Reg
    Plaintext   : dckr_pat_secret_token_12345
    ```
 
-5. **Test in MCP Router Runtime**:
+5. **Test in Model Context Gateway Runtime**:
    - Register a backend server with `SecretProvider = "WindowsRegistry"`, `SecretPath = "SOFTWARE\McpRouter\Secrets"`, and `SecretItemKey = "DockerApiKey"`.
    - Invoke a tool on that server via the Test Bench. The gateway dynamically reads and decrypts the registry binary value and injects it into the transport request.
 

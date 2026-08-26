@@ -1,6 +1,6 @@
 # Multi-Tenant OAuth Consent Flow & Dynamic Client Registration (DCR)
 
-To securely support dynamic, multi-tenant AI integrations (such as the **Slack MCP Server** or **Splunk MCP** integrations), the MCP Router natively supports the standard OAuth 2.0 `authorization_code` and `refresh_token` flows. This allows external IDEs and agents to request fine-grained access to a user's isolated backend resources.
+To securely support dynamic, multi-tenant AI integrations (such as the **Slack MCP Server** or **Splunk MCP** integrations), Model Context Gateway (MCG) natively supports the standard OAuth 2.0 `authorization_code` and `refresh_token` flows. This allows external IDEs and agents to request fine-grained access to a user's isolated backend resources.
 
 ## 1. The Interactive Consent Architecture
 
@@ -49,7 +49,7 @@ When a new client is provisioned (either via the UI, the `/api/register` DCR end
 
 ## 4. Step-by-Step Setup Guide (Example: Slack MCP Integration)
 
-Follow these steps to configure an external multi-tenant AI client (like Slack) to authenticate against the MCP Router using the Interactive Consent Flow:
+Follow these steps to configure an external multi-tenant AI client (like Slack) to authenticate against Model Context Gateway (MCG) using the Interactive Consent Flow:
 
 ### Step 1: Register the Dynamic Client
 Before Slack can redirect users to the router, it must be registered as an OAuth Client. 
@@ -71,7 +71,7 @@ In your Slack App configuration portal (or equivalent external platform):
 5. **Scopes**: Add the scope `api`.
 6. **Redirect URI**: Note the callback URL provided by Slack (e.g., `https://slack.com/oauth/callback...`).
 
-*(Note: The MCP Router currently accepts any valid redirect URI during the authorization request as long as the client is registered).*
+*(Note: The Model Context Gateway (MCG) currently accepts any valid redirect URI during the authorization request as long as the client is registered).*
 
 ### Step 3: Trigger the Flow
 1. A user interacts with your Slack App and requests to use an MCP Tool.

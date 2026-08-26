@@ -1,6 +1,6 @@
 # 03. RBAC, Security & Access Control Policies
 
-The **MCP Gateway Router** enforces multi-stage Role-Based Access Control (RBAC), multi-provider identity resolution, explicit deny safety barriers, user quota limits, and cryptographic AppKey scope validation.
+The **Model Context Gateway (MCG)** enforces multi-stage Role-Based Access Control (RBAC), multi-provider identity resolution, explicit deny safety barriers, user quota limits, and cryptographic AppKey scope validation.
 
 ---
 

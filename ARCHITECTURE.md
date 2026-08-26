@@ -84,7 +84,7 @@ When an MCP client initiates a connection to `/sse`:
 sequenceDiagram
     autonumber
     actor Client as MCP Client
-    participant Router as MCP Router
+    participant Router as Model Context Gateway (MCG)
     participant SessionMgr as SessionManager
     participant BackendConn as BackendConnection
     participant Downstream as MCP Backend
@@ -110,7 +110,7 @@ When an agent client searches for and executes a capability:
 sequenceDiagram
     autonumber
     actor Client as LLM / Agent
-    participant Router as MCP Router
+    participant Router as Model Context Gateway (MCG)
     participant SemanticSvc as SemanticSearchService
     participant DB as SQL Database
     participant BackendConn as BackendConnection

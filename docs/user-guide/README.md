@@ -1,4 +1,4 @@
-# 📚 MCP Gateway Router - Official User Guide & Manual
+# 📚 Model Context Gateway (MCG) - Official User Guide & Manual
 
 Welcome to the official user manual for the **Model Context Protocol (MCP) Gateway Router**. This router acts as a unified control plane, semantic proxy, and security gateway aggregating 100+ backend MCP services, optimizing tool calling for AI agents, and enforcing enterprise RBAC.
 

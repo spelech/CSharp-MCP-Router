@@ -1,18 +1,18 @@
 # 01. Dashboard & Navigation Interface
 
-The **MCP Gateway Router Dashboard** provides a centralized control plane for monitoring, configuring, testing, and securing all connected backend Model Context Protocol (MCP) servers, client connections, and security policies.
+The **Model Context Gateway (MCG) Dashboard** provides a centralized control plane for monitoring, configuring, testing, and securing all connected backend Model Context Protocol (MCP) servers, client connections, and security policies.
 
 ---
 
 ## 🖥️ Layout & Primary Navigation Tabs
 
-![MCP Gateway Router Overview Dashboard](../assets/dashboard.jpg)
+![Model Context Gateway (MCG) Overview Dashboard](../assets/dashboard.jpg)
 
 The web interface features a dark-mode glassmorphic design with a fixed top navigation bar that enables one-click switching across primary functional views:
 
 ```
 +--------------------------------------------------------------------------------------------------------+
-| 🌐 MCP Router Gateway  [Overview] [App Keys & Security] [Test Bench] [Settings] [My MCP Servers]  👤 admin |
+| 🌐 Model Context Gateway (MCG)  [Overview] [App Keys & Security] [Test Bench] [Settings] [My MCP Servers]  👤 admin |
 +--------------------------------------------------------------------------------------------------------+
 ```
 

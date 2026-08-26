@@ -3,7 +3,7 @@
 **Date:** 2026-08-17 (Post-Windows IIS & DPAPI Validation)  
 **Status:** **All Frontend Component Modules & Backend Controllers $\ge 85\%$ | Native Windows Subsystems 100%**
 
-This document details the code coverage metrics across the core modules of the MCP Router, including containerized Linux environments and native Windows IIS hosting.
+This document details the code coverage metrics across the core modules of the Model Context Gateway (MCG), including containerized Linux environments and native Windows IIS hosting.
 
 ---
 

@@ -1,6 +1,6 @@
 # 🔐 Enterprise Secret Providers & Key Management Guide
 
-The **MCP Router Gateway & Semantic Proxy** provides a pluggable secrets management subsystem (`ISecretRetriever`). It prevents plaintext storage of downstream MCP server credentials (API keys, bearer tokens, passwords, service account keys) in database columns, configuration files, or container environments.
+The **Model Context Gateway (MCG) & Semantic Proxy** provides a pluggable secrets management subsystem (`ISecretRetriever`). It prevents plaintext storage of downstream MCP server credentials (API keys, bearer tokens, passwords, service account keys) in database columns, configuration files, or container environments.
 
 This guide details supported secret providers, AES-256-GCM encryption-at-rest architecture, dynamic runtime reloading, audit safety mechanisms, Docker configurations, and troubleshooting.
 
@@ -37,7 +37,7 @@ When an incoming client request (via HTTP, SSE, or STDIO) requires communication
 
 ```mermaid
 flowchart TD
-    Client["Client IDE / LLM Agent"] -->|JSON-RPC Request| Router["MCP Gateway Router"]
+    Client["Client IDE / LLM Agent"] -->|JSON-RPC Request| Router["Model Context Gateway (MCG)"]
     Router --> Transport["Transport Layer (HTTP / SSE / STDIO)"]
     Transport -->|ResolveTokenAsync| Composite["CompositeSecretRetriever"]
     
@@ -220,7 +220,7 @@ The gateway supports declarative admin key provisioning:
 
 **Implementation**: [`ProvidersController.cs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-56/Components/Providers/ProvidersController.cs)
 
-To maintain 99.999% uptime for connected AI agents and IDEs, the MCP Router supports **hot-reloading of secret providers without restarting the application or Docker container**.
+To maintain 99.999% uptime for connected AI agents and IDEs, Model Context Gateway (MCG) supports **hot-reloading of secret providers without restarting the application or Docker container**.
 
 ```mermaid
 sequenceDiagram
@@ -261,7 +261,7 @@ sequenceDiagram
 
 **Implementation**: [`ProviderConfigSecurityHelper.cs`](file:///containers/dev/csharp-mcp-router/.worktrees/issue-56/Components/Providers/ProviderConfigSecurityHelper.cs)
 
-To adhere to Zero Trust principles, the MCP Router enforces multi-layered redaction and audit protection across all APIs and logs.
+To adhere to Zero Trust principles, the Model Context Gateway (MCG) enforces multi-layered redaction and audit protection across all APIs and logs.
 
 ### Masking & Mask-Preserving Updates
 1. **Automatic JSON Redaction**:
@@ -437,7 +437,7 @@ echo "Vault Secret ID: $SECRET_ID"
 | **`403 Forbidden: permission denied at secret/data/...`** | Vault ACL policy path mismatch. | Vault KV v2 paths require the `data/` prefix in policies (`path "secret/data/*"`), but API lookups use mount `secret` and path `services/docker`. Ensure policy covers `secret/data/*`. |
 | **`SecurityException: Failed to resolve secret from provider 'Vault'...`** | The requested secret key or path does not exist in Vault. | Run `vault kv get secret/<path>` to confirm the field name matches `secretField` exactly (case-sensitive). |
 | **`FATAL: Master encryption key is missing.`** | Neither `MCG_MASTER_KEY` nor `DB_ENCRYPTION_KEY` is defined. | Define `MCG_MASTER_KEY` in `docker-compose.yaml` or `.env`. Ensure it is a persistent, non-empty secret string. |
-| **`WindowsRegistry provider returns null`** | MCP Router is running in a Linux/Docker container. | Windows Registry lookups require a native Windows host environment. Switch the server's `secretProvider` to `Vault` or `Environment`. |
+| **`WindowsRegistry provider returns null`** | Model Context Gateway (MCG) is running in a Linux/Docker container. | Windows Registry lookups require a native Windows host environment. Switch the server's `secretProvider` to `Vault` or `Environment`. |
 | **`System.Net.Http.HttpRequestException: Connection refused`** | Network isolation between Router and Vault. | Ensure both containers share the same Docker network bridge (`networks: [mcp_network]`) and use container DNS names (e.g. `http://vault:8200`). |
 | **`ArgumentException: Vault Address must use HTTP or HTTPS scheme`** | Malformed URL in database or environment. | Ensure `address` starts with `https://` (or `http://` for local development networks). |
 

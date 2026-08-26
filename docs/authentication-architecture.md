@@ -1,6 +1,6 @@
 # Authentication & Authorization Architecture
 
-This document outlines authentication and authorization in the MCP Router Gateway, detailing the separation between Active Directory (AD) Security Identifiers (SIDs), OIDC/Reverse Proxy headers, standalone network authorization, AppKeys, and the dedicated Admin MCP Server.
+This document outlines authentication and authorization in Model Context Gateway (MCG), detailing the separation between Active Directory (AD) Security Identifiers (SIDs), OIDC/Reverse Proxy headers, standalone network authorization, AppKeys, and the dedicated Admin MCP Server.
 
 ---
 

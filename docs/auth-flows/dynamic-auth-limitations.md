@@ -1,6 +1,6 @@
 # Dynamic Auth & Kerberos Limitations
 
-This document outlines fundamental architectural limitations when dealing with dynamic credentials (like short-lived JWTs) and Windows Integrated Authentication (Kerberos/NTLM) in the MCP Router.
+This document outlines fundamental architectural limitations when dealing with dynamic credentials (like short-lived JWTs) and Windows Integrated Authentication (Kerberos/NTLM) in Model Context Gateway (MCG).
 
 ## 1. The Kerberos "Double-Hop" Boundary
 

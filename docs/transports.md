@@ -1,4 +1,4 @@
-# 🚀 MCP Router Transport Capability & Configuration Guide
+# 🚀 Model Context Gateway (MCG) Transport Capability & Configuration Guide
 
 The **Model Context Protocol (MCP) Gateway Router** supports multiple downstream transport mechanisms to communicate with backend tools, services, and local processes, as well as multiple upstream client connectivity models.
 
@@ -41,7 +41,7 @@ The gateway router abstracts transport differences behind the unified [`ITranspo
 graph TD
     Client["Client IDE / LLM Agent"]
     
-    subgraph Gateway ["MCP Router Gateway"]
+    subgraph Gateway ["Model Context Gateway (MCG)"]
         Proxy["ProxyEndpoints (/sse, /{server_id})"]
         Session["ClientSession & SessionManager"]
         StateManager["JsonRpcStateManager<br>(ID Rewriting & Response Isolation)"]
@@ -205,7 +205,7 @@ sequenceDiagram
     autonumber
     participant ClientA as Client A (id: 1)
     participant ClientB as Client B (id: 1)
-    participant Gateway as MCP Router Gateway
+    participant Gateway as Model Context Gateway (MCG)
     participant Backend as Downstream Backend Server
 
     ClientA->>Gateway: POST /message {"id": 1, "method": "tools/call", "params": {"name": "docker__list"}}

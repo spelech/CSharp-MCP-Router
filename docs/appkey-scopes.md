@@ -25,7 +25,7 @@ External callers authenticate via two primary vectors:
 
 ### Defense-in-Depth Model
 
-Authorization in the MCP Router enforces four concentric security boundaries:
+Authorization in Model Context Gateway (MCG) enforces four concentric security boundaries:
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -174,7 +174,7 @@ The table below outlines how each Model Context Protocol (MCP) method and Router
 
 ## 5. Key Lifecycle & Cryptographic Architecture
 
-The MCP Router implements industry-standard token hashing, high-entropy selectors, and constant-time authentication to safeguard machine credentials:
+Model Context Gateway (MCG) implements industry-standard token hashing, high-entropy selectors, and constant-time authentication to safeguard machine credentials:
 
 ### 1. Token Structure & Entropy Specification
 

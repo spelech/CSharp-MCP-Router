@@ -6,7 +6,7 @@ This document details the architectural specification, schema contracts, encrypt
 
 ## 📊 Database Engine Support Matrix
 
-The MCP Router employs **Dapper** with specialized dialect handlers and native ADO.NET providers to deliver high-throughput, low-latency persistence across embedded, enterprise on-premises, and cloud environments.
+Model Context Gateway (MCG) employs **Dapper** with specialized dialect handlers and native ADO.NET providers to deliver high-throughput, low-latency persistence across embedded, enterprise on-premises, and cloud environments.
 
 | Feature / Dimension | 🪶 SQLite (Default) | 🏢 Microsoft SQL Server | 🐬 MySQL / MariaDB |
 | :--- | :--- | :--- | :--- |
@@ -25,7 +25,7 @@ The MCP Router employs **Dapper** with specialized dialect handlers and native A
 
 ## 🗺️ Unified Database Entity-Relationship Diagram (ERD)
 
-The following diagram models the complete schema architecture, primary keys (`PK`), unique keys (`UK`), foreign key constraints (`FK`), data types, and relational cardinality across all 12 core tables in the MCP Router persistence tier. A dedicated standalone specification is available at [**Canonical Data Model & Database ERD**](data-model.md):
+The following diagram models the complete schema architecture, primary keys (`PK`), unique keys (`UK`), foreign key constraints (`FK`), data types, and relational cardinality across all 12 core tables in Model Context Gateway (MCG) persistence tier. A dedicated standalone specification is available at [**Canonical Data Model & Database ERD**](data-model.md):
 
 ```mermaid
 erDiagram
@@ -342,7 +342,7 @@ DELIMITER ;
 
 ## 🔐 Database Encryption & Secrets Architecture
 
-The MCP Router implements authenticated envelope encryption for all sensitive secrets, tokens, and third-party configuration payloads persisted in the database.
+Model Context Gateway (MCG) implements authenticated envelope encryption for all sensitive secrets, tokens, and third-party configuration payloads persisted in the database.
 
 ```mermaid
 flowchart TD
@@ -391,7 +391,7 @@ To prevent runtime data corruption or silent failures caused by misconfigured sc
 ```mermaid
 sequenceDiagram
     autonumber
-    participant App as MCP Router Startup
+    participant App as Model Context Gateway Startup
     participant Seeder as DatabaseSeederService
     participant DB as Target Database Engine
 

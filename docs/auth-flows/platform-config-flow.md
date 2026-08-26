@@ -1,6 +1,6 @@
 # Platform Configuration & User Setup Flow
 
-This document illustrates how the MCP Router gateway is configured to authenticate incoming users (clients, IDEs, or human admins), and how `AppKeys` fit into the ecosystem.
+This document illustrates how Model Context Gateway (MCG) is configured to authenticate incoming users (clients, IDEs, or human admins), and how `AppKeys` fit into the ecosystem.
 
 ```mermaid
 flowchart TD
@@ -27,7 +27,7 @@ flowchart TD
 ```
 
 ### Explanation of AppKeys
-AppKeys (or AppTokens) are persistent API keys used by external clients (like an IDE or an automated script) to authenticate against the MCP Router.
+AppKeys (or AppTokens) are persistent API keys used by external clients (like an IDE or an automated script) to authenticate against Model Context Gateway (MCG).
 
 - **Prefix & Hash**: AppKeys consist of a public prefix (used for database lookup) and a secret portion (hashed via SHA-256 in the database). Format: `mcp-{scopeSlug}-{selector}-{secret}`.
 - **Scopes**: Dictate permissions. A scope of `admin` or `*` grants the AppKey administrative privileges over the router configuration.
