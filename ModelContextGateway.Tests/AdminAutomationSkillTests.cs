@@ -192,6 +192,7 @@ namespace ModelContextGateway.Tests
                         {
                             { "ConnectionStrings:Sqlite", $"Data Source={tempDbFile}" },
                             { "DB_ENCRYPTION_KEY", "TestMasterSecretKey123456789012345678901234" },
+                            { "MCG_ADMIN_AUTH_KEY", "mcp-global-admin-default-cli-key-99" },
                             { "Admin:StandaloneAllowedNetworks:0", "127.0.0.1" },
                             { "Admin:StandaloneAllowedNetworks:1", "::1" }
                         });
@@ -369,7 +370,7 @@ namespace ModelContextGateway.Tests
                         config.AddInMemoryCollection(new Dictionary<string, string?>
                         {
                             { "DATA_DIR", tempDir },
-                            { "ConnectionStrings:Sqlite", $"Data Source={tempDbFile}" },
+                            { "ConnectionStrings:DefaultConnection", $"Data Source={tempDbFile}" },
                             { "Admin:StandaloneAllowedNetworks:0", "127.0.0.1" },
                             { "Admin:StandaloneAllowedNetworks:1", "::1" }
                         });
@@ -388,10 +389,14 @@ namespace ModelContextGateway.Tests
                 Assert.True(File.Exists(keyFilePath), "Persistent .master.key file must be auto-generated in data dir.");
                 var generatedKey = File.ReadAllText(keyFilePath).Trim();
                 Assert.False(string.IsNullOrWhiteSpace(generatedKey));
-                Assert.Equal(32, Convert.FromBase64String(generatedKey).Length);
+                // 3. Assert .admin.key was auto-generated
+                var adminKeyPath = Path.Combine(tempDir, ".admin.key");
+                Assert.True(File.Exists(adminKeyPath), "Persistent .admin.key file must be auto-generated in data dir.");
+                var generatedAdminKey = File.ReadAllText(adminKeyPath).Trim();
+                Assert.StartsWith("mcp-adm-", generatedAdminKey);
 
-                // 3. Admin MCP Server invocation with seeded key
-                client.DefaultRequestHeaders.Add("Authorization", "Bearer mcp-global-admin-default-cli-key-99");
+                // 4. Admin MCP Server invocation with auto-generated key
+                client.DefaultRequestHeaders.Add("Authorization", $"Bearer {generatedAdminKey}");
                 var payload = new
                 {
                     jsonrpc = "2.0",

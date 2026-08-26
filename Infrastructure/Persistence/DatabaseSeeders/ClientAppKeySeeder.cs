@@ -126,26 +126,30 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
                 }
                 else
                 {
-                    const string checkPrefix = "mcp-global-admin";
-                    var existingKey = conn.QueryFirstOrDefault<string>(
-                        "SELECT Id FROM AppKeys WHERE KeyPrefix = @KeyPrefix;",
-                        new { KeyPrefix = checkPrefix });
+                    // Check if ANY active system/admin AppKey already exists in the database
+                    var existingAdminKey = conn.QueryFirstOrDefault<string>(
+                        "SELECT Id FROM AppKeys WHERE ScopesJson LIKE '%admin%' OR KeyType = 'system';");
 
-                    if (string.IsNullOrEmpty(existingKey))
+                    if (string.IsNullOrEmpty(existingAdminKey))
                     {
-                        const string defaultPlaintextKey = "mcp-global-admin-default-cli-key-99";
+                        const string base62Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+                        var selector = RandomNumberGenerator.GetString(base62Chars, 8);
+                        var secret = RandomNumberGenerator.GetString(base62Chars, 16);
+                        var keyPrefix = $"mcp-adm-{selector}";
+                        var generatedPlaintextKey = $"{keyPrefix}-{secret}";
+
                         using var sha256 = SHA256.Create();
-                        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(defaultPlaintextKey));
+                        var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(generatedPlaintextKey));
                         var hashedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
 
                         var defaultKey = new AppKey
                         {
                             Id = Guid.NewGuid().ToString("N"),
-                            Name = "CLI Default Admin Key",
+                            Name = "Auto-Generated System Admin Key",
                             Username = "admin",
                             OwnerSid = string.Empty,
                             KeyType = "system",
-                            KeyPrefix = checkPrefix,
+                            KeyPrefix = keyPrefix,
                             EncryptedKey = hashedKey,
                             ScopesJson = "[\"all\",\"admin\"]",
                             ExpiresAt = null,
@@ -153,7 +157,25 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
                         };
 
                         SaveAppKeyToDb(conn, dbFactory.ProviderName, defaultKey);
-                        logger.LogInformation("Seeded default CLI Admin AppKey for 'admin'.");
+
+                        // Persist to .admin.key file in data directory for host admin retrieval
+                        try
+                        {
+                            string dataDir = DbKeyHelper.ResolveDataDirectory(configuration);
+                            Directory.CreateDirectory(dataDir);
+                            string adminKeyPath = Path.Combine(dataDir, ".admin.key");
+                            File.WriteAllText(adminKeyPath, generatedPlaintextKey);
+                            if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+                            {
+                                File.SetUnixFileMode(adminKeyPath, UnixFileMode.UserRead | UnixFileMode.UserWrite);
+                            }
+                        }
+                        catch (Exception exFile)
+                        {
+                            logger.LogWarning(exFile, "Could not write .admin.key file to data directory.");
+                        }
+
+                        logger.LogInformation("Seeded auto-generated high-entropy Admin AppKey for 'admin' (Prefix: {Prefix}, Key written to .admin.key).", keyPrefix);
                     }
                 }
             }
