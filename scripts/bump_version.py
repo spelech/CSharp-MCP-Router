@@ -180,8 +180,18 @@ def main():
                 f.write(updated_store)
             print(f"Updated {user_store_path}")
 
-    # 6. Stage files using git add
-    paths_to_stage = [csproj_path, html_path, readme_path, changelog_path] + user_store_paths
+    # 6. Update frontend/package.json
+    pkg_json_path = os.path.join(repo_root, "frontend", "package.json")
+    if os.path.exists(pkg_json_path):
+        with open(pkg_json_path, "r", encoding="utf-8") as f:
+            pkg_content = f.read()
+        updated_pkg = re.sub(r'("version":\s*")[^"]+(")', fr'\g<1>{new_version}\g<2>', pkg_content)
+        with open(pkg_json_path, "w", encoding="utf-8", newline="\n") as f:
+            f.write(updated_pkg)
+        print(f"Updated {pkg_json_path}")
+
+    # 7. Stage files using git add
+    paths_to_stage = [csproj_path, html_path, readme_path, changelog_path, pkg_json_path] + user_store_paths
     existing_paths = [p for p in paths_to_stage if os.path.exists(p)]
     os.system(f"git add {' '.join(existing_paths)}")
     print("Staged updated versioning files.")
