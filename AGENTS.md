@@ -25,10 +25,11 @@ Run tests via `dotnet test ModelContextGateway.slnx`.
 
 ## Rules
 
-- **MANDATORY VERSIONING RULE**: **EVERY COMMIT OR MERGE TO `main` MUST BUMP THE VERSION NUMBER.**
+- **MANDATORY VERSIONING RULE**: **EVERY CODE CHANGE COMMIT OR MERGE TO `main` MUST BUMP THE VERSION NUMBER.**
+  - **Exception**: Documentation-only changes (e.g. updating markdown files under `docs/`, `README.md`, or architecture guides without code/schema changes) **DO NOT** require a version bump, release tagging, or container rebuild.
   - Patch Bumps (e.g. `5.0.0` -> `5.0.1`): For bug fixes, performance optimizations, log refactoring, or minor UI tweaks.
   - Minor Bumps (e.g. `5.0.0` -> `5.1.0`): For new features, API endpoints, schema changes, or architectural additions.
-  - **Files That MUST Be Updated Simultaneously**:
+  - **Files That MUST Be Updated Simultaneously (When Bumping Version)**:
     1. `ModelContextGateway.csproj` (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`)
     2. `frontend/src/stores/useUserStore.ts` (React fallback version)
     3. `CHANGELOG.md` (Add release entry to the Release Changelog table)

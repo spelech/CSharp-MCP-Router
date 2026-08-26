@@ -72,10 +72,11 @@ Ensure `mcg` is rebuilt and running (`docker compose up -d mcg`) on the `net_clo
 
 ## 🏷️ 5. Mandatory Versioning & Documentation Rule
 
-**EVERY COMMIT OR MERGE TO `main` MUST BUMP THE VERSION NUMBER WITHOUT EXCEPTION.**
+**EVERY CODE CHANGE COMMIT OR MERGE TO `main` MUST BUMP THE VERSION NUMBER.**
+- **Exception**: Documentation-only changes (e.g. updating markdown files under `docs/`, `README.md`, or architecture guides without code/schema changes) **DO NOT** require a version bump, release tagging, or container rebuild.
 - **Patch Bumps (e.g. `5.0.0` -> `5.0.1`)**: For bug fixes, performance optimizations, log refactoring, or minor UI tweaks.
 - **Minor Bumps (e.g. `5.0.0` -> `5.1.0`)**: For new features, API endpoints, schema changes, or architectural additions.
-- **Files That MUST Be Updated Simultaneously**:
+- **Files That MUST Be Updated Simultaneously (When Bumping Version)**:
   1. [`ModelContextGateway.csproj`](file:///containers/dev/csharp-mcp-router/ModelContextGateway.csproj) (`<Version>`, `<AssemblyVersion>`, `<FileVersion>`).
   2. [`frontend/src/stores/useUserStore.ts`](file:///containers/dev/csharp-mcp-router/frontend/src/stores/useUserStore.ts) (React fallback version).
   3. [`CHANGELOG.md`](file:///containers/dev/csharp-mcp-router/CHANGELOG.md) (Add release entry to full changelog table).
