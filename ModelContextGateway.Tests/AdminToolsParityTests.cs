@@ -677,7 +677,7 @@ namespace ModelContextGateway.Tests
             // 2. Update Settings via direct properties
             var updateArgs = JsonDocument.Parse(@"{
                 ""action"": ""update"",
-                ""dashboardTitle"": ""Enterprise MCP Router Hub"",
+                ""dashboardTitle"": ""Enterprise Model Context Gateway Hub"",
                 ""dashboardIcon"": ""fa-solid fa-server"",
                 ""embeddingProvider"": ""api"",
                 ""embeddingApiUrl"": ""https://embeddings.corp.internal/v1"",
@@ -689,14 +689,14 @@ namespace ModelContextGateway.Tests
             var updateRes = await _adminMcpServer.CallToolAsync("manage_settings", updateArgs, "admin_user");
             var updateDoc = AssertIsSuccess(updateRes);
             var updateText = updateDoc.RootElement.GetProperty("content")[0].GetProperty("text").GetString()!;
-            Assert.Contains("Enterprise MCP Router Hub", updateText);
+            Assert.Contains("Enterprise Model Context Gateway Hub", updateText);
             Assert.Contains("500", updateText);
 
             // 3. Verify Get reflects updated values
             var getAfterRes = await _adminMcpServer.CallToolAsync("manage_settings", getArgs, "admin_user");
             var getAfterDoc = AssertIsSuccess(getAfterRes);
             var getAfterText = getAfterDoc.RootElement.GetProperty("content")[0].GetProperty("text").GetString()!;
-            Assert.Contains("Enterprise MCP Router Hub", getAfterText);
+            Assert.Contains("Enterprise Model Context Gateway Hub", getAfterText);
 
             // 4. Update Settings via nested object
             var updateNestedArgs = JsonDocument.Parse(@"{

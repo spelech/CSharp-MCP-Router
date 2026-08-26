@@ -1,6 +1,6 @@
 ﻿<#
 .SYNOPSIS
-    Manages DPAPI-encrypted and plaintext secrets in the Windows Registry for C# MCP Router.
+    Manages DPAPI-encrypted and plaintext secrets in the Windows Registry for Model Context Gateway.
 
 .DESCRIPTION
     Writes, reads, decrypts, lists, and removes secrets in HKLM\SOFTWARE\McpRouter\Secrets.

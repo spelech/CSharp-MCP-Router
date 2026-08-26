@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ==============================================================================
-# Integration Test Stack Lifecycle Helper (CSharp MCP Router)
+# Integration Test Stack Lifecycle Helper (Model Context Gateway (MCG))
 # ==============================================================================
 set -euo pipefail
 

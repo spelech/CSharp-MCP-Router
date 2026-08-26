@@ -226,11 +226,11 @@ The repository includes a comprehensive deployment automation script: [`scripts/
 
 | Parameter | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
-| `-SiteName` | string | `"McpRouter"` | Name of the IIS Website. |
-| `-AppPoolName` | string | `"McpRouterAppPool"` | Name of the dedicated IIS Application Pool. |
+| `-SiteName` | string | `"ModelContextGateway"` | Name of the IIS Website. |
+| `-AppPoolName` | string | `"ModelContextGatewayAppPool"` | Name of the dedicated IIS Application Pool. |
 | `-Port` | int | `8080` | HTTP port for the website binding. |
 | `-HostName` | string | `""` | Optional hostname binding (e.g. `mcp.corp.local`). |
-| `-PhysicalPath` | string | `"C:\inetpub\mcp-router"` | Target physical deployment directory. |
+| `-PhysicalPath` | string | `"C:\inetpub\mcg"` | Target physical deployment directory. |
 | `-Configuration` | string | `"Release"` | Build configuration (`Release` or `Debug`). |
 | `-RepoRoot` | string | Auto-resolved | Path to the repository root directory. |
 | `-SkipFrontend` | switch | `false` | Skips compiling the Vite React frontend. |
@@ -243,10 +243,10 @@ The repository includes a comprehensive deployment automation script: [`scripts/
 
 ```powershell
 # Standard Production Deployment (Port 8080 with Windows Authentication):
-.\scripts\windows\Deploy-IIS.ps1 -SiteName "McpRouter" -Port 8080 -EnableWindowsAuth
+.\scripts\windows\Deploy-IIS.ps1 -SiteName "ModelContextGateway" -Port 8080 -EnableWindowsAuth
 
 # Host Header Binding Deployment (e.g. mcp.company.internal):
-.\scripts\windows\Deploy-IIS.ps1 -SiteName "McpRouter" -Port 80 -HostName "mcp.company.internal" -EnableWindowsAuth
+.\scripts\windows\Deploy-IIS.ps1 -SiteName "ModelContextGateway" -Port 80 -HostName "mcp.company.internal" -EnableWindowsAuth
 
 # Self-Contained Deployment to Custom Directory:
 .\scripts\windows\Deploy-IIS.ps1 -PhysicalPath "D:\Apps\ModelContextGateway" -Port 8443 -SelfContained
@@ -412,7 +412,7 @@ The repository provides the lifecycle management script: [`scripts/windows/Setup
 | Parameter | Type | Default | Description |
 | :--- | :--- | :--- | :--- |
 | `-Action` | string | *(Mandatory)* | `Install`, `Uninstall`, `Start`, `Stop`, `Restart`, `Status`. |
-| `-ServiceName` | string | `"McpRouter"` | Unique service name in SCM. |
+| `-ServiceName` | string | `"ModelContextGateway"` | Unique service name in SCM. |
 | `-DisplayName` | string | `"Model Context Gateway (MCG) Service"` | User-friendly display name. |
 | `-InstallDir` | string | `"C:\Program Files\McpRouter"` | Target directory for published binaries. |
 | `-Port` | int | `8080` | Port for ASP.NET Core Kestrel HTTP listener. |

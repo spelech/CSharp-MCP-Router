@@ -376,7 +376,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "mcg": {
       "url": "http://localhost:8026/sse",
       "type": "sse",
       "trust": true,
@@ -393,7 +393,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 ```json
 {
   "mcpServers": {
-    "homelab-router": {
+    "homelab-mcg": {
       "url": "http://localhost:8026/sse",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"
@@ -407,7 +407,7 @@ Backend servers can be configured dynamically via the Web Dashboard or declarati
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "mcg": {
       "url": "http://localhost:8026/sse",
       "headers": {
         "X-App-Key": "mcp_app_live_your_app_key_here"

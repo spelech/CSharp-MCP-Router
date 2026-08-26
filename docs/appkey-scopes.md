@@ -271,7 +271,7 @@ Below are recommended configurations adhering strictly to the principle of least
 ```json
 {
   "mcpServers": {
-    "mcp-router-docker": {
+    "mcg-docker": {
       "url": "http://10.0.0.10:8026/sse",
       "headers": {
         "X-App-Key": "mcp-server-a1b2c3d4e5f678901234567890abcdef-1234567890abcdef..."
@@ -299,7 +299,7 @@ Below are recommended configurations adhering strictly to the principle of least
 ```json
 {
   "mcpServers": {
-    "mcp-router-smarthome": {
+    "mcg-smarthome": {
       "command": "npx",
       "args": [
         "-y",

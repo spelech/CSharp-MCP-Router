@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Automated Diagnostic and Verification Runner for Windows Hosts (C# MCP Router).
+    Automated Diagnostic and Verification Runner for Windows Hosts (Model Context Gateway).
 
 .DESCRIPTION
     Performs comprehensive diagnostic validation of Windows host prerequisites,
@@ -14,7 +14,7 @@
     7. Frontend Unit Tests: Optional execution of Vitest suite.
 
 .PARAMETER RepoRoot
-    Root directory of the CSharp-MCP-Router repository. Defaults to the repository root.
+    Root directory of the Model Context Gateway repository. Defaults to the repository root.
 
 .PARAMETER SkipTests
     Skips execution of the backend xUnit test suite (dotnet test).
@@ -458,7 +458,7 @@ Write-Section "5. Automated Backend Test Suite (dotnet test ModelContextGateway.
 if (-not $SkipTests) {
     $solutionPath = Join-Path $RepoRoot "ModelContextGateway.slnx"
     if (-not (Test-Path $solutionPath)) {
-        $solutionPath = Join-Path $RepoRoot "mcp-router.sln"
+        $solutionPath = Join-Path $RepoRoot "ModelContextGateway.slnx"
     }
 
     if (Test-Path $solutionPath) {

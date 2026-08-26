@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-    Automated IIS Deployment and Configuration Script for C# MCP Router Gateway.
+    Automated IIS Deployment and Configuration Script for Model Context Gateway (MCG).
 
 .DESCRIPTION
     Builds the frontend and backend, configures the IIS Application Pool with 'No Managed Code',
@@ -8,10 +8,10 @@
     deploys web.config with unbuffered SSE streaming settings, and verifies deployment health.
 
 .PARAMETER SiteName
-    Name of the IIS Website. Default: "McpRouter".
+    Name of the IIS Website. Default: "ModelContextGateway".
 
 .PARAMETER AppPoolName
-    Name of the IIS Application Pool. Default: "McpRouterAppPool".
+    Name of the IIS Application Pool. Default: "ModelContextGatewayAppPool".
 
 .PARAMETER Port
     HTTP port for the IIS Website binding. Default: 8080.
@@ -20,13 +20,13 @@
     Optional host header binding (e.g., "mcp.corp.local"). Default: "" (all host headers).
 
 .PARAMETER PhysicalPath
-    Target physical deployment directory. Default: "C:\inetpub\mcp-router".
+    Target physical deployment directory. Default: "C:\inetpub\mcg".
 
 .PARAMETER Configuration
     Build configuration: "Release" or "Debug". Default: "Release".
 
 .PARAMETER RepoRoot
-    Root directory of the CSharp-MCP-Router repository. Defaults to the repository containing this script.
+    Root directory of the Model Context Gateway repository. Defaults to the repository containing this script.
 
 .PARAMETER SkipFrontend
     If specified, skips running the npm frontend build.
@@ -44,7 +44,7 @@
     If specified, explicitly enables Windows Authentication on the IIS site.
 
 .EXAMPLE
-    .\Deploy-IIS.ps1 -Port 8080 -PhysicalPath "C:\inetpub\mcp-router"
+    .\Deploy-IIS.ps1 -Port 8080 -PhysicalPath "C:\inetpub\mcg"
 
 .EXAMPLE
     .\Deploy-IIS.ps1 -SiteName "McpRouterProd" -Port 443 -HostName "mcp.corp.local" -EnableWindowsAuth
@@ -53,10 +53,10 @@
 [CmdletBinding()]
 param(
     [Parameter()]
-    [string]$SiteName = "McpRouter",
+    [string]$SiteName = "ModelContextGateway",
 
     [Parameter()]
-    [string]$AppPoolName = "McpRouterAppPool",
+    [string]$AppPoolName = "ModelContextGatewayAppPool",
 
     [Parameter()]
     [int]$Port = 8080,
@@ -65,7 +65,7 @@ param(
     [string]$HostName = "",
 
     [Parameter()]
-    [string]$PhysicalPath = "C:\inetpub\mcp-router",
+    [string]$PhysicalPath = "C:\inetpub\mcg",
 
     [Parameter()]
     [string]$Configuration = "Release",
@@ -346,7 +346,7 @@ if (-not $healthy) {
     Write-Warn "Health check probe could not reach '$healthUrl'. Please check IIS logs in '$logsDir' or Event Viewer (Application log)."
 } else {
     Write-Host "`n========================================================" -ForegroundColor Green
-    Write-Host "  MCP Router Successfully Deployed to IIS!" -ForegroundColor Green
+    Write-Host "  Model Context Gateway Successfully Deployed to IIS!" -ForegroundColor Green
     Write-Host "  URL: http://localhost:$Port" -ForegroundColor Green
     Write-Host "  Health Endpoint: http://localhost:$Port/health" -ForegroundColor Green
     Write-Host "========================================================`n" -ForegroundColor Green

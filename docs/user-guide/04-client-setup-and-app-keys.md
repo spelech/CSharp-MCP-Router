@@ -61,7 +61,7 @@ To connect Cursor to the unified Meta-Mode gateway:
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "model-context-gateway": {
       "url": "http://10.0.0.10:8026/sse",
       "headers": {
         "X-App-Key": "mcp_app_key_your_generated_secret_key_here"
@@ -86,7 +86,7 @@ Claude Desktop connects using the official MCP inspector bridge or direct SSE tr
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "model-context-gateway": {
       "command": "npx",
       "args": [
         "-y",
@@ -125,7 +125,7 @@ In VS Code with the Cline or Roo Code extension:
 ```json
 {
   "mcpServers": {
-    "mcp-router": {
+    "model-context-gateway": {
       "url": "http://10.0.0.10:8026/sse",
       "headers": {
         "X-App-Key": "mcp_app_key_your_generated_secret_key_here"

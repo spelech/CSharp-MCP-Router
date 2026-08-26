@@ -120,7 +120,7 @@ class ReleaseVerifier:
     def print_banner(self):
         banner = f"""
 {color("==================================================================", Colors.CYAN, Colors.BOLD)}
-{color("  🛡️  MCP Router - Release & Quality Verification Engine  🛡️  ", Colors.WHITE, Colors.BOLD)}
+{color("  🛡️  Model Context Gateway (MCG) - Release & Quality Verification Engine  🛡️  ", Colors.WHITE, Colors.BOLD)}
 {color("==================================================================", Colors.CYAN, Colors.BOLD)}
   Repository Root: {color(str(self.repo_root), Colors.DIM)}
 """
@@ -157,8 +157,7 @@ class ReleaseVerifier:
         self.print_section("1. Version Synchronization & Consistency", "🏷️")
 
         csproj_path = self.repo_root / "ModelContextGateway.csproj"
-        if not csproj_path.exists():
-            csproj_path = self.repo_root / "mcp-router.csproj"
+        
         if not csproj_path.exists():
             self.record_check("Version", "Project File Exists", False, error=f"File not found: ModelContextGateway.csproj")
             return None
@@ -535,7 +534,7 @@ class ReleaseVerifier:
 
 
 def main():
-    parser = argparse.ArgumentParser(description="MCP Router Release & Quality Verification Engine")
+    parser = argparse.ArgumentParser(description="Model Context Gateway (MCG) Release & Quality Verification Engine")
     parser.add_argument("--skip-tests", action="store_true", help="Skip backend/frontend test and build execution")
     parser.add_argument("--skip-links", action="store_true", help="Skip markdown link and anchor verification")
     parser.add_argument("--skip-versions", action="store_true", help="Skip version synchronization checks")

@@ -78,7 +78,7 @@ test.describe('Multi-User Context Matrix Flow (Issue #50)', () => {
 
     // Verify dashboard renders cleanly under AppKey headers
     await expect(appKeyPage.locator('button:has-text("Overview")')).toBeVisible();
-    const headerTitle = appKeyPage.locator('.header-title h1, h1:has-text("MCP Router")');
+    const headerTitle = appKeyPage.locator('.header-title h1, h1:has-text("Model Context Gateway")');
     await expect(headerTitle.first()).toBeVisible();
   });
 

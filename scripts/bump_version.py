@@ -14,14 +14,13 @@ def main():
     # Paths relative to repository root
     repo_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     csproj_path = os.path.join(repo_root, "ModelContextGateway.csproj")
-    if not os.path.exists(csproj_path):
-        csproj_path = os.path.join(repo_root, "mcp-router.csproj")
+    
     html_path = os.path.join(repo_root, "wwwroot", "index.html")
     readme_path = os.path.join(repo_root, "README.md")
 
     # Read current version from csproj
     if not os.path.exists(csproj_path):
-        print(f"Error: ModelContextGateway.csproj / mcp-router.csproj not found.")
+        print(f"Error: ModelContextGateway.csproj not found.")
         sys.exit(1)
 
     with open(csproj_path, "r", encoding="utf-8") as f:

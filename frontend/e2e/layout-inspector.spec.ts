@@ -5,7 +5,7 @@ test.describe('Dashboard Layout & UX Audit', () => {
 
   test.beforeEach(async ({ page }) => {
     await page.route('**/api/config/branding', async (route) => {
-      await route.fulfill({ json: { title: 'MCP Router Gateway', logoUrl: '' } });
+      await route.fulfill({ json: { title: 'Model Context Gateway', logoUrl: '' } });
     });
     await page.route('**/api/user/me', async (route) => {
       await route.fulfill({

@@ -67,7 +67,7 @@ These features have been implemented to address the current limitations in ident
 
 ### "Batteries-Included" Docker Image for STDIO
 * **Status**: Implemented (v4.21.0)
-* **Description**: Publish a secondary Docker image tag (e.g., `ghcr.io/org/mcp-router:latest-full`) that comes pre-installed with Node.js, Python 3, `uv`, and `bun`.
+* **Description**: Publish a secondary Docker image tag (e.g., `ghcr.io/spelech/model-context-gateway:latest-full`) that comes pre-installed with Node.js, Python 3, `uv`, and `bun`.
 * **Why it matters**: The official lightweight `aspnet:10.0` Docker image lacks the toolchains needed to natively run python/node scripts via `stdio`. A "batteries-included" tag allows users to rapidly deploy and run `stdio` backend scripts natively inside the container without having to build custom images or manage sidecar network topologies.
 
 ---

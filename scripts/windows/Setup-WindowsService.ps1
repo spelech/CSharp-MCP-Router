@@ -1,25 +1,25 @@
 <#
 .SYNOPSIS
-    Windows Service Management Script for C# MCP Router Gateway.
+    Windows Service Management Script for Model Context Gateway (MCG).
 
 .DESCRIPTION
-    Automates publishing the C# MCP Router binary, registering it as a native Windows Service
+    Automates publishing the Model Context Gateway binary, registering it as a native Windows Service
     with automatic recovery triggers, and managing its lifecycle (Install, Uninstall, Start, Stop, Restart, Status).
 
 .PARAMETER Action
     Service action to perform: "Install", "Uninstall", "Start", "Stop", "Restart", "Status".
 
 .PARAMETER ServiceName
-    Name of the Windows Service in SCM. Default: "McpRouter".
+    Name of the Windows Service in SCM. Default: "ModelContextGateway".
 
 .PARAMETER DisplayName
-    Display name of the Windows Service. Default: "MCP Router Gateway Service".
+    Display name of the Windows Service. Default: "Model Context Gateway Service".
 
 .PARAMETER Description
     Description text for the Windows Service.
 
 .PARAMETER InstallDir
-    Target directory for publishing service binaries. Default: "C:\Program Files\McpRouter".
+    Target directory for publishing service binaries. Default: "C:\Program Files\ModelContextGateway".
 
 .PARAMETER Port
     Listening port for the service. Default: 8080.
@@ -31,7 +31,7 @@
     Build configuration: "Release" or "Debug". Default: "Release".
 
 .PARAMETER RepoRoot
-    Root directory of the CSharp-MCP-Router repository.
+    Root directory of the Model Context Gateway repository.
 
 .PARAMETER SkipFrontend
     If specified, skips building the frontend UI.
@@ -65,16 +65,16 @@ param(
     [string]$Action,
 
     [Parameter()]
-    [string]$ServiceName = "McpRouter",
+    [string]$ServiceName = "ModelContextGateway",
 
     [Parameter()]
-    [string]$DisplayName = "MCP Router Gateway Service",
+    [string]$DisplayName = "Model Context Gateway Service",
 
     [Parameter()]
     [string]$Description = "High-performance C# ASP.NET Core gateway router for the Model Context Protocol (MCP)",
 
     [Parameter()]
-    [string]$InstallDir = "C:\Program Files\McpRouter",
+    [string]$InstallDir = "C:\Program Files\ModelContextGateway",
 
     [Parameter()]
     [int]$Port = 8080,

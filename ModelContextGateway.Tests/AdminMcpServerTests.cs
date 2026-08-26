@@ -489,7 +489,7 @@ namespace ModelContextGateway.Tests
             // 2. Update settings
             var updateArgs = JsonDocument.Parse(@"{
                 ""action"": ""update"",
-                ""dashboardTitle"": ""Custom Router Hub"",
+                ""dashboardTitle"": ""Custom MCG Hub"",
                 ""globalMaxKeys"": 200,
                 ""userMaxKeys"": 10
             }").RootElement;
@@ -498,7 +498,7 @@ namespace ModelContextGateway.Tests
             var updateJson = JsonSerializer.Serialize(updateRes);
             using var updateDoc = JsonDocument.Parse(updateJson);
             Assert.False(updateDoc.RootElement.GetProperty("isError").GetBoolean());
-            Assert.Contains("Custom Router Hub", updateDoc.RootElement.GetProperty("content")[0].GetProperty("text").GetString());
+            Assert.Contains("Custom MCG Hub", updateDoc.RootElement.GetProperty("content")[0].GetProperty("text").GetString());
         }
 
         [Fact]
