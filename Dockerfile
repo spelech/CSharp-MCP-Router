@@ -1,5 +1,5 @@
 # Stage 1: Build the React frontend SPA
-FROM node:22-alpine AS frontend-build
+FROM node:25-alpine AS frontend-build
 WORKDIR /frontend
 COPY frontend/package*.json ./
 RUN npm ci
