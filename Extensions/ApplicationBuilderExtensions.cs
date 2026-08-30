@@ -26,8 +26,15 @@ namespace ModelContextGateway.Extensions
                     ? string.Join(", ", standaloneNetworks)
                     : (config["Admin:StandaloneAllowedNetworks"] ?? "127.0.0.1, ::1");
 
-                logger.LogInformation("Standalone Admin Mode active (no external IDP detected). Allowed administrative network CIDRs: {Networks}", networksList);
             }
+
+            var forwardedHeadersOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = Microsoft.AspNetCore.HttpOverrides.ForwardedHeaders.All
+            };
+            forwardedHeadersOptions.KnownIPNetworks.Clear();
+            forwardedHeadersOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardedHeadersOptions);
 
             app.UseCors();
 

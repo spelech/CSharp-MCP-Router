@@ -8,6 +8,7 @@ obj/
 publish/
 
 # Database files and keys
+data/mcg.db*
 data/mcp_router.db*
 data/router.db*
 data/*.key
