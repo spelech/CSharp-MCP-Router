@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-25T19:45:31.8972680Z",
+    "generatedAt": "2026-08-30T22:58:47.5064205Z",
     "totalRequirements": 133,
     "positiveCount": 110,
     "guardrailCount": 23,
-    "totalProofs": 292
+    "totalProofs": 293
   },
   "requirements": [
     {
@@ -366,29 +366,6 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 173,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "AUTH-109",
-      "category": "AUTH",
-      "type": "Positive",
-      "description": "ConsentView properly renders the client name from query string and builds correct form action.",
-      "proofCount": 2,
-      "proofs": [
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
-          "lineNumber": 16,
-          "testName": "renders client name from query string and sets form action",
-          "details": null
-        },
-        {
-          "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/oauth-consent-flow.spec.ts",
-          "lineNumber": 5,
-          "testName": "should render interactive OAuth consent screen and display requesting client name",
           "details": null
         }
       ]
@@ -2120,6 +2097,36 @@
       ]
     },
     {
+      "id": "AUTH-109",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "RegisterClient uses ICredentialService when IOpenIddictApplicationManager is null.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 88,
+          "testName": "RegisterClient_UsesCredentialService_WhenApplicationManagerNull",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
+          "lineNumber": 16,
+          "testName": "renders client name from query string and sets form action",
+          "details": null
+        },
+        {
+          "suite": "Playwright E2E",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/oauth-consent-flow.spec.ts",
+          "lineNumber": 5,
+          "testName": "should render interactive OAuth consent screen and display requesting client name",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "SEC-01",
       "category": "SEC",
       "type": "Positive",
@@ -2288,7 +2295,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
-          "lineNumber": 351,
+          "lineNumber": 352,
           "testName": "Gateway_BlankSlate_WithoutMasterKeyEnv_AutoGeneratesKeyFileAndBootsSuccessfully",
           "details": null
         }
