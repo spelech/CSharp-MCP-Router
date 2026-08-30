@@ -244,25 +244,25 @@ export const ClientSetupGuide: React.FC = () => {
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '8px',
+                gap: '10px',
                 cursor: 'pointer',
-                padding: '6px 10px',
+                padding: '8px 14px',
                 background: 'rgba(0,0,0,0.2)',
                 borderRadius: '6px',
                 border: '1px solid var(--glass-border)',
-                fontSize: '12px',
-                minHeight: '24px',
-                height: '32px'
+                fontSize: '13px',
+                minHeight: '40px'
               }}
             >
               <input
                 type="checkbox"
                 id="meta-mode-toggle"
+                aria-label="Toggle Meta-Mode Dynamic Routing"
                 checked={metaMode}
                 onChange={(e) => setMetaMode(e.target.checked)}
-                style={{ cursor: 'pointer', width: '16px', height: '16px' }}
+                style={{ cursor: 'pointer', width: '24px', height: '24px', minWidth: '24px', minHeight: '24px', accentColor: 'var(--primary)' }}
               />
-              <span>Meta-Mode (Dynamic Routing)</span>
+              <span style={{ fontWeight: 500, minHeight: '24px', display: 'inline-flex', alignItems: 'center' }}>Meta-Mode (Dynamic Routing)</span>
             </label>
           </div>
         )}
