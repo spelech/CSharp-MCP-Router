@@ -17,6 +17,7 @@ namespace ModelContextGateway.Components.Clients
         private readonly IDbConnectionFactory? _dbFactory;
         private readonly ICredentialService? _credentialService;
 
+        [ActivatorUtilitiesConstructor]
         public AuthorizationController(
             IDbConnectionFactory dbFactory,
             ICredentialService credentialService,
