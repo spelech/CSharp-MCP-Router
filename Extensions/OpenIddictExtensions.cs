@@ -91,7 +91,7 @@ namespace ModelContextGateway.Extensions
                 .AddServer(options =>
                 {
                     options.SetTokenEndpointUris("/connect/token", "/oauth/token");
-                    options.SetAuthorizationEndpointUris("/connect/authorize");
+                    options.SetAuthorizationEndpointUris("/connect/authorize", "/oauth/authorize");
                     options.AllowClientCredentialsFlow();
                     options.AllowAuthorizationCodeFlow();
                     options.AllowRefreshTokenFlow();
@@ -127,7 +127,8 @@ namespace ModelContextGateway.Extensions
 
                     options.UseAspNetCore()
                            .EnableTokenEndpointPassthrough()
-                           .EnableAuthorizationEndpointPassthrough();
+                           .EnableAuthorizationEndpointPassthrough()
+                           .DisableTransportSecurityRequirement();
                 })
                 .AddValidation(options =>
                 {

@@ -20,6 +20,7 @@ export const ServerControlsToolbar: React.FC = () => {
         <input
           type="text"
           id="server-search"
+          aria-label="Filter servers by name, url, or category"
           placeholder="Filter servers by name, url, or category..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}

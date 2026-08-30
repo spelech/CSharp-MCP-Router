@@ -55,7 +55,8 @@ export const PaginationToolbar: React.FC<PaginationToolbarProps> = ({
               className="btn btn-secondary btn-sm"
               disabled={currentEffectivePage <= 1}
               onClick={() => onPageChange(currentEffectivePage - 1)}
-              style={{ padding: '4px 8px', minWidth: '30px' }}
+              style={{ padding: '6px 10px', minWidth: '36px', minHeight: '36px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+              aria-label="Previous page"
             >
               <i className="fa-solid fa-chevron-left"></i>
             </button>
@@ -66,7 +67,8 @@ export const PaginationToolbar: React.FC<PaginationToolbarProps> = ({
               className="btn btn-secondary btn-sm"
               disabled={currentEffectivePage >= totalPages}
               onClick={() => onPageChange(currentEffectivePage + 1)}
-              style={{ padding: '4px 8px', minWidth: '30px' }}
+              style={{ padding: '6px 10px', minWidth: '36px', minHeight: '36px', display: 'inline-flex', alignItems: 'center', justifyContent: 'center' }}
+              aria-label="Next page"
             >
               <i className="fa-solid fa-chevron-right"></i>
             </button>

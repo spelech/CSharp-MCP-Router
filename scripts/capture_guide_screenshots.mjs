@@ -1,4 +1,4 @@
-import { chromium } from '@playwright/test';
+import { chromium } from '../frontend/node_modules/playwright/index.mjs';
 import path from 'path';
 import fs from 'fs';
 import { fileURLToPath } from 'url';

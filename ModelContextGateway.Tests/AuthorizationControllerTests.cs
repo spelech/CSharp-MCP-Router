@@ -84,5 +84,46 @@ namespace ModelContextGateway.Tests
 
             await Assert.ThrowsAsync<InvalidOperationException>(() => controller.Authorize());
         }
+
+        [Fact]
+        [ModelContextGateway.Tests.Attributes.Requirement("AUTH-109", "SEC", ModelContextGateway.Tests.Attributes.RequirementType.Positive, "RegisterClient uses ICredentialService when IOpenIddictApplicationManager is null.")]
+        public async Task RegisterClient_UsesCredentialService_WhenApplicationManagerNull()
+        {
+            var mockDbFactory = new Mock<ModelContextGateway.Infrastructure.Persistence.IDbConnectionFactory>();
+            var mockCredService = new Mock<ModelContextGateway.Components.Clients.ICredentialService>();
+            mockCredService.Setup(m => m.CreateCredentialAsync(
+                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<int?>(), It.IsAny<string>()))
+                .ReturnsAsync((new AppKey { Id = "key-1", Name = "GeminiClient" }, "mcg_live_secret"));
+
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
+
+            var mockLoggerFactory = new Mock<ILoggerFactory>();
+            mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+            var mockServiceProvider = new Mock<IServiceProvider>();
+
+            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), mockLoggerFactory.Object, mockServiceProvider.Object);
+            embeddingServiceMock.Setup(m => m.GetSettings()).Returns(new RouterSettings { AllowOpenClientRegistration = true });
+
+            var mockAuthService = new Mock<IAuthorizationService>();
+
+            var services = new ServiceCollection();
+            services.AddSingleton(embeddingServiceMock.Object);
+            services.AddSingleton(mockAuthService.Object);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpContext = new DefaultHttpContext { RequestServices = serviceProvider };
+
+            var controller = new AuthorizationController(mockDbFactory.Object, mockCredService.Object, mockAudit.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
+            var json = JsonDocument.Parse("{\"client_name\":\"GeminiClient\"}").RootElement;
+            var result = await controller.RegisterClient(json) as OkObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(200, result.StatusCode);
+            mockCredService.Verify(m => m.CreateCredentialAsync("GeminiClient", It.IsAny<string>(), string.Empty, It.IsAny<List<string>>(), null, "personal"), Times.Once);
+        }
     }
 }

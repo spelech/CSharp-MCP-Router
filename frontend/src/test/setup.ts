@@ -329,7 +329,7 @@ function setupDefaultRoutes() {
 export function resetAllStores() {
   useUserStore.setState({
     user: null,
-    version: '5.0.0',
+    version: '5.0.1',
     service: 'ModelContextGateway',
     isLoadingUser: false
   });

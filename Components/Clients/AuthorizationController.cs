@@ -1,5 +1,6 @@
 using System.Security.Claims;
 using System.Text.Json;
+using Dapper;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
@@ -11,13 +12,85 @@ namespace ModelContextGateway.Components.Clients
 {
     public class AuthorizationController : Controller
     {
-        private readonly IOpenIddictApplicationManager _applicationManager;
+        private readonly IOpenIddictApplicationManager? _applicationManager;
         private readonly IAuditLogger _auditLogger;
+        private readonly IDbConnectionFactory? _dbFactory;
+        private readonly ICredentialService? _credentialService;
+
+        public AuthorizationController(
+            IDbConnectionFactory dbFactory,
+            ICredentialService credentialService,
+            IAuditLogger auditLogger,
+            IOpenIddictApplicationManager? applicationManager = null)
+        {
+            _dbFactory = dbFactory;
+            _credentialService = credentialService;
+            _auditLogger = auditLogger;
+            _applicationManager = applicationManager;
+        }
 
         public AuthorizationController(IOpenIddictApplicationManager applicationManager, IAuditLogger auditLogger)
+            : this(null!, null!, auditLogger, applicationManager)
         {
-            _applicationManager = applicationManager;
-            _auditLogger = auditLogger;
+        }
+
+        private async Task<object?> FindApplicationAsync(string clientId)
+        {
+            if (_applicationManager != null)
+            {
+                return await _applicationManager.FindByClientIdAsync(clientId);
+            }
+            if (_dbFactory != null)
+            {
+                using var conn = _dbFactory.CreateConnection();
+                return await conn.QuerySingleOrDefaultAsync<AppKey>(
+                    "SELECT * FROM AppKeys WHERE Username = @Id OR KeyPrefix = @Id",
+                    new { Id = clientId });
+            }
+            return null;
+        }
+
+        private async Task<string?> GetDisplayNameAsync(object application)
+        {
+            if (_applicationManager != null)
+            {
+                return await _applicationManager.GetDisplayNameAsync(application);
+            }
+            if (application is AppKey appKey)
+            {
+                return appKey.Name;
+            }
+            return null;
+        }
+
+        private async Task<object?> CreateApplicationAsync(OpenIddictApplicationDescriptor descriptor)
+        {
+            if (_applicationManager != null)
+            {
+                return await _applicationManager.CreateAsync(descriptor);
+            }
+            if (_credentialService != null)
+            {
+                var scopes = descriptor.Permissions
+                    .Where(p => p.StartsWith(OpenIddictConstants.Permissions.Prefixes.Scope))
+                    .Select(p => p.Substring(OpenIddictConstants.Permissions.Prefixes.Scope.Length))
+                    .ToList();
+
+                if (scopes.Count == 0)
+                {
+                    scopes.Add("all");
+                }
+
+                var (appKey, plaintext) = await _credentialService.CreateCredentialAsync(
+                    descriptor.DisplayName ?? "Dynamic Client",
+                    descriptor.ClientId ?? Guid.NewGuid().ToString("N"),
+                    string.Empty,
+                    scopes,
+                    null
+                );
+                return appKey;
+            }
+            return null;
         }
 
         [HttpPost("~/connect/token")]
@@ -30,7 +103,7 @@ namespace ModelContextGateway.Components.Clients
 
             if (request.IsClientCredentialsGrantType())
             {
-                var application = await _applicationManager.FindByClientIdAsync(request.ClientId!);
+                var application = await FindApplicationAsync(request.ClientId!);
                 if (application == null)
                 {
                     return Forbid(
@@ -46,7 +119,7 @@ namespace ModelContextGateway.Components.Clients
 
                 // Subject (sub) is a required claim
                 identity.AddClaim(OpenIddictConstants.Claims.Subject, request.ClientId!);
-                identity.AddClaim(OpenIddictConstants.Claims.Name, await _applicationManager.GetDisplayNameAsync(application) ?? request.ClientId!);
+                identity.AddClaim(OpenIddictConstants.Claims.Name, await GetDisplayNameAsync(application) ?? request.ClientId!);
 
                 identity.SetDestinations(static claim => new[] { OpenIddictConstants.Destinations.AccessToken });
 
@@ -78,6 +151,8 @@ namespace ModelContextGateway.Components.Clients
 
         [HttpGet("~/connect/authorize")]
         [HttpPost("~/connect/authorize")]
+        [HttpGet("~/oauth/authorize")]
+        [HttpPost("~/oauth/authorize")]
         [IgnoreAntiforgeryToken]
         public async Task<IActionResult> Authorize()
         {
@@ -96,13 +171,13 @@ namespace ModelContextGateway.Components.Clients
                 return Content("<html><body><div style='font-family:sans-serif; text-align:center; padding-top: 50px;'><h1>Access Denied</h1><p>Please authenticate through your SSO portal or provide valid proxy headers to access this consent screen.</p></div></body></html>", "text/html");
             }
 
-            var application = await _applicationManager.FindByClientIdAsync(request.ClientId!);
+            var application = await FindApplicationAsync(request.ClientId!);
             if (application == null)
             {
                 return BadRequest(new { error = "invalid_client", error_description = "The client application was not found." });
             }
 
-            var clientName = await _applicationManager.GetDisplayNameAsync(application) ?? request.ClientId!;
+            var clientName = await GetDisplayNameAsync(application) ?? request.ClientId!;
             var username = result.Principal.Identity?.Name ?? "Unknown";
 
             // Handle Form Post (Accept/Deny)
@@ -173,7 +248,7 @@ namespace ModelContextGateway.Components.Clients
 
             try
             {
-                await _applicationManager.CreateAsync(descriptor);
+                await CreateApplicationAsync(descriptor);
 
                 var username = User?.Identity?.Name ?? "unknown";
                 await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName }), true);
