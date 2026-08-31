@@ -299,6 +299,28 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     conn.Execute("ALTER TABLE Servers ADD COLUMN DynamicAuthPrompt TEXT NULL;");
                 }
             }
+
+            // 6. OAuthClients table
+            var oauthClientsExists = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='OAuthClients';") > 0;
+            if (!oauthClientsExists)
+            {
+                logger.LogInformation("Creating SQLite OAuthClients table...");
+                conn.Execute(@"
+                    CREATE TABLE IF NOT EXISTS OAuthClients (
+                        ClientId TEXT PRIMARY KEY,
+                        ClientSecretHash TEXT DEFAULT '',
+                        ClientName TEXT NOT NULL,
+                        ClientType TEXT DEFAULT 'confidential',
+                        RedirectUrisJson TEXT DEFAULT '[]',
+                        GrantTypesJson TEXT DEFAULT '[]',
+                        ScopesJson TEXT DEFAULT '[]',
+                        OwnerSid TEXT DEFAULT '',
+                        CreatedBy TEXT DEFAULT '',
+                        ExpiresAt TEXT NULL,
+                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                    );
+                ");
+            }
         }
 
         private static void ApplyMssqlMigrations(IDbConnection conn, ILogger logger)
@@ -502,6 +524,24 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     BEGIN
                         ALTER TABLE [dbo].[AppKeys] ADD [KeyType] VARCHAR(50) NOT NULL DEFAULT 'personal';
                     END;
+                END;
+
+                -- 6. Migrate OAuthClients table
+                IF OBJECT_ID('dbo.OAuthClients', 'U') IS NULL
+                BEGIN
+                    CREATE TABLE [dbo].[OAuthClients] (
+                        [ClientId]         VARCHAR(100) PRIMARY KEY,
+                        [ClientSecretHash] VARCHAR(256) NOT NULL DEFAULT '',
+                        [ClientName]       NVARCHAR(200) NOT NULL,
+                        [ClientType]       VARCHAR(50) NOT NULL DEFAULT 'confidential',
+                        [RedirectUrisJson] NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+                        [GrantTypesJson]   NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+                        [ScopesJson]       NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+                        [OwnerSid]         NVARCHAR(200) NOT NULL DEFAULT '',
+                        [CreatedBy]        NVARCHAR(256) NOT NULL DEFAULT '',
+                        [ExpiresAt]        DATETIME2 NULL,
+                        [CreatedAt]        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+                    );
                 END;
             ");
         }
@@ -831,6 +871,30 @@ namespace ModelContextGateway.Infrastructure.Persistence
                     conn.Execute("ALTER TABLE `AppKeys` ADD COLUMN `KeyType` VARCHAR(50) NOT NULL DEFAULT 'personal';");
                 }
             }
+
+            // 6. Migrate OAuthClients table
+            var oauthClientsExists = conn.ExecuteScalar<int>(@"
+                SELECT COUNT(*) FROM information_schema.tables 
+                WHERE table_schema = DATABASE() AND table_name = 'OAuthClients';") > 0;
+
+            if (!oauthClientsExists)
+            {
+                conn.Execute(@"
+                    CREATE TABLE IF NOT EXISTS `OAuthClients` (
+                        `ClientId`         VARCHAR(100) PRIMARY KEY,
+                        `ClientSecretHash` VARCHAR(256) NOT NULL DEFAULT '',
+                        `ClientName`       VARCHAR(200) NOT NULL,
+                        `ClientType`       VARCHAR(50) NOT NULL DEFAULT 'confidential',
+                        `RedirectUrisJson` LONGTEXT NOT NULL,
+                        `GrantTypesJson`   LONGTEXT NOT NULL,
+                        `ScopesJson`       LONGTEXT NOT NULL,
+                        `OwnerSid`         VARCHAR(200) NOT NULL DEFAULT '',
+                        `CreatedBy`        VARCHAR(256) NOT NULL DEFAULT '',
+                        `ExpiresAt`        DATETIME NULL,
+                        `CreatedAt`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+                ");
+            }
         }
 
         private static void EnsureBaselineTables(IDbConnection conn, string provider)
@@ -954,6 +1018,20 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         GroupsHeader TEXT,
                         EncryptedConfigJson TEXT,
                         IsEnabled INTEGER DEFAULT 1
+                    );
+
+                    CREATE TABLE IF NOT EXISTS OAuthClients (
+                        ClientId TEXT PRIMARY KEY,
+                        ClientSecretHash TEXT DEFAULT '',
+                        ClientName TEXT NOT NULL,
+                        ClientType TEXT DEFAULT 'confidential',
+                        RedirectUrisJson TEXT DEFAULT '[]',
+                        GrantTypesJson TEXT DEFAULT '[]',
+                        ScopesJson TEXT DEFAULT '[]',
+                        OwnerSid TEXT DEFAULT '',
+                        CreatedBy TEXT DEFAULT '',
+                        ExpiresAt TEXT NULL,
+                        CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
                     );
                 ");
 
@@ -1134,6 +1212,23 @@ namespace ModelContextGateway.Infrastructure.Persistence
                             [UpdatedAt]           DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
                         );
                     END;
+
+                    IF OBJECT_ID('dbo.OAuthClients', 'U') IS NULL
+                    BEGIN
+                        CREATE TABLE [dbo].[OAuthClients] (
+                            [ClientId]         VARCHAR(100) PRIMARY KEY,
+                            [ClientSecretHash] VARCHAR(256) NOT NULL DEFAULT '',
+                            [ClientName]       NVARCHAR(200) NOT NULL,
+                            [ClientType]       VARCHAR(50) NOT NULL DEFAULT 'confidential',
+                            [RedirectUrisJson] NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+                            [GrantTypesJson]   NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+                            [ScopesJson]       NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+                            [OwnerSid]         NVARCHAR(200) NOT NULL DEFAULT '',
+                            [CreatedBy]        NVARCHAR(256) NOT NULL DEFAULT '',
+                            [ExpiresAt]        DATETIME2 NULL,
+                            [CreatedAt]        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+                        );
+                    END;
                 ");
             }
             else if (provider == "mysql")
@@ -1264,6 +1359,20 @@ namespace ModelContextGateway.Infrastructure.Persistence
                         `IsEnabled`           TINYINT(1) NOT NULL DEFAULT 1,
                         `UpdatedAt`           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
                     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+                    CREATE TABLE IF NOT EXISTS `OAuthClients` (
+                        `ClientId`         VARCHAR(100) PRIMARY KEY,
+                        `ClientSecretHash` VARCHAR(256) NOT NULL DEFAULT '',
+                        `ClientName`       VARCHAR(200) NOT NULL,
+                        `ClientType`       VARCHAR(50) NOT NULL DEFAULT 'confidential',
+                        `RedirectUrisJson` LONGTEXT NOT NULL,
+                        `GrantTypesJson`   LONGTEXT NOT NULL,
+                        `ScopesJson`       LONGTEXT NOT NULL,
+                        `OwnerSid`         VARCHAR(200) NOT NULL DEFAULT '',
+                        `CreatedBy`        VARCHAR(256) NOT NULL DEFAULT '',
+                        `ExpiresAt`        DATETIME NULL,
+                        `CreatedAt`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
                 ");
             }
         }
@@ -1322,6 +1431,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 { "Servers", "SELECT Id, DisplayName, Url, Enabled, Hidden, Type, SecretProvider, SecretItemKey, SecretMount, SecretPath, SecretField, AuthShape, CustomHeaderName, Categories, ApiKey, HeadersJson, AutoDiscovered FROM Servers WHERE 1=0" },
                 { "Settings", "SELECT Id, EmbeddingProvider, EmbeddingApiUrl, EmbeddingApiKey, EmbeddingApiModel, EmbeddingModelDir, GlobalMaxKeys, UserMaxKeys FROM Settings WHERE 1=0" },
                 { "AppKeys", "SELECT Id, Name, Username, OwnerSid, KeyType, KeyPrefix, EncryptedKey, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys WHERE 1=0" },
+                { "OAuthClients", "SELECT ClientId, ClientSecretHash, ClientName, ClientType, RedirectUrisJson, GrantTypesJson, ScopesJson, OwnerSid, CreatedBy, ExpiresAt, CreatedAt FROM OAuthClients WHERE 1=0" },
                 { "UserQuotas", "SELECT Username, MaxKeys, CreatedAt, UpdatedAt FROM UserQuotas WHERE 1=0" },
                 { "AccessPolicies", "SELECT Id, TargetId, RequiredGroup, IsAllowed FROM AccessPolicies WHERE 1=0" },
                 { "GroupMappings", "SELECT Id, ExternalId, InternalGroup FROM GroupMappings WHERE 1=0" },
@@ -1385,6 +1495,12 @@ namespace ModelContextGateway.Infrastructure.Persistence
             {
                 throw new InvalidOperationException("SQLite schema compatibility check failed: AppKeys table is missing 'KeyType' column.");
             }
+
+            var oauthCols = conn.Query<string>("SELECT name FROM pragma_table_info('OAuthClients');").ToHashSet(StringComparer.OrdinalIgnoreCase);
+            if (!oauthCols.Contains("ClientId") || !oauthCols.Contains("ClientSecretHash") || !oauthCols.Contains("ClientName"))
+            {
+                throw new InvalidOperationException("SQLite schema compatibility check failed: OAuthClients table is missing required columns.");
+            }
         }
 
         private static void ValidateMssqlSchema(IDbConnection conn, ILogger logger)
@@ -1417,7 +1533,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 }
             }
 
-            // 2. Validate all 10 stored procedures exist
+            // 2. Validate all 14 stored procedures exist
             var expectedProcedures = new[]
             {
                 "sp_EvaluateUserAccess",
@@ -1429,7 +1545,11 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 "sp_SaveAppKey",
                 "sp_DeleteAppKey",
                 "sp_GetAppKeys",
-                "sp_InsertAdminAuditLog"
+                "sp_InsertAdminAuditLog",
+                "sp_SaveOAuthClient",
+                "sp_GetOAuthClients",
+                "sp_GetOAuthClientById",
+                "sp_DeleteOAuthClient"
             };
 
             var existingProcedures = conn.Query<string>("SELECT name FROM sys.procedures;").ToHashSet(StringComparer.OrdinalIgnoreCase);
@@ -1449,6 +1569,17 @@ namespace ModelContextGateway.Infrastructure.Persistence
             if (saveAppKeyParams.Contains("@CreatedAt"))
             {
                 throw new InvalidOperationException("MSSQL schema compatibility check failed: sp_SaveAppKey should not accept @CreatedAt parameter as CreatedAt is generated via SYSUTCDATETIME().");
+            }
+
+            // 4. Validate sp_SaveOAuthClient parameters (ensure CreatedAt is NOT a parameter)
+            var saveOAuthClientParams = conn.Query<string>(@"
+                SELECT p.name 
+                FROM sys.parameters p
+                WHERE p.object_id = OBJECT_ID('dbo.sp_SaveOAuthClient');").ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (saveOAuthClientParams.Contains("@CreatedAt"))
+            {
+                throw new InvalidOperationException("MSSQL schema compatibility check failed: sp_SaveOAuthClient should not accept @CreatedAt parameter as CreatedAt is generated via SYSUTCDATETIME().");
             }
         }
 
@@ -1471,7 +1602,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 }
             }
 
-            // 2. Validate all 10 stored procedures exist
+            // 2. Validate all 14 stored procedures exist
             var expectedProcedures = new[]
             {
                 "sp_EvaluateUserAccess",
@@ -1483,7 +1614,11 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 "sp_SaveAppKey",
                 "sp_DeleteAppKey",
                 "sp_GetAppKeys",
-                "sp_InsertAdminAuditLog"
+                "sp_InsertAdminAuditLog",
+                "sp_SaveOAuthClient",
+                "sp_GetOAuthClients",
+                "sp_GetOAuthClientById",
+                "sp_DeleteOAuthClient"
             };
 
             var existingProcedures = conn.Query<string>(@"
@@ -1506,6 +1641,17 @@ namespace ModelContextGateway.Infrastructure.Persistence
             if (sampleParams.Count > 0 && sampleParams.Any(p => !p.StartsWith("p_", StringComparison.OrdinalIgnoreCase)))
             {
                 throw new InvalidOperationException("MySQL schema compatibility check failed: sp_SaveAppKey parameters must use 'p_' prefix (e.g. p_Id, p_Name, p_Username, etc.).");
+            }
+
+            // 4. Validate sp_SaveOAuthClient parameters have p_ prefix
+            var sampleOAuthParams = conn.Query<string>(@"
+                SELECT PARAMETER_NAME 
+                FROM information_schema.parameters 
+                WHERE SPECIFIC_SCHEMA = DATABASE() AND SPECIFIC_NAME = 'sp_SaveOAuthClient' AND PARAMETER_NAME IS NOT NULL;").ToList();
+
+            if (sampleOAuthParams.Count > 0 && sampleOAuthParams.Any(p => !p.StartsWith("p_", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw new InvalidOperationException("MySQL schema compatibility check failed: sp_SaveOAuthClient parameters must use 'p_' prefix (e.g. p_ClientId, p_ClientName, etc.).");
             }
         }
     }

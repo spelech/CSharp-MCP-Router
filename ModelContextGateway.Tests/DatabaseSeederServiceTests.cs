@@ -328,5 +328,40 @@ namespace ModelContextGateway.Tests
             Assert.Equal(initialRow.Id, updatedRow.Id);
             Assert.NotEqual(initialRow.EncryptedKey, updatedRow.EncryptedKey);
         }
+
+        [Fact]
+        [Requirement("DB-07", "DB", RequirementType.Positive, "Seeder initializes OAuthClients table with proper schema")]
+        public void Seeder_Initializes_OAuthClients_Table()
+        {
+            var (conn, factory) = CreateDbFactory();
+            var services = new ServiceCollection();
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "DB_ENCRYPTION_KEY", "TestSecretKey1234567890123456789012" }
+            }).Build();
+
+            services.AddSingleton<IConfiguration>(config);
+            services.AddSingleton(factory);
+            services.AddLogging();
+            var sp = services.BuildServiceProvider();
+
+            DatabaseSeederService.SeedDatabase(sp, config);
+
+            var count = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM OAuthClients;");
+            Assert.Equal(0, count);
+
+            var cols = conn.Query<string>("SELECT name FROM pragma_table_info('OAuthClients');").ToHashSet(StringComparer.OrdinalIgnoreCase);
+            Assert.Contains("ClientId", cols);
+            Assert.Contains("ClientSecretHash", cols);
+            Assert.Contains("ClientName", cols);
+            Assert.Contains("ClientType", cols);
+            Assert.Contains("RedirectUrisJson", cols);
+            Assert.Contains("GrantTypesJson", cols);
+            Assert.Contains("ScopesJson", cols);
+            Assert.Contains("OwnerSid", cols);
+            Assert.Contains("CreatedBy", cols);
+            Assert.Contains("CreatedAt", cols);
+            Assert.Contains("ExpiresAt", cols);
+        }
     }
 }

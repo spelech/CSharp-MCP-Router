@@ -332,7 +332,11 @@ namespace ModelContextGateway.Tests
                 "sp_SaveAppKey",
                 "sp_DeleteAppKey",
                 "sp_GetAppKeys",
-                "sp_InsertAdminAuditLog"
+                "sp_InsertAdminAuditLog",
+                "sp_SaveOAuthClient",
+                "sp_GetOAuthClients",
+                "sp_GetOAuthClientById",
+                "sp_DeleteOAuthClient"
             };
 
             foreach (var proc in expectedProcedures)
@@ -348,6 +352,15 @@ namespace ModelContextGateway.Tests
             Assert.Contains("@Id", paramBlock);
             Assert.Contains("@EncryptedKey", paramBlock);
             Assert.Contains("@OwnerSid", paramBlock);
+
+            // Verify sp_SaveOAuthClient does NOT declare @CreatedAt parameter
+            var saveOAuthClientMatch = Regex.Match(script, @"CREATE\s+OR\s+ALTER\s+PROCEDURE\s+\[dbo\]\.\[sp_SaveOAuthClient\](.*?)\bAS\b", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            Assert.True(saveOAuthClientMatch.Success, "sp_SaveOAuthClient definition not matched in MSSQL script");
+            var oauthParamBlock = saveOAuthClientMatch.Groups[1].Value;
+            Assert.DoesNotContain("@CreatedAt", oauthParamBlock, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("@ClientId", oauthParamBlock);
+            Assert.Contains("@ClientName", oauthParamBlock);
+            Assert.Contains("@ClientSecretHash", oauthParamBlock);
         }
 
         /// <summary>
@@ -377,7 +390,11 @@ namespace ModelContextGateway.Tests
                 "sp_SaveAppKey",
                 "sp_DeleteAppKey",
                 "sp_GetAppKeys",
-                "sp_InsertAdminAuditLog"
+                "sp_InsertAdminAuditLog",
+                "sp_SaveOAuthClient",
+                "sp_GetOAuthClients",
+                "sp_GetOAuthClientById",
+                "sp_DeleteOAuthClient"
             };
 
             foreach (var proc in expectedProcedures)
@@ -398,6 +415,291 @@ namespace ModelContextGateway.Tests
             Assert.Contains("p_OwnerSid", paramBlock);
             Assert.Contains("p_ExpiresAt", paramBlock);
             Assert.DoesNotContain("p_CreatedAt", paramBlock, StringComparison.OrdinalIgnoreCase);
+
+            // Verify MySQL sp_SaveOAuthClient uses p_ parameters
+            var saveOAuthClientMatch = Regex.Match(script, @"CREATE\s+PROCEDURE\s+`sp_SaveOAuthClient`\s*\((.*?)\)\s*BEGIN", RegexOptions.Singleline | RegexOptions.IgnoreCase);
+            Assert.True(saveOAuthClientMatch.Success, "sp_SaveOAuthClient definition not matched in MySQL script");
+            var oauthParamBlock = saveOAuthClientMatch.Groups[1].Value;
+            Assert.Contains("p_ClientId", oauthParamBlock);
+            Assert.Contains("p_ClientName", oauthParamBlock);
+            Assert.Contains("p_ClientSecretHash", oauthParamBlock);
+            Assert.Contains("p_ClientType", oauthParamBlock);
+            Assert.DoesNotContain("p_CreatedAt", oauthParamBlock, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Verifies that SQLite upgrade migration creates OAuthClients table when upgrading an existing legacy database.
+        /// </summary>
+        [Fact]
+        [Requirement("DB-07", "DB", RequirementType.Positive, "SQLite upgrade migration automatically provisions OAuthClients table on legacy database")]
+        public void Sqlite_UpgradeMigration_ProvisionsOAuthClientsTable()
+        {
+            var (conn, _) = CreateDbFactory();
+
+            // Create pre-existing database with older schema without OAuthClients
+            conn.Execute(@"
+                CREATE TABLE Settings (
+                    Id TEXT PRIMARY KEY,
+                    DashboardTitle TEXT DEFAULT 'MCP Gateway',
+                    DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired',
+                    GlobalMaxKeys INTEGER DEFAULT 100,
+                    UserMaxKeys INTEGER DEFAULT 5,
+                    UserSecretStorage TEXT DEFAULT 'Database'
+                );
+                CREATE TABLE Servers (
+                    Id TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    Url TEXT,
+                    Enabled INTEGER DEFAULT 1,
+                    Hidden INTEGER DEFAULT 0,
+                    Type TEXT DEFAULT 'sse',
+                    SecretProvider TEXT DEFAULT 'None',
+                    Categories TEXT DEFAULT '[]'
+                );
+                CREATE TABLE AppKeys (
+                    Id TEXT PRIMARY KEY,
+                    Name TEXT,
+                    Username TEXT,
+                    OwnerSid TEXT DEFAULT '',
+                    KeyType TEXT DEFAULT 'personal',
+                    KeyPrefix TEXT,
+                    EncryptedKey TEXT,
+                    ScopesJson TEXT DEFAULT '[]',
+                    ExpiresAt TEXT,
+                    CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE UserQuotas (
+                    Username TEXT PRIMARY KEY,
+                    MaxKeys INTEGER DEFAULT 5,
+                    CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                    UpdatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE AccessPolicies (
+                    Id TEXT PRIMARY KEY,
+                    TargetId TEXT,
+                    RequiredGroup TEXT,
+                    IsAllowed INTEGER DEFAULT 1
+                );
+                CREATE TABLE GroupMappings (
+                    Id TEXT PRIMARY KEY,
+                    ExternalId TEXT,
+                    InternalGroup TEXT
+                );
+                CREATE TABLE AuditLogs (
+                    RequestId TEXT PRIMARY KEY,
+                    UserPrincipalName TEXT,
+                    UserSid TEXT,
+                    ServerCodeName TEXT,
+                    ItemName TEXT,
+                    RequestMethod TEXT,
+                    ExecutionTimeMs INTEGER,
+                    StatusCode INTEGER,
+                    RequestPayload TEXT,
+                    ResponsePayload TEXT,
+                    ErrorMessage TEXT,
+                    Timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE AdminAuditLogs (
+                    Id TEXT PRIMARY KEY,
+                    Username TEXT,
+                    Action TEXT,
+                    Target TEXT,
+                    Details TEXT,
+                    Success INTEGER,
+                    ErrorMessage TEXT,
+                    Timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE SecretProviders (
+                    ProviderName TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    EncryptedConfigJson TEXT,
+                    IsEnabled INTEGER DEFAULT 1
+                );
+                CREATE TABLE AuthProviderConfigs (
+                    ProviderName TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    UserHeader TEXT,
+                    GroupsHeader TEXT,
+                    EncryptedConfigJson TEXT,
+                    IsEnabled INTEGER DEFAULT 1
+                );
+            ");
+
+            // Verify OAuthClients does not exist yet
+            var initialCheck = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='OAuthClients';");
+            Assert.Equal(0, initialCheck);
+
+            // Apply migrations and baseline
+            DatabaseSeederService.ApplyUpgradeMigrations(conn, "sqlite", NullLogger.Instance);
+            DatabaseSeederService.ValidateSchemaCompatibility(conn, "sqlite", NullLogger.Instance);
+
+            var postCheck = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='OAuthClients';");
+            Assert.Equal(1, postCheck);
+        }
+
+        /// <summary>
+        /// Verifies that MSSQL migration 004 declares OAuthClients table and procedures.
+        /// </summary>
+        [Fact]
+        [Requirement("DB-07", "DB", RequirementType.Positive, "MSSQL migration script provisions OAuthClients table and procedures")]
+        public void Mssql_Migration004_DeclaresOAuthClientsTableAndProcedures()
+        {
+            var mssqlMigrationPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "scripts", "db", "mssql", "migrations", "004_add_oauth_clients.sql");
+            if (!File.Exists(mssqlMigrationPath))
+            {
+                mssqlMigrationPath = Path.Combine(Directory.GetCurrentDirectory(), "scripts", "db", "mssql", "migrations", "004_add_oauth_clients.sql");
+            }
+            Assert.True(File.Exists(mssqlMigrationPath), $"MSSQL migration file not found at: {mssqlMigrationPath}");
+
+            var script = File.ReadAllText(mssqlMigrationPath);
+            Assert.Contains("OAuthClients", script, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sp_SaveOAuthClient", script, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sp_GetOAuthClients", script, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sp_GetOAuthClientById", script, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sp_DeleteOAuthClient", script, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Verifies that MySQL migration 004 declares OAuthClients table and procedures.
+        /// </summary>
+        [Fact]
+        [Requirement("DB-07", "DB", RequirementType.Positive, "MySQL migration script provisions OAuthClients table and procedures")]
+        public void MySql_Migration004_DeclaresOAuthClientsTableAndProcedures()
+        {
+            var mysqlMigrationPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "scripts", "db", "mysql", "migrations", "004_add_oauth_clients.sql");
+            if (!File.Exists(mysqlMigrationPath))
+            {
+                mysqlMigrationPath = Path.Combine(Directory.GetCurrentDirectory(), "scripts", "db", "mysql", "migrations", "004_add_oauth_clients.sql");
+            }
+            Assert.True(File.Exists(mysqlMigrationPath), $"MySQL migration file not found at: {mysqlMigrationPath}");
+
+            var script = File.ReadAllText(mysqlMigrationPath);
+            Assert.Contains("OAuthClients", script, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sp_SaveOAuthClient", script, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sp_GetOAuthClients", script, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sp_GetOAuthClientById", script, StringComparison.OrdinalIgnoreCase);
+            Assert.Contains("sp_DeleteOAuthClient", script, StringComparison.OrdinalIgnoreCase);
+        }
+
+        /// <summary>
+        /// Ensures database schema validation fails closed when OAuthClients table is missing.
+        /// </summary>
+        [Fact]
+        [Requirement("GUARD-04", "Database schema validation fails closed when OAuthClients table is missing", Type = RequirementType.Negative, Category = "GUARD")]
+        public void SchemaValidation_FailsClosed_WhenOAuthClientsTableMissing()
+        {
+            var (conn, _) = CreateDbFactory();
+
+            // Create all tables EXCEPT OAuthClients
+            conn.Execute(@"
+                CREATE TABLE Servers (
+                    Id TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    Url TEXT,
+                    Enabled INTEGER DEFAULT 1,
+                    Hidden INTEGER DEFAULT 0,
+                    Type TEXT DEFAULT 'sse',
+                    SecretProvider TEXT DEFAULT 'None',
+                    SecretItemKey TEXT,
+                    SecretMount TEXT,
+                    SecretPath TEXT,
+                    SecretField TEXT,
+                    AuthShape TEXT DEFAULT 'bearer',
+                    CustomHeaderName TEXT,
+                    Categories TEXT DEFAULT '[]',
+                    ApiKey TEXT,
+                    HeadersJson TEXT,
+                    AutoDiscovered INTEGER DEFAULT 0,
+                    AllowPassThroughAuth INTEGER DEFAULT 0,
+                    DynamicAuthPrompt TEXT
+                );
+                CREATE TABLE Settings (
+                    Id TEXT PRIMARY KEY,
+                    DashboardTitle TEXT DEFAULT 'MCP Gateway',
+                    DashboardIcon TEXT DEFAULT 'fa-solid fa-network-wired',
+                    EmbeddingProvider TEXT,
+                    EmbeddingApiUrl TEXT,
+                    EmbeddingApiKey TEXT,
+                    EmbeddingApiModel TEXT,
+                    EmbeddingModelDir TEXT,
+                    GlobalMaxKeys INTEGER DEFAULT 100,
+                    UserMaxKeys INTEGER DEFAULT 5,
+                    UserSecretStorage TEXT DEFAULT 'Database'
+                );
+                CREATE TABLE AppKeys (
+                    Id TEXT PRIMARY KEY,
+                    Name TEXT,
+                    Username TEXT,
+                    OwnerSid TEXT DEFAULT '',
+                    KeyType TEXT DEFAULT 'personal',
+                    KeyPrefix TEXT,
+                    EncryptedKey TEXT,
+                    ScopesJson TEXT DEFAULT '[]',
+                    ExpiresAt TEXT,
+                    CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE UserQuotas (
+                    Username TEXT PRIMARY KEY,
+                    MaxKeys INTEGER DEFAULT 5,
+                    CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP,
+                    UpdatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE AccessPolicies (
+                    Id TEXT PRIMARY KEY,
+                    TargetId TEXT,
+                    RequiredGroup TEXT,
+                    IsAllowed INTEGER DEFAULT 1
+                );
+                CREATE TABLE GroupMappings (
+                    Id TEXT PRIMARY KEY,
+                    ExternalId TEXT,
+                    InternalGroup TEXT
+                );
+                CREATE TABLE AuditLogs (
+                    RequestId TEXT PRIMARY KEY,
+                    UserPrincipalName TEXT,
+                    UserSid TEXT,
+                    ServerCodeName TEXT,
+                    ItemName TEXT,
+                    RequestMethod TEXT,
+                    ExecutionTimeMs INTEGER,
+                    StatusCode INTEGER,
+                    RequestPayload TEXT,
+                    ResponsePayload TEXT,
+                    ErrorMessage TEXT,
+                    Timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE AdminAuditLogs (
+                    Id TEXT PRIMARY KEY,
+                    Username TEXT,
+                    Action TEXT,
+                    Target TEXT,
+                    Details TEXT,
+                    Success INTEGER,
+                    ErrorMessage TEXT,
+                    Timestamp TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE SecretProviders (
+                    ProviderName TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    EncryptedConfigJson TEXT,
+                    IsEnabled INTEGER DEFAULT 1
+                );
+                CREATE TABLE AuthProviderConfigs (
+                    ProviderName TEXT PRIMARY KEY,
+                    DisplayName TEXT,
+                    UserHeader TEXT,
+                    GroupsHeader TEXT,
+                    EncryptedConfigJson TEXT,
+                    IsEnabled INTEGER DEFAULT 1
+                );
+            ");
+
+            // Calling validation should throw InvalidOperationException
+            Assert.Throws<InvalidOperationException>(() =>
+            {
+                DatabaseSeederService.ValidateSchemaCompatibility(conn, "sqlite", NullLogger.Instance);
+            });
         }
 
         /// <summary>

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T01:06:07.3698979Z",
-    "totalRequirements": 134,
-    "positiveCount": 111,
+    "generatedAt": "2026-08-31T01:34:08.3757828Z",
+    "totalRequirements": 135,
+    "positiveCount": 112,
     "guardrailCount": 23,
-    "totalProofs": 295
+    "totalProofs": 300
   },
   "requirements": [
     {
@@ -999,14 +999,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 356,
+          "lineNumber": 369,
           "testName": "MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters",
           "details": "Verifies that MySQL stored procedure scripts declare all required procedures with p_ parameter conventions."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 406,
+          "lineNumber": 708,
           "testName": "Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters",
           "details": "Verifies that Dapper repository mappings for MySQL correctly bind stored procedure p_ parameters."
         },
@@ -1015,6 +1015,43 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MySqlLiveIntegrationTests.cs",
           "lineNumber": 25,
           "testName": "MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "DB-07",
+      "category": "DB",
+      "type": "Positive",
+      "description": "SQLite upgrade migration automatically provisions OAuthClients table on legacy database",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "lineNumber": 433,
+          "testName": "Sqlite_UpgradeMigration_ProvisionsOAuthClientsTable",
+          "details": "Verifies that SQLite upgrade migration creates OAuthClients table when upgrading an existing legacy database."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "lineNumber": 543,
+          "testName": "Mssql_Migration004_DeclaresOAuthClientsTableAndProcedures",
+          "details": "Verifies that MSSQL migration 004 declares OAuthClients table and procedures."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "lineNumber": 565,
+          "testName": "MySql_Migration004_DeclaresOAuthClientsTableAndProcedures",
+          "details": "Verifies that MySQL migration 004 declares OAuthClients table and procedures."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
+          "lineNumber": 332,
+          "testName": "Seeder_Initializes_OAuthClients_Table",
           "details": null
         }
       ]
@@ -1296,7 +1333,7 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "Malformed completion payloads or unmapped backends must fail closed safely",
-      "proofCount": 4,
+      "proofCount": 5,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1325,6 +1362,13 @@
           "lineNumber": 189,
           "testName": "SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing",
           "details": "Ensures database schema validation fails closed when KeyType column or UserQuotas table is missing."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "lineNumber": 587,
+          "testName": "SchemaValidation_FailsClosed_WhenOAuthClientsTableMissing",
+          "details": "Ensures database schema validation fails closed when OAuthClients table is missing."
         }
       ]
     },
