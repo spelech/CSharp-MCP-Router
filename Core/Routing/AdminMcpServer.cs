@@ -92,7 +92,8 @@ namespace ModelContextGateway.Core.Routing
                 protocolVersion = negotiatedVersion,
                 capabilities = new
                 {
-                    tools = new { listChanged = false }
+                    tools = new { listChanged = false },
+                    extensions = new { }
                 },
                 serverInfo = new
                 {
