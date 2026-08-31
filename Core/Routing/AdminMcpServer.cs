@@ -264,7 +264,7 @@ namespace ModelContextGateway.Core.Routing
 
                     case "tools/list":
                         var tools = await ListToolsAsync();
-                        response.Result = JsonSerializer.SerializeToElement(new { tools });
+                        response.Result = JsonSerializer.SerializeToElement(CacheableResult.FormatCacheableResult(new { tools }));
                         break;
 
                     case "tools/call":

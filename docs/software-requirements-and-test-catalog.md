@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **154 Requirements Verified** across **353 Test Proofs** (123 Functional Capabilities, 31 Safety Guardrails).
+> **Catalog Statistics:** **154 Requirements Verified** across **357 Test Proofs** (123 Functional Capabilities, 31 Safety Guardrails).
 
 ---
 
@@ -14,7 +14,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **3** | 3 | 0 | 20 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 44 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **45** | 43 | 2 | 46 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **45** | 43 | 2 | 50 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **38** | 29 | 9 | 65 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **17** | 15 | 2 | 67 proofs |
@@ -302,8 +302,12 @@
 ### `[MCP-08]` Middleware parses 2026-07-28 spec headers Mcp-Method and Mcp-Name
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (1):**
+* **Verification Proofs (5):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L8) (`Middleware_Parses_2026_Spec_Headers`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L12) (`FormatCacheableResult_AppliesDefault_TtlMs_And_CacheScope`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L29`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L29) (`FormatCacheableResult_PreservesExisting_TtlMs_And_CacheScope`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L43`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L43) (`AdminMcpServer_ToolsList_Returns_TtlMs_And_CacheScope`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L90`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L90) (`ClientSession_ListAndReadMethods_FormatCacheableResults`)
 
 ### `[MCP-ADMIN-DISCOVER-HANDSHAKE]` AdminMcpServer server/discover RPC advertises supported protocol versions, capabilities, and identity.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)

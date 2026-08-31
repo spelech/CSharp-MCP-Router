@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:31:04.7942054Z",
+    "generatedAt": "2026-08-31T04:36:16.0597738Z",
     "totalRequirements": 154,
     "positiveCount": 123,
     "guardrailCount": 31,
-    "totalProofs": 353
+    "totalProofs": 357
   },
   "requirements": [
     {
@@ -1672,13 +1672,41 @@
       "category": "MCP",
       "type": "Positive",
       "description": "Middleware parses 2026-07-28 spec headers Mcp-Method and Mcp-Name",
-      "proofCount": 1,
+      "proofCount": 5,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
           "lineNumber": 8,
           "testName": "Middleware_Parses_2026_Spec_Headers",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
+          "lineNumber": 12,
+          "testName": "FormatCacheableResult_AppliesDefault_TtlMs_And_CacheScope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
+          "lineNumber": 29,
+          "testName": "FormatCacheableResult_PreservesExisting_TtlMs_And_CacheScope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
+          "lineNumber": 43,
+          "testName": "AdminMcpServer_ToolsList_Returns_TtlMs_And_CacheScope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
+          "lineNumber": 90,
+          "testName": "ClientSession_ListAndReadMethods_FormatCacheableResults",
           "details": null
         }
       ]
