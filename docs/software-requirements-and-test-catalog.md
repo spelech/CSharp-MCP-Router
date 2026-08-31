@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **147 Requirements Verified** across **344 Test Proofs** (118 Functional Capabilities, 29 Safety Guardrails).
+> **Catalog Statistics:** **147 Requirements Verified** across **351 Test Proofs** (118 Functional Capabilities, 29 Safety Guardrails).
 
 ---
 
@@ -13,11 +13,11 @@
 | **`CORE`** | CORE | **1** | 1 | 0 | 9 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **3** | 3 | 0 | 20 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 40 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **38** | 38 | 0 | 43 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 44 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **38** | 38 | 0 | 44 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **38** | 29 | 9 | 65 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **17** | 15 | 2 | 65 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **17** | 15 | 2 | 67 proofs |
 
 ---
 
@@ -302,12 +302,13 @@
 ### `[MCP-08]` AdminMcpServer returns MethodNotFound (-32601) for ping request per MCP 2026-07-28 deprecations
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (5):**
+* **Verification Proofs (6):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L9`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L9) (`AdminMcpServer_ProcessRequestAsync_Ping_ReturnsMethodNotFound`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L50`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L50) (`McpLogLevelHelper_ExtractPerRequestLogLevel_ParamsMeta`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L71`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L71) (`McpLogLevelHelper_ExtractPerRequestLogLevel_TopLevelMeta`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L89`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L89) (`McpLogLevelHelper_ExtractPerRequestLogLevel_ReturnsNull_WhenMissing`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L107`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L107) (`McpLogLevelHelper_ShouldEmitLogNotification_EvaluatesCorrectly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L8) (`Middleware_Parses_2026_Spec_Headers`)
 
 ### `[MCP-ADMIN-DISCOVER-HANDSHAKE]` AdminMcpServer server/discover RPC advertises supported protocol versions, capabilities, and identity.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -767,16 +768,18 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L63`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L63) (`renders grouped server view by category and allows collapsing`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L90`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L90) (`renders grouped server view by status and type`)
 
-### `[UI-04]` Tool selector filters available tools by selected backend server
+### `[UI-04]` Renders fallback notice and switch button for dynamic JSON schemas with no extractable properties
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (7):**
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L77`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L77) (`filters tools by selected server and handles tool change`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L106`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L106) (`filters custom tools with no namespace prefix when selectedServer is custom`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L131`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L131) (`renders dynamic fields for boolean, number, string, array, and object types`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L178`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L178) (`renders empty state when selected tool takes no arguments`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L203`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L203) (`switches to raw JSON tab and handles raw JSON editing`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L242`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L242) (`handles form submission`)
+* **Verification Proofs (9):**
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L101`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L101) (`displays fallback notice for complex non-object JSON schemas and allows switching to raw JSON tab`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L142`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L142) (`renders initial server and tool selection options`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L176`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L176) (`filters tools by selected server and handles tool change`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L205`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L205) (`filters custom tools with no namespace prefix when selectedServer is custom`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L230`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L230) (`renders dynamic fields for boolean, number, string, array, and object types`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L277`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L277) (`renders empty state when selected tool takes no arguments`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L302`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L302) (`switches to raw JSON tab and handles raw JSON editing`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L341`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L341) (`handles form submission`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L5) (`should interact with Prompt Tester and Resource Tester cards in Test Bench`)
 
 ### `[UI-05]` Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API.
@@ -804,11 +807,11 @@
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L1) (`renders stats card, server list, and client setup guide`)
 
-### `[UI-103]` Interactive tool tester renders server and tool selection dropdowns
+### `[UI-103]` Dynamic form generator renders fields extracted from JSON Schema 2020-12 keywords (allOf, anyOf, $ref)
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1) (`renders initial server and tool selection options`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1) (`renders fields from JSON Schema 2020-12 keywords (allOf, anyOf, $ref)`)
 
 ### `[UI-109]` Renders ClientSetupGuide below the user credentials card.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -914,12 +917,16 @@
 ### `[GUARD-01]` Null or empty capability targets must immediately fail closed and return unauthorized
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (9):**
+* **Verification Proofs (13):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468) (`Pairwise_NullOrEmptyTarget_FailsClosed_ReturnsFalse`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490) (`Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L220`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L220) (`AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239) (`AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L304`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L304) (`ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L38`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L38) (`Middleware_Returns_HeaderMismatchError_When_Headers_Missing_On_POST`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L77`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L77) (`Middleware_Returns_HeaderMismatchError_When_McpMethod_Mismatched`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L111`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L111) (`Middleware_Returns_HeaderMismatchError_When_McpName_Missing_For_ToolCall`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L145`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L145) (`Middleware_Returns_HeaderMismatchError_When_McpName_Mismatched`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L270`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L270) (`CreateClient_ReturnsBadRequest_WhenDisplayNameMissing`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283) (`CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300) (`CreateClient_Returns500_WhenOAuthClientRepositoryThrows`)
@@ -1248,12 +1255,12 @@
 | `UI-01` | Positive | `UI` | Dashboard shows empty filter state when no servers match search term | [`DashboardView.test.tsx:L115`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L115) | Frontend Vitest |
 | `UI-02` | Positive | `UI` | Inspect modal displays spinner loading state while querying server capabilities | [`ServerInspectModal.test.tsx:L61`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L61) | Frontend Vitest |
 | `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L63`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L63) | Frontend Vitest |
-| `UI-04` | Positive | `UI` | Tool selector filters available tools by selected backend server | [`ToolTesterCard.test.tsx:L77`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L77) | Frontend Vitest |
+| `UI-04` | Positive | `UI` | Renders fallback notice and switch button for dynamic JSON schemas with no extractable properties | [`ToolTesterCard.test.tsx:L101`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L101) | Frontend Vitest |
 | `UI-05` | Positive | `UI` | Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API. | [`PipelineIntegrationTests.cs:L242`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L242) | Backend xUnit |
 | `UI-06` | Positive | `UI` | Router supports uploading and retrieving custom branding logo images via dedicated endpoints. | [`PipelineIntegrationTests.cs:L420`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L420) | Backend xUnit |
 | `UI-07` | Positive | `UI` | Audits desktop viewport layout for zero horizontal overflow and high UX score. | [`layout-inspector.spec.ts:L38`](file:////containers/dev/csharp-mcp-router/frontend/e2e/layout-inspector.spec.ts#L38) | Playwright E2E |
 | `UI-102` | Positive | `UI` | Dashboard renders stats card, connected server list, and setup instructions | [`DashboardView.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L1) | Frontend Vitest |
-| `UI-103` | Positive | `UI` | Interactive tool tester renders server and tool selection dropdowns | [`ToolTesterCard.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1) | Frontend Vitest |
+| `UI-103` | Positive | `UI` | Dynamic form generator renders fields extracted from JSON Schema 2020-12 keywords (allOf, anyOf, $ref) | [`ToolTesterCard.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1) | Frontend Vitest |
 | `UI-109` | Positive | `UI` | Renders ClientSetupGuide below the user credentials card. | [`MyMcpServers.test.tsx:L102`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx#L102) | Frontend Vitest |
 | `UI-116` | Positive | `UI` | Modal remains hidden when isInspectOpen is false | [`ServerInspectModal.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L1) | Frontend Vitest |
 | `UI-124` | Positive | `UI` | Renders main dashboard navigation tabs and layout headers | [`dashboard.spec.ts:L1`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L1) | Playwright E2E |
