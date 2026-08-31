@@ -157,4 +157,80 @@ namespace ModelContextGateway.Core.Protocol
         [JsonPropertyName("version")]
         public string Version { get; set; } = GatewayMetadata.Version;
     }
+
+    /// <summary>
+    /// MCP 2026-07-28 Spec: Interface for Cacheable Results returned by list and read endpoints containing ttlMs and cacheScope.
+    /// </summary>
+    public interface ICacheableResult
+    {
+        [JsonPropertyName("ttlMs")]
+        long TtlMs { get; set; }
+
+        [JsonPropertyName("cacheScope")]
+        string CacheScope { get; set; }
+    }
+
+    /// <summary>
+    /// MCP 2026-07-28 Spec: CacheableResult model for list and read responses.
+    /// </summary>
+    public class CacheableResult : ICacheableResult
+    {
+        [JsonPropertyName("ttlMs")]
+        public long TtlMs { get; set; } = 300000L;
+
+        [JsonPropertyName("cacheScope")]
+        public string CacheScope { get; set; } = "session";
+
+        public static object FormatCacheableResult(object? result, long defaultTtlMs = 300000L, string defaultCacheScope = "session")
+        {
+            if (result == null)
+            {
+                return new Dictionary<string, object?>
+                {
+                    ["ttlMs"] = defaultTtlMs,
+                    ["cacheScope"] = defaultCacheScope
+                };
+            }
+
+            if (result is JsonElement element)
+            {
+                if (element.ValueKind == JsonValueKind.Object)
+                {
+                    var dict = JsonSerializer.Deserialize<Dictionary<string, object?>>(element.GetRawText()) ?? new Dictionary<string, object?>();
+                    if (!dict.ContainsKey("ttlMs"))
+                    {
+                        dict["ttlMs"] = defaultTtlMs;
+                    }
+                    if (!dict.ContainsKey("cacheScope"))
+                    {
+                        dict["cacheScope"] = defaultCacheScope;
+                    }
+                    return dict;
+                }
+            }
+
+            var jsonText = JsonSerializer.Serialize(result);
+            using var doc = JsonDocument.Parse(jsonText);
+            if (doc.RootElement.ValueKind == JsonValueKind.Object)
+            {
+                var dict = JsonSerializer.Deserialize<Dictionary<string, object?>>(jsonText) ?? new Dictionary<string, object?>();
+                if (!dict.ContainsKey("ttlMs"))
+                {
+                    dict["ttlMs"] = defaultTtlMs;
+                }
+                if (!dict.ContainsKey("cacheScope"))
+                {
+                    dict["cacheScope"] = defaultCacheScope;
+                }
+                return dict;
+            }
+
+            return new
+            {
+                value = result,
+                ttlMs = defaultTtlMs,
+                cacheScope = defaultCacheScope
+            };
+        }
+    }
 }

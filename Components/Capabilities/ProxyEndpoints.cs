@@ -131,7 +131,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new { tools }
+                                result = CacheableResult.FormatCacheableResult(new { tools })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -166,7 +166,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new { resources }
+                                result = CacheableResult.FormatCacheableResult(new { resources })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -179,7 +179,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new { templates }
+                                result = CacheableResult.FormatCacheableResult(new { templates })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -193,11 +193,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var uri = uriProp.GetString() ?? string.Empty;
                                 var res = await activeSession.ReadResourceAsync(uri, requestBody, httpContext);
+                                var innerResult = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                    result = CacheableResult.FormatCacheableResult(innerResult)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -213,7 +214,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new { prompts }
+                                result = CacheableResult.FormatCacheableResult(new { prompts })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -886,7 +887,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new { tools }
+                            result = CacheableResult.FormatCacheableResult(new { tools })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -917,7 +918,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new { resources }
+                            result = CacheableResult.FormatCacheableResult(new { resources })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -928,11 +929,12 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             var uri = uriProp.GetString() ?? string.Empty;
                             var res = await session.ReadResourceAsync(uri, body, httpContext);
+                            var innerResult = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                result = CacheableResult.FormatCacheableResult(innerResult)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -946,7 +948,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new { templates }
+                            result = CacheableResult.FormatCacheableResult(new { templates })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -989,7 +991,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new { prompts }
+                            result = CacheableResult.FormatCacheableResult(new { prompts })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
