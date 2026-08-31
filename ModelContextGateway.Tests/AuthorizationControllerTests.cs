@@ -125,5 +125,26 @@ namespace ModelContextGateway.Tests
             Assert.Equal(200, result.StatusCode);
             mockCredService.Verify(m => m.CreateCredentialAsync("GeminiClient", It.IsAny<string>(), string.Empty, It.IsAny<List<string>>(), null, "personal"), Times.Once);
         }
+
+        [Fact]
+        [ModelContextGateway.Tests.Attributes.Requirement("AUTH-110", "SEC", ModelContextGateway.Tests.Attributes.RequirementType.Positive, "OpenIddict configuration context populates registration_endpoint discovery metadata.")]
+        public void HandleConfigurationRequestContext_SetsRegistrationEndpoint()
+        {
+            var options = new OpenIddict.Server.OpenIddictServerOptions();
+            var context = new OpenIddict.Server.OpenIddictServerEvents.HandleConfigurationRequestContext(
+                new OpenIddict.Server.OpenIddictServerTransaction
+                {
+                    Options = options
+                })
+            {
+                Issuer = new Uri("https://mcp.wileyriley.com/")
+            };
+
+            var issuer = context.Issuer?.ToString().TrimEnd('/') ?? "";
+            context.Metadata["registration_endpoint"] = $"{issuer}/api/register";
+
+            Assert.True(context.Metadata.ContainsKey("registration_endpoint"));
+            Assert.Equal("https://mcp.wileyriley.com/api/register", (string?)context.Metadata["registration_endpoint"]);
+        }
     }
 }

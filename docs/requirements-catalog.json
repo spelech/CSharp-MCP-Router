@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-30T23:46:31.0614971Z",
+    "generatedAt": "2026-08-31T00:00:22.2184665Z",
     "totalRequirements": 133,
     "positiveCount": 110,
     "guardrailCount": 23,
-    "totalProofs": 293
+    "totalProofs": 294
   },
   "requirements": [
     {
@@ -375,13 +375,20 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0.",
-      "proofCount": 1,
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs",
           "lineNumber": 339,
           "testName": "CreateAppKey_AllowsUnlimited_WhenLimitsAreZero",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 129,
+          "testName": "HandleConfigurationRequestContext_SetsRegistrationEndpoint",
           "details": null
         }
       ]

@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.0.3`** | 2026-08-30 | feat(oauth): advertise `registration_endpoint` in OAuth 2.0 / OpenID Connect discovery metadata (`HandleConfigurationRequestContext`) enabling Google Gemini automatic client registration, and map standard DCR route aliases (`/api/register`, `/connect/register`, `/oauth/register`, `/register`) |
 | **`v5.0.2`** | 2026-08-30 | fix(di): add `[ActivatorUtilitiesConstructor]` attribute to `AuthorizationController` ensuring explicit DI constructor resolution under ASP.NET Core ActivatorUtilities, eliminating multiple constructor activation exceptions during Dynamic Client Registration (`/api/register`) |
 | **`v5.0.1`** | 2026-08-30 | fix(auth): resolve OAuth 2.0 / 2.1 discovery and Dynamic Client Registration (RFC 7591) for Google Gemini and external reverse proxies by enabling `DisableTransportSecurityRequirement()`, registering `/oauth/authorize` routes, wiring `UseForwardedHeaders`, and supporting SQLite `AppKeys` backing store in `AuthorizationController` |
 | **`v5.0.0`** | 2026-08-25 | feat(rebrand): major project rebrand to Model Context Gateway (MCG), binary/assembly renamed to `mcg`/`mcg.dll`, clean cutover to `MCG_*` environment variables and configuration keys (removed legacy `ROUTER_*` fallbacks), updated endpoints (`/admin`, `/mcg-admin`), AgentSkills.io skills (`mcg-admin`, `mcg-setup`), and documentation portal (`https://spelech.github.io/model-context-gateway/`) |

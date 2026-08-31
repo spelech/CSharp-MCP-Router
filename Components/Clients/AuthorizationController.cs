@@ -210,6 +210,9 @@ namespace ModelContextGateway.Components.Clients
 
 
         [HttpPost("~/api/register")]
+        [HttpPost("~/connect/register")]
+        [HttpPost("~/oauth/register")]
+        [HttpPost("~/register")]
         [Produces("application/json")]
         public async Task<IActionResult> RegisterClient([FromBody] JsonElement metadata)
         {

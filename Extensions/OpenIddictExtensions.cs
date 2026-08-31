@@ -129,6 +129,17 @@ namespace ModelContextGateway.Extensions
                            .EnableTokenEndpointPassthrough()
                            .EnableAuthorizationEndpointPassthrough()
                            .DisableTransportSecurityRequirement();
+
+                    options.AddEventHandler<OpenIddict.Server.OpenIddictServerEvents.HandleConfigurationRequestContext>(builder =>
+                        builder.UseInlineHandler(context =>
+                        {
+                            var issuer = context.Issuer?.ToString().TrimEnd('/') ?? "";
+                            if (!string.IsNullOrEmpty(issuer))
+                            {
+                                context.Metadata["registration_endpoint"] = $"{issuer}/api/register";
+                            }
+                            return default;
+                        }));
                 })
                 .AddValidation(options =>
                 {
