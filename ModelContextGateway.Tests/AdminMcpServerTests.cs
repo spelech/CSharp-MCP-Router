@@ -193,6 +193,38 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-ADMIN-DISCOVER-HANDSHAKE", "MCP", RequirementType.Positive, "AdminMcpServer server/discover RPC advertises supported protocol versions, capabilities, and identity.")]
+        public async Task ProcessRequestAsync_ServerDiscover_ReturnsCapabilitiesAndVersions()
+        {
+            var request = new JsonRpcRequest
+            {
+                Id = 123,
+                Method = "server/discover"
+            };
+
+            var response = await _adminMcpServer.ProcessRequestAsync(request);
+            Assert.NotNull(response);
+            Assert.Null(response.Error);
+            Assert.NotNull(response.Result);
+
+            var json = JsonSerializer.Serialize(response.Result);
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            Assert.True(root.TryGetProperty("supportedVersions", out var versionsProp));
+            Assert.Equal(JsonValueKind.Array, versionsProp.ValueKind);
+            var versions = versionsProp.EnumerateArray().Select(v => v.GetString()).ToList();
+            Assert.Contains("2026-07-28", versions);
+            Assert.Contains("2024-11-05", versions);
+
+            Assert.True(root.TryGetProperty("capabilities", out var capsProp));
+            Assert.True(capsProp.TryGetProperty("tools", out _));
+
+            Assert.True(root.TryGetProperty("serverInfo", out var infoProp));
+            Assert.Equal("Model-Context-Gateway-Admin", infoProp.GetProperty("name").GetString());
+        }
+
+        [Fact]
         [Requirement("MCP-ADMIN-INITIALIZE-HANDSHAKE", "MCP", RequirementType.Positive, "AdminMcpServer initialize handles protocol negotiation for 2026-07-28 and 2024-11-05.")]
         public async Task HandleInitializeAsync_NegotiatesProtocolVersion()
         {
