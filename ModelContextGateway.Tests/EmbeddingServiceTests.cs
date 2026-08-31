@@ -59,6 +59,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "ApiEmbeddingService parses OpenAI-compatible vector responses and extracts float embeddings.")]
         public async Task ApiEmbeddingService_GetEmbeddingAsync_Returns_Vector_From_OpenAI_Response()
         {
             var (conn, dbFactory, settings) = CreateDbFactory();
@@ -80,6 +81,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "ApiEmbeddingService fails closed and throws HttpRequestException on downstream embedding provider HTTP errors.")]
         public async Task ApiEmbeddingService_GetEmbeddingAsync_Throws_On_Http_Error()
         {
             var (conn, dbFactory, settings) = CreateDbFactory();

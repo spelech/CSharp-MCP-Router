@@ -82,6 +82,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "RBAC defaults to deny when no matching access policies are configured.")]
         public async Task RBAC_DefaultsToDenied_WhenNoPoliciesConfigured()
         {
             var session = CreateSession("bob", new List<string> { "Users" });
@@ -91,6 +92,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "RBAC grants access when user claims match the required policy security group.")]
         public async Task RBAC_AllowsUser_WhenPolicyMatchesRequiredGroup()
         {
             SeedPolicy("p1", "tool:ha__turn_on", "SmartHomeAdmins", true);
@@ -102,6 +104,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "RBAC denies access when user does not possess the required security group.")]
         public async Task RBAC_RejectsUser_WhenPolicyRequiresDifferentGroup()
         {
             SeedPolicy("p1", "tool:ha__turn_on", "SmartHomeAdmins", true);
@@ -113,6 +116,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "RBAC enforces explicit policy denials to reject unauthorized callers.")]
         public async Task RBAC_RejectsUser_OnExplicitDeny()
         {
             SeedPolicy("p1", "tool:ha__turn_on", "Users", false);
@@ -124,6 +128,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "CallToolAsync returns a formatted security error when user is unauthorized.")]
         public async Task CallToolAsync_ReturnsError_WhenUnauthorized()
         {
             SeedPolicy("p1", "tool:ha__turn_on", "SmartHomeAdmins", true);
@@ -138,6 +143,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "GetPromptAsync throws UnauthorizedAccessException when user lacks permissions for target prompt.")]
         public async Task GetPromptAsync_ThrowsUnauthorized_WhenUnauthorized()
         {
             SeedPolicy("p1", "prompt:secure_prompt", "Admins", true);
@@ -151,6 +157,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ReadResourceAsync throws UnauthorizedAccessException when user lacks permissions for target resource.")]
         public async Task ReadResourceAsync_ThrowsUnauthorized_WhenUnauthorized()
         {
             SeedPolicy("p1", "resource:router://status", "Admins", true);
@@ -164,6 +171,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "RBAC defaults to denied fail-closed when database or connection exceptions occur.")]
         public async Task RBAC_DefaultsToDenied_WhenDbExceptionThrown()
         {
             var context = new DefaultHttpContext();
@@ -190,6 +198,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "tools/list filters exposed backend tools according to caller role and RBAC policy permissions.")]
         public async Task ToolsList_FiltersByAuthorization()
         {
             var context = new DefaultHttpContext();

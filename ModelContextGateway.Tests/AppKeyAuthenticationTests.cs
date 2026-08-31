@@ -70,6 +70,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Positive, "SymmetricEncryptionHelper encrypts and decrypts secret strings using AES-256.")]
         public void SymmetricEncryptionHelper_EncryptsAndDecryptsCorrectly()
         {
             var original = "mcp-global-securekeypartabc123";
@@ -83,6 +84,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "AppKeys supports prefix-based indexing and fast database lookup.")]
         public async Task AppKeys_PrefixLookup_WorksCorrectly()
         {
             var keyString = "mcp-global-randomstring123456789";
@@ -118,6 +120,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "AppKeys validates expiration timestamps and flags expired API keys.")]
         public async Task AppKeys_KeyExpiration_CheckedCorrectly()
         {
             var expiredKey = new AppKey
@@ -146,6 +149,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "Enforces user and global AppKey quota limits from router settings.")]
         public async Task AppKeys_Limits_CheckWorks()
         {
             // Seed 5 keys for Alice (which is the UserMaxKeys limit)
@@ -183,6 +187,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "AppKeys verifies SHA-256 hashed API keys using constant-time cryptographic equality.")]
         public void AppKeys_Sha256Hashing_VerificationWorks()
         {
             var keyString = "mcp-global-randomstring123456789";
@@ -209,6 +214,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "AuditLogger throws InvalidOperationException when audit log database connection fails.")]
         public async Task AuditLogger_ThrowsException_OnDatabaseError()
         {
             var brokenFactoryMock = new Mock<IDbConnectionFactory>();
@@ -232,6 +238,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "CallTool fails closed and denies execution with SecurityException when audit logging fails under FailClosed policy.")]
         public async Task CallTool_FailsClosed_WhenAuditLogFails()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {
@@ -270,6 +277,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "CallTool fails closed and denies execution with SecurityException when AuditLogger dependency is unresolved under FailClosed policy.")]
         public async Task CallTool_FailsClosed_WhenAuditLoggerUnresolved()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> {

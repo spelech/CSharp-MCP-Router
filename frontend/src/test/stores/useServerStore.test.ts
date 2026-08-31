@@ -21,6 +21,12 @@ describe('useServerStore', () => {
     allowPassThroughAuth: false
   };
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description initializes with default state
+   */
   it('initializes with default state', () => {
     const state = useServerStore.getState();
     expect(state.servers).toEqual([]);
@@ -37,6 +43,12 @@ describe('useServerStore', () => {
   });
 
   describe('fetchServers', () => {
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description successfully loads servers and updates state
+     */
     it('successfully loads servers and updates state', async () => {
       mockApiResponse('/api/servers', [sampleServer]);
 
@@ -50,6 +62,12 @@ describe('useServerStore', () => {
       expect(useServerStore.getState().servers[0].id).toBe('docker-mcp');
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description triggers batch reconnect when refreshAll is true
+     */
     it('triggers batch reconnect when refreshAll is true', async () => {
       let reconnectCalled = false;
       mockApiResponse('/api/servers/reconnect-all', () => {
@@ -64,6 +82,12 @@ describe('useServerStore', () => {
       expect(useServerStore.getState().servers).toHaveLength(1);
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description handles server fetch errors gracefully and shows error toast
+     */
     it('handles server fetch errors gracefully and shows error toast', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/servers', 'Internal Server Error', 500, 'Internal Server Error');
@@ -78,6 +102,12 @@ describe('useServerStore', () => {
   });
 
   describe('saveServer', () => {
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description creates a new server via POST when no id is present
+     */
     it('creates a new server via POST when no id is present', async () => {
       let postPayload: any = null;
       mockApiResponse('/api/servers', (_url, options) => {
@@ -109,6 +139,12 @@ describe('useServerStore', () => {
       expect(toasts.some((t) => t.message.includes('added successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description updates an existing server via PUT when id is present
+     */
     it('updates an existing server via PUT when id is present', async () => {
       let putPayload: any = null;
       let targetUrl = '';
@@ -137,6 +173,12 @@ describe('useServerStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('updated successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description shows error toast when save fails
+     */
     it('shows error toast when save fails', async () => {
       mockApiResponse('/api/servers', 'Failed to save', 500, 'Server Error');
 
@@ -149,6 +191,12 @@ describe('useServerStore', () => {
   });
 
   describe('toggleServerEnabled', () => {
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description sends PUT request to update server enabled state and refreshes
+     */
     it('sends PUT request to update server enabled state and refreshes', async () => {
       let toggleBody: any = null;
       mockApiResponse(/\/api\/servers\/docker-mcp/, (_url, options) => {
@@ -165,6 +213,12 @@ describe('useServerStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('disabled successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description handles toggle failure with error toast
+     */
     it('handles toggle failure with error toast', async () => {
       mockApiResponse(/\/api\/servers\/docker-mcp/, 'Error', 500, 'Error');
 
@@ -175,6 +229,12 @@ describe('useServerStore', () => {
   });
 
   describe('reconnectServer', () => {
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description sends reconnect POST request and shows info toast
+     */
     it('sends reconnect POST request and shows info toast', async () => {
       useServerStore.setState({ servers: [sampleServer] });
       let reconnectCalled = false;
@@ -189,6 +249,12 @@ describe('useServerStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.type === 'info')).toBe(true);
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description handles reconnect failure with error toast
+     */
     it('handles reconnect failure with error toast', async () => {
       useServerStore.setState({ servers: [sampleServer] });
       mockApiResponse('/api/servers/docker-mcp/reconnect', 'Reconnect failed', 500);
@@ -256,6 +322,12 @@ describe('useServerStore', () => {
   });
 
   describe('UI state mutations', () => {
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description updates search query and resets page to 1
+     */
     it('updates search query and resets page to 1', () => {
       useServerStore.setState({ currentPage: 3 });
       useServerStore.getState().setSearchQuery('notes');
@@ -263,6 +335,12 @@ describe('useServerStore', () => {
       expect(useServerStore.getState().currentPage).toBe(1);
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description updates sortBy and groupBy
+     */
     it('updates sortBy and groupBy', () => {
       useServerStore.getState().setSortBy('name-asc');
       expect(useServerStore.getState().sortBy).toBe('name-asc');
@@ -271,6 +349,12 @@ describe('useServerStore', () => {
       expect(useServerStore.getState().groupBy).toBe('category');
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description updates page and pageSize
+     */
     it('updates page and pageSize', () => {
       useServerStore.getState().setCurrentPage(2);
       expect(useServerStore.getState().currentPage).toBe(2);
@@ -280,6 +364,12 @@ describe('useServerStore', () => {
       expect(useServerStore.getState().currentPage).toBe(1);
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description toggles group collapse state
+     */
     it('toggles group collapse state', () => {
       useServerStore.getState().toggleGroupCollapse('group-media');
       expect(useServerStore.getState().collapsedGroups).toContain('group-media');
@@ -288,6 +378,12 @@ describe('useServerStore', () => {
       expect(useServerStore.getState().collapsedGroups).not.toContain('group-media');
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description manages modal open/close actions
+     */
     it('manages modal open/close actions', () => {
       useServerStore.getState().openAddModal();
       expect(useServerStore.getState().isAddEditOpen).toBe(true);
@@ -304,6 +400,12 @@ describe('useServerStore', () => {
   });
 
   describe('Inspect Modal', () => {
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description opens inspect modal and loads server inspection data
+     */
     it('opens inspect modal and loads server inspection data', async () => {
       const inspectData = {
         tools: [{ name: 'docker__list', description: 'List docker containers' }],
@@ -323,6 +425,12 @@ describe('useServerStore', () => {
       expect(state.inspectData.prompts).toHaveLength(1);
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description handles inspect failure with error toast
+     */
     it('handles inspect failure with error toast', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/servers/docker-mcp/inspect', 'Inspect error', 500);
@@ -334,6 +442,12 @@ describe('useServerStore', () => {
       consoleSpy.mockRestore();
     });
 
+    /**
+     * @requirement MCP-01
+     * @category MCP
+     * @type Positive
+     * @description sets inspect active tab and search query
+     */
     it('sets inspect active tab and search query', () => {
       useServerStore.getState().setInspectActiveTab('resources');
       expect(useServerStore.getState().inspectActiveTab).toBe('resources');

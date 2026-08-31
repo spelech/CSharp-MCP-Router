@@ -91,6 +91,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "GroupMappings resolves external Windows SIDs to internal security groups to satisfy access policies.")]
         public async Task GroupMapping_AllowsUser_WhenMappingResolvesToAllowedInternalGroup()
         {
             // Seed a policy requiring the internal group "database_users"
@@ -108,6 +109,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "GroupMappings resolves external OIDC claim groups to internal security groups.")]
         public async Task GroupMapping_AllowsUser_WhenOidcGroupMapsToAllowedInternalGroup()
         {
             SeedPolicy("pol-2", "tool:ha__write", "smarthome_writers", true);
@@ -121,6 +123,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Fails closed and denies access when no valid group mapping exists for a restricted target.")]
         public async Task GroupMapping_RejectsUser_WhenNoMappingExistsForRestrictedTarget()
         {
             SeedPolicy("pol-3", "tool:ha__write", "smarthome_writers", true);

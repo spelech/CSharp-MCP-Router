@@ -18,6 +18,12 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
     internalGroup: 'Administrators'
   };
 
+  /**
+   * @requirement AUTH-01
+   * @category AUTH
+   * @type Positive
+   * @description initializes with empty policies and mappings
+   */
   it('initializes with empty policies and mappings', () => {
     const state = useSettingsStore.getState();
     expect(state.policies).toEqual([]);
@@ -29,6 +35,12 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
   });
 
   describe('policies management', () => {
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description fetches access policies and updates store
+     */
     it('fetches access policies and updates store', async () => {
       mockApiResponse('/api/permissions/policies', [samplePolicy]);
 
@@ -38,6 +50,12 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useSettingsStore.getState().policies[0].targetId).toBe('server:ha');
     });
 
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description creates/saves a policy (ALLOW rule) and closes modal
+     */
     it('creates/saves a policy (ALLOW rule) and closes modal', async () => {
       let postBody: any = null;
       mockApiResponse('/api/permissions/policies', (_url, options) => {
@@ -65,6 +83,12 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('Policy saved successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement GUARD-01
+     * @category GUARD
+     * @type Negative
+     * @description handles policy save failure with error toast
+     */
     it('handles policy save failure with error toast', async () => {
       mockApiResponse('/api/permissions/policies', 'Save policy failed', 500);
 
@@ -129,6 +153,12 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
   });
 
   describe('mappings management', () => {
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description fetches group mappings and updates store
+     */
     it('fetches group mappings and updates store', async () => {
       mockApiResponse('/api/permissions/mappings', [sampleMapping]);
 
@@ -138,6 +168,12 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useSettingsStore.getState().mappings[0].internalGroup).toBe('Administrators');
     });
 
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description saves a group mapping and closes mapping modal
+     */
     it('saves a group mapping and closes mapping modal', async () => {
       let postBody: any = null;
       mockApiResponse('/api/permissions/mappings', (_url, options) => {
@@ -275,6 +311,12 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
   });
 
   describe('modals state', () => {
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description handles policy modal open and close
+     */
     it('handles policy modal open and close', () => {
       useSettingsStore.getState().openPolicyModal(samplePolicy);
       expect(useSettingsStore.getState().isPolicyModalOpen).toBe(true);
@@ -285,6 +327,12 @@ describe('usePolicyStore (useSettingsStore policy & mapping actions)', () => {
       expect(useSettingsStore.getState().editingPolicy).toBeNull();
     });
 
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description handles mapping modal open and close
+     */
     it('handles mapping modal open and close', () => {
       useSettingsStore.getState().openMappingModal(sampleMapping);
       expect(useSettingsStore.getState().isMappingModalOpen).toBe(true);

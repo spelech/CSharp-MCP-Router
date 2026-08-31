@@ -6,6 +6,7 @@ namespace ModelContextGateway.Tests
     public class DatabaseEncryptionTests
     {
         [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Positive, "SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY.")]
         public void SqliteDatabase_IsEncrypted_WithSQLCipher()
         {
             var tempDbFile = Path.Combine(Path.GetTempPath(), $"mcp_test_{Guid.NewGuid():N}.db");

@@ -18,11 +18,23 @@ describe('ConfirmModal', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders nothing when closed
+   */
   it('renders nothing when closed', () => {
     const { container } = render(<ConfirmModal />);
     expect(container.firstChild).toBeNull();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders title, message, and action buttons when open
+   */
   it('renders title, message, and action buttons when open', () => {
     useConfirmStore.setState({
       isOpen: true,
@@ -43,6 +55,12 @@ describe('ConfirmModal', () => {
     expect(screen.getByRole('button', { name: 'Keep Key' })).toBeInTheDocument();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description calls handleConfirm when confirm button clicked
+   */
   it('calls handleConfirm when confirm button clicked', () => {
     let resolvedValue: boolean | null = null;
     useConfirmStore.setState({
@@ -61,6 +79,12 @@ describe('ConfirmModal', () => {
     expect(useConfirmStore.getState().isOpen).toBe(false);
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description calls handleCancel when cancel button clicked
+   */
   it('calls handleCancel when cancel button clicked', () => {
     let resolvedValue: boolean | null = null;
     useConfirmStore.setState({

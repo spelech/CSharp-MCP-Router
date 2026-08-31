@@ -18,6 +18,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Positive, "CORS default fallback allows localhost origins in Development environment without wildcard permissions.")]
         public void Cors_DefaultFallback_Allows_LocalhostOrigins()
         {
             // Arrange
@@ -47,6 +48,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "CORS policy fails closed in Production and denies localhost origins by default.")]
         public void Cors_DefaultFallback_Denies_In_Production()
         {
             // Arrange
@@ -88,6 +90,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Positive, "CORS restricts access strictly to configured CORS_ALLOWED_ORIGINS list.")]
         public void Cors_WithConfiguredOrigins_RestrictsToConfigured()
         {
             // Arrange
@@ -116,6 +119,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Positive, "CORS policy falls back to AllowedOrigins configuration key when CORS_ALLOWED_ORIGINS is unset.")]
         public void Cors_WithAllowedOriginsKeyFallback_RestrictsToConfigured()
         {
             // Arrange

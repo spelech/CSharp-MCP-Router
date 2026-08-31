@@ -189,6 +189,7 @@ namespace ModelContextGateway.Tests
     public class ChallengerTests
     {
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "RewriteRequestJson accurately parses JSON batches, comments, and trailing commas using System.Text.Json JsonNode.")]
         public void JsonNode_Rewrite_HandlesBatchCommentsAndCommas()
         {
             var loggerMock = new Mock<ILogger>();
@@ -213,6 +214,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "Auth middleware enforces case-insensitive route matching preventing path bypass.")]
         public async Task AuthMiddleware_CaseInsensitivity_Bypass_Check()
         {
             // Simulate the middleware routing check from Program.cs:
@@ -272,6 +274,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "SendRequestAsync times out cleanly and removes pending completion handlers without leaking memory.")]
         public async Task SendRequestAsync_TimesOutCleanly_AndDoesNotLeak()
         {
             // Verify that SendRequestAsync times out cleanly (throws TimeoutException)
@@ -331,6 +334,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "JsonRpcMessageConverter prioritizes result/error properties over method property in polymorphic response parsing.")]
         public async Task SendRequestAsync_Succeeds_When_Response_Has_Method_Property()
         {
             // Verify that SendRequestAsync succeeds (does not hang) if the response contains a 'method' property,
@@ -413,6 +417,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-01", "TRANS", RequirementType.Positive, "SSE backend notifications are forwarded to client sessions with all payload fields intact.")]
         public async Task SseBackend_Notification_IsForwardedToClient_WithAllFieldsIntact()
         {
             // Arrange
@@ -487,6 +492,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "BackendConnection multiplexes 100+ concurrent asynchronous polymorphic RPC requests without deadlocking.")]
         public async Task AsynchronousRouting_HighVolumeAndPolymorphic_DoesNotHang()
         {
             var server = new McpServer
@@ -564,6 +570,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "JsonNode request rewrite handles adversarial mixed arrays, block comments, and malformed JSON.")]
         public void JsonNode_Rewrite_HandlesAdversarialEdgeCases()
         {
             var loggerMock = new Mock<ILogger>();
@@ -594,6 +601,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "Auth middleware allows bypass routes and extracts SSO headers in a case-insensitive manner.")]
         public async Task AuthMiddleware_CaseInsensitivity_BypassAndHeader_Check()
         {
             var bypassPaths = new[] { "/api/register", "/API/REGISTER", "/Api/Register", "/api/me", "/API/ME", "/Api/Me" };
@@ -674,6 +682,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "JsonRpcMessageConverter deserializes edge-case minimal/null JSON-RPC variants without stack overflows.")]
         public void PlainJsonRpcMessages_DoNotCauseStackOverflow_PolymorphicVariants()
         {
             var options = new JsonSerializerOptions
@@ -701,6 +710,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "Socket-level SSRF protection blocks private and loopback IP connections unless explicitly allowlisted.")]
         public async Task Connect_BlocksPrivateOrLoopbackIPs_AtSocketLevel()
         {
             // 1. Without allowed IP ranges, connecting to 127.0.0.1 must throw HttpRequestException with SSRF protection message.
@@ -732,6 +742,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Positive, "SecurityValidationHelper accurately validates IPv4/IPv6 private, loopback, and CIDR allowlist ranges.")]
         public void SecurityValidationHelper_IsBlockedIp_ValidatesAllBlockedAndAllowedRanges()
         {
             // IPv4 Loopback

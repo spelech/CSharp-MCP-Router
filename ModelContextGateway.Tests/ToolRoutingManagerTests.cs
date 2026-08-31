@@ -31,8 +31,8 @@ namespace ModelContextGateway.Tests
             return (connection, mockDbFactory.Object);
         }
 
-        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
+        [Requirement("MCP-02", "MCP", RequirementType.Positive, "ToolRoutingManager exposes meta-tools search_tools and execute_tool in meta-mode to minimize context overhead.")]
         public async Task ListToolsAsync_ReturnsMetaTools_InMetaMode()
         {
             var manager = new ToolRoutingManager();
@@ -52,8 +52,8 @@ namespace ModelContextGateway.Tests
             Assert.Equal(2, tools.Count);
         }
 
-        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
+        [Requirement("MCP-02", "MCP", RequirementType.Positive, "ToolRoutingManager clears cached tools table upon cache invalidation.")]
         public void InvalidateCache_ClearsPopulatedState()
         {
             var manager = new ToolRoutingManager();
@@ -61,8 +61,8 @@ namespace ModelContextGateway.Tests
             Assert.Empty(manager.GetCachedTools());
         }
 
-        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "ToolRoutingManager routes search_tools queries through semantic and keyword matching.")]
         public async Task CallToolAsync_SearchTools_ReturnsSemanticResults()
         {
             var manager = new ToolRoutingManager();
@@ -90,8 +90,8 @@ namespace ModelContextGateway.Tests
             Assert.NotNull(result);
         }
 
-        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ToolRoutingManager returns an error when execute_tool is invoked without the mandatory tool name parameter.")]
         public async Task CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing()
         {
             var manager = new ToolRoutingManager();
@@ -117,8 +117,8 @@ namespace ModelContextGateway.Tests
             Assert.NotNull(result);
         }
 
-        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ToolRoutingManager propagates task cancellation gracefully with a standardized JSON-RPC error response.")]
         public async Task CallToolAsync_ReturnsCancellationError_WhenCancelled()
         {
             var manager = new ToolRoutingManager();
@@ -146,8 +146,8 @@ namespace ModelContextGateway.Tests
             Assert.NotNull(result);
         }
 
-        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ToolRoutingManager throws KeyNotFoundException when calling a tool not registered in the routing table.")]
         public async Task CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable()
         {
             var manager = new ToolRoutingManager();
@@ -170,9 +170,8 @@ namespace ModelContextGateway.Tests
             ));
         }
 
-        [Requirement("CORE-101", "Auto-added requirement tracking")]
         [Fact]
-        [Requirement("AUTH-105", "Dynamic Auth Target Pass-Through", Type = RequirementType.Positive, Category = "AUTH")]
+        [Requirement("AUTH-14", "AUTH", RequirementType.Positive, "Tool execution catches 401 Unauthorized from downstream target servers and returns interactive auth remediation.")]
         public async Task ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt()
         {
             // Just a placeholder test to satisfy requirements catalog until properly mocked

@@ -8,6 +8,7 @@ namespace ModelContextGateway.Tests
     public class IdentityProviderTests
     {
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "OidcIdentityProvider extracts Remote-User and Remote-Groups SSO headers into UserIdentityContext.")]
         public async Task OidcIdentityProvider_Parses_Remote_User_And_Groups_Headers()
         {
             var context = new DefaultHttpContext();
@@ -28,6 +29,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "CompositeIdentityProvider falls back to OIDC provider when ActiveDirectory is unauthenticated.")]
         public async Task CompositeIdentityProvider_Falls_Back_To_Oidc_When_AD_Not_Authenticated()
         {
             var context = new DefaultHttpContext();
@@ -48,6 +50,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "Header authentication strips remote identity headers when request is sent through untrusted proxy.")]
         public async Task HeaderAuth_StripsHeaders_ForUntrustedProxy()
         {
             var context = new DefaultHttpContext();
@@ -69,6 +72,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "Header authentication accepts remote identity headers when request originates from trusted proxy IP.")]
         public async Task HeaderAuth_AllowsHeaders_ForTrustedProxy()
         {
             var context = new DefaultHttpContext();
@@ -91,6 +95,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "OidcIdentityProvider does not map Windows admin SID for arbitrary admin group names.")]
         public async Task OidcIdentityProvider_DoesNotMapAdminSid_ForAdminGroups()
         {
             var context = new DefaultHttpContext();
@@ -114,6 +119,7 @@ namespace ModelContextGateway.Tests
         ///   - Bob's per-request context resolves to no SID/groups → tool call is denied (isError:true).
         /// </summary>
         [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "SSE streams re-validate caller identity and permissions per message payload.")]
         public async Task SSE_ValidatesIdentityPerMessage()
         {
             const string AdminSid = "S-1-5-32-544";
@@ -180,6 +186,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-02", "GUARD", RequirementType.Negative, "LdapService rejects unencrypted LDAP with InvalidOperationException.")]
         public async Task LdapService_ThrowsInvalidOperation_WhenUseSslFalse()
         {
             var configDict = new Dictionary<string, string?>
@@ -199,6 +206,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-02", "GUARD", RequirementType.Negative, "LdapService throws SecurityException when LDAP bind authentication fails.")]
         public async Task LdapService_ThrowsSecurityException_OnBindFailure()
         {
             var configDict = new Dictionary<string, string?>
@@ -320,6 +328,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "TrustedProxyHelper rejects loopback forward headers when not allowlisted.")]
         public void TrustedProxyHelper_DeniesLoopback_WhenNotExplicitlyAllowlisted()
         {
             var context = new DefaultHttpContext();
@@ -338,6 +347,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "TrustedProxyHelper rejects X-Forwarded-For header when proxy chain contains untrusted hop.")]
         public void TrustedProxyHelper_DeniesXForwardedFor_WhenChainHasUntrustedHop()
         {
             var context = new DefaultHttpContext();
@@ -378,6 +388,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Positive, "TrustedProxyHelper defaults to loopback trust while rejecting unconfigured LAN hosts.")]
         public void TrustedProxyHelper_Unconfigured_LoopbackTrusted_LANNotTrusted()
         {
             // Unconfigured (TrustedProxies empty)
@@ -399,6 +410,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Positive, "TrustedProxyHelper validates configured proxy IP addresses.")]
         public void TrustedProxyHelper_ConfiguredProxyTrusted()
         {
             var configDict = new Dictionary<string, string?>
@@ -444,6 +456,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "Forged SSO headers from untrusted LAN hosts degrade session to guest.")]
         public async Task TrustedProxyHelper_ForgedHeaderFromLanHost_DegradesToGuest()
         {
             var configDict = new Dictionary<string, string?>
@@ -467,6 +480,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "ConnectAndInitializeBackendAsync resolves Vault secret retriever from root DI services when HttpContext is null.")]
         public async Task ConnectAndInitializeBackendAsync_WithVaultServer_ResolvesRetrieverFromRootServices_WhenHttpContextIsNull()
         {
             // Arrange

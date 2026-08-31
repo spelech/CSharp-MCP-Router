@@ -58,6 +58,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-05", "SEC", RequirementType.Positive, "AuditLogger writes tool invocation audit records with actor attribution and duration to AuditLogs table.")]
         public async Task LogInvocationAsync_WritesEntryToDatabase()
         {
             var auditLogger = new AuditLogger(_dbFactory);
@@ -72,6 +73,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-05", "SEC", RequirementType.Positive, "AuditLogger records administrative configuration changes and security events to AdminAuditLogs table.")]
         public async Task LogAdminActionAsync_WritesEntryToDatabase()
         {
             var auditLogger = new AuditLogger(_dbFactory);
@@ -87,6 +89,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "AuditLogger fails closed and throws InvalidOperationException when audit log database is unreachable.")]
         public async Task LogInvocationAsync_ThrowsInvalidOperationException_OnConnectionFailure()
         {
             var failingFactory = new Mock<IDbConnectionFactory>();
@@ -99,6 +102,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "AuditLogger fails closed and throws InvalidOperationException when admin audit log persistence fails.")]
         public async Task LogAdminActionAsync_ThrowsInvalidOperationException_OnConnectionFailure()
         {
             var failingFactory = new Mock<IDbConnectionFactory>();

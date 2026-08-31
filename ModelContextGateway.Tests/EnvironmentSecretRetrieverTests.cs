@@ -3,6 +3,7 @@ namespace ModelContextGateway.Tests
     public class EnvironmentSecretRetrieverTests
     {
         [Fact]
+        [Requirement("SEC-03", "SEC", RequirementType.Positive, "EnvironmentSecretRetriever retrieves server credentials and API tokens dynamically from environment variables.")]
         public async Task EnvironmentSecretRetriever_RetrievesSecret_FromEnvironmentVariables()
         {
             var retriever = new EnvironmentSecretRetriever();

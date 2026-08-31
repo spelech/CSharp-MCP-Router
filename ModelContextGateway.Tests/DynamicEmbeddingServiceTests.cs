@@ -60,6 +60,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "DynamicEmbeddingService retrieves and persists embedding provider configurations in Settings table.")]
         public void DynamicEmbeddingService_Gets_And_Saves_Settings()
         {
             var (provider, conn) = CreateServiceProvider();
@@ -81,6 +82,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "DynamicEmbeddingService blocks private and loopback IP embedding endpoints when ALLOW_PRIVATE_IPS is false.")]
         public void PrivateOrLoopback_Blocked_When_AllowPrivateIps_False()
         {
             Environment.SetEnvironmentVariable("ALLOW_PRIVATE_IPS", "false");
@@ -104,6 +106,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "DynamicEmbeddingService reloads active embedding provider and settings in-memory.")]
         public void ReloadSettings_UpdatesSettingsAndActiveService()
         {
             var (provider, _) = CreateServiceProvider();
@@ -120,6 +123,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "DynamicEmbeddingService routes embedding generation to configured API provider.")]
         public async Task DynamicEmbeddingService_GetEmbeddingAsync_Uses_ApiProvider_When_Configured()
         {
             var (provider, conn) = CreateServiceProvider();
@@ -143,6 +147,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "DynamicEmbeddingService computes vector cosine similarity across identical, orthogonal, and edge cases.")]
         public void CosineSimilarity_Calculates_Correct_Vector_Distance()
         {
             var (provider, _) = CreateServiceProvider();
@@ -166,6 +171,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "DynamicEmbeddingService pre-warms underlying embedding service during startup initialization.")]
         public async Task PreWarmAsync_Executes_Without_Throwing()
         {
             var (provider, conn) = CreateServiceProvider();
@@ -185,6 +191,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "DynamicEmbeddingService delegates vector generation to active underlying provider.")]
         public async Task GenerateEmbeddingAsync_Uses_UnderlyingProvider()
         {
             var (provider, conn) = CreateServiceProvider();

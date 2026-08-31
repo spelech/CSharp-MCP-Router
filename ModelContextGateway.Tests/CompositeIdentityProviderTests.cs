@@ -7,6 +7,7 @@ namespace ModelContextGateway.Tests
     public class CompositeIdentityProviderTests
     {
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "CompositeIdentityProvider returns 'Composite' as its unified provider descriptor.")]
         public void ProviderName_ReturnsComposite()
         {
             var provider = new CompositeIdentityProvider(new List<IIdentityProvider>());
@@ -14,6 +15,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "CompositeIdentityProvider chains registered providers and returns the first authenticated non-anonymous identity.")]
         public async Task ResolveIdentityAsync_ReturnsFirstNonAnonymousUser()
         {
             var p1 = new Mock<IIdentityProvider>();
@@ -34,6 +36,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "CompositeIdentityProvider safely falls back to anonymous identity context when no provider authenticates.")]
         public async Task ResolveIdentityAsync_FallsBackToAnonymous_WhenNoUserResolved()
         {
             var p1 = new Mock<IIdentityProvider>();
@@ -50,6 +53,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "CompositeIdentityProvider falls back through chain to OIDC provider when preceding provider is anonymous.")]
         public async Task ResolveIdentityAsync_FallsBackToOidcProvider_WhenAnonymous()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

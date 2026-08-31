@@ -95,6 +95,12 @@ describe('SettingsView component', () => {
     mockApiResponse('/api/permissions/mappings', testMappings);
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders tab navigation and switches active subviews
+   */
   it('renders tab navigation and switches active subviews', async () => {
     await act(async () => {
       render(<SettingsView />);
@@ -135,6 +141,12 @@ describe('SettingsView component', () => {
   });
 
   describe('Vector & Search Subview', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description saves embedding settings and displays success feedback
+     */
     it('saves embedding settings and displays success feedback', async () => {
       let postedSettings: any = null;
       mockApiResponse('/api/settings', (_url, options) => {
@@ -168,6 +180,12 @@ describe('SettingsView component', () => {
   });
 
   describe('Identity & Auth Subview', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description saves Auth Provider configurations including Active Directory and OIDC header mappings
+     */
     it('saves Auth Provider configurations including Active Directory and OIDC header mappings', async () => {
       const savedProviders: any[] = [];
       mockApiResponse('/api/providers/auth', (_url, options) => {
@@ -219,6 +237,12 @@ describe('SettingsView component', () => {
   });
 
   describe('Secret Providers Subview', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description saves secret providers while preserving Vault config and secrets
+     */
     it('saves secret providers while preserving Vault config and secrets', async () => {
       const savedSecrets: any[] = [];
       mockApiResponse('/api/providers/secrets', (_url, options) => {
@@ -284,6 +308,12 @@ describe('SettingsView component', () => {
   });
 
   describe('Prompts & Resources Subview', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description renders custom files table with edit and delete actions
+     */
     it('renders custom files table with edit and delete actions', async () => {
       const openModalSpy = vi.fn();
       const deleteSpy = vi.fn();
@@ -321,6 +351,12 @@ describe('SettingsView component', () => {
   });
 
   describe('Access Control Subview', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description renders access policies and group mappings with CRUD actions
+     */
     it('renders access policies and group mappings with CRUD actions', async () => {
       const openPolicySpy = vi.fn();
       const deletePolicySpy = vi.fn();

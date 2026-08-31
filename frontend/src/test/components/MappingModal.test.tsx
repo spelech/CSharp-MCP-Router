@@ -12,12 +12,24 @@ describe('MappingModal component', () => {
     internalGroup: 'Domain Admins'
   };
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders nothing when isMappingModalOpen is false
+   */
   it('renders nothing when isMappingModalOpen is false', () => {
     useSettingsStore.setState({ isMappingModalOpen: false, editingMapping: null });
     const { container } = render(<MappingModal />);
     expect(container.firstChild).toBeNull();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders create mapping form with empty inputs
+   */
   it('renders create mapping form with empty inputs', () => {
     useSettingsStore.setState({ isMappingModalOpen: true, editingMapping: null });
     render(<MappingModal />);
@@ -27,6 +39,12 @@ describe('MappingModal component', () => {
     expect(screen.getByLabelText('Internal Group Name')).toHaveValue('');
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders edit mapping form pre-filled with mapping data
+   */
   it('renders edit mapping form pre-filled with mapping data', () => {
     useSettingsStore.setState({ isMappingModalOpen: true, editingMapping: existingMapping });
     render(<MappingModal />);
@@ -36,6 +54,12 @@ describe('MappingModal component', () => {
     expect(screen.getByLabelText('Internal Group Name')).toHaveValue('Domain Admins');
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description submits form with externalId and internalGroup
+   */
   it('submits form with externalId and internalGroup', async () => {
     const saveSpy = vi.fn().mockResolvedValue(undefined);
     useSettingsStore.setState({ isMappingModalOpen: true, editingMapping: null, saveMapping: saveSpy });
@@ -55,6 +79,12 @@ describe('MappingModal component', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description closes modal on cancel click
+   */
   it('closes modal on cancel click', () => {
     const closeSpy = vi.fn();
     useSettingsStore.setState({ isMappingModalOpen: true, editingMapping: null, closeMappingModal: closeSpy });

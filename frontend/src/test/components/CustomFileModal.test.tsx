@@ -23,6 +23,12 @@ describe('CustomFileModal Component', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders CustomFileModal in create mode and displays visual builder tabs
+   */
   it('renders CustomFileModal in create mode and displays visual builder tabs', () => {
     render(<CustomFileModal />);
 
@@ -32,6 +38,12 @@ describe('CustomFileModal Component', () => {
     expect(screen.getByText('Prompt Description')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description allows adding and removing arguments in visual builder
+   */
   it('allows adding and removing arguments in visual builder', async () => {
     const { container } = render(<CustomFileModal />);
 
@@ -53,6 +65,12 @@ describe('CustomFileModal Component', () => {
     expect(remainingVarInputs.length).toBe(varInputs.length - 1);
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description allows adding and removing messages in visual builder
+   */
   it('allows adding and removing messages in visual builder', async () => {
     const { container } = render(<CustomFileModal />);
 
@@ -74,6 +92,12 @@ describe('CustomFileModal Component', () => {
     expect(remainingMsgAreas.length).toBe(msgAreas.length - 1);
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description switches between Raw JSON Editor and Visual Prompt Builder with synchronization
+   */
   it('switches between Raw JSON Editor and Visual Prompt Builder with synchronization', async () => {
     render(<CustomFileModal />);
 
@@ -150,6 +174,12 @@ describe('CustomFileModal Component', () => {
     expect(useToastStore.getState().toasts.some((t) => t.message.includes('Invalid JSON content') && t.type === 'error')).toBe(true);
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description changes file type to resources and adjusts extension
+   */
   it('changes file type to resources and adjusts extension', async () => {
     render(<CustomFileModal />);
 
@@ -161,6 +191,12 @@ describe('CustomFileModal Component', () => {
     expect(screen.getByPlaceholderText('e.g. guide.md')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description submits form and calls saveCustomFile
+   */
   it('submits form and calls saveCustomFile', async () => {
     const saveSpy = vi.fn().mockResolvedValue(true);
     const closeSpy = vi.fn();
@@ -183,6 +219,12 @@ describe('CustomFileModal Component', () => {
     expect(closeSpy).toHaveBeenCalled();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders in edit mode when editingFileMeta is set
+   */
   it('renders in edit mode when editingFileMeta is set', () => {
     useSettingsStore.setState({
       editingFileMeta: {
@@ -199,6 +241,12 @@ describe('CustomFileModal Component', () => {
     expect(screen.getByText('Edit test-doc.md')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description allows adding assistant messages, modifying argument required checkbox, and rendering empty arguments state
+   */
   it('allows adding assistant messages, modifying argument required checkbox, and rendering empty arguments state', async () => {
     useSettingsStore.setState({
       isCustomFileOpen: true,

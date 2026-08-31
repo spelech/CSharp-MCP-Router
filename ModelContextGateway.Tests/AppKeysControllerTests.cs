@@ -257,6 +257,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-05", "SEC", RequirementType.Positive, "AppKeys API returns sanitized key metadata without leaking plaintext tokens.")]
         public async Task GetAppKeys_ReturnsSanitizedKeys_ForAdminAndFiltered()
         {
             await _rawConnection.ExecuteAsync(@"
@@ -275,6 +276,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "Creates new AppKeys with custom scope slugs successfully.")]
         public async Task CreateAppKey_CreatesNewKey_Successfully_WithDifferentScopeSlugs()
         {
             var controller = CreateController("alice", "User");
@@ -308,6 +310,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Rejects AppKey creation with BadRequest when name is missing.")]
         public async Task CreateAppKey_ReturnsBadRequest_WhenNameMissing()
         {
             var controller = CreateController("alice", "User");
@@ -319,6 +322,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Enforces user AppKey limit and returns BadRequest when quota is exceeded.")]
         public async Task CreateAppKey_EnforcesUserLimit_ForNonAdmin()
         {
             // Set UserMaxKeys to 1
@@ -363,6 +367,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Returns NotFound when revoking non-existent AppKey ID.")]
         public async Task RevokeAppKey_ReturnsNotFound_WhenIdDoesNotExist()
         {
             var controller = CreateController("alice", "Admin");
@@ -371,6 +376,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Returns Forbid when non-owner/non-admin attempts to revoke an AppKey.")]
         public async Task RevokeAppKey_ReturnsForbid_WhenUserNotOwnerOrAdmin()
         {
             await _rawConnection.ExecuteAsync(@"
@@ -383,6 +389,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "Returns quota limits and current active AppKey counts for the user.")]
         public async Task GetAppKeysLimits_ReturnsLimitsAndCounts()
         {
             var controller = CreateController("alice", "User");
@@ -394,6 +401,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "Administrator can create, update, and delete custom user quota overrides.")]
         public async Task QuotaEndpoints_Admin_CanManageCustomUserQuotas()
         {
             var controller = CreateController("admin", "Admin");
@@ -423,6 +431,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Returns BadRequest on invalid quota override input parameters.")]
         public async Task QuotaEndpoints_Validation_ReturnsBadRequest_OnInvalidInputs()
         {
             var controller = CreateController("admin", "Admin");
@@ -438,6 +447,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "Fails closed and returns HTTP 500 when database errors occur in AppKeys controller.")]
         public async Task Controllers_HandleDbFailures_Returning500()
         {
             var mockConn = new Mock<IDbConnection>();

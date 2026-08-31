@@ -5,6 +5,12 @@ import { useUserStore } from '../../stores/useUserStore';
 import { mockApiResponse } from '../setup';
 
 describe('useUserStore', () => {
+  /**
+   * @requirement AUTH-01
+   * @category AUTH
+   * @type Positive
+   * @description should initialize with default values
+   */
   it('should initialize with default values', () => {
     const state = useUserStore.getState();
     expect(state.user).toBeNull();
@@ -14,6 +20,12 @@ describe('useUserStore', () => {
   });
 
   describe('loadUser', () => {
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description successfully loads user profile from /api/me
+     */
     it('successfully loads user profile from /api/me', async () => {
       const mockUser = {
         authenticated: true,
@@ -35,6 +47,12 @@ describe('useUserStore', () => {
       expect(state.user?.groups).toContain('full_admin');
     });
 
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description handles error response gracefully and sets unauthenticated user state
+     */
     it('handles error response gracefully and sets unauthenticated user state', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/me', 'Unauthorized', 401, 'Unauthorized');
@@ -48,6 +66,12 @@ describe('useUserStore', () => {
       consoleSpy.mockRestore();
     });
 
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description handles network failure gracefully
+     */
     it('handles network failure gracefully', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/me', () => {
@@ -62,6 +86,12 @@ describe('useUserStore', () => {
       consoleSpy.mockRestore();
     });
 
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description correctly handles non-admin user role extraction
+     */
     it('correctly handles non-admin user role extraction', async () => {
       const standardUser = {
         authenticated: true,
@@ -80,6 +110,12 @@ describe('useUserStore', () => {
   });
 
   describe('loadVersion', () => {
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description successfully updates version and service from /health endpoint
+     */
     it('successfully updates version and service from /health endpoint', async () => {
       mockApiResponse('/health', { version: '5.2.0', service: 'ModelContextGateway', status: 'healthy' });
 
@@ -89,6 +125,12 @@ describe('useUserStore', () => {
       expect(useUserStore.getState().service).toBe('ModelContextGateway');
     });
 
+    /**
+     * @requirement AUTH-01
+     * @category AUTH
+     * @type Positive
+     * @description keeps existing fallback version on error
+     */
     it('keeps existing fallback version on error', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       useUserStore.setState({ version: '5.0.7', service: 'ModelContextGateway' });

@@ -4,6 +4,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Test Bench View Flow', () => {
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description should navigate to Test Bench view and render tester cards
+   */
   test('should navigate to Test Bench view and render tester cards', async ({ page }) => {
     await page.goto('/');
 

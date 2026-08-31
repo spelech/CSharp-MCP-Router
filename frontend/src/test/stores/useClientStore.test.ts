@@ -19,6 +19,12 @@ describe('useClientStore', () => {
     expiresAt: null
   };
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description initializes with default state
+   */
   it('initializes with default state', () => {
     const state = useClientStore.getState();
     expect(state.clients).toEqual([]);
@@ -48,6 +54,12 @@ describe('useClientStore', () => {
       expect(useClientStore.getState().clients[0].clientType).toBe('confidential');
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description handles fetch error gracefully without crashing
+     */
     it('handles fetch error gracefully without crashing', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/clients', 'Failed to load', 500);
@@ -108,6 +120,12 @@ describe('useClientStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('registered successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description handles register error with toast and propagates error
+     */
     it('handles register error with toast and propagates error', async () => {
       mockApiResponse('/api/clients', 'Registration failed', 400);
 
@@ -174,6 +192,12 @@ describe('useClientStore', () => {
       expect(deleteCalled).toBe(false);
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description handles delete failure with error toast
+     */
     it('handles delete failure with error toast', async () => {
       mockApiResponse(/\/api\/clients\/c-123/, 'Delete failed', 500);
 
@@ -186,6 +210,12 @@ describe('useClientStore', () => {
   });
 
   describe('modal state', () => {
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description opens and closes add client modal and resets created result
+     */
     it('opens and closes add client modal and resets created result', () => {
       useClientStore.setState({ createdClientResult: { clientId: 'c', clientSecret: 's' } });
 
@@ -235,6 +265,12 @@ describe('useAppKeyStore', () => {
     updatedAt: '2026-08-22T00:00:00Z'
   };
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description initializes with default state
+   */
   it('initializes with default state', () => {
     const state = useAppKeyStore.getState();
     expect(state.appKeys).toEqual([]);
@@ -301,6 +337,12 @@ describe('useAppKeyStore', () => {
       expect(useAppKeyStore.getState().appKeys).toEqual([sampleSystemKey]);
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description loads app key limits
+     */
     it('loads app key limits', async () => {
       mockApiResponse('/api/appkeys/limits', sampleLimits);
 
@@ -309,6 +351,12 @@ describe('useAppKeyStore', () => {
       expect(useAppKeyStore.getState().limits).toEqual(sampleLimits);
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description handles fetch error gracefully without crashing
+     */
     it('handles fetch error gracefully without crashing', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/appkeys', 'Failed to load', 500);
@@ -367,6 +415,12 @@ describe('useAppKeyStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('created successfully'))).toBe(true);
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description handles create key error with toast and throws
+     */
     it('handles create key error with toast and throws', async () => {
       mockApiResponse('/api/appkeys', 'Quota exceeded', 400);
 
@@ -436,6 +490,12 @@ describe('useAppKeyStore', () => {
       expect(deleteCalled).toBe(false);
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description handles revoke failure with error toast
+     */
     it('handles revoke failure with error toast', async () => {
       mockApiResponse(/\/api\/appkeys\/k-1/, 'Revoke failed', 500);
 
@@ -448,6 +508,12 @@ describe('useAppKeyStore', () => {
   });
 
   describe('user quota management', () => {
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description loads user quotas and updates store
+     */
     it('loads user quotas and updates store', async () => {
       mockApiResponse('/api/appkeys/quotas', [sampleQuota]);
 
@@ -460,6 +526,12 @@ describe('useAppKeyStore', () => {
       expect(useAppKeyStore.getState().userQuotas).toEqual([sampleQuota]);
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description handles fetchUserQuotas error gracefully without crashing
+     */
     it('handles fetchUserQuotas error gracefully without crashing', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       mockApiResponse('/api/appkeys/quotas', 'Failed to load quotas', 500);
@@ -493,6 +565,12 @@ describe('useAppKeyStore', () => {
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('Quota updated'))).toBe(true);
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description handles setUserQuota error with toast and throws
+     */
     it('handles setUserQuota error with toast and throws', async () => {
       mockApiResponse('/api/appkeys/quotas', 'Invalid quota', 400);
 
@@ -558,6 +636,12 @@ describe('useAppKeyStore', () => {
       expect(deleteCalled).toBe(false);
     });
 
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description handles deleteUserQuota failure with error toast
+     */
     it('handles deleteUserQuota failure with error toast', async () => {
       mockApiResponse(/\/api\/appkeys\/quotas\/developer1/, 'Delete quota failed', 500);
 
@@ -570,6 +654,12 @@ describe('useAppKeyStore', () => {
   });
 
   describe('modal controls', () => {
+    /**
+     * @requirement AUTH-02
+     * @category AUTH
+     * @type Positive
+     * @description opens and closes create modal and clears result
+     */
     it('opens and closes create modal and clears result', () => {
       useAppKeyStore.setState({ createdResult: { id: 'k', name: 'n', username: 'u', keyPrefix: 'p', plaintextKey: 's', scopes: ['all'], createdAt: '' } });
 

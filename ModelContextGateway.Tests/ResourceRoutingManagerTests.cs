@@ -6,6 +6,7 @@ namespace ModelContextGateway.Tests
     public class ResourceRoutingManagerTests
     {
         [Fact]
+        [Requirement("MCP-05", "MCP", RequirementType.Positive, "ResourceRoutingManager returns all registered resources when search query is empty.")]
         public async Task SearchResourcesAsync_ReturnsAll_WhenQueryIsEmpty()
         {
             var manager = new ResourceRoutingManager();
@@ -20,6 +21,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-05", "MCP", RequirementType.Positive, "ResourceRoutingManager filters registered resources matching query tokens across name and description fields.")]
         public async Task SearchResourcesAsync_FiltersByQuery_MatchingNameOrDescription()
         {
             var manager = new ResourceRoutingManager();
@@ -37,6 +39,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-05", "MCP", RequirementType.Positive, "ResourceRoutingManager reads built-in diagnostic and metrics resources (router://status, router://metrics, logs://).")]
         public async Task ReadResourceAsync_LocalBuiltInResources_ReturnCorrectJson()
         {
             var manager = new ResourceRoutingManager();
@@ -62,6 +65,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ResourceRoutingManager throws KeyNotFoundException when reading an unregistered resource URI.")]
         public async Task ReadResourceAsync_ThrowsKeyNotFound_WhenResourceNotRegistered()
         {
             var manager = new ResourceRoutingManager();
@@ -76,6 +80,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-05", "MCP", RequirementType.Positive, "ResourceRoutingManager returns built-in dynamic resource templates.")]
         public async Task ListResourceTemplatesAsync_ReturnsBuiltInTemplates()
         {
             var manager = new ResourceRoutingManager();

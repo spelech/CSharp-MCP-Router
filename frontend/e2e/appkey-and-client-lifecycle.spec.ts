@@ -3,6 +3,12 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('AppKey and Client Lifecycle Flow', () => {
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description should create client application and generate AppKey with scope constraints
+   */
   test('should create client application and generate AppKey with scope constraints', async ({ page }) => {
     await page.goto('/');
 

@@ -9,6 +9,12 @@ import { AccessControlTab } from '../../components/settings/AccessControlTab';
 import { BackupsTab } from '../../components/settings/BackupsTab';
 
 describe('Modular Settings Tab Components', () => {
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders GeneralTab and triggers save
+   */
   it('renders GeneralTab and triggers save', async () => {
     const saveSpy = vi.fn().mockResolvedValue(true);
     render(
@@ -40,6 +46,12 @@ describe('Modular Settings Tab Components', () => {
     expect(saveSpy).toHaveBeenCalledWith(expect.objectContaining({ allowOpenClientRegistration: true }));
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders IdentityAuthTab and SecretProvidersTab inside ProvidersTab
+   */
   it('renders IdentityAuthTab and SecretProvidersTab inside ProvidersTab', () => {
     const saveAuthSpy = vi.fn().mockResolvedValue(undefined);
     const saveSecretSpy = vi.fn().mockResolvedValue(undefined);
@@ -62,6 +74,12 @@ describe('Modular Settings Tab Components', () => {
     expect(screen.getByText('Secret Providers')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders CustomFilesTab and triggers modal open and delete
+   */
   it('renders CustomFilesTab and triggers modal open and delete', async () => {
     const openModalSpy = vi.fn().mockResolvedValue(undefined);
     const deleteSpy = vi.fn().mockResolvedValue(undefined);
@@ -89,6 +107,12 @@ describe('Modular Settings Tab Components', () => {
     expect(deleteSpy).toHaveBeenCalledWith('prompts', 'test-prompt.json');
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders AccessControlTab with policies and mappings
+   */
   it('renders AccessControlTab with policies and mappings', () => {
     const openPolicySpy = vi.fn();
     const deletePolicySpy = vi.fn().mockResolvedValue(undefined);
@@ -112,6 +136,12 @@ describe('Modular Settings Tab Components', () => {
     expect(screen.getByText('ext_admin')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders BackupsTab
+   */
   it('renders BackupsTab', () => {
     render(<BackupsTab />);
     expect(screen.getByText('Database & System Maintenance')).toBeInTheDocument();

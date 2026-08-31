@@ -4,6 +4,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('RBAC Access Control & Policy Modal Flow', () => {
 
+  /**
+   * @requirement AUTH-01
+   * @category AUTH
+   * @type Positive
+   * @description should navigate to settings permissions tab and open policy configuration modal
+   */
   test('should navigate to settings permissions tab and open policy configuration modal', async ({ page }) => {
     await page.goto('/');
 

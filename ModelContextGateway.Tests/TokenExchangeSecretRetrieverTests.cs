@@ -35,6 +35,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "TokenExchangeSecretRetriever exchanges upstream caller credentials for downstream OAuth tokens and caches response.")]
         public async Task GetSecretAsync_MintsTokenViaTokenExchange_AndCachesResponse()
         {
             var tokenResponse = new
@@ -91,6 +92,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-03", "GUARD", RequirementType.Negative, "TokenExchangeSecretRetriever fails closed with InvalidOperationException when token endpoint is not configured.")]
         public async Task GetSecretAsync_ThrowsInvalidOperationException_WhenTokenEndpointMissing()
         {
             var retriever = new TokenExchangeSecretRetriever();
@@ -98,6 +100,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-03", "GUARD", RequirementType.Negative, "TokenExchangeSecretRetriever fails closed with SecurityException when token exchange endpoint returns HTTP error.")]
         public async Task GetSecretAsync_ThrowsSecurityException_WhenHttpResponseIsNotSuccess()
         {
             var factoryMock = CreateMockHttpClientFactory(HttpStatusCode.BadRequest, "{\"error\":\"invalid_grant\"}");
@@ -122,6 +125,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "CompositeSecretRetriever routes OBO, PocketID, and OAuth2 provider aliases to TokenExchange provider.")]
         public async Task CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever()
         {
             var mockTe = new Mock<ISecretRetriever>();

@@ -46,6 +46,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "PermissionsController returns access policies list with 200 OK.")]
         public async Task GetPolicies_ReturnsOk()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -55,6 +56,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing targetId with BadRequest.")]
         public async Task SavePolicy_ReturnsBadRequest_WhenTargetIdMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -65,6 +67,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects policy saves missing requiredGroup with BadRequest.")]
         public async Task SavePolicy_ReturnsBadRequest_WhenRequiredGroupMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -75,6 +78,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("DB-01", "DB", RequirementType.Positive, "PermissionsController persists access policy to SQLite database repository.")]
         public async Task SavePolicy_SavesSuccessfully_OnSqlite()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -85,6 +89,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("DB-01", "DB", RequirementType.Positive, "PermissionsController persists access policy to MySQL database repository.")]
         public async Task SavePolicy_SavesSuccessfully_OnMySql()
         {
             var mockFactory = new Mock<IDbConnectionFactory>();
@@ -107,6 +112,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Positive, "PermissionsController removes access policies.")]
         public async Task DeletePolicy_DeletesSuccessfully()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -116,6 +122,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "PermissionsController fails closed with 500 when database delete fails.")]
         public async Task DeletePolicy_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -128,6 +135,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "PermissionsController returns group mappings list with 200 OK.")]
         public async Task GetMappings_ReturnsOk()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -137,6 +145,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "PermissionsController returns 500 on database error during mapping retrieval.")]
         public async Task GetMappings_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -149,6 +158,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing external ID with BadRequest.")]
         public async Task SaveMapping_ReturnsBadRequest_WhenExternalIdMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -159,6 +169,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "PermissionsController rejects mapping save missing internal group with BadRequest.")]
         public async Task SaveMapping_ReturnsBadRequest_WhenInternalGroupMissing()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -169,6 +180,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("DB-01", "DB", RequirementType.Positive, "PermissionsController persists group mappings to SQLite database.")]
         public async Task SaveMapping_SavesSuccessfully_OnSqlite()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -179,6 +191,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "PermissionsController returns 500 when saving mapping encounters DB error.")]
         public async Task SaveMapping_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -192,6 +205,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "PermissionsController deletes group mappings successfully.")]
         public async Task DeleteMapping_DeletesSuccessfully()
         {
             var controller = new PermissionsController(_dbFactory, new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>().Object);
@@ -201,6 +215,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "PermissionsController returns 500 when deleting mapping encounters DB error.")]
         public async Task DeleteMapping_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -213,6 +228,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "PermissionsController returns 500 when retrieving policies encounters DB error.")]
         public async Task GetPolicies_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();

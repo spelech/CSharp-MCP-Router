@@ -49,6 +49,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-04", "SEC", RequirementType.Positive, "WindowsRegistrySecretRetriever returns null gracefully when registry key or path is not found.")]
         public async Task GetSecretAsync_ReturnsNull_WhenKeyNotFoundOrNull()
         {
             var mockRegistry = new Mock<IRegistryAccessor>();
@@ -63,6 +64,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-03", "GUARD", RequirementType.Negative, "WindowsRegistrySecretRetriever fails closed and handles registry accessor exceptions gracefully without leaking secrets.")]
         public async Task GetSecretAsync_HandlesExceptionGracefully_ReturnsNull()
         {
             var mockRegistry = new Mock<IRegistryAccessor>();

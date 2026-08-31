@@ -10,6 +10,7 @@ namespace ModelContextGateway.Tests
     public class ConcurrentResponseIsolationTests
     {
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "Multiplexes concurrent client calls sharing identical JSON-RPC IDs and routes reversed responses correctly.")]
         public async Task ConcurrentResponseIsolation_TwoCallersSameId_SucceedsWithReversedResponseOrder()
         {
             // Arrange
@@ -111,6 +112,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "Maintains strict response isolation under high concurrency with 100+ callers reusing identical RPC IDs.")]
         public async Task HighConcurrencyResponseIsolation_RepeatedIdsAcrossCallers()
         {
             // Arrange
@@ -215,6 +217,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "Cleans up pending request tracking maps upon timeout and cancellation.")]
         public async Task TimeoutAndCancellationCleanup_DoesNotLeavePendingRequests()
         {
             // Arrange
@@ -276,6 +279,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "Cleans up and cancels pending requests upon backend transport disconnect.")]
         public async Task BackendDisconnectCleanup_ClearsPendingRequests()
         {
             // Arrange
@@ -346,6 +350,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "Handles JSON-RPC requests with explicit null IDs and multiplexes upstream calls correctly.")]
         public async Task ConcurrentResponseIsolation_ExplicitNullId_Succeeds()
         {
             // Arrange
@@ -420,6 +425,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "Handles JSON-RPC notifications without registering pending response listeners.")]
         public async Task ConcurrentResponseIsolation_Notification_DoesNotExpectResponse()
         {
             // Arrange
@@ -484,6 +490,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "Isolates cancellation tokens between concurrent stateless client requests.")]
         public async Task ClientSession_ConcurrentStatelessRequestIsolateCancellation()
         {
             // Arrange
@@ -543,6 +550,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "Targeted cancellation does not cancel concurrent client sessions reusing identical RPC IDs.")]
         public async Task ClientSession_TargetedCancellation_DoesNotCancelOtherClientsReusingId()
         {
             // Arrange
@@ -575,6 +583,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "JsonRpcStateManager rejects registration and cancels pending completions upon disconnect.")]
         public void JsonRpcStateManager_Disconnect_PreventsRegistrationAndCancelsPending()
         {
             var stateManager = new JsonRpcStateManager();
@@ -610,6 +619,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("TRANS-02", "TRANS", RequirementType.Positive, "Handles mixed numeric, string, and null JSON-RPC IDs concurrently across backend transports.")]
         public async Task ConcurrentResponseIsolation_MixedNumericStringNullIds()
         {
             // Arrange

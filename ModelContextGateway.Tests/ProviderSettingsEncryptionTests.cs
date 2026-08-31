@@ -68,6 +68,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Positive, "Encrypts SecretProvider configuration JSON at rest in database using Master Key.")]
         public async Task SaveSecretProvider_EncryptsConfigJson_AtRestInDatabase()
         {
             var plainConfig = "{\"address\":\"https://vault.corp.local:8200\",\"token\":\"s.SuperSecretVaultToken12345\"}";
@@ -96,6 +97,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Positive, "Encrypts AuthProvider configuration JSON at rest in database using Master Key.")]
         public async Task SaveAuthProvider_EncryptsConfigJson_AtRestInDatabase()
         {
             var plainConfig = "{\"server\":\"ldaps.corp.local\",\"bindPassword\":\"P@ssw0rdServiceAccount999!\",\"useSsl\":true}";
@@ -126,6 +128,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-05", "SEC", RequirementType.Positive, "ProvidersController GET endpoints mask sensitive tokens and passwords as asterisks.")]
         public async Task ProvidersController_GetEndpoints_RedactSensitiveSecrets()
         {
             var secretDto = new SecretProviderDto
@@ -180,6 +183,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-05", "SEC", RequirementType.Positive, "ProvidersController redacts sensitive secrets in administrative audit logs.")]
         public async Task ProvidersController_SaveEndpoints_RedactAuditLogPayloads()
         {
             var loggedActions = new List<(string Action, string Target, string Details, bool Success)>();
@@ -212,6 +216,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Positive, "Preserves existing stored secret ciphertext when masked placeholder string is submitted in updates.")]
         public async Task ProvidersController_MaskPreserving_PreservesExistingDecryptedSecret_WhenMaskSubmitted()
         {
             // Seed initial config
@@ -249,6 +254,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "Fails closed with HTTP 400 when invalid JSON or insecure HTTP/LDAP URLs are submitted.")]
         public async Task FailClosedValidation_RejectsInvalidJson_AndInsecureUrls()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -286,6 +292,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository.")]
         public async Task VaultSecretRetriever_DynamicallyLoadsAndAppliesDbConfig_WithReload()
         {
             var cache = new MemoryCache(new MemoryCacheOptions());
@@ -321,6 +328,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "HeaderIdentityProvider dynamically applies database-configured SSO proxy headers.")]
         public async Task HeaderIdentityProvider_DynamicallyLoadsAndAppliesDbConfig()
         {
             var headerProvider = new HeaderIdentityProvider(new ConfigurationBuilder().Build(), _repo);
@@ -355,6 +363,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "LdapActiveDirectoryService returns empty SIDs when disabled in database.")]
         public async Task LdapActiveDirectoryService_RespectsDisabledStatusInDatabase()
         {
             var authDto = new AuthProviderDto

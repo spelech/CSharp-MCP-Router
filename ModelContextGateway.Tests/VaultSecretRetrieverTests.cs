@@ -9,6 +9,7 @@ namespace ModelContextGateway.Tests
     public class VaultSecretRetrieverTests
     {
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultSecretRetriever reports 'HashiCorpVault' as its provider descriptor.")]
         public void ProviderName_ReturnsHashiCorpVault()
         {
             var retriever = new VaultSecretRetriever(new ConfigurationBuilder().Build(), new MemoryCache(new MemoryCacheOptions()));
@@ -16,6 +17,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-03", "GUARD", RequirementType.Negative, "VaultSecretRetriever rejects non-HTTP/HTTPS URI schemes and throws ArgumentException.")]
         public async Task EnsureVaultClientAsync_ThrowsArgumentException_WhenAddressInvalidScheme()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -32,6 +34,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultSecretRetriever returns null gracefully when credentials or endpoints are unconfigured.")]
         public async Task EnsureVaultClientAsync_ReturnsNull_WhenCredentialsMissing()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -51,6 +54,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultSecretRetriever authenticates with AppRole credentials and creates a reusable IVaultClient.")]
         public async Task EnsureVaultClientAsync_CreatesClient_WhenValidConfig()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -72,6 +76,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultSecretRetriever retrieves cached secrets from in-memory cache to avoid repeated Vault lookups.")]
         public async Task GetSecretAsync_ReturnsCachedValue_WhenPresent()
         {
             var config = new ConfigurationBuilder().Build();
@@ -85,6 +90,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "VaultSecretRetriever returns null when client cannot be initialized.")]
         public async Task GetSecretAsync_ReturnsNull_WhenClientIsNull()
         {
             var config = new ConfigurationBuilder().Build();
@@ -96,6 +102,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-03", "GUARD", RequirementType.Negative, "VaultSecretRetriever fails closed with SecurityException when custom vault client returns unauthenticated or invalid payload.")]
         public async Task GetSecretAsync_UsesCustomVaultClientFactory()
         {
             var config = new ConfigurationBuilder().Build();

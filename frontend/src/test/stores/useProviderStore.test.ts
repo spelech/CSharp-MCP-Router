@@ -25,6 +25,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
     })
   };
 
+  /**
+   * @requirement AUTH-03
+   * @category AUTH
+   * @type Positive
+   * @description initializes with empty providers
+   */
   it('initializes with empty providers', () => {
     const state = useSettingsStore.getState();
     expect(state.authProviders).toEqual([]);
@@ -32,6 +38,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
   });
 
   describe('fetchProviders', () => {
+    /**
+     * @requirement SEC-02
+     * @category SEC
+     * @type Positive
+     * @description successfully loads auth and secret providers
+     */
     it('successfully loads auth and secret providers', async () => {
       mockApiResponse('/api/providers/auth', [sampleAuthProvider]);
       mockApiResponse('/api/providers/secrets', [sampleSecretProvider]);
@@ -45,6 +57,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
       expect(state.secretProviders[0].providerName).toBe('Vault');
     });
 
+    /**
+     * @requirement AUTH-03
+     * @category AUTH
+     * @type Positive
+     * @description handles provider fetch warnings gracefully when endpoints are unavailable
+     */
     it('handles provider fetch warnings gracefully when endpoints are unavailable', async () => {
       const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
       mockApiResponse('/api/providers/auth', 'Not initialized', 404);
@@ -59,6 +77,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
   });
 
   describe('saveAuthProvider', () => {
+    /**
+     * @requirement AUTH-03
+     * @category AUTH
+     * @type Positive
+     * @description saves auth provider config and refreshes providers
+     */
     it('saves auth provider config and refreshes providers', async () => {
       let postBody: any = null;
       mockApiResponse('/api/providers/auth', (_url, options) => {
@@ -82,6 +106,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
       });
     });
 
+    /**
+     * @requirement AUTH-03
+     * @category AUTH
+     * @type Positive
+     * @description handles auth provider save error and displays toast
+     */
     it('handles auth provider save error and displays toast', async () => {
       mockApiResponse('/api/providers/auth', 'Invalid provider config', 400);
 
@@ -98,6 +128,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
   });
 
   describe('saveSecretProvider', () => {
+    /**
+     * @requirement SEC-02
+     * @category SEC
+     * @type Positive
+     * @description saves secret provider preserving Vault token and mount path
+     */
     it('saves secret provider preserving Vault token and mount path', async () => {
       let postBody: any = null;
       mockApiResponse('/api/providers/secrets', (_url, options) => {
@@ -131,6 +167,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
       expect(parsedConfig.mountPath).toBe('homelab/secrets/');
     });
 
+    /**
+     * @requirement SEC-02
+     * @category SEC
+     * @type Positive
+     * @description saves Windows Registry and Environment secret providers correctly
+     */
     it('saves Windows Registry and Environment secret providers correctly', async () => {
       const savedProviders: any[] = [];
       mockApiResponse('/api/providers/secrets', (_url, options) => {
@@ -160,6 +202,12 @@ describe('useProviderStore (useSettingsStore provider actions)', () => {
       expect(JSON.parse(savedProviders[1].configJson).prefix).toBe('MCP_ENV_');
     });
 
+    /**
+     * @requirement SEC-02
+     * @category SEC
+     * @type Positive
+     * @description handles secret provider save error with toast and throws
+     */
     it('handles secret provider save error with toast and throws', async () => {
       mockApiResponse('/api/providers/secrets', 'Failed to connect to Vault', 500);
 

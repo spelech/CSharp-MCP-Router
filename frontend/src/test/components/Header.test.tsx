@@ -10,6 +10,12 @@ describe('Header component', () => {
     mockApiResponse('/health', { version: '4.5.6', status: 'healthy' });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders title, MCG badge, subtitle, and version badge
+   */
   it('renders title, MCG badge, subtitle, and version badge', async () => {
     mockApiResponse('/api/me', {
       authenticated: true,
@@ -29,6 +35,12 @@ describe('Header component', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders admin badge and shield icon for full_admin users
+   */
   it('renders admin badge and shield icon for full_admin users', async () => {
     mockApiResponse('/api/me', {
       authenticated: true,
@@ -49,6 +61,12 @@ describe('Header component', () => {
     expect(userStatus?.querySelector('.fa-user-shield')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders standard user badge for non-admin users
+   */
   it('renders standard user badge for non-admin users', async () => {
     mockApiResponse('/api/me', {
       authenticated: true,
@@ -69,6 +87,12 @@ describe('Header component', () => {
     expect(userStatus?.querySelector('.fa-user-shield')).toBeNull();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description does not render user status item when unauthenticated
+   */
   it('does not render user status item when unauthenticated', async () => {
     mockApiResponse('/api/me', {
       authenticated: false
@@ -83,6 +107,12 @@ describe('Header component', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description displays gateway status and SSE endpoint
+   */
   it('displays gateway status and SSE endpoint', async () => {
     await act(async () => {
       render(<Header />);
@@ -93,6 +123,12 @@ describe('Header component', () => {
     expect(screen.getByText(`${window.location.origin}/sse`)).toBeInTheDocument();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description toggles light and dark theme on button click and updates document attribute
+   */
   it('toggles light and dark theme on button click and updates document attribute', async () => {
     await act(async () => {
       render(<Header />);

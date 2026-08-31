@@ -4,6 +4,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Client Setup & App Key Management Flow', () => {
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description should open App Keys & Security view and display client setup controls
+   */
   test('should open App Keys & Security view and display client setup controls', async ({ page }) => {
     await page.goto('/');
 

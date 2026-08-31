@@ -18,6 +18,12 @@ describe('Header Branding and Favicon Sync', () => {
   });
 
   describe('isImageUrl', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description identifies image URLs and paths accurately
+     */
     it('identifies image URLs and paths accurately', () => {
       expect(isImageUrl('/api/config/branding/logo')).toBe(true);
       expect(isImageUrl('/images/logo.png')).toBe(true);
@@ -28,6 +34,12 @@ describe('Header Branding and Favicon Sync', () => {
       expect(isImageUrl('custom-logo.JPG')).toBe(true);
     });
 
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description identifies FontAwesome class names and invalid inputs as non-image URLs
+     */
     it('identifies FontAwesome class names and invalid inputs as non-image URLs', () => {
       expect(isImageUrl('fa-solid fa-bolt')).toBe(false);
       expect(isImageUrl('fa-solid fa-network-wired')).toBe(false);
@@ -39,6 +51,12 @@ describe('Header Branding and Favicon Sync', () => {
   });
 
   describe('updateFaviconAndTitle', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description updates document.title and sets custom image favicon when icon is an image URL
+     */
     it('updates document.title and sets custom image favicon when icon is an image URL', () => {
       updateFaviconAndTitle('Custom Gateway', '/api/config/branding/logo');
 
@@ -48,6 +66,12 @@ describe('Header Branding and Favicon Sync', () => {
       expect(faviconLink?.href).toContain('/api/config/branding/logo');
     });
 
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description sets default title and generated SVG favicon when branding is null or uses FontAwesome icon
+     */
     it('sets default title and generated SVG favicon when branding is null or uses FontAwesome icon', () => {
       updateFaviconAndTitle(null, 'fa-solid fa-bolt');
 
@@ -60,6 +84,12 @@ describe('Header Branding and Favicon Sync', () => {
   });
 
   describe('Header Component Branding Rendering', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description renders img element with logo-icon logo-img class when branding.icon is an image endpoint
+     */
     it('renders img element with logo-icon logo-img class when branding.icon is an image endpoint', async () => {
       mockApiResponse('/api/config/branding', {
         title: 'Acme Gateway',
@@ -82,6 +112,12 @@ describe('Header Branding and Favicon Sync', () => {
       expect(document.title).toBe('Acme Gateway - Model Context Gateway');
     });
 
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description renders FontAwesome i element when branding.icon is a FontAwesome class
+     */
     it('renders FontAwesome i element when branding.icon is a FontAwesome class', async () => {
       mockApiResponse('/api/config/branding', {
         title: 'Lightning MCP',

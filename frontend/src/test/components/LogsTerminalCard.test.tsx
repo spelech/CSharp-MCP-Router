@@ -31,6 +31,12 @@ describe('LogsTerminalCard Component', () => {
     },
   ];
 
+  /**
+   * @requirement SEC-05
+   * @category SEC
+   * @type Positive
+   * @description renders system logs and handles level filter
+   */
   it('renders system logs and handles level filter', () => {
     useLogStore.setState({
       logs: mockLogs,
@@ -52,6 +58,12 @@ describe('LogsTerminalCard Component', () => {
     expect(useLogStore.getState().levelFilter).toBe('ERROR');
   });
 
+  /**
+   * @requirement SEC-05
+   * @category SEC
+   * @type Positive
+   * @description renders RPC message stream with formatted JSON
+   */
   it('renders RPC message stream with formatted JSON', () => {
     useLogStore.setState({
       logs: mockLogs,
@@ -66,6 +78,12 @@ describe('LogsTerminalCard Component', () => {
     expect(screen.getByText(/"method": "tools\/list"/i)).toBeInTheDocument();
   });
 
+  /**
+   * @requirement SEC-05
+   * @category SEC
+   * @type Positive
+   * @description toggles autoscroll and handles clear logs
+   */
   it('toggles autoscroll and handles clear logs', () => {
     const clearSpy = vi.spyOn(useLogStore.getState(), 'clearLogs');
     useLogStore.setState({
@@ -87,6 +105,12 @@ describe('LogsTerminalCard Component', () => {
     expect(clearSpy).toHaveBeenCalled();
   });
 
+  /**
+   * @requirement SEC-05
+   * @category SEC
+   * @type Positive
+   * @description shows empty state when no logs match filter
+   */
   it('shows empty state when no logs match filter', () => {
     useLogStore.setState({
       logs: [],

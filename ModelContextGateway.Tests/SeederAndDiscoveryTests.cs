@@ -51,6 +51,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("DB-01", "DB", RequirementType.Positive, "DatabaseSeeder initializes default router tables, settings, and seed servers.")]
         public void DatabaseSeeder_SeedsDefaultData_Successfully()
         {
             using var freshConn = new SqliteConnection("Data Source=FreshSeederDb;Mode=Memory;Cache=Shared");
@@ -80,6 +81,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-10", "MCP", RequirementType.Positive, "DockerAutoDiscoveryService handles missing Docker socket gracefully without throwing unhandled exceptions.")]
         public async Task DockerAutoDiscovery_ScanContainers_HandlesMissingSocketGracefully()
         {
             var (sp, _) = CreateServiceProvider();
@@ -96,6 +98,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "SemanticSearchService gracefully handles fallback execution when embedding provider is unconfigured.")]
         public async Task SemanticSearchService_Fallback_With_DummyEmbeddings()
         {
             var toolsList = new List<object>

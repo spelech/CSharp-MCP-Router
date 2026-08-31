@@ -15,6 +15,12 @@ describe('ResourceTesterCard Component', () => {
     ],
   };
 
+  /**
+   * @requirement MCP-05
+   * @category MCP
+   * @type Positive
+   * @description renders resource tester with servers and resources
+   */
   it('renders resource tester with servers and resources', () => {
     const onServerChange = vi.fn();
     const onSelectChange = vi.fn();
@@ -38,6 +44,12 @@ describe('ResourceTesterCard Component', () => {
     expect(screen.getByDisplayValue('router://catalog')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement MCP-05
+   * @category MCP
+   * @type Positive
+   * @description handles custom URI input and submit
+   */
   it('handles custom URI input and submit', () => {
     const onServerChange = vi.fn();
     const onSelectChange = vi.fn();

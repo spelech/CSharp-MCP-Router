@@ -5,6 +5,7 @@ namespace ModelContextGateway.Tests
     public class SecurityValidationHelperTests
     {
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "SecurityValidationHelper blocks private, loopback, link-local, multicast, and carrier-grade NAT IP ranges by default (SSRF guardrail).")]
         public void IsBlockedIp_ValidatesSpecialIpRanges()
         {
             Assert.True(SecurityValidationHelper.IsBlockedIp(null!, null));
@@ -28,6 +29,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Positive, "SecurityValidationHelper tests IP subnet inclusion accurately across CIDR ranges and loopback aliases.")]
         public void IsInSubnet_HandlesSpecialCases()
         {
             Assert.False(SecurityValidationHelper.IsInSubnet(null!, "10.0.0.0/8"));
@@ -40,6 +42,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Positive, "SecurityValidationHelper validates tool and prompt names against namespaced server identifiers.")]
         public void ValidateToolOrPromptName_ValidatesNames()
         {
             var validServers = new List<string> { "docker", "plex" };
@@ -56,6 +59,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-05", "MCP", RequirementType.Positive, "SecurityValidationHelper validates resource URI schemas against registered server targets.")]
         public void ValidateResourceUri_ValidatesUris()
         {
             var validServers = new List<string> { "docker", "plex" };

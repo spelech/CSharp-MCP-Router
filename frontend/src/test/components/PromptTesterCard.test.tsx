@@ -21,6 +21,12 @@ describe('PromptTesterCard Component', () => {
     },
   ];
 
+  /**
+   * @requirement MCP-06
+   * @category MCP
+   * @type Positive
+   * @description renders prompt dropdown and filters by selected server
+   */
   it('renders prompt dropdown and filters by selected server', () => {
     const onServerChange = vi.fn();
     const onPromptChange = vi.fn();
@@ -44,6 +50,12 @@ describe('PromptTesterCard Component', () => {
     expect(screen.getByText('Text to summarize')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement MCP-06
+   * @category MCP
+   * @type Positive
+   * @description triggers arg change and form submit
+   */
   it('triggers arg change and form submit', () => {
     const onServerChange = vi.fn();
     const onPromptChange = vi.fn();

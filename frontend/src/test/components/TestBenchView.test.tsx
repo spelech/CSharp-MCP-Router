@@ -39,6 +39,12 @@ describe('TestBenchView Component', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description renders test bench cards and switches tabs
+   */
   it('renders test bench cards and switches tabs', async () => {
     render(<TestBenchView />);
 
@@ -62,6 +68,12 @@ describe('TestBenchView Component', () => {
     expect(screen.getByText('Interactive Tool Tester')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description handles semantic search queries in SemanticRouterCard
+   */
   it('handles semantic search queries in SemanticRouterCard', async () => {
     vi.spyOn(api, 'apiRequest').mockResolvedValue([
       { name: 'docker__list_containers', score: 0.95, description: 'List containers' },
@@ -84,6 +96,12 @@ describe('TestBenchView Component', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description executes tool and updates console
+   */
   it('executes tool and updates console', async () => {
     vi.spyOn(api, 'apiRequest').mockResolvedValue({
       content: [{ type: 'text', text: '{"status":"ok"}' }],
@@ -109,6 +127,12 @@ describe('TestBenchView Component', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description executes prompt get in prompt tester tab
+   */
   it('executes prompt get in prompt tester tab', async () => {
     vi.spyOn(api, 'apiRequest').mockResolvedValue({
       messages: [{ role: 'user', content: { type: 'text', text: 'Diagnose stopped container' } }],
@@ -137,6 +161,12 @@ describe('TestBenchView Component', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description executes resource read in resource inspector tab
+   */
   it('executes resource read in resource inspector tab', async () => {
     vi.spyOn(api, 'apiRequest').mockResolvedValue({
       contents: [{ uri: 'mcp://docker/status', text: 'running' }],

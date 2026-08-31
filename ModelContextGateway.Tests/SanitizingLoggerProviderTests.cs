@@ -6,6 +6,7 @@ namespace ModelContextGateway.Tests
     public class SanitizingLoggerProviderTests
     {
         [Fact]
+        [Requirement("SEC-05", "SEC", RequirementType.Positive, "SanitizingLoggerProvider automatically redacts Bearer tokens, API keys, and credentials in log message strings.")]
         public void SanitizingLoggerProvider_RedactsBearerTokensAndKeys()
         {
             // Arrange
@@ -40,6 +41,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-05", "SEC", RequirementType.Positive, "SanitizingLoggerProvider preserves non-sensitive log statements intact.")]
         public void SanitizingLoggerProvider_LeavesPlainMessagesUnchanged()
         {
             // Arrange
@@ -72,6 +74,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-05", "SEC", RequirementType.Positive, "SanitizingLoggerProvider sanitizes exception messages and stack traces to prevent credential leaks in error logs.")]
         public void SanitizingLoggerProvider_RedactsSecretsInExceptionMessageAndToString()
         {
             // Arrange

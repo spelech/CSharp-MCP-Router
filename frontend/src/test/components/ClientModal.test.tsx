@@ -12,6 +12,12 @@ describe('ClientModal component', () => {
     });
   });
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description renders nothing when isAddClientOpen is false
+   */
   it('renders nothing when isAddClientOpen is false', () => {
     useClientStore.setState({ isAddClientOpen: false, createdClientResult: null });
     const { container } = render(<ClientModal />);

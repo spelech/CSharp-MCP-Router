@@ -16,6 +16,12 @@ describe('GeneralTab Logo Upload and Live Preview', () => {
     vi.clearAllMocks();
   });
 
+  /**
+   * @requirement SEC-05
+   * @category SEC
+   * @type Positive
+   * @description renders branding label and FontAwesome icon preview when icon is a CSS class
+   */
   it('renders branding label and FontAwesome icon preview when icon is a CSS class', () => {
     render(
       <GeneralTab
@@ -47,6 +53,12 @@ describe('GeneralTab Logo Upload and Live Preview', () => {
     expect(document.querySelector('.logo-preview-box img')).toBeNull();
   });
 
+  /**
+   * @requirement SEC-05
+   * @category SEC
+   * @type Positive
+   * @description renders img live preview when dashboardIcon is an image URL
+   */
   it('renders img live preview when dashboardIcon is an image URL', () => {
     render(
       <GeneralTab
@@ -73,6 +85,12 @@ describe('GeneralTab Logo Upload and Live Preview', () => {
     expect(document.querySelector('.logo-preview-box i')).toBeNull();
   });
 
+  /**
+   * @requirement SEC-05
+   * @category SEC
+   * @type Positive
+   * @description updates dashboardIcon and live preview when a logo image file is uploaded
+   */
   it('updates dashboardIcon and live preview when a logo image file is uploaded', async () => {
     const uploadSpy = vi.spyOn(settingsApi, 'uploadBrandingLogo').mockResolvedValue({
       url: '/api/config/branding/logo',
@@ -120,6 +138,12 @@ describe('GeneralTab Logo Upload and Live Preview', () => {
     expect(previewImg).toHaveAttribute('src', '/api/config/branding/logo');
   });
 
+  /**
+   * @requirement SEC-05
+   * @category SEC
+   * @type Positive
+   * @description saves settings with the updated logo URL when form is submitted after upload
+   */
   it('saves settings with the updated logo URL when form is submitted after upload', async () => {
     vi.spyOn(settingsApi, 'uploadBrandingLogo').mockResolvedValue({
       url: '/api/config/branding/logo',

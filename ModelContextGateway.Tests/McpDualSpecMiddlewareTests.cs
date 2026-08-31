@@ -6,6 +6,7 @@ namespace ModelContextGateway.Tests
     public class McpDualSpecMiddlewareTests
     {
         [Fact]
+        [Requirement("MCP-21", "MCP", RequirementType.Positive, "McpDualSpecMiddleware extracts Mcp-Method, Mcp-Name, and MCP-Protocol-Version request headers per MCP 2026-07-28 spec.")]
         public async Task Middleware_Parses_2026_Spec_Headers()
         {
             var context = new DefaultHttpContext();
@@ -31,6 +32,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-21", "MCP", RequirementType.Positive, "McpDualSpecMiddleware falls back transparently to parsing JSON-RPC body when spec headers are missing.")]
         public async Task Middleware_Falls_Back_To_Json_Body_When_Headers_Missing()
         {
             var context = new DefaultHttpContext();

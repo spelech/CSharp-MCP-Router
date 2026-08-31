@@ -43,6 +43,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-10", "MCP", RequirementType.Positive, "DockerAutoDiscoveryService initializes with valid container service dependencies.")]
         public void Service_Initializes_With_Valid_Dependencies()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -55,6 +56,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "Docker auto-discovery skips containers resolving to blocked private IP ranges (SSRF protection).")]
         public void DockerDiscovery_SkipsContainer_ResolvingToPrivateIp()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -75,6 +77,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-10", "MCP", RequirementType.Positive, "DockerAutoDiscoveryService handles absent Docker socket gracefully without crashing host runtime.")]
         public async Task ExecuteAsync_SkipsScan_WhenDockerSocketDoesNotExist()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -98,6 +101,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-10", "MCP", RequirementType.Positive, "DockerAutoDiscoveryService parses Docker container mcp.* labels into McpServer metadata definitions.")]
         public void ParseDiscoveredServers_ParsesValidDockerContainerLabels()
         {
             var json = @"[
@@ -131,6 +135,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-10", "MCP", RequirementType.Positive, "DockerAutoDiscoveryService dynamically registers newly discovered servers and updates changed configurations.")]
         public void UpsertDiscoveredServers_AddsNewServers_AndDisablesStoppedServers()
         {
             var (conn, dbFactory) = CreateDbFactory();

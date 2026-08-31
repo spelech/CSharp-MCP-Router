@@ -10,6 +10,7 @@ namespace ModelContextGateway.Tests
     public class OpenIddictProductionTests
     {
         [Fact]
+        [Requirement("GUARD-06", "GUARD", RequirementType.Negative, "OpenIddict requires explicit certificate configuration in Production environment and throws InvalidOperationException when missing.")]
         public void Production_WithNoCert_Throws_InvalidOperationException()
         {
             var services = new ServiceCollection();
@@ -27,6 +28,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-15", "AUTH", RequirementType.Positive, "OpenIddict initializes ephemeral development signing certificates in Development environment.")]
         public void Development_WithNoCert_BootsOnDevCerts()
         {
             var services = new ServiceCollection();
@@ -42,6 +44,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-15", "AUTH", RequirementType.Positive, "OpenIddict loads production X.509 PFX certificate for token signing and encryption.")]
         public void Production_WithValidPfx_Boots()
         {
             var tempPfxPath = Path.Combine(Path.GetTempPath(), $"test_cert_{Guid.NewGuid():N}.pfx");

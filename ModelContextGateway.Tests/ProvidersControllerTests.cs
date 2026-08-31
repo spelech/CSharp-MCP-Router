@@ -51,6 +51,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "ProvidersController returns combined list of Secret and Auth providers.")]
         public async Task GetAllProviders_ReturnsOkWithSecretAndAuthProviders()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -61,6 +62,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "ProvidersController returns 500 when retrieving all providers encounters database failure.")]
         public async Task GetAllProviders_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -75,6 +77,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "ProvidersController returns secret providers list.")]
         public async Task GetSecretProviders_ReturnsOkWithList()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -85,6 +88,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ProvidersController rejects saving secret provider without providerName with BadRequest.")]
         public async Task SaveSecretProvider_ReturnsBadRequest_WhenProviderNameMissing()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -97,6 +101,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "ProvidersController rejects external HTTP URLs for secret providers with BadRequest.")]
         public async Task SaveSecretProvider_ReturnsBadRequest_WhenHttpUrlPassedInConfig()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -114,6 +119,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "ProvidersController saves secret provider successfully.")]
         public async Task SaveSecretProvider_SavesSuccessfully()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -132,6 +138,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "ProvidersController returns 500 when saving secret provider encounters repository exception.")]
         public async Task SaveSecretProvider_Returns500_WhenRepositoryThrows()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -152,6 +159,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "ProvidersController returns auth providers list.")]
         public async Task GetAuthProviders_ReturnsOkWithList()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -162,6 +170,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "ProvidersController rejects saving auth provider without providerName with BadRequest.")]
         public async Task SaveAuthProvider_ReturnsBadRequest_WhenProviderNameMissing()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -174,6 +183,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "ProvidersController saves auth provider configuration successfully.")]
         public async Task SaveAuthProvider_SavesSuccessfully()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -194,6 +204,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "ProvidersController returns 500 when saving auth provider encounters repository exception.")]
         public async Task SaveAuthProvider_Returns500_WhenRepositoryThrows()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -214,6 +225,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "ProvidersController returns 500 when secret provider retrieval throws database exception.")]
         public async Task GetSecretProviders_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -228,6 +240,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-04", "GUARD", RequirementType.Negative, "ProvidersController returns 500 when auth provider retrieval throws database exception.")]
         public async Task GetAuthProviders_Returns500_OnDbException()
         {
             var mockFailingFactory = new Mock<IDbConnectionFactory>();
@@ -242,6 +255,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "ProvidersController validates Vault test connections and handles connection errors gracefully.")]
         public async Task TestVaultConnection_ValidatesInputAndHandlesFailureGracefully()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -282,6 +296,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ProvidersController validates LDAP test connections and handles connection errors gracefully.")]
         public async Task TestLdapConnection_ValidatesInputAndHandlesFailureGracefully()
         {
             var controller = new ProvidersController(_dbRepo, _dbRepo);
@@ -332,6 +347,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "ProvidersController allows HTTP URLs for localhost and 127.0.0.1 in development setups.")]
         public async Task SaveSecretProvider_HttpUrl_AllowedForLocalhost()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -355,6 +371,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "ProvidersController allows HTTP URLs for intranet simple hostnames.")]
         public async Task SaveSecretProvider_HttpUrl_AllowedForSimpleHost()
         {
             var mockAudit = new Mock<IAuditLogger>();
@@ -378,6 +395,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "ProvidersController rejects HTTP URLs for external FQDN hostnames under security policy.")]
         public async Task SaveSecretProvider_HttpUrl_RejectedForExternal()
         {
             var mockAudit = new Mock<IAuditLogger>();

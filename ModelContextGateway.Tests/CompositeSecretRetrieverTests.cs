@@ -6,6 +6,7 @@ namespace ModelContextGateway.Tests
     public class CompositeSecretRetrieverTests
     {
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "CompositeSecretRetriever returns null when secret provider is 'None'.")]
         public async Task GetSecretForProviderAsync_ReturnsNull_WhenProviderIsNone()
         {
             var retriever = new CompositeSecretRetriever(new List<ISecretRetriever>());
@@ -14,6 +15,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-03", "GUARD", RequirementType.Negative, "CompositeSecretRetriever throws InvalidOperationException when an unregistered secret provider is requested.")]
         public async Task GetSecretForProviderAsync_ThrowsInvalidOperationException_WhenProviderNotRegistered()
         {
             var retriever = new CompositeSecretRetriever(new List<ISecretRetriever>());
@@ -22,6 +24,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "CompositeSecretRetriever routes to matching provider and caches secret values in memory.")]
         public async Task GetSecretForProviderAsync_RoutesToTargetProvider_AndCachesValue()
         {
             var mockRetriever = new Mock<ISecretRetriever>();
@@ -43,6 +46,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-02", "SEC", RequirementType.Positive, "CompositeSecretRetriever normalizes provider alias names like 'Vault' to 'HashiCorpVault'.")]
         public async Task GetSecretForProviderAsync_MatchesVaultAliasNames()
         {
             var mockVaultRetriever = new Mock<ISecretRetriever>();

@@ -55,6 +55,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "BackendHealthCheckService marks server as Connected when downstream HTTP/SSE endpoint returns 200 OK.")]
         public async Task ProbeServerAsync_Sets_Connected_When_Endpoint_Responds_200()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -94,6 +95,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "BackendHealthCheckService marks server as Failed when downstream HTTP connection fails.")]
         public async Task ProbeServerAsync_Sets_Failed_When_Endpoint_Throws_Exception()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -128,6 +130,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "BackendHealthCheckService marks disabled servers as Disabled.")]
         public async Task ProbeServerAsync_Sets_Disabled_When_Server_Not_Enabled()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -156,6 +159,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "BackendHealthCheckService probes all enabled backend servers in the fleet.")]
         public async Task ProbeAllServersAsync_Probes_All_Enabled_Servers()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -184,6 +188,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "BackendHealthCheckService sets valid STDIO servers to Connected without making network HTTP probes.")]
         public async Task ProbeServerAsync_Sets_Connected_For_Valid_Stdio_Server_Without_Http_Probe()
         {
             var (conn, dbFactory) = CreateDbFactory();
@@ -225,6 +230,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-05", "GUARD", RequirementType.Negative, "BackendHealthCheckService marks invalid or dangerous STDIO commands as Failed under security policy.")]
         public async Task ProbeServerAsync_Sets_Failed_For_Invalid_Stdio_Server_Command()
         {
             var (_, dbFactory) = CreateDbFactory();
@@ -256,6 +262,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "BackendHealthCheckService marks registered custom servers as Connected.")]
         public async Task ProbeServerAsync_Sets_Connected_For_Custom_Server()
         {
             var (_, dbFactory) = CreateDbFactory();

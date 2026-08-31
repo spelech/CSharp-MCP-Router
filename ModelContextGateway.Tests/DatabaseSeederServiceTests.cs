@@ -28,6 +28,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("DB-01", "DB", RequirementType.Positive, "DatabaseSeederService initializes default router settings, provider configs, and schema.")]
         public void Seeder_Initializes_Default_Settings_And_Providers()
         {
             var (conn, factory) = CreateDbFactory();
@@ -49,6 +50,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Positive, "DatabaseSeederService validates DB encryption key strength and warns on weak keys.")]
         public void DbEncryptionKey_Warning_Detection_Works_Correctly()
         {
             var testKeys = new[] { "", "short", "SomeSecureRandomKeyValue999!" };
@@ -66,6 +68,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Positive, "DatabaseSeederService migrates legacy plaintext keys to secure one-way hashes on startup.")]
         public async Task Startup_MigratesLegacyKeysToHashedKeys()
         {
             var (connection, mockDbFactory) = CreateDbFactory();

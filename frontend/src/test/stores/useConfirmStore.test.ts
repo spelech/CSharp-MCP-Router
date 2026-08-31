@@ -16,12 +16,24 @@ describe('useConfirmStore', () => {
     });
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description initializes in closed state
+   */
   it('initializes in closed state', () => {
     const state = useConfirmStore.getState();
     expect(state.isOpen).toBe(false);
     expect(state.resolve).toBeNull();
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description opens confirmation modal and resolves true when confirmed
+   */
   it('opens confirmation modal and resolves true when confirmed', async () => {
     const confirmPromise = confirmAction({
       title: 'Delete Item',
@@ -43,6 +55,12 @@ describe('useConfirmStore', () => {
     expect(useConfirmStore.getState().isOpen).toBe(false);
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description resolves false when cancelled
+   */
   it('resolves false when cancelled', async () => {
     const confirmPromise = confirmAction('Delete this file?');
     const state = useConfirmStore.getState();
@@ -55,6 +73,12 @@ describe('useConfirmStore', () => {
     expect(useConfirmStore.getState().isOpen).toBe(false);
   });
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description settles existing pending promise with false when a new confirmation is opened
+   */
   it('settles existing pending promise with false when a new confirmation is opened', async () => {
     const firstPromise = confirmAction('First confirmation');
     const secondPromise = confirmAction('Second confirmation');

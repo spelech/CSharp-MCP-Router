@@ -4,6 +4,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Settings View Flow', () => {
 
+  /**
+   * @requirement UI-01
+   * @category UI
+   * @type Positive
+   * @description should navigate to Settings view and configure vector embedding options
+   */
   test('should navigate to Settings view and configure vector embedding options', async ({ page }) => {
     await page.goto('/');
 

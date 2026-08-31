@@ -5,6 +5,7 @@ namespace ModelContextGateway.Tests
     public class OnnxEmbeddingServiceTests
     {
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "OnnxEmbeddingService initializes local model directory and tokenizer configuration.")]
         public void Service_InitializesAndSetsUpPaths()
         {
             var settings = new RouterSettings
@@ -17,6 +18,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "OnnxEmbeddingService clears cached session and tokenizer state upon settings reload.")]
         public void ReloadSettings_ClearsSessionAndTokenizerState()
         {
             var settings1 = new RouterSettings { EmbeddingModelDir = "models/v1" };
@@ -29,6 +31,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "OnnxEmbeddingService computes vector cosine similarity for identical and orthogonal embedding vectors.")]
         public void CosineSimilarity_CalculatesOrthogonalAndIdenticalVectors()
         {
             var settings = new RouterSettings { EmbeddingModelDir = "models/test" };
@@ -46,6 +49,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "OnnxEmbeddingService returns standardized 384-dimensional vector format for empty query input.")]
         public async Task GetEmbeddingAsync_ReturnsEmpty384Vector_ForEmptyString()
         {
             var settings = new RouterSettings { EmbeddingModelDir = "models/test" };

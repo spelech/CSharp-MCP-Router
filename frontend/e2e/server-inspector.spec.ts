@@ -4,6 +4,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Server Inspector Modal Flow', () => {
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description should open Server Inspect Modal if servers are present on dashboard
+   */
   test('should open Server Inspect Modal if servers are present on dashboard', async ({ page }) => {
     await page.goto('/');
 

@@ -9,6 +9,7 @@ namespace ModelContextGateway.Tests
     public class LdapActiveDirectoryServiceIntegrationTests
     {
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "LdapActiveDirectoryService returns empty SIDs list when LDAP provider is disabled in database.")]
         public async Task ResolveUserSidsAsync_ReturnsEmpty_WhenLdapProviderDisabledInDb()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -34,6 +35,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-02", "GUARD", RequirementType.Negative, "LdapActiveDirectoryService rejects unencrypted plaintext LDAP on port 389 and throws InvalidOperationException.")]
         public async Task ResolveUserSidsAsync_ThrowsInvalidOperation_WhenDbConfigSpecifiesPlaintextLdap()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
@@ -55,6 +57,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "LdapActiveDirectoryService utilizes cached group SIDs to avoid redundant network LDAP lookups.")]
         public async Task ResolveUserSidsAsync_UsesCache_WhenCachedSidsExist()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -73,6 +76,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-02", "GUARD", RequirementType.Negative, "LdapActiveDirectoryService fails closed with SecurityException when the configured LDAP server is unreachable.")]
         public async Task ResolveUserSidsAsync_FailsClosedWithSecurityException_OnUnreachableServer()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

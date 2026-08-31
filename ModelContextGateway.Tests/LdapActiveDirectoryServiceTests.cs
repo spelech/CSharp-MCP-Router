@@ -13,6 +13,7 @@ namespace ModelContextGateway.Tests
         [InlineData("user\\name", "user\\5cname")]
         [InlineData("user\0null", "user\\00null")]
         [InlineData("", "")]
+        [Requirement("GUARD-02", "GUARD", RequirementType.Positive, "EscapeLdapFilter sanitizes and escapes special LDAP filter characters to prevent LDAP injection.")]
         public void EscapeLdapFilter_EscapesSpecialCharacters(string input, string expected)
         {
             var result = LdapActiveDirectoryService.EscapeLdapFilter(input);
@@ -20,6 +21,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ConvertSidBytesToString accurately formats binary SID byte arrays to Windows SID string format.")]
         public void ConvertSidBytesToString_FormatsValidBinarySid()
         {
             // Binary representation of S-1-5-32-544 (Builtin Administrators)
@@ -30,6 +32,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ConvertSidBytesToString returns empty string for invalid binary SID buffers.")]
         public void ConvertSidBytesToString_ReturnsEmpty_OnInvalidBytes()
         {
             Assert.Equal(string.Empty, LdapActiveDirectoryService.ConvertSidBytesToString(null!));
@@ -37,6 +40,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ResolveUserSidsAsync returns empty list when username is empty.")]
         public async Task ResolveUserSidsAsync_ReturnsEmpty_WhenUsernameEmpty()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
@@ -47,6 +51,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ResolveUserSidsAsync returns empty list when LDAP server is unconfigured.")]
         public async Task ResolveUserSidsAsync_ReturnsEmpty_WhenServerNotConfigured()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>()).Build();
@@ -57,6 +62,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-02", "GUARD", RequirementType.Negative, "ResolveUserSidsAsync rejects plaintext unencrypted LDAP connections with InvalidOperationException.")]
         public async Task ResolveUserSidsAsync_ThrowsInvalidOperation_WhenPlaintextLdapConfigured()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -71,6 +77,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ActiveDirectoryIdentityProvider returns anonymous identity context when request originates from untrusted proxy.")]
         public async Task ActiveDirectoryIdentityProvider_ReturnsAnonymous_WhenUntrustedProxy()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -87,6 +94,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ActiveDirectoryIdentityProvider returns anonymous when request lacks Windows authentication credentials.")]
         public async Task ActiveDirectoryIdentityProvider_ReturnsAnonymous_WhenNotWindowsAuth()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
@@ -102,6 +110,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-04", "AUTH", RequirementType.Positive, "ActiveDirectoryIdentityProvider delegates group SID resolution to ILdapService.")]
         public async Task ActiveDirectoryIdentityProvider_ResolvesLdapSids_WhenLdapServiceProvided()
         {
             var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>

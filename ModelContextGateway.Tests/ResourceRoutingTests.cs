@@ -3,6 +3,7 @@ namespace ModelContextGateway.Tests
     public class ResourceRoutingTests
     {
         [Fact]
+        [Requirement("MCP-05", "MCP", RequirementType.Positive, "ResourceRoutingManager filters and matches MCP resources using semantic and keyword matching.")]
         public async Task SearchResourcesAsync_FiltersResourcesCorrectly()
         {
             var manager = new ResourceRoutingManager();

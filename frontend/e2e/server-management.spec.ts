@@ -4,6 +4,12 @@ import { test, expect } from '@playwright/test';
 
 test.describe('Server Registration & Secret Providers Flow', () => {
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description should open Add Server modal and switch secret provider types
+   */
   test('should open Add Server modal and switch secret provider types', async ({ page }) => {
     await page.goto('/');
 

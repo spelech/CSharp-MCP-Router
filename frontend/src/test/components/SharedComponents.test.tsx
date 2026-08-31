@@ -8,6 +8,12 @@ import { PaginationToolbar } from '../../components/shared/PaginationToolbar';
 
 describe('Shared Components Suite', () => {
   describe('Modal Component', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description returns null when isOpen is false
+     */
     it('returns null when isOpen is false', () => {
       const { container } = render(
         <Modal isOpen={false} onClose={vi.fn()} title="Test Modal">
@@ -17,6 +23,12 @@ describe('Shared Components Suite', () => {
       expect(container).toBeEmptyDOMElement();
     });
 
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description renders title, children, and handles close button click
+     */
     it('renders title, children, and handles close button click', () => {
       const onClose = vi.fn();
       render(
@@ -35,6 +47,12 @@ describe('Shared Components Suite', () => {
   });
 
   describe('StatusBadge Component', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description renders various statuses correctly with indicators
+     */
     it('renders various statuses correctly with indicators', () => {
       const { rerender } = render(<StatusBadge status="connected" showIndicator={true} />);
       expect(screen.getByText(/connected/i)).toHaveClass('badge-success');
@@ -51,6 +69,12 @@ describe('Shared Components Suite', () => {
   });
 
   describe('PaginationToolbar Component', () => {
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description returns null when totalItems is 0
+     */
     it('returns null when totalItems is 0', () => {
       const { container } = render(
         <PaginationToolbar
@@ -64,6 +88,12 @@ describe('Shared Components Suite', () => {
       expect(container).toBeEmptyDOMElement();
     });
 
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description renders page info and navigation controls
+     */
     it('renders page info and navigation controls', () => {
       const onPageChange = vi.fn();
       const onPageSizeChange = vi.fn();
@@ -97,6 +127,12 @@ describe('Shared Components Suite', () => {
       expect(onPageChange).toHaveBeenCalledWith(3);
     });
 
+    /**
+     * @requirement UI-01
+     * @category UI
+     * @type Positive
+     * @description handles pageSize all
+     */
     it('handles pageSize all', () => {
       const onPageSizeChange = vi.fn();
 

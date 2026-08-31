@@ -39,6 +39,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "SemanticSearchService scores and ranks backend tools using vector embeddings and cosine similarity.")]
         public async Task SearchToolsSemanticAsync_ScoresAndRanksTools()
         {
             var embeddingService = new TestEmbeddingService();
@@ -57,6 +58,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "SemanticSearchService performs keyword and token substring matching when semantic provider is offline.")]
         public void SearchTools_KeywordMatching_WorksCorrectly()
         {
             var tools = new List<object>

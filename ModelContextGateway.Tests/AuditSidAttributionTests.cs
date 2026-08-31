@@ -9,6 +9,7 @@ namespace ModelContextGateway.Tests
     public class AuditSidAttributionTests
     {
         [Fact]
+        [Requirement("AUTH-03", "AUTH", RequirementType.Positive, "HeaderIdentityProvider extracts Remote-User-Sid from trusted proxy headers and populates caller SID.")]
         public async Task HeaderIdentityProvider_Extracts_RemoteUserSid_And_Populates_Sid()
         {
             var context = new DefaultHttpContext();
@@ -31,6 +32,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "AppKey model and authentication handler support OwnerSid attribution for identity tracking.")]
         public async Task AppKeyAuthenticationHandler_Emits_Sid_Claim_When_OwnerSid_Present()
         {
             var services = new ServiceCollection();
@@ -65,6 +67,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "AppKeyIdentityProvider resolves authenticated owner and SID from validated request items.")]
         public async Task AppKeyIdentityProvider_ResolvesOwnerAndSid_FromHttpContextItems()
         {
             // Simulates what AppKeyAuthenticationHandler stashes after validating a key.
@@ -82,6 +85,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-02", "AUTH", RequirementType.Positive, "AppKeyIdentityProvider falls back to anonymous identity when no AppKey is present.")]
         public async Task AppKeyIdentityProvider_ReturnsAnonymous_WhenNoAppKey()
         {
             var context = new DefaultHttpContext();

@@ -5,6 +5,7 @@ namespace ModelContextGateway.Tests
     public class ProtocolResultTypeTests
     {
         [Fact]
+        [Requirement("MCP-15", "MCP", RequirementType.Positive, "All JSON-RPC results return a resultType discriminator (complete or input_required) per MCP 2026-07-28 spec.")]
         public void EnsureResultType_AttachesComplete_WhenMissing()
         {
             var rawResult = new { tools = new[] { "tool1", "tool2" } };
@@ -20,6 +21,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-15", "MCP", RequirementType.Positive, "Preserves existing resultType in JSON-RPC results when explicitly supplied.")]
         public void EnsureResultType_PreservesExistingResultType()
         {
             var rawResult = new { resultType = "input_required", prompt = "Authentication token needed" };
@@ -35,6 +37,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-15", "MCP", RequirementType.Positive, "Handles null result object and returns a default complete resultType structure.")]
         public void EnsureResultType_HandlesNullResult()
         {
             var processed = ProtocolHelper.EnsureResultType(null);
@@ -48,6 +51,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-15", "MCP", RequirementType.Positive, "Attaches resultType to JsonElement objects during protocol normalization.")]
         public void EnsureResultType_HandlesJsonElement()
         {
             using var docIn = JsonDocument.Parse("{\"resources\":[]}");

@@ -13,12 +13,24 @@ describe('PolicyModal component', () => {
     isAllowed: true
   };
 
+  /**
+   * @requirement AUTH-01
+   * @category AUTH
+   * @type Positive
+   * @description renders nothing when isPolicyModalOpen is false
+   */
   it('renders nothing when isPolicyModalOpen is false', () => {
     useSettingsStore.setState({ isPolicyModalOpen: false, editingPolicy: null });
     const { container } = render(<PolicyModal />);
     expect(container.firstChild).toBeNull();
   });
 
+  /**
+   * @requirement AUTH-01
+   * @category AUTH
+   * @type Positive
+   * @description renders create policy form with default inputs
+   */
   it('renders create policy form with default inputs', () => {
     useSettingsStore.setState({ isPolicyModalOpen: true, editingPolicy: null });
     render(<PolicyModal />);
@@ -29,6 +41,12 @@ describe('PolicyModal component', () => {
     expect(screen.getByLabelText('Policy Mode')).toHaveValue('true');
   });
 
+  /**
+   * @requirement AUTH-01
+   * @category AUTH
+   * @type Positive
+   * @description renders edit policy form pre-filled with policy data
+   */
   it('renders edit policy form pre-filled with policy data', () => {
     useSettingsStore.setState({ isPolicyModalOpen: true, editingPolicy: existingPolicy });
     render(<PolicyModal />);
@@ -39,6 +57,12 @@ describe('PolicyModal component', () => {
     expect(screen.getByLabelText('Policy Mode')).toHaveValue('true');
   });
 
+  /**
+   * @requirement GUARD-01
+   * @category GUARD
+   * @type Negative
+   * @description submits form with constructed payload for DENY policy
+   */
   it('submits form with constructed payload for DENY policy', async () => {
     const saveSpy = vi.fn().mockResolvedValue(undefined);
     useSettingsStore.setState({ isPolicyModalOpen: true, editingPolicy: null, savePolicy: saveSpy });
@@ -60,6 +84,12 @@ describe('PolicyModal component', () => {
     });
   });
 
+  /**
+   * @requirement AUTH-01
+   * @category AUTH
+   * @type Positive
+   * @description closes modal on cancel click
+   */
   it('closes modal on cancel click', () => {
     const closeSpy = vi.fn();
     useSettingsStore.setState({ isPolicyModalOpen: true, editingPolicy: null, closePolicyModal: closeSpy });

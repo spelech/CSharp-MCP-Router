@@ -3,6 +3,7 @@ namespace ModelContextGateway.Tests
     public class ApiEmbeddingServiceTests
     {
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "ApiEmbeddingService computes vector cosine similarity accurately for semantic tool ranking.")]
         public void CalculateCosineSimilarity_ComputesSimilarity()
         {
             var service = new ApiEmbeddingService(new HttpClient(), new RouterSettings());
@@ -14,6 +15,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "ApiEmbeddingService dynamically reloads provider configuration and API endpoints without gateway restarts.")]
         public void ReloadSettings_UpdatesSettings()
         {
             var service = new ApiEmbeddingService(new HttpClient(), new RouterSettings());

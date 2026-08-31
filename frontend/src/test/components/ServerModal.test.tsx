@@ -26,12 +26,24 @@ describe('ServerModal component', () => {
     connectionError: '',
   };
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description renders nothing when isAddEditOpen is false
+   */
   it('renders nothing when isAddEditOpen is false', () => {
     useServerStore.setState({ isAddEditOpen: false, editingServer: null });
     const { container } = render(<ServerModal />);
     expect(container.firstChild).toBeNull();
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description renders Add MCP Server form with default values when in add mode
+   */
   it('renders Add MCP Server form with default values when in add mode', () => {
     useServerStore.setState({ isAddEditOpen: true, editingServer: null });
     render(<ServerModal />);
@@ -47,6 +59,12 @@ describe('ServerModal component', () => {
     expect((document.getElementById('server-hidden') as HTMLInputElement)).not.toBeChecked();
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description renders Edit MCP Server form populated with server details when editing
+   */
   it('renders Edit MCP Server form populated with server details when editing', () => {
     useServerStore.setState({ isAddEditOpen: true, editingServer: existingServer });
     render(<ServerModal />);
@@ -62,6 +80,12 @@ describe('ServerModal component', () => {
     expect(screen.getByLabelText('Custom Header / Query Name')).toHaveValue('X-HA-Access');
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description switches to connection command when STDIO transport type is selected
+   */
   it('switches to connection command when STDIO transport type is selected', async () => {
     useServerStore.setState({ isAddEditOpen: true, editingServer: null });
     render(<ServerModal />);
@@ -77,6 +101,12 @@ describe('ServerModal component', () => {
     expect(screen.getByLabelText('Connection URL')).toBeInTheDocument();
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description shows custom header input when auth shape is custom-header or query
+   */
   it('shows custom header input when auth shape is custom-header or query', () => {
     useServerStore.setState({ isAddEditOpen: true, editingServer: null });
     render(<ServerModal />);
@@ -94,6 +124,12 @@ describe('ServerModal component', () => {
     expect(screen.queryByLabelText('Custom Header / Query Name')).toBeNull();
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description closes modal when cancel button or close X is clicked
+   */
   it('closes modal when cancel button or close X is clicked', () => {
     const closeSpy = vi.fn();
     useServerStore.setState({ isAddEditOpen: true, editingServer: null, closeAddEditModal: closeSpy });
@@ -108,6 +144,12 @@ describe('ServerModal component', () => {
     expect(closeSpy).toHaveBeenCalledTimes(2);
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description submits form with correctly formatted payload including trimmed categories
+   */
   it('submits form with correctly formatted payload including trimmed categories', async () => {
     const saveSpy = vi.fn().mockResolvedValue(undefined);
     useServerStore.setState({ isAddEditOpen: true, editingServer: null, saveServer: saveSpy });

@@ -27,6 +27,12 @@ describe('ClientSetupGuide Component', () => {
     vi.mocked(appKeyApi.fetchAppKeysApi).mockResolvedValue(sampleKeys as any);
   });
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description renders default standard mcpServers configuration with meta mode
+   */
   it('renders default standard mcpServers configuration with meta mode', async () => {
     render(<ClientSetupGuide />);
 
@@ -42,6 +48,12 @@ describe('ClientSetupGuide Component', () => {
     expect(screen.getByTestId('server-scope-select')).toHaveValue('all');
   });
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description switches between format tabs (Standard, VS Code, Generic SSE)
+   */
   it('switches between format tabs (Standard, VS Code, Generic SSE)', async () => {
     render(<ClientSetupGuide />);
 
@@ -63,6 +75,12 @@ describe('ClientSetupGuide Component', () => {
     expect(screen.getByText(/"authHeader":\s*"X-App-Key:\s*mcp_live_YOUR_APP_KEY_HERE"/i)).toBeInTheDocument();
   });
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description switches server scope from all servers to individual server
+   */
   it('switches server scope from all servers to individual server', async () => {
     render(<ClientSetupGuide />);
 
@@ -76,6 +94,12 @@ describe('ClientSetupGuide Component', () => {
     expect(screen.getByText(/\/docker/i)).toBeInTheDocument();
   });
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description updates domain when LAN or custom is chosen
+   */
   it('updates domain when LAN or custom is chosen', async () => {
     render(<ClientSetupGuide />);
 
@@ -95,6 +119,12 @@ describe('ClientSetupGuide Component', () => {
     expect(screen.getByText(/https:\/\/my-custom-router\.internal:9999/i)).toBeInTheDocument();
   });
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description toggles meta mode when server scope is all
+   */
   it('toggles meta mode when server scope is all', async () => {
     render(<ClientSetupGuide />);
 
@@ -110,6 +140,12 @@ describe('ClientSetupGuide Component', () => {
     expect(screen.getByText(/\/sse\?meta=true/i)).toBeInTheDocument();
   });
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description populates app keys dropdown and injects selected key
+   */
   it('populates app keys dropdown and injects selected key', async () => {
     render(<ClientSetupGuide />);
 
@@ -127,6 +163,12 @@ describe('ClientSetupGuide Component', () => {
     expect(screen.getByText(/"X-App-Key":\s*"mcp_live_xyz789\.\.\."/i)).toBeInTheDocument();
   });
 
+  /**
+   * @requirement AUTH-02
+   * @category AUTH
+   * @type Positive
+   * @description copies configuration to clipboard and triggers success toast
+   */
   it('copies configuration to clipboard and triggers success toast', async () => {
     const writeTextSpy = vi.fn().mockResolvedValue(undefined);
     Object.assign(navigator, {

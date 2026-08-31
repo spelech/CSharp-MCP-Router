@@ -57,6 +57,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-01", "MCP", RequirementType.Positive, "ClientSession initializes, aggregates downstream servers, and manages connection lifecycle.")]
         public async Task ClientSession_InitializationAndLifecycle_ExecutesSuccessfully()
         {
             var (_, dbFactory) = CreateDbFactory();

@@ -21,6 +21,12 @@ describe('ServerCard Component', () => {
     allowPassThroughAuth: false,
   };
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description renders connected server details with badges and triggers actions
+   */
   it('renders connected server details with badges and triggers actions', () => {
     const toggleSpy = vi.spyOn(useServerStore.getState(), 'toggleServerEnabled').mockImplementation(vi.fn());
     const editSpy = vi.spyOn(useServerStore.getState(), 'openEditModal').mockImplementation(vi.fn());
@@ -57,6 +63,12 @@ describe('ServerCard Component', () => {
     expect(toggleSpy).toHaveBeenCalledWith('docker', false);
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description renders connecting/retrying state
+   */
   it('renders connecting/retrying state', () => {
     const connectingServer: McpServer = {
       ...baseServer,
@@ -68,6 +80,12 @@ describe('ServerCard Component', () => {
     expect(screen.getByText(/Connecting \(2\/5\)/i)).toBeInTheDocument();
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description renders failed state with retry button
+   */
   it('renders failed state with retry button', () => {
     const reconnectSpy = vi.spyOn(useServerStore.getState(), 'reconnectServer').mockImplementation(vi.fn());
     const failedServer: McpServer = {
@@ -85,6 +103,12 @@ describe('ServerCard Component', () => {
     expect(reconnectSpy).toHaveBeenCalledWith('docker');
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description renders disconnected state with connect button and hidden badge
+   */
   it('renders disconnected state with connect button and hidden badge', () => {
     const reconnectSpy = vi.spyOn(useServerStore.getState(), 'reconnectServer').mockImplementation(vi.fn());
     const disconnectedServer: McpServer = {
@@ -102,6 +126,12 @@ describe('ServerCard Component', () => {
     expect(reconnectSpy).toHaveBeenCalledWith('docker');
   });
 
+  /**
+   * @requirement MCP-01
+   * @category MCP
+   * @type Positive
+   * @description renders disabled state
+   */
   it('renders disabled state', () => {
     const disabledServer: McpServer = {
       ...baseServer,
