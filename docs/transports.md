@@ -443,9 +443,12 @@ To connect directly to a single backend bypassing Meta-Mode, point the client UR
 | `-32700` | `Parse error` | Client sent malformed or invalid JSON payload. | Verify JSON syntax and escaping in client payloads. |
 | `-32600` | `Invalid Request` | JSON is not a valid JSON-RPC 2.0 request object. | Ensure payload includes `"jsonrpc": "2.0"` and valid `"method"`. |
 | `-32601` | `Method not found` | Method is not implemented or namespaced identifier is invalid. | Query `search_tools` first or verify exact `<serverId>__<toolName>` spelling. |
-| `-32602` | `Invalid params` | Arguments do not match tool input schema. | Inspect tool input schema using the Test Bench form builder. |
+| `-32602` | `Invalid params / Resource Not Found` | Arguments do not match tool input schema or requested resource URI not found. | Inspect tool input schema using the Test Bench form builder or verify URI. |
 | `-32603` | `Internal error` | Unhandled downstream server error or serialization failure. | Check gateway diagnostic logs in Web UI for backend stack trace. |
 | `-32001` | `Server Disconnected / Not Running` | Downstream SSE stream or STDIO subprocess is offline. | Check backend server status on Overview dashboard; inspect container logs. |
+| `-32020` | `Connection Closed` | Downstream connection terminated during communication. | Check backend server connectivity and logs. |
+| `-32021` | `Request Cancelled` | Request was cancelled by client session via `notifications/cancelled`. | Check client session lifecycle and timeouts. |
+| `-32022` | `Missing Required Client Capability` | Client lacked declared capability for requested operation (e.g. sampling). | Declare required client capability in initialize handshake. |
 
 ### HTTP Status Codes
 

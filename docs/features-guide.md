@@ -458,3 +458,54 @@ The official Docker image simplifies deployment of STDIO-based subprocess server
 - **Embedded Runtimes**: The image ships with pre-installed Node.js, Python 3, `uv` package manager, and `bun`.
 - **Use Case**: Natively execute STDIO backend scripts (e.g., `npx -y @modelcontextprotocol/server-postgres`) directly from within the gateway container, minimizing network configuration overhead.
 
+---
+
+## ⚡ 14. Model Context Protocol Specification Alignment (MCP 2026-07-28)
+
+Model Context Gateway strictly implements the MCP 2026-07-28 specification:
+
+### Required `resultType` Field
+All successful JSON-RPC results return a top-level `resultType` discriminator:
+- `"complete"`: Indicates full execution with final tool results or resource content.
+- `"input_required"`: Signals Multi Round-Trip interactive requests requiring follow-up user input.
+
+### Multi Round-Trip Requests (MRTR)
+When downstream tools or workflows require step-by-step interactive inputs (e.g. 2FA codes, interactive confirmation, parameter disambiguation):
+- The gateway returns `resultType: "input_required"` with an array of `inputRequests` (`id`, `type`, `message`, `required`, `schema`).
+- Clients reply via `execute_tool` using the optional `inputResponses` parameter matching each requested input ID.
+
+### Cacheable Results Metadata
+Endpoints (`tools/list`, `resources/list`, `resources/read`, `prompts/list`) annotate responses with caching metadata:
+- `ttlMs`: Cache time-to-live in milliseconds (default: `300000` / 5 minutes).
+- `cacheScope`: Caching scope boundary (`"session"` or `"global"`).
+
+### MCP 2026-07-28 Spec Error Codes
+Error handling adheres strictly to the official taxonomy:
+- `-32602` (Invalid Params): Used when requested resources or parameters are not found or invalid.
+- `-32020` (Connection Closed): Downstream connection terminated.
+- `-32021` (Request Cancelled): Client or session cancelled pending request.
+- `-32022` (Capability Missing): Client or server lacks declared required capability.
+
+### Request Header Annotations
+MCP HTTP POST endpoints enforce spec-compliant headers:
+- `Mcp-Method`: Specifies the target RPC method (e.g., `tools/call`, `resources/read`).
+- `Mcp-Name`: Specifies the target tool, prompt, or resource name.
+- Dual-spec fallback ensures transparent backwards compatibility with legacy payloads.
+
+### Deprecated Features Cleanup
+Per the 2026-07-28 specification deprecation schedule:
+- Per-request log levels are supported via `_meta.io.modelcontextprotocol/logLevel` on incoming requests.
+- Legacy `logging/setLevel`, `roots/list`, `sampling/createMessage`, and Admin `ping` methods return Method Not Found (`-32601`).
+- `Mcp-Session-Id` header is deprecated on HTTP+SSE transports in favor of URL-bound session routing.
+
+---
+
+## 🔒 15. OAuth 2.1 Dynamic Client Registration & RFC 7591 Security
+
+The integrated OAuth 2.0 / 2.1 authorization server complies with RFC 7591 and OAuth 2.1 standards:
+- **Mandatory `application_type`**: Dynamic Client Registration (`/api/register`) requires explicit `application_type` (`"web"` or `"native"`). Public native clients default to PKCE with `token_endpoint_auth_method: "none"`.
+- **Issuer Validation & Binding**: Client credentials and authorization requests strictly validate and bind to the gateway's canonical issuer URL (`iss`).
+- **One-Way Secret Hashing**: Client secrets are hashed using SHA-256 before storage across SQLite, MSSQL, and MySQL databases.
+- **Resource Metadata**: RFC 9728 discovery automatically exposes `authorization_servers` and `resource` indicators.
+
+
