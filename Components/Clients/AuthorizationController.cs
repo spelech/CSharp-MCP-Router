@@ -83,6 +83,18 @@ namespace ModelContextGateway.Components.Clients
 
                 if (application is OAuthClient client)
                 {
+                    var isPublic = string.Equals(client.ClientType, "public", StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(client.ClientSecretHash);
+                    if (isPublic)
+                    {
+                        return Forbid(
+                            authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                            properties: new Microsoft.AspNetCore.Authentication.AuthenticationProperties(new Dictionary<string, string?>
+                            {
+                                [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.UnauthorizedClient,
+                                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "Public clients are not allowed to use the client_credentials grant type."
+                            }));
+                    }
+
                     if (client.ExpiresAt.HasValue && client.ExpiresAt.Value < DateTime.UtcNow)
                     {
                         return Forbid(
@@ -129,6 +141,12 @@ namespace ModelContextGateway.Components.Clients
                 // Subject (sub) is a required claim
                 identity.AddClaim(OpenIddictConstants.Claims.Subject, request.ClientId!);
                 identity.AddClaim(OpenIddictConstants.Claims.Name, await GetDisplayNameAsync(application) ?? request.ClientId!);
+
+                var requestedScopes = request.GetScopes();
+                if (requestedScopes.Any())
+                {
+                    identity.SetScopes(requestedScopes);
+                }
 
                 identity.SetDestinations(static claim => new[] { OpenIddictConstants.Destinations.AccessToken });
 
@@ -257,14 +275,16 @@ namespace ModelContextGateway.Components.Clients
                 var authResult = await authService.AuthorizeAsync(User, "AdminPolicy");
                 if (!authResult.Succeeded)
                 {
-                    return Forbid();
+                    return StatusCode(StatusCodes.Status403Forbidden, new
+                    {
+                        error = "access_denied",
+                        error_description = "Dynamic client registration is restricted to administrators."
+                    });
                 }
             }
 
             var clientName = metadata.TryGetProperty("client_name", out var cn) ? cn.GetString() : "Unknown Client";
             var clientId = Guid.NewGuid().ToString("N");
-            var clientSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
-            var clientSecretHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(clientSecret))).ToLowerInvariant();
 
             var redirectUrisList = new List<string>();
             if (metadata.TryGetProperty("redirect_uris", out var rUris) && rUris.ValueKind == JsonValueKind.Array)
@@ -274,6 +294,17 @@ namespace ModelContextGateway.Components.Clients
                     var uriStr = uri.GetString();
                     if (!string.IsNullOrEmpty(uriStr))
                     {
+                        if (!Uri.TryCreate(uriStr, UriKind.Absolute, out var parsedUri) || 
+                            (!string.Equals(parsedUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) && 
+                             !string.Equals(parsedUri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) &&
+                             !parsedUri.IsLoopback))
+                        {
+                            return BadRequest(new
+                            {
+                                error = "invalid_redirect_uri",
+                                error_description = $"The redirect URI '{uriStr}' is invalid or not an absolute HTTP/HTTPS URI."
+                            });
+                        }
                         redirectUrisList.Add(uriStr);
                     }
                 }
@@ -313,7 +344,7 @@ namespace ModelContextGateway.Components.Clients
                 var parsed = scopeProp.GetString()?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
                 if (parsed != null && parsed.Length > 0)
                 {
-                    scopesList = parsed.ToList();
+                    scopesList = parsed.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
                 }
             }
             else if (metadata.TryGetProperty("scopes", out var scopesProp) && scopesProp.ValueKind == JsonValueKind.Array)
@@ -327,9 +358,16 @@ namespace ModelContextGateway.Components.Clients
                         scopesList.Add(sStr);
                     }
                 }
+                scopesList = scopesList.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             }
 
-            var authMethod = metadata.TryGetProperty("token_endpoint_auth_method", out var team) ? team.GetString() : "client_secret_post";
+            var authMethod = metadata.TryGetProperty("token_endpoint_auth_method", out var team) ? team.GetString() : null;
+            var isNativeApp = metadata.TryGetProperty("application_type", out var appType) && string.Equals(appType.GetString(), "native", StringComparison.OrdinalIgnoreCase);
+            var isPublic = string.Equals(authMethod, "none", StringComparison.OrdinalIgnoreCase) || (isNativeApp && (authMethod == null || string.Equals(authMethod, "none", StringComparison.OrdinalIgnoreCase)));
+
+            var clientType = isPublic ? "public" : "confidential";
+            string? clientSecret = isPublic ? null : Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+            string clientSecretHash = clientSecret != null ? Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(clientSecret))).ToLowerInvariant() : "";
 
             try
             {
@@ -340,20 +378,32 @@ namespace ModelContextGateway.Components.Clients
                         ClientId = clientId,
                         ClientSecret = clientSecret,
                         DisplayName = clientName,
+                        ClientType = isPublic ? OpenIddictConstants.ClientTypes.Public : OpenIddictConstants.ClientTypes.Confidential,
                         Permissions =
                         {
                             OpenIddictConstants.Permissions.Endpoints.Token,
                             OpenIddictConstants.Permissions.Endpoints.Authorization,
-                            OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
                             OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
                             OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                            OpenIddictConstants.Permissions.ResponseTypes.Code,
-                            OpenIddictConstants.Permissions.Prefixes.Scope + "api",
-                            OpenIddictConstants.Permissions.Prefixes.Scope + "mcp_client",
-                            OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
-                            OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access"
+                            OpenIddictConstants.Permissions.ResponseTypes.Code
                         }
                     };
+
+                    if (isPublic)
+                    {
+                        descriptor.Requirements.Add(OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange);
+                    }
+                    else
+                    {
+                        descriptor.Permissions.Add(OpenIddictConstants.Permissions.GrantTypes.ClientCredentials);
+                    }
+
+                    // Dynamically register all requested scopes in OpenIddict application permissions
+                    foreach (var s in scopesList)
+                    {
+                        descriptor.Permissions.Add(OpenIddictConstants.Permissions.Prefixes.Scope + s);
+                    }
+
                     foreach (var uriStr in redirectUrisList)
                     {
                         if (Uri.TryCreate(uriStr, UriKind.Absolute, out var parsedUri))
@@ -371,7 +421,7 @@ namespace ModelContextGateway.Components.Clients
                         ClientId = clientId,
                         ClientSecretHash = clientSecretHash,
                         ClientName = clientName ?? "Unknown Client",
-                        ClientType = "confidential",
+                        ClientType = clientType,
                         RedirectUrisJson = JsonSerializer.Serialize(redirectUrisList),
                         GrantTypesJson = JsonSerializer.Serialize(grantTypesList),
                         ScopesJson = JsonSerializer.Serialize(scopesList),
@@ -382,7 +432,22 @@ namespace ModelContextGateway.Components.Clients
                 }
 
                 var username = User?.Identity?.Name ?? "unknown";
-                await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName, redirectUris = redirectUrisList }), true);
+                await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName, redirectUris = redirectUrisList, clientType }), true);
+
+                if (isPublic)
+                {
+                    return StatusCode(StatusCodes.Status201Created, new
+                    {
+                        client_id = clientId,
+                        client_name = clientName,
+                        client_id_issued_at = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
+                        redirect_uris = redirectUrisList,
+                        grant_types = grantTypesList,
+                        response_types = responseTypesList,
+                        token_endpoint_auth_method = "none",
+                        scope = string.Join(" ", scopesList)
+                    });
+                }
 
                 return StatusCode(StatusCodes.Status201Created, new
                 {
@@ -394,7 +459,8 @@ namespace ModelContextGateway.Components.Clients
                     redirect_uris = redirectUrisList,
                     grant_types = grantTypesList,
                     response_types = responseTypesList,
-                    token_endpoint_auth_method = authMethod ?? "client_secret_post"
+                    token_endpoint_auth_method = authMethod ?? "client_secret_post",
+                    scope = string.Join(" ", scopesList)
                 });
             }
             catch (Exception ex)

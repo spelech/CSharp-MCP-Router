@@ -157,9 +157,9 @@ namespace ModelContextGateway.Extensions
                 return Results.Json(new
                 {
                     resource = resourceUri,
-                    authorization_servers = new[] { $"{scheme}://{host}/", $"{scheme}://{host}" },
+                    authorization_servers = new[] { $"{scheme}://{host}" },
                     bearer_methods_supported = new[] { "header" },
-                    scopes_supported = new[] { "mcp_client", "openid", "offline_access" }
+                    scopes_supported = new[] { "mcp_client", "openid", "offline_access", "api" }
                 });
             });
 
@@ -170,9 +170,9 @@ namespace ModelContextGateway.Extensions
                 return Results.Json(new
                 {
                     resource = $"{scheme}://{host}/{path}",
-                    authorization_servers = new[] { $"{scheme}://{host}/", $"{scheme}://{host}" },
+                    authorization_servers = new[] { $"{scheme}://{host}" },
                     bearer_methods_supported = new[] { "header" },
-                    scopes_supported = new[] { "mcp_client", "openid", "offline_access" }
+                    scopes_supported = new[] { "mcp_client", "openid", "offline_access", "api" }
                 });
             });
 

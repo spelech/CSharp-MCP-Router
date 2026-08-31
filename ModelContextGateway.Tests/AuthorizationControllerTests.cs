@@ -347,5 +347,210 @@ namespace ModelContextGateway.Tests
             Assert.StartsWith("/consent", redirectResult.Url);
             Assert.Contains("client_name=Awesome%20MCP%20App", redirectResult.Url);
         }
+
+        [Fact]
+        [Requirement("AUTH-113", "SEC", RequirementType.Positive, "RegisterClient supports public clients with PKCE (token_endpoint_auth_method: none) and omits client secret.")]
+        public async Task RegisterClient_PublicClient_SucceedsWithoutSecret()
+        {
+            var mockAppManager = new Mock<IOpenIddictApplicationManager>();
+            OpenIddictApplicationDescriptor? capturedDescriptor = null;
+            mockAppManager.Setup(m => m.CreateAsync(It.IsAny<OpenIddictApplicationDescriptor>(), default))
+                          .Callback<OpenIddictApplicationDescriptor, CancellationToken>((d, _) => capturedDescriptor = d)
+                          .ReturnsAsync(new object());
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
+            var mockOAuthRepo = new Mock<IOAuthClientRepository>();
+
+            var mockLoggerFactory = new Mock<ILoggerFactory>();
+            mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+            var mockServiceProvider = new Mock<IServiceProvider>();
+
+            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), mockLoggerFactory.Object, mockServiceProvider.Object);
+            embeddingServiceMock.Setup(m => m.GetSettings()).Returns(new RouterSettings { AllowOpenClientRegistration = true });
+
+            var services = new ServiceCollection();
+            services.AddSingleton(embeddingServiceMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpContext = new DefaultHttpContext { RequestServices = serviceProvider };
+
+            var controller = new AuthorizationController(mockOAuthRepo.Object, mockAudit.Object, mockAppManager.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
+            var json = JsonDocument.Parse("{\"client_name\":\"Claude Desktop\",\"redirect_uris\":[\"http://127.0.0.1:8080/callback\"],\"token_endpoint_auth_method\":\"none\",\"scope\":\"mcp_client tools:execute\"}").RootElement;
+            var result = await controller.RegisterClient(json) as ObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(201, result.StatusCode);
+            Assert.NotNull(capturedDescriptor);
+            Assert.Equal(OpenIddictConstants.ClientTypes.Public, capturedDescriptor.ClientType);
+            Assert.Null(capturedDescriptor.ClientSecret);
+            Assert.Contains(OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange, capturedDescriptor.Requirements);
+            Assert.Contains(OpenIddictConstants.Permissions.Prefixes.Scope + "mcp_client", capturedDescriptor.Permissions);
+            Assert.Contains(OpenIddictConstants.Permissions.Prefixes.Scope + "tools:execute", capturedDescriptor.Permissions);
+
+            var jsonText = JsonSerializer.Serialize(result.Value);
+            var doc = JsonDocument.Parse(jsonText);
+            Assert.False(doc.RootElement.TryGetProperty("client_secret", out _));
+            Assert.Equal("none", doc.RootElement.GetProperty("token_endpoint_auth_method").GetString());
+            Assert.Contains("tools:execute", doc.RootElement.GetProperty("scope").GetString());
+        }
+
+        [Fact]
+        [Requirement("AUTH-114", "SEC", RequirementType.Negative, "RegisterClient rejects invalid or non-absolute redirect URIs with standard RFC 7591 invalid_redirect_uri error.")]
+        public async Task RegisterClient_InvalidRedirectUri_ReturnsBadRequest()
+        {
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
+            var mockOAuthRepo = new Mock<IOAuthClientRepository>();
+
+            var mockLoggerFactory = new Mock<ILoggerFactory>();
+            mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+            var mockServiceProvider = new Mock<IServiceProvider>();
+
+            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), mockLoggerFactory.Object, mockServiceProvider.Object);
+            embeddingServiceMock.Setup(m => m.GetSettings()).Returns(new RouterSettings { AllowOpenClientRegistration = true });
+
+            var services = new ServiceCollection();
+            services.AddSingleton(embeddingServiceMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpContext = new DefaultHttpContext { RequestServices = serviceProvider };
+
+            var controller = new AuthorizationController(mockOAuthRepo.Object, mockAudit.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
+            var json = JsonDocument.Parse("{\"client_name\":\"Bad App\",\"redirect_uris\":[\"not-a-valid-uri\"]}").RootElement;
+            var result = await controller.RegisterClient(json) as BadRequestObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
+            var jsonText = JsonSerializer.Serialize(result.Value);
+            var doc = JsonDocument.Parse(jsonText);
+            Assert.Equal("invalid_redirect_uri", doc.RootElement.GetProperty("error").GetString());
+        }
+
+        [Fact]
+        [Requirement("AUTH-115", "SEC", RequirementType.Positive, "RegisterClient dynamically binds requested scopes to OpenIddict application descriptor permissions.")]
+        public async Task RegisterClient_DynamicScopes_AddedToPermissions()
+        {
+            var mockAppManager = new Mock<IOpenIddictApplicationManager>();
+            OpenIddictApplicationDescriptor? capturedDescriptor = null;
+            mockAppManager.Setup(m => m.CreateAsync(It.IsAny<OpenIddictApplicationDescriptor>(), default))
+                          .Callback<OpenIddictApplicationDescriptor, CancellationToken>((d, _) => capturedDescriptor = d)
+                          .ReturnsAsync(new object());
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
+            var mockOAuthRepo = new Mock<IOAuthClientRepository>();
+
+            var mockLoggerFactory = new Mock<ILoggerFactory>();
+            mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+            var mockServiceProvider = new Mock<IServiceProvider>();
+
+            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), mockLoggerFactory.Object, mockServiceProvider.Object);
+            embeddingServiceMock.Setup(m => m.GetSettings()).Returns(new RouterSettings { AllowOpenClientRegistration = true });
+
+            var services = new ServiceCollection();
+            services.AddSingleton(embeddingServiceMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpContext = new DefaultHttpContext { RequestServices = serviceProvider };
+
+            var controller = new AuthorizationController(mockOAuthRepo.Object, mockAudit.Object, mockAppManager.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
+            var json = JsonDocument.Parse("{\"client_name\":\"Scope App\",\"redirect_uris\":[\"https://example.com/oauth/callback\"],\"scope\":\"custom:read custom:write\"}").RootElement;
+            var result = await controller.RegisterClient(json) as ObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(201, result.StatusCode);
+            Assert.NotNull(capturedDescriptor);
+            Assert.Contains(OpenIddictConstants.Permissions.Prefixes.Scope + "custom:read", capturedDescriptor.Permissions);
+            Assert.Contains(OpenIddictConstants.Permissions.Prefixes.Scope + "custom:write", capturedDescriptor.Permissions);
+        }
+
+        [Fact]
+        [Requirement("AUTH-116", "SEC", RequirementType.Negative, "Exchange rejects client_credentials grant attempts by public clients with UnauthorizedClient error.")]
+        public async Task Exchange_PublicClient_ClientCredentials_ReturnsForbid()
+        {
+            var mockOAuthRepo = new Mock<IOAuthClientRepository>();
+            mockOAuthRepo.Setup(r => r.GetOAuthClientByIdAsync("public-client"))
+                .ReturnsAsync(new OAuthClient
+                {
+                    ClientId = "public-client",
+                    ClientSecretHash = "",
+                    ClientName = "Public CLI App",
+                    ClientType = "public"
+                });
+
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
+
+            var openIdRequest = new OpenIddictRequest
+            {
+                GrantType = OpenIddictConstants.GrantTypes.ClientCredentials,
+                ClientId = "public-client"
+            };
+
+            var httpContext = new DefaultHttpContext();
+            httpContext.Features.Set(new OpenIddictServerAspNetCoreFeature
+            {
+                Transaction = new OpenIddict.Server.OpenIddictServerTransaction
+                {
+                    Request = openIdRequest
+                }
+            });
+
+            var controller = new AuthorizationController(mockOAuthRepo.Object, mockAudit.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
+            var result = await controller.Exchange();
+            var forbidResult = Assert.IsType<ForbidResult>(result);
+            Assert.Contains(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme, forbidResult.AuthenticationSchemes);
+        }
+
+        [Fact]
+        [Requirement("AUTH-117", "SEC", RequirementType.Negative, "RegisterClient returns 403 Forbidden with access_denied when open client registration is disabled and caller is unauthorized.")]
+        public async Task RegisterClient_WhenClosedRegistration_UnauthorizedUser_ReturnsForbidden()
+        {
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
+            var mockOAuthRepo = new Mock<IOAuthClientRepository>();
+
+            var mockLoggerFactory = new Mock<ILoggerFactory>();
+            mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+            var mockServiceProvider = new Mock<IServiceProvider>();
+
+            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), mockLoggerFactory.Object, mockServiceProvider.Object);
+            embeddingServiceMock.Setup(m => m.GetSettings()).Returns(new RouterSettings { AllowOpenClientRegistration = false });
+
+            var mockAuthService = new Mock<IAuthorizationService>();
+            mockAuthService.Setup(a => a.AuthorizeAsync(It.IsAny<ClaimsPrincipal>(), It.IsAny<object>(), "AdminPolicy"))
+                           .ReturnsAsync(AuthorizationResult.Failed());
+
+            var services = new ServiceCollection();
+            services.AddSingleton(embeddingServiceMock.Object);
+            services.AddSingleton(mockAuthService.Object);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpContext = new DefaultHttpContext { RequestServices = serviceProvider };
+
+            var controller = new AuthorizationController(mockOAuthRepo.Object, mockAudit.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
+            var json = JsonDocument.Parse("{\"client_name\":\"Unauthorized App\",\"redirect_uris\":[\"https://example.com/callback\"]}").RootElement;
+            var result = await controller.RegisterClient(json) as ObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(403, result.StatusCode);
+            var jsonText = JsonSerializer.Serialize(result.Value);
+            var doc = JsonDocument.Parse(jsonText);
+            Assert.Equal("access_denied", doc.RootElement.GetProperty("error").GetString());
+        }
     }
 }

@@ -8,7 +8,7 @@ describe('useUserStore', () => {
   it('should initialize with default values', () => {
     const state = useUserStore.getState();
     expect(state.user).toBeNull();
-    expect(state.version).toBe('5.1.0');
+    expect(state.version).toBe('5.2.0');
     expect(state.service).toBe('ModelContextGateway');
     expect(state.isLoadingUser).toBe(false);
   });
@@ -81,11 +81,11 @@ describe('useUserStore', () => {
 
   describe('loadVersion', () => {
     it('successfully updates version and service from /health endpoint', async () => {
-      mockApiResponse('/health', { version: '5.1.0', service: 'ModelContextGateway', status: 'healthy' });
+      mockApiResponse('/health', { version: '5.2.0', service: 'ModelContextGateway', status: 'healthy' });
 
       await useUserStore.getState().loadVersion();
 
-      expect(useUserStore.getState().version).toBe('5.1.0');
+      expect(useUserStore.getState().version).toBe('5.2.0');
       expect(useUserStore.getState().service).toBe('ModelContextGateway');
     });
 

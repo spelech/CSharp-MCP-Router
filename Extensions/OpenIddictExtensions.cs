@@ -96,6 +96,18 @@ namespace ModelContextGateway.Extensions
                     options.AllowAuthorizationCodeFlow();
                     options.AllowRefreshTokenFlow();
                     options.EnableDegradedMode();
+                    options.RegisterScopes(
+                        OpenIddict.Abstractions.OpenIddictConstants.Scopes.OpenId,
+                        OpenIddict.Abstractions.OpenIddictConstants.Scopes.Profile,
+                        OpenIddict.Abstractions.OpenIddictConstants.Scopes.Email,
+                        OpenIddict.Abstractions.OpenIddictConstants.Scopes.OfflineAccess,
+                        "api",
+                        "mcp_client",
+                        "tools:execute",
+                        "resources:read",
+                        "prompts:read"
+                    );
+                    options.DisableScopeValidation();
 
                     var certPath = config["MCG_JWT_CERT_PATH"]
                         ?? config["MCG_OPENIDDICT_CERT_PATH"]
