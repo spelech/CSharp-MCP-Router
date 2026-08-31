@@ -210,6 +210,16 @@ namespace ModelContextGateway.Infrastructure.Transports
                 req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
             }
 
+            var (mcpMethod, mcpName) = SseTransport.ExtractMcpHeaderMetadata(bodyJson, method);
+            if (!string.IsNullOrEmpty(mcpMethod))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethod);
+            }
+            if (!string.IsNullOrEmpty(mcpName))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Name", mcpName);
+            }
+
             await ApplyAuthAndCustomHeadersAsync(req);
 
             using var ctsTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(15));
