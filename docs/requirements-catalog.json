@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T01:52:22.7162564Z",
-    "totalRequirements": 136,
-    "positiveCount": 111,
+    "generatedAt": "2026-08-31T01:55:23.4483471Z",
+    "totalRequirements": 139,
+    "positiveCount": 114,
     "guardrailCount": 25,
-    "totalProofs": 322
+    "totalProofs": 331
   },
   "requirements": [
     {
@@ -518,7 +518,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 290,
+          "lineNumber": 325,
           "testName": "creates category-scoped key, captures one-time plaintext key, and refreshes",
           "details": null
         },
@@ -590,7 +590,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 232,
+          "lineNumber": 267,
           "testName": "loads app keys and updates store",
           "details": null
         },
@@ -641,7 +641,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 439,
+          "lineNumber": 474,
           "testName": "sets user quota override and refreshes quota list",
           "details": null
         },
@@ -793,14 +793,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 216,
+          "lineNumber": 251,
           "testName": "switches keyTypeTab between personal and system",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 250,
+          "lineNumber": 285,
           "testName": "fetches system-filtered app keys via query parameters",
           "details": null
         },
@@ -3314,6 +3314,96 @@
       ]
     },
     {
+      "id": "UI-30",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx",
+          "lineNumber": 21,
+          "testName": "renders client registration form with rich OAuth fields and cancel button",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx",
+          "lineNumber": 49,
+          "testName": "submits registration form with parsed scopes array and OAuth metadata",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx",
+          "lineNumber": 88,
+          "testName": "renders one-time secret display result card with copy buttons when createdClientResult is populated",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-31",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Fetches registered OAuth clients and updates store state.",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 31,
+          "testName": "fetches registered clients and updates state",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "lineNumber": 42,
+          "testName": "renders header, register button, and calls fetchClients on mount",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "lineNumber": 67,
+          "testName": "renders empty state when no registered clients exist",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "lineNumber": 84,
+          "testName": "renders rich client columns and handles client ID copy",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "lineNumber": 130,
+          "testName": "triggers deleteClient when Delete button is clicked",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "UI-32",
+      "category": "UI",
+      "type": "Positive",
+      "description": "Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 64,
+          "testName": "creates client with one-time secret result and refreshes list",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "UI-CONFIRM-MODAL",
       "category": "UI",
       "type": "Negative",
@@ -3365,42 +3455,42 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 88,
+          "lineNumber": 123,
           "testName": "prompts confirmation and deletes client when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 117,
+          "lineNumber": 152,
           "testName": "cancels deletion when user denies confirmation",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 350,
+          "lineNumber": 385,
           "testName": "confirms and revokes AppKey and refreshes list",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 379,
+          "lineNumber": 414,
           "testName": "cancels revocation when confirm is rejected",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 471,
+          "lineNumber": 506,
           "testName": "prompts confirmation modal and resets user quota when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 501,
+          "lineNumber": 536,
           "testName": "cancels quota reset when user denies confirmation",
           "details": null
         },

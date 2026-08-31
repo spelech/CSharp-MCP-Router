@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useClientStore } from '../../stores/useClientStore';
+import { showToast } from '../../stores/useToastStore';
 
 export const RegisteredClientsCard: React.FC = () => {
   const { clients, fetchClients, deleteClient, openAddClientModal } = useClientStore();
@@ -7,6 +8,11 @@ export const RegisteredClientsCard: React.FC = () => {
   useEffect(() => {
     fetchClients();
   }, [fetchClients]);
+
+  const copyClientId = (clientId: string) => {
+    navigator.clipboard.writeText(clientId);
+    showToast('Client ID copied to clipboard', 'info');
+  };
 
   return (
     <div className="glass-card dcr-card">
@@ -23,32 +29,90 @@ export const RegisteredClientsCard: React.FC = () => {
         <table id="clients-table">
           <thead>
             <tr>
-              <th>Client Name</th>
+              <th>Application Name</th>
               <th>Client ID</th>
               <th>Type</th>
+              <th>Grant Types</th>
+              <th>Redirect URIs</th>
               <th>Scopes</th>
+              <th>Created / Expires</th>
               <th>Actions</th>
             </tr>
           </thead>
           <tbody>
             {clients.length === 0 ? (
               <tr>
-                <td colSpan={5} className="empty-state">
+                <td colSpan={8} className="empty-state">
                   No registered clients found.
                 </td>
               </tr>
             ) : (
               clients.map((c) => (
                 <tr key={c.id}>
-                  <td>{c.displayName}</td>
                   <td>
-                    <span className="code">{c.clientId}</span>
+                    <strong>{c.displayName}</strong>
                   </td>
                   <td>
-                    <span className="server-badge">{c.isDynamic ? 'Dynamic' : 'Static'}</span>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <span className="code">{c.clientId}</span>
+                      <button
+                        type="button"
+                        aria-label="Copy Client ID"
+                        className="btn btn-secondary btn-sm"
+                        style={{ padding: '2px 6px', fontSize: '11px' }}
+                        onClick={() => copyClientId(c.clientId)}
+                        title="Copy Client ID"
+                      >
+                        <i className="fa-solid fa-copy"></i>
+                      </button>
+                    </div>
                   </td>
                   <td>
-                    <span className="server-badge">{c.scopes ? c.scopes.join(', ') : 'mcp_client'}</span>
+                    <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                      <span className="server-badge" style={{ background: 'rgba(56, 189, 248, 0.1)', color: '#38bdf8' }}>
+                        {c.clientType || 'confidential'}
+                      </span>
+                      <span className="server-badge">
+                        {c.isDynamic ? 'Dynamic' : 'Manual'}
+                      </span>
+                    </div>
+                  </td>
+                  <td>
+                    <span className="server-badge" style={{ background: 'rgba(255, 255, 255, 0.05)' }}>
+                      {c.grantTypes && c.grantTypes.length > 0
+                        ? c.grantTypes.join(', ')
+                        : 'client_credentials, authorization_code'}
+                    </span>
+                  </td>
+                  <td>
+                    {c.redirectUris && c.redirectUris.length > 0 ? (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', maxWidth: '240px', wordBreak: 'break-all' }}>
+                        {c.redirectUris.map((uri, idx) => (
+                          <span key={idx} className="server-badge" style={{ fontSize: '11px', textAlign: 'left' }}>
+                            {uri}
+                          </span>
+                        ))}
+                      </div>
+                    ) : (
+                      <span style={{ color: 'var(--secondary)' }}>&mdash;</span>
+                    )}
+                  </td>
+                  <td>
+                    <span className="server-badge">
+                      {c.scopes && c.scopes.length > 0 ? c.scopes.join(', ') : 'mcp_client'}
+                    </span>
+                  </td>
+                  <td>
+                    <div style={{ fontSize: '12px', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <span>{c.createdAt ? new Date(c.createdAt).toLocaleDateString() : '&mdash;'}</span>
+                      <small style={{ color: c.expiresAt && new Date(c.expiresAt) < new Date() ? '#ef4444' : 'var(--secondary)' }}>
+                        {c.expiresAt ? (
+                          new Date(c.expiresAt) < new Date() ? 'Expired' : `Exp: ${new Date(c.expiresAt).toLocaleDateString()}`
+                        ) : (
+                          'Never'
+                        )}
+                      </small>
+                    </div>
                   </td>
                   <td>
                     <button

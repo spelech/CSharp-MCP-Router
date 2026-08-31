@@ -2,11 +2,22 @@ export interface RegisteredClient {
   id: string;
   clientId: string;
   displayName: string;
-  isDynamic: boolean;
-  scopes?: string[];
+  clientType?: 'confidential' | 'public';
+  redirectUris?: string[];
+  grantTypes?: string[];
+  scopes: string[];
+  expiresAt: string | null;
+  createdAt: string;
+  isDynamic?: boolean;
 }
 
 export interface NewClientResult {
+  id?: string;
   clientId: string;
   clientSecret: string;
+  displayName?: string;
+  scopes?: string[];
+  redirectUris?: string[];
+  grantTypes?: string[];
+  expiresAt?: string | null;
 }

@@ -6,10 +6,24 @@ export async function fetchClientsApi(): Promise<RegisteredClient[]> {
   return data || [];
 }
 
-export async function registerClientApi(displayName: string, scopes: string[]): Promise<NewClientResult> {
+export async function registerClientApi(
+  displayName: string,
+  scopes: string[],
+  redirectUris?: string[],
+  grantTypes?: string[],
+  clientType?: 'confidential' | 'public',
+  expiresInDays?: number
+): Promise<NewClientResult> {
   return apiRequest<NewClientResult>('/api/clients', {
     method: 'POST',
-    body: { displayName, scopes }
+    body: {
+      displayName,
+      scopes,
+      redirectUris,
+      grantTypes,
+      clientType,
+      expiresInDays
+    }
   });
 }
 

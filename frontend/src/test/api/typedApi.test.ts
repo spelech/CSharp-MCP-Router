@@ -70,7 +70,14 @@ describe('Typed API Client Layer', () => {
       const clients = await fetchClientsApi();
       expect(clients).toHaveLength(1);
 
-      await registerClientApi('Test Client', ['all']);
+      await registerClientApi(
+        'Test Client',
+        ['all'],
+        ['https://oauth.pstmn.io/v1/callback'],
+        ['authorization_code', 'client_credentials'],
+        'confidential',
+        30
+      );
       await deleteClientApi('c1');
 
       const appKeys = await fetchAppKeysApi();
