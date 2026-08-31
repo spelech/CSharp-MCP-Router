@@ -133,7 +133,9 @@ namespace ModelContextGateway.Tests
             await SendJsonRpcAsync("{\"jsonrpc\":\"2.0\",\"method\":\"prompts/get\",\"id\":8,\"params\":{\"name\":\"docker__prompt\"}}");
             await SendJsonRpcAsync("{\"jsonrpc\":\"2.0\",\"method\":\"completion/complete\",\"id\":9}");
             await SendJsonRpcAsync("{\"jsonrpc\":\"2.0\",\"method\":\"roots/list\",\"id\":10}");
-            await SendJsonRpcAsync("{\"jsonrpc\":\"2.0\",\"method\":\"notifications/cancelled\",\"id\":11,\"params\":{\"requestId\":\"1\"}}");
+            await SendJsonRpcAsync("{\"jsonrpc\":\"2.0\",\"method\":\"logging/setLevel\",\"id\":11,\"params\":{\"level\":\"info\"}}");
+            await SendJsonRpcAsync("{\"jsonrpc\":\"2.0\",\"method\":\"notifications/message\",\"params\":{\"level\":\"info\",\"data\":\"test log\"}}");
+            await SendJsonRpcAsync("{\"jsonrpc\":\"2.0\",\"method\":\"notifications/cancelled\",\"id\":12,\"params\":{\"requestId\":\"1\"}}");
             await SendJsonRpcAsync("{\"jsonrpc\":\"2.0\",\"method\":\"custom/notification\",\"params\":{}}");
         }
 

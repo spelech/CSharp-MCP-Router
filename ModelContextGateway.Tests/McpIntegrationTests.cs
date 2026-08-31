@@ -969,7 +969,7 @@ namespace ModelContextGateway.Tests
             // WaitAsync cancellation check should return the cancellation error text
             cancelJson.Should().Contain("cancelled");
 
-            // Act 3: Bidirectional Client Response / Sampling
+            // Act 3: Bidirectional Client Response / Sampling (Deprecated feature warning test)
             var sampleRequest = new JsonRpcRequest
             {
                 Method = "sampling/createMessage",
@@ -981,6 +981,19 @@ namespace ModelContextGateway.Tests
             var sampleResponse = await forwardTask;
             sampleResponse.Should().NotBeNull();
             sampleResponse.Id?.ToString().Should().Be("sample-request-1");
+
+            // Test logging feature deprecation warning in ForwardRequestToClientAsync
+            var loggingRequest = new JsonRpcRequest
+            {
+                Method = "logging/setLevel",
+                Id = "log-req-1",
+                Params = JsonDocument.Parse("{\"level\":\"info\"}").RootElement
+            };
+            var forwardLogTask = session.ForwardRequestToClientAsync(loggingRequest);
+            session.TryHandleClientResponse("log-req-1", "{\"jsonrpc\":\"2.0\",\"id\":\"log-req-1\",\"result\":{}}");
+            var loggingResponse = await forwardLogTask;
+            loggingResponse.Should().NotBeNull();
+            loggingResponse.Id?.ToString().Should().Be("log-req-1");
         }
 
         [Fact]

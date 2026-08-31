@@ -6,6 +6,7 @@ namespace ModelContextGateway.Tests
     public class McpDualSpecMiddlewareTests
     {
         [Fact]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "Middleware parses 2026-07-28 spec headers Mcp-Method and Mcp-Name")]
         public async Task Middleware_Parses_2026_Spec_Headers()
         {
             var context = new DefaultHttpContext();
@@ -35,6 +36,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Middleware returns HeaderMismatch error (-32020) when headers missing on POST")]
         public async Task Middleware_Returns_HeaderMismatchError_When_Headers_Missing_On_POST()
         {
             var context = new DefaultHttpContext();
@@ -73,6 +75,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Middleware returns HeaderMismatch error when Mcp-Method is mismatched")]
         public async Task Middleware_Returns_HeaderMismatchError_When_McpMethod_Mismatched()
         {
             var context = new DefaultHttpContext();
@@ -106,6 +109,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Middleware returns HeaderMismatch error when Mcp-Name is missing for tool call")]
         public async Task Middleware_Returns_HeaderMismatchError_When_McpName_Missing_For_ToolCall()
         {
             var context = new DefaultHttpContext();
@@ -139,6 +143,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "Middleware returns HeaderMismatch error when Mcp-Name is mismatched")]
         public async Task Middleware_Returns_HeaderMismatchError_When_McpName_Mismatched()
         {
             var context = new DefaultHttpContext();
