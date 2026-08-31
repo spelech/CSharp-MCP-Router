@@ -8,7 +8,7 @@ describe('useUserStore', () => {
   it('should initialize with default values', () => {
     const state = useUserStore.getState();
     expect(state.user).toBeNull();
-    expect(state.version).toBe('5.0.7');
+    expect(state.version).toBe('5.1.0');
     expect(state.service).toBe('ModelContextGateway');
     expect(state.isLoadingUser).toBe(false);
   });
