@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:13:57.7831125Z",
-    "totalRequirements": 146,
-    "positiveCount": 117,
+    "generatedAt": "2026-08-31T04:20:47.6600531Z",
+    "totalRequirements": 147,
+    "positiveCount": 118,
     "guardrailCount": 29,
-    "totalProofs": 340
+    "totalProofs": 346
   },
   "requirements": [
     {
@@ -1229,7 +1229,7 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "Null or empty capability targets must immediately fail closed and return unauthorized",
-      "proofCount": 9,
+      "proofCount": 13,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1265,6 +1265,34 @@
           "lineNumber": 304,
           "testName": "ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest",
           "details": "Ensures client creation with empty category scope fails closed with BadRequest."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 38,
+          "testName": "Middleware_Returns_HeaderMismatchError_When_Headers_Missing_On_POST",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 77,
+          "testName": "Middleware_Returns_HeaderMismatchError_When_McpMethod_Mismatched",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 111,
+          "testName": "Middleware_Returns_HeaderMismatchError_When_McpName_Missing_For_ToolCall",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 145,
+          "testName": "Middleware_Returns_HeaderMismatchError_When_McpName_Mismatched",
+          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -1640,6 +1668,22 @@
       ]
     },
     {
+      "id": "MCP-08",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Middleware parses 2026-07-28 spec headers Mcp-Method and Mcp-Name",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 8,
+          "testName": "Middleware_Parses_2026_Spec_Headers",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-DISCOVER-HANDSHAKE",
       "category": "MCP",
       "type": "Positive",
@@ -1819,7 +1863,7 @@
       "id": "MCP-ADMIN-PARITY-JSONRPC-DISPATCH",
       "category": "MCP",
       "type": "Positive",
-      "description": "AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping).",
+      "description": "AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, initialize).",
       "proofCount": 1,
       "proofs": [
         {
@@ -2382,7 +2426,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 351,
+          "lineNumber": 384,
           "testName": "RegisterClient_PublicClient_SucceedsWithoutSecret",
           "details": null
         }
@@ -2398,7 +2442,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 400,
+          "lineNumber": 433,
           "testName": "RegisterClient_InvalidRedirectUri_ReturnsBadRequest",
           "details": null
         }
@@ -2414,7 +2458,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 435,
+          "lineNumber": 468,
           "testName": "RegisterClient_DynamicScopes_AddedToPermissions",
           "details": null
         }
@@ -2430,7 +2474,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 475,
+          "lineNumber": 508,
           "testName": "Exchange_PublicClient_ClientCredentials_ReturnsForbid",
           "details": null
         }
@@ -2446,7 +2490,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 516,
+          "lineNumber": 549,
           "testName": "RegisterClient_WhenClosedRegistration_UnauthorizedUser_ReturnsForbidden",
           "details": null
         }
@@ -2456,13 +2500,20 @@
       "id": "AUTH-118",
       "category": "SEC",
       "type": "Negative",
-      "description": "RegisterClient returns 400 Bad Request when application_type parameter is missing.",
-      "proofCount": 1,
+      "description": "OpenIddict ApplyAuthorizationResponseContext populates iss parameter in authorization responses.",
+      "proofCount": 2,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 556,
+          "lineNumber": 354,
+          "testName": "ApplyAuthorizationResponseContext_SetsIssParameter",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 589,
           "testName": "RegisterClient_MissingApplicationType_ReturnsBadRequest",
           "details": null
         }
