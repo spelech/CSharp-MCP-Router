@@ -28,9 +28,12 @@ namespace ModelContextGateway.Middleware
                 if (context.Request.Headers.TryGetValue("Mcp-Method", out var methodHeader))
                 {
                     method = methodHeader.ToString();
+                    context.Items["MCP_HEADER_METHOD"] = method;
+
                     if (context.Request.Headers.TryGetValue("Mcp-Name", out var nameHeader))
                     {
                         itemName = nameHeader.ToString();
+                        context.Items["MCP_HEADER_NAME"] = itemName;
                     }
                 }
                 // 2. Fallback: Body Inspection for Older/Legacy MCP Clients

@@ -77,6 +77,19 @@ namespace ModelContextGateway.Core.Routing
 
         public async Task<JsonRpcResponse> ForwardRequestToClientAsync(JsonRpcRequest request)
         {
+            if (request.Method == "sampling/createMessage" && DeclaredCapabilities.HasValue && !HasClientCapability("sampling"))
+            {
+                return new JsonRpcResponse
+                {
+                    Id = request.Id,
+                    Error = new JsonRpcError
+                    {
+                        Code = McpErrorCodes.MissingRequiredClientCapability,
+                        Message = "Client missing required capability: sampling"
+                    }
+                };
+            }
+
             var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             var requestId = request.Id?.ToString() ?? Guid.NewGuid().ToString("N");
 
