@@ -135,14 +135,15 @@ Content-Type: application/json
 #### Request Fields
 | Parameter | Type | Required | Default | Description |
 | :--- | :--- | :---: | :--- | :--- |
-| `client_name` | String | No | `"Dynamic Client"` | Human-readable name identifying the client application. |
+| `client_name` | String | No | `"Unknown Client"` | Human-readable name identifying the client application. |
 | `redirect_uris` | Array\<String\> | No | `[]` | Whitelisted redirection URIs for interactive `authorization_code` flows. |
-| `grant_types` | Array\<String\> | No | `["authorization_code", "refresh_token", "client_credentials"]` | Allowed OAuth 2.0 grant types for this client. |
+| `grant_types` | Array\<String\> | No | `["authorization_code", "refresh_token"]` | Allowed OAuth 2.0 grant types for this client. |
 | `response_types` | Array\<String\> | No | `["code"]` | Allowed response types for authorization requests. |
-| `token_endpoint_auth_method` | String | No | `"client_secret_post"` | Authentication method: `"client_secret_post"` or `"client_secret_basic"`. |
-| `scope` | String | No | `"mcp_client"` | Space-delimited string of requested OAuth scopes. |
+| `token_endpoint_auth_method` | String | No | `"client_secret_post"` | Authentication method: `"client_secret_post"`, `"client_secret_basic"`, or `"none"` (public client). |
+| `application_type` | String | No | `"web"` | Application type: `"web"` or `"native"` (native defaults to public client with PKCE). |
+| `scope` | String | No | `"mcp_client"` | Space-delimited string of requested OAuth scopes (e.g. `"openid mcp_client tools:execute"`). |
 
-### Response Payload (`HTTP 201 Created`)
+### Response Payload — Confidential Client (`HTTP 201 Created`)
 ```http
 HTTP/1.1 201 Created
 Content-Type: application/json
@@ -153,6 +154,7 @@ Pragma: no-cache
   "client_id": "client-8f3b2c1e4d5a",
   "client_secret": "4a8e2b9c7d1f0e3a5b6c8d9e0f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6d7e8f9a",
   "client_id_issued_at": 1756598400,
+  "client_secret_expires_at": 0,
   "client_name": "Google Gemini Assistant",
   "redirect_uris": [
     "https://oauth.pstmn.io/v1/callback",
@@ -166,12 +168,40 @@ Pragma: no-cache
   "response_types": [
     "code"
   ],
-  "token_endpoint_auth_method": "client_secret_post"
+  "token_endpoint_auth_method": "client_secret_post",
+  "scope": "api mcp_client openid offline_access"
+}
+```
+
+### Response Payload — Public Client / Native App (`HTTP 201 Created`)
+For native apps or public clients requesting `token_endpoint_auth_method: "none"` (e.g. Claude Desktop, Cursor, CLI tools using PKCE), no secret is issued or required:
+```http
+HTTP/1.1 201 Created
+Content-Type: application/json
+Cache-Control: no-store
+Pragma: no-cache
+
+{
+  "client_id": "client-2c9e4b1a7d8f",
+  "client_name": "Claude Desktop",
+  "client_id_issued_at": 1756598400,
+  "redirect_uris": [
+    "http://127.0.0.1:8080/callback"
+  ],
+  "grant_types": [
+    "authorization_code",
+    "refresh_token"
+  ],
+  "response_types": [
+    "code"
+  ],
+  "token_endpoint_auth_method": "none",
+  "scope": "mcp_client openid offline_access tools:execute"
 }
 ```
 
 > [!CAUTION]
-> **One-Time Secret Disclosure**: The plaintext `client_secret` is **only returned once** in the HTTP 201 response. The gateway computes and stores only its SHA-256 hash in the database. Plaintext secrets are never stored on disk and cannot be retrieved via any subsequent API call.
+> **One-Time Secret Disclosure**: For confidential clients, the plaintext `client_secret` is **only returned once** in the HTTP 201 response. The gateway computes and stores only its SHA-256 hash in the database. Plaintext secrets are never stored on disk and cannot be retrieved via any subsequent API call. Public clients never have secrets.
 
 ---
 

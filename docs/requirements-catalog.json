@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T02:02:49.2417420Z",
-    "totalRequirements": 139,
-    "positiveCount": 114,
-    "guardrailCount": 25,
-    "totalProofs": 331
+    "generatedAt": "2026-08-31T03:01:54.3950848Z",
+    "totalRequirements": 144,
+    "positiveCount": 116,
+    "guardrailCount": 28,
+    "totalProofs": 336
   },
   "requirements": [
     {
@@ -2352,6 +2352,86 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 141,
           "testName": "DeleteClient_ReturnsNotFound_WhenAppDoesNotExist",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-113",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "RegisterClient supports public clients with PKCE (token_endpoint_auth_method: none) and omits client secret.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 351,
+          "testName": "RegisterClient_PublicClient_SucceedsWithoutSecret",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-114",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "RegisterClient rejects invalid or non-absolute redirect URIs with standard RFC 7591 invalid_redirect_uri error.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 400,
+          "testName": "RegisterClient_InvalidRedirectUri_ReturnsBadRequest",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-115",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "RegisterClient dynamically binds requested scopes to OpenIddict application descriptor permissions.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 435,
+          "testName": "RegisterClient_DynamicScopes_AddedToPermissions",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-116",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "Exchange rejects client_credentials grant attempts by public clients with UnauthorizedClient error.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 475,
+          "testName": "Exchange_PublicClient_ClientCredentials_ReturnsForbid",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-117",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "RegisterClient returns 403 Forbidden with access_denied when open client registration is disabled and caller is unauthorized.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 516,
+          "testName": "RegisterClient_WhenClosedRegistration_UnauthorizedUser_ReturnsForbidden",
           "details": null
         }
       ]
