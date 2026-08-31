@@ -1,14 +1,6 @@
 import React, { useState } from 'react';
-
-interface ToolItem {
-  name: string;
-  description: string;
-  inputSchema?: {
-    type?: string;
-    properties?: Record<string, any>;
-    required?: string[];
-  };
-}
+import { ToolItem } from '../../shared/types/testbench';
+import { extractPropertiesFromSchema } from '../../utils/schemaUtils';
 
 interface ToolTesterCardProps {
   tools: ToolItem[];
@@ -129,7 +121,7 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
           <div className="tester-tab-content active">
             <div id="dynamic-form-fields">
               {selectedToolName && currentTool ? (
-                renderDynamicFields(currentTool, toolArguments, onArgChange)
+                renderDynamicFields(currentTool, toolArguments, onArgChange, () => setInteractiveTab('json'))
               ) : (
                 <div className="empty-state">Select a tool to generate parameters.</div>
               )}
@@ -163,16 +155,35 @@ export const ToolTesterCard: React.FC<ToolTesterCardProps> = ({
 const renderDynamicFields = (
   tool: ToolItem,
   args: Record<string, any>,
-  onChange: (key: string, type: string, val: any) => void
+  onChange: (key: string, type: string, val: any) => void,
+  switchToRawJson: () => void
 ) => {
-  if (!tool.inputSchema || !tool.inputSchema.properties) {
+  const { properties, required, hasSchemaKeywords } = extractPropertiesFromSchema(tool.inputSchema);
+  const propertyEntries = Object.entries(properties);
+
+  if (propertyEntries.length === 0) {
+    if (tool.inputSchema && hasSchemaKeywords) {
+      return (
+        <div className="empty-state" style={{ textAlign: 'left', padding: '16px' }}>
+          <p style={{ marginBottom: '12px' }}>
+            <i className="fa-solid fa-circle-info" style={{ marginRight: '6px', color: 'var(--accent-color, #3b82f6)' }}></i>
+            This tool uses a dynamic or complex JSON Schema (JSON Schema 2020-12 / anyOf / allOf / non-object schema).
+          </p>
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={switchToRawJson}
+            style={{ fontSize: '0.85rem' }}
+          >
+            Switch to Raw JSON Input
+          </button>
+        </div>
+      );
+    }
     return <div className="empty-state">This tool takes no arguments.</div>;
   }
 
-  const properties = tool.inputSchema.properties;
-  const required = tool.inputSchema.required || [];
-
-  return Object.entries(properties).map(([key, prop]: [string, any]) => {
+  return propertyEntries.map(([key, prop]: [string, any]) => {
     const isRequired = required.includes(key);
     const reqText = isRequired ? <span style={{ color: 'var(--status-offline)' }}>*</span> : null;
 
