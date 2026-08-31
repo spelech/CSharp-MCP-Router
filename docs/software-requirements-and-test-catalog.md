@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **149 Requirements Verified** across **344 Test Proofs** (120 Functional Capabilities, 29 Safety Guardrails).
+> **Catalog Statistics:** **150 Requirements Verified** across **349 Test Proofs** (121 Functional Capabilities, 29 Safety Guardrails).
 
 ---
 
@@ -13,8 +13,8 @@
 | **`CORE`** | CORE | **1** | 1 | 0 | 9 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **3** | 3 | 0 | 20 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 40 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **40** | 40 | 0 | 41 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 44 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **41** | 41 | 0 | 42 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **38** | 29 | 9 | 65 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **17** | 15 | 2 | 67 proofs |
@@ -298,6 +298,12 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) (`Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly`)
+
+### `[MCP-08]` Middleware parses 2026-07-28 spec headers Mcp-Method and Mcp-Name
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L8) (`Middleware_Parses_2026_Spec_Headers`)
 
 ### `[MCP-ADMIN-DISCOVER-HANDSHAKE]` AdminMcpServer server/discover RPC advertises supported protocol versions, capabilities, and identity.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -924,12 +930,16 @@
 ### `[GUARD-01]` Null or empty capability targets must immediately fail closed and return unauthorized
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (9):**
+* **Verification Proofs (13):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468) (`Pairwise_NullOrEmptyTarget_FailsClosed_ReturnsFalse`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490) (`Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L220`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L220) (`AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L239) (`AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L304`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs#L304) (`ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L38`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L38) (`Middleware_Returns_HeaderMismatchError_When_Headers_Missing_On_POST`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L77`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L77) (`Middleware_Returns_HeaderMismatchError_When_McpMethod_Mismatched`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L111`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L111) (`Middleware_Returns_HeaderMismatchError_When_McpName_Missing_For_ToolCall`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L145`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L145) (`Middleware_Returns_HeaderMismatchError_When_McpName_Mismatched`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L270`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L270) (`CreateClient_ReturnsBadRequest_WhenDisplayNameMissing`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283) (`CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300) (`CreateClient_Returns500_WhenOAuthClientRepositoryThrows`)
@@ -1178,6 +1188,7 @@
 | `MCP-ADMIN-TOOL-TEST-CALL-ERROR` | **Guardrail** | `GUARD` | AdminMcpServer test_tool_call propagates downstream backend errors with visibility. | [`AdminMcpServerTests.cs:L666`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L666) | Backend xUnit |
 | `MCP-01` | Positive | `MCP` | Meta-mode execute_tool strictly enforces target tool authorization policies | [`PairwiseIntegrationMatrixTests.cs:L567`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L567) | Backend xUnit |
 | `MCP-02` | Positive | `MCP` | All MCP protocol capabilities enforce caller role authorizations consistently | [`PairwiseIntegrationMatrixTests.cs:L385`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) | Backend xUnit |
+| `MCP-08` | Positive | `MCP` | Middleware parses 2026-07-28 spec headers Mcp-Method and Mcp-Name | [`McpDualSpecMiddlewareTests.cs:L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs#L8) | Backend xUnit |
 | `MCP-ADMIN-DISCOVER-HANDSHAKE` | Positive | `MCP` | AdminMcpServer server/discover RPC advertises supported protocol versions, capabilities, and identity. | [`AdminMcpServerTests.cs:L195`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L195) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L296`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs#L296) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L214`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs#L214) | Backend xUnit |
