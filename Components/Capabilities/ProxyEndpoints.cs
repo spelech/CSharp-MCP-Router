@@ -43,6 +43,9 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             using var doc = JsonDocument.Parse(requestBody);
                             var root = doc.RootElement;
+                            var logLevel = McpLogLevelHelper.ExtractPerRequestLogLevel(root);
+                            McpLogLevelHelper.CurrentPerRequestLogLevel.Value = logLevel;
+                            httpContext.Items["PerRequestLogLevel"] = logLevel;
                             if (root.TryGetProperty("method", out var methodProp))
                             {
                                 method = methodProp.GetString() ?? string.Empty;
@@ -663,6 +666,9 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             using var doc = JsonDocument.Parse(requestBody);
                             var root = doc.RootElement;
+                            var logLevel = McpLogLevelHelper.ExtractPerRequestLogLevel(root);
+                            McpLogLevelHelper.CurrentPerRequestLogLevel.Value = logLevel;
+                            httpContext.Items["PerRequestLogLevel"] = logLevel;
                             if (root.TryGetProperty("method", out var methodProp))
                             {
                                 method = methodProp.GetString() ?? string.Empty;
@@ -815,6 +821,9 @@ namespace ModelContextGateway.Components.Capabilities
                 {
                     using var doc = JsonDocument.Parse(body);
                     var root = doc.RootElement;
+                    var logLevel = McpLogLevelHelper.ExtractPerRequestLogLevel(root);
+                    McpLogLevelHelper.CurrentPerRequestLogLevel.Value = logLevel;
+                    httpContext.Items["PerRequestLogLevel"] = logLevel;
 
                     if (!root.TryGetProperty("method", out var methodProp))
                     {

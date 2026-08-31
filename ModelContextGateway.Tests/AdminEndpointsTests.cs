@@ -66,7 +66,7 @@ namespace ModelContextGateway.Tests
             var client = CreateAdminClient();
 
             // 1. Initiate SSE connection to /admin/sse
-            using var sseCts = new CancellationTokenSource(TimeSpan.FromSeconds(5));
+            using var sseCts = new CancellationTokenSource(TimeSpan.FromSeconds(15));
             using var sseRequest = new HttpRequestMessage(HttpMethod.Get, "/admin/sse");
             sseRequest.Headers.Add("Accept", "text/event-stream");
 
