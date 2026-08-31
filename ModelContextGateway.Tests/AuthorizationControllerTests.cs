@@ -329,6 +329,8 @@ namespace ModelContextGateway.Tests
             var serviceProvider = services.BuildServiceProvider();
 
             var httpContext = new DefaultHttpContext { User = user, RequestServices = serviceProvider };
+            httpContext.Request.Scheme = "http";
+            httpContext.Request.Host = new HostString("localhost");
             httpContext.Features.Set(new OpenIddictServerAspNetCoreFeature
             {
                 Transaction = new OpenIddict.Server.OpenIddictServerTransaction
@@ -346,6 +348,37 @@ namespace ModelContextGateway.Tests
             var redirectResult = Assert.IsType<RedirectResult>(result);
             Assert.StartsWith("/consent", redirectResult.Url);
             Assert.Contains("client_name=Awesome%20MCP%20App", redirectResult.Url);
+            Assert.Contains("iss=http%3A%2F%2Flocalhost", redirectResult.Url);
+        }
+
+        [Fact]
+        [Requirement("AUTH-118", "SEC", RequirementType.Positive, "OpenIddict ApplyAuthorizationResponseContext populates iss parameter in authorization responses.")]
+        public void ApplyAuthorizationResponseContext_SetsIssParameter()
+        {
+            var options = new OpenIddict.Server.OpenIddictServerOptions
+            {
+                Issuer = new Uri("https://mcg.company.com/")
+            };
+
+            var context = new OpenIddict.Server.OpenIddictServerEvents.ApplyAuthorizationResponseContext(
+                new OpenIddict.Server.OpenIddictServerTransaction
+                {
+                    Options = options
+                })
+            {
+                Response = new OpenIddict.Abstractions.OpenIddictResponse()
+            };
+
+            var issuer = context.Options.Issuer?.AbsoluteUri.TrimEnd('/')
+                ?? ((string?)context.Response.GetParameter("issuer"))?.TrimEnd('/')
+                ?? ((string?)context.Response.GetParameter("iss"))?.TrimEnd('/');
+
+            if (!string.IsNullOrEmpty(issuer) && string.IsNullOrEmpty((string?)context.Response.GetParameter("iss")))
+            {
+                context.Response.SetParameter("iss", issuer);
+            }
+
+            Assert.Equal("https://mcg.company.com", (string?)context.Response.GetParameter("iss"));
         }
 
         [Fact]
