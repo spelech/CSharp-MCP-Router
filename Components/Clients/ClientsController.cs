@@ -1,7 +1,11 @@
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using ModelContextGateway.Infrastructure.Persistence;
+using ModelContextGateway.Models;
 
 namespace ModelContextGateway.Components.Clients
 {
@@ -10,39 +14,52 @@ namespace ModelContextGateway.Components.Clients
     [Authorize(Policy = "AdminPolicy")]
     public class ClientsController : ControllerBase
     {
-        private readonly IDbConnectionFactory _dbFactory;
+        private readonly IOAuthClientRepository _oauthClientRepo;
         private readonly IAuditLogger _auditLogger;
-        private readonly ICredentialService _credentialService;
+        private readonly IDbConnectionFactory? _dbFactory;
 
-        public ClientsController(IDbConnectionFactory dbFactory, IAuditLogger auditLogger, ICredentialService credentialService)
+        [ActivatorUtilitiesConstructor]
+        public ClientsController(IOAuthClientRepository oauthClientRepo, IAuditLogger auditLogger, IDbConnectionFactory? dbFactory = null)
         {
-            _dbFactory = dbFactory;
+            _oauthClientRepo = oauthClientRepo;
             _auditLogger = auditLogger;
-            _credentialService = credentialService;
+            _dbFactory = dbFactory;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetClients()
         {
-            using var conn = _dbFactory.CreateConnection();
-            var keys = await conn.QueryAsync<dynamic>("SELECT Id, Name, Username, KeyPrefix, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys");
+            var oauthClients = await _oauthClientRepo.GetOAuthClientsAsync();
 
-            var clients = keys.Select(k =>
+            var clients = oauthClients.Select(c =>
             {
-                var scopesJson = Convert.ToString(k.ScopesJson) ?? "[]";
                 List<string> scopes;
-                try { scopes = JsonSerializer.Deserialize<List<string>>(scopesJson) ?? new List<string>(); }
+                try { scopes = JsonSerializer.Deserialize<List<string>>(c.ScopesJson) ?? new List<string>(); }
                 catch { scopes = new List<string>(); }
+
+                List<string> redirectUris;
+                try { redirectUris = JsonSerializer.Deserialize<List<string>>(c.RedirectUrisJson) ?? new List<string>(); }
+                catch { redirectUris = new List<string>(); }
+
+                List<string> grantTypes;
+                try { grantTypes = JsonSerializer.Deserialize<List<string>>(c.GrantTypesJson) ?? new List<string>(); }
+                catch { grantTypes = new List<string>(); }
 
                 return new
                 {
-                    Id = Convert.ToString(k.Id),
-                    ClientId = Convert.ToString(k.Username) ?? Convert.ToString(k.KeyPrefix),
-                    DisplayName = Convert.ToString(k.Name) ?? "App Key",
+                    Id = c.ClientId,
+                    ClientId = c.ClientId,
+                    DisplayName = c.ClientName,
+                    ClientName = c.ClientName,
+                    ClientType = c.ClientType,
                     Scopes = scopes,
-                    ExpiresAt = k.ExpiresAt != null ? (DateTime?)Convert.ToDateTime(k.ExpiresAt) : null,
-                    CreatedAt = k.CreatedAt != null ? (DateTime?)Convert.ToDateTime(k.CreatedAt) : null,
-                    IsDynamic = false
+                    RedirectUris = redirectUris,
+                    GrantTypes = grantTypes,
+                    OwnerSid = c.OwnerSid,
+                    CreatedBy = c.CreatedBy,
+                    CreatedAt = (DateTime?)c.CreatedAt,
+                    ExpiresAt = c.ExpiresAt,
+                    IsDynamic = string.Equals(c.CreatedBy, "dcr", StringComparison.OrdinalIgnoreCase) || string.IsNullOrEmpty(c.CreatedBy)
                 };
             }).ToList();
 
@@ -58,6 +75,8 @@ namespace ModelContextGateway.Components.Clients
             }
 
             var clientId = Guid.NewGuid().ToString("N");
+            var clientSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+            var secretHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(clientSecret))).ToLowerInvariant();
             var scopes = model.Scopes ?? new List<string>();
 
             var username = User?.Identity?.Name ?? "unknown";
@@ -115,26 +134,37 @@ namespace ModelContextGateway.Components.Clients
                 }
             }
 
+            DateTime? expiresAt = model.ExpiresInDays.HasValue ? DateTime.UtcNow.AddDays(model.ExpiresInDays.Value) : null;
+
             try
             {
                 // CRITICAL SECURITY: Decouple creator SID from client credentials.
                 // Client credentials must NOT inherit administrative privileges or creator's SID.
-                var (appKey, plaintextKey) = await _credentialService.CreateCredentialAsync(
-                    model.DisplayName,
-                    clientId, // Username/ClientId of the AppKey
-                    string.Empty, // No administrative SID assigned to machine/client credentials
-                    scopes,
-                    model.ExpiresInDays
-                );
+                var oauthClient = new OAuthClient
+                {
+                    ClientId = clientId,
+                    ClientSecretHash = secretHash,
+                    ClientName = model.DisplayName,
+                    ClientType = "confidential",
+                    RedirectUrisJson = model.RedirectUris != null ? JsonSerializer.Serialize(model.RedirectUris) : "[]",
+                    GrantTypesJson = model.GrantTypes != null ? JsonSerializer.Serialize(model.GrantTypes) : JsonSerializer.Serialize(new[] { "client_credentials", "authorization_code", "refresh_token" }),
+                    ScopesJson = JsonSerializer.Serialize(scopes),
+                    OwnerSid = string.Empty,
+                    CreatedBy = username,
+                    CreatedAt = DateTime.UtcNow,
+                    ExpiresAt = expiresAt
+                };
+
+                await _oauthClientRepo.SaveOAuthClientAsync(oauthClient);
 
                 await _auditLogger.LogAdminActionAsync(username, "client.create", clientId, JsonSerializer.Serialize(new { model.DisplayName, Scopes = model.Scopes, model.ExpiresInDays }), true);
 
                 return Ok(new
                 {
                     ClientId = clientId,
-                    ClientSecret = plaintextKey,
+                    ClientSecret = clientSecret,
                     DisplayName = model.DisplayName,
-                    ExpiresAt = appKey.ExpiresAt
+                    ExpiresAt = expiresAt
                 });
             }
             catch (Exception ex)
@@ -150,35 +180,38 @@ namespace ModelContextGateway.Components.Clients
             var categories = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
             try
             {
-                using var conn = _dbFactory.CreateConnection();
-                var rawList = await conn.QueryAsync<string>("SELECT Categories FROM Servers WHERE Enabled = 1");
-                foreach (var rawCat in rawList)
+                if (_dbFactory != null)
                 {
-                    if (string.IsNullOrWhiteSpace(rawCat))
+                    using var conn = _dbFactory.CreateConnection();
+                    var rawList = await conn.QueryAsync<string>("SELECT Categories FROM Servers WHERE Enabled = 1");
+                    foreach (var rawCat in rawList)
                     {
-                        continue;
-                    }
-
-                    try
-                    {
-                        var list = JsonSerializer.Deserialize<List<string>>(rawCat);
-                        if (list != null)
+                        if (string.IsNullOrWhiteSpace(rawCat))
                         {
-                            foreach (var c in list)
+                            continue;
+                        }
+
+                        try
+                        {
+                            var list = JsonSerializer.Deserialize<List<string>>(rawCat);
+                            if (list != null)
                             {
-                                if (!string.IsNullOrWhiteSpace(c))
+                                foreach (var c in list)
                                 {
-                                    categories.Add(c.Trim());
+                                    if (!string.IsNullOrWhiteSpace(c))
+                                    {
+                                        categories.Add(c.Trim());
+                                    }
                                 }
                             }
                         }
-                    }
-                    catch
-                    {
-                        var parts = rawCat.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                        foreach (var p in parts)
+                        catch
                         {
-                            categories.Add(p);
+                            var parts = rawCat.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                            foreach (var p in parts)
+                            {
+                                categories.Add(p);
+                            }
                         }
                     }
                 }
@@ -198,8 +231,8 @@ namespace ModelContextGateway.Components.Clients
             {
                 try
                 {
-                    var compositeProvider = HttpContext.RequestServices.GetService<CompositeIdentityProvider>();
-                    if (compositeProvider != null)
+                    var compositeProvider = HttpContext?.RequestServices?.GetService<CompositeIdentityProvider>();
+                    if (compositeProvider != null && HttpContext != null)
                     {
                         var identity = await compositeProvider.ResolveIdentityAsync(HttpContext);
                         if (identity != null)
@@ -210,7 +243,7 @@ namespace ModelContextGateway.Components.Clients
                 }
                 catch { }
 
-                var success = await _credentialService.RevokeCredentialAsync(id);
+                var success = await _oauthClientRepo.DeleteOAuthClientAsync(id);
                 if (!success)
                 {
                     await _auditLogger.LogAdminActionAsync(username, "client.delete", id, "", false, "Client not found");
@@ -232,6 +265,8 @@ namespace ModelContextGateway.Components.Clients
         {
             public string DisplayName { get; set; } = string.Empty;
             public List<string> Scopes { get; set; } = new();
+            public List<string>? RedirectUris { get; set; }
+            public List<string>? GrantTypes { get; set; }
             public int? ExpiresInDays { get; set; }
         }
     }

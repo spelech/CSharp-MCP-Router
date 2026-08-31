@@ -1,12 +1,14 @@
 using System.Security.Claims;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
-using Dapper;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
+using ModelContextGateway.Infrastructure.Persistence;
 
 namespace ModelContextGateway.Components.Clients
 {
@@ -14,24 +16,21 @@ namespace ModelContextGateway.Components.Clients
     {
         private readonly IOpenIddictApplicationManager? _applicationManager;
         private readonly IAuditLogger _auditLogger;
-        private readonly IDbConnectionFactory? _dbFactory;
-        private readonly ICredentialService? _credentialService;
+        private readonly IOAuthClientRepository? _oauthClientRepo;
 
         [ActivatorUtilitiesConstructor]
         public AuthorizationController(
-            IDbConnectionFactory dbFactory,
-            ICredentialService credentialService,
+            IOAuthClientRepository oauthClientRepo,
             IAuditLogger auditLogger,
             IOpenIddictApplicationManager? applicationManager = null)
         {
-            _dbFactory = dbFactory;
-            _credentialService = credentialService;
+            _oauthClientRepo = oauthClientRepo;
             _auditLogger = auditLogger;
             _applicationManager = applicationManager;
         }
 
         public AuthorizationController(IOpenIddictApplicationManager applicationManager, IAuditLogger auditLogger)
-            : this(null!, null!, auditLogger, applicationManager)
+            : this(null!, auditLogger, applicationManager)
         {
         }
 
@@ -41,55 +40,22 @@ namespace ModelContextGateway.Components.Clients
             {
                 return await _applicationManager.FindByClientIdAsync(clientId);
             }
-            if (_dbFactory != null)
+            if (_oauthClientRepo != null)
             {
-                using var conn = _dbFactory.CreateConnection();
-                return await conn.QuerySingleOrDefaultAsync<AppKey>(
-                    "SELECT * FROM AppKeys WHERE Username = @Id OR KeyPrefix = @Id",
-                    new { Id = clientId });
+                return await _oauthClientRepo.GetOAuthClientByIdAsync(clientId);
             }
             return null;
         }
 
         private async Task<string?> GetDisplayNameAsync(object application)
         {
-            if (_applicationManager != null)
+            if (_applicationManager != null && !(application is OAuthClient))
             {
                 return await _applicationManager.GetDisplayNameAsync(application);
             }
-            if (application is AppKey appKey)
+            if (application is OAuthClient client)
             {
-                return appKey.Name;
-            }
-            return null;
-        }
-
-        private async Task<object?> CreateApplicationAsync(OpenIddictApplicationDescriptor descriptor)
-        {
-            if (_applicationManager != null)
-            {
-                return await _applicationManager.CreateAsync(descriptor);
-            }
-            if (_credentialService != null)
-            {
-                var scopes = descriptor.Permissions
-                    .Where(p => p.StartsWith(OpenIddictConstants.Permissions.Prefixes.Scope))
-                    .Select(p => p.Substring(OpenIddictConstants.Permissions.Prefixes.Scope.Length))
-                    .ToList();
-
-                if (scopes.Count == 0)
-                {
-                    scopes.Add("all");
-                }
-
-                var (appKey, plaintext) = await _credentialService.CreateCredentialAsync(
-                    descriptor.DisplayName ?? "Dynamic Client",
-                    descriptor.ClientId ?? Guid.NewGuid().ToString("N"),
-                    string.Empty,
-                    scopes,
-                    null
-                );
-                return appKey;
+                return client.ClientName;
             }
             return null;
         }
@@ -114,6 +80,49 @@ namespace ModelContextGateway.Components.Clients
                             [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidClient,
                             [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The client application was not found in the directory."
                         }));
+                }
+
+                if (application is OAuthClient client)
+                {
+                    if (client.ExpiresAt.HasValue && client.ExpiresAt.Value < DateTime.UtcNow)
+                    {
+                        return Forbid(
+                            authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                            properties: new Microsoft.AspNetCore.Authentication.AuthenticationProperties(new Dictionary<string, string?>
+                            {
+                                [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidClient,
+                                [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The client application credentials have expired."
+                            }));
+                    }
+
+                    if (!string.IsNullOrEmpty(client.ClientSecretHash))
+                    {
+                        var providedSecret = request.ClientSecret;
+                        if (string.IsNullOrEmpty(providedSecret))
+                        {
+                            return Forbid(
+                                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                                properties: new Microsoft.AspNetCore.Authentication.AuthenticationProperties(new Dictionary<string, string?>
+                                {
+                                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidClient,
+                                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The client secret is invalid."
+                                }));
+                        }
+
+                        var hash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(providedSecret))).ToLowerInvariant();
+                        if (!CryptographicOperations.FixedTimeEquals(
+                            Encoding.UTF8.GetBytes(hash),
+                            Encoding.UTF8.GetBytes(client.ClientSecretHash.ToLowerInvariant())))
+                        {
+                            return Forbid(
+                                authenticationSchemes: OpenIddictServerAspNetCoreDefaults.AuthenticationScheme,
+                                properties: new Microsoft.AspNetCore.Authentication.AuthenticationProperties(new Dictionary<string, string?>
+                                {
+                                    [OpenIddictServerAspNetCoreConstants.Properties.Error] = OpenIddictConstants.Errors.InvalidClient,
+                                    [OpenIddictServerAspNetCoreConstants.Properties.ErrorDescription] = "The client secret is invalid."
+                                }));
+                        }
+                    }
                 }
 
                 var identity = new ClaimsIdentity(OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
@@ -233,7 +242,6 @@ namespace ModelContextGateway.Components.Clients
             return Redirect($"/consent{qs}");
         }
 
-
         [HttpPost("~/api/register")]
         [HttpPost("~/connect/register")]
         [HttpPost("~/oauth/register")]
@@ -241,10 +249,10 @@ namespace ModelContextGateway.Components.Clients
         [Produces("application/json")]
         public async Task<IActionResult> RegisterClient([FromBody] JsonElement metadata)
         {
-            var embeddingService = HttpContext.RequestServices.GetRequiredService<ModelContextGateway.Core.Routing.DynamicEmbeddingService>();
-            var settings = embeddingService.GetSettings();
+            var embeddingService = HttpContext.RequestServices.GetService<ModelContextGateway.Core.Routing.DynamicEmbeddingService>();
+            var settings = embeddingService?.GetSettings();
 
-            if (!settings.AllowOpenClientRegistration)
+            if (settings != null && !settings.AllowOpenClientRegistration)
             {
                 var authService = HttpContext.RequestServices.GetRequiredService<Microsoft.AspNetCore.Authorization.IAuthorizationService>();
                 var authResult = await authService.AuthorizeAsync(User, "AdminPolicy");
@@ -256,27 +264,8 @@ namespace ModelContextGateway.Components.Clients
 
             var clientName = metadata.TryGetProperty("client_name", out var cn) ? cn.GetString() : "Unknown Client";
             var clientId = Guid.NewGuid().ToString("N");
-            var clientSecret = Guid.NewGuid().ToString("N");
-
-            var descriptor = new OpenIddictApplicationDescriptor
-            {
-                ClientId = clientId,
-                ClientSecret = clientSecret,
-                DisplayName = clientName,
-                Permissions =
-                {
-                    OpenIddictConstants.Permissions.Endpoints.Token,
-                    OpenIddictConstants.Permissions.Endpoints.Authorization,
-                    OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
-                    OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                    OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                    OpenIddictConstants.Permissions.ResponseTypes.Code,
-                    OpenIddictConstants.Permissions.Prefixes.Scope + "api",
-                    OpenIddictConstants.Permissions.Prefixes.Scope + "mcp_client",
-                    OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
-                    OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access"
-                }
-            };
+            var clientSecret = Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
+            var clientSecretHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(clientSecret))).ToLowerInvariant();
 
             var redirectUrisList = new List<string>();
             if (metadata.TryGetProperty("redirect_uris", out var rUris) && rUris.ValueKind == JsonValueKind.Array)
@@ -287,10 +276,6 @@ namespace ModelContextGateway.Components.Clients
                     if (!string.IsNullOrEmpty(uriStr))
                     {
                         redirectUrisList.Add(uriStr);
-                        if (Uri.TryCreate(uriStr, UriKind.Absolute, out var parsedUri))
-                        {
-                            descriptor.RedirectUris.Add(parsedUri);
-                        }
                     }
                 }
             }
@@ -323,11 +308,79 @@ namespace ModelContextGateway.Components.Clients
                 }
             }
 
+            var scopesList = new List<string> { "api", "mcp_client", "openid", "offline_access" };
+            if (metadata.TryGetProperty("scope", out var scopeProp) && scopeProp.ValueKind == JsonValueKind.String)
+            {
+                var parsed = scopeProp.GetString()?.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                if (parsed != null && parsed.Length > 0)
+                {
+                    scopesList = parsed.ToList();
+                }
+            }
+            else if (metadata.TryGetProperty("scopes", out var scopesProp) && scopesProp.ValueKind == JsonValueKind.Array)
+            {
+                scopesList.Clear();
+                foreach (var s in scopesProp.EnumerateArray())
+                {
+                    var sStr = s.GetString();
+                    if (!string.IsNullOrEmpty(sStr))
+                    {
+                        scopesList.Add(sStr);
+                    }
+                }
+            }
+
             var authMethod = metadata.TryGetProperty("token_endpoint_auth_method", out var team) ? team.GetString() : "client_secret_post";
 
             try
             {
-                await CreateApplicationAsync(descriptor);
+                if (_applicationManager != null)
+                {
+                    var descriptor = new OpenIddictApplicationDescriptor
+                    {
+                        ClientId = clientId,
+                        ClientSecret = clientSecret,
+                        DisplayName = clientName,
+                        Permissions =
+                        {
+                            OpenIddictConstants.Permissions.Endpoints.Token,
+                            OpenIddictConstants.Permissions.Endpoints.Authorization,
+                            OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
+                            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                            OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                            OpenIddictConstants.Permissions.ResponseTypes.Code,
+                            OpenIddictConstants.Permissions.Prefixes.Scope + "api",
+                            OpenIddictConstants.Permissions.Prefixes.Scope + "mcp_client",
+                            OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
+                            OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access"
+                        }
+                    };
+                    foreach (var uriStr in redirectUrisList)
+                    {
+                        if (Uri.TryCreate(uriStr, UriKind.Absolute, out var parsedUri))
+                        {
+                            descriptor.RedirectUris.Add(parsedUri);
+                        }
+                    }
+                    await _applicationManager.CreateAsync(descriptor);
+                }
+
+                if (_oauthClientRepo != null)
+                {
+                    var oauthClient = new OAuthClient
+                    {
+                        ClientId = clientId,
+                        ClientSecretHash = clientSecretHash,
+                        ClientName = clientName ?? "Unknown Client",
+                        ClientType = "confidential",
+                        RedirectUrisJson = JsonSerializer.Serialize(redirectUrisList),
+                        GrantTypesJson = JsonSerializer.Serialize(grantTypesList),
+                        ScopesJson = JsonSerializer.Serialize(scopesList),
+                        CreatedBy = User?.Identity?.Name ?? "dcr",
+                        CreatedAt = DateTime.UtcNow
+                    };
+                    await _oauthClientRepo.SaveOAuthClientAsync(oauthClient);
+                }
 
                 var username = User?.Identity?.Name ?? "unknown";
                 await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName, redirectUris = redirectUrisList }), true);

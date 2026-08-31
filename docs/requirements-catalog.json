@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T01:40:33.9064908Z",
-    "totalRequirements": 135,
-    "positiveCount": 112,
-    "guardrailCount": 23,
-    "totalProofs": 306
+    "generatedAt": "2026-08-31T01:52:22.7162564Z",
+    "totalRequirements": 136,
+    "positiveCount": 111,
+    "guardrailCount": 25,
+    "totalProofs": 322
   },
   "requirements": [
     {
@@ -91,7 +91,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 255,
+          "lineNumber": 258,
           "testName": "AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds",
           "details": "Verifies that admin callers can create forward-looking AppKeys for unconfigured categories."
         },
@@ -177,63 +177,63 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 194,
+          "lineNumber": 197,
           "testName": "AppKeysController_CreateAppKey_ValidCategory_Succeeds",
           "details": "Verifies that AppKeys can be created with valid category scopes."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 278,
+          "lineNumber": 281,
           "testName": "ClientsController_CreateClient_ValidCategory_Succeeds",
           "details": "Verifies that OAuth client credentials can be created with category-scoped access rules."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 361,
+          "lineNumber": 364,
           "testName": "ClientSession_CategoryScope_AuthorizesMatchingServerTools_AndDeniesOthers",
           "details": "Verifies that category-scoped AppKey authorizes access exclusively to servers belonging to the permitted category."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 385,
+          "lineNumber": 388,
           "testName": "ClientSession_GroupAliasScope_AuthorizesIdenticallyToCategory",
           "details": "Verifies that group-alias scopes evaluate identically to category scopes during tool authorization."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 407,
+          "lineNumber": 410,
           "testName": "ClientSession_CategoryScope_IsCaseInsensitive",
           "details": "Verifies that category scope matching is case-insensitive across server categories."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 457,
+          "lineNumber": 460,
           "testName": "ClientSession_ResourcesAndTemplates_FilteredByCategoryScope",
           "details": "Verifies that resources and templates are filtered according to category-scoped AppKey permissions."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 485,
+          "lineNumber": 488,
           "testName": "ClientSession_DynamicServerMembership_UpdatesAccessDynamically",
           "details": "Verifies that dynamic updates to server categories immediately update tool access without re-authenticating."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 521,
+          "lineNumber": 524,
           "testName": "ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes",
           "details": "Verifies that AppKeys can combine category scopes and granular tool-level scopes additively."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 548,
+          "lineNumber": 551,
           "testName": "ClientSession_Complete_FiltersServerNamesByCategoryScope",
           "details": "Verifies that autocomplete and completion requests filter suggestions to servers within category scopes."
         },
@@ -375,7 +375,7 @@
       "category": "AUTH",
       "type": "Positive",
       "description": "CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0.",
-      "proofCount": 2,
+      "proofCount": 4,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -387,8 +387,22 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 129,
+          "lineNumber": 137,
           "testName": "ApplyConfigurationResponseContext_SetsRegistrationEndpoint",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 53,
+          "testName": "GetClients_ReturnsOk_WithClientsAndMappedProperties",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 240,
+          "testName": "GetClients_NeverLeaksRawBearerSecretOrHash",
           "details": null
         }
       ]
@@ -1215,7 +1229,7 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "Null or empty capability targets must immediately fail closed and return unauthorized",
-      "proofCount": 5,
+      "proofCount": 9,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1234,23 +1248,51 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 217,
+          "lineNumber": 220,
           "testName": "AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest",
           "details": "Ensures non-admin callers cannot create AppKeys with unconfigured categories."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 236,
+          "lineNumber": 239,
           "testName": "AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest",
           "details": "Ensures AppKey creation with empty or whitespace category fails closed with BadRequest."
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 301,
+          "lineNumber": 304,
           "testName": "ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest",
           "details": "Ensures client creation with empty category scope fails closed with BadRequest."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 272,
+          "testName": "CreateClient_ReturnsBadRequest_WhenDisplayNameMissing",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 285,
+          "testName": "CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 302,
+          "testName": "CreateClient_Returns500_WhenOAuthClientRepositoryThrows",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 319,
+          "testName": "DeleteClient_Returns500_WhenOAuthClientRepositoryThrows",
+          "details": null
         }
       ]
     },
@@ -1575,7 +1617,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 425,
+          "lineNumber": 428,
           "testName": "ClientSession_ExecuteTool_EnforcesCategoryScopeOnInnerTarget",
           "details": "Verifies that router meta-mode execute_tool validates and enforces category scopes on target tool calls."
         }
@@ -2151,7 +2193,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 15,
+          "lineNumber": 21,
           "testName": "Exchange_ThrowsInvalidOperationException_WhenRequestNull",
           "details": null
         }
@@ -2167,7 +2209,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 33,
+          "lineNumber": 38,
           "testName": "RegisterClient_CreatesApplicationAndReturnsOk",
           "details": null
         }
@@ -2183,7 +2225,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 71,
+          "lineNumber": 79,
           "testName": "Authorize_ThrowsInvalidOperationException_WhenRequestNull",
           "details": null
         }
@@ -2193,14 +2235,14 @@
       "id": "AUTH-109",
       "category": "SEC",
       "type": "Positive",
-      "description": "RegisterClient uses ICredentialService when IOpenIddictApplicationManager is null.",
+      "description": "RegisterClient uses IOAuthClientRepository when IOpenIddictApplicationManager is null.",
       "proofCount": 3,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 88,
-          "testName": "RegisterClient_UsesCredentialService_WhenApplicationManagerNull",
+          "lineNumber": 96,
+          "testName": "RegisterClient_UsesOAuthClientRepository_WhenApplicationManagerNull",
           "details": null
         },
         {
@@ -2222,15 +2264,94 @@
     {
       "id": "AUTH-111",
       "category": "SEC",
-      "type": "Positive",
+      "type": "Negative",
       "description": "Pipeline exposes RFC 9728 OAuth Protected Resource discovery endpoints with dynamic resource identifiers.",
-      "proofCount": 1,
+      "proofCount": 8,
       "proofs": [
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
           "lineNumber": 61,
           "testName": "Pipeline_WellKnown_Endpoints_ReturnSuccess",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 161,
+          "testName": "Exchange_ClientCredentials_ValidSecret_ReturnsSignInResult",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 208,
+          "testName": "Exchange_ClientCredentials_InvalidSecret_ReturnsForbid",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 253,
+          "testName": "Exchange_ClientCredentials_ExpiredClient_ReturnsForbid",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 86,
+          "testName": "CreateClient_ReturnsOk_WithGeneratedCredentials",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 155,
+          "testName": "DatabaseAssertion_PlaintextNotPersisted",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 181,
+          "testName": "CreateClient_AdminCreator_DoesNotInheritAdminSid",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 217,
+          "testName": "CreateClient_WithExpiresInDays_SetsExpiration",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-112",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "Authorize resolves client application from IOAuthClientRepository and redirects to consent.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 299,
+          "testName": "Authorize_ResolvesClientAndRedirectsToConsent",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 122,
+          "testName": "DeleteClient_ReturnsNoContent_WhenAppExists",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 143,
+          "testName": "DeleteClient_ReturnsNotFound_WhenAppDoesNotExist",
           "details": null
         }
       ]
