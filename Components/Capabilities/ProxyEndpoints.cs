@@ -45,10 +45,7 @@ namespace ModelContextGateway.Components.Capabilities
                             var root = doc.RootElement;
                             var logLevel = McpLogLevelHelper.ExtractPerRequestLogLevel(root);
                             McpLogLevelHelper.CurrentPerRequestLogLevel.Value = logLevel;
-                            if (httpContext != null)
-                            {
-                                httpContext.Items["PerRequestLogLevel"] = logLevel;
-                            }
+                            httpContext.Items["PerRequestLogLevel"] = logLevel;
                             if (root.TryGetProperty("method", out var methodProp))
                             {
                                 method = methodProp.GetString() ?? string.Empty;
@@ -667,10 +664,7 @@ namespace ModelContextGateway.Components.Capabilities
                             var root = doc.RootElement;
                             var logLevel = McpLogLevelHelper.ExtractPerRequestLogLevel(root);
                             McpLogLevelHelper.CurrentPerRequestLogLevel.Value = logLevel;
-                            if (httpContext != null)
-                            {
-                                httpContext.Items["PerRequestLogLevel"] = logLevel;
-                            }
+                            httpContext.Items["PerRequestLogLevel"] = logLevel;
                             if (root.TryGetProperty("method", out var methodProp))
                             {
                                 method = methodProp.GetString() ?? string.Empty;
@@ -822,10 +816,7 @@ namespace ModelContextGateway.Components.Capabilities
                     var root = doc.RootElement;
                     var logLevel = McpLogLevelHelper.ExtractPerRequestLogLevel(root);
                     McpLogLevelHelper.CurrentPerRequestLogLevel.Value = logLevel;
-                    if (httpContext != null)
-                    {
-                        httpContext.Items["PerRequestLogLevel"] = logLevel;
-                    }
+                    httpContext.Items["PerRequestLogLevel"] = logLevel;
 
                     if (!root.TryGetProperty("method", out var methodProp))
                     {

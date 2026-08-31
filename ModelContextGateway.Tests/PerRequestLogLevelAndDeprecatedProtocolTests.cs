@@ -1,8 +1,6 @@
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
-using ModelContextGateway.Core.Routing;
 using Moq;
-using Xunit;
 
 namespace ModelContextGateway.Tests
 {
