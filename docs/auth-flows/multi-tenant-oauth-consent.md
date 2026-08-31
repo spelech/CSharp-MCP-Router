@@ -2,6 +2,9 @@
 
 To securely support dynamic, multi-tenant AI integrations (such as the **Slack MCP Server** or **Splunk MCP** integrations), Model Context Gateway (MCG) natively supports the standard OAuth 2.0 `authorization_code` and `refresh_token` flows. This allows external IDEs and agents to request fine-grained access to a user's isolated backend resources.
 
+> [!TIP]
+> **For the dedicated Dynamic Client Registration (RFC 7591) specification**, discovery metadata, and payload schemas, see [**Dynamic Client Registration (RFC 7591) Guide**](dynamic-client-registration.md).
+
 ## 1. The Interactive Consent Architecture
 
 Rather than relying purely on static API keys or upstream proxy headers for all client interactions, the router acts as an **OAuth 2.0 Authorization Server** using OpenIddict. 

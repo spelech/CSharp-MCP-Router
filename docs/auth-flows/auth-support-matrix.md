@@ -76,6 +76,10 @@ These features have been implemented to address the current limitations in ident
 
 The router includes built-in support for RFC 7591 Dynamic Client Registration, allowing IDEs and autonomous agents (like Gemini Spark) to provision long-lived OAuth 2.0 credentials via the `/api/register` endpoint or the `manage_clients` MCP tool.
 
+For complete specification, sequence diagrams, and integration guide, see:
+* [**Dynamic Client Registration (RFC 7591) Guide**](dynamic-client-registration.md)
+* [**Multi-Tenant OAuth Consent Flow**](multi-tenant-oauth-consent.md)
+
 > **Interactive Per-User OAuth Consent Screen**: To support true multi-tenant scenarios (like the Slack MCP Server and Splunk MCP), the router natively supports standard `authorization_code` flows. When an AI IDE needs access to isolated backend resources on behalf of a user, it can trigger an interactive consent screen at `/connect/authorize`. This allows a user to explicitly grant the dynamically registered client access to their resources, returning an OIDC standard `authorization_code` to the IDE which can be exchanged for a short-lived access token, rather than relying strictly on static API Keys or proxy headers.
 
 👉 For detailed architecture documentation, see **[Multi-Tenant OAuth Consent Flow & Dynamic Client Registration](multi-tenant-oauth-consent.md)**.
