@@ -265,7 +265,7 @@ namespace ModelContextGateway.Core.Routing
                     }
                     if (resp.Result.HasValue)
                     {
-                        return ProtocolHelper.EnsureResultType(resp.Result.Value);
+                        resp.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(resp.Result.Value));
                     }
                     return resp;
                 }

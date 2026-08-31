@@ -887,7 +887,7 @@ namespace ModelContextGateway.Tests
             var tools = listResp.Result.Value.GetProperty("tools").EnumerateArray().ToList();
             Assert.Equal(10, tools.Count);
 
-            // 2. ping
+            // 2. ping (deprecated in MCP 2026-07-28, returns -32601)
             var pingReq = new JsonRpcRequest
             {
                 Id = "jsonrpc-ping",
@@ -895,7 +895,8 @@ namespace ModelContextGateway.Tests
             };
 
             var pingResp = await _adminMcpServer.ProcessRequestAsync(pingReq, "admin_user");
-            Assert.Null(pingResp.Error);
+            Assert.NotNull(pingResp.Error);
+            Assert.Equal(-32601, pingResp.Error.Code);
 
             // 3. tools/call
             var callReq = new JsonRpcRequest
