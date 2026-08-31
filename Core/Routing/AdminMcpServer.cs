@@ -106,6 +106,29 @@ namespace ModelContextGateway.Core.Routing
         }
 
         /// <summary>
+        /// Handles the MCP server/discover request according to protocol version specifications.
+        /// </summary>
+        public Task<object> HandleDiscoverAsync(JsonElement? paramsElement)
+        {
+            var result = (object)new
+            {
+                supportedVersions = new[] { DefaultProtocolVersion, LegacyProtocolVersion },
+                capabilities = new
+                {
+                    tools = new { listChanged = false }
+                },
+                serverInfo = new
+                {
+                    name = GatewayMetadata.AdminServerName,
+                    version = GatewayMetadata.Version
+                },
+                instructions = "In-process virtual Admin MCP Server for managing the Model Context Gateway configuration, servers, clients, policies, providers, settings, and diagnostics."
+            };
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
         /// Returns the 10 consolidated admin tool definitions with complete JSON schemas.
         /// </summary>
         public Task<List<object>> ListToolsAsync()
@@ -211,6 +234,11 @@ namespace ModelContextGateway.Core.Routing
                     case "initialize":
                         var initResult = await HandleInitializeAsync(request.Params);
                         response.Result = JsonSerializer.SerializeToElement(initResult);
+                        break;
+
+                    case "server/discover":
+                        var discoverResult = await HandleDiscoverAsync(request.Params);
+                        response.Result = JsonSerializer.SerializeToElement(discoverResult);
                         break;
 
                     case "notifications/initialized":
