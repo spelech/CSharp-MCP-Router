@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:32:15.1205244Z",
-    "totalRequirements": 150,
-    "positiveCount": 121,
-    "guardrailCount": 29,
-    "totalProofs": 353
+    "generatedAt": "2026-08-31T04:36:16.0597738Z",
+    "totalRequirements": 154,
+    "positiveCount": 123,
+    "guardrailCount": 31,
+    "totalProofs": 357
   },
   "requirements": [
     {
@@ -2267,6 +2267,70 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 147,
           "testName": "ListToolsAsync_ReturnsTenConsolidatedTools",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ERROR-CODES-HEADER-ANNOTATION",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "McpDualSpecMiddleware extracts Mcp-Method and Mcp-Name headers into HttpContext.Items.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpErrorCodesTests.cs",
+          "lineNumber": 116,
+          "testName": "McpDualSpecMiddleware_ExtractsHeaders_IntoItems",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ERROR-CODES-MISSING-CAPABILITY",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "ClientSession returns MissingRequiredClientCapability (-32021) when client lacks required capability.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpErrorCodesTests.cs",
+          "lineNumber": 83,
+          "testName": "ClientSession_MissingRequiredClientCapability_ReturnsError",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ERROR-CODES-SPEC-ALLOCATION",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Verify MCP 2026-07-28 error codes match specification allocation policy.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpErrorCodesTests.cs",
+          "lineNumber": 11,
+          "testName": "McpErrorCodes_ConstantValues_MatchSpec",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-ERROR-CODES-UNSUPPORTED-PROTOCOL",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "AdminMcpServer returns UnsupportedProtocolVersion (-32022) when protocol version is invalid.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpErrorCodesTests.cs",
+          "lineNumber": 27,
+          "testName": "AdminMcpServer_UnsupportedProtocolVersion_ReturnsError",
           "details": null
         }
       ]

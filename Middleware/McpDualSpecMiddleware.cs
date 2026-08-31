@@ -101,10 +101,15 @@ namespace ModelContextGateway.Middleware
             {
                 if (context.Request.Headers.TryGetValue("Mcp-Method", out var methodHeader))
                 {
-                    context.Items["MCP_METHOD"] = methodHeader.ToString();
+                    var methodVal = methodHeader.ToString();
+                    context.Items["MCP_HEADER_METHOD"] = methodVal;
+                    context.Items["MCP_METHOD"] = methodVal;
+
                     if (context.Request.Headers.TryGetValue("Mcp-Name", out var nameHeader))
                     {
-                        context.Items["MCP_ITEM_NAME"] = nameHeader.ToString();
+                        var itemVal = nameHeader.ToString();
+                        context.Items["MCP_HEADER_NAME"] = itemVal;
+                        context.Items["MCP_ITEM_NAME"] = itemVal;
                     }
                     context.Items["MCP_SPEC_VERSION"] = context.Request.Headers["MCP-Protocol-Version"].FirstOrDefault() ?? "2026-07-28";
                 }

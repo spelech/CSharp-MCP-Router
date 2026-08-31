@@ -80,9 +80,16 @@ namespace ModelContextGateway.Core.Routing
                 if (paramsElement.Value.TryGetProperty("protocolVersion", out var versionProp))
                 {
                     var requestedVersion = versionProp.GetString();
-                    if (!string.IsNullOrEmpty(requestedVersion) && requestedVersion.StartsWith("2024", StringComparison.OrdinalIgnoreCase))
+                    if (!string.IsNullOrEmpty(requestedVersion))
                     {
-                        negotiatedVersion = LegacyProtocolVersion;
+                        if (requestedVersion.StartsWith("2024", StringComparison.OrdinalIgnoreCase))
+                        {
+                            negotiatedVersion = LegacyProtocolVersion;
+                        }
+                        else if (!requestedVersion.Equals(DefaultProtocolVersion, StringComparison.OrdinalIgnoreCase))
+                        {
+                            throw new InvalidOperationException($"Unsupported protocol version: '{requestedVersion}'");
+                        }
                     }
                 }
             }
@@ -288,10 +295,15 @@ namespace ModelContextGateway.Core.Routing
                         break;
                 }
             }
+            catch (InvalidOperationException ex) when (ex.Message.StartsWith("Unsupported protocol version"))
+            {
+                _logger?.LogWarning(ex, "Unsupported protocol version requested.");
+                response.Error = new JsonRpcError { Code = McpErrorCodes.UnsupportedProtocolVersion, Message = ex.Message };
+            }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "An unexpected error occurred.");
-                response.Error = new JsonRpcError { Code = -32603, Message = ex.Message };
+                response.Error = new JsonRpcError { Code = McpErrorCodes.InternalError, Message = ex.Message };
             }
 
             return response;

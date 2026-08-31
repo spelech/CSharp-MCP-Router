@@ -39,6 +39,17 @@ namespace ModelContextGateway.Core.Routing
 
         public void StartInitialization(string initializeRequest)
         {
+            try
+            {
+                using var doc = JsonDocument.Parse(initializeRequest);
+                var root = doc.RootElement;
+                if (root.TryGetProperty("params", out var pProp) && pProp.TryGetProperty("capabilities", out var capProp))
+                {
+                    DeclaredCapabilities = capProp.Clone();
+                }
+            }
+            catch { }
+
             lock (_initLock)
             {
                 if (_initializeTask == null)

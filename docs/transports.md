@@ -445,7 +445,10 @@ To connect directly to a single backend bypassing Meta-Mode, point the client UR
 | `-32601` | `Method not found` | Method is not implemented or namespaced identifier is invalid. | Query `search_tools` first or verify exact `<serverId>__<toolName>` spelling. |
 | `-32602` | `Invalid params` | Arguments do not match tool input schema. | Inspect tool input schema using the Test Bench form builder. |
 | `-32603` | `Internal error` | Unhandled downstream server error or serialization failure. | Check gateway diagnostic logs in Web UI for backend stack trace. |
-| `-32001` | `Server Disconnected / Not Running` | Downstream SSE stream or STDIO subprocess is offline. | Check backend server status on Overview dashboard; inspect container logs. |
+| `-32001` | `Connection Closed / Unauthorized` | Downstream SSE stream or STDIO subprocess is offline, or caller is unauthorized. | Check backend server status on Overview dashboard; inspect authentication credentials. |
+| `-32020` | `Header Mismatch` | HTTP headers `Mcp-Method` or `Mcp-Name` do not match request body payload. | Ensure client request headers match JSON-RPC request body method and parameter names. |
+| `-32021` | `Missing Required Client Capability` | Client requested operation requiring capabilities that were not declared during initialization. | Include required capabilities in `initialize` request params (e.g. `sampling`). |
+| `-32022` | `Unsupported Protocol Version` | Protocol version requested in `initialize` or `MCP-Protocol-Version` header is unsupported. | Use a supported MCP protocol version (e.g. `2026-07-28` or `2024-11-05`). |
 
 ### HTTP Status Codes
 
