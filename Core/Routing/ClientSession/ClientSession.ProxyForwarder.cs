@@ -77,17 +77,26 @@ namespace ModelContextGateway.Core.Routing
 
         public async Task<JsonRpcResponse> ForwardRequestToClientAsync(JsonRpcRequest request)
         {
-            if (request.Method == "sampling/createMessage" && DeclaredCapabilities.HasValue && !HasClientCapability("sampling"))
+            if (request.Method == "sampling/createMessage")
             {
-                return new JsonRpcResponse
+                _logger.LogWarning("[Deprecated Spec MCP 2026-07-28] Method 'sampling/createMessage' is deprecated and scheduled for removal in future specification versions.");
+
+                if (DeclaredCapabilities.HasValue && !HasClientCapability("sampling"))
                 {
-                    Id = request.Id,
-                    Error = new JsonRpcError
+                    return new JsonRpcResponse
                     {
-                        Code = McpErrorCodes.MissingRequiredClientCapability,
-                        Message = "Client missing required capability: sampling"
-                    }
-                };
+                        Id = request.Id,
+                        Error = new JsonRpcError
+                        {
+                            Code = McpErrorCodes.MissingRequiredClientCapability,
+                            Message = "Client missing required capability: sampling"
+                        }
+                    };
+                }
+            }
+            else if (request.Method == "logging/setLevel" || (request.Method != null && request.Method.StartsWith("notifications/message")))
+            {
+                _logger.LogWarning("[Deprecated Spec MCP 2026-07-28] Logging feature ('{Method}') is deprecated and scheduled for removal in future specification versions.", request.Method);
             }
 
             var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);

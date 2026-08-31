@@ -182,6 +182,26 @@ namespace ModelContextGateway.Core.Routing
                                 _logger.LogInformation("Received notifications/prompts/list_changed from server {ServerId}. Invalidating prompts cache.", server.Id);
                                 _sessionManager?.RemoveServerPromptsCache(server.Id);
                             }
+                            else if (notification.Method == "notifications/message" || notification.Method == "notifications/logMessage")
+                            {
+                                var activeLogLevel = McpLogLevelHelper.CurrentPerRequestLogLevel.Value
+                                    ?? (_clientResponse?.HttpContext?.Items["PerRequestLogLevel"] as string);
+
+                                string? notificationLevel = null;
+                                if (notification.Params.HasValue && notification.Params.Value.ValueKind == JsonValueKind.Object)
+                                {
+                                    if (notification.Params.Value.TryGetProperty("level", out var lProp) && lProp.ValueKind == JsonValueKind.String)
+                                    {
+                                        notificationLevel = lProp.GetString();
+                                    }
+                                }
+
+                                if (!McpLogLevelHelper.ShouldEmitLogNotification(activeLogLevel, notificationLevel))
+                                {
+                                    _logger.LogDebug("Suppressing log notification {Method} because per-request logLevel was not set in _meta or threshold was not met.", notification.Method);
+                                    return;
+                                }
+                            }
                         }
 
                         // Otherwise, it is a notification (e.g. logMessage, resourceUpdated) - forward to client
