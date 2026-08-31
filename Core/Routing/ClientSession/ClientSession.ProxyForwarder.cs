@@ -77,15 +77,6 @@ namespace ModelContextGateway.Core.Routing
 
         public async Task<JsonRpcResponse> ForwardRequestToClientAsync(JsonRpcRequest request)
         {
-            if (request.Method == "sampling/createMessage")
-            {
-                _logger.LogWarning("[Deprecated Spec MCP 2026-07-28] Method 'sampling/createMessage' is deprecated and scheduled for removal in future specification versions.");
-            }
-            else if (request.Method == "logging/setLevel" || (request.Method != null && request.Method.StartsWith("notifications/message")))
-            {
-                _logger.LogWarning("[Deprecated Spec MCP 2026-07-28] Logging feature ('{Method}') is deprecated and scheduled for removal in future specification versions.", request.Method);
-            }
-
             var tcs = new TaskCompletionSource<JsonRpcResponse>(TaskCreationOptions.RunContinuationsAsynchronously);
             var requestId = request.Id?.ToString() ?? Guid.NewGuid().ToString("N");
 

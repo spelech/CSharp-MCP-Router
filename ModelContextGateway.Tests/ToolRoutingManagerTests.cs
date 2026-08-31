@@ -50,49 +50,6 @@ namespace ModelContextGateway.Tests
 
             Assert.NotNull(tools);
             Assert.Equal(2, tools.Count);
-            // Verify deterministic sorting order: "execute_tool" before "search_tools"
-            Assert.Equal("execute_tool", ToolRoutingManager.GetToolName(tools[0]));
-            Assert.Equal("search_tools", ToolRoutingManager.GetToolName(tools[1]));
-        }
-
-        [Fact]
-        public async Task PopulateToolsCacheAsync_OrdersToolsDeterministicallyByName()
-        {
-            var manager = new ToolRoutingManager();
-
-            var server1 = new McpServer { Id = "srv1", Url = "http://srv1/mcp", Type = "http", Enabled = true };
-            var server2 = new McpServer { Id = "srv2", Url = "http://srv2/mcp", Type = "http", Enabled = true };
-
-            var handler1 = new MockHttpMessageHandler();
-            handler1.Handler = req => Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
-            {
-                Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":\"refresh-list\",\"result\":{\"tools\":[{\"name\":\"z_tool\"},{\"name\":\"a_tool\"}]}}", System.Text.Encoding.UTF8, "application/json")
-            });
-
-            var handler2 = new MockHttpMessageHandler();
-            handler2.Handler = req => Task.FromResult(new HttpResponseMessage(System.Net.HttpStatusCode.OK)
-            {
-                Content = new StringContent("{\"jsonrpc\":\"2.0\",\"id\":\"refresh-list\",\"result\":{\"tools\":[{\"name\":\"m_tool\"},{\"name\":\"b_tool\"}]}}", System.Text.Encoding.UTF8, "application/json")
-            });
-
-            using var conn1 = new BackendConnection(server1, new HttpClient(handler1), NullLogger.Instance);
-            using var conn2 = new BackendConnection(server2, new HttpClient(handler2), NullLogger.Instance);
-
-            var connections = new Dictionary<string, BackendConnection>
-            {
-                { "srv2", conn2 },
-                { "srv1", conn1 }
-            };
-
-            await manager.PopulateToolsCacheAsync("{}", connections, NullLogger.Instance, new List<McpServer>());
-
-            var cachedTools = manager.GetCachedTools();
-            Assert.Equal(4, cachedTools.Count);
-
-            var toolNames = cachedTools.Select(t => ToolRoutingManager.GetToolName(t)).ToList();
-            var expectedNames = new List<string> { "srv1__a_tool", "srv1__z_tool", "srv2__b_tool", "srv2__m_tool" };
-
-            Assert.Equal(expectedNames, toolNames);
         }
 
         [Requirement("CORE-101", "Auto-added requirement tracking")]

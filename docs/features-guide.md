@@ -4,19 +4,6 @@ This guide details the features of the Model Context Gateway (MCG).
 
 ---
 
-## ⚠️ MCP 2026-07-28 Specification & Feature Deprecations
-
-According to the Model Context Protocol (MCP) 2026-07-28 specification, several legacy features and transports are reclassified or deprecated:
-
-- **Roots (`roots/list`)**: Deprecated and scheduled for removal in future spec revisions.
-- **Sampling (`sampling/createMessage`)**: Deprecated and scheduled for removal in future spec revisions.
-- **Logging (`notifications/message`, `logging/setLevel`)**: Deprecated and scheduled for removal in future spec revisions.
-- **HTTP+SSE Transport (`/sse`, `/{targetServerId}`, `/message`)**: Reclassified as Deprecated. Clients are strongly recommended to migrate to Streamable HTTP.
-
-ModelContextGateway maintains full backward compatibility for these features while tracking and logging runtime deprecation warnings (`[Deprecated Spec MCP 2026-07-28]`).
-
----
-
 ## 🖥️ 1. Dynamic Server Management
 
 Model Context Gateway (MCG) supports four methods to manage backend Model Context Protocol (MCP) servers:

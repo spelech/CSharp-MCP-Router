@@ -29,10 +29,10 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Log in to the Container registry
-        uses: docker/login-action@v3
+        uses: docker/login-action@v4
         with:
           registry: ${{ env.REGISTRY }}
           username: ${{ github.actor }}
@@ -40,7 +40,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for standard Docker image
         id: meta-standard
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           tags: |
@@ -53,7 +53,7 @@ jobs:
 
       - name: Extract metadata (tags, labels) for full Docker image
         id: meta-full
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           flavor: |
@@ -70,7 +70,7 @@ jobs:
         uses: docker/setup-buildx-action@v4
 
       - name: Build and push standard Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
           target: runtime
@@ -81,7 +81,7 @@ jobs:
           cache-to: type=gha,mode=max,scope=runtime
 
       - name: Build and push full Docker image
-        uses: docker/build-push-action@v5
+        uses: docker/build-push-action@v7
         with:
           context: .
           target: runtime-full

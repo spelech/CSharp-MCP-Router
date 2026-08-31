@@ -31,6 +31,7 @@ namespace ModelContextGateway.Core.Routing
                 logger.LogWarning("Execution of tool '{ToolName}' was cancelled.", toolName);
                 return new
                 {
+                    resultType = "complete",
                     isError = true,
                     content = new[] {
                         new {
@@ -87,6 +88,7 @@ namespace ModelContextGateway.Core.Routing
                 var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService, logger);
                 return new
                 {
+                    resultType = "complete",
                     content = new[] {
                         new {
                             type = "text",
@@ -125,6 +127,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {
@@ -140,6 +143,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {
@@ -171,6 +175,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {
@@ -233,6 +238,7 @@ namespace ModelContextGateway.Core.Routing
                         var transformed = ToolErrorFormatter.TransformError(resp.Error, toolName, serverId);
                         return new
                         {
+                            resultType = "complete",
                             isError = true,
                             content = new[] {
                                 new {
@@ -242,6 +248,10 @@ namespace ModelContextGateway.Core.Routing
                             }
                         };
                     }
+                    if (resp.Result.HasValue)
+                    {
+                        return ProtocolHelper.EnsureResultType(resp.Result.Value);
+                    }
                     return resp;
                 }
                 catch (System.Net.Http.HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -250,6 +260,7 @@ namespace ModelContextGateway.Core.Routing
                     var prompt = (srv != null && !string.IsNullOrEmpty(srv.DynamicAuthPrompt)) ? srv.DynamicAuthPrompt : "401 Unauthorized. Please provide a valid target_auth_token via execute_tool.";
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {
@@ -264,6 +275,7 @@ namespace ModelContextGateway.Core.Routing
                     var transformed = ToolErrorFormatter.TransformException(ex, toolName, serverId);
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {
