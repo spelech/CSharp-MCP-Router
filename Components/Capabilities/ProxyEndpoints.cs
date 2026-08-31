@@ -149,12 +149,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var toolName = nameProp.GetString() ?? string.Empty;
                                 var res = await activeSession.CallToolAsync(toolName, requestBody, dbFactory, httpContext);
-                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
+                                var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = ProtocolHelper.EnsureResultType(targetRes)
+                                    result = ProtocolHelper.EnsureResultType(innerResult)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -197,12 +197,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var uri = uriProp.GetString() ?? string.Empty;
                                 var res = await activeSession.ReadResourceAsync(uri, requestBody, httpContext);
-                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
+                                var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = ProtocolHelper.EnsureResultType(targetRes)
+                                    result = ProtocolHelper.EnsureResultType(innerResult)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -232,12 +232,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var name = nameProp.GetString() ?? string.Empty;
                                 var res = await activeSession.GetPromptAsync(name, requestBody, httpContext);
-                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
+                                var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = ProtocolHelper.EnsureResultType(targetRes)
+                                    result = ProtocolHelper.EnsureResultType(innerResult)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -919,13 +919,13 @@ namespace ModelContextGateway.Components.Capabilities
                             var toolName = nameProp.GetString() ?? string.Empty;
                             var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
                             var res = await session.CallToolAsync(toolName, body, dbFactory, httpContext);
-                            var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
+                            var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
 
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(targetRes)
+                                result = ProtocolHelper.EnsureResultType(innerResult)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -950,12 +950,12 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             var uri = uriProp.GetString() ?? string.Empty;
                             var res = await session.ReadResourceAsync(uri, body, httpContext);
-                            var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
+                            var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(targetRes)
+                                result = ProtocolHelper.EnsureResultType(innerResult)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -1024,12 +1024,12 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             var name = nameProp.GetString() ?? string.Empty;
                             var res = await session.GetPromptAsync(name, body, httpContext);
-                            var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
+                            var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(targetRes)
+                                result = ProtocolHelper.EnsureResultType(innerResult)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:27:14.7589016Z",
-    "totalRequirements": 147,
-    "positiveCount": 118,
+    "generatedAt": "2026-08-31T04:34:51.3023174Z",
+    "totalRequirements": 150,
+    "positiveCount": 121,
     "guardrailCount": 29,
-    "totalProofs": 351
+    "totalProofs": 354
   },
   "requirements": [
     {
@@ -2274,6 +2274,54 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 147,
           "testName": "ListToolsAsync_ReturnsTenConsolidatedTools",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-MRTR-01",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "McpInputRequiredResult serializes and deserializes according to MCP 2026-07-28 spec with resultType input_required.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs",
+          "lineNumber": 9,
+          "testName": "Test_MrtrModels_Serialization",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-MRTR-02",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "execute_tool forwards inputResponses to target tool params during request retry.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs",
+          "lineNumber": 41,
+          "testName": "Test_ExecuteTool_ForwardsInputResponses",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-MRTR-03",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Direct tool call returns InputRequiredResult intact when backend requires additional input.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs",
+          "lineNumber": 113,
+          "testName": "Test_DirectToolCall_ReturnsInputRequiredResult",
           "details": null
         }
       ]
