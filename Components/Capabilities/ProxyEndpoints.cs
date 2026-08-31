@@ -131,7 +131,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new { tools }
+                                result = ProtocolHelper.EnsureResultType(new { tools })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -146,11 +146,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var toolName = nameProp.GetString() ?? string.Empty;
                                 var res = await activeSession.CallToolAsync(toolName, requestBody, dbFactory, httpContext);
+                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                    result = ProtocolHelper.EnsureResultType(targetRes)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -166,7 +167,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new { resources }
+                                result = ProtocolHelper.EnsureResultType(new { resources })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -179,7 +180,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new { templates }
+                                result = ProtocolHelper.EnsureResultType(new { templates })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -193,11 +194,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var uri = uriProp.GetString() ?? string.Empty;
                                 var res = await activeSession.ReadResourceAsync(uri, requestBody, httpContext);
+                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                    result = ProtocolHelper.EnsureResultType(targetRes)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -213,7 +215,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new { prompts }
+                                result = ProtocolHelper.EnsureResultType(new { prompts })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -227,11 +229,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var name = nameProp.GetString() ?? string.Empty;
                                 var res = await activeSession.GetPromptAsync(name, requestBody, httpContext);
+                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                    result = ProtocolHelper.EnsureResultType(targetRes)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -247,7 +250,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = res
+                                result = ProtocolHelper.EnsureResultType(res)
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -259,7 +262,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = new
+                                result = ProtocolHelper.EnsureResultType(new
                                 {
                                     roots = new[] {
                                         new {
@@ -267,7 +270,7 @@ namespace ModelContextGateway.Components.Capabilities
                                             name = "Docker Containers Workspace"
                                         }
                                     }
-                                }
+                                })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -338,7 +341,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new
+                            result = ProtocolHelper.EnsureResultType(new
                             {
                                 protocolVersion = "2024-11-05",
                                 capabilities = new
@@ -348,7 +351,7 @@ namespace ModelContextGateway.Components.Capabilities
                                     resources = new { subscribe = false, listChanged = true }
                                 },
                                 serverInfo = new { name = "ModelContextGateway", version = AppVersion }
-                            }
+                            })
                         };
                         var json = JsonSerializer.Serialize(response);
                         await httpContext.Response.WriteAsync($"event: message\ndata: {json}\n\n");
@@ -361,7 +364,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new
+                            result = ProtocolHelper.EnsureResultType(new
                             {
                                 supportedVersions = new[] { "2026-07-28" },
                                 capabilities = new
@@ -371,7 +374,7 @@ namespace ModelContextGateway.Components.Capabilities
                                     resources = new { subscribe = false, listChanged = true }
                                 },
                                 serverInfo = new { name = "ModelContextGateway", version = AppVersion }
-                            }
+                            })
                         };
                         var json = JsonSerializer.Serialize(response);
                         await httpContext.Response.WriteAsync($"event: message\ndata: {json}\n\n");
@@ -720,7 +723,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new
+                            result = ProtocolHelper.EnsureResultType(new
                             {
                                 supportedVersions = new[] { "2026-07-28" },
                                 capabilities = new
@@ -730,12 +733,12 @@ namespace ModelContextGateway.Components.Capabilities
                                     resources = new { subscribe = false, listChanged = true }
                                 },
                                 serverInfo = new { name = serverName, version = AppVersion }
-                            }
+                            })
                         } : new
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new
+                            result = ProtocolHelper.EnsureResultType(new
                             {
                                 protocolVersion = "2024-11-05",
                                 capabilities = new
@@ -745,7 +748,7 @@ namespace ModelContextGateway.Components.Capabilities
                                     resources = new { subscribe = false, listChanged = true }
                                 },
                                 serverInfo = new { name = serverName, version = AppVersion }
-                            }
+                            })
                         };
                         await session.WriteMessageAsync(response);
                         session.StartInitialization(requestBody);
@@ -831,7 +834,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new
+                            result = ProtocolHelper.EnsureResultType(new
                             {
                                 protocolVersion = "2024-11-05",
                                 capabilities = new
@@ -845,7 +848,7 @@ namespace ModelContextGateway.Components.Capabilities
                                     name = "ModelContextGateway",
                                     version = AppVersion
                                 }
-                            }
+                            })
                         };
 
                         await session.WriteMessageAsync(response);
@@ -858,7 +861,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new
+                            result = ProtocolHelper.EnsureResultType(new
                             {
                                 supportedVersions = new[] { "2026-07-28" },
                                 capabilities = new
@@ -872,7 +875,7 @@ namespace ModelContextGateway.Components.Capabilities
                                     name = "ModelContextGateway",
                                     version = AppVersion
                                 }
-                            }
+                            })
                         };
 
                         await session.WriteMessageAsync(response);
@@ -886,7 +889,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new { tools }
+                            result = ProtocolHelper.EnsureResultType(new { tools })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -898,12 +901,13 @@ namespace ModelContextGateway.Components.Capabilities
                             var toolName = nameProp.GetString() ?? string.Empty;
                             var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
                             var res = await session.CallToolAsync(toolName, body, dbFactory, httpContext);
+                            var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
 
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                result = ProtocolHelper.EnsureResultType(targetRes)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -917,7 +921,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new { resources }
+                            result = ProtocolHelper.EnsureResultType(new { resources })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -928,11 +932,12 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             var uri = uriProp.GetString() ?? string.Empty;
                             var res = await session.ReadResourceAsync(uri, body, httpContext);
+                            var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                result = ProtocolHelper.EnsureResultType(targetRes)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -946,7 +951,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new { templates }
+                            result = ProtocolHelper.EnsureResultType(new { templates })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -958,7 +963,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = res
+                            result = ProtocolHelper.EnsureResultType(res)
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -969,7 +974,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new
+                            result = ProtocolHelper.EnsureResultType(new
                             {
                                 roots = new[] {
                                     new {
@@ -977,7 +982,7 @@ namespace ModelContextGateway.Components.Capabilities
                                         name = "Docker Containers Workspace"
                                     }
                                 }
-                            }
+                            })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -989,7 +994,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = new { prompts }
+                            result = ProtocolHelper.EnsureResultType(new { prompts })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -1000,11 +1005,12 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             var name = nameProp.GetString() ?? string.Empty;
                             var res = await session.GetPromptAsync(name, body, httpContext);
+                            var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                result = ProtocolHelper.EnsureResultType(targetRes)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -1045,7 +1051,7 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     jsonrpc = "2.0",
                                     id = (object)id,
-                                    result = results.First().Value
+                                    result = ProtocolHelper.EnsureResultType(results.First().Value)
                                 };
                                 await session.WriteMessageAsync(response);
                             }

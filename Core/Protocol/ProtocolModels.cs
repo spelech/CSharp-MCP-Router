@@ -157,4 +157,64 @@ namespace ModelContextGateway.Core.Protocol
         [JsonPropertyName("version")]
         public string Version { get; set; } = GatewayMetadata.Version;
     }
+
+    public static class ProtocolHelper
+    {
+        public static object EnsureResultType(object? result, string defaultResultType = "complete")
+        {
+            if (result == null)
+            {
+                return new Dictionary<string, object?>(StringComparer.Ordinal)
+                {
+                    ["resultType"] = defaultResultType
+                };
+            }
+
+            if (result is JsonElement je && je.ValueKind == JsonValueKind.Object)
+            {
+                if (je.TryGetProperty("resultType", out _))
+                {
+                    return je;
+                }
+
+                var dict = new Dictionary<string, object?>(StringComparer.Ordinal)
+                {
+                    ["resultType"] = defaultResultType
+                };
+                foreach (var prop in je.EnumerateObject())
+                {
+                    dict[prop.Name] = prop.Value.Clone();
+                }
+                return dict;
+            }
+
+            try
+            {
+                var element = JsonSerializer.SerializeToElement(result);
+                if (element.ValueKind == JsonValueKind.Object)
+                {
+                    if (element.TryGetProperty("resultType", out _))
+                    {
+                        return result;
+                    }
+
+                    var dict = new Dictionary<string, object?>(StringComparer.Ordinal)
+                    {
+                        ["resultType"] = defaultResultType
+                    };
+                    foreach (var prop in element.EnumerateObject())
+                    {
+                        dict[prop.Name] = prop.Value.Clone();
+                    }
+                    return dict;
+                }
+            }
+            catch
+            {
+                // Fallback if serialization fails
+            }
+
+            return result;
+        }
+    }
 }

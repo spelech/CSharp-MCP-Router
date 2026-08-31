@@ -210,20 +210,20 @@ namespace ModelContextGateway.Core.Routing
                 {
                     case "initialize":
                         var initResult = await HandleInitializeAsync(request.Params);
-                        response.Result = JsonSerializer.SerializeToElement(initResult);
+                        response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(initResult));
                         break;
 
                     case "notifications/initialized":
-                        response.Result = JsonSerializer.SerializeToElement(new { });
+                        response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new { }));
                         break;
 
                     case "ping":
-                        response.Result = JsonSerializer.SerializeToElement(new { });
+                        response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new { }));
                         break;
 
                     case "tools/list":
                         var tools = await ListToolsAsync();
-                        response.Result = JsonSerializer.SerializeToElement(new { tools });
+                        response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new { tools }));
                         break;
 
                     case "tools/call":
@@ -240,7 +240,7 @@ namespace ModelContextGateway.Core.Routing
                             else
                             {
                                 var toolResult = await CallToolAsync(toolName, arguments, callerUsername);
-                                response.Result = JsonSerializer.SerializeToElement(toolResult);
+                                response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(toolResult));
                             }
                         }
                         else
