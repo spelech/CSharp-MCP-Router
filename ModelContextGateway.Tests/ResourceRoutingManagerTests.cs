@@ -62,17 +62,23 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        public async Task ReadResourceAsync_ThrowsKeyNotFound_WhenResourceNotRegistered()
+        public async Task ReadResourceAsync_ReturnsError32602_WhenResourceNotRegistered()
         {
             var manager = new ResourceRoutingManager();
             var backendConnections = new ConcurrentDictionary<string, BackendConnection>();
             Func<Task> ensureInitialized = () => Task.CompletedTask;
             Func<string, string, string, string> rewriteJson = (body, key, val) => body;
 
-            await Assert.ThrowsAsync<KeyNotFoundException>(async () =>
-            {
-                await manager.ReadResourceAsync("mcp://unknown-server/unregistered-resource", "{}", backendConnections, ensureInitialized, rewriteJson);
-            });
+            var res = await manager.ReadResourceAsync("mcp://unknown-server/unregistered-resource", "{}", backendConnections, ensureInitialized, rewriteJson);
+            Assert.NotNull(res);
+
+            var json = System.Text.Json.JsonSerializer.Serialize(res);
+            using var doc = System.Text.Json.JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            Assert.True(root.TryGetProperty("error", out var errorProp));
+            Assert.True(errorProp.TryGetProperty("code", out var codeProp));
+            Assert.Equal(-32602, codeProp.GetInt32());
         }
 
         [Fact]

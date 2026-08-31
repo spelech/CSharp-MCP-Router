@@ -53,7 +53,7 @@ namespace ModelContextGateway.Infrastructure.Secrets
 
             string scope = !string.IsNullOrWhiteSpace(keyName) ? keyName : (options.Scope ?? string.Empty);
             string subjectKey = !string.IsNullOrWhiteSpace(subjectToken) ? subjectToken : (subject ?? "anonymous");
-            string cacheKey = $"token_exchange:{options.ClientId}:{subjectKey}:{scope}:{options.TokenEndpoint}";
+            string cacheKey = $"token_exchange:{options.Issuer}:{options.ClientId}:{subjectKey}:{scope}:{options.TokenEndpoint}";
 
             if (_cache != null && _cache.TryGetValue(cacheKey, out string? cachedToken) && !string.IsNullOrEmpty(cachedToken))
             {
@@ -143,6 +143,27 @@ namespace ModelContextGateway.Infrastructure.Secrets
 
             using var doc = JsonDocument.Parse(responseBody);
             var root = doc.RootElement;
+
+            string? responseIssuer = null;
+            if (root.TryGetProperty("iss", out var issProp))
+            {
+                responseIssuer = issProp.GetString();
+            }
+            else if (root.TryGetProperty("issuer", out var issuerProp))
+            {
+                responseIssuer = issuerProp.GetString();
+            }
+
+            if (!string.IsNullOrEmpty(responseIssuer) && !string.IsNullOrEmpty(options.Issuer))
+            {
+                var normExpected = options.Issuer.TrimEnd('/');
+                var normActual = responseIssuer.TrimEnd('/');
+                if (!string.Equals(normExpected, normActual, StringComparison.OrdinalIgnoreCase))
+                {
+                    _logger?.LogError("TokenExchange issuer mismatch: expected '{Expected}', received '{Actual}'", options.Issuer, responseIssuer);
+                    throw new System.Security.SecurityException($"TokenExchange issuer mismatch: expected '{options.Issuer}', received '{responseIssuer}'.");
+                }
+            }
 
             string? accessToken = null;
             if (root.TryGetProperty("access_token", out var tokenProp))
@@ -271,12 +292,22 @@ namespace ModelContextGateway.Infrastructure.Secrets
                 var section = _config.GetSection("Identity:TokenExchange");
                 if (section.Exists())
                 {
+                    options.Issuer = options.Issuer ?? section["Issuer"];
                     options.TokenEndpoint = options.TokenEndpoint ?? section["TokenEndpoint"];
                     options.ClientId = options.ClientId ?? section["ClientId"];
                     options.ClientSecret = options.ClientSecret ?? section["ClientSecret"];
                     options.GrantType = options.GrantType ?? section["GrantType"];
                     options.Scope = options.Scope ?? section["Scope"];
                     options.Audience = options.Audience ?? section["Audience"];
+                }
+                options.Issuer = options.Issuer ?? _config["Oidc:Issuer"];
+            }
+
+            if (string.IsNullOrWhiteSpace(options.Issuer) && !string.IsNullOrWhiteSpace(options.TokenEndpoint))
+            {
+                if (Uri.TryCreate(options.TokenEndpoint, UriKind.Absolute, out var endpointUri))
+                {
+                    options.Issuer = endpointUri.GetLeftPart(UriPartial.Authority);
                 }
             }
 
@@ -298,6 +329,7 @@ namespace ModelContextGateway.Infrastructure.Secrets
 
         private class TokenExchangeOptions
         {
+            public string? Issuer { get; set; }
             public string? TokenEndpoint { get; set; }
             public string? ClientId { get; set; }
             public string? ClientSecret { get; set; }
@@ -314,6 +346,10 @@ namespace ModelContextGateway.Infrastructure.Secrets
                     using var doc = JsonDocument.Parse(json);
                     var root = doc.RootElement;
 
+                    if (root.TryGetProperty("issuer", out var iss) || root.TryGetProperty("iss", out iss))
+                    {
+                        Issuer = iss.GetString() ?? Issuer;
+                    }
                     if (root.TryGetProperty("tokenEndpoint", out var te) || root.TryGetProperty("token_endpoint", out te) || root.TryGetProperty("url", out te))
                     {
                         TokenEndpoint = te.GetString() ?? TokenEndpoint;
