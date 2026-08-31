@@ -256,6 +256,12 @@ namespace ModelContextGateway.Components.Clients
                 var encodedName = Uri.EscapeDataString(clientName);
                 qs = string.IsNullOrEmpty(qs) ? $"?client_name={encodedName}" : $"{qs}&client_name={encodedName}";
             }
+            if (!qs.Contains("iss="))
+            {
+                var issuer = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}".TrimEnd('/');
+                var encodedIss = Uri.EscapeDataString(issuer);
+                qs = string.IsNullOrEmpty(qs) ? $"?iss={encodedIss}" : $"{qs}&iss={encodedIss}";
+            }
             return Redirect($"/consent{qs}");
         }
 
@@ -361,8 +367,18 @@ namespace ModelContextGateway.Components.Clients
                 scopesList = scopesList.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
             }
 
+            if (!metadata.TryGetProperty("application_type", out var appTypeProp) || string.IsNullOrWhiteSpace(appTypeProp.GetString()))
+            {
+                return BadRequest(new
+                {
+                    error = "invalid_client_metadata",
+                    error_description = "The 'application_type' parameter is required."
+                });
+            }
+
+            var appTypeValue = appTypeProp.GetString()!;
             var authMethod = metadata.TryGetProperty("token_endpoint_auth_method", out var team) ? team.GetString() : null;
-            var isNativeApp = metadata.TryGetProperty("application_type", out var appType) && string.Equals(appType.GetString(), "native", StringComparison.OrdinalIgnoreCase);
+            var isNativeApp = string.Equals(appTypeValue, "native", StringComparison.OrdinalIgnoreCase);
             var isPublic = string.Equals(authMethod, "none", StringComparison.OrdinalIgnoreCase) || (isNativeApp && (authMethod == null || string.Equals(authMethod, "none", StringComparison.OrdinalIgnoreCase)));
 
             var clientType = isPublic ? "public" : "confidential";
@@ -444,6 +460,7 @@ namespace ModelContextGateway.Components.Clients
                         redirect_uris = redirectUrisList,
                         grant_types = grantTypesList,
                         response_types = responseTypesList,
+                        application_type = appTypeValue,
                         token_endpoint_auth_method = "none",
                         scope = string.Join(" ", scopesList)
                     });
@@ -459,6 +476,7 @@ namespace ModelContextGateway.Components.Clients
                     redirect_uris = redirectUrisList,
                     grant_types = grantTypesList,
                     response_types = responseTypesList,
+                    application_type = appTypeValue,
                     token_endpoint_auth_method = authMethod ?? "client_secret_post",
                     scope = string.Join(" ", scopesList)
                 });

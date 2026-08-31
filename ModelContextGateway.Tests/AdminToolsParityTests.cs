@@ -871,7 +871,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [Requirement("MCP-ADMIN-PARITY-JSONRPC-DISPATCH", "MCP", RequirementType.Positive, "AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping).")]
+        [Requirement("MCP-ADMIN-PARITY-JSONRPC-DISPATCH", "MCP", RequirementType.Positive, "AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, initialize).")]
         public async Task AdminTools_ProcessRequest_JsonRpcProtocol()
         {
             // 1. tools/list
@@ -887,15 +887,15 @@ namespace ModelContextGateway.Tests
             var tools = listResp.Result.Value.GetProperty("tools").EnumerateArray().ToList();
             Assert.Equal(10, tools.Count);
 
-            // 2. ping
-            var pingReq = new JsonRpcRequest
+            // 2. initialize
+            var initReq = new JsonRpcRequest
             {
-                Id = "jsonrpc-ping",
-                Method = "ping"
+                Id = "jsonrpc-init",
+                Method = "initialize"
             };
 
-            var pingResp = await _adminMcpServer.ProcessRequestAsync(pingReq, "admin_user");
-            Assert.Null(pingResp.Error);
+            var initResp = await _adminMcpServer.ProcessRequestAsync(initReq, "admin_user");
+            Assert.Null(initResp.Error);
 
             // 3. tools/call
             var callReq = new JsonRpcRequest

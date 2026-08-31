@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:12:14.5632635Z",
-    "totalRequirements": 145,
-    "positiveCount": 117,
-    "guardrailCount": 28,
-    "totalProofs": 340
+    "generatedAt": "2026-08-31T04:19:02.3647832Z",
+    "totalRequirements": 147,
+    "positiveCount": 118,
+    "guardrailCount": 29,
+    "totalProofs": 343
   },
   "requirements": [
     {
@@ -364,7 +364,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 173,
+          "lineNumber": 216,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
         }
@@ -904,42 +904,42 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 55,
+          "lineNumber": 98,
           "testName": "InvalidateCache_ClearsPopulatedState",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 64,
+          "lineNumber": 107,
           "testName": "CallToolAsync_SearchTools_ReturnsSemanticResults",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 93,
+          "lineNumber": 136,
           "testName": "CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 120,
+          "lineNumber": 163,
           "testName": "CallToolAsync_ReturnsCancellationError_WhenCancelled",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 149,
+          "lineNumber": 192,
           "testName": "CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 173,
+          "lineNumber": 216,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
         }
@@ -1514,7 +1514,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 193,
+          "lineNumber": 195,
           "testName": "AdminEndpoint_UnauthorizedCaller_Returns403",
           "details": null
         }
@@ -1578,7 +1578,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 592,
+          "lineNumber": 625,
           "testName": "CallToolAsync_UnknownToolOrAction_ReturnsErrorResponse",
           "details": null
         }
@@ -1594,7 +1594,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 633,
+          "lineNumber": 666,
           "testName": "CallToolAsync_TestToolCall_MissingServer_ReturnsError",
           "details": null
         }
@@ -1677,6 +1677,22 @@
       ]
     },
     {
+      "id": "MCP-ADMIN-DISCOVER-HANDSHAKE",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer server/discover RPC advertises supported protocol versions, capabilities, and identity.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 195,
+          "testName": "ProcessRequestAsync_ServerDiscover_ReturnsCapabilitiesAndVersions",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "MCP-ADMIN-ENDPOINT-CALL-TOOL",
       "category": "MCP",
       "type": "Positive",
@@ -1686,7 +1702,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 294,
+          "lineNumber": 296,
           "testName": "AdminEndpoint_SseSession_CallTool_ManageSystemDiagnostics",
           "details": null
         }
@@ -1702,7 +1718,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 212,
+          "lineNumber": 214,
           "testName": "AdminEndpoint_HeadRequest_ReturnsEventStreamHeaders",
           "details": null
         }
@@ -1718,7 +1734,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 224,
+          "lineNumber": 226,
           "testName": "AdminEndpoint_SseSession_ListTools",
           "details": null
         }
@@ -1734,7 +1750,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 149,
+          "lineNumber": 151,
           "testName": "TargetProxy_RouterAdmin_RoutesToAdminServer",
           "details": null
         }
@@ -1766,7 +1782,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 195,
+          "lineNumber": 227,
           "testName": "HandleInitializeAsync_NegotiatesProtocolVersion",
           "details": null
         }
@@ -1840,7 +1856,7 @@
       "id": "MCP-ADMIN-PARITY-JSONRPC-DISPATCH",
       "category": "MCP",
       "type": "Positive",
-      "description": "AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping).",
+      "description": "AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, initialize).",
       "proofCount": 1,
       "proofs": [
         {
@@ -2054,7 +2070,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 266,
+          "lineNumber": 299,
           "testName": "CallToolAsync_RecordsAuditLog",
           "details": null
         }
@@ -2070,7 +2086,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 283,
+          "lineNumber": 316,
           "testName": "CallToolAsync_ManageAppKeys_Lifecycle",
           "details": null
         }
@@ -2086,7 +2102,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 330,
+          "lineNumber": 363,
           "testName": "CallToolAsync_ManageClients_Lifecycle",
           "details": null
         }
@@ -2102,7 +2118,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 504,
+          "lineNumber": 537,
           "testName": "CallToolAsync_ManageCustomFiles_Lifecycle",
           "details": null
         }
@@ -2118,7 +2134,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 402,
+          "lineNumber": 435,
           "testName": "CallToolAsync_ManageGroupMappings_Lifecycle",
           "details": null
         }
@@ -2134,7 +2150,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 368,
+          "lineNumber": 401,
           "testName": "CallToolAsync_ManagePolicies_Lifecycle",
           "details": null
         }
@@ -2150,7 +2166,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 435,
+          "lineNumber": 468,
           "testName": "CallToolAsync_ManageProviders_Lifecycle",
           "details": null
         }
@@ -2166,7 +2182,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 214,
+          "lineNumber": 247,
           "testName": "CallToolAsync_ManageServers_ListAndCreate",
           "details": null
         }
@@ -2182,7 +2198,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 478,
+          "lineNumber": 511,
           "testName": "CallToolAsync_ManageSettings_Lifecycle",
           "details": null
         }
@@ -2198,7 +2214,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 558,
+          "lineNumber": 591,
           "testName": "CallToolAsync_ManageSystem_Lifecycle",
           "details": null
         }
@@ -2403,7 +2419,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 351,
+          "lineNumber": 384,
           "testName": "RegisterClient_PublicClient_SucceedsWithoutSecret",
           "details": null
         }
@@ -2419,7 +2435,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 400,
+          "lineNumber": 433,
           "testName": "RegisterClient_InvalidRedirectUri_ReturnsBadRequest",
           "details": null
         }
@@ -2435,7 +2451,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 435,
+          "lineNumber": 468,
           "testName": "RegisterClient_DynamicScopes_AddedToPermissions",
           "details": null
         }
@@ -2451,7 +2467,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 475,
+          "lineNumber": 508,
           "testName": "Exchange_PublicClient_ClientCredentials_ReturnsForbid",
           "details": null
         }
@@ -2467,8 +2483,31 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 516,
+          "lineNumber": 549,
           "testName": "RegisterClient_WhenClosedRegistration_UnauthorizedUser_ReturnsForbidden",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-118",
+      "category": "SEC",
+      "type": "Negative",
+      "description": "OpenIddict ApplyAuthorizationResponseContext populates iss parameter in authorization responses.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 354,
+          "testName": "ApplyAuthorizationResponseContext_SetsIssParameter",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 589,
+          "testName": "RegisterClient_MissingApplicationType_ReturnsBadRequest",
           "details": null
         }
       ]
@@ -2626,7 +2665,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 609,
+          "lineNumber": 642,
           "testName": "CallToolAsync_AuditLog_RedactsSensitivePayloadData",
           "details": null
         }
@@ -2878,7 +2917,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 452,
+          "lineNumber": 454,
           "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
           "details": null
         }
@@ -3305,7 +3344,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 240,
+          "lineNumber": 242,
           "testName": "Pipeline_Settings_Branding_ReadWrite",
           "details": null
         }
@@ -3321,7 +3360,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 418,
+          "lineNumber": 420,
           "testName": "Branding_Logo_Upload_And_Retrieval_Works",
           "details": null
         }
