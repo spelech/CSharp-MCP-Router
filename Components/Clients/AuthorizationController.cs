@@ -246,30 +246,84 @@ namespace ModelContextGateway.Components.Clients
                     OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
                     OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
                     OpenIddictConstants.Permissions.ResponseTypes.Code,
-                    OpenIddictConstants.Permissions.Prefixes.Scope + "api"
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "api",
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "mcp_client",
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "openid",
+                    OpenIddictConstants.Permissions.Prefixes.Scope + "offline_access"
                 }
             };
+
+            var redirectUrisList = new List<string>();
+            if (metadata.TryGetProperty("redirect_uris", out var rUris) && rUris.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var uri in rUris.EnumerateArray())
+                {
+                    var uriStr = uri.GetString();
+                    if (!string.IsNullOrEmpty(uriStr))
+                    {
+                        redirectUrisList.Add(uriStr);
+                        if (Uri.TryCreate(uriStr, UriKind.Absolute, out var parsedUri))
+                        {
+                            descriptor.RedirectUris.Add(parsedUri);
+                        }
+                    }
+                }
+            }
+
+            var grantTypesList = new List<string> { "authorization_code", "refresh_token" };
+            if (metadata.TryGetProperty("grant_types", out var gTypes) && gTypes.ValueKind == JsonValueKind.Array)
+            {
+                grantTypesList.Clear();
+                foreach (var gt in gTypes.EnumerateArray())
+                {
+                    var gtStr = gt.GetString();
+                    if (!string.IsNullOrEmpty(gtStr))
+                    {
+                        grantTypesList.Add(gtStr);
+                    }
+                }
+            }
+
+            var responseTypesList = new List<string> { "code" };
+            if (metadata.TryGetProperty("response_types", out var respTypes) && respTypes.ValueKind == JsonValueKind.Array)
+            {
+                responseTypesList.Clear();
+                foreach (var rt in respTypes.EnumerateArray())
+                {
+                    var rtStr = rt.GetString();
+                    if (!string.IsNullOrEmpty(rtStr))
+                    {
+                        responseTypesList.Add(rtStr);
+                    }
+                }
+            }
+
+            var authMethod = metadata.TryGetProperty("token_endpoint_auth_method", out var team) ? team.GetString() : "client_secret_post";
 
             try
             {
                 await CreateApplicationAsync(descriptor);
 
                 var username = User?.Identity?.Name ?? "unknown";
-                await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName }), true);
+                await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName, redirectUris = redirectUrisList }), true);
 
-                return Ok(new
+                return StatusCode(StatusCodes.Status201Created, new
                 {
                     client_id = clientId,
                     client_secret = clientSecret,
+                    client_name = clientName,
                     client_id_issued_at = DateTimeOffset.UtcNow.ToUnixTimeSeconds(),
                     client_secret_expires_at = 0,
-                    token_endpoint_auth_method = "client_secret_post"
+                    redirect_uris = redirectUrisList,
+                    grant_types = grantTypesList,
+                    response_types = responseTypesList,
+                    token_endpoint_auth_method = authMethod ?? "client_secret_post"
                 });
             }
             catch (Exception ex)
             {
                 var username = User?.Identity?.Name ?? "unknown";
-                await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName }), false, ex.Message);
+                await _auditLogger.LogAdminActionAsync(username, "oauth.client.register", clientId, JsonSerializer.Serialize(new { clientName, redirectUris = redirectUrisList }), false, ex.Message);
                 throw;
             }
         }

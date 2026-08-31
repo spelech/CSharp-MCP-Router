@@ -61,12 +61,12 @@ namespace ModelContextGateway.Tests
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
 
-            var json = JsonDocument.Parse("{\"client_name\":\"IntegrationTestApp\"}").RootElement;
-            var result = await controller.RegisterClient(json) as OkObjectResult;
+            var json = JsonDocument.Parse("{\"client_name\":\"IntegrationTestApp\",\"redirect_uris\":[\"https://oauth.google.com/callback\"]}").RootElement;
+            var result = await controller.RegisterClient(json) as ObjectResult;
 
             Assert.NotNull(result);
-            Assert.Equal(200, result.StatusCode);
-            mockAppManager.Verify(m => m.CreateAsync(It.Is<OpenIddictApplicationDescriptor>(d => d.DisplayName == "IntegrationTestApp"), default), Times.Once);
+            Assert.Equal(201, result.StatusCode);
+            mockAppManager.Verify(m => m.CreateAsync(It.Is<OpenIddictApplicationDescriptor>(d => d.DisplayName == "IntegrationTestApp" && d.RedirectUris.Count == 1), default), Times.Once);
         }
         [Fact]
         [ModelContextGateway.Tests.Attributes.Requirement("AUTH-108", "SEC", ModelContextGateway.Tests.Attributes.RequirementType.Negative, "Authorize throws InvalidOperationException when OIDC request is null.")]
@@ -119,10 +119,10 @@ namespace ModelContextGateway.Tests
             };
 
             var json = JsonDocument.Parse("{\"client_name\":\"GeminiClient\"}").RootElement;
-            var result = await controller.RegisterClient(json) as OkObjectResult;
+            var result = await controller.RegisterClient(json) as ObjectResult;
 
             Assert.NotNull(result);
-            Assert.Equal(200, result.StatusCode);
+            Assert.Equal(201, result.StatusCode);
             mockCredService.Verify(m => m.CreateCredentialAsync("GeminiClient", It.IsAny<string>(), string.Empty, It.IsAny<List<string>>(), null, "personal"), Times.Once);
         }
 

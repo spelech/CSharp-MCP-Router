@@ -28,7 +28,7 @@ namespace ModelContextGateway.Core
         /// <summary>
         /// Canonical semantic version dynamically resolved from the executing assembly.
         /// </summary>
-        public static string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "5.0.5";
+        public static string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "5.0.6";
 
         /// <summary>
         /// Builds a standard JSON-RPC 2.0 initialize request payload with dynamic versioning.

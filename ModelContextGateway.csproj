@@ -6,9 +6,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <AssemblyName>mcg</AssemblyName>
     <RootNamespace>ModelContextGateway</RootNamespace>
-    <Version>5.0.5</Version>
-    <AssemblyVersion>5.0.5</AssemblyVersion>
-    <FileVersion>5.0.5</FileVersion>
+    <Version>5.0.6</Version>
+    <AssemblyVersion>5.0.6</AssemblyVersion>
+    <FileVersion>5.0.6</FileVersion>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IsTransformWebConfigDisabled>true</IsTransformWebConfigDisabled>
     <NoWarn>$(NoWarn);1591</NoWarn>
