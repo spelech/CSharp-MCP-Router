@@ -19,7 +19,10 @@ namespace ModelContextGateway.Core.Routing
 
         public static string GetToolName(object tool)
         {
-            if (tool == null) return string.Empty;
+            if (tool == null)
+            {
+                return string.Empty;
+            }
 
             if (tool is IDictionary<string, object> dict)
             {
