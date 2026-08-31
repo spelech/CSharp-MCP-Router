@@ -300,8 +300,8 @@ namespace ModelContextGateway.Components.Clients
                     var uriStr = uri.GetString();
                     if (!string.IsNullOrEmpty(uriStr))
                     {
-                        if (!Uri.TryCreate(uriStr, UriKind.Absolute, out var parsedUri) || 
-                            (!string.Equals(parsedUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) && 
+                        if (!Uri.TryCreate(uriStr, UriKind.Absolute, out var parsedUri) ||
+                            (!string.Equals(parsedUri.Scheme, Uri.UriSchemeHttps, StringComparison.OrdinalIgnoreCase) &&
                              !string.Equals(parsedUri.Scheme, Uri.UriSchemeHttp, StringComparison.OrdinalIgnoreCase) &&
                              !parsedUri.IsLoopback))
                         {
