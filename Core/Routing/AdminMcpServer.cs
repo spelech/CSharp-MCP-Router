@@ -1677,7 +1677,7 @@ namespace ModelContextGateway.Core.Routing
 
         private static List<object> GetToolDefinitions()
         {
-            return new List<object>
+            var definitions = new List<object>
             {
                 new
                 {
@@ -1889,6 +1889,8 @@ namespace ModelContextGateway.Core.Routing
                     }
                 }
             };
+
+            return definitions.OrderBy(t => ToolRoutingManager.GetToolName(t), StringComparer.Ordinal).ToList();
         }
 
         #endregion
