@@ -204,6 +204,15 @@ namespace ModelContextGateway.Core.Routing
                 Id = request.Id
             };
 
+            if (request.Params.HasValue)
+            {
+                var level = McpLogLevelHelper.ExtractPerRequestLogLevel(request.Params.Value);
+                if (!string.IsNullOrEmpty(level))
+                {
+                    McpLogLevelHelper.CurrentPerRequestLogLevel.Value = level;
+                }
+            }
+
             try
             {
                 switch (request.Method)
@@ -214,10 +223,6 @@ namespace ModelContextGateway.Core.Routing
                         break;
 
                     case "notifications/initialized":
-                        response.Result = JsonSerializer.SerializeToElement(new { });
-                        break;
-
-                    case "ping":
                         response.Result = JsonSerializer.SerializeToElement(new { });
                         break;
 

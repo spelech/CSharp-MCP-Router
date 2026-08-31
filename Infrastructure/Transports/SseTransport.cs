@@ -312,26 +312,6 @@ namespace ModelContextGateway.Infrastructure.Transports
                     }
                 }
             });
-
-            _ = Task.Run(async () =>
-            {
-                while (!_cts.Token.IsCancellationRequested)
-                {
-                    await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token);
-                    try
-                    {
-                        var resp = await CallMethodAsync("ping", new { });
-                        if (resp.Error != null)
-                        {
-                            _logger.LogWarning("Ping failed for backend {ServerId}: {Code} {Message}", _server.Id, resp.Error.Code, resp.Error.Message);
-                        }
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogWarning(ex, "Ping exception for backend {ServerId}", _server.Id);
-                    }
-                }
-            });
         }
 
         private static object? GetJsonElementValue(JsonElement element)
