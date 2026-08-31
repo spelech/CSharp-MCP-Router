@@ -92,6 +92,30 @@ namespace ModelContextGateway.Core.Routing
                 protocolVersion = negotiatedVersion,
                 capabilities = new
                 {
+                    tools = new { listChanged = false },
+                    extensions = new { }
+                },
+                serverInfo = new
+                {
+                    name = GatewayMetadata.AdminServerName,
+                    version = GatewayMetadata.Version
+                },
+                instructions = "In-process virtual Admin MCP Server for managing the Model Context Gateway configuration, servers, clients, policies, providers, settings, and diagnostics."
+            };
+
+            return Task.FromResult(result);
+        }
+
+        /// <summary>
+        /// Handles the MCP server/discover request according to protocol version specifications.
+        /// </summary>
+        public Task<object> HandleDiscoverAsync(JsonElement? paramsElement)
+        {
+            var result = (object)new
+            {
+                supportedVersions = new[] { DefaultProtocolVersion, LegacyProtocolVersion },
+                capabilities = new
+                {
                     tools = new { listChanged = false }
                 },
                 serverInfo = new
@@ -204,6 +228,15 @@ namespace ModelContextGateway.Core.Routing
                 Id = request.Id
             };
 
+            if (request.Params.HasValue)
+            {
+                var level = McpLogLevelHelper.ExtractPerRequestLogLevel(request.Params.Value);
+                if (!string.IsNullOrEmpty(level))
+                {
+                    McpLogLevelHelper.CurrentPerRequestLogLevel.Value = level;
+                }
+            }
+
             try
             {
                 switch (request.Method)
@@ -213,11 +246,12 @@ namespace ModelContextGateway.Core.Routing
                         response.Result = JsonSerializer.SerializeToElement(initResult);
                         break;
 
-                    case "notifications/initialized":
-                        response.Result = JsonSerializer.SerializeToElement(new { });
+                    case "server/discover":
+                        var discoverResult = await HandleDiscoverAsync(request.Params);
+                        response.Result = JsonSerializer.SerializeToElement(discoverResult);
                         break;
 
-                    case "ping":
+                    case "notifications/initialized":
                         response.Result = JsonSerializer.SerializeToElement(new { });
                         break;
 
@@ -1677,7 +1711,7 @@ namespace ModelContextGateway.Core.Routing
 
         private static List<object> GetToolDefinitions()
         {
-            return new List<object>
+            var definitions = new List<object>
             {
                 new
                 {
@@ -1889,6 +1923,8 @@ namespace ModelContextGateway.Core.Routing
                     }
                 }
             };
+
+            return definitions.OrderBy(t => ToolRoutingManager.GetToolName(t), StringComparer.Ordinal).ToList();
         }
 
         #endregion

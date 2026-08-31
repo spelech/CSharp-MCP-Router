@@ -218,7 +218,7 @@ namespace ModelContextGateway.Tests
             };
             var transport = new HttpTransport(server, new HttpClient(), NullLogger<HttpTransport>.Instance, null, null, null);
 
-            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => transport.SendRequestAsync("ping", "{\"jsonrpc\":\"2.0\",\"method\":\"ping\",\"id\":1}"));
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => transport.SendRequestAsync("tools/list", "{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":1}"));
             Assert.Contains("Kerberos impersonation failed", ex.Message);
         }
     }

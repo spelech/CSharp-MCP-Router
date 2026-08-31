@@ -43,6 +43,9 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             using var doc = JsonDocument.Parse(requestBody);
                             var root = doc.RootElement;
+                            var logLevel = McpLogLevelHelper.ExtractPerRequestLogLevel(root);
+                            McpLogLevelHelper.CurrentPerRequestLogLevel.Value = logLevel;
+                            httpContext.Items["PerRequestLogLevel"] = logLevel;
                             if (root.TryGetProperty("method", out var methodProp))
                             {
                                 method = methodProp.GetString() ?? string.Empty;
@@ -256,6 +259,7 @@ namespace ModelContextGateway.Components.Capabilities
                         }
                         else if (method == "roots/list")
                         {
+                            logger.LogWarning("[Deprecated Spec MCP 2026-07-28] Method 'roots/list' is deprecated and scheduled for removal in future specification versions.");
                             var response = new
                             {
                                 jsonrpc = "2.0",
@@ -303,6 +307,7 @@ namespace ModelContextGateway.Components.Capabilities
 
                 // Otherwise, this is a new session establishment request (GET /sse or POST with initialize/discover)
                 var sessionId = (httpContext.Request.Method == "POST") ? "global-stateless-session" : Guid.NewGuid().ToString("N");
+                logger.LogWarning("[Deprecated Spec MCP 2026-07-28] HTTP+SSE transport (/sse) is reclassified as Deprecated; recommend migration to Streamable HTTP.");
                 logger.LogInformation("New client SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
 
                 // Write SSE endpoint event
@@ -346,7 +351,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             }
@@ -369,7 +375,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             }
@@ -660,6 +667,9 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             using var doc = JsonDocument.Parse(requestBody);
                             var root = doc.RootElement;
+                            var logLevel = McpLogLevelHelper.ExtractPerRequestLogLevel(root);
+                            McpLogLevelHelper.CurrentPerRequestLogLevel.Value = logLevel;
+                            httpContext.Items["PerRequestLogLevel"] = logLevel;
                             if (root.TryGetProperty("method", out var methodProp))
                             {
                                 method = methodProp.GetString() ?? string.Empty;
@@ -680,6 +690,7 @@ namespace ModelContextGateway.Components.Capabilities
                 httpContext.Response.Headers.CacheControl = "no-cache";
                 httpContext.Response.Headers.Connection = "keep-alive";
 
+                logger.LogWarning("[Deprecated Spec MCP 2026-07-28] HTTP+SSE transport (/{TargetServerId}) is reclassified as Deprecated; recommend migration to Streamable HTTP.", targetServerId);
                 logger.LogInformation("New client /mcp SSE connection ({Method}). SessionId: {SessionId}", httpContext.Request.Method, sessionId);
 
                 var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
@@ -728,7 +739,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new { name = serverName, version = AppVersion }
                             }
@@ -743,7 +755,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new { name = serverName, version = AppVersion }
                             }
@@ -809,6 +822,9 @@ namespace ModelContextGateway.Components.Capabilities
                 {
                     using var doc = JsonDocument.Parse(body);
                     var root = doc.RootElement;
+                    var logLevel = McpLogLevelHelper.ExtractPerRequestLogLevel(root);
+                    McpLogLevelHelper.CurrentPerRequestLogLevel.Value = logLevel;
+                    httpContext.Items["PerRequestLogLevel"] = logLevel;
 
                     if (!root.TryGetProperty("method", out var methodProp))
                     {
@@ -839,7 +855,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new
                                 {
@@ -866,7 +883,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new
                                 {
@@ -967,6 +985,7 @@ namespace ModelContextGateway.Components.Capabilities
                     }
                     else if (method == "roots/list")
                     {
+                        logger.LogWarning("[Deprecated Spec MCP 2026-07-28] Method 'roots/list' is deprecated and scheduled for removal in future specification versions.");
                         var response = new
                         {
                             jsonrpc = "2.0",
@@ -1026,8 +1045,18 @@ namespace ModelContextGateway.Components.Capabilities
                         await session.BroadcastNotificationAsync(method, body);
                         return Results.Accepted();
                     }
+                    else if (method == "logging/setLevel")
+                    {
+                        logger.LogWarning("[Deprecated Spec MCP 2026-07-28] Method 'logging/setLevel' (Logging) is deprecated and scheduled for removal in future specification versions.");
+                        await session.BroadcastNotificationAsync(method, body);
+                        return Results.Accepted();
+                    }
                     else if (method.StartsWith("notifications/"))
                     {
+                        if (method == "notifications/message" || method.StartsWith("notifications/message/"))
+                        {
+                            logger.LogWarning("[Deprecated Spec MCP 2026-07-28] Notification method '{Method}' (Logging) is deprecated and scheduled for removal in future specification versions.", method);
+                        }
                         await session.BroadcastNotificationAsync(method, body);
                         return Results.Accepted();
                     }

@@ -10,6 +10,7 @@ namespace ModelContextGateway.Tests
     public class CacheableResultTests
     {
         [Fact]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "FormatCacheableResult applies default ttlMs and cacheScope according to MCP 2026-07-28 spec")]
         public void FormatCacheableResult_AppliesDefault_TtlMs_And_CacheScope()
         {
             var payload = new { tools = new[] { "tool1", "tool2" } };
@@ -26,6 +27,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "FormatCacheableResult preserves existing ttlMs and cacheScope")]
         public void FormatCacheableResult_PreservesExisting_TtlMs_And_CacheScope()
         {
             var payload = new { tools = new[] { "tool1" }, ttlMs = 60000L, cacheScope = "global" };
@@ -39,6 +41,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "AdminMcpServer tools/list returns ttlMs and cacheScope in results")]
         public async Task AdminMcpServer_ToolsList_Returns_TtlMs_And_CacheScope()
         {
             var serverRepoMock = new Mock<IServerRepository>();
@@ -85,6 +88,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "ClientSession list and read methods format cacheable results with ttlMs and cacheScope")]
         public async Task ClientSession_ListAndReadMethods_FormatCacheableResults()
         {
             var services = new ServiceCollection();

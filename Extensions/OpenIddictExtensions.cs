@@ -150,6 +150,20 @@ namespace ModelContextGateway.Extensions
                     options.AddEventHandler<OpenIddict.Server.OpenIddictServerEvents.ValidateTokenRequestContext>(builder =>
                         builder.UseInlineHandler(context => default));
 
+                    options.AddEventHandler<OpenIddict.Server.OpenIddictServerEvents.ApplyAuthorizationResponseContext>(builder =>
+                        builder.UseInlineHandler(context =>
+                        {
+                            var issuer = context.Options.Issuer?.AbsoluteUri.TrimEnd('/')
+                                ?? ((string?)context.Response.GetParameter("issuer"))?.TrimEnd('/')
+                                ?? ((string?)context.Response.GetParameter("iss"))?.TrimEnd('/');
+
+                            if (!string.IsNullOrEmpty(issuer) && string.IsNullOrEmpty((string?)context.Response.GetParameter("iss")))
+                            {
+                                context.Response.SetParameter("iss", issuer);
+                            }
+                            return default;
+                        }));
+
                     options.AddEventHandler<OpenIddict.Server.OpenIddictServerEvents.ApplyConfigurationResponseContext>(builder =>
                         builder.UseInlineHandler(context =>
                         {
