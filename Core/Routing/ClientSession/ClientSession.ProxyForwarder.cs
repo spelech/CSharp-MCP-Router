@@ -80,6 +80,19 @@ namespace ModelContextGateway.Core.Routing
             if (request.Method == "sampling/createMessage")
             {
                 _logger.LogWarning("[Deprecated Spec MCP 2026-07-28] Method 'sampling/createMessage' is deprecated and scheduled for removal in future specification versions.");
+
+                if (DeclaredCapabilities.HasValue && !HasClientCapability("sampling"))
+                {
+                    return new JsonRpcResponse
+                    {
+                        Id = request.Id,
+                        Error = new JsonRpcError
+                        {
+                            Code = McpErrorCodes.MissingRequiredClientCapability,
+                            Message = "Client missing required capability: sampling"
+                        }
+                    };
+                }
             }
             else if (request.Method == "logging/setLevel" || (request.Method != null && request.Method.StartsWith("notifications/message")))
             {
