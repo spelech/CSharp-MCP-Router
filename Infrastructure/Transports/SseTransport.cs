@@ -378,7 +378,7 @@ namespace ModelContextGateway.Infrastructure.Transports
 
             if (_messageUrl == null)
             {
-                return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Not connected" } };
+                return new JsonRpcResponse { Error = new JsonRpcError { Code = McpErrorCodes.ConnectionClosed, Message = "Not connected" } };
             }
 
             string upstreamRequestId = Guid.NewGuid().ToString("N");

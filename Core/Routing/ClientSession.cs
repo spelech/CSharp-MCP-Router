@@ -23,6 +23,22 @@ namespace ModelContextGateway.Core.Routing
         private readonly Core.Routing.PromptRoutingManager _promptRoutingManager = new();
 
         public bool IsMetaMode { get; set; } = false;
+        public JsonElement? DeclaredCapabilities { get; private set; }
+
+        public bool HasClientCapability(string capabilityName)
+        {
+            if (!DeclaredCapabilities.HasValue || DeclaredCapabilities.Value.ValueKind != JsonValueKind.Object)
+            {
+                return false;
+            }
+            return DeclaredCapabilities.Value.TryGetProperty(capabilityName, out _);
+        }
+
+        public void SetClientCapabilities(JsonElement? capabilities)
+        {
+            DeclaredCapabilities = capabilities;
+        }
+
         private Task? _initializeTask = null;
         public readonly object _initLock = new();
         private readonly CancellationTokenSource _cts = new();
