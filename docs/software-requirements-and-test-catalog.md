@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **147 Requirements Verified** across **343 Test Proofs** (118 Functional Capabilities, 29 Safety Guardrails).
+> **Catalog Statistics:** **147 Requirements Verified** across **345 Test Proofs** (118 Functional Capabilities, 29 Safety Guardrails).
 
 ---
 
@@ -17,7 +17,7 @@
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **38** | 38 | 0 | 42 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **38** | 29 | 9 | 65 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **17** | 15 | 2 | 65 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **17** | 15 | 2 | 67 proofs |
 
 ---
 
@@ -766,16 +766,18 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L63`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L63) (`renders grouped server view by category and allows collapsing`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L90`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L90) (`renders grouped server view by status and type`)
 
-### `[UI-04]` Tool selector filters available tools by selected backend server
+### `[UI-04]` Renders fallback notice and switch button for dynamic JSON schemas with no extractable properties
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
-* **Verification Proofs (7):**
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L77`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L77) (`filters tools by selected server and handles tool change`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L106`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L106) (`filters custom tools with no namespace prefix when selectedServer is custom`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L131`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L131) (`renders dynamic fields for boolean, number, string, array, and object types`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L178`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L178) (`renders empty state when selected tool takes no arguments`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L203`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L203) (`switches to raw JSON tab and handles raw JSON editing`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L242`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L242) (`handles form submission`)
+* **Verification Proofs (9):**
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L101`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L101) (`displays fallback notice for complex non-object JSON schemas and allows switching to raw JSON tab`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L142`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L142) (`renders initial server and tool selection options`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L176`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L176) (`filters tools by selected server and handles tool change`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L205`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L205) (`filters custom tools with no namespace prefix when selectedServer is custom`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L230`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L230) (`renders dynamic fields for boolean, number, string, array, and object types`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L277`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L277) (`renders empty state when selected tool takes no arguments`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L302`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L302) (`switches to raw JSON tab and handles raw JSON editing`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L341`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L341) (`handles form submission`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L5`](file:////containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L5) (`should interact with Prompt Tester and Resource Tester cards in Test Bench`)
 
 ### `[UI-05]` Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API.
@@ -803,11 +805,11 @@
 * **Verification Proofs (1):**
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L1) (`renders stats card, server list, and client setup guide`)
 
-### `[UI-103]` Interactive tool tester renders server and tool selection dropdowns
+### `[UI-103]` Dynamic form generator renders fields extracted from JSON Schema 2020-12 keywords (allOf, anyOf, $ref)
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1) (`renders initial server and tool selection options`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1) (`renders fields from JSON Schema 2020-12 keywords (allOf, anyOf, $ref)`)
 
 ### `[UI-109]` Renders ClientSetupGuide below the user credentials card.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
@@ -1247,12 +1249,12 @@
 | `UI-01` | Positive | `UI` | Dashboard shows empty filter state when no servers match search term | [`DashboardView.test.tsx:L115`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L115) | Frontend Vitest |
 | `UI-02` | Positive | `UI` | Inspect modal displays spinner loading state while querying server capabilities | [`ServerInspectModal.test.tsx:L61`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L61) | Frontend Vitest |
 | `UI-03` | Positive | `UI` | Grouped server view renders category sections and supports collapsible groups | [`DashboardView.test.tsx:L63`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L63) | Frontend Vitest |
-| `UI-04` | Positive | `UI` | Tool selector filters available tools by selected backend server | [`ToolTesterCard.test.tsx:L77`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L77) | Frontend Vitest |
+| `UI-04` | Positive | `UI` | Renders fallback notice and switch button for dynamic JSON schemas with no extractable properties | [`ToolTesterCard.test.tsx:L101`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L101) | Frontend Vitest |
 | `UI-05` | Positive | `UI` | Router allows customized branding parameters (DashboardTitle, DashboardIcon) to be saved and retrieved via the API. | [`PipelineIntegrationTests.cs:L242`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L242) | Backend xUnit |
 | `UI-06` | Positive | `UI` | Router supports uploading and retrieving custom branding logo images via dedicated endpoints. | [`PipelineIntegrationTests.cs:L420`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L420) | Backend xUnit |
 | `UI-07` | Positive | `UI` | Audits desktop viewport layout for zero horizontal overflow and high UX score. | [`layout-inspector.spec.ts:L38`](file:////containers/dev/csharp-mcp-router/frontend/e2e/layout-inspector.spec.ts#L38) | Playwright E2E |
 | `UI-102` | Positive | `UI` | Dashboard renders stats card, connected server list, and setup instructions | [`DashboardView.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx#L1) | Frontend Vitest |
-| `UI-103` | Positive | `UI` | Interactive tool tester renders server and tool selection dropdowns | [`ToolTesterCard.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1) | Frontend Vitest |
+| `UI-103` | Positive | `UI` | Dynamic form generator renders fields extracted from JSON Schema 2020-12 keywords (allOf, anyOf, $ref) | [`ToolTesterCard.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx#L1) | Frontend Vitest |
 | `UI-109` | Positive | `UI` | Renders ClientSetupGuide below the user credentials card. | [`MyMcpServers.test.tsx:L102`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx#L102) | Frontend Vitest |
 | `UI-116` | Positive | `UI` | Modal remains hidden when isInspectOpen is false | [`ServerInspectModal.test.tsx:L1`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx#L1) | Frontend Vitest |
 | `UI-124` | Positive | `UI` | Renders main dashboard navigation tabs and layout headers | [`dashboard.spec.ts:L1`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L1) | Playwright E2E |

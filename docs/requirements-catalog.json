@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:17:59.9820415Z",
+    "generatedAt": "2026-08-31T04:21:52.2593588Z",
     "totalRequirements": 147,
     "positiveCount": 118,
     "guardrailCount": 29,
-    "totalProofs": 343
+    "totalProofs": 345
   },
   "requirements": [
     {
@@ -3280,48 +3280,62 @@
       "id": "UI-04",
       "category": "UI",
       "type": "Positive",
-      "description": "Tool selector filters available tools by selected backend server",
-      "proofCount": 7,
+      "description": "Renders fallback notice and switch button for dynamic JSON schemas with no extractable properties",
+      "proofCount": 9,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 77,
+          "lineNumber": 101,
+          "testName": "displays fallback notice for complex non-object JSON schemas and allows switching to raw JSON tab",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "lineNumber": 142,
+          "testName": "renders initial server and tool selection options",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "lineNumber": 176,
           "testName": "filters tools by selected server and handles tool change",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 106,
+          "lineNumber": 205,
           "testName": "filters custom tools with no namespace prefix when selectedServer is custom",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 131,
+          "lineNumber": 230,
           "testName": "renders dynamic fields for boolean, number, string, array, and object types",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 178,
+          "lineNumber": 277,
           "testName": "renders empty state when selected tool takes no arguments",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 203,
+          "lineNumber": 302,
           "testName": "switches to raw JSON tab and handles raw JSON editing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 242,
+          "lineNumber": 341,
           "testName": "handles form submission",
           "details": null
         },
@@ -3409,14 +3423,14 @@
       "id": "UI-103",
       "category": "UI",
       "type": "Positive",
-      "description": "Interactive tool tester renders server and tool selection dropdowns",
+      "description": "Dynamic form generator renders fields extracted from JSON Schema 2020-12 keywords (allOf, anyOf, $ref)",
       "proofCount": 1,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 1,
-          "testName": "renders initial server and tool selection options",
+          "testName": "renders fields from JSON Schema 2020-12 keywords (allOf, anyOf, $ref)",
           "details": null
         }
       ]
