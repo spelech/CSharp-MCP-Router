@@ -459,8 +459,6 @@ namespace ModelContextGateway.Tests
             var context = new DefaultHttpContext();
             var responseBody = new MemoryStream();
             context.Response.Body = responseBody;
-            context.Items["PerRequestLogLevel"] = "info";
-            McpLogLevelHelper.CurrentPerRequestLogLevel.Value = "info";
 
             var embeddingMock = new Mock<IEmbeddingService>();
             var session = new ClientSession("test-session", context.Response, new List<McpServer> { server }, httpClient, embeddingMock.Object, loggerMock.Object);

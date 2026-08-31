@@ -4,19 +4,6 @@ This guide details the features of the Model Context Gateway (MCG).
 
 ---
 
-## ⚠️ MCP 2026-07-28 Specification & Feature Deprecations
-
-According to the Model Context Protocol (MCP) 2026-07-28 specification, several legacy features and transports are reclassified or deprecated:
-
-- **Roots (`roots/list`)**: Deprecated and scheduled for removal in future spec revisions.
-- **Sampling (`sampling/createMessage`)**: Deprecated and scheduled for removal in future spec revisions.
-- **Logging (`notifications/message`, `logging/setLevel`)**: Deprecated and scheduled for removal in future spec revisions.
-- **HTTP+SSE Transport (`/sse`, `/{targetServerId}`, `/message`)**: Reclassified as Deprecated. Clients are strongly recommended to migrate to Streamable HTTP.
-
-ModelContextGateway maintains full backward compatibility for these features while tracking and logging runtime deprecation warnings (`[Deprecated Spec MCP 2026-07-28]`).
-
----
-
 ## 🖥️ 1. Dynamic Server Management
 
 Model Context Gateway (MCG) supports four methods to manage backend Model Context Protocol (MCP) servers:
@@ -108,12 +95,6 @@ Connect clients via these SSE endpoints:
 | `/sse?meta=false` | **Full-List Mode** | Exposes all underlying tools from all connected servers. |
 | `/{targetServerId}` | **Target-Specific Proxying** | Proxies connections directly to the specified target server (e.g., `/docker` or `/ha`). |
 | `/admin` or `/router-admin` | **Admin MCP Server** | Virtual in-process control plane providing 10 consolidated entity tools for autonomous agents to manage router state. |
-
-### Multi Round-Trip Requests (MRTR) Pattern (MCP 2026-07-28 Spec)
-Model Context Gateway fully supports the Multi Round-Trip Requests (MRTR) pattern introduced in the MCP 2026-07-28 specification:
-- **`InputRequiredResult`**: When a backend server requires additional input before completing a request, it returns a result object with `resultType: "input_required"` and an `inputRequests` array detailing required inputs.
-- **Client Retry & `inputResponses`**: Clients respond by retrying the original request with user input provided in the `inputResponses` parameter field.
-- **Gateway Forwarding**: The gateway transparently preserves `InputRequiredResult` payloads and forwards `inputResponses` in both direct tool calls and meta-mode (`execute_tool`) invocations.
 
 > For transport protocol comparisons (`sse`, `http`, `stdio`), concurrency, security policies, and error recovery, see [**Transport Capability & Configuration Guide**](transports.md).
 

@@ -31,6 +31,7 @@ namespace ModelContextGateway.Core.Routing
                 logger.LogWarning("Execution of tool '{ToolName}' was cancelled.", toolName);
                 return new
                 {
+                    resultType = "complete",
                     isError = true,
                     content = new[] {
                         new {
@@ -87,6 +88,7 @@ namespace ModelContextGateway.Core.Routing
                 var results = await SemanticSearchService.SearchToolsSemanticAsync(query, tools, embeddingService, logger);
                 return new
                 {
+                    resultType = "complete",
                     content = new[] {
                         new {
                             type = "text",
@@ -102,7 +104,6 @@ namespace ModelContextGateway.Core.Routing
 
                 string targetName = "";
                 JsonElement targetArgs = default;
-                JsonElement inputResponses = default;
                 string? targetAuthToken = null;
 
                 if (root.TryGetProperty("params", out var paramsProp) &&
@@ -116,14 +117,6 @@ namespace ModelContextGateway.Core.Routing
                     {
                         targetArgs = targetArgsProp.Clone();
                     }
-                    if (argsProp.TryGetProperty("inputResponses", out var inputRespProp))
-                    {
-                        inputResponses = inputRespProp.Clone();
-                    }
-                    else if (paramsProp.TryGetProperty("inputResponses", out var paramInputRespProp))
-                    {
-                        inputResponses = paramInputRespProp.Clone();
-                    }
                     if (argsProp.TryGetProperty("target_auth_token", out var targetAuthTokenProp))
                     {
                         targetAuthToken = targetAuthTokenProp.GetString();
@@ -134,6 +127,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {
@@ -149,6 +143,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {
@@ -159,21 +154,15 @@ namespace ModelContextGateway.Core.Routing
                     };
                 }
 
-                var targetParams = new Dictionary<string, object>
-                {
-                    ["name"] = targetName,
-                    ["arguments"] = targetArgs.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : targetArgs
-                };
-                if (inputResponses.ValueKind != JsonValueKind.Undefined)
-                {
-                    targetParams["inputResponses"] = inputResponses;
-                }
-
                 var targetPayload = new
                 {
                     jsonrpc = "2.0",
                     method = "tools/call",
-                    @params = targetParams
+                    @params = new
+                    {
+                        name = targetName,
+                        arguments = targetArgs.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : targetArgs
+                    }
                 };
                 var targetBody = JsonSerializer.Serialize(targetPayload);
 
@@ -186,6 +175,7 @@ namespace ModelContextGateway.Core.Routing
                 {
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {
@@ -248,6 +238,7 @@ namespace ModelContextGateway.Core.Routing
                         var transformed = ToolErrorFormatter.TransformError(resp.Error, toolName, serverId);
                         return new
                         {
+                            resultType = "complete",
                             isError = true,
                             content = new[] {
                                 new {
@@ -257,6 +248,10 @@ namespace ModelContextGateway.Core.Routing
                             }
                         };
                     }
+                    if (resp.Result.HasValue)
+                    {
+                        return ProtocolHelper.EnsureResultType(resp.Result.Value);
+                    }
                     return resp;
                 }
                 catch (System.Net.Http.HttpRequestException ex) when (ex.StatusCode == System.Net.HttpStatusCode.Unauthorized)
@@ -265,6 +260,7 @@ namespace ModelContextGateway.Core.Routing
                     var prompt = (srv != null && !string.IsNullOrEmpty(srv.DynamicAuthPrompt)) ? srv.DynamicAuthPrompt : "401 Unauthorized. Please provide a valid target_auth_token via execute_tool.";
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {
@@ -279,6 +275,7 @@ namespace ModelContextGateway.Core.Routing
                     var transformed = ToolErrorFormatter.TransformException(ex, toolName, serverId);
                     return new
                     {
+                        resultType = "complete",
                         isError = true,
                         content = new[] {
                             new {

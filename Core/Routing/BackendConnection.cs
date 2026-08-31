@@ -70,7 +70,7 @@ namespace ModelContextGateway.Core.Routing
             });
         }
 
-        public virtual async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
+        public async Task<JsonRpcResponse> SendRequestAsync(string method, string bodyJson, string? targetAuthToken = null)
         {
             return await _transport.SendRequestAsync(method, bodyJson, targetAuthToken);
         }

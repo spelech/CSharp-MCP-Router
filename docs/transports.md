@@ -68,7 +68,7 @@ graph TD
 | **Protocol Framing** | W3C Server-Sent Events (`text/event-stream`) + HTTP POST | HTTP POST with `application/json` or chunked streaming | Newline-delimited JSON-RPC 2.0 (NDJSON) over standard pipes | Passthrough MCP SSE or HTTP stream directly to target server |
 | **Connection Model** | Long-lived persistent SSE connection with duplex HTTP POST | Request-Response or single-shot chunked stream per request | Long-lived managed subprocess with redirected `stdin`/`stdout`/`stderr` | Stateful or stateless client session mapped to a single backend |
 | **Duplex Streaming** | Full duplex (server events via SSE, client calls via POST) | Half duplex (request/response body stream) | Full duplex (asynchronous line-by-line read/write locks) | Full duplex passthrough directly to target server |
-| **Session Identification** | `event: endpoint` payload | Session token / request context | Subprocess Process ID (PID) + dedicated transport instance | Target session ID + client connection token |
+| **Session Identification** | `Mcp-Session-Id` header and `event: endpoint` payload | `Mcp-Session-Id` header (propagated across requests) | Subprocess Process ID (PID) + dedicated transport instance | Target session ID + client connection token |
 | **Secret Injection** | Authorization headers (`Bearer`, `Basic`, `Raw`, `X-API-Key`, `Custom-Header`) or Query Param | Authorization headers (`Bearer`, `Basic`, `Raw`, `X-API-Key`, `Custom-Header`) or Query Param | Environment Variables (`startInfo.Environment`) — **never CLI arguments** | Inherits target server auth + AppKey scope validation |
 | **Health Probing** | HTTP GET probe every 15s + 30s background JSON-RPC `ping` loop | HTTP GET probe every 15s | Process liveness check (`!_process.HasExited`) & syntax check | Evaluates target server backend connection health |
 | **Auto-Reconnection** | Automatic reconnect with 5-second backoff and clean state reset | Stateless per-request retries with 15-second default timeout | Subprocess exit detection, state cleanup, and lazy re-spawn | Rebinds client session upon reconnect |
@@ -445,10 +445,7 @@ To connect directly to a single backend bypassing Meta-Mode, point the client UR
 | `-32601` | `Method not found` | Method is not implemented or namespaced identifier is invalid. | Query `search_tools` first or verify exact `<serverId>__<toolName>` spelling. |
 | `-32602` | `Invalid params` | Arguments do not match tool input schema. | Inspect tool input schema using the Test Bench form builder. |
 | `-32603` | `Internal error` | Unhandled downstream server error or serialization failure. | Check gateway diagnostic logs in Web UI for backend stack trace. |
-| `-32001` | `Connection Closed / Unauthorized` | Downstream SSE stream or STDIO subprocess is offline, or caller is unauthorized. | Check backend server status on Overview dashboard; inspect authentication credentials. |
-| `-32020` | `Header Mismatch` | HTTP headers `Mcp-Method` or `Mcp-Name` do not match request body payload. | Ensure client request headers match JSON-RPC request body method and parameter names. |
-| `-32021` | `Missing Required Client Capability` | Client requested operation requiring capabilities that were not declared during initialization. | Include required capabilities in `initialize` request params (e.g. `sampling`). |
-| `-32022` | `Unsupported Protocol Version` | Protocol version requested in `initialize` or `MCP-Protocol-Version` header is unsupported. | Use a supported MCP protocol version (e.g. `2026-07-28` or `2024-11-05`). |
+| `-32001` | `Server Disconnected / Not Running` | Downstream SSE stream or STDIO subprocess is offline. | Check backend server status on Overview dashboard; inspect container logs. |
 
 ### HTTP Status Codes
 
