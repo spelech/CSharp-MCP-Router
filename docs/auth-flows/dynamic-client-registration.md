@@ -127,6 +127,7 @@ Content-Type: application/json
   "response_types": [
     "code"
   ],
+  "application_type": "web",
   "token_endpoint_auth_method": "client_secret_post",
   "scope": "mcp_client"
 }
@@ -140,7 +141,7 @@ Content-Type: application/json
 | `grant_types` | Array\<String\> | No | `["authorization_code", "refresh_token"]` | Allowed OAuth 2.0 grant types for this client. |
 | `response_types` | Array\<String\> | No | `["code"]` | Allowed response types for authorization requests. |
 | `token_endpoint_auth_method` | String | No | `"client_secret_post"` | Authentication method: `"client_secret_post"`, `"client_secret_basic"`, or `"none"` (public client). |
-| `application_type` | String | No | `"web"` | Application type: `"web"` or `"native"` (native defaults to public client with PKCE). |
+| `application_type` | String | **Yes** | — | Application type: `"web"` or `"native"` (native defaults to public client with PKCE). Required per MCP 2026-07-28 spec. |
 | `scope` | String | No | `"mcp_client"` | Space-delimited string of requested OAuth scopes (e.g. `"openid mcp_client tools:execute"`). |
 
 ### Response Payload — Confidential Client (`HTTP 201 Created`)
@@ -168,6 +169,7 @@ Pragma: no-cache
   "response_types": [
     "code"
   ],
+  "application_type": "web",
   "token_endpoint_auth_method": "client_secret_post",
   "scope": "api mcp_client openid offline_access"
 }
@@ -195,6 +197,7 @@ Pragma: no-cache
   "response_types": [
     "code"
   ],
+  "application_type": "native",
   "token_endpoint_auth_method": "none",
   "scope": "mcp_client openid offline_access tools:execute"
 }

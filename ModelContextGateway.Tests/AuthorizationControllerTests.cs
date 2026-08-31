@@ -65,7 +65,7 @@ namespace ModelContextGateway.Tests
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
 
-            var json = JsonDocument.Parse("{\"client_name\":\"IntegrationTestApp\",\"redirect_uris\":[\"https://oauth.google.com/callback\"]}").RootElement;
+            var json = JsonDocument.Parse("{\"client_name\":\"IntegrationTestApp\",\"redirect_uris\":[\"https://oauth.google.com/callback\"],\"application_type\":\"web\"}").RootElement;
             var result = await controller.RegisterClient(json) as ObjectResult;
 
             Assert.NotNull(result);
@@ -119,7 +119,7 @@ namespace ModelContextGateway.Tests
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
 
-            var json = JsonDocument.Parse("{\"client_name\":\"GeminiClient\",\"redirect_uris\":[\"https://client.example.com/cb\"]}").RootElement;
+            var json = JsonDocument.Parse("{\"client_name\":\"GeminiClient\",\"redirect_uris\":[\"https://client.example.com/cb\"],\"application_type\":\"web\"}").RootElement;
             var result = await controller.RegisterClient(json) as ObjectResult;
 
             Assert.NotNull(result);
@@ -378,7 +378,7 @@ namespace ModelContextGateway.Tests
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
 
-            var json = JsonDocument.Parse("{\"client_name\":\"Claude Desktop\",\"redirect_uris\":[\"http://127.0.0.1:8080/callback\"],\"token_endpoint_auth_method\":\"none\",\"scope\":\"mcp_client tools:execute\"}").RootElement;
+            var json = JsonDocument.Parse("{\"client_name\":\"Claude Desktop\",\"redirect_uris\":[\"http://127.0.0.1:8080/callback\"],\"application_type\":\"native\",\"token_endpoint_auth_method\":\"none\",\"scope\":\"mcp_client tools:execute\"}").RootElement;
             var result = await controller.RegisterClient(json) as ObjectResult;
 
             Assert.NotNull(result);
@@ -422,7 +422,7 @@ namespace ModelContextGateway.Tests
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
 
-            var json = JsonDocument.Parse("{\"client_name\":\"Bad App\",\"redirect_uris\":[\"not-a-valid-uri\"]}").RootElement;
+            var json = JsonDocument.Parse("{\"client_name\":\"Bad App\",\"redirect_uris\":[\"not-a-valid-uri\"],\"application_type\":\"web\"}").RootElement;
             var result = await controller.RegisterClient(json) as BadRequestObjectResult;
 
             Assert.NotNull(result);
@@ -462,7 +462,7 @@ namespace ModelContextGateway.Tests
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
 
-            var json = JsonDocument.Parse("{\"client_name\":\"Scope App\",\"redirect_uris\":[\"https://example.com/oauth/callback\"],\"scope\":\"custom:read custom:write\"}").RootElement;
+            var json = JsonDocument.Parse("{\"client_name\":\"Scope App\",\"redirect_uris\":[\"https://example.com/oauth/callback\"],\"application_type\":\"web\",\"scope\":\"custom:read custom:write\"}").RootElement;
             var result = await controller.RegisterClient(json) as ObjectResult;
 
             Assert.NotNull(result);
@@ -543,7 +543,7 @@ namespace ModelContextGateway.Tests
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
 
-            var json = JsonDocument.Parse("{\"client_name\":\"Unauthorized App\",\"redirect_uris\":[\"https://example.com/callback\"]}").RootElement;
+            var json = JsonDocument.Parse("{\"client_name\":\"Unauthorized App\",\"redirect_uris\":[\"https://example.com/callback\"],\"application_type\":\"web\"}").RootElement;
             var result = await controller.RegisterClient(json) as ObjectResult;
 
             Assert.NotNull(result);
@@ -551,6 +551,42 @@ namespace ModelContextGateway.Tests
             var jsonText = JsonSerializer.Serialize(result.Value);
             var doc = JsonDocument.Parse(jsonText);
             Assert.Equal("access_denied", doc.RootElement.GetProperty("error").GetString());
+        }
+
+        [Fact]
+        [Requirement("AUTH-118", "SEC", RequirementType.Negative, "RegisterClient returns 400 Bad Request when application_type parameter is missing.")]
+        public async Task RegisterClient_MissingApplicationType_ReturnsBadRequest()
+        {
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
+            var mockOAuthRepo = new Mock<IOAuthClientRepository>();
+
+            var mockLoggerFactory = new Mock<ILoggerFactory>();
+            mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+            var mockServiceProvider = new Mock<IServiceProvider>();
+
+            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), mockLoggerFactory.Object, mockServiceProvider.Object);
+            embeddingServiceMock.Setup(m => m.GetSettings()).Returns(new RouterSettings { AllowOpenClientRegistration = true });
+
+            var services = new ServiceCollection();
+            services.AddSingleton(embeddingServiceMock.Object);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpContext = new DefaultHttpContext { RequestServices = serviceProvider };
+
+            var controller = new AuthorizationController(mockOAuthRepo.Object, mockAudit.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
+            var json = JsonDocument.Parse("{\"client_name\":\"No AppType\",\"redirect_uris\":[\"https://example.com/callback\"]}").RootElement;
+            var result = await controller.RegisterClient(json) as BadRequestObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(400, result.StatusCode);
+            var jsonText = JsonSerializer.Serialize(result.Value);
+            var doc = JsonDocument.Parse(jsonText);
+            Assert.Equal("invalid_client_metadata", doc.RootElement.GetProperty("error").GetString());
+            Assert.Equal("The 'application_type' parameter is required.", doc.RootElement.GetProperty("error_description").GetString());
         }
     }
 }
