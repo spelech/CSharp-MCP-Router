@@ -62,7 +62,7 @@ namespace ModelContextGateway.Components.Capabilities
                         await httpContext.Response.WriteAsJsonAsync(new
                         {
                             jsonrpc = "2.0",
-                            error = new { code = McpErrorCodes.ConnectionClosed, message = exAuth.Message }
+                            error = new { code = -32001, message = exAuth.Message }
                         });
                         return;
                     }
@@ -131,7 +131,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = CacheableResult.FormatCacheableResult(new { tools })
+                                result = ProtocolHelper.EnsureResultType(new { tools })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -146,12 +146,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var toolName = nameProp.GetString() ?? string.Empty;
                                 var res = await activeSession.CallToolAsync(toolName, requestBody, dbFactory, httpContext);
-                                var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
+                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = ProtocolHelper.EnsureResultType(innerResult)
+                                    result = ProtocolHelper.EnsureResultType(targetRes)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -167,7 +167,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = CacheableResult.FormatCacheableResult(new { resources })
+                                result = ProtocolHelper.EnsureResultType(new { resources })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -180,7 +180,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = CacheableResult.FormatCacheableResult(new { templates })
+                                result = ProtocolHelper.EnsureResultType(new { templates })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -194,12 +194,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var uri = uriProp.GetString() ?? string.Empty;
                                 var res = await activeSession.ReadResourceAsync(uri, requestBody, httpContext);
-                                var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
+                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = CacheableResult.FormatCacheableResult(innerResult)
+                                    result = ProtocolHelper.EnsureResultType(targetRes)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -215,7 +215,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = CacheableResult.FormatCacheableResult(new { prompts })
+                                result = ProtocolHelper.EnsureResultType(new { prompts })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -229,12 +229,12 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 var name = nameProp.GetString() ?? string.Empty;
                                 var res = await activeSession.GetPromptAsync(name, requestBody, httpContext);
-                                var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
+                                var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                                 var response = new
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = ProtocolHelper.EnsureResultType(innerResult)
+                                    result = ProtocolHelper.EnsureResultType(targetRes)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -291,7 +291,7 @@ namespace ModelContextGateway.Components.Capabilities
                         await httpContext.Response.WriteAsJsonAsync(new
                         {
                             jsonrpc = "2.0",
-                            error = new { code = McpErrorCodes.ConnectionClosed, message = exAuth.Message }
+                            error = new { code = -32001, message = exAuth.Message }
                         });
                         return;
                     }
@@ -828,83 +828,6 @@ namespace ModelContextGateway.Components.Capabilities
                     var method = methodProp.GetString() ?? string.Empty;
                     var id = root.TryGetProperty("id", out var idProp) ? idProp.Clone() : (JsonElement?)null;
 
-                    // Protocol Version Header Validation
-                    if (httpContext.Request.Headers.TryGetValue("MCP-Protocol-Version", out var protoVersionHeader))
-                    {
-                        var protoVer = protoVersionHeader.ToString();
-                        if (!string.IsNullOrEmpty(protoVer) &&
-                            !protoVer.Equals("2026-07-28", StringComparison.OrdinalIgnoreCase) &&
-                            !protoVer.Equals("2024-11-05", StringComparison.OrdinalIgnoreCase))
-                        {
-                            httpContext.Response.StatusCode = 400;
-                            return Results.Json(new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                error = new { code = McpErrorCodes.UnsupportedProtocolVersion, message = $"Unsupported protocol version: '{protoVer}'." }
-                            }, statusCode: 400);
-                        }
-                    }
-
-                    // Header Mismatch Validation
-                    if (httpContext.Items.TryGetValue("MCP_HEADER_METHOD", out var hMethodObj) && hMethodObj is string hMethod && !string.IsNullOrEmpty(hMethod))
-                    {
-                        if (!string.Equals(hMethod, method, StringComparison.OrdinalIgnoreCase))
-                        {
-                            httpContext.Response.StatusCode = 400;
-                            return Results.Json(new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                error = new { code = McpErrorCodes.HeaderMismatch, message = $"Header Mcp-Method ('{hMethod}') does not match request body method ('{method}')." }
-                            }, statusCode: 400);
-                        }
-                    }
-
-                    string bodyItemName = string.Empty;
-                    if (root.TryGetProperty("params", out var paramsForName))
-                    {
-                        if (paramsForName.TryGetProperty("name", out var nProp))
-                        {
-                            bodyItemName = nProp.GetString() ?? string.Empty;
-                        }
-                        else if (paramsForName.TryGetProperty("uri", out var uProp))
-                        {
-                            bodyItemName = uProp.GetString() ?? string.Empty;
-                        }
-                    }
-
-                    if (httpContext.Items.TryGetValue("MCP_HEADER_NAME", out var hNameObj) && hNameObj is string hName && !string.IsNullOrEmpty(hName))
-                    {
-                        if (!string.IsNullOrEmpty(bodyItemName) && !string.Equals(hName, bodyItemName, StringComparison.OrdinalIgnoreCase))
-                        {
-                            httpContext.Response.StatusCode = 400;
-                            return Results.Json(new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                error = new { code = McpErrorCodes.HeaderMismatch, message = $"Header Mcp-Name ('{hName}') does not match request body item name ('{bodyItemName}')." }
-                            }, statusCode: 400);
-                        }
-                    }
-
-                    if ((method == "initialize" || method == "server/discover") && root.TryGetProperty("params", out var initParamsProp) && initParamsProp.TryGetProperty("protocolVersion", out var pvProp))
-                    {
-                        var reqPv = pvProp.GetString();
-                        if (!string.IsNullOrEmpty(reqPv) &&
-                            !reqPv.Equals("2026-07-28", StringComparison.OrdinalIgnoreCase) &&
-                            !reqPv.Equals("2024-11-05", StringComparison.OrdinalIgnoreCase))
-                        {
-                            httpContext.Response.StatusCode = 400;
-                            return Results.Json(new
-                            {
-                                jsonrpc = "2.0",
-                                id = id != null ? (object)id : null,
-                                error = new { code = McpErrorCodes.UnsupportedProtocolVersion, message = $"Unsupported protocol version: '{reqPv}'." }
-                            }, statusCode: 400);
-                        }
-                    }
-
                     if (method == "initialize")
                     {
                         var response = new
@@ -966,7 +889,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = CacheableResult.FormatCacheableResult(new { tools })
+                            result = ProtocolHelper.EnsureResultType(new { tools })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -978,13 +901,13 @@ namespace ModelContextGateway.Components.Capabilities
                             var toolName = nameProp.GetString() ?? string.Empty;
                             var dbFactory = httpContext.RequestServices.GetRequiredService<IDbConnectionFactory>();
                             var res = await session.CallToolAsync(toolName, body, dbFactory, httpContext);
-                            var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
+                            var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
 
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(innerResult)
+                                result = ProtocolHelper.EnsureResultType(targetRes)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -998,7 +921,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = CacheableResult.FormatCacheableResult(new { resources })
+                            result = ProtocolHelper.EnsureResultType(new { resources })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -1009,12 +932,12 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             var uri = uriProp.GetString() ?? string.Empty;
                             var res = await session.ReadResourceAsync(uri, body, httpContext);
-                            var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
+                            var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = CacheableResult.FormatCacheableResult(innerResult)
+                                result = ProtocolHelper.EnsureResultType(targetRes)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -1028,7 +951,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = CacheableResult.FormatCacheableResult(new { templates })
+                            result = ProtocolHelper.EnsureResultType(new { templates })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -1071,7 +994,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = CacheableResult.FormatCacheableResult(new { prompts })
+                            result = ProtocolHelper.EnsureResultType(new { prompts })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -1082,12 +1005,12 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             var name = nameProp.GetString() ?? string.Empty;
                             var res = await session.GetPromptAsync(name, body, httpContext);
-                            var innerResult = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res);
+                            var targetRes = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res;
                             var response = new
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(innerResult)
+                                result = ProtocolHelper.EnsureResultType(targetRes)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -1143,7 +1066,7 @@ namespace ModelContextGateway.Components.Capabilities
                     return Results.Json(new
                     {
                         jsonrpc = "2.0",
-                        error = new { code = McpErrorCodes.ConnectionClosed, message = exAuth.Message }
+                        error = new { code = -32001, message = exAuth.Message }
                     }, statusCode: 403);
                 }
                 catch (Exception ex)

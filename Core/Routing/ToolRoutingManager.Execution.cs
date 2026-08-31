@@ -104,7 +104,6 @@ namespace ModelContextGateway.Core.Routing
 
                 string targetName = "";
                 JsonElement targetArgs = default;
-                JsonElement inputResponses = default;
                 string? targetAuthToken = null;
 
                 if (root.TryGetProperty("params", out var paramsProp) &&
@@ -117,14 +116,6 @@ namespace ModelContextGateway.Core.Routing
                     if (argsProp.TryGetProperty("arguments", out var targetArgsProp))
                     {
                         targetArgs = targetArgsProp.Clone();
-                    }
-                    if (argsProp.TryGetProperty("inputResponses", out var inputRespProp))
-                    {
-                        inputResponses = inputRespProp.Clone();
-                    }
-                    else if (paramsProp.TryGetProperty("inputResponses", out var paramInputRespProp))
-                    {
-                        inputResponses = paramInputRespProp.Clone();
                     }
                     if (argsProp.TryGetProperty("target_auth_token", out var targetAuthTokenProp))
                     {
@@ -163,21 +154,15 @@ namespace ModelContextGateway.Core.Routing
                     };
                 }
 
-                var targetParams = new Dictionary<string, object>
-                {
-                    ["name"] = targetName,
-                    ["arguments"] = targetArgs.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : targetArgs
-                };
-                if (inputResponses.ValueKind != JsonValueKind.Undefined)
-                {
-                    targetParams["inputResponses"] = inputResponses;
-                }
-
                 var targetPayload = new
                 {
                     jsonrpc = "2.0",
                     method = "tools/call",
-                    @params = targetParams
+                    @params = new
+                    {
+                        name = targetName,
+                        arguments = targetArgs.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : targetArgs
+                    }
                 };
                 var targetBody = JsonSerializer.Serialize(targetPayload);
 
@@ -265,7 +250,7 @@ namespace ModelContextGateway.Core.Routing
                     }
                     if (resp.Result.HasValue)
                     {
-                        resp.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(resp.Result.Value));
+                        return ProtocolHelper.EnsureResultType(resp.Result.Value);
                     }
                     return resp;
                 }

@@ -80,16 +80,9 @@ namespace ModelContextGateway.Core.Routing
                 if (paramsElement.Value.TryGetProperty("protocolVersion", out var versionProp))
                 {
                     var requestedVersion = versionProp.GetString();
-                    if (!string.IsNullOrEmpty(requestedVersion))
+                    if (!string.IsNullOrEmpty(requestedVersion) && requestedVersion.StartsWith("2024", StringComparison.OrdinalIgnoreCase))
                     {
-                        if (requestedVersion.StartsWith("2024", StringComparison.OrdinalIgnoreCase))
-                        {
-                            negotiatedVersion = LegacyProtocolVersion;
-                        }
-                        else if (!requestedVersion.Equals(DefaultProtocolVersion, StringComparison.OrdinalIgnoreCase))
-                        {
-                            throw new InvalidOperationException($"Unsupported protocol version: '{requestedVersion}'");
-                        }
+                        negotiatedVersion = LegacyProtocolVersion;
                     }
                 }
             }
@@ -224,9 +217,13 @@ namespace ModelContextGateway.Core.Routing
                         response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new { }));
                         break;
 
+                    case "ping":
+                        response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new { }));
+                        break;
+
                     case "tools/list":
                         var tools = await ListToolsAsync();
-                        response.Result = JsonSerializer.SerializeToElement(CacheableResult.FormatCacheableResult(new { tools }));
+                        response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new { tools }));
                         break;
 
                     case "tools/call":
@@ -257,15 +254,10 @@ namespace ModelContextGateway.Core.Routing
                         break;
                 }
             }
-            catch (InvalidOperationException ex) when (ex.Message.StartsWith("Unsupported protocol version"))
-            {
-                _logger?.LogWarning(ex, "Unsupported protocol version requested.");
-                response.Error = new JsonRpcError { Code = McpErrorCodes.UnsupportedProtocolVersion, Message = ex.Message };
-            }
             catch (Exception ex)
             {
                 _logger?.LogError(ex, "An unexpected error occurred.");
-                response.Error = new JsonRpcError { Code = McpErrorCodes.InternalError, Message = ex.Message };
+                response.Error = new JsonRpcError { Code = -32603, Message = ex.Message };
             }
 
             return response;

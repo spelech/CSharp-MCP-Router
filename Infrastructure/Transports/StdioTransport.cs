@@ -389,7 +389,7 @@ namespace ModelContextGateway.Infrastructure.Transports
         {
             if (_process == null || _process.HasExited)
             {
-                return new JsonRpcResponse { Error = new JsonRpcError { Code = McpErrorCodes.ConnectionClosed, Message = "Process not running" } };
+                return new JsonRpcResponse { Error = new JsonRpcError { Code = -32001, Message = "Process not running" } };
             }
 
             string requestId = Guid.NewGuid().ToString("N");

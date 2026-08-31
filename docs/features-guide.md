@@ -96,12 +96,6 @@ Connect clients via these SSE endpoints:
 | `/{targetServerId}` | **Target-Specific Proxying** | Proxies connections directly to the specified target server (e.g., `/docker` or `/ha`). |
 | `/admin` or `/router-admin` | **Admin MCP Server** | Virtual in-process control plane providing 10 consolidated entity tools for autonomous agents to manage router state. |
 
-### Multi Round-Trip Requests (MRTR) Pattern (MCP 2026-07-28 Spec)
-Model Context Gateway fully supports the Multi Round-Trip Requests (MRTR) pattern introduced in the MCP 2026-07-28 specification:
-- **`InputRequiredResult`**: When a backend server requires additional input before completing a request, it returns a result object with `resultType: "input_required"` and an `inputRequests` array detailing required inputs.
-- **Client Retry & `inputResponses`**: Clients respond by retrying the original request with user input provided in the `inputResponses` parameter field.
-- **Gateway Forwarding**: The gateway transparently preserves `InputRequiredResult` payloads and forwards `inputResponses` in both direct tool calls and meta-mode (`execute_tool`) invocations.
-
 > For transport protocol comparisons (`sse`, `http`, `stdio`), concurrency, security policies, and error recovery, see [**Transport Capability & Configuration Guide**](transports.md).
 
 ### Gateway Client Setup Examples (`/sse`)

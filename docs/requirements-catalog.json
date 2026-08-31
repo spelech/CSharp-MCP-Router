@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:48:42.3643477Z",
-    "totalRequirements": 152,
-    "positiveCount": 122,
-    "guardrailCount": 30,
-    "totalProofs": 347
+    "generatedAt": "2026-08-31T03:01:54.3950848Z",
+    "totalRequirements": 144,
+    "positiveCount": 116,
+    "guardrailCount": 28,
+    "totalProofs": 336
   },
   "requirements": [
     {
@@ -1640,43 +1640,6 @@
       ]
     },
     {
-      "id": "MCP-08",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "FormatCacheableResult applies default ttlMs and cacheScope according to MCP 2026-07-28 spec",
-      "proofCount": 4,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
-          "lineNumber": 12,
-          "testName": "FormatCacheableResult_AppliesDefault_TtlMs_And_CacheScope",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
-          "lineNumber": 29,
-          "testName": "FormatCacheableResult_PreservesExisting_TtlMs_And_CacheScope",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
-          "lineNumber": 43,
-          "testName": "AdminMcpServer_ToolsList_Returns_TtlMs_And_CacheScope",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
-          "lineNumber": 90,
-          "testName": "ClientSession_ListAndReadMethods_FormatCacheableResults",
-          "details": null
-        }
-      ]
-    },
-    {
       "id": "MCP-ADMIN-ENDPOINT-CALL-TOOL",
       "category": "MCP",
       "type": "Positive",
@@ -2216,118 +2179,6 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 147,
           "testName": "ListToolsAsync_ReturnsTenConsolidatedTools",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "MCP-ERROR-CODES-HEADER-ANNOTATION",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "McpDualSpecMiddleware extracts Mcp-Method and Mcp-Name headers into HttpContext.Items.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpErrorCodesTests.cs",
-          "lineNumber": 116,
-          "testName": "McpDualSpecMiddleware_ExtractsHeaders_IntoItems",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "MCP-ERROR-CODES-MISSING-CAPABILITY",
-      "category": "MCP",
-      "type": "Negative",
-      "description": "ClientSession returns MissingRequiredClientCapability (-32021) when client lacks required capability.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpErrorCodesTests.cs",
-          "lineNumber": 83,
-          "testName": "ClientSession_MissingRequiredClientCapability_ReturnsError",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "MCP-ERROR-CODES-SPEC-ALLOCATION",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "Verify MCP 2026-07-28 error codes match specification allocation policy.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpErrorCodesTests.cs",
-          "lineNumber": 11,
-          "testName": "McpErrorCodes_ConstantValues_MatchSpec",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "MCP-ERROR-CODES-UNSUPPORTED-PROTOCOL",
-      "category": "MCP",
-      "type": "Negative",
-      "description": "AdminMcpServer returns UnsupportedProtocolVersion (-32022) when protocol version is invalid.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpErrorCodesTests.cs",
-          "lineNumber": 27,
-          "testName": "AdminMcpServer_UnsupportedProtocolVersion_ReturnsError",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "MCP-MRTR-01",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "McpInputRequiredResult serializes and deserializes according to MCP 2026-07-28 spec with resultType input_required.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs",
-          "lineNumber": 9,
-          "testName": "Test_MrtrModels_Serialization",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "MCP-MRTR-02",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "execute_tool forwards inputResponses to target tool params during request retry.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs",
-          "lineNumber": 41,
-          "testName": "Test_ExecuteTool_ForwardsInputResponses",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "MCP-MRTR-03",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "Direct tool call returns InputRequiredResult intact when backend requires additional input.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs",
-          "lineNumber": 113,
-          "testName": "Test_DirectToolCall_ReturnsInputRequiredResult",
           "details": null
         }
       ]
