@@ -59,14 +59,20 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("AUTH-111", "SEC", RequirementType.Positive, "Pipeline exposes RFC 9728 OAuth Protected Resource discovery endpoints with dynamic resource identifiers.")]
         public async Task Pipeline_WellKnown_Endpoints_ReturnSuccess()
         {
             var client = CreateAuthenticatedClient();
             var res1 = await client.GetAsync("/.well-known/oauth-protected-resource");
-            Assert.True((int)res1.StatusCode < 600);
+            Assert.Equal(HttpStatusCode.OK, res1.StatusCode);
+            var json1 = await res1.Content.ReadFromJsonAsync<JsonElement>();
+            Assert.True(json1.TryGetProperty("resource", out _));
+            Assert.True(json1.TryGetProperty("authorization_servers", out _));
 
-            var res1b = await client.GetAsync("/.well-known/oauth-protected-resource/subpath");
-            Assert.True((int)res1b.StatusCode < 600);
+            var res1b = await client.GetAsync("/.well-known/oauth-protected-resource/sse");
+            Assert.Equal(HttpStatusCode.OK, res1b.StatusCode);
+            var json1b = await res1b.Content.ReadFromJsonAsync<JsonElement>();
+            Assert.Contains("/sse", json1b.GetProperty("resource").GetString());
 
             var res2 = await client.GetAsync("/.well-known/oauth-authorization-server");
             Assert.True((int)res2.StatusCode < 600);

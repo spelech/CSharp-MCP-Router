@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T00:08:27.5173842Z",
-    "totalRequirements": 133,
-    "positiveCount": 110,
+    "generatedAt": "2026-08-31T00:46:59.4415984Z",
+    "totalRequirements": 134,
+    "positiveCount": 111,
     "guardrailCount": 23,
-    "totalProofs": 294
+    "totalProofs": 295
   },
   "requirements": [
     {
@@ -2134,6 +2134,22 @@
       ]
     },
     {
+      "id": "AUTH-111",
+      "category": "SEC",
+      "type": "Positive",
+      "description": "Pipeline exposes RFC 9728 OAuth Protected Resource discovery endpoints with dynamic resource identifiers.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 61,
+          "testName": "Pipeline_WellKnown_Endpoints_ReturnSuccess",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "SEC-01",
       "category": "SEC",
       "type": "Positive",
@@ -2538,7 +2554,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 446,
+          "lineNumber": 452,
           "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
           "details": null
         }
@@ -2965,7 +2981,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 234,
+          "lineNumber": 240,
           "testName": "Pipeline_Settings_Branding_ReadWrite",
           "details": null
         }
@@ -2981,7 +2997,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 412,
+          "lineNumber": 418,
           "testName": "Branding_Logo_Upload_And_Retrieval_Works",
           "details": null
         }

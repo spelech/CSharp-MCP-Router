@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.0.5`** | 2026-08-30 | feat(telemetry): add early-pipeline HTTP request logging middleware capturing method, path, status, duration, client IP, auth scheme, and user-agent; fix RFC 9728 `oauth-protected-resource` discovery metadata to match requested resource URI |
 | **`v5.0.4`** | 2026-08-30 | fix(oauth): inject `registration_endpoint` directly into serialized OpenID / OAuth discovery responses via `ApplyConfigurationResponseContext.Response.SetParameter()` ensuring RFC 8414 compliance for automatic client registration in Google Gemini |
 | **`v5.0.3`** | 2026-08-30 | feat(oauth): advertise `registration_endpoint` in OAuth 2.0 / OpenID Connect discovery metadata (`HandleConfigurationRequestContext`) enabling Google Gemini automatic client registration, and map standard DCR route aliases (`/api/register`, `/connect/register`, `/oauth/register`, `/register`) |
 | **`v5.0.2`** | 2026-08-30 | fix(di): add `[ActivatorUtilitiesConstructor]` attribute to `AuthorizationController` ensuring explicit DI constructor resolution under ASP.NET Core ActivatorUtilities, eliminating multiple constructor activation exceptions during Dynamic Client Registration (`/api/register`) |

@@ -36,6 +36,35 @@ namespace ModelContextGateway.Extensions
             forwardedHeadersOptions.KnownProxies.Clear();
             app.UseForwardedHeaders(forwardedHeadersOptions);
 
+            // Comprehensive HTTP Request Logging Middleware (logs method, path, status code, duration, IP, user-agent)
+            app.Use(async (context, next) =>
+            {
+                var sw = System.Diagnostics.Stopwatch.StartNew();
+                var reqLogger = context.RequestServices.GetRequiredService<ILogger<Program>>();
+                var ip = context.Request.Headers.TryGetValue("X-Forwarded-For", out var fwd) ? fwd.ToString() : context.Connection.RemoteIpAddress?.ToString();
+                var userAgent = context.Request.Headers.UserAgent.ToString();
+
+                try
+                {
+                    await next();
+                }
+                finally
+                {
+                    sw.Stop();
+                    var status = context.Response.StatusCode;
+                    var authScheme = context.Request.Headers.Authorization.FirstOrDefault()?.Split(' ').FirstOrDefault() ?? "None";
+                    reqLogger.LogInformation("HTTP {Method} {Path}{Query} -> {StatusCode} in {ElapsedMs:0.0}ms [IP: {Ip}, Auth: {AuthScheme}, UA: {UserAgent}]",
+                        context.Request.Method,
+                        context.Request.Path,
+                        context.Request.QueryString.HasValue ? context.Request.QueryString.Value : "",
+                        status,
+                        sw.Elapsed.TotalMilliseconds,
+                        ip,
+                        authScheme,
+                        userAgent);
+                }
+            });
+
             app.UseCors();
 
             // Extract token from query parameters for SSE / WebSocket bypass support
@@ -60,15 +89,6 @@ namespace ModelContextGateway.Extensions
             app.UseAuthorization();
             app.UseMiddleware<ModelContextGateway.Middleware.McpDualSpecMiddleware>();
             app.MapControllers();
-
-            // Request logging middleware (metadata only — never headers/body/query, which carry credentials)
-            app.Use(async (context, next) =>
-            {
-                var reqLogger = context.RequestServices.GetRequiredService<ILogger<Program>>();
-                reqLogger.LogInformation("Incoming request: {Method} {Path} from {Ip}",
-                    context.Request.Method, context.Request.Path, context.Connection.RemoteIpAddress);
-                await next();
-            });
 
             app.UseDefaultFiles();
             app.UseStaticFiles(new StaticFileOptions
@@ -124,17 +144,22 @@ namespace ModelContextGateway.Extensions
             });
 
             // ----------------------------------------------------
-            // OAUTH & OIDC DISCOVERY ENDPOINTS
+            // OAUTH & OIDC PROTECTED RESOURCE DISCOVERY (RFC 9728)
             // ----------------------------------------------------
             app.MapGet("/.well-known/oauth-protected-resource", (HttpContext context) =>
             {
                 var host = context.Request.Host;
                 var scheme = context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) ? proto.ToString() : context.Request.Scheme;
+                var requestedResource = context.Request.Query["resource"].FirstOrDefault();
+                var resourceUri = !string.IsNullOrEmpty(requestedResource)
+                    ? requestedResource
+                    : $"{scheme}://{host}/sse";
                 return Results.Json(new
                 {
-                    resource = $"{scheme}://{host}/mcp",
-                    authorization_servers = new[] { $"{scheme}://{host}" },
-                    bearer_methods_supported = new[] { "header" }
+                    resource = resourceUri,
+                    authorization_servers = new[] { $"{scheme}://{host}/", $"{scheme}://{host}" },
+                    bearer_methods_supported = new[] { "header" },
+                    scopes_supported = new[] { "mcp_client", "openid", "offline_access" }
                 });
             });
 
@@ -145,41 +170,9 @@ namespace ModelContextGateway.Extensions
                 return Results.Json(new
                 {
                     resource = $"{scheme}://{host}/{path}",
-                    authorization_servers = new[] { $"{scheme}://{host}" },
-                    bearer_methods_supported = new[] { "header" }
-                });
-            });
-
-            app.MapGet("/.well-known/oauth-authorization-server", (HttpContext context) =>
-            {
-                var host = context.Request.Host;
-                var scheme = context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) ? proto.ToString() : context.Request.Scheme;
-                return Results.Json(new
-                {
-                    issuer = $"{scheme}://{host}",
-                    authorization_endpoint = $"{scheme}://{host}/oauth/authorize",
-                    token_endpoint = $"{scheme}://{host}/oauth/token",
-                    registration_endpoint = $"{scheme}://{host}/api/register",
-                    response_types_supported = new[] { "code" },
-                    grant_types_supported = new[] { "authorization_code" },
-                    token_endpoint_auth_methods_supported = new[] { "client_secret_post", "client_secret_basic" }
-                });
-            });
-
-            app.MapGet("/.well-known/openid-configuration", (HttpContext context) =>
-            {
-                var host = context.Request.Host;
-                var scheme = context.Request.Headers.TryGetValue("X-Forwarded-Proto", out var proto) ? proto.ToString() : context.Request.Scheme;
-                return Results.Json(new
-                {
-                    issuer = $"{scheme}://{host}",
-                    authorization_endpoint = $"{scheme}://{host}/oauth/authorize",
-                    token_endpoint = $"{scheme}://{host}/oauth/token",
-                    registration_endpoint = $"{scheme}://{host}/api/register",
-                    response_types_supported = new[] { "code" },
-                    grant_types_supported = new[] { "authorization_code" },
-                    subject_types_supported = new[] { "public" },
-                    id_token_signing_alg_values_supported = new[] { "RS256" }
+                    authorization_servers = new[] { $"{scheme}://{host}/", $"{scheme}://{host}" },
+                    bearer_methods_supported = new[] { "header" },
+                    scopes_supported = new[] { "mcp_client", "openid", "offline_access" }
                 });
             });
 
