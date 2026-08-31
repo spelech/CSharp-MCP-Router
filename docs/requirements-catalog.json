@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:19:02.3647832Z",
-    "totalRequirements": 147,
-    "positiveCount": 118,
+    "generatedAt": "2026-08-31T04:19:20.4061051Z",
+    "totalRequirements": 146,
+    "positiveCount": 117,
     "guardrailCount": 29,
-    "totalProofs": 343
+    "totalProofs": 339
   },
   "requirements": [
     {
@@ -1636,43 +1636,6 @@
           "lineNumber": 385,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
-        }
-      ]
-    },
-    {
-      "id": "MCP-08",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "Attaches resultType complete when missing in JSON-RPC results",
-      "proofCount": 4,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProtocolResultTypeTests.cs",
-          "lineNumber": 7,
-          "testName": "EnsureResultType_AttachesComplete_WhenMissing",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProtocolResultTypeTests.cs",
-          "lineNumber": 23,
-          "testName": "EnsureResultType_PreservesExistingResultType",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProtocolResultTypeTests.cs",
-          "lineNumber": 39,
-          "testName": "EnsureResultType_HandlesNullResult",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProtocolResultTypeTests.cs",
-          "lineNumber": 53,
-          "testName": "EnsureResultType_HandlesJsonElement",
-          "details": null
         }
       ]
     },
