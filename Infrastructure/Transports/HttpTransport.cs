@@ -202,7 +202,15 @@ namespace ModelContextGateway.Infrastructure.Transports
             req.Headers.Host = "localhost";
             req.Headers.Accept.Clear();
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+            var (mcpMethod, mcpName) = SseTransport.ExtractMcpHeaderMetadata(bodyJson, method);
+            if (!string.IsNullOrEmpty(mcpMethod))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethod);
+            }
+            if (!string.IsNullOrEmpty(mcpName))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Name", mcpName);
+            }
 
             await ApplyAuthAndCustomHeadersAsync(req);
 

@@ -289,6 +289,36 @@ namespace ModelContextGateway.Infrastructure.Transports
             });
         }
 
+        public static (string Method, string ItemName) ExtractMcpHeaderMetadata(string jsonBody, string fallbackMethod = "")
+        {
+            string method = fallbackMethod;
+            string itemName = "";
+            if (!string.IsNullOrWhiteSpace(jsonBody))
+            {
+                try
+                {
+                    var node = System.Text.Json.Nodes.JsonNode.Parse(jsonBody);
+                    var parsedMethod = node?["method"]?.ToString();
+                    if (!string.IsNullOrEmpty(parsedMethod))
+                    {
+                        method = parsedMethod;
+                    }
+                    itemName = method switch
+                    {
+                        "tools/call" => node?["params"]?["name"]?.ToString() ?? "",
+                        "prompts/get" => node?["params"]?["name"]?.ToString() ?? "",
+                        "resources/read" => node?["params"]?["uri"]?.ToString() ?? "",
+                        _ => ""
+                    };
+                }
+                catch
+                {
+                    // Fallback to passed method if JSON parsing fails
+                }
+            }
+            return (method, itemName);
+        }
+
         private static object? GetJsonElementValue(JsonElement element)
         {
             switch (element.ValueKind)
@@ -384,6 +414,16 @@ namespace ModelContextGateway.Infrastructure.Transports
                 req.Headers.Accept.Clear();
                 req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
 
+                var (mcpMethodNotif, mcpNameNotif) = ExtractMcpHeaderMetadata(modifiedBody, method);
+                if (!string.IsNullOrEmpty(mcpMethodNotif))
+                {
+                    req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodNotif);
+                }
+                if (!string.IsNullOrEmpty(mcpNameNotif))
+                {
+                    req.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameNotif);
+                }
+
                 await ApplyAuthAndCustomHeadersAsync(req);
                 if (!string.IsNullOrEmpty(targetAuthToken))
                 {
@@ -407,6 +447,16 @@ namespace ModelContextGateway.Infrastructure.Transports
                 req.Headers.Host = "localhost";
                 req.Headers.Accept.Clear();
                 req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+
+                var (mcpMethodReq, mcpNameReq) = ExtractMcpHeaderMetadata(modifiedBody, method);
+                if (!string.IsNullOrEmpty(mcpMethodReq))
+                {
+                    req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodReq);
+                }
+                if (!string.IsNullOrEmpty(mcpNameReq))
+                {
+                    req.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameReq);
+                }
 
                 await ApplyAuthAndCustomHeadersAsync(req);
                 if (!string.IsNullOrEmpty(targetAuthToken))
@@ -467,6 +517,16 @@ namespace ModelContextGateway.Infrastructure.Transports
                 postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
 
+                var (mcpMethodCall, mcpNameCall) = ExtractMcpHeaderMetadata(bodyJson, method);
+                if (!string.IsNullOrEmpty(mcpMethodCall))
+                {
+                    postReq.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodCall);
+                }
+                if (!string.IsNullOrEmpty(mcpNameCall))
+                {
+                    postReq.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameCall);
+                }
+
                 await ApplyAuthAndCustomHeadersAsync(postReq);
 
                 using var res = await _httpClient.SendAsync(postReq, _cts.Token);
@@ -491,6 +551,17 @@ namespace ModelContextGateway.Infrastructure.Transports
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
             req.Headers.Host = "localhost";
+
+            var (mcpMethodNotif, mcpNameNotif) = ExtractMcpHeaderMetadata(bodyJson, method);
+            if (!string.IsNullOrEmpty(mcpMethodNotif))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodNotif);
+            }
+            if (!string.IsNullOrEmpty(mcpNameNotif))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameNotif);
+            }
+
             await ApplyAuthAndCustomHeadersAsync(req);
 
             using var res = await _httpClient.SendAsync(req, _cts.Token);
@@ -508,6 +579,17 @@ namespace ModelContextGateway.Infrastructure.Transports
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
             req.Headers.Host = "localhost";
+
+            var (mcpMethodResp, mcpNameResp) = ExtractMcpHeaderMetadata(responseJson);
+            if (!string.IsNullOrEmpty(mcpMethodResp))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodResp);
+            }
+            if (!string.IsNullOrEmpty(mcpNameResp))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameResp);
+            }
+
             await ApplyAuthAndCustomHeadersAsync(req);
 
             using var res = await _httpClient.SendAsync(req, _cts.Token);

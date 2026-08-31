@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:21:30.1684695Z",
-    "totalRequirements": 150,
-    "positiveCount": 119,
+    "generatedAt": "2026-08-31T04:26:26.1490316Z",
+    "totalRequirements": 151,
+    "positiveCount": 120,
     "guardrailCount": 31,
-    "totalProofs": 345
+    "totalProofs": 350
   },
   "requirements": [
     {
@@ -1229,7 +1229,7 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "Null or empty capability targets must immediately fail closed and return unauthorized",
-      "proofCount": 9,
+      "proofCount": 13,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1265,6 +1265,34 @@
           "lineNumber": 304,
           "testName": "ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest",
           "details": "Ensures client creation with empty category scope fails closed with BadRequest."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 38,
+          "testName": "Middleware_Returns_HeaderMismatchError_When_Headers_Missing_On_POST",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 77,
+          "testName": "Middleware_Returns_HeaderMismatchError_When_McpMethod_Mismatched",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 111,
+          "testName": "Middleware_Returns_HeaderMismatchError_When_McpName_Missing_For_ToolCall",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 145,
+          "testName": "Middleware_Returns_HeaderMismatchError_When_McpName_Mismatched",
+          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -1636,6 +1664,22 @@
           "lineNumber": 385,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
+        }
+      ]
+    },
+    {
+      "id": "MCP-08",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Middleware parses 2026-07-28 spec headers Mcp-Method and Mcp-Name",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
+          "lineNumber": 8,
+          "testName": "Middleware_Parses_2026_Spec_Headers",
+          "details": null
         }
       ]
     },
