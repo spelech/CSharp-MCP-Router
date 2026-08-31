@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **151 Requirements Verified** across **343 Test Proofs** (121 Functional Capabilities, 30 Safety Guardrails).
+> **Catalog Statistics:** **152 Requirements Verified** across **347 Test Proofs** (122 Functional Capabilities, 30 Safety Guardrails).
 
 ---
 
@@ -14,7 +14,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **3** | 3 | 0 | 20 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 40 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **43** | 41 | 2 | 44 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **44** | 42 | 2 | 48 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **37** | 29 | 8 | 63 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **17** | 15 | 2 | 65 proofs |
@@ -298,6 +298,15 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) (`Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly`)
+
+### `[MCP-08]` FormatCacheableResult applies default ttlMs and cacheScope according to MCP 2026-07-28 spec
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (4):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L12) (`FormatCacheableResult_AppliesDefault_TtlMs_And_CacheScope`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L29`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L29) (`FormatCacheableResult_PreservesExisting_TtlMs_And_CacheScope`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L43`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L43) (`AdminMcpServer_ToolsList_Returns_TtlMs_And_CacheScope`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L90`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L90) (`ClientSession_ListAndReadMethods_FormatCacheableResults`)
 
 ### `[MCP-ADMIN-ENDPOINT-CALL-TOOL]` Admin endpoint /admin/message executes tools/call for manage_system diagnostics.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1187,6 +1196,7 @@
 | `MCP-ADMIN-TOOL-TEST-CALL-ERROR` | **Guardrail** | `GUARD` | AdminMcpServer test_tool_call propagates downstream backend errors with visibility. | [`AdminMcpServerTests.cs:L633`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L633) | Backend xUnit |
 | `MCP-01` | Positive | `MCP` | Meta-mode execute_tool strictly enforces target tool authorization policies | [`PairwiseIntegrationMatrixTests.cs:L567`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L567) | Backend xUnit |
 | `MCP-02` | Positive | `MCP` | All MCP protocol capabilities enforce caller role authorizations consistently | [`PairwiseIntegrationMatrixTests.cs:L385`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) | Backend xUnit |
+| `MCP-08` | Positive | `MCP` | FormatCacheableResult applies default ttlMs and cacheScope according to MCP 2026-07-28 spec | [`CacheableResultTests.cs:L12`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs#L12) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L294`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs#L294) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L212`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs#L212) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-LIST-TOOLS` | Positive | `MCP` | Admin endpoint /admin/message executes tools/list over active SSE session and returns 10 admin tools. | [`AdminEndpointsTests.cs:L224`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs#L224) | Backend xUnit |

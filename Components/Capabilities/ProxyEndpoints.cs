@@ -131,7 +131,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new { tools })
+                                result = CacheableResult.FormatCacheableResult(new { tools })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -167,7 +167,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new { resources })
+                                result = CacheableResult.FormatCacheableResult(new { resources })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -180,7 +180,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new { templates })
+                                result = CacheableResult.FormatCacheableResult(new { templates })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -199,7 +199,7 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = ProtocolHelper.EnsureResultType(innerResult)
+                                    result = CacheableResult.FormatCacheableResult(innerResult)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -215,7 +215,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(new { prompts })
+                                result = CacheableResult.FormatCacheableResult(new { prompts })
                             };
                             httpContext.Response.Headers.ContentType = "application/json";
                             await httpContext.Response.WriteAsJsonAsync(response);
@@ -966,7 +966,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = ProtocolHelper.EnsureResultType(new { tools })
+                            result = CacheableResult.FormatCacheableResult(new { tools })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -998,7 +998,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = ProtocolHelper.EnsureResultType(new { resources })
+                            result = CacheableResult.FormatCacheableResult(new { resources })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -1014,7 +1014,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = ProtocolHelper.EnsureResultType(innerResult)
+                                result = CacheableResult.FormatCacheableResult(innerResult)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -1028,7 +1028,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = ProtocolHelper.EnsureResultType(new { templates })
+                            result = CacheableResult.FormatCacheableResult(new { templates })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();
@@ -1071,7 +1071,7 @@ namespace ModelContextGateway.Components.Capabilities
                         {
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
-                            result = ProtocolHelper.EnsureResultType(new { prompts })
+                            result = CacheableResult.FormatCacheableResult(new { prompts })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();

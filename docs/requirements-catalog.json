@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:37:05.6656309Z",
-    "totalRequirements": 151,
-    "positiveCount": 121,
+    "generatedAt": "2026-08-31T04:42:05.4854421Z",
+    "totalRequirements": 152,
+    "positiveCount": 122,
     "guardrailCount": 30,
-    "totalProofs": 343
+    "totalProofs": 347
   },
   "requirements": [
     {
@@ -1636,6 +1636,43 @@
           "lineNumber": 385,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
+        }
+      ]
+    },
+    {
+      "id": "MCP-08",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "FormatCacheableResult applies default ttlMs and cacheScope according to MCP 2026-07-28 spec",
+      "proofCount": 4,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
+          "lineNumber": 12,
+          "testName": "FormatCacheableResult_AppliesDefault_TtlMs_And_CacheScope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
+          "lineNumber": 29,
+          "testName": "FormatCacheableResult_PreservesExisting_TtlMs_And_CacheScope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
+          "lineNumber": 43,
+          "testName": "AdminMcpServer_ToolsList_Returns_TtlMs_And_CacheScope",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CacheableResultTests.cs",
+          "lineNumber": 90,
+          "testName": "ClientSession_ListAndReadMethods_FormatCacheableResults",
+          "details": null
         }
       ]
     },
