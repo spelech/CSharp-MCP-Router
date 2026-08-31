@@ -13,7 +13,14 @@ interface ClientStore {
   createdClientResult: NewClientResult | null;
 
   fetchClients: () => Promise<void>;
-  registerClient: (displayName: string, scopes: string[]) => Promise<void>;
+  registerClient: (
+    displayName: string,
+    scopes: string[],
+    redirectUris?: string[],
+    grantTypes?: string[],
+    clientType?: 'confidential' | 'public',
+    expiresInDays?: number
+  ) => Promise<void>;
   deleteClient: (id: string, name: string) => Promise<void>;
 
   openAddClientModal: () => void;
@@ -37,9 +44,9 @@ export const useClientStore = create<ClientStore>((set, get) => ({
     }
   },
 
-  registerClient: async (displayName, scopes) => {
+  registerClient: async (displayName, scopes, redirectUris, grantTypes, clientType, expiresInDays) => {
     try {
-      const result = await registerClientApi(displayName, scopes);
+      const result = await registerClientApi(displayName, scopes, redirectUris, grantTypes, clientType, expiresInDays);
       set({ createdClientResult: result });
       showToast('Client registered successfully', 'success');
       get().fetchClients();

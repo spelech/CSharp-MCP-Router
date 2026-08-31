@@ -290,3 +290,87 @@ BEGIN
     );
 END;
 GO
+
+-- 11. Procedure: Save or Update OAuthClient Configuration
+CREATE OR ALTER PROCEDURE [dbo].[sp_SaveOAuthClient]
+    @ClientId VARCHAR(100),
+    @ClientSecretHash VARCHAR(256) = '',
+    @ClientName NVARCHAR(200),
+    @ClientType VARCHAR(50) = 'confidential',
+    @RedirectUrisJson NVARCHAR(MAX) = '[]',
+    @GrantTypesJson NVARCHAR(MAX) = '[]',
+    @ScopesJson NVARCHAR(MAX) = '[]',
+    @OwnerSid NVARCHAR(200) = '',
+    @CreatedBy NVARCHAR(256) = '',
+    @ExpiresAt DATETIME2 = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF EXISTS (SELECT 1 FROM [dbo].[OAuthClients] WHERE [ClientId] = @ClientId)
+    BEGIN
+        UPDATE [dbo].[OAuthClients]
+        SET [ClientSecretHash] = @ClientSecretHash,
+            [ClientName] = @ClientName,
+            [ClientType] = @ClientType,
+            [RedirectUrisJson] = @RedirectUrisJson,
+            [GrantTypesJson] = @GrantTypesJson,
+            [ScopesJson] = @ScopesJson,
+            [OwnerSid] = @OwnerSid,
+            [CreatedBy] = @CreatedBy,
+            [ExpiresAt] = @ExpiresAt
+        WHERE [ClientId] = @ClientId;
+    END
+    ELSE
+    BEGIN
+        INSERT INTO [dbo].[OAuthClients] (
+            [ClientId], [ClientSecretHash], [ClientName], [ClientType],
+            [RedirectUrisJson], [GrantTypesJson], [ScopesJson],
+            [OwnerSid], [CreatedBy], [ExpiresAt], [CreatedAt]
+        )
+        VALUES (
+            @ClientId, @ClientSecretHash, @ClientName, @ClientType,
+            @RedirectUrisJson, @GrantTypesJson, @ScopesJson,
+            @OwnerSid, @CreatedBy, @ExpiresAt, SYSUTCDATETIME()
+        );
+    END
+END;
+GO
+
+-- 12. Procedure: Get OAuthClients
+CREATE OR ALTER PROCEDURE [dbo].[sp_GetOAuthClients]
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT [ClientId], [ClientSecretHash], [ClientName], [ClientType],
+           [RedirectUrisJson], [GrantTypesJson], [ScopesJson],
+           [OwnerSid], [CreatedBy], [ExpiresAt], [CreatedAt]
+    FROM [dbo].[OAuthClients]
+    ORDER BY [CreatedAt] DESC;
+END;
+GO
+
+-- 13. Procedure: Get OAuthClient By ClientId
+CREATE OR ALTER PROCEDURE [dbo].[sp_GetOAuthClientById]
+    @ClientId VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SELECT [ClientId], [ClientSecretHash], [ClientName], [ClientType],
+           [RedirectUrisJson], [GrantTypesJson], [ScopesJson],
+           [OwnerSid], [CreatedBy], [ExpiresAt], [CreatedAt]
+    FROM [dbo].[OAuthClients]
+    WHERE [ClientId] = @ClientId;
+END;
+GO
+
+-- 14. Procedure: Delete OAuthClient
+CREATE OR ALTER PROCEDURE [dbo].[sp_DeleteOAuthClient]
+    @ClientId VARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    DELETE FROM [dbo].[OAuthClients] WHERE [ClientId] = @ClientId;
+END;
+GO
+

@@ -107,8 +107,11 @@ graph TD
 * Administrators can configure local LAN CIDRs (e.g. `10.0.0.0/8`, `192.168.0.0/16`) or central open mode (`0.0.0.0/0`) via environment variable `Admin__StandaloneAllowedNetworks__0=10.0.0.0/8`.
 * External non-matching IPs require an Admin AppKey (`mcp-global-admin...`).
 
-### 5. OAuth 2.0 Authorization Server (`OpenIddict`)
+### 5. OAuth 2.0 Authorization Server (`OpenIddict`) & RFC 7591 Dynamic Client Registration
 * Built-in OAuth 2.0 authorization server for issuing signed access tokens with standard token lifecycles and scopes.
+* **Dynamic Client Registration (RFC 7591)**: Enables AI platforms (e.g. Google Gemini, Slack MCP) to dynamically register client credentials at `/api/register`, `/connect/register`, or `/oauth/register`.
+* **Isolated `OAuthClients` Storage**: Stores client credentials separately from API keys with SHA-256 secret hashing, whitelisted redirect URIs, grant types, and scope constraints.
+* **Rich Web UI Management**: View, register, and revoke OAuth applications from the **`App Keys & Security`** tab under **Dynamic Client Registration (RFC 7591)**.
 
 ---
 

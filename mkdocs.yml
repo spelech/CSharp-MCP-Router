@@ -109,6 +109,7 @@ nav:
           - Platform Config Flow: auth-flows/platform-config-flow.md
           - MCP Server Config Flow: auth-flows/mcp-server-config-flow.md
           - Multi-Tenant OAuth Consent: auth-flows/multi-tenant-oauth-consent.md
+          - Dynamic Client Registration (RFC 7591): auth-flows/dynamic-client-registration.md
           - Dynamic Auth Limitations: auth-flows/dynamic-auth-limitations.md
   - Architecture & Internals:
       - System Architecture: architecture.md

@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.0.7-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.1.0-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -237,11 +237,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.1.0`** | 2026-08-30 | feat(oauth): dedicated `OAuthClients` persistence isolation for RFC 7591 Dynamic Client Registration (DCR) and manual OAuth applications across SQLite, MSSQL, and MySQL; SHA-256 one-way client secret hashing; rich metadata support (`redirect_uris`, `grant_types`, `scopes`, `client_type`); and enhanced Web UI management card and modal |
 | **`v5.0.7`** | 2026-08-30 | fix(oauth): enable OpenIddict server degraded mode (`EnableDegradedMode()`) to support custom credential and SQLite stores without default EF Core provider requirements, and enhance `/oauth/authorize` authentication handling |
 | **`v5.0.6`** | 2026-08-30 | feat(oauth): full RFC 7591 Dynamic Client Registration response specification returning HTTP `201 Created`, echoing `redirect_uris`, `grant_types`, `response_types`, and `client_name`, and registering custom client `redirect_uris` in OpenIddict |
 | **`v5.0.5`** | 2026-08-30 | feat(telemetry): add early-pipeline HTTP request logging middleware capturing method, path, status, duration, client IP, auth scheme, and user-agent; fix RFC 9728 `oauth-protected-resource` discovery metadata to match requested resource URI |
 | **`v5.0.4`** | 2026-08-30 | fix(oauth): inject `registration_endpoint` directly into serialized OpenID / OAuth discovery responses via `ApplyConfigurationResponseContext.Response.SetParameter()` ensuring RFC 8414 compliance for automatic client registration in Google Gemini |
-| **`v5.0.3`** | 2026-08-30 | feat(oauth): advertise `registration_endpoint` in OAuth 2.0 / OpenID Connect discovery metadata (`HandleConfigurationRequestContext`) enabling Google Gemini automatic client registration, and map standard DCR route aliases (`/api/register`, `/connect/register`, `/oauth/register`, `/register`) |
 ---
 
 ## 🧪 Code Coverage & Quality Gates

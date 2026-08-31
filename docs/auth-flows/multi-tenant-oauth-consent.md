@@ -2,6 +2,9 @@
 
 To securely support dynamic, multi-tenant AI integrations (such as the **Slack MCP Server** or **Splunk MCP** integrations), Model Context Gateway (MCG) natively supports the standard OAuth 2.0 `authorization_code` and `refresh_token` flows. This allows external IDEs and agents to request fine-grained access to a user's isolated backend resources.
 
+> [!TIP]
+> **For the dedicated Dynamic Client Registration (RFC 7591) specification**, discovery metadata, and payload schemas, see [**Dynamic Client Registration (RFC 7591) Guide**](dynamic-client-registration.md).
+
 ## 1. The Interactive Consent Architecture
 
 Rather than relying purely on static API keys or upstream proxy headers for all client interactions, the router acts as an **OAuth 2.0 Authorization Server** using OpenIddict. 
@@ -38,14 +41,19 @@ Once the user clicks **Accept**, the router issues a short-lived `authorization_
 2. **Refresh Tokens**: To prevent the user from having to repeatedly consent every hour, the router issues a long-lived `refresh_token` (enabled via `AllowRefreshTokenFlow`). The client stores this securely and uses it to silently renew the access token when it expires.
 3. **Execution**: The client then uses the Access Token as a Bearer token to execute MCP tools on the router. The router logs the execution and enforces Row-Level Security (RLS) under the context of the user who originally consented.
 
-## Summary of Client Registration Permissions
+## Summary of Client Registration & Persistence Isolation
 
-When a new client is provisioned (either via the UI, the `/api/register` DCR endpoint, or the `manage_clients` MCP tool), it is automatically granted the following capabilities:
-* `GrantTypes.ClientCredentials` (for machine-to-machine background tasks)
-* `GrantTypes.AuthorizationCode` (for the interactive flow)
-* `GrantTypes.RefreshToken` (for maintaining sessions)
-* `Endpoints.Authorization` & `Endpoints.Token`
-* `ResponseTypes.Code`
+In MCG v5.1.0+, OAuth 2.0 / 2.1 client applications and RFC 7591 Dynamic Client Registrations are persisted in a dedicated, isolated **`OAuthClients`** table across SQLite, Microsoft SQL Server, and MySQL. This completely separates machine and interactive OAuth applications from static API keys (`AppKeys`):
+
+* **SHA-256 Secret Hashing**: The `client_secret` is hashed using SHA-256 immediately upon generation. Plaintext secrets are **only returned once** during registration and are never persisted to disk or exposed in management APIs.
+* **Privilege Decoupling**: Machine credentials registered via DCR or the management UI are created with `OwnerSid = ''`, ensuring machine applications do not inherit administrator SIDs or elevated privileges.
+* **Multi-Dialect Persistence**: Backed by `sp_SaveOAuthClient`, `sp_GetOAuthClients`, `sp_GetOAuthClientById`, and `sp_DeleteOAuthClient` in MSSQL and MySQL, and atomic parameterized queries with upsert semantics in SQLite.
+
+When a new client is provisioned (either via the UI, the `/api/register` DCR endpoint, or the `/api/clients` API), it is configured with:
+* `grant_types`: `["authorization_code", "refresh_token", "client_credentials"]`
+* `response_types`: `["code"]`
+* `token_endpoint_auth_method`: `"client_secret_post"` or `"client_secret_basic"`
+* `redirect_uris`: Whitelisted callback URLs registered dynamically or manually
 
 ## 4. Step-by-Step Setup Guide (Example: Slack MCP Integration)
 
@@ -53,14 +61,18 @@ Follow these steps to configure an external multi-tenant AI client (like Slack) 
 
 ### Step 1: Register the Dynamic Client
 Before Slack can redirect users to the router, it must be registered as an OAuth Client. 
-You can do this via the router's UI (**Settings > Clients**) or via a direct API call to `/api/register`:
+You can do this via the router's UI (**App Keys & Security > Dynamic Client Registration**) or via a direct API call to `/api/register` (RFC 7591):
 ```json
 // POST https://your-router-url.com/api/register
 {
-  "client_name": "Slack MCP Workspace App"
+  "client_name": "Slack MCP Workspace App",
+  "redirect_uris": ["https://slack.com/oauth/callback"],
+  "grant_types": ["authorization_code", "refresh_token", "client_credentials"],
+  "response_types": ["code"],
+  "token_endpoint_auth_method": "client_secret_post"
 }
 ```
-**Save the Output:** The router will return a `client_id` and `client_secret`. 
+**Save the Output:** The router will return HTTP `201 Created` with a `client_id` and one-time plaintext `client_secret`. 
 
 ### Step 2: Configure the Client (Slack App)
 In your Slack App configuration portal (or equivalent external platform):

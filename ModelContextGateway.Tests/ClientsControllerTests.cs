@@ -1,73 +1,70 @@
 using System.Security.Claims;
-using System.Text.Encodings.Web;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json;
 using Dapper;
 using FluentAssertions;
-using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging.Abstractions;
-using Microsoft.Extensions.Options;
 using Moq;
 
 namespace ModelContextGateway.Tests
 {
     public class ClientsControllerTests
     {
-        private (SqliteConnection conn, IDbConnectionFactory factory) CreateDbFactory()
+        private (SqliteConnection conn, IDbConnectionFactory factory, IOAuthClientRepository repo) CreateDbEnvironment()
         {
             var dbName = $"Data Source=ClientsControllerTests_{Guid.NewGuid():N};Mode=Memory;Cache=Shared";
             var connection = new SqliteConnection(dbName);
             connection.Open();
 
             connection.Execute(@"
-                CREATE TABLE IF NOT EXISTS AppKeys (
-                    Id TEXT PRIMARY KEY,
-                    Name TEXT,
-                    Username TEXT,
-                    KeyPrefix TEXT,
-                    EncryptedKey TEXT,
+                CREATE TABLE IF NOT EXISTS OAuthClients (
+                    ClientId TEXT PRIMARY KEY,
+                    ClientSecretHash TEXT DEFAULT '',
+                    ClientName TEXT NOT NULL,
+                    ClientType TEXT DEFAULT 'confidential',
+                    RedirectUrisJson TEXT DEFAULT '[]',
+                    GrantTypesJson TEXT DEFAULT '[]',
                     ScopesJson TEXT DEFAULT '[]',
-                    OwnerSid TEXT,
-                    KeyType TEXT DEFAULT 'personal',
-                    ExpiresAt TEXT,
+                    OwnerSid TEXT DEFAULT '',
+                    CreatedBy TEXT DEFAULT '',
+                    ExpiresAt TEXT NULL,
                     CreatedAt TEXT DEFAULT CURRENT_TIMESTAMP
+                );
+                CREATE TABLE IF NOT EXISTS Servers (
+                    Id TEXT PRIMARY KEY,
+                    Categories TEXT,
+                    Enabled INTEGER DEFAULT 1
                 );
             ");
 
             var mockDbFactory = new Mock<IDbConnectionFactory>();
             mockDbFactory.Setup(f => f.CreateConnection()).Returns(() => new SqliteConnection(dbName));
             mockDbFactory.Setup(f => f.ProviderName).Returns("sqlite");
-            return (connection, mockDbFactory.Object);
-        }
 
-        private AppKeyAuthenticationHandler CreateAuthenticationHandler(IDbConnectionFactory dbFactory, IConfiguration config)
-        {
-            var optionsMonitorMock = new Mock<IOptionsMonitor<AuthenticationSchemeOptions>>();
-            optionsMonitorMock.Setup(o => o.Get(It.IsAny<string>())).Returns(new AuthenticationSchemeOptions());
-
-            return new AppKeyAuthenticationHandler(
-                optionsMonitorMock.Object,
-                NullLoggerFactory.Instance,
-                UrlEncoder.Default,
-                dbFactory,
-                config
-            );
+            var repo = new DatabaseRepository(mockDbFactory.Object);
+            return (connection, mockDbFactory.Object, repo);
         }
 
         [Fact]
+        [Requirement("AUTH-110", "AUTH", RequirementType.Positive, "GetClients returns list of OAuthClient records without secret hashes")]
         public async Task GetClients_ReturnsOk_WithClientsAndMappedProperties()
         {
-            var (conn, dbFactory) = CreateDbFactory();
-            conn.Execute("INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey, ScopesJson) VALUES ('id-1', 'Client One', 'client-1', 'mcp_prefix1', 'secret1', '[\"mcp_client\"]')");
+            var (_, dbFactory, repo) = CreateDbEnvironment();
+            await repo.SaveOAuthClientAsync(new OAuthClient
+            {
+                ClientId = "client-1",
+                ClientName = "Client One",
+                ClientSecretHash = "hash123",
+                ScopesJson = "[\"mcp_client\"]",
+                GrantTypesJson = "[\"authorization_code\"]",
+                RedirectUrisJson = "[\"https://app.example.com/cb\"]"
+            });
 
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
 
             var result = await controller.GetClients();
             var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
@@ -75,15 +72,22 @@ namespace ModelContextGateway.Tests
 
             list.Should().NotBeNull();
             list.Should().HaveCount(1);
+
+            var item = list![0];
+            var json = JsonSerializer.Serialize(item);
+            json.Should().NotContain("hash123");
+            json.Should().NotContain("ClientSecretHash");
+            json.Should().Contain("client-1");
+            json.Should().Contain("Client One");
         }
 
         [Fact]
+        [Requirement("AUTH-111", "AUTH", RequirementType.Positive, "CreateClient persists OAuthClient with SHA-256 secret hash and returns plaintext secret")]
         public async Task CreateClient_ReturnsOk_WithGeneratedCredentials()
         {
-            var (_, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var (_, dbFactory, repo) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
 
             var model = new ClientsController.CreateClientModel
             {
@@ -97,96 +101,62 @@ namespace ModelContextGateway.Tests
 
             value.Should().NotBeNull();
             var displayNameProp = value!.GetType().GetProperty("DisplayName")?.GetValue(value, null) as string;
+            var clientIdProp = value.GetType().GetProperty("ClientId")?.GetValue(value, null) as string;
+            var clientSecretProp = value.GetType().GetProperty("ClientSecret")?.GetValue(value, null) as string;
+
             displayNameProp.Should().Be("Test CLI");
+            clientIdProp.Should().NotBeNullOrEmpty();
+            clientSecretProp.Should().NotBeNullOrEmpty();
+
+            // Verify stored hash matches SHA-256 of plaintext secret
+            var savedClient = await repo.GetOAuthClientByIdAsync(clientIdProp!);
+            savedClient.Should().NotBeNull();
+            savedClient!.ClientName.Should().Be("Test CLI");
+
+            var expectedHash = Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(clientSecretProp!))).ToLowerInvariant();
+            savedClient.ClientSecretHash.Should().Be(expectedHash);
         }
 
         [Fact]
+        [Requirement("AUTH-112", "AUTH", RequirementType.Positive, "DeleteClient removes OAuthClient via repository")]
         public async Task DeleteClient_ReturnsNoContent_WhenAppExists()
         {
-            var (conn, dbFactory) = CreateDbFactory();
-            conn.Execute("INSERT INTO AppKeys (Id, Name, Username, KeyPrefix, EncryptedKey) VALUES ('123', 'Client', 'user', 'pref', 'sec')");
+            var (_, dbFactory, repo) = CreateDbEnvironment();
+            await repo.SaveOAuthClientAsync(new OAuthClient
+            {
+                ClientId = "123",
+                ClientName = "Client"
+            });
 
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
             var result = await controller.DeleteClient("123");
 
             result.Should().BeOfType<NoContentResult>();
+
+            var lookup = await repo.GetOAuthClientByIdAsync("123");
+            lookup.Should().BeNull();
         }
 
         [Fact]
+        [Requirement("AUTH-112", "AUTH", RequirementType.Negative, "DeleteClient returns NotFound when client does not exist")]
         public async Task DeleteClient_ReturnsNotFound_WhenAppDoesNotExist()
         {
-            var (_, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var (_, dbFactory, repo) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
 
             var result = await controller.DeleteClient("nonexistent");
             result.Should().BeOfType<NotFoundResult>();
         }
 
-        // --- NEW COMPREHENSIVE TESTS ---
-
         [Fact]
-        public async Task CreateThenAuthenticate_IntegrationTest_Succeeds()
-        {
-            var (_, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
-
-            // 1. Create a client using the endpoint
-            var createModel = new ClientsController.CreateClientModel
-            {
-                DisplayName = "Automated Test App",
-                Scopes = new List<string> { "all" }
-            };
-            var createResult = await controller.CreateClient(createModel);
-            var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
-            var responseValue = okResult.Value;
-            responseValue.Should().NotBeNull();
-
-            var clientId = responseValue!.GetType().GetProperty("ClientId")?.GetValue(responseValue, null) as string;
-            var clientSecret = responseValue!.GetType().GetProperty("ClientSecret")?.GetValue(responseValue, null) as string;
-
-            clientId.Should().NotBeNullOrEmpty();
-            clientSecret.Should().NotBeNullOrEmpty();
-            clientSecret.Should().StartWith("mcp-");
-
-            // 2. Authenticate against AppKeyAuthenticationHandler using the returned credential
-            var configMock = new Mock<IConfiguration>();
-            var services = new ServiceCollection();
-            services.AddSingleton(dbFactory);
-            services.AddSingleton(configMock.Object);
-            var serviceProvider = services.BuildServiceProvider();
-
-            var handler = CreateAuthenticationHandler(dbFactory, configMock.Object);
-            var httpContext = new DefaultHttpContext();
-            httpContext.RequestServices = serviceProvider;
-            httpContext.Request.Headers["Authorization"] = $"Bearer {clientSecret}";
-
-            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
-            await handler.InitializeAsync(scheme, httpContext);
-
-            var authResult = await handler.AuthenticateAsync();
-            authResult.Succeeded.Should().BeTrue(authResult.Failure?.Message);
-            authResult.Principal.Should().NotBeNull();
-            authResult.Principal!.Identity!.Name.Should().Be(clientId);
-
-            // HttpContext items should be populated correctly
-            httpContext.Items["AppKeyUsed"].Should().Be(true);
-            httpContext.Items["AppKeyOwner"].Should().Be(clientId);
-            ((string)httpContext.Items["AppKeyScopes"]!).Should().Contain("all");
-        }
-
-        [Fact]
+        [Requirement("AUTH-111", "SEC", RequirementType.Positive, "Plaintext secret is never persisted in OAuthClients repository")]
         public async Task DatabaseAssertion_PlaintextNotPersisted()
         {
-            var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var (conn, dbFactory, repo) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
 
             var createModel = new ClientsController.CreateClientModel
             {
@@ -198,230 +168,22 @@ namespace ModelContextGateway.Tests
             var responseValue = okResult.Value;
             var clientSecret = responseValue!.GetType().GetProperty("ClientSecret")?.GetValue(responseValue, null) as string;
 
-            // Assert that plaintext is not saved
-            var storedKey = conn.QueryFirstOrDefault<AppKey>("SELECT * FROM AppKeys;");
-            storedKey.Should().NotBeNull();
-            storedKey!.EncryptedKey.Should().NotBe(clientSecret);
-            storedKey.EncryptedKey.Should().HaveLength(64); // SHA-256 is 32 bytes (64 hex characters)
-            storedKey.EncryptedKey.Should().NotContain("+").And.NotContain("/").And.NotContain("="); // Hexadecimal, not Base64
+            // Assert that plaintext is not saved in SQLite
+            var storedClient = conn.QueryFirstOrDefault<OAuthClient>("SELECT * FROM OAuthClients;");
+            storedClient.Should().NotBeNull();
+            storedClient!.ClientSecretHash.Should().NotBe(clientSecret);
+            storedClient.ClientSecretHash.Should().HaveLength(64); // SHA-256 hex is 64 characters
+            storedClient.ClientSecretHash.Should().NotContain("+").And.NotContain("/").And.NotContain("=");
         }
 
         [Fact]
-        public async Task InvalidPrefix_Test_ReturnsNoResult()
+        [Requirement("AUTH-111", "SEC", RequirementType.Positive, "Client credentials do not inherit administrative SID or privileges")]
+        public async Task CreateClient_AdminCreator_DoesNotInheritAdminSid()
         {
-            var (_, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var (conn, dbFactory, repo) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
 
-            var createModel = new ClientsController.CreateClientModel
-            {
-                DisplayName = "Some App",
-                Scopes = new List<string> { "all" }
-            };
-            var createResult = await controller.CreateClient(createModel);
-            var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
-            var responseValue = okResult.Value;
-            var clientSecret = responseValue!.GetType().GetProperty("ClientSecret")?.GetValue(responseValue, null) as string;
-
-            // Change mcp- prefix to invalid prefix mcp_
-            var invalidSecret = "mcp_" + clientSecret!.Substring(4);
-
-            var configMock = new Mock<IConfiguration>();
-            var handler = CreateAuthenticationHandler(dbFactory, configMock.Object);
-            var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Authorization"] = $"Bearer {invalidSecret}";
-
-            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
-            await handler.InitializeAsync(scheme, httpContext);
-
-            var authResult = await handler.AuthenticateAsync();
-            authResult.Succeeded.Should().BeFalse();
-            authResult.None.Should().BeTrue(); // NoResult
-        }
-
-        [Fact]
-        public async Task InvalidHash_Test_Fails()
-        {
-            var (_, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
-
-            var createModel = new ClientsController.CreateClientModel
-            {
-                DisplayName = "Some App",
-                Scopes = new List<string> { "all" }
-            };
-            var createResult = await controller.CreateClient(createModel);
-            var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
-            var responseValue = okResult.Value;
-            var clientSecret = responseValue!.GetType().GetProperty("ClientSecret")?.GetValue(responseValue, null) as string;
-
-            // Tamper with the credential string
-            var invalidSecret = clientSecret + "x";
-
-            var configMock = new Mock<IConfiguration>();
-            var handler = CreateAuthenticationHandler(dbFactory, configMock.Object);
-            var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Authorization"] = $"Bearer {invalidSecret}";
-
-            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
-            await handler.InitializeAsync(scheme, httpContext);
-
-            var authResult = await handler.AuthenticateAsync();
-            authResult.Succeeded.Should().BeFalse();
-            authResult.Failure.Should().NotBeNull();
-            authResult.Failure!.Message.Should().Be("Invalid App Key.");
-        }
-
-        [Fact]
-        public async Task Expired_Test_Fails()
-        {
-            var (_, dbFactory) = CreateDbFactory();
-            var credentialService = new CredentialService(dbFactory);
-
-            // Create expired credential manually or via helper
-            var scopes = new List<string> { "all" };
-            var (_, plaintextKey) = await credentialService.CreateCredentialAsync(
-                "Expired App", "client-expired", "sid-expired", scopes, -1 // expired yesterday
-            );
-
-            var configMock = new Mock<IConfiguration>();
-            var handler = CreateAuthenticationHandler(dbFactory, configMock.Object);
-            var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Authorization"] = $"Bearer {plaintextKey}";
-
-            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
-            await handler.InitializeAsync(scheme, httpContext);
-
-            var authResult = await handler.AuthenticateAsync();
-            authResult.Succeeded.Should().BeFalse();
-            authResult.Failure.Should().NotBeNull();
-            authResult.Failure!.Message.Should().Be("App Key has expired.");
-        }
-
-        [Fact]
-        public async Task RevokedOrDeleted_Test_Fails()
-        {
-            var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
-
-            var createModel = new ClientsController.CreateClientModel
-            {
-                DisplayName = "To Be Revoked",
-                Scopes = new List<string> { "all" }
-            };
-            var createResult = await controller.CreateClient(createModel);
-            var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
-            var responseValue = okResult.Value;
-            var id = responseValue!.GetType().GetProperty("ClientId")?.GetValue(responseValue, null) as string;
-            var clientSecret = responseValue!.GetType().GetProperty("ClientSecret")?.GetValue(responseValue, null) as string;
-
-            // Delete / Revoke the client.
-            // Find the database ID first
-            var storedKey = conn.QueryFirstOrDefault<AppKey>("SELECT * FROM AppKeys WHERE Username = @Username;", new { Username = id });
-            storedKey.Should().NotBeNull();
-
-            var deleteResult = await controller.DeleteClient(storedKey!.Id);
-            deleteResult.Should().BeOfType<NoContentResult>();
-
-            // Try to authenticate with the deleted secret
-            var configMock = new Mock<IConfiguration>();
-            var handler = CreateAuthenticationHandler(dbFactory, configMock.Object);
-            var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Authorization"] = $"Bearer {clientSecret}";
-
-            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
-            await handler.InitializeAsync(scheme, httpContext);
-
-            var authResult = await handler.AuthenticateAsync();
-            authResult.Succeeded.Should().BeFalse();
-            authResult.Failure.Should().NotBeNull();
-            authResult.Failure!.Message.Should().Be("Invalid App Key prefix.");
-        }
-
-        [Fact]
-        public async Task OutOfScope_Test_BehavesIdenticallyToAppKeys()
-        {
-            var (conn, dbFactory) = CreateDbFactory();
-
-            // Create AccessPolicies table and insert rules so the McpClient role is authorized
-            conn.Execute(@"
-                CREATE TABLE IF NOT EXISTS AccessPolicies (
-                    Id TEXT PRIMARY KEY,
-                    TargetId TEXT,
-                    RequiredGroup TEXT,
-                    IsAllowed INTEGER DEFAULT 1
-                );
-            ");
-            conn.Execute("INSERT INTO AccessPolicies (Id, TargetId, RequiredGroup, IsAllowed) VALUES ('p1', 'server:mcp-github', 'McpClient', 1);");
-            conn.Execute("INSERT INTO AccessPolicies (Id, TargetId, RequiredGroup, IsAllowed) VALUES ('p2', 'server:mcp-docker', 'McpClient', 1);");
-
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
-
-            // Register client with server-specific scope
-            var createModel = new ClientsController.CreateClientModel
-            {
-                DisplayName = "Server Specific App",
-                Scopes = new List<string> { "server:mcp-github" }
-            };
-            var createResult = await controller.CreateClient(createModel);
-            var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
-            var responseValue = okResult.Value;
-            var clientSecret = responseValue!.GetType().GetProperty("ClientSecret")?.GetValue(responseValue, null) as string;
-
-            // Authenticate first
-            var configMock = new Mock<IConfiguration>();
-            var services = new ServiceCollection();
-            services.AddSingleton(dbFactory);
-            services.AddSingleton(configMock.Object);
-            var serviceProvider = services.BuildServiceProvider();
-
-            var handler = CreateAuthenticationHandler(dbFactory, configMock.Object);
-            var httpContext = new DefaultHttpContext();
-            httpContext.RequestServices = serviceProvider;
-            httpContext.Request.Headers["Authorization"] = $"Bearer {clientSecret}";
-
-            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
-            await handler.InitializeAsync(scheme, httpContext);
-
-            var authResult = await handler.AuthenticateAsync();
-            authResult.Succeeded.Should().BeTrue();
-            httpContext.User = authResult.Principal!;
-
-            // Setup a ClientSession mock or directly check how IsUserAuthorizedAsync would behave
-            // using the HttpContext.Items populated by our authentication handler.
-            var responseMock = new Mock<HttpResponse>();
-            responseMock.Setup(r => r.HttpContext).Returns(httpContext);
-
-            var loggerMock = new Mock<Microsoft.Extensions.Logging.ILogger>();
-            var servers = new List<McpServer> { new McpServer { Id = "mcp-github", Enabled = true } };
-
-            var session = new ClientSession("session-1", responseMock.Object, servers, new HttpClient(), new Mock<IEmbeddingService>().Object, null, loggerMock.Object);
-
-            // Check authorized target (in scope)
-            var authorized = await session.IsUserAuthorizedAsync("callTool", "mcp-github__get_repo", httpContext);
-            authorized.Should().BeTrue();
-
-            // Check unauthorized target (out of scope)
-            var unauthorized = await session.IsUserAuthorizedAsync("callTool", "mcp-docker__list_containers", httpContext);
-            unauthorized.Should().BeFalse();
-        }
-
-        [Fact]
-        public async Task CreateClient_AdminCreator_DoesNotInheritAdminSid_AndCannotAccessAdminPolicy()
-        {
-            var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
-
-            // Simulate creating admin user with Admin SID
             var adminSid = "S-1-5-32-544";
             var claims = new List<Claim>
             {
@@ -434,7 +196,6 @@ namespace ModelContextGateway.Tests
             httpContext.User = adminPrincipal;
             controller.ControllerContext = new ControllerContext { HttpContext = httpContext };
 
-            // Create client
             var createModel = new ClientsController.CreateClientModel
             {
                 DisplayName = "Machine Client App",
@@ -444,71 +205,21 @@ namespace ModelContextGateway.Tests
             var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
             var responseValue = okResult.Value;
             var clientId = responseValue!.GetType().GetProperty("ClientId")?.GetValue(responseValue, null) as string;
-            var clientSecret = responseValue!.GetType().GetProperty("ClientSecret")?.GetValue(responseValue, null) as string;
 
-            // 1. Verify DB record has EMPTY OwnerSid, NOT admin's SID
-            var storedKey = conn.QueryFirstOrDefault<AppKey>("SELECT * FROM AppKeys WHERE Username = @Username;", new { Username = clientId });
-            storedKey.Should().NotBeNull();
-            storedKey!.OwnerSid.Should().BeEmpty();
-
-            // 2. Authenticate with the generated client secret
-            var configDict = new Dictionary<string, string?>
-            {
-                ["Admin:GroupSid"] = adminSid
-            };
-            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
-
-            var services = new ServiceCollection();
-            services.AddSingleton(dbFactory);
-            services.AddSingleton<IConfiguration>(config);
-            services.AddLogging();
-            services.AddAuthorization(options =>
-            {
-                options.AddPolicy("AdminPolicy", policy =>
-                {
-                    policy.RequireAuthenticatedUser()
-                          .RequireAssertion(ctx =>
-                          {
-                              var hc = ctx.Resource as HttpContext;
-                              var cfg = hc?.RequestServices?.GetService<IConfiguration>();
-                              var targetSid = cfg?["Admin:GroupSid"] ?? "S-1-5-32-544";
-                              return ctx.User.HasClaim("Sid", targetSid);
-                          });
-                });
-            });
-
-            var sp = services.BuildServiceProvider();
-            var authService = sp.GetRequiredService<IAuthorizationService>();
-
-            var handler = CreateAuthenticationHandler(dbFactory, config);
-            var clientContext = new DefaultHttpContext();
-            clientContext.RequestServices = sp;
-            clientContext.Request.Headers["Authorization"] = $"Bearer {clientSecret}";
-
-            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
-            await handler.InitializeAsync(scheme, clientContext);
-
-            var authResult = await handler.AuthenticateAsync();
-            authResult.Succeeded.Should().BeTrue();
-            authResult.Principal.Should().NotBeNull();
-
-            // The client principal must NOT have the admin's SID claim
-            authResult.Principal!.HasClaim("Sid", adminSid).Should().BeFalse();
-
-            // The client principal MUST be denied access to AdminPolicy
-            var authPolicyResult = await authService.AuthorizeAsync(authResult.Principal!, clientContext, "AdminPolicy");
-            authPolicyResult.Succeeded.Should().BeFalse("Machine client credentials must NOT inherit administrative privileges!");
+            // Verify DB record has EMPTY OwnerSid, NOT admin's SID
+            var storedClient = conn.QueryFirstOrDefault<OAuthClient>("SELECT * FROM OAuthClients WHERE ClientId = @ClientId;", new { ClientId = clientId });
+            storedClient.Should().NotBeNull();
+            storedClient!.OwnerSid.Should().BeEmpty();
         }
 
         [Fact]
-        public async Task CreateClient_WithExpiresInDays_SetsExpiration_AndEnforcesExpiredAuthentication()
+        [Requirement("AUTH-111", "AUTH", RequirementType.Positive, "CreateClient sets expiration timestamp when ExpiresInDays is specified")]
+        public async Task CreateClient_WithExpiresInDays_SetsExpiration()
         {
-            var (_, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var (_, dbFactory, repo) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
 
-            // 1. Create client with 30-day expiration
             var createModel = new ClientsController.CreateClientModel
             {
                 DisplayName = "Expiring App",
@@ -522,42 +233,16 @@ namespace ModelContextGateway.Tests
 
             expiresAt.Should().NotBeNull();
             expiresAt.Value.Should().BeAfter(DateTime.UtcNow.AddDays(29));
-
-            // 2. Create client with expired duration (-1 days)
-            var expiredModel = new ClientsController.CreateClientModel
-            {
-                DisplayName = "Already Expired App",
-                Scopes = new List<string> { "all" },
-                ExpiresInDays = -1
-            };
-            var expiredResult = await controller.CreateClient(expiredModel);
-            var expiredOk = expiredResult.Should().BeOfType<OkObjectResult>().Subject;
-            var expiredValue = expiredOk.Value;
-            var expiredSecret = expiredValue!.GetType().GetProperty("ClientSecret")?.GetValue(expiredValue, null) as string;
-
-            // Authenticate with expired client secret
-            var configMock = new Mock<IConfiguration>();
-            var handler = CreateAuthenticationHandler(dbFactory, configMock.Object);
-            var httpContext = new DefaultHttpContext();
-            httpContext.Request.Headers["Authorization"] = $"Bearer {expiredSecret}";
-
-            var scheme = new AuthenticationScheme("AppKey", null, typeof(AppKeyAuthenticationHandler));
-            await handler.InitializeAsync(scheme, httpContext);
-
-            var authResult = await handler.AuthenticateAsync();
-            authResult.Succeeded.Should().BeFalse();
-            authResult.Failure!.Message.Should().Be("App Key has expired.");
         }
 
         [Fact]
-        public async Task GetClients_NeverLeaksRawBearerSecretOrEncryptedKey()
+        [Requirement("AUTH-110", "SEC", RequirementType.Positive, "GetClients never leaks secret hashes or credentials")]
+        public async Task GetClients_NeverLeaksRawBearerSecretOrHash()
         {
-            var (_, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var (_, dbFactory, repo) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
 
-            // Create client
             var createModel = new ClientsController.CreateClientModel
             {
                 DisplayName = "Leak Prevention App",
@@ -567,7 +252,6 @@ namespace ModelContextGateway.Tests
             var okResult = createResult.Should().BeOfType<OkObjectResult>().Subject;
             var rawSecret = okResult.Value!.GetType().GetProperty("ClientSecret")?.GetValue(okResult.Value, null) as string;
 
-            // Query GetClients
             var listResult = await controller.GetClients();
             var listOk = listResult.Should().BeOfType<OkObjectResult>().Subject;
             var list = (listOk.Value as IEnumerable<object>)?.ToList();
@@ -578,60 +262,18 @@ namespace ModelContextGateway.Tests
             var item = list![0];
             var json = JsonSerializer.Serialize(item);
 
-            // Ensure json never contains raw secret or encrypted hash
             json.Should().NotContain(rawSecret!);
-            json.Should().NotContain("EncryptedKey");
-            json.Should().NotContain("PlaintextKey");
+            json.Should().NotContain("ClientSecretHash");
             json.Should().NotContain("ClientSecret");
         }
 
         [Fact]
-        public async Task RevokeCredential_HandlesSqlServerNoCount_AndReturnsAccurateStatus()
-        {
-            var (_, dbFactory) = CreateDbFactory();
-            var credentialService = new CredentialService(dbFactory);
-            var (appKey, _) = await credentialService.CreateCredentialAsync(
-                "Test Key", "test-user", "", new List<string> { "all" }, null
-            );
-
-            // Revoking existing credential returns true
-            var revoked = await credentialService.RevokeCredentialAsync(appKey.Id);
-            revoked.Should().BeTrue();
-
-            // Revoking already revoked or non-existent credential returns false
-            var revokedAgain = await credentialService.RevokeCredentialAsync(appKey.Id);
-            revokedAgain.Should().BeFalse();
-
-            var nonExistentRevoked = await credentialService.RevokeCredentialAsync("does-not-exist");
-            nonExistentRevoked.Should().BeFalse();
-        }
-
-        [Fact]
-        public async Task CredentialService_GeneratesHighEntropySelectorPrefix()
-        {
-            var (_, dbFactory) = CreateDbFactory();
-            var credentialService = new CredentialService(dbFactory);
-
-            var (appKey, plaintextKey) = await credentialService.CreateCredentialAsync(
-                "High Entropy App", "client-high-entropy", "", new List<string> { "all" }, null
-            );
-
-            // Prefix format: mcp-glb-{8 Base62 chars} (length: 8 + 8 = 16)
-            appKey.KeyPrefix.Should().StartWith("mcp-glb-");
-            appKey.KeyPrefix.Length.Should().Be(16);
-
-            // Plaintext format: mcp-glb-{8 Base62 chars}-{16 Base62 chars}
-            plaintextKey.Should().StartWith(appKey.KeyPrefix + "-");
-            plaintextKey.Length.Should().Be(16 + 1 + 16); // 33 characters
-        }
-
-        [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "CreateClient fails closed when DisplayName is missing")]
         public async Task CreateClient_ReturnsBadRequest_WhenDisplayNameMissing()
         {
-            var (_, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var (_, dbFactory, repo) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
 
             var model = new ClientsController.CreateClientModel { DisplayName = "" };
             var result = await controller.CreateClient(model);
@@ -639,12 +281,12 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "CreateClient fails closed when category scope is empty")]
         public async Task CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty()
         {
-            var (_, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var credentialService = new CredentialService(dbFactory);
-            var controller = new ClientsController(dbFactory, mockAudit.Object, credentialService);
+            var (_, dbFactory, repo) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var controller = new ClientsController(repo, mockAudit.Object, dbFactory);
 
             var model = new ClientsController.CreateClientModel
             {
@@ -656,16 +298,16 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        public async Task CreateClient_Returns500_WhenCredentialServiceThrows()
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "CreateClient returns 500 when repository throws")]
+        public async Task CreateClient_Returns500_WhenOAuthClientRepositoryThrows()
         {
-            var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var mockCredService = new Mock<ICredentialService>();
-            mockCredService.Setup(c => c.CreateCredentialAsync(
-                It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<int?>()
-            )).ThrowsAsync(new Exception("Database disk full"));
+            var (_, dbFactory, _) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var mockRepo = new Mock<IOAuthClientRepository>();
+            mockRepo.Setup(c => c.SaveOAuthClientAsync(It.IsAny<OAuthClient>()))
+                .ThrowsAsync(new Exception("Database disk full"));
 
-            var controller = new ClientsController(dbFactory, mockAudit.Object, mockCredService.Object);
+            var controller = new ClientsController(mockRepo.Object, mockAudit.Object, dbFactory);
             var model = new ClientsController.CreateClientModel { DisplayName = "Faulty App" };
             var result = await controller.CreateClient(model);
             var statusResult = result.Should().BeOfType<ObjectResult>().Subject;
@@ -673,19 +315,21 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        public async Task DeleteClient_Returns500_WhenCredentialServiceThrows()
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "DeleteClient returns 500 when repository throws")]
+        public async Task DeleteClient_Returns500_WhenOAuthClientRepositoryThrows()
         {
-            var (conn, dbFactory) = CreateDbFactory();
-            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
-            var mockCredService = new Mock<ICredentialService>();
-            mockCredService.Setup(c => c.RevokeCredentialAsync(It.IsAny<string>()))
+            var (_, dbFactory, _) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var mockRepo = new Mock<IOAuthClientRepository>();
+            mockRepo.Setup(c => c.DeleteOAuthClientAsync(It.IsAny<string>()))
                 .ThrowsAsync(new Exception("Database locked"));
 
-            var controller = new ClientsController(dbFactory, mockAudit.Object, mockCredService.Object);
+            var controller = new ClientsController(mockRepo.Object, mockAudit.Object, dbFactory);
             var result = await controller.DeleteClient("client-123");
             var statusResult = result.Should().BeOfType<ObjectResult>().Subject;
             statusResult.StatusCode.Should().Be(500);
         }
     }
 }
+
 

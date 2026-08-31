@@ -101,7 +101,10 @@ namespace ModelContextGateway.Tests
             _credentialServiceMock = new Mock<ICredentialService>();
             _appKeyRepoMock = new Mock<IAppKeyRepository>();
             _settingRepoMock = new Mock<ISettingRepository>();
+            _oauthClientRepoMock = new Mock<IOAuthClientRepository>();
         }
+
+        private readonly Mock<IOAuthClientRepository> _oauthClientRepoMock;
 
         public void Dispose()
         {
@@ -179,7 +182,7 @@ namespace ModelContextGateway.Tests
             }
             httpContext.User = new ClaimsPrincipal(new ClaimsIdentity(claims, "TestAuth"));
 
-            var controller = new ClientsController(_dbFactory, _auditLoggerMock.Object, _credentialServiceMock.Object)
+            var controller = new ClientsController(_oauthClientRepoMock.Object, _auditLoggerMock.Object, _dbFactory)
             {
                 ControllerContext = new ControllerContext { HttpContext = httpContext }
             };
@@ -280,9 +283,9 @@ namespace ModelContextGateway.Tests
         public async Task ClientsController_CreateClient_ValidCategory_Succeeds()
         {
             var controller = CreateClientsController("admin1", "Admin");
-            _credentialServiceMock
-                .Setup(c => c.CreateCredentialAsync(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<List<string>>(), It.IsAny<int?>()))
-                .ReturnsAsync((new AppKey { Id = "client-1", Name = "HomeAssistant Client", Username = "client-id-1" }, "mcp-test-plain-secret"));
+            _oauthClientRepoMock
+                .Setup(c => c.SaveOAuthClientAsync(It.IsAny<OAuthClient>()))
+                .Returns(Task.CompletedTask);
 
             var model = new ClientsController.CreateClientModel
             {

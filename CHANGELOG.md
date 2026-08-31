@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.1.0`** | 2026-08-30 | feat(oauth): dedicated `OAuthClients` persistence isolation for RFC 7591 Dynamic Client Registration (DCR) and manual OAuth applications across SQLite, MSSQL, and MySQL; SHA-256 one-way client secret hashing; rich metadata support (`redirect_uris`, `grant_types`, `scopes`, `client_type`); and enhanced Web UI management card and modal |
 | **`v5.0.7`** | 2026-08-30 | fix(oauth): enable OpenIddict server degraded mode (`EnableDegradedMode()`) to support custom credential and SQLite stores without default EF Core provider requirements, and enhance `/oauth/authorize` authentication handling |
 | **`v5.0.6`** | 2026-08-30 | feat(oauth): full RFC 7591 Dynamic Client Registration response specification returning HTTP `201 Created`, echoing `redirect_uris`, `grant_types`, `response_types`, and `client_name`, and registering custom client `redirect_uris` in OpenIddict |
 | **`v5.0.5`** | 2026-08-30 | feat(telemetry): add early-pipeline HTTP request logging middleware capturing method, path, status, duration, client IP, auth scheme, and user-agent; fix RFC 9728 `oauth-protected-resource` discovery metadata to match requested resource URI |

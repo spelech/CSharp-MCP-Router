@@ -166,3 +166,19 @@ CREATE TABLE IF NOT EXISTS `UserQuotas` (
     `CreatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     `UpdatedAt`    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 11. OAuth Clients Table (RFC 7591 Dynamic Client Registration)
+CREATE TABLE IF NOT EXISTS `OAuthClients` (
+    `ClientId`         VARCHAR(100) PRIMARY KEY,
+    `ClientSecretHash` VARCHAR(256) NOT NULL DEFAULT '',
+    `ClientName`       VARCHAR(200) NOT NULL,
+    `ClientType`       VARCHAR(50) NOT NULL DEFAULT 'confidential',
+    `RedirectUrisJson` LONGTEXT NOT NULL,
+    `GrantTypesJson`   LONGTEXT NOT NULL,
+    `ScopesJson`       LONGTEXT NOT NULL,
+    `OwnerSid`         VARCHAR(200) NOT NULL DEFAULT '',
+    `CreatedBy`        VARCHAR(256) NOT NULL DEFAULT '',
+    `ExpiresAt`        DATETIME NULL,
+    `CreatedAt`        DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+

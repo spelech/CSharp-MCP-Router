@@ -177,6 +177,20 @@ erDiagram
         string ErrorMessage "Error details if action failed"
         datetime Timestamp "UTC timestamp of administrative action"
     }
+
+    OAuthClients {
+        string ClientId PK "Client unique identifier"
+        string ClientSecretHash "SHA-256 hash of client secret"
+        string ClientName "Human-readable application name"
+        string ClientType "Client type: confidential or public"
+        string RedirectUrisJson "JSON array of allowed redirect URIs"
+        string GrantTypesJson "JSON array of allowed grant types"
+        string ScopesJson "JSON array of allowed OAuth scopes"
+        string OwnerSid "Target user SID (empty for machine apps)"
+        string CreatedBy "Creator username or dcr"
+        datetime ExpiresAt "Optional client secret expiration UTC timestamp"
+        datetime CreatedAt "Timestamp of client registration"
+    }
 ```
 
 ---
@@ -236,6 +250,10 @@ All persistence operations in MSSQL execute via pre-compiled stored procedures:
 | `sp_SaveAppKey` | Upserts client application API keys with owner SID tracking | `@Id`, `@Name`, `@Username`, `@KeyPrefix`, `@EncryptedKey`, `@ScopesJson`, `@OwnerSid`, `@ExpiresAt` |
 | `sp_DeleteAppKey` | Permanently revokes an application API key by ID | `@Id` |
 | `sp_GetAppKeys` | Queries active API keys (filtered by username or all for admins) | `@Username` |
+| `sp_SaveOAuthClient` | Upserts OAuth / DCR client application with hashed secret and metadata | `@ClientId`, `@ClientSecretHash`, `@ClientName`, `@ClientType`, `@RedirectUrisJson`, `@GrantTypesJson`, `@ScopesJson`, `@OwnerSid`, `@CreatedBy`, `@ExpiresAt` |
+| `sp_GetOAuthClients` | Retrieves all registered OAuth client applications | *(None)* |
+| `sp_GetOAuthClientById` | Retrieves a specific OAuth client by Client ID | `@ClientId` |
+| `sp_DeleteOAuthClient` | Deletes a registered OAuth client application by Client ID | `@ClientId` |
 | `sp_InsertAdminAuditLog` | Records administrative mutations (server additions, policy edits) | `@Id`, `@Username`, `@Action`, `@Target`, `@Details`, `@Success`, `@ErrorMessage` |
 
 #### Parameter Mapping Contract (`sp_SaveAppKey` & `@CreatedAt`)

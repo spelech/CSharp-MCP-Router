@@ -235,3 +235,23 @@ BEGIN
     );
 END;
 GO
+
+-- 11. OAuth Clients Table (RFC 7591 Dynamic Client Registration)
+IF OBJECT_ID('dbo.OAuthClients', 'U') IS NULL
+BEGIN
+    CREATE TABLE [dbo].[OAuthClients] (
+        [ClientId]         VARCHAR(100) PRIMARY KEY,
+        [ClientSecretHash] VARCHAR(256) NOT NULL DEFAULT '',
+        [ClientName]       NVARCHAR(200) NOT NULL,
+        [ClientType]       VARCHAR(50) NOT NULL DEFAULT 'confidential',
+        [RedirectUrisJson] NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+        [GrantTypesJson]   NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+        [ScopesJson]       NVARCHAR(MAX) NOT NULL DEFAULT '[]',
+        [OwnerSid]         NVARCHAR(200) NOT NULL DEFAULT '',
+        [CreatedBy]        NVARCHAR(256) NOT NULL DEFAULT '',
+        [ExpiresAt]        DATETIME2 NULL,
+        [CreatedAt]        DATETIME2 NOT NULL DEFAULT SYSUTCDATETIME()
+    );
+END;
+GO
+

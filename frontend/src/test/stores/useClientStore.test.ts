@@ -10,8 +10,13 @@ describe('useClientStore', () => {
     id: 'c-123',
     clientId: 'cursor-ide',
     displayName: 'Cursor IDE',
+    clientType: 'confidential',
+    redirectUris: ['https://oauth.pstmn.io/v1/callback'],
+    grantTypes: ['authorization_code', 'refresh_token', 'client_credentials'],
     isDynamic: false,
-    scopes: ['mcp_client']
+    scopes: ['mcp_client'],
+    createdAt: '2026-08-30T10:00:00Z',
+    expiresAt: null
   };
 
   it('initializes with default state', () => {
@@ -23,6 +28,12 @@ describe('useClientStore', () => {
   });
 
   describe('fetchClients', () => {
+    /**
+     * @requirement UI-31
+     * @category UI
+     * @type PositiveFeature
+     * @description Fetches registered OAuth clients and updates store state.
+     */
     it('fetches registered clients and updates state', async () => {
       mockApiResponse('/api/clients', [sampleClient]);
 
@@ -34,6 +45,7 @@ describe('useClientStore', () => {
       expect(useClientStore.getState().isLoadingClients).toBe(false);
       expect(useClientStore.getState().clients).toHaveLength(1);
       expect(useClientStore.getState().clients[0].displayName).toBe('Cursor IDE');
+      expect(useClientStore.getState().clients[0].clientType).toBe('confidential');
     });
 
     it('handles fetch error gracefully without crashing', async () => {
@@ -49,10 +61,22 @@ describe('useClientStore', () => {
   });
 
   describe('registerClient', () => {
+    /**
+     * @requirement UI-32
+     * @category UI
+     * @type PositiveFeature
+     * @description Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials.
+     */
     it('creates client with one-time secret result and refreshes list', async () => {
       const createdResult = {
+        id: 'new-client-uuid',
         clientId: 'new-client-uuid',
-        clientSecret: 'secret_live_token_12345'
+        clientSecret: 'secret_live_token_12345',
+        displayName: 'OpenClaw PC',
+        scopes: ['admin', 'mcp_client'],
+        redirectUris: ['https://oauth.pstmn.io/v1/callback'],
+        grantTypes: ['authorization_code', 'client_credentials'],
+        expiresAt: null
       };
       let postBody: any = null;
       mockApiResponse('/api/clients', (_url, options) => {
@@ -63,11 +87,22 @@ describe('useClientStore', () => {
         return [sampleClient];
       });
 
-      await useClientStore.getState().registerClient('OpenClaw PC', ['admin', 'mcp_client']);
+      await useClientStore.getState().registerClient(
+        'OpenClaw PC',
+        ['admin', 'mcp_client'],
+        ['https://oauth.pstmn.io/v1/callback'],
+        ['authorization_code', 'client_credentials'],
+        'confidential',
+        30
+      );
 
       expect(postBody).toEqual({
         displayName: 'OpenClaw PC',
-        scopes: ['admin', 'mcp_client']
+        scopes: ['admin', 'mcp_client'],
+        redirectUris: ['https://oauth.pstmn.io/v1/callback'],
+        grantTypes: ['authorization_code', 'client_credentials'],
+        clientType: 'confidential',
+        expiresInDays: 30
       });
       expect(useClientStore.getState().createdClientResult).toEqual(createdResult);
       expect(useToastStore.getState().toasts.some((t) => t.message.includes('registered successfully'))).toBe(true);
