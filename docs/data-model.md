@@ -145,6 +145,20 @@ erDiagram
         int ExecutionDurationMs "Execution latency in milliseconds"
         datetime Timestamp "UTC event log timestamp"
     }
+
+    OAuthClients {
+        string ClientId PK "Client unique identifier"
+        string ClientSecretHash "SHA-256 hash of client secret"
+        string ClientName "Human-readable application name"
+        string ClientType "Client type: confidential or public"
+        string RedirectUrisJson "JSON array of allowed redirect URIs"
+        string GrantTypesJson "JSON array of allowed grant types"
+        string ScopesJson "JSON array of allowed OAuth scopes"
+        string OwnerSid "Target user SID (empty for machine apps)"
+        string CreatedBy "Creator username or dcr"
+        datetime ExpiresAt "Optional client secret expiration UTC timestamp"
+        datetime CreatedAt "Timestamp of client registration"
+    }
 ```
 
 ---
@@ -317,6 +331,25 @@ Stores append-only, PII-sanitized audit trails of all tool calls, prompt evaluat
 | `ResponseStatus` | `VARCHAR(50)` | No | | Execution outcome: `SUCCESS`, `DENIED`, `ERROR`, `PENDING` |
 | `ExecutionDurationMs` | `INT` | No | | Total round-trip execution latency in milliseconds |
 | `Timestamp` | `DATETIME` | No | Default `CURRENT_TIMESTAMP` | UTC event creation timestamp |
+
+---
+
+### 9. `OAuthClients` (RFC 7591 & Dynamic Client Registration)
+Stores registered OAuth 2.0 / 2.1 client applications, redirect URIs, grant types, and SHA-256 hashed secrets.
+
+| Column | Type | Nullable | Constraints | Description |
+| :--- | :--- | :--- | :--- | :--- |
+| `ClientId` | `VARCHAR(100)` | No | `PK` | Unique OAuth client identifier (e.g. `client-xxx`, GUID) |
+| `ClientSecretHash` | `VARCHAR(128)` | No | Default `''` | Hex-encoded SHA-256 hash of plaintext client secret |
+| `ClientName` | `VARCHAR(255)` | No | | Friendly client / application name |
+| `ClientType` | `VARCHAR(50)` | No | Default `'confidential'` | Client type: `'confidential'` or `'public'` |
+| `RedirectUrisJson` | `TEXT / JSON` | No | Default `'[]'` | JSON array of whitelisted redirect URI strings |
+| `GrantTypesJson` | `TEXT / JSON` | No | Default `'[]'` | JSON array of allowed grant types (`authorization_code`, etc.) |
+| `ScopesJson` | `TEXT / JSON` | No | Default `'[]'` | JSON array of allowed OAuth scopes (`mcp_client`, `category:*`) |
+| `OwnerSid` | `VARCHAR(200)` | No | Default `''` | Target owner SID (empty string for machine clients) |
+| `CreatedBy` | `VARCHAR(256)` | No | Default `''` | Creator username or `'dcr'` |
+| `ExpiresAt` | `DATETIME` | Yes | `NULL` | Optional client secret expiration UTC timestamp |
+| `CreatedAt` | `DATETIME` | No | Default `CURRENT_TIMESTAMP` | UTC client registration creation timestamp |
 
 ---
 

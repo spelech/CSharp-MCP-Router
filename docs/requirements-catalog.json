@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T01:55:23.4483471Z",
+    "generatedAt": "2026-08-31T02:02:49.2417420Z",
     "totalRequirements": 139,
     "positiveCount": 114,
     "guardrailCount": 25,
@@ -387,21 +387,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 137,
+          "lineNumber": 135,
           "testName": "ApplyConfigurationResponseContext_SetsRegistrationEndpoint",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 53,
+          "lineNumber": 51,
           "testName": "GetClients_ReturnsOk_WithClientsAndMappedProperties",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 240,
+          "lineNumber": 238,
           "testName": "GetClients_NeverLeaksRawBearerSecretOrHash",
           "details": null
         }
@@ -1269,28 +1269,28 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 272,
+          "lineNumber": 270,
           "testName": "CreateClient_ReturnsBadRequest_WhenDisplayNameMissing",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 285,
+          "lineNumber": 283,
           "testName": "CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 302,
+          "lineNumber": 300,
           "testName": "CreateClient_Returns500_WhenOAuthClientRepositoryThrows",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 319,
+          "lineNumber": 317,
           "testName": "DeleteClient_Returns500_WhenOAuthClientRepositoryThrows",
           "details": null
         }
@@ -2193,7 +2193,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 21,
+          "lineNumber": 19,
           "testName": "Exchange_ThrowsInvalidOperationException_WhenRequestNull",
           "details": null
         }
@@ -2209,7 +2209,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 38,
+          "lineNumber": 36,
           "testName": "RegisterClient_CreatesApplicationAndReturnsOk",
           "details": null
         }
@@ -2225,7 +2225,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 79,
+          "lineNumber": 77,
           "testName": "Authorize_ThrowsInvalidOperationException_WhenRequestNull",
           "details": null
         }
@@ -2241,7 +2241,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 96,
+          "lineNumber": 94,
           "testName": "RegisterClient_UsesOAuthClientRepository_WhenApplicationManagerNull",
           "details": null
         },
@@ -2278,49 +2278,49 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 161,
+          "lineNumber": 159,
           "testName": "Exchange_ClientCredentials_ValidSecret_ReturnsSignInResult",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 208,
+          "lineNumber": 206,
           "testName": "Exchange_ClientCredentials_InvalidSecret_ReturnsForbid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 253,
+          "lineNumber": 251,
           "testName": "Exchange_ClientCredentials_ExpiredClient_ReturnsForbid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 86,
+          "lineNumber": 84,
           "testName": "CreateClient_ReturnsOk_WithGeneratedCredentials",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 155,
+          "lineNumber": 153,
           "testName": "DatabaseAssertion_PlaintextNotPersisted",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 181,
+          "lineNumber": 179,
           "testName": "CreateClient_AdminCreator_DoesNotInheritAdminSid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 217,
+          "lineNumber": 215,
           "testName": "CreateClient_WithExpiresInDays_SetsExpiration",
           "details": null
         }
@@ -2336,21 +2336,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 299,
+          "lineNumber": 297,
           "testName": "Authorize_ResolvesClientAndRedirectsToConsent",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 122,
+          "lineNumber": 120,
           "testName": "DeleteClient_ReturnsNoContent_WhenAppExists",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 143,
+          "lineNumber": 141,
           "testName": "DeleteClient_ReturnsNotFound_WhenAppDoesNotExist",
           "details": null
         }
