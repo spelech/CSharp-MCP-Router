@@ -252,7 +252,7 @@ namespace ModelContextGateway.Core.Routing
                 var resp = await conn.SendRequestAsync("resources/read", routingBody);
                 return resp.Result;
             }
-            return new { error = new { code = -32602, message = $"Resource {resourceUri} not found in routing table." } };
+            throw new KeyNotFoundException($"Resource {resourceUri} not found in routing table.");
         }
 
         private object ResolveLocalResource(string uri, ConcurrentDictionary<string, BackendConnection> backendConnections, SessionManager? sessionManager)
@@ -314,7 +314,7 @@ namespace ModelContextGateway.Core.Routing
                         };
                     }
                 }
-                return new { error = new { code = -32602, message = $"Local resource file '{filename}' was not found in data/resources/." } };
+                throw new KeyNotFoundException($"Local resource file '{filename}' was not found in data/resources/.");
             }
 
             string jsonText = "{}";

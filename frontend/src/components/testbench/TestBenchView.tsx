@@ -2,7 +2,6 @@ import React from 'react';
 import { apiRequest } from '../../shared/api/api';
 import { showToast } from '../../stores/useToastStore';
 import { useTestBenchState } from './useTestBenchState';
-import { extractPropertiesFromSchema } from '../../utils/schemaUtils';
 
 import { ToolTesterCard } from './ToolTesterCard';
 import { PromptTesterCard } from './PromptTesterCard';
@@ -46,10 +45,9 @@ export const TestBenchView: React.FC = () => {
     setSelectedToolName(name);
     setToolArguments({});
     const tool = tools.find((t) => t.name === name);
-    if (tool && tool.inputSchema) {
-      const { properties } = extractPropertiesFromSchema(tool.inputSchema);
+    if (tool && tool.inputSchema && tool.inputSchema.properties) {
       const initial: Record<string, any> = {};
-      Object.entries(properties).forEach(([key, prop]: [string, any]) => {
+      Object.entries(tool.inputSchema.properties).forEach(([key, prop]: [string, any]) => {
         if (prop.type === 'boolean') {
           initial[key] = false;
         }

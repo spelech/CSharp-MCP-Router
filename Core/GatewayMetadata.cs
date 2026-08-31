@@ -43,7 +43,7 @@ namespace ModelContextGateway.Core
                 @params = new
                 {
                     protocolVersion = ProtocolVersion,
-                    capabilities = new { extensions = new { } },
+                    capabilities = new { },
                     clientInfo = new
                     {
                         name = clientName,

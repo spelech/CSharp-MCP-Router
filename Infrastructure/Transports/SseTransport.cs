@@ -19,6 +19,7 @@ namespace ModelContextGateway.Infrastructure.Transports
 
         private string? _messageUrl;
         private TaskCompletionSource<string> _endpointTcs = new(TaskCreationOptions.RunContinuationsAsynchronously);
+        private string _sessionId = Guid.NewGuid().ToString("N");
 
         private static readonly JsonSerializerOptions _jsonOptions = new()
         {
@@ -171,6 +172,7 @@ namespace ModelContextGateway.Infrastructure.Transports
         {
             var request = new HttpRequestMessage(HttpMethod.Get, _server.Url);
             request.Headers.Host = "localhost";
+            request.Headers.Add("Mcp-Session-Id", _sessionId);
             await ApplyAuthAndCustomHeadersAsync(request);
 
             _logger.LogInformation("Connecting to backend {ServerId} SSE stream at {Url}...", _server.Id, _server.Url);
@@ -195,13 +197,36 @@ namespace ModelContextGateway.Infrastructure.Transports
                         request.Headers.Accept.Clear();
                         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                         request.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+                        request.Headers.Add("Mcp-Session-Id", _sessionId);
 
                         await ApplyAuthAndCustomHeadersAsync(request);
 
                         using var response = await _httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, _cts.Token);
                         response.EnsureSuccessStatusCode();
 
-                        if (response.Content.Headers.ContentType?.MediaType == "text/event-stream")
+                        IEnumerable<string>? sessionValues = null;
+                        if (response.Headers.TryGetValues("Mcp-Session-Id", out var hVals))
+                        {
+                            sessionValues = hVals;
+                        }
+                        else if (response.Content.Headers.TryGetValues("Mcp-Session-Id", out var cVals))
+                        {
+                            sessionValues = cVals;
+                        }
+
+                        if (sessionValues != null)
+                        {
+                            _sessionId = sessionValues.FirstOrDefault() ?? string.Empty;
+                            _ = Task.Delay(1500, _cts.Token).ContinueWith(t =>
+                            {
+                                if (!t.IsCanceled && _messageUrl == null)
+                                {
+                                    _messageUrl = _server.Url;
+                                    _endpointTcs.TrySetResult(_server.Url);
+                                }
+                            });
+                        }
+                        else if (response.Content.Headers.ContentType?.MediaType == "text/event-stream")
                         {
                             _ = Task.Delay(1500, _cts.Token).ContinueWith(t =>
                             {
@@ -287,36 +312,26 @@ namespace ModelContextGateway.Infrastructure.Transports
                     }
                 }
             });
-        }
 
-        public static (string Method, string ItemName) ExtractMcpHeaderMetadata(string jsonBody, string fallbackMethod = "")
-        {
-            string method = fallbackMethod;
-            string itemName = "";
-            if (!string.IsNullOrWhiteSpace(jsonBody))
+            _ = Task.Run(async () =>
             {
-                try
+                while (!_cts.Token.IsCancellationRequested)
                 {
-                    var node = System.Text.Json.Nodes.JsonNode.Parse(jsonBody);
-                    var parsedMethod = node?["method"]?.ToString();
-                    if (!string.IsNullOrEmpty(parsedMethod))
+                    await Task.Delay(TimeSpan.FromSeconds(30), _cts.Token);
+                    try
                     {
-                        method = parsedMethod;
+                        var resp = await CallMethodAsync("ping", new { });
+                        if (resp.Error != null)
+                        {
+                            _logger.LogWarning("Ping failed for backend {ServerId}: {Code} {Message}", _server.Id, resp.Error.Code, resp.Error.Message);
+                        }
                     }
-                    itemName = method switch
+                    catch (Exception ex)
                     {
-                        "tools/call" => node?["params"]?["name"]?.ToString() ?? "",
-                        "prompts/get" => node?["params"]?["name"]?.ToString() ?? "",
-                        "resources/read" => node?["params"]?["uri"]?.ToString() ?? "",
-                        _ => ""
-                    };
+                        _logger.LogWarning(ex, "Ping exception for backend {ServerId}", _server.Id);
+                    }
                 }
-                catch
-                {
-                    // Fallback to passed method if JSON parsing fails
-                }
-            }
-            return (method, itemName);
+            });
         }
 
         private static object? GetJsonElementValue(JsonElement element)
@@ -413,15 +428,9 @@ namespace ModelContextGateway.Infrastructure.Transports
                 req.Headers.Host = "localhost";
                 req.Headers.Accept.Clear();
                 req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                var (mcpMethodNotif, mcpNameNotif) = ExtractMcpHeaderMetadata(modifiedBody, method);
-                if (!string.IsNullOrEmpty(mcpMethodNotif))
+                if (!string.IsNullOrEmpty(_sessionId))
                 {
-                    req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodNotif);
-                }
-                if (!string.IsNullOrEmpty(mcpNameNotif))
-                {
-                    req.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameNotif);
+                    req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
                 }
 
                 await ApplyAuthAndCustomHeadersAsync(req);
@@ -436,7 +445,7 @@ namespace ModelContextGateway.Infrastructure.Transports
                 return new JsonRpcResponse();
             }
 
-            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, string.Empty, _cts.Token, RequestTimeout);
+            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, _sessionId, _cts.Token, RequestTimeout);
 
             try
             {
@@ -447,15 +456,9 @@ namespace ModelContextGateway.Infrastructure.Transports
                 req.Headers.Host = "localhost";
                 req.Headers.Accept.Clear();
                 req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-
-                var (mcpMethodReq, mcpNameReq) = ExtractMcpHeaderMetadata(modifiedBody, method);
-                if (!string.IsNullOrEmpty(mcpMethodReq))
+                if (!string.IsNullOrEmpty(_sessionId))
                 {
-                    req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodReq);
-                }
-                if (!string.IsNullOrEmpty(mcpNameReq))
-                {
-                    req.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameReq);
+                    req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
                 }
 
                 await ApplyAuthAndCustomHeadersAsync(req);
@@ -504,7 +507,7 @@ namespace ModelContextGateway.Infrastructure.Transports
                 throw new InvalidOperationException($"Backend {_server.Id} has not sent its endpoint event yet.");
             }
 
-            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, string.Empty, _cts.Token, RequestTimeout);
+            var tcs = _stateManager.CreateTrackedRequest(upstreamRequestId, originalId, _sessionId, _cts.Token, RequestTimeout);
 
             try
             {
@@ -516,15 +519,9 @@ namespace ModelContextGateway.Infrastructure.Transports
                 postReq.Headers.Accept.Clear();
                 postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
                 postReq.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
-
-                var (mcpMethodCall, mcpNameCall) = ExtractMcpHeaderMetadata(bodyJson, method);
-                if (!string.IsNullOrEmpty(mcpMethodCall))
+                if (!string.IsNullOrEmpty(_sessionId))
                 {
-                    postReq.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodCall);
-                }
-                if (!string.IsNullOrEmpty(mcpNameCall))
-                {
-                    postReq.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameCall);
+                    postReq.Headers.Add("Mcp-Session-Id", _sessionId);
                 }
 
                 await ApplyAuthAndCustomHeadersAsync(postReq);
@@ -551,18 +548,11 @@ namespace ModelContextGateway.Infrastructure.Transports
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
             req.Headers.Host = "localhost";
-
-            var (mcpMethodNotif, mcpNameNotif) = ExtractMcpHeaderMetadata(bodyJson, method);
-            if (!string.IsNullOrEmpty(mcpMethodNotif))
-            {
-                req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodNotif);
-            }
-            if (!string.IsNullOrEmpty(mcpNameNotif))
-            {
-                req.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameNotif);
-            }
-
             await ApplyAuthAndCustomHeadersAsync(req);
+            if (!string.IsNullOrEmpty(_sessionId))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+            }
 
             using var res = await _httpClient.SendAsync(req, _cts.Token);
             res.EnsureSuccessStatusCode();
@@ -579,18 +569,11 @@ namespace ModelContextGateway.Infrastructure.Transports
             content.Headers.ContentType = new MediaTypeHeaderValue("application/json");
             using var req = new HttpRequestMessage(HttpMethod.Post, _messageUrl) { Content = content };
             req.Headers.Host = "localhost";
-
-            var (mcpMethodResp, mcpNameResp) = ExtractMcpHeaderMetadata(responseJson);
-            if (!string.IsNullOrEmpty(mcpMethodResp))
-            {
-                req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethodResp);
-            }
-            if (!string.IsNullOrEmpty(mcpNameResp))
-            {
-                req.Headers.TryAddWithoutValidation("Mcp-Name", mcpNameResp);
-            }
-
             await ApplyAuthAndCustomHeadersAsync(req);
+            if (!string.IsNullOrEmpty(_sessionId))
+            {
+                req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
+            }
 
             using var res = await _httpClient.SendAsync(req, _cts.Token);
             res.EnsureSuccessStatusCode();

@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:34:51.3023174Z",
-    "totalRequirements": 150,
-    "positiveCount": 121,
-    "guardrailCount": 29,
-    "totalProofs": 354
+    "generatedAt": "2026-08-31T04:35:15.3703050Z",
+    "totalRequirements": 147,
+    "positiveCount": 119,
+    "guardrailCount": 28,
+    "totalProofs": 339
   },
   "requirements": [
     {
@@ -364,7 +364,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 216,
+          "lineNumber": 173,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
         }
@@ -904,42 +904,42 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 98,
+          "lineNumber": 55,
           "testName": "InvalidateCache_ClearsPopulatedState",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 107,
+          "lineNumber": 64,
           "testName": "CallToolAsync_SearchTools_ReturnsSemanticResults",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 136,
+          "lineNumber": 93,
           "testName": "CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 163,
+          "lineNumber": 120,
           "testName": "CallToolAsync_ReturnsCancellationError_WhenCancelled",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 192,
+          "lineNumber": 149,
           "testName": "CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 216,
+          "lineNumber": 173,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
         }
@@ -1229,7 +1229,7 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "Null or empty capability targets must immediately fail closed and return unauthorized",
-      "proofCount": 13,
+      "proofCount": 9,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1265,34 +1265,6 @@
           "lineNumber": 304,
           "testName": "ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest",
           "details": "Ensures client creation with empty category scope fails closed with BadRequest."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
-          "lineNumber": 38,
-          "testName": "Middleware_Returns_HeaderMismatchError_When_Headers_Missing_On_POST",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
-          "lineNumber": 77,
-          "testName": "Middleware_Returns_HeaderMismatchError_When_McpMethod_Mismatched",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
-          "lineNumber": 111,
-          "testName": "Middleware_Returns_HeaderMismatchError_When_McpName_Missing_For_ToolCall",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
-          "lineNumber": 145,
-          "testName": "Middleware_Returns_HeaderMismatchError_When_McpName_Mismatched",
-          "details": null
         },
         {
           "suite": "Backend xUnit",
@@ -1542,7 +1514,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 195,
+          "lineNumber": 193,
           "testName": "AdminEndpoint_UnauthorizedCaller_Returns403",
           "details": null
         }
@@ -1606,7 +1578,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 625,
+          "lineNumber": 592,
           "testName": "CallToolAsync_UnknownToolOrAction_ReturnsErrorResponse",
           "details": null
         }
@@ -1622,7 +1594,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 666,
+          "lineNumber": 633,
           "testName": "CallToolAsync_TestToolCall_MissingServer_ReturnsError",
           "details": null
         }
@@ -1668,73 +1640,6 @@
       ]
     },
     {
-      "id": "MCP-08",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "AdminMcpServer returns MethodNotFound (-32601) for ping request per MCP 2026-07-28 deprecations",
-      "proofCount": 6,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
-          "lineNumber": 9,
-          "testName": "AdminMcpServer_ProcessRequestAsync_Ping_ReturnsMethodNotFound",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
-          "lineNumber": 50,
-          "testName": "McpLogLevelHelper_ExtractPerRequestLogLevel_ParamsMeta",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
-          "lineNumber": 71,
-          "testName": "McpLogLevelHelper_ExtractPerRequestLogLevel_TopLevelMeta",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
-          "lineNumber": 89,
-          "testName": "McpLogLevelHelper_ExtractPerRequestLogLevel_ReturnsNull_WhenMissing",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
-          "lineNumber": 107,
-          "testName": "McpLogLevelHelper_ShouldEmitLogNotification_EvaluatesCorrectly",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
-          "lineNumber": 8,
-          "testName": "Middleware_Parses_2026_Spec_Headers",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "MCP-ADMIN-DISCOVER-HANDSHAKE",
-      "category": "MCP",
-      "type": "Positive",
-      "description": "AdminMcpServer server/discover RPC advertises supported protocol versions, capabilities, and identity.",
-      "proofCount": 1,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 195,
-          "testName": "ProcessRequestAsync_ServerDiscover_ReturnsCapabilitiesAndVersions",
-          "details": null
-        }
-      ]
-    },
-    {
       "id": "MCP-ADMIN-ENDPOINT-CALL-TOOL",
       "category": "MCP",
       "type": "Positive",
@@ -1744,7 +1649,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 296,
+          "lineNumber": 294,
           "testName": "AdminEndpoint_SseSession_CallTool_ManageSystemDiagnostics",
           "details": null
         }
@@ -1760,7 +1665,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 214,
+          "lineNumber": 212,
           "testName": "AdminEndpoint_HeadRequest_ReturnsEventStreamHeaders",
           "details": null
         }
@@ -1776,7 +1681,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 226,
+          "lineNumber": 224,
           "testName": "AdminEndpoint_SseSession_ListTools",
           "details": null
         }
@@ -1792,7 +1697,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
-          "lineNumber": 151,
+          "lineNumber": 149,
           "testName": "TargetProxy_RouterAdmin_RoutesToAdminServer",
           "details": null
         }
@@ -1824,7 +1729,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 227,
+          "lineNumber": 195,
           "testName": "HandleInitializeAsync_NegotiatesProtocolVersion",
           "details": null
         }
@@ -1898,7 +1803,7 @@
       "id": "MCP-ADMIN-PARITY-JSONRPC-DISPATCH",
       "category": "MCP",
       "type": "Positive",
-      "description": "AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, initialize).",
+      "description": "AdminMcpServer processes standard JSON-RPC 2.0 requests (tools/list, tools/call, ping).",
       "proofCount": 1,
       "proofs": [
         {
@@ -2112,7 +2017,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 299,
+          "lineNumber": 266,
           "testName": "CallToolAsync_RecordsAuditLog",
           "details": null
         }
@@ -2128,7 +2033,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 316,
+          "lineNumber": 283,
           "testName": "CallToolAsync_ManageAppKeys_Lifecycle",
           "details": null
         }
@@ -2144,7 +2049,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 363,
+          "lineNumber": 330,
           "testName": "CallToolAsync_ManageClients_Lifecycle",
           "details": null
         }
@@ -2160,7 +2065,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 537,
+          "lineNumber": 504,
           "testName": "CallToolAsync_ManageCustomFiles_Lifecycle",
           "details": null
         }
@@ -2176,7 +2081,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 435,
+          "lineNumber": 402,
           "testName": "CallToolAsync_ManageGroupMappings_Lifecycle",
           "details": null
         }
@@ -2192,7 +2097,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 401,
+          "lineNumber": 368,
           "testName": "CallToolAsync_ManagePolicies_Lifecycle",
           "details": null
         }
@@ -2208,7 +2113,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 468,
+          "lineNumber": 435,
           "testName": "CallToolAsync_ManageProviders_Lifecycle",
           "details": null
         }
@@ -2224,7 +2129,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 247,
+          "lineNumber": 214,
           "testName": "CallToolAsync_ManageServers_ListAndCreate",
           "details": null
         }
@@ -2240,7 +2145,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 511,
+          "lineNumber": 478,
           "testName": "CallToolAsync_ManageSettings_Lifecycle",
           "details": null
         }
@@ -2256,7 +2161,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 591,
+          "lineNumber": 558,
           "testName": "CallToolAsync_ManageSystem_Lifecycle",
           "details": null
         }
@@ -2509,7 +2414,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 384,
+          "lineNumber": 351,
           "testName": "RegisterClient_PublicClient_SucceedsWithoutSecret",
           "details": null
         }
@@ -2525,7 +2430,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 433,
+          "lineNumber": 400,
           "testName": "RegisterClient_InvalidRedirectUri_ReturnsBadRequest",
           "details": null
         }
@@ -2541,7 +2446,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 468,
+          "lineNumber": 435,
           "testName": "RegisterClient_DynamicScopes_AddedToPermissions",
           "details": null
         }
@@ -2557,7 +2462,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 508,
+          "lineNumber": 475,
           "testName": "Exchange_PublicClient_ClientCredentials_ReturnsForbid",
           "details": null
         }
@@ -2573,31 +2478,8 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 549,
+          "lineNumber": 516,
           "testName": "RegisterClient_WhenClosedRegistration_UnauthorizedUser_ReturnsForbidden",
-          "details": null
-        }
-      ]
-    },
-    {
-      "id": "AUTH-118",
-      "category": "SEC",
-      "type": "Negative",
-      "description": "OpenIddict ApplyAuthorizationResponseContext populates iss parameter in authorization responses.",
-      "proofCount": 2,
-      "proofs": [
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 354,
-          "testName": "ApplyAuthorizationResponseContext_SetsIssParameter",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 589,
-          "testName": "RegisterClient_MissingApplicationType_ReturnsBadRequest",
           "details": null
         }
       ]
@@ -2755,7 +2637,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
-          "lineNumber": 642,
+          "lineNumber": 609,
           "testName": "CallToolAsync_AuditLog_RedactsSensitivePayloadData",
           "details": null
         }
@@ -3007,7 +2889,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 454,
+          "lineNumber": 452,
           "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
           "details": null
         }
@@ -3370,62 +3252,48 @@
       "id": "UI-04",
       "category": "UI",
       "type": "Positive",
-      "description": "Renders fallback notice and switch button for dynamic JSON schemas with no extractable properties",
-      "proofCount": 9,
+      "description": "Tool selector filters available tools by selected backend server",
+      "proofCount": 7,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 101,
-          "testName": "displays fallback notice for complex non-object JSON schemas and allows switching to raw JSON tab",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 142,
-          "testName": "renders initial server and tool selection options",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 176,
+          "lineNumber": 77,
           "testName": "filters tools by selected server and handles tool change",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 205,
+          "lineNumber": 106,
           "testName": "filters custom tools with no namespace prefix when selectedServer is custom",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 230,
+          "lineNumber": 131,
           "testName": "renders dynamic fields for boolean, number, string, array, and object types",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 277,
+          "lineNumber": 178,
           "testName": "renders empty state when selected tool takes no arguments",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 302,
+          "lineNumber": 203,
           "testName": "switches to raw JSON tab and handles raw JSON editing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
-          "lineNumber": 341,
+          "lineNumber": 242,
           "testName": "handles form submission",
           "details": null
         },
@@ -3448,7 +3316,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 242,
+          "lineNumber": 240,
           "testName": "Pipeline_Settings_Branding_ReadWrite",
           "details": null
         }
@@ -3464,7 +3332,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 420,
+          "lineNumber": 418,
           "testName": "Branding_Logo_Upload_And_Retrieval_Works",
           "details": null
         }
@@ -3513,14 +3381,14 @@
       "id": "UI-103",
       "category": "UI",
       "type": "Positive",
-      "description": "Dynamic form generator renders fields extracted from JSON Schema 2020-12 keywords (allOf, anyOf, $ref)",
+      "description": "Interactive tool tester renders server and tool selection dropdowns",
       "proofCount": 1,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 1,
-          "testName": "renders fields from JSON Schema 2020-12 keywords (allOf, anyOf, $ref)",
+          "testName": "renders initial server and tool selection options",
           "details": null
         }
       ]

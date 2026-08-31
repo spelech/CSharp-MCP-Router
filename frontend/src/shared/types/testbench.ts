@@ -1,7 +1,11 @@
 export interface ToolItem {
   name: string;
   description: string;
-  inputSchema?: Record<string, any>;
+  inputSchema?: {
+    type?: string;
+    properties?: Record<string, any>;
+    required?: string[];
+  };
 }
 
 export interface PromptItem {
