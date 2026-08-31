@@ -4,8 +4,6 @@ using System.Text.Json;
 using Dapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using ModelContextGateway.Infrastructure.Persistence;
-using ModelContextGateway.Models;
 
 namespace ModelContextGateway.Components.Clients
 {

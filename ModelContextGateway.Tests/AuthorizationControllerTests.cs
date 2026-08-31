@@ -11,8 +11,6 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using OpenIddict.Abstractions;
 using OpenIddict.Server.AspNetCore;
-using ModelContextGateway.Core.Routing;
-using ModelContextGateway.Tests.Attributes;
 
 namespace ModelContextGateway.Tests
 {

@@ -8,8 +8,6 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.Sqlite;
 using Moq;
-using ModelContextGateway.Infrastructure.Logging;
-using ModelContextGateway.Tests.Attributes;
 
 namespace ModelContextGateway.Tests
 {
