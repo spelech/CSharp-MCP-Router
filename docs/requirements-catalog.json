@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T00:00:22.2184665Z",
+    "generatedAt": "2026-08-31T00:08:27.5173842Z",
     "totalRequirements": 133,
     "positiveCount": 110,
     "guardrailCount": 23,
@@ -388,7 +388,7 @@
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 129,
-          "testName": "HandleConfigurationRequestContext_SetsRegistrationEndpoint",
+          "testName": "ApplyConfigurationResponseContext_SetsRegistrationEndpoint",
           "details": null
         }
       ]

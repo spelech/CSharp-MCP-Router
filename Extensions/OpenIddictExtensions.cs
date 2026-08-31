@@ -130,13 +130,13 @@ namespace ModelContextGateway.Extensions
                            .EnableAuthorizationEndpointPassthrough()
                            .DisableTransportSecurityRequirement();
 
-                    options.AddEventHandler<OpenIddict.Server.OpenIddictServerEvents.HandleConfigurationRequestContext>(builder =>
+                    options.AddEventHandler<OpenIddict.Server.OpenIddictServerEvents.ApplyConfigurationResponseContext>(builder =>
                         builder.UseInlineHandler(context =>
                         {
-                            var issuer = context.Issuer?.ToString().TrimEnd('/') ?? "";
+                            var issuer = ((string?)context.Response.GetParameter("issuer"))?.TrimEnd('/') ?? "";
                             if (!string.IsNullOrEmpty(issuer))
                             {
-                                context.Metadata["registration_endpoint"] = $"{issuer}/api/register";
+                                context.Response.SetParameter("registration_endpoint", $"{issuer}/api/register");
                             }
                             return default;
                         }));

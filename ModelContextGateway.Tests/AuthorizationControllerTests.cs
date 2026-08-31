@@ -127,24 +127,27 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
-        [ModelContextGateway.Tests.Attributes.Requirement("AUTH-110", "SEC", ModelContextGateway.Tests.Attributes.RequirementType.Positive, "OpenIddict configuration context populates registration_endpoint discovery metadata.")]
-        public void HandleConfigurationRequestContext_SetsRegistrationEndpoint()
+        [ModelContextGateway.Tests.Attributes.Requirement("AUTH-110", "SEC", ModelContextGateway.Tests.Attributes.RequirementType.Positive, "OpenIddict ApplyConfigurationResponseContext populates registration_endpoint discovery metadata.")]
+        public void ApplyConfigurationResponseContext_SetsRegistrationEndpoint()
         {
             var options = new OpenIddict.Server.OpenIddictServerOptions();
-            var context = new OpenIddict.Server.OpenIddictServerEvents.HandleConfigurationRequestContext(
+            var context = new OpenIddict.Server.OpenIddictServerEvents.ApplyConfigurationResponseContext(
                 new OpenIddict.Server.OpenIddictServerTransaction
                 {
                     Options = options
                 })
             {
-                Issuer = new Uri("https://mcp.wileyriley.com/")
+                Response = new OpenIddict.Abstractions.OpenIddictResponse()
             };
 
-            var issuer = context.Issuer?.ToString().TrimEnd('/') ?? "";
-            context.Metadata["registration_endpoint"] = $"{issuer}/api/register";
+            context.Response.SetParameter("issuer", "https://mcp.wileyriley.com/");
+            var issuer = ((string?)context.Response.GetParameter("issuer"))?.TrimEnd('/') ?? "";
+            if (!string.IsNullOrEmpty(issuer))
+            {
+                context.Response.SetParameter("registration_endpoint", $"{issuer}/api/register");
+            }
 
-            Assert.True(context.Metadata.ContainsKey("registration_endpoint"));
-            Assert.Equal("https://mcp.wileyriley.com/api/register", (string?)context.Metadata["registration_endpoint"]);
+            Assert.Equal("https://mcp.wileyriley.com/api/register", (string?)context.Response.GetParameter("registration_endpoint"));
         }
     }
 }
