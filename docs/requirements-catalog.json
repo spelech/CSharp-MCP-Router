@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T03:01:54.3950848Z",
-    "totalRequirements": 144,
-    "positiveCount": 116,
+    "generatedAt": "2026-08-31T03:50:30.2001926Z",
+    "totalRequirements": 147,
+    "positiveCount": 119,
     "guardrailCount": 28,
-    "totalProofs": 336
+    "totalProofs": 339
   },
   "requirements": [
     {
@@ -16,7 +16,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserSecretStoreTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/UserSecretStoreTests.cs",
           "lineNumber": 8,
           "testName": "DatabaseUserSecretStore_SavesAndRetrieves_Secret",
           "details": null
@@ -32,7 +32,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserCredentialsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/UserCredentialsControllerTests.cs",
           "lineNumber": 11,
           "testName": "GetUserCredentials_ReturnsServerIds",
           "details": null
@@ -43,110 +43,110 @@
       "id": "AUTH-01",
       "category": "AUTH",
       "type": "Negative",
-      "description": "AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)",
+      "description": "SecurityValidationHelper authorizes principals via Admin Group SID",
       "proofCount": 15,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
-          "lineNumber": 13,
-          "testName": "AdminPolicy_Allows_Principal_With_AdminGroupName",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
-          "lineNumber": 47,
-          "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
-          "lineNumber": 81,
-          "testName": "AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
-          "lineNumber": 116,
-          "testName": "AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs",
-          "lineNumber": 16,
-          "testName": "AdminPolicy_Denies_StandardRole_Without_AdminSid",
-          "details": "Verifies that users with standard/unconfigured role names lacking explicit Admin SID claim or Admin Group are denied by AdminPolicy."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs",
-          "lineNumber": 58,
-          "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
-          "details": "Verifies that principals with the configured Admin SID are granted administrative policy access."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 258,
-          "testName": "AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds",
-          "details": "Verifies that admin callers can create forward-looking AppKeys for unconfigured categories."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/IdentityProviderTests.cs",
           "lineNumber": 220,
           "testName": "SecurityValidationHelper_IsAdmin_RequiresAdminGroupSid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/IdentityProviderTests.cs",
           "lineNumber": 238,
           "testName": "SecurityValidationHelper_IsAdmin_AllowsAdminGroupName",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/IdentityProviderTests.cs",
           "lineNumber": 252,
           "testName": "SecurityValidationHelper_IsAdmin_RejectsNonAdminGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/IdentityProviderTests.cs",
           "lineNumber": 269,
           "testName": "SecurityValidationHelper_IsAdmin_AllowsCustomAdminGroupsArray",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/IdentityProviderTests.cs",
           "lineNumber": 284,
           "testName": "SecurityValidationHelper_IsAdmin_AllowsMappedGroups",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/IdentityProviderTests.cs",
           "lineNumber": 299,
           "testName": "OidcIdentityProvider_DoesNotGrantAdminSid_FromGroupOrUserNames",
           "details": null
         },
         {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
+          "lineNumber": 13,
+          "testName": "AdminPolicy_Allows_Principal_With_AdminGroupName",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
+          "lineNumber": 47,
+          "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
+          "lineNumber": 81,
+          "testName": "AdminPolicy_Allows_Principal_With_ConfiguredAdminGroups",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AdminPolicyHybridAuthTests.cs",
+          "lineNumber": 116,
+          "testName": "AdminPolicy_Denies_StandardRole_WithoutAdminSidOrGroup",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs",
+          "lineNumber": 16,
+          "testName": "AdminPolicy_Denies_StandardRole_Without_AdminSid",
+          "details": "Verifies that users with standard/unconfigured role names lacking explicit Admin SID claim or Admin Group are denied by AdminPolicy."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AdminPolicySidOnlyTests.cs",
+          "lineNumber": 58,
+          "testName": "AdminPolicy_Allows_Principal_With_AdminSid",
+          "details": "Verifies that principals with the configured Admin SID are granted administrative policy access."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "lineNumber": 258,
+          "testName": "AppKeysController_CreateAppKey_UnknownCategory_Admin_Succeeds",
+          "details": "Verifies that admin callers can create forward-looking AppKeys for unconfigured categories."
+        },
+        {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 12,
           "testName": "renders Active Directory disabled initially, toggles on and exposes fields",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 46,
           "testName": "fills LDAP parameters and executes test connection",
           "details": null
@@ -162,84 +162,84 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 242,
           "testName": "Pairwise_AppKeyScopes_RestrictsAccessPrecisely",
           "details": "Verifies pairwise combination of AppKey scopes across all MCP capabilities and backend targets."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 146,
           "testName": "AppKeyRepository_SaveAndGet_PersistsKeyTypeAndFilters",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 197,
           "testName": "AppKeysController_CreateAppKey_ValidCategory_Succeeds",
           "details": "Verifies that AppKeys can be created with valid category scopes."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 281,
           "testName": "ClientsController_CreateClient_ValidCategory_Succeeds",
           "details": "Verifies that OAuth client credentials can be created with category-scoped access rules."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 364,
           "testName": "ClientSession_CategoryScope_AuthorizesMatchingServerTools_AndDeniesOthers",
           "details": "Verifies that category-scoped AppKey authorizes access exclusively to servers belonging to the permitted category."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 388,
           "testName": "ClientSession_GroupAliasScope_AuthorizesIdenticallyToCategory",
           "details": "Verifies that group-alias scopes evaluate identically to category scopes during tool authorization."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 410,
           "testName": "ClientSession_CategoryScope_IsCaseInsensitive",
           "details": "Verifies that category scope matching is case-insensitive across server categories."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 460,
           "testName": "ClientSession_ResourcesAndTemplates_FilteredByCategoryScope",
           "details": "Verifies that resources and templates are filtered according to category-scoped AppKey permissions."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 488,
           "testName": "ClientSession_DynamicServerMembership_UpdatesAccessDynamically",
           "details": "Verifies that dynamic updates to server categories immediately update tool access without re-authenticating."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 524,
           "testName": "ClientSession_MixedScopes_CombinesCategoryAndSpecificToolScopes",
           "details": "Verifies that AppKeys can combine category scopes and granular tool-level scopes additively."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 551,
           "testName": "ClientSession_Complete_FiltersServerNamesByCategoryScope",
           "details": "Verifies that autocomplete and completion requests filter suggestions to servers within category scopes."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "/app/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 70,
           "testName": "AppKey Direct Context: connects with API key header identity",
           "details": null
@@ -255,14 +255,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 319,
           "testName": "Pairwise_SsoIdentityAndGroupMappings_EvaluateCorrectly",
           "details": "Verifies pairwise combination of SSO identities, SIDs, and group mappings across all targets."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "/app/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 36,
           "testName": "Operator Context: allows overview and testbench navigation with operator identity",
           "details": null
@@ -278,21 +278,21 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs",
           "lineNumber": 12,
           "testName": "ResolveIdentityAsync_ExtractsWindowsIdentitySids_ViaAccessor",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ActiveDirectoryWindowsIdentityTests.cs",
           "lineNumber": 50,
           "testName": "ResolveIdentityAsync_AugmentsWithLdapSids_WhenLdapServiceProvided",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/ldap-identity-and-auth-flow.spec.ts",
+          "filePath": "/app/frontend/e2e/ldap-identity-and-auth-flow.spec.ts",
           "lineNumber": 5,
           "testName": "should configure LDAP identity provider, test connection, and save settings",
           "details": null
@@ -308,14 +308,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/McpServerTests.cs",
           "lineNumber": 5,
           "testName": "McpServer_Should_Have_AllowPassThroughAuth",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/my-mcp-servers.spec.ts",
+          "filePath": "/app/frontend/e2e/my-mcp-servers.spec.ts",
           "lineNumber": 7,
           "testName": "should render user provided servers and allow editing credentials with SQLite schema",
           "details": null
@@ -331,7 +331,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportsAuthShapeTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/TransportsAuthShapeTests.cs",
           "lineNumber": 200,
           "testName": "Transports_Use_PassThroughToken_If_Allowed",
           "details": null
@@ -347,7 +347,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityHeaderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/IdentityHeaderTests.cs",
           "lineNumber": 9,
           "testName": "HttpTransport_InjectsXForwardedUserHeader",
           "details": null
@@ -363,7 +363,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 173,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
@@ -374,35 +374,65 @@
       "id": "AUTH-110",
       "category": "AUTH",
       "type": "Positive",
-      "description": "CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0.",
+      "description": "GetClients returns list of OAuthClient records without secret hashes",
       "proofCount": 4,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs",
-          "lineNumber": 339,
-          "testName": "CreateAppKey_AllowsUnlimited_WhenLimitsAreZero",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 135,
-          "testName": "ApplyConfigurationResponseContext_SetsRegistrationEndpoint",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 51,
           "testName": "GetClients_ReturnsOk_WithClientsAndMappedProperties",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 238,
           "testName": "GetClients_NeverLeaksRawBearerSecretOrHash",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 339,
+          "testName": "CreateAppKey_AllowsUnlimited_WhenLimitsAreZero",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 135,
+          "testName": "ApplyConfigurationResponseContext_SetsRegistrationEndpoint",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-112",
+      "category": "AUTH",
+      "type": "Negative",
+      "description": "DeleteClient removes OAuthClient via repository",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 120,
+          "testName": "DeleteClient_ReturnsNoContent_WhenAppExists",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 141,
+          "testName": "DeleteClient_ReturnsNotFound_WhenAppDoesNotExist",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 297,
+          "testName": "Authorize_ResolvesClientAndRedirectsToConsent",
           "details": null
         }
       ]
@@ -416,7 +446,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 79,
           "testName": "AppKey_WithAdminScope_GrantsAdminAccess",
           "details": null
@@ -432,7 +462,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 255,
           "testName": "IsAdmin_AppKeyScopes_InHttpContextItems_ReturnsTrue",
           "details": null
@@ -448,7 +478,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 140,
           "testName": "AppKey_WithWildcardScope_GrantsAdminAccess",
           "details": null
@@ -464,7 +494,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
           "lineNumber": 409,
           "testName": "CreateCredentialAsync_GeneratesCompactKeysWithSemanticPrefixes",
           "details": null
@@ -480,21 +510,21 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
           "lineNumber": 186,
           "testName": "Startup_SeedsCustomAdminKey_WhenConfigured",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
           "lineNumber": 238,
           "testName": "Startup_SeedsCustomAdminKey_WhenMcgAdminKeyConfigured",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
           "lineNumber": 289,
           "testName": "Startup_UpdatesAdminKeyHash_WhenEnvironmentKeyChanges",
           "details": null
@@ -510,63 +540,63 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AppKeysControllerTests.cs",
           "lineNumber": 191,
           "testName": "CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 325,
-          "testName": "creates category-scoped key, captures one-time plaintext key, and refreshes",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 19,
           "testName": "renders nothing when isCreateModalOpen is false",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 61,
           "testName": "locks key type to personal key for non-admin and shows quota feedback",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 115,
           "testName": "handles scope serialization for server scope and target username for admin",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 154,
           "testName": "handles scope serialization for category scope and expiration days",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 192,
           "testName": "disables submit button when quota limit is reached",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 217,
           "testName": "displays one-time secret result and copies plaintext key to clipboard",
           "details": null
         },
         {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 325,
+          "testName": "creates category-scoped key, captures one-time plaintext key, and refreshes",
+          "details": null
+        },
+        {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "filePath": "/app/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 33,
           "testName": "Non-Admin Context: mints personal key, views snippet, and revokes key",
           "details": null
@@ -582,42 +612,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AppKeysControllerTests.cs",
           "lineNumber": 125,
           "testName": "GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 267,
-          "testName": "loads app keys and updates store",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx",
-          "lineNumber": 81,
-          "testName": "renders role-adaptive UI for non-admin user",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 34,
           "testName": "renders role-adapted My App Keys view for non-admin user",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/AppKeysCard.test.tsx",
           "lineNumber": 79,
           "testName": "renders keys list, copies config snippet, and revokes key",
           "details": null
         },
         {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/components/App.test.tsx",
+          "lineNumber": 81,
+          "testName": "renders role-adaptive UI for non-admin user",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 267,
+          "testName": "loads app keys and updates store",
+          "details": null
+        },
+        {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "filePath": "/app/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 5,
           "testName": "Non-Admin Context: displays My App Keys navigation and personal quota indicator",
           "details": null
@@ -633,42 +663,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AppKeysControllerTests.cs",
           "lineNumber": 223,
           "testName": "CreateAppKey_CustomQuotaOverride_AllowsHigherLimit",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 474,
-          "testName": "sets user quota override and refreshes quota list",
+          "filePath": "/app/frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 222,
+          "testName": "manages custom user quotas in admin quotas tab",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/GeneralTab.test.tsx",
           "lineNumber": 6,
           "testName": "renders GeneralTab with security default quota inputs and triggers save",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/GeneralTab.test.tsx",
           "lineNumber": 71,
           "testName": "updates form state when settings prop changes",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 222,
-          "testName": "manages custom user quotas in admin quotas tab",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 474,
+          "testName": "sets user quota override and refreshes quota list",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "filePath": "/app/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 135,
           "testName": "Admin Context: configures custom user quota override",
           "details": null
@@ -684,7 +714,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
           "lineNumber": 443,
           "testName": "ExtractKeyPrefix_ExtractsSemanticAndLegacyPrefixesAccurately",
           "details": null
@@ -700,14 +730,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EndpointAuthorizationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/EndpointAuthorizationTests.cs",
           "lineNumber": 7,
           "testName": "QueryStringTokenMiddleware_Extracts_AccessToken_To_AuthorizationHeader",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EndpointAuthorizationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/EndpointAuthorizationTests.cs",
           "lineNumber": 45,
           "testName": "QueryStringTokenMiddleware_Extracts_Token_To_AuthorizationHeader",
           "details": null
@@ -723,7 +753,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 176,
           "testName": "AdminPolicy_StandaloneMode_LoopbackIp_PassesAdminPolicy",
           "details": null
@@ -739,7 +769,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 35,
           "testName": "IsAdmin_StandaloneMode_CustomCidr_ReturnsTrue",
           "details": null
@@ -755,7 +785,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 14,
           "testName": "IsAdmin_StandaloneMode_LoopbackIp_ReturnsTrue",
           "details": null
@@ -766,75 +796,75 @@
       "id": "AUTH-SYSTEM-APPKEY-SEPARATION",
       "category": "AUTH",
       "type": "Positive",
-      "description": "System keys are distinct and require admin permissions",
+      "description": "Personal AppKey with \u0027all\u0027 scope does not grant Administrator role",
       "proofCount": 10,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs",
-          "lineNumber": 151,
-          "testName": "SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
           "lineNumber": 303,
           "testName": "PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
           "lineNumber": 356,
           "testName": "SystemAppKey_WithAdminScope_GrantsAdministratorRole",
           "details": null
         },
         {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 251,
-          "testName": "switches keyTypeTab between personal and system",
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/AppKeysControllerTests.cs",
+          "lineNumber": 151,
+          "testName": "SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 285,
-          "testName": "fetches system-filtered app keys via query parameters",
+          "filePath": "/app/frontend/src/test/components/AppKeysCard.test.tsx",
+          "lineNumber": 166,
+          "testName": "handles admin tab switching and username filtering",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx",
+          "filePath": "/app/frontend/src/test/components/App.test.tsx",
           "lineNumber": 15,
           "testName": "renders header, navigation tabs, and default overview dashboard for admin user",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx",
+          "filePath": "/app/frontend/src/test/components/App.test.tsx",
           "lineNumber": 36,
           "testName": "switches between tabs on navigation click",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/AppKeyModal.test.tsx",
           "lineNumber": 31,
           "testName": "allows admin to select key type and create system app key",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx",
-          "lineNumber": 166,
-          "testName": "handles admin tab switching and username filtering",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 251,
+          "testName": "switches keyTypeTab between personal and system",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 285,
+          "testName": "fetches system-filtered app keys via query parameters",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
+          "filePath": "/app/frontend/e2e/personal-appkeys-and-quotas.spec.ts",
           "lineNumber": 87,
           "testName": "Admin Context: manages segmented App-Level Keys and User Personal Keys",
           "details": null
@@ -850,7 +880,7 @@
       "proofs": [
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/rbac-enforcement-flow.spec.ts",
+          "filePath": "/app/frontend/e2e/rbac-enforcement-flow.spec.ts",
           "lineNumber": 1,
           "testName": "should create, verify, and delete RBAC policy and SID mapping",
           "details": null
@@ -866,7 +896,7 @@
       "proofs": [
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "/app/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 1,
           "testName": "Admin Context: renders full administrator view and privileged controls",
           "details": null
@@ -882,63 +912,63 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SessionManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/SessionManagerTests.cs",
           "lineNumber": 9,
           "testName": "PerformanceMetrics_And_TotalRequests_IncrementCorrectly",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SessionManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/SessionManagerTests.cs",
           "lineNumber": 33,
           "testName": "UpdateBackendStatus_TracksBackendHealth",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 34,
           "testName": "ListToolsAsync_ReturnsMetaTools_InMetaMode",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 55,
           "testName": "InvalidateCache_ClearsPopulatedState",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 64,
           "testName": "CallToolAsync_SearchTools_ReturnsSemanticResults",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 93,
           "testName": "CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 120,
           "testName": "CallToolAsync_ReturnsCancellationError_WhenCancelled",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 149,
           "testName": "CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
           "lineNumber": 173,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
@@ -949,50 +979,50 @@
       "id": "DB-01",
       "category": "DB",
       "type": "Positive",
-      "description": "SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data",
+      "description": "IUserQuotaRepository persists user quota overrides and retrieves them correctly",
       "proofCount": 6,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
-          "lineNumber": 29,
-          "testName": "Sqlite_UpgradeMigration_FromLegacySchema_PreservesDataAndPassesValidation",
-          "details": "Verifies that SQLite upgrade migration from legacy schema preserves data, encrypts configs, and passes schema validation."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 85,
           "testName": "UserQuotaRepository_SetAndGet_ReturnsPersistedQuota",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 98,
           "testName": "UserQuotaRepository_GetAll_ReturnsAllUserQuotas",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 117,
           "testName": "UserQuotaRepository_Update_UpdatesExistingQuota",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 132,
           "testName": "UserQuotaRepository_Delete_RemovesQuota",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/UserQuotaAndAppKeyRepositoryTests.cs",
           "lineNumber": 199,
           "testName": "DependencyInjection_RegistersIUserQuotaRepository",
           "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "lineNumber": 29,
+          "testName": "Sqlite_UpgradeMigration_FromLegacySchema_PreservesDataAndPassesValidation",
+          "details": "Verifies that SQLite upgrade migration from legacy schema preserves data, encrypts configs, and passes schema validation."
         }
       ]
     },
@@ -1005,28 +1035,28 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 311,
           "testName": "Mssql_Scripts_DeclareAllProceduresAndExpectedParameters",
           "details": "Verifies that MSSQL stored procedure scripts declare all required procedures and parameter contracts correctly."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 369,
           "testName": "MySql_Scripts_DeclareAllProceduresWithP_PrefixParameters",
           "details": "Verifies that MySQL stored procedure scripts declare all required procedures with p_ parameter conventions."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 708,
           "testName": "Repositories_MySQL_AppKeyOperations_UseP_PrefixParameters",
           "details": "Verifies that Dapper repository mappings for MySQL correctly bind stored procedure p_ parameters."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MySqlLiveIntegrationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/MySqlLiveIntegrationTests.cs",
           "lineNumber": 25,
           "testName": "MySql_LiveRepository_AppKeyAndSecretProviderLifecycle_Succeeds",
           "details": null
@@ -1042,70 +1072,70 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 433,
           "testName": "Sqlite_UpgradeMigration_ProvisionsOAuthClientsTable",
           "details": "Verifies that SQLite upgrade migration creates OAuthClients table when upgrading an existing legacy database."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 543,
           "testName": "Mssql_Migration004_DeclaresOAuthClientsTableAndProcedures",
           "details": "Verifies that MSSQL migration 004 declares OAuthClients table and procedures."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 565,
           "testName": "MySql_Migration004_DeclaresOAuthClientsTableAndProcedures",
           "details": "Verifies that MySQL migration 004 declares OAuthClients table and procedures."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
           "lineNumber": 71,
           "testName": "SaveAndGetOAuthClientById_Success",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
           "lineNumber": 108,
           "testName": "SaveOAuthClient_UpdateExisting_Success",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
           "lineNumber": 150,
           "testName": "GetOAuthClients_ReturnsAllClientsOrderedByCreatedAt",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
           "lineNumber": 177,
           "testName": "DeleteOAuthClient_ExistingClient_ReturnsTrueAndRemovesClient",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
           "lineNumber": 198,
           "testName": "DeleteOAuthClient_NonExistentClient_ReturnsFalse",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
           "lineNumber": 206,
           "testName": "GetOAuthClientById_NonExistentClient_ReturnsNull",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs",
           "lineNumber": 332,
           "testName": "Seeder_Initializes_OAuthClients_Table",
           "details": null
@@ -1121,7 +1151,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/SetupSkillTests.cs",
           "lineNumber": 18,
           "testName": "Skill_Frontmatter_IsValidAndWithinCharacterLimit",
           "details": null
@@ -1137,7 +1167,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/SetupSkillTests.cs",
           "lineNumber": 152,
           "testName": "Skill_MirroredInAgentsDirectory",
           "details": null
@@ -1153,7 +1183,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/SetupSkillTests.cs",
           "lineNumber": 98,
           "testName": "Templates_AreValidAndContainRequiredDirectives",
           "details": null
@@ -1169,7 +1199,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SetupSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/SetupSkillTests.cs",
           "lineNumber": 44,
           "testName": "Skill_ContainsAllRequiredPhasesAndComparisons",
           "details": null
@@ -1185,7 +1215,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 224,
           "testName": "AdminPolicy_ExternalIdpConfigured_LoopbackIp_RequiresCredentials",
           "details": null
@@ -1201,7 +1231,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 200,
           "testName": "AdminPolicy_StandaloneMode_ExternalUntrustedIp_FailsAdminPolicy",
           "details": null
@@ -1217,7 +1247,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs",
           "lineNumber": 57,
           "testName": "IsAdmin_StandaloneMode_UntrustedIp_ReturnsFalse",
           "details": null
@@ -1233,66 +1263,66 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 468,
           "testName": "Pairwise_NullOrEmptyTarget_FailsClosed_ReturnsFalse",
           "details": "Ensures null or whitespace capability targets fail closed immediately."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 490,
           "testName": "Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse",
           "details": "Ensures corrupted AppKey scopes JSON fails closed safely and rejects execution."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 220,
-          "testName": "AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest",
-          "details": "Ensures non-admin callers cannot create AppKeys with unconfigured categories."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 239,
-          "testName": "AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest",
-          "details": "Ensures AppKey creation with empty or whitespace category fails closed with BadRequest."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
-          "lineNumber": 304,
-          "testName": "ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest",
-          "details": "Ensures client creation with empty category scope fails closed with BadRequest."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 270,
           "testName": "CreateClient_ReturnsBadRequest_WhenDisplayNameMissing",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 283,
           "testName": "CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 300,
           "testName": "CreateClient_Returns500_WhenOAuthClientRepositoryThrows",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 317,
           "testName": "DeleteClient_Returns500_WhenOAuthClientRepositoryThrows",
           "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "lineNumber": 220,
+          "testName": "AppKeysController_CreateAppKey_UnknownCategory_NonAdmin_FailsWithBadRequest",
+          "details": "Ensures non-admin callers cannot create AppKeys with unconfigured categories."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "lineNumber": 239,
+          "testName": "AppKeysController_CreateAppKey_EmptyCategory_FailsWithBadRequest",
+          "details": "Ensures AppKey creation with empty or whitespace category fails closed with BadRequest."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "lineNumber": 304,
+          "testName": "ClientsController_CreateClient_EmptyCategory_ReturnsBadRequest",
+          "details": "Ensures client creation with empty category scope fails closed with BadRequest."
         }
       ]
     },
@@ -1300,61 +1330,61 @@
       "id": "GUARD-02",
       "category": "GUARD",
       "type": "Negative",
-      "description": "SSE transport fails closed with SecurityException when secret provider resolution fails",
+      "description": "Throws InvalidOperationException when Vault master key retrieval fails.",
       "proofCount": 8,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs",
-          "lineNumber": 32,
-          "testName": "ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails",
-          "details": "Ensures SSE transport fails closed with SecurityException when secret retriever fails."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs",
-          "lineNumber": 53,
-          "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
-          "details": "Ensures SSE transport fails closed when no secret retriever is registered."
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 283,
           "testName": "ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenVaultFails",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
-          "lineNumber": 394,
-          "testName": "StdioTransport_ShouldFailClosed_WhenSecretResolutionFails",
-          "details": "Ensures STDIO transport fails closed without spawning subprocess if secret resolution fails."
+          "filePath": "/app/ModelContextGateway.Tests/SseTransportTests.cs",
+          "lineNumber": 32,
+          "testName": "ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails",
+          "details": "Ensures SSE transport fails closed with SecurityException when secret retriever fails."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/SseTransportTests.cs",
+          "lineNumber": 53,
+          "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
+          "details": "Ensures SSE transport fails closed when no secret retriever is registered."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/HttpTransportTests.cs",
           "lineNumber": 31,
           "testName": "ResolveTokenAsync_ThrowsSecurityException_WhenSecretProviderFails",
           "details": "Ensures HTTP transport fails closed with SecurityException when secret retriever fails."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/HttpTransportTests.cs",
           "lineNumber": 54,
           "testName": "ResolveTokenAsync_ThrowsInvalidOperationException_WhenNoRetrieverRegistered",
           "details": "Ensures HTTP transport fails closed when no secret retriever is registered."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "lineNumber": 394,
+          "testName": "StdioTransport_ShouldFailClosed_WhenSecretResolutionFails",
+          "details": "Ensures STDIO transport fails closed without spawning subprocess if secret resolution fails."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 61,
           "testName": "EnsureVaultClientAsync_ReturnsNull_WhenVaultProviderDisabledInRepo",
           "details": "Ensures Vault client returns null when Vault provider is disabled in repository."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 113,
           "testName": "GetSecretAsync_ThrowsSecurityException_OnVaultException",
           "details": "Ensures Vault secret retrieval failures throw SecurityException and fail closed."
@@ -1370,42 +1400,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 104,
           "testName": "StdioTransport_ShouldThrowSecurityExceptionForUnsafeExecutable",
           "details": "Ensures STDIO transport rejects commands with shell metacharacters or dangerous commands."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 126,
           "testName": "StdioTransport_ShouldThrowSecurityExceptionForShellExecutable",
           "details": "Ensures STDIO transport rejects shell wrappers and script interpreters lacking explicit safe paths."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 148,
           "testName": "StdioTransport_ShouldThrowOnInvalidExecutable",
           "details": "Ensures STDIO transport fails cleanly with InvalidOperationException when target binary is not found."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 210,
           "testName": "StdioTransport_ShouldTimeoutOnSlowRequests",
           "details": "Ensures STDIO transport times out requests exceeding configured execution duration limits."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 289,
           "testName": "StdioTransport_ShouldHandleUnexpectedExit",
           "details": "Ensures STDIO transport clears pending requests and fails closed upon unexpected child process termination."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/multi-user-matrix.spec.ts",
+          "filePath": "/app/frontend/e2e/multi-user-matrix.spec.ts",
           "lineNumber": 55,
           "testName": "Guest / Denied Context: restricted user session renders safely",
           "details": null
@@ -1421,35 +1451,35 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 508,
           "testName": "Pairwise_CompleteAsync_MalformedOrMissingBackends_ThrowsOrFailsClosed",
           "details": "Ensures malformed completion payloads or unmapped backends throw or fail closed."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 531,
           "testName": "Pairwise_DatabaseDisconnection_FailsClosedSafely",
           "details": "Ensures database disconnection or failure fails closed safely without leaking access."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 163,
           "testName": "SchemaValidation_FailsClosed_WhenRequiredColumnOrTableMissing",
           "details": "Ensures database schema validation fails closed when required columns or tables are missing."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 189,
           "testName": "SchemaValidation_FailsClosed_WhenUserQuotasOrKeyTypeMissing",
           "details": "Ensures database schema validation fails closed when KeyType column or UserQuotas table is missing."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DatabaseSchemaUpgradeAndContractTests.cs",
           "lineNumber": 587,
           "testName": "SchemaValidation_FailsClosed_WhenOAuthClientsTableMissing",
           "details": "Ensures database schema validation fails closed when OAuthClients table is missing."
@@ -1465,7 +1495,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProvidersControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ProvidersControllerTests.cs",
           "lineNumber": 315,
           "testName": "SaveAuthProvidersBatch_ReturnsBadRequest_WhenAllProvidersDisabled",
           "details": null
@@ -1481,7 +1511,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PermissionsControllerTests.cs",
           "lineNumber": 227,
           "testName": "SavePolicy_ReturnsBadRequest_WhenWildcardDenyPolicy",
           "details": null
@@ -1497,7 +1527,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 779,
           "testName": "ManageCustomFiles_ValidationGuardrails",
           "details": null
@@ -1513,7 +1543,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminEndpointsTests.cs",
           "lineNumber": 193,
           "testName": "AdminEndpoint_UnauthorizedCaller_Returns403",
           "details": null
@@ -1529,7 +1559,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 513,
           "testName": "ManagePolicies_WildcardDenyGuardrail",
           "details": null
@@ -1545,7 +1575,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 650,
           "testName": "ManageProviders_LdapPlaintextGuardrail",
           "details": null
@@ -1561,7 +1591,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 324,
           "testName": "ManageServers_ValidationGuardrails",
           "details": null
@@ -1577,7 +1607,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 592,
           "testName": "CallToolAsync_UnknownToolOrAction_ReturnsErrorResponse",
           "details": null
@@ -1593,7 +1623,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 633,
           "testName": "CallToolAsync_TestToolCall_MissingServer_ReturnsError",
           "details": null
@@ -1609,14 +1639,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 567,
           "testName": "Pairwise_MetaMode_ExecuteTool_EnforcesTargetAuthorization",
           "details": "Verifies that router meta-mode execute_tool strictly enforces target tool authorization policies."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/CategoryScopedAppKeysTests.cs",
           "lineNumber": 428,
           "testName": "ClientSession_ExecuteTool_EnforcesCategoryScopeOnInnerTarget",
           "details": "Verifies that router meta-mode execute_tool validates and enforces category scopes on target tool calls."
@@ -1632,7 +1662,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs",
           "lineNumber": 385,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
@@ -1648,7 +1678,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminEndpointsTests.cs",
           "lineNumber": 294,
           "testName": "AdminEndpoint_SseSession_CallTool_ManageSystemDiagnostics",
           "details": null
@@ -1664,7 +1694,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminEndpointsTests.cs",
           "lineNumber": 212,
           "testName": "AdminEndpoint_HeadRequest_ReturnsEventStreamHeaders",
           "details": null
@@ -1680,7 +1710,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminEndpointsTests.cs",
           "lineNumber": 224,
           "testName": "AdminEndpoint_SseSession_ListTools",
           "details": null
@@ -1696,7 +1726,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminEndpointsTests.cs",
           "lineNumber": 149,
           "testName": "TargetProxy_RouterAdmin_RoutesToAdminServer",
           "details": null
@@ -1712,7 +1742,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminEndpointsTests.cs",
           "lineNumber": 62,
           "testName": "AdminEndpoint_SseHandshake_NegotiatesProtocol",
           "details": null
@@ -1728,7 +1758,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 195,
           "testName": "HandleInitializeAsync_NegotiatesProtocolVersion",
           "details": null
@@ -1744,7 +1774,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 370,
           "testName": "ManageAppKeys_Parity_AllActions",
           "details": null
@@ -1760,7 +1790,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 423,
           "testName": "ManageClients_Parity_AllActions",
           "details": null
@@ -1776,7 +1806,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 716,
           "testName": "ManageCustomFiles_Parity_AllActions",
           "details": null
@@ -1792,7 +1822,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 530,
           "testName": "ManageGroupMappings_Parity_AllActions",
           "details": null
@@ -1808,7 +1838,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 873,
           "testName": "AdminTools_ProcessRequest_JsonRpcProtocol",
           "details": null
@@ -1824,7 +1854,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 464,
           "testName": "ManagePolicies_Parity_AllActions",
           "details": null
@@ -1840,7 +1870,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 577,
           "testName": "ManageProviders_Parity_AllActions",
           "details": null
@@ -1856,7 +1886,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 234,
           "testName": "ManageServers_Parity_AllActions",
           "details": null
@@ -1872,7 +1902,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 667,
           "testName": "ManageSettings_Parity_AllActions",
           "details": null
@@ -1888,7 +1918,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 816,
           "testName": "ManageSystem_Parity_AllActions",
           "details": null
@@ -1904,7 +1934,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 846,
           "testName": "TestToolCall_Execution_Parity",
           "details": null
@@ -1920,7 +1950,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminToolsParityTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminToolsParityTests.cs",
           "lineNumber": 191,
           "testName": "AdminTools_ExecuteSuccessfully",
           "details": null
@@ -1936,7 +1966,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
           "lineNumber": 176,
           "testName": "EndToEnd_BlankSlateProvisioning_ConfiguresAllEntitiesViaAdminTools",
           "details": null
@@ -1952,7 +1982,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
           "lineNumber": 21,
           "testName": "Skill_Frontmatter_IsValidAndWithinCharacterLimit",
           "details": null
@@ -1968,7 +1998,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
           "lineNumber": 147,
           "testName": "Skill_MirroredInAgentsDirectory",
           "details": null
@@ -1984,7 +2014,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
           "lineNumber": 103,
           "testName": "Templates_AllExistAndAreValidJsonOrScripts",
           "details": null
@@ -2000,7 +2030,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
           "lineNumber": 47,
           "testName": "Skill_ContainsAllRequiredPhasesAndProviderCookbooks",
           "details": null
@@ -2016,7 +2046,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 266,
           "testName": "CallToolAsync_RecordsAuditLog",
           "details": null
@@ -2032,7 +2062,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 283,
           "testName": "CallToolAsync_ManageAppKeys_Lifecycle",
           "details": null
@@ -2048,7 +2078,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 330,
           "testName": "CallToolAsync_ManageClients_Lifecycle",
           "details": null
@@ -2064,7 +2094,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 504,
           "testName": "CallToolAsync_ManageCustomFiles_Lifecycle",
           "details": null
@@ -2080,7 +2110,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 402,
           "testName": "CallToolAsync_ManageGroupMappings_Lifecycle",
           "details": null
@@ -2096,7 +2126,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 368,
           "testName": "CallToolAsync_ManagePolicies_Lifecycle",
           "details": null
@@ -2112,7 +2142,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 435,
           "testName": "CallToolAsync_ManageProviders_Lifecycle",
           "details": null
@@ -2128,7 +2158,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 214,
           "testName": "CallToolAsync_ManageServers_ListAndCreate",
           "details": null
@@ -2144,7 +2174,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 478,
           "testName": "CallToolAsync_ManageSettings_Lifecycle",
           "details": null
@@ -2160,7 +2190,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 558,
           "testName": "CallToolAsync_ManageSystem_Lifecycle",
           "details": null
@@ -2176,9 +2206,57 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 147,
           "testName": "ListToolsAsync_ReturnsTenConsolidatedTools",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-MRTR-01",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "McpInputRequiredResult serializes and deserializes according to MCP 2026-07-28 spec with resultType input_required.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/MrtrTests.cs",
+          "lineNumber": 9,
+          "testName": "Test_MrtrModels_Serialization",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-MRTR-02",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "execute_tool forwards inputResponses to target tool params during request retry.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/MrtrTests.cs",
+          "lineNumber": 41,
+          "testName": "Test_ExecuteTool_ForwardsInputResponses",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-MRTR-03",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "Direct tool call returns InputRequiredResult intact when backend requires additional input.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/MrtrTests.cs",
+          "lineNumber": 113,
+          "testName": "Test_DirectToolCall_ReturnsInputRequiredResult",
           "details": null
         }
       ]
@@ -2192,7 +2270,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 19,
           "testName": "Exchange_ThrowsInvalidOperationException_WhenRequestNull",
           "details": null
@@ -2208,7 +2286,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 36,
           "testName": "RegisterClient_CreatesApplicationAndReturnsOk",
           "details": null
@@ -2224,7 +2302,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 77,
           "testName": "Authorize_ThrowsInvalidOperationException_WhenRequestNull",
           "details": null
@@ -2240,21 +2318,21 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 94,
           "testName": "RegisterClient_UsesOAuthClientRepository_WhenApplicationManagerNull",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
+          "filePath": "/app/frontend/src/test/pages/ConsentView.test.tsx",
           "lineNumber": 16,
           "testName": "renders client name from query string and sets form action",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/oauth-consent-flow.spec.ts",
+          "filePath": "/app/frontend/e2e/oauth-consent-flow.spec.ts",
           "lineNumber": 5,
           "testName": "should render interactive OAuth consent screen and display requesting client name",
           "details": null
@@ -2270,88 +2348,58 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
           "lineNumber": 61,
           "testName": "Pipeline_WellKnown_Endpoints_ReturnSuccess",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 159,
-          "testName": "Exchange_ClientCredentials_ValidSecret_ReturnsSignInResult",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 206,
-          "testName": "Exchange_ClientCredentials_InvalidSecret_ReturnsForbid",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 251,
-          "testName": "Exchange_ClientCredentials_ExpiredClient_ReturnsForbid",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 84,
           "testName": "CreateClient_ReturnsOk_WithGeneratedCredentials",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 153,
           "testName": "DatabaseAssertion_PlaintextNotPersisted",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 179,
           "testName": "CreateClient_AdminCreator_DoesNotInheritAdminSid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 215,
           "testName": "CreateClient_WithExpiresInDays_SetsExpiration",
           "details": null
-        }
-      ]
-    },
-    {
-      "id": "AUTH-112",
-      "category": "SEC",
-      "type": "Negative",
-      "description": "Authorize resolves client application from IOAuthClientRepository and redirects to consent.",
-      "proofCount": 3,
-      "proofs": [
+        },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
-          "lineNumber": 297,
-          "testName": "Authorize_ResolvesClientAndRedirectsToConsent",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 159,
+          "testName": "Exchange_ClientCredentials_ValidSecret_ReturnsSignInResult",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 120,
-          "testName": "DeleteClient_ReturnsNoContent_WhenAppExists",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 206,
+          "testName": "Exchange_ClientCredentials_InvalidSecret_ReturnsForbid",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
-          "lineNumber": 141,
-          "testName": "DeleteClient_ReturnsNotFound_WhenAppDoesNotExist",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 251,
+          "testName": "Exchange_ClientCredentials_ExpiredClient_ReturnsForbid",
           "details": null
         }
       ]
@@ -2365,7 +2413,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 351,
           "testName": "RegisterClient_PublicClient_SucceedsWithoutSecret",
           "details": null
@@ -2381,7 +2429,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 400,
           "testName": "RegisterClient_InvalidRedirectUri_ReturnsBadRequest",
           "details": null
@@ -2397,7 +2445,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 435,
           "testName": "RegisterClient_DynamicScopes_AddedToPermissions",
           "details": null
@@ -2413,7 +2461,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 475,
           "testName": "Exchange_PublicClient_ClientCredentials_ReturnsForbid",
           "details": null
@@ -2429,7 +2477,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
           "lineNumber": 516,
           "testName": "RegisterClient_WhenClosedRegistration_UnauthorizedUser_ReturnsForbidden",
           "details": null
@@ -2445,42 +2493,42 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 14,
           "testName": "EnsureVaultClientAsync_CreatesClient_WithAppRoleCredentials",
           "details": "Verifies that VaultSecretRetriever authenticates with HashiCorp Vault using AppRole credentials."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 35,
           "testName": "EnsureVaultClientAsync_LoadsFromSecretRepo_WhenConfigJsonHasAppRole",
           "details": "Verifies that VaultSecretRetriever loads AppRole credentials dynamically from repository."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs",
           "lineNumber": 87,
           "testName": "ReloadConfigAsync_ClearsClient_ForcesRecreation",
           "details": "Verifies that reloading config flushes cached Vault client and forces recreation."
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/SecretProvidersTab.test.tsx",
           "lineNumber": 19,
           "testName": "renders provider inputs and submits updated configuration",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/SecretProvidersTab.test.tsx",
           "lineNumber": 90,
           "testName": "handles Test Vault connection button with success and failure responses",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-sse-vault.spec.ts",
+          "filePath": "/app/frontend/e2e/full-ui-flow-sse-vault.spec.ts",
           "lineNumber": 8,
           "testName": "should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search",
           "details": null
@@ -2496,21 +2544,21 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 344,
           "testName": "StdioTransport_ShouldPassSecretViaEnvironmentVariables_AndNotCommandLine",
           "details": "Verifies that STDIO transport securely injects secret credentials via environment variables rather than command-line arguments."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 429,
           "testName": "StdioTransport_ShouldSanitizeAndMaskSecretsInLogs",
           "details": "Verifies that subprocess logs and stderr streams are actively sanitized to mask sensitive tokens and credentials."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/vault-approle-config-flow.spec.ts",
+          "filePath": "/app/frontend/e2e/vault-approle-config-flow.spec.ts",
           "lineNumber": 5,
           "testName": "should configure Vault AppRole credentials and test connection in settings",
           "details": null
@@ -2526,14 +2574,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/IdentityProviderTests.cs",
           "lineNumber": 360,
           "testName": "TrustedProxyHelper_AllowsXForwardedFor_WhenChainIsFullyTrusted",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/IdentityProviderTests.cs",
           "lineNumber": 419,
           "testName": "TrustedProxyHelper_ConfiguredProxyTrusted_CIDR",
           "details": null
@@ -2549,14 +2597,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs",
           "lineNumber": 12,
           "testName": "GetSecretAsync_ReturnsPlainString_WhenRegistryValueIsString",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/WindowsRegistrySecretRetrieverTests.cs",
           "lineNumber": 27,
           "testName": "GetSecretAsync_DecryptsDpapiBytes_WhenRegistryValueIsByteArray",
           "details": null
@@ -2572,7 +2620,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs",
           "lineNumber": 379,
           "testName": "SaveSecretProvider_WhenDecryptionFailed_DoesNotOverwriteCorruptPayload",
           "details": null
@@ -2588,7 +2636,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminMcpServerTests.cs",
           "lineNumber": 609,
           "testName": "CallToolAsync_AuditLog_RedactsSensitivePayloadData",
           "details": null
@@ -2604,7 +2652,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/AdminAutomationSkillTests.cs",
           "lineNumber": 352,
           "testName": "Gateway_BlankSlate_WithoutMasterKeyEnv_AutoGeneratesKeyFileAndBootsSuccessfully",
           "details": null
@@ -2620,7 +2668,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs",
           "lineNumber": 42,
           "testName": "GetDbEncryptionKey_AutoGenerates_WhenUnconfigured",
           "details": null
@@ -2636,7 +2684,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs",
           "lineNumber": 28,
           "testName": "GetDbEncryptionKey_UsesConfig_WhenProvided",
           "details": null
@@ -2652,7 +2700,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs",
           "lineNumber": 70,
           "testName": "GetRouterSecret_FallsBackToDbEncryptionKey_WhenDbEncryptionKeyProvided",
           "details": null
@@ -2668,7 +2716,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/EncryptionKeyProviderTests.cs",
           "lineNumber": 56,
           "testName": "GetRouterSecret_UsesConfig_WhenProvided",
           "details": null
@@ -2684,7 +2732,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 63,
           "testName": "ResolveDbEncryptionKey_AutoGeneratesAndPersistsKey_WhenBlankSlate",
           "details": null
@@ -2700,7 +2748,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 28,
           "testName": "ResolveDbEncryptionKey_ReturnsConfiguredEnvKey_WhenPresent",
           "details": null
@@ -2716,7 +2764,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 123,
           "testName": "ResolveDbEncryptionKey_FileSecretTakesPrecedenceOverKeyFile",
           "details": null
@@ -2732,7 +2780,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 45,
           "testName": "ResolveDbEncryptionKey_ReturnsFileSecret_WhenKeyFileSpecified",
           "details": null
@@ -2748,7 +2796,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 101,
           "testName": "ResolveDbEncryptionKey_EnvVarTakesPrecedenceOverFileSecretAndKeyFile",
           "details": null
@@ -2764,7 +2812,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 83,
           "testName": "ResolveDbEncryptionKey_LoadsExistingKeyFile_OnSubsequentBoot",
           "details": null
@@ -2780,7 +2828,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 144,
           "testName": "ResolveDbEncryptionKey_IdentifiesKeySourceAccurately",
           "details": null
@@ -2796,7 +2844,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 314,
           "testName": "SetCachedKey_UpdatesCachedKeyAndActiveKeySource",
           "details": null
@@ -2807,42 +2855,42 @@
       "id": "SEC-MASTERKEY-ATOMIC-REENCRYPTION",
       "category": "SEC",
       "type": "Positive",
-      "description": "Atomically re-encrypts database credentials when setting a custom master key.",
+      "description": "Rejects POST /api/config/master-key when key source is external.",
       "proofCount": 5,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "lineNumber": 452,
+          "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/app/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
           "lineNumber": 142,
           "testName": "SetMasterKey_AtomicallyReEncryptsDatabaseCredentials",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
           "lineNumber": 241,
           "testName": "SetMasterKey_RejectsWhenKeySourceIsExternalOrVault",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
           "lineNumber": 259,
           "testName": "AdminMcpServer_ManageSystem_SetMasterKey_ReencryptsCleanly",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/MasterKeyReEncryptionTests.cs",
           "lineNumber": 338,
           "testName": "SetMasterKey_RejectsInvalidOrShortKeys",
-          "details": null
-        },
-        {
-          "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 452,
-          "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
           "details": null
         }
       ]
@@ -2856,7 +2904,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/GeneralTab.test.tsx",
           "lineNumber": 192,
           "testName": "renders configured badge and rotate key button when master key is Configured",
           "details": null
@@ -2872,21 +2920,21 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/MasterKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/MasterKeyModal.test.tsx",
           "lineNumber": 6,
           "testName": "validates key inputs and submits custom master key to callback",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/MasterKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/MasterKeyModal.test.tsx",
           "lineNumber": 54,
           "testName": "generates a strong random master key when auto-generate button is clicked",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/MasterKeyModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/MasterKeyModal.test.tsx",
           "lineNumber": 85,
           "testName": "displays validation error when onSetMasterKey returns failure",
           "details": null
@@ -2902,7 +2950,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/GeneralTab.test.tsx",
           "lineNumber": 149,
           "testName": "renders locked badge when master key is managed externally",
           "details": null
@@ -2918,7 +2966,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/GeneralTab.test.tsx",
           "lineNumber": 115,
           "testName": "renders AutoGenerated warning banner and opens MasterKeyModal",
           "details": null
@@ -2934,7 +2982,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 191,
           "testName": "ResolveDbEncryptionKey_BootstrapsFromVault_WhenVaultConfigured",
           "details": null
@@ -2950,7 +2998,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/DbKeyHelperTests.cs",
           "lineNumber": 236,
           "testName": "ResolveDbEncryptionKey_BootstrapsFromVault_WithCustomPathAndKeyName",
           "details": null
@@ -2966,14 +3014,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SseTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/SseTransportTests.cs",
           "lineNumber": 11,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that SSE transport resolves plaintext API key when secret provider is None."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-http-direct.spec.ts",
+          "filePath": "/app/frontend/e2e/full-ui-flow-http-direct.spec.ts",
           "lineNumber": 8,
           "testName": "should register HTTP server with Direct Key, verify status badge, and execute tool in Test Bench",
           "details": null
@@ -2989,14 +3037,14 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/HttpTransportTests.cs",
           "lineNumber": 11,
           "testName": "ResolveTokenAsync_ReturnsApiKey_WhenProviderNone",
           "details": "Verifies that HTTP transport resolves plaintext API key when secret provider is None."
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-stdio-env.spec.ts",
+          "filePath": "/app/frontend/e2e/full-ui-flow-stdio-env.spec.ts",
           "lineNumber": 8,
           "testName": "should register STDIO server, verify card, and execute echo tool via Test Bench",
           "details": null
@@ -3012,35 +3060,35 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 49,
           "testName": "StdioTransport_ShouldInitializeAndCallToolSuccessfully",
           "details": "Verifies that STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 170,
           "testName": "StdioTransport_ShouldRouteStderrToLogs",
           "details": "Verifies that STDIO transport streams subprocess stderr asynchronously to logs."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 242,
           "testName": "StdioTransport_ShouldSupportCancellationAndProcessTreeTermination",
           "details": "Verifies that STDIO transport terminates subprocess tree cleanly upon disposal or cancellation."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 327,
           "testName": "StdioTransport_ParseCommandLine_Handles_Quotes_And_Spaces",
           "details": "Verifies that STDIO command-line tokenizer preserves quoted arguments and space escaping."
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/StdioTransportTests.cs",
           "lineNumber": 472,
           "testName": "StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately",
           "details": "Verifies that STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly."
@@ -3051,75 +3099,75 @@
       "id": "UI-01",
       "category": "UI",
       "type": "Positive",
-      "description": "Dashboard shows empty filter state when no servers match search term",
+      "description": "Navigation tab bars use centered alignment across top bar and sub bars.",
       "proofCount": 10,
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx",
-          "lineNumber": 115,
-          "testName": "renders empty state when no servers match search",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "filePath": "/app/frontend/src/test/components/LayoutCentering.test.tsx",
           "lineNumber": 19,
           "testName": "renders top navigation bar with centered alignment in layout.css and App",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "filePath": "/app/frontend/src/test/components/LayoutCentering.test.tsx",
           "lineNumber": 42,
           "testName": "renders tester tabs with centered alignment in tester.css",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "filePath": "/app/frontend/src/test/components/LayoutCentering.test.tsx",
           "lineNumber": 58,
           "testName": "renders SettingsView sub-navigation bar with centered alignment",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "filePath": "/app/frontend/src/test/components/LayoutCentering.test.tsx",
           "lineNumber": 74,
           "testName": "renders AppKeysCard sub-navigation tabs with centered alignment for admin",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "filePath": "/app/frontend/src/test/components/LayoutCentering.test.tsx",
           "lineNumber": 90,
           "testName": "uses body::before and body::after pseudo-elements for ambient gradients and removes background-decor DOM nodes",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx",
+          "filePath": "/app/frontend/src/test/components/LayoutCentering.test.tsx",
           "lineNumber": 117,
           "testName": "defines focus-visible outline indicators for interactive focus styling",
           "details": null
         },
         {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/components/DashboardView.test.tsx",
+          "lineNumber": 115,
+          "testName": "renders empty state when no servers match search",
+          "details": null
+        },
+        {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts",
+          "filePath": "/app/frontend/e2e/prompts-resources-customfiles.spec.ts",
           "lineNumber": 42,
           "testName": "should navigate to Custom Files and Prompts in Settings view",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts",
+          "filePath": "/app/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 23,
           "testName": "should display aggregate statistics cards",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts",
+          "filePath": "/app/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 37,
           "testName": "should filter servers using search input",
           "details": null
@@ -3135,42 +3183,42 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 61,
           "testName": "renders loading state when inspectLoading is true",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 79,
           "testName": "renders tools tab with schema and handles tab switching",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 116,
           "testName": "renders resources tab items and handles search filtering",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 144,
           "testName": "renders prompts tab with arguments and empty state when filtered out",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 166,
           "testName": "renders empty states for tabs when data is empty",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 194,
           "testName": "closes modal when close button is clicked",
           "details": null
@@ -3186,14 +3234,14 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "/app/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 63,
           "testName": "renders grouped server view by category and allows collapsing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "/app/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 90,
           "testName": "renders grouped server view by status and type",
           "details": null
@@ -3209,49 +3257,49 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 77,
           "testName": "filters tools by selected server and handles tool change",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 106,
           "testName": "filters custom tools with no namespace prefix when selectedServer is custom",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 131,
           "testName": "renders dynamic fields for boolean, number, string, array, and object types",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 178,
           "testName": "renders empty state when selected tool takes no arguments",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 203,
           "testName": "switches to raw JSON tab and handles raw JSON editing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 242,
           "testName": "handles form submission",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts",
+          "filePath": "/app/frontend/e2e/prompts-resources-customfiles.spec.ts",
           "lineNumber": 5,
           "testName": "should interact with Prompt Tester and Resource Tester cards in Test Bench",
           "details": null
@@ -3267,7 +3315,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
           "lineNumber": 240,
           "testName": "Pipeline_Settings_Branding_ReadWrite",
           "details": null
@@ -3283,7 +3331,7 @@
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
+          "filePath": "/app/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
           "lineNumber": 418,
           "testName": "Branding_Logo_Upload_And_Retrieval_Works",
           "details": null
@@ -3299,14 +3347,14 @@
       "proofs": [
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/layout-inspector.spec.ts",
+          "filePath": "/app/frontend/e2e/layout-inspector.spec.ts",
           "lineNumber": 38,
           "testName": "should pass layout audit on desktop 1080p viewport",
           "details": null
         },
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/layout-inspector.spec.ts",
+          "filePath": "/app/frontend/e2e/layout-inspector.spec.ts",
           "lineNumber": 64,
           "testName": "should pass layout audit on Samsung Galaxy S25\u002B mobile viewport",
           "details": null
@@ -3322,7 +3370,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/DashboardView.test.tsx",
+          "filePath": "/app/frontend/src/test/components/DashboardView.test.tsx",
           "lineNumber": 1,
           "testName": "renders stats card, server list, and client setup guide",
           "details": null
@@ -3338,7 +3386,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ToolTesterCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ToolTesterCard.test.tsx",
           "lineNumber": 1,
           "testName": "renders initial server and tool selection options",
           "details": null
@@ -3354,7 +3402,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "filePath": "/app/frontend/src/test/pages/MyMcpServers.test.tsx",
           "lineNumber": 102,
           "testName": "renders client setup guide below credentials card",
           "details": null
@@ -3370,7 +3418,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ServerInspectModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ServerInspectModal.test.tsx",
           "lineNumber": 1,
           "testName": "renders nothing when isInspectOpen is false",
           "details": null
@@ -3386,7 +3434,7 @@
       "proofs": [
         {
           "suite": "Playwright E2E",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts",
+          "filePath": "/app/frontend/e2e/dashboard.spec.ts",
           "lineNumber": 1,
           "testName": "should render the dashboard layout and header components",
           "details": null
@@ -3402,21 +3450,21 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ClientModal.test.tsx",
           "lineNumber": 21,
           "testName": "renders client registration form with rich OAuth fields and cancel button",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ClientModal.test.tsx",
           "lineNumber": 49,
           "testName": "submits registration form with parsed scopes array and OAuth metadata",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/ClientModal.test.tsx",
           "lineNumber": 88,
           "testName": "renders one-time secret display result card with copy buttons when createdClientResult is populated",
           "details": null
@@ -3427,42 +3475,42 @@
       "id": "UI-31",
       "category": "UI",
       "type": "Positive",
-      "description": "Fetches registered OAuth clients and updates store state.",
+      "description": "Fetches clients on mount and renders table headers and action buttons.",
       "proofCount": 5,
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 31,
-          "testName": "fetches registered clients and updates state",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/RegisteredClientsCard.test.tsx",
           "lineNumber": 42,
           "testName": "renders header, register button, and calls fetchClients on mount",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/RegisteredClientsCard.test.tsx",
           "lineNumber": 67,
           "testName": "renders empty state when no registered clients exist",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/RegisteredClientsCard.test.tsx",
           "lineNumber": 84,
           "testName": "renders rich client columns and handles client ID copy",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
+          "filePath": "/app/frontend/src/test/components/RegisteredClientsCard.test.tsx",
           "lineNumber": 130,
           "testName": "triggers deleteClient when Delete button is clicked",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 31,
+          "testName": "fetches registered clients and updates state",
           "details": null
         }
       ]
@@ -3476,7 +3524,7 @@
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 64,
           "testName": "creates client with one-time secret result and refreshes list",
           "details": null
@@ -3487,105 +3535,105 @@
       "id": "UI-CONFIRM-MODAL",
       "category": "UI",
       "type": "Negative",
-      "description": "Deletes an access policy when confirmed via confirm modal.",
+      "description": "Prompts confirmation modal and deletes server when confirmed.",
       "proofCount": 14,
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 76,
-          "testName": "deletes a policy when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 105,
-          "testName": "does not delete policy when confirm is cancelled",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 166,
-          "testName": "deletes a group mapping when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 195,
-          "testName": "does not delete group mapping when confirm is cancelled",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 222,
-          "testName": "deletes a custom file when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts",
-          "lineNumber": 251,
-          "testName": "does not delete custom file when confirm is cancelled",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 123,
-          "testName": "prompts confirmation and deletes client when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 152,
-          "testName": "cancels deletion when user denies confirmation",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 385,
-          "testName": "confirms and revokes AppKey and refreshes list",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 414,
-          "testName": "cancels revocation when confirm is rejected",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 506,
-          "testName": "prompts confirmation modal and resets user quota when confirmed",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 536,
-          "testName": "cancels quota reset when user denies confirmation",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
+          "filePath": "/app/frontend/src/test/stores/useServerStore.test.ts",
           "lineNumber": 203,
           "testName": "prompts window.confirm and deletes server when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts",
+          "filePath": "/app/frontend/src/test/stores/useServerStore.test.ts",
           "lineNumber": 232,
           "testName": "does not send delete request when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 76,
+          "testName": "deletes a policy when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 105,
+          "testName": "does not delete policy when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 166,
+          "testName": "deletes a group mapping when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 195,
+          "testName": "does not delete group mapping when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 222,
+          "testName": "deletes a custom file when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/usePolicyStore.test.ts",
+          "lineNumber": 251,
+          "testName": "does not delete custom file when confirm is cancelled",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 123,
+          "testName": "prompts confirmation and deletes client when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 152,
+          "testName": "cancels deletion when user denies confirmation",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 385,
+          "testName": "confirms and revokes AppKey and refreshes list",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 414,
+          "testName": "cancels revocation when confirm is rejected",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 506,
+          "testName": "prompts confirmation modal and resets user quota when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 536,
+          "testName": "cancels quota reset when user denies confirmation",
           "details": null
         }
       ]
@@ -3594,63 +3642,63 @@
       "id": "UI-TOAST-TRANSITION",
       "category": "UI",
       "type": "Negative",
-      "description": "Displays error toast notification when saving invalid JSON credentials for user-provided server.",
+      "description": "Displays error toast notification when switching from invalid JSON to Visual Prompt Builder.",
       "proofCount": 8,
       "proofs": [
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 23,
-          "testName": "shows error toast when saving invalid JSON credentials",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx",
-          "lineNumber": 64,
-          "testName": "saves valid credentials successfully and closes modal",
-          "details": null
-        },
-        {
-          "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/CustomFileModal.test.tsx",
           "lineNumber": 88,
           "testName": "shows error toast when switching from invalid JSON to Visual Prompt Builder",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/CustomFileModal.test.tsx",
           "lineNumber": 109,
           "testName": "shows error toast when saving without a file name",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/CustomFileModal.test.tsx",
+          "filePath": "/app/frontend/src/test/components/CustomFileModal.test.tsx",
           "lineNumber": 129,
           "testName": "shows error toast when saving prompt with invalid JSON content",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/SecretProvidersTab.test.tsx",
+          "lineNumber": 63,
+          "testName": "displays error toast when saving secret providers fails",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 99,
           "testName": "saves updated Active Directory configuration JSON",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/IdentityAuthTab.test.tsx",
+          "filePath": "/app/frontend/src/test/components/IdentityAuthTab.test.tsx",
           "lineNumber": 138,
           "testName": "displays error toast when saving auth providers fails",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
-          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx",
-          "lineNumber": 63,
-          "testName": "displays error toast when saving secret providers fails",
+          "filePath": "/app/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 23,
+          "testName": "shows error toast when saving invalid JSON credentials",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/app/frontend/src/test/pages/MyMcpServers.test.tsx",
+          "lineNumber": 64,
+          "testName": "saves valid credentials successfully and closes modal",
           "details": null
         }
       ]

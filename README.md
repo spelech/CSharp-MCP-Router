@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.2.1-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.3.0-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -237,6 +237,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.3.0`** | 2026-08-30 | feat(mcp): Multi Round-Trip Requests (MRTR) pattern support (MCP 2026-07-28 spec); `McpInputRequiredResult` (`resultType: "input_required"`, `inputRequests`), `inputResponses` forwarding in direct & meta-mode (`execute_tool`), and input schemas |
 | **`v5.2.1`** | 2026-08-30 | feat(oauth): MCP Authorization Specification (2026-07-28) & RFC 7591 compliance; OpenIddict global scope registration & dynamic scope permissions eliminating `invalid_scope` (`ID2052`) errors; RFC 7591 public client DCR with PKCE (`token_endpoint_auth_method: "none"` / native apps); structured RFC 7591 error formatting; and canonical RFC 9728 `authorization_servers` discovery |
 | **`v5.1.0`** | 2026-08-30 | feat(oauth): dedicated `OAuthClients` persistence isolation for RFC 7591 Dynamic Client Registration (DCR) and manual OAuth applications across SQLite, MSSQL, and MySQL; SHA-256 one-way client secret hashing; rich metadata support (`redirect_uris`, `grant_types`, `scopes`, `client_type`); and enhanced Web UI management card and modal |
 | **`v5.0.7`** | 2026-08-30 | fix(oauth): enable OpenIddict server degraded mode (`EnableDegradedMode()`) to support custom credential and SQLite stores without default EF Core provider requirements, and enhance `/oauth/authorize` authentication handling |

@@ -46,6 +46,7 @@ namespace ModelContextGateway.Core.Routing
                         {
                             name = new { type = "string", description = "The exact name of the tool to execute (e.g., 'docker/list_containers')." },
                             arguments = new { type = "object", description = "The arguments JSON object expected by the target tool." },
+                            inputResponses = new { type = "object", description = "Optional user input responses to previous inputRequests when retrying a request that returned resultType 'input_required'." },
                             target_auth_token = new { type = "string", description = "Optional authentication token if the backend tool requires dynamic pass-through authorization." }
                         },
                         required = new[] { "name", "arguments" }
