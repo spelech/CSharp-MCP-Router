@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T01:34:08.3757828Z",
+    "generatedAt": "2026-08-31T01:40:33.9064908Z",
     "totalRequirements": 135,
     "positiveCount": 112,
     "guardrailCount": 23,
-    "totalProofs": 300
+    "totalProofs": 306
   },
   "requirements": [
     {
@@ -1024,7 +1024,7 @@
       "category": "DB",
       "type": "Positive",
       "description": "SQLite upgrade migration automatically provisions OAuthClients table on legacy database",
-      "proofCount": 4,
+      "proofCount": 10,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1046,6 +1046,48 @@
           "lineNumber": 565,
           "testName": "MySql_Migration004_DeclaresOAuthClientsTableAndProcedures",
           "details": "Verifies that MySQL migration 004 declares OAuthClients table and procedures."
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 71,
+          "testName": "SaveAndGetOAuthClientById_Success",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 108,
+          "testName": "SaveOAuthClient_UpdateExisting_Success",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 150,
+          "testName": "GetOAuthClients_ReturnsAllClientsOrderedByCreatedAt",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 177,
+          "testName": "DeleteOAuthClient_ExistingClient_ReturnsTrueAndRemovesClient",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 198,
+          "testName": "DeleteOAuthClient_NonExistentClient_ReturnsFalse",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 206,
+          "testName": "GetOAuthClientById_NonExistentClient_ReturnsNull",
+          "details": null
         },
         {
           "suite": "Backend xUnit",

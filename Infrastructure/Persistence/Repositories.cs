@@ -41,6 +41,14 @@ namespace ModelContextGateway.Infrastructure.Persistence
         Task DeleteUserQuotaAsync(string username);
     }
 
+    public interface IOAuthClientRepository
+    {
+        Task<IEnumerable<OAuthClient>> GetOAuthClientsAsync();
+        Task<OAuthClient?> GetOAuthClientByIdAsync(string clientId);
+        Task SaveOAuthClientAsync(OAuthClient client);
+        Task<bool> DeleteOAuthClientAsync(string clientId);
+    }
+
     public interface ISecretProviderRepository
     {
         Task<IEnumerable<SecretProviderDto>> GetSecretProvidersAsync();
@@ -77,6 +85,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
         IAuthProviderRepository,
         IUserCredentialRepository,
         IUserQuotaRepository,
+        IOAuthClientRepository,
         IMasterKeyManager
     {
         private readonly IDbConnectionFactory _dbFactory;
@@ -746,6 +755,179 @@ namespace ModelContextGateway.Infrastructure.Persistence
             await conn.ExecuteAsync(
                 "DELETE FROM UserQuotas WHERE Username = @Username;",
                 new { Username = username });
+        }
+
+        // ==========================================
+        // IOAuthClientRepository
+        // ==========================================
+        public async Task<IEnumerable<OAuthClient>> GetOAuthClientsAsync()
+        {
+            using var conn = _dbFactory.CreateConnection();
+            var provider = _dbFactory.ProviderName.ToLowerInvariant();
+
+            if (provider == "sqlite")
+            {
+                return await conn.QueryAsync<OAuthClient>(@"
+                    SELECT ClientId, ClientSecretHash, ClientName, ClientType,
+                           RedirectUrisJson, GrantTypesJson, ScopesJson,
+                           OwnerSid, CreatedBy, ExpiresAt, CreatedAt
+                    FROM OAuthClients
+                    ORDER BY CreatedAt DESC;");
+            }
+            else if (provider == "mysql")
+            {
+                return await conn.QueryAsync<OAuthClient>(
+                    "sp_GetOAuthClients",
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+            else
+            {
+                return await conn.QueryAsync<OAuthClient>(
+                    "sp_GetOAuthClients",
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
+
+        public async Task<OAuthClient?> GetOAuthClientByIdAsync(string clientId)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            var provider = _dbFactory.ProviderName.ToLowerInvariant();
+
+            if (provider == "sqlite")
+            {
+                return await conn.QueryFirstOrDefaultAsync<OAuthClient>(@"
+                    SELECT ClientId, ClientSecretHash, ClientName, ClientType,
+                           RedirectUrisJson, GrantTypesJson, ScopesJson,
+                           OwnerSid, CreatedBy, ExpiresAt, CreatedAt
+                    FROM OAuthClients
+                    WHERE ClientId = @ClientId;",
+                    new { ClientId = clientId });
+            }
+            else if (provider == "mysql")
+            {
+                return await conn.QueryFirstOrDefaultAsync<OAuthClient>(
+                    "sp_GetOAuthClientById",
+                    new { p_ClientId = clientId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+            else
+            {
+                return await conn.QueryFirstOrDefaultAsync<OAuthClient>(
+                    "sp_GetOAuthClientById",
+                    new { ClientId = clientId },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
+
+        public async Task SaveOAuthClientAsync(OAuthClient client)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            var provider = _dbFactory.ProviderName.ToLowerInvariant();
+
+            if (provider == "sqlite")
+            {
+                const string sql = @"
+                    INSERT INTO OAuthClients (ClientId, ClientSecretHash, ClientName, ClientType, RedirectUrisJson, GrantTypesJson, ScopesJson, OwnerSid, CreatedBy, ExpiresAt, CreatedAt)
+                    VALUES (@ClientId, @ClientSecretHash, @ClientName, @ClientType, @RedirectUrisJson, @GrantTypesJson, @ScopesJson, @OwnerSid, @CreatedBy, @ExpiresAt, @CreatedAt)
+                    ON CONFLICT(ClientId) DO UPDATE SET
+                        ClientSecretHash = @ClientSecretHash,
+                        ClientName = @ClientName,
+                        ClientType = @ClientType,
+                        RedirectUrisJson = @RedirectUrisJson,
+                        GrantTypesJson = @GrantTypesJson,
+                        ScopesJson = @ScopesJson,
+                        OwnerSid = @OwnerSid,
+                        CreatedBy = @CreatedBy,
+                        ExpiresAt = @ExpiresAt;";
+                await conn.ExecuteAsync(sql, new
+                {
+                    client.ClientId,
+                    ClientSecretHash = client.ClientSecretHash ?? "",
+                    client.ClientName,
+                    ClientType = string.IsNullOrEmpty(client.ClientType) ? "confidential" : client.ClientType,
+                    RedirectUrisJson = client.RedirectUrisJson ?? "[]",
+                    GrantTypesJson = client.GrantTypesJson ?? "[]",
+                    ScopesJson = client.ScopesJson ?? "[]",
+                    OwnerSid = client.OwnerSid ?? "",
+                    CreatedBy = client.CreatedBy ?? "",
+                    client.ExpiresAt,
+                    client.CreatedAt
+                });
+            }
+            else if (provider == "mysql")
+            {
+                await conn.ExecuteAsync(
+                    "sp_SaveOAuthClient",
+                    new
+                    {
+                        p_ClientId = client.ClientId,
+                        p_ClientSecretHash = client.ClientSecretHash ?? "",
+                        p_ClientName = client.ClientName,
+                        p_ClientType = string.IsNullOrEmpty(client.ClientType) ? "confidential" : client.ClientType,
+                        p_RedirectUrisJson = client.RedirectUrisJson ?? "[]",
+                        p_GrantTypesJson = client.GrantTypesJson ?? "[]",
+                        p_ScopesJson = client.ScopesJson ?? "[]",
+                        p_OwnerSid = client.OwnerSid ?? "",
+                        p_CreatedBy = client.CreatedBy ?? "",
+                        p_ExpiresAt = client.ExpiresAt
+                    },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+            else
+            {
+                await conn.ExecuteAsync(
+                    "sp_SaveOAuthClient",
+                    new
+                    {
+                        client.ClientId,
+                        ClientSecretHash = client.ClientSecretHash ?? "",
+                        client.ClientName,
+                        ClientType = string.IsNullOrEmpty(client.ClientType) ? "confidential" : client.ClientType,
+                        RedirectUrisJson = client.RedirectUrisJson ?? "[]",
+                        GrantTypesJson = client.GrantTypesJson ?? "[]",
+                        ScopesJson = client.ScopesJson ?? "[]",
+                        OwnerSid = client.OwnerSid ?? "",
+                        CreatedBy = client.CreatedBy ?? "",
+                        client.ExpiresAt
+                    },
+                    commandType: CommandType.StoredProcedure
+                );
+            }
+        }
+
+        public async Task<bool> DeleteOAuthClientAsync(string clientId)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            var provider = _dbFactory.ProviderName.ToLowerInvariant();
+
+            if (provider == "sqlite")
+            {
+                var affected = await conn.ExecuteAsync("DELETE FROM OAuthClients WHERE ClientId = @ClientId;", new { ClientId = clientId });
+                return affected > 0;
+            }
+            else if (provider == "mysql")
+            {
+                var affected = await conn.ExecuteAsync(
+                    "sp_DeleteOAuthClient",
+                    new { p_ClientId = clientId },
+                    commandType: CommandType.StoredProcedure
+                );
+                return affected > 0;
+            }
+            else
+            {
+                var affected = await conn.ExecuteAsync(
+                    "sp_DeleteOAuthClient",
+                    new { ClientId = clientId },
+                    commandType: CommandType.StoredProcedure
+                );
+                return affected > 0 || affected == -1;
+            }
         }
 
         // ==========================================

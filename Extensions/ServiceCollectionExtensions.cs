@@ -85,6 +85,7 @@ namespace ModelContextGateway.Extensions
             builder.Services.AddSingleton<IAuthProviderRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
             builder.Services.AddSingleton<IUserCredentialRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
             builder.Services.AddSingleton<IUserQuotaRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
+            builder.Services.AddSingleton<IOAuthClientRepository>(sp => sp.GetRequiredService<DatabaseRepository>());
             builder.Services.AddSingleton<IMasterKeyManager>(sp => sp.GetRequiredService<DatabaseRepository>());
 
             // Register Credential Service
