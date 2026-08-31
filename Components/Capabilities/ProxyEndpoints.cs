@@ -347,7 +347,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             }
@@ -370,7 +371,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             }
@@ -730,7 +732,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new { name = serverName, version = AppVersion }
                             }
@@ -745,7 +748,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new { name = serverName, version = AppVersion }
                             }
@@ -841,7 +845,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new
                                 {
@@ -868,7 +873,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { subscribe = false, listChanged = true },
+                                    extensions = new { }
                                 },
                                 serverInfo = new
                                 {

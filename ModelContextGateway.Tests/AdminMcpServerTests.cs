@@ -234,6 +234,7 @@ namespace ModelContextGateway.Tests
             using var docDefault = JsonDocument.Parse(jsonDefault);
             Assert.Equal("2026-07-28", docDefault.RootElement.GetProperty("protocolVersion").GetString());
             Assert.Equal("Model-Context-Gateway-Admin", docDefault.RootElement.GetProperty("serverInfo").GetProperty("name").GetString());
+            Assert.True(docDefault.RootElement.GetProperty("capabilities").TryGetProperty("extensions", out _));
 
             // Backward compatibility negotiation to 2024-11-05
             var params2024 = JsonDocument.Parse("{\"protocolVersion\":\"2024-11-05\"}").RootElement;
