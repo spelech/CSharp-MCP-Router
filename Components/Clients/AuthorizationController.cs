@@ -256,6 +256,12 @@ namespace ModelContextGateway.Components.Clients
                 var encodedName = Uri.EscapeDataString(clientName);
                 qs = string.IsNullOrEmpty(qs) ? $"?client_name={encodedName}" : $"{qs}&client_name={encodedName}";
             }
+            if (!qs.Contains("iss="))
+            {
+                var issuer = $"{HttpContext.Request.Scheme}://{HttpContext.Request.Host}".TrimEnd('/');
+                var encodedIss = Uri.EscapeDataString(issuer);
+                qs = string.IsNullOrEmpty(qs) ? $"?iss={encodedIss}" : $"{qs}&iss={encodedIss}";
+            }
             return Redirect($"/consent{qs}");
         }
 
