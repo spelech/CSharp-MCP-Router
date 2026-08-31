@@ -99,13 +99,10 @@ namespace ModelContextGateway.Core.Routing
                     }
                     if (sessionManager != null)
                     {
-                        serverTools = serverTools.OrderBy(t => GetToolName(t), StringComparer.Ordinal).ToList();
                         sessionManager.SetServerToolsCache(item.ServerId, serverTools);
                     }
                 }
             }
-
-            allTools = allTools.OrderBy(t => GetToolName(t), StringComparer.Ordinal).ToList();
 
             lock (_cacheLock)
             {

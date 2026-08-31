@@ -17,41 +17,9 @@ namespace ModelContextGateway.Core.Routing
         /// </summary>
         public ConcurrentDictionary<string, string> ToolRoutingTable => _toolRoutingTable;
 
-        public static string GetToolName(object tool)
-        {
-            if (tool == null)
-            {
-                return string.Empty;
-            }
-
-            if (tool is IDictionary<string, object> dict)
-            {
-                if (dict.TryGetValue("name", out var nameObj) && nameObj != null)
-                {
-                    return nameObj.ToString() ?? string.Empty;
-                }
-            }
-
-            if (tool is System.Text.Json.JsonElement elem)
-            {
-                if (elem.ValueKind == System.Text.Json.JsonValueKind.Object && elem.TryGetProperty("name", out var nameProp))
-                {
-                    return nameProp.GetString() ?? string.Empty;
-                }
-            }
-
-            var prop = tool.GetType().GetProperty("name") ?? tool.GetType().GetProperty("Name");
-            if (prop != null)
-            {
-                return prop.GetValue(tool)?.ToString() ?? string.Empty;
-            }
-
-            return string.Empty;
-        }
-
         public static List<object> GetMetaModeTools()
         {
-            var metaTools = new List<object>
+            return new List<object>
             {
                 new
                 {
@@ -84,8 +52,6 @@ namespace ModelContextGateway.Core.Routing
                     }
                 }
             };
-
-            return metaTools.OrderBy(t => GetToolName(t), StringComparer.Ordinal).ToList();
         }
 
         public void InvalidateCache()

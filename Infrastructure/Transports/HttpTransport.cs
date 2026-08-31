@@ -15,6 +15,7 @@ namespace ModelContextGateway.Infrastructure.Transports
         private readonly ILogger _logger;
         private readonly ISecretRetriever? _secretRetriever;
         private readonly CancellationTokenSource _cts = new();
+        private string _sessionId = string.Empty;
 
         public HttpTransport(McpServer server, HttpClient httpClient, ILogger logger, ISecretRetriever? secretRetriever = null, string? passThroughToken = null, System.Security.Principal.WindowsIdentity? callerWindowsIdentity = null, string? forwardedUser = null)
         {
@@ -202,14 +203,11 @@ namespace ModelContextGateway.Infrastructure.Transports
             req.Headers.Host = "localhost";
             req.Headers.Accept.Clear();
             req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
-            var (mcpMethod, mcpName) = SseTransport.ExtractMcpHeaderMetadata(bodyJson, method);
-            if (!string.IsNullOrEmpty(mcpMethod))
+            req.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("text/event-stream"));
+
+            if (!string.IsNullOrEmpty(_sessionId))
             {
-                req.Headers.TryAddWithoutValidation("Mcp-Method", mcpMethod);
-            }
-            if (!string.IsNullOrEmpty(mcpName))
-            {
-                req.Headers.TryAddWithoutValidation("Mcp-Name", mcpName);
+                req.Headers.TryAddWithoutValidation("Mcp-Session-Id", _sessionId);
             }
 
             await ApplyAuthAndCustomHeadersAsync(req);
@@ -269,6 +267,15 @@ namespace ModelContextGateway.Infrastructure.Transports
             }
 
             resp.EnsureSuccessStatusCode();
+
+            if (resp.Headers.TryGetValues("Mcp-Session-Id", out var sVals))
+            {
+                _sessionId = sVals.FirstOrDefault() ?? _sessionId;
+            }
+            else if (resp.Content.Headers.TryGetValues("Mcp-Session-Id", out var scVals))
+            {
+                _sessionId = scVals.FirstOrDefault() ?? _sessionId;
+            }
 
             string responseBody = string.Empty;
             using (var stream = await resp.Content.ReadAsStreamAsync(linked.Token))
