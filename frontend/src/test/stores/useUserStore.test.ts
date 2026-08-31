@@ -8,7 +8,7 @@ describe('useUserStore', () => {
   it('should initialize with default values', () => {
     const state = useUserStore.getState();
     expect(state.user).toBeNull();
-    expect(state.version).toBe('5.0.6');
+    expect(state.version).toBe('5.0.7');
     expect(state.service).toBe('ModelContextGateway');
     expect(state.isLoadingUser).toBe(false);
   });
@@ -91,12 +91,12 @@ describe('useUserStore', () => {
 
     it('keeps existing fallback version on error', async () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
-      useUserStore.setState({ version: '5.0.6', service: 'ModelContextGateway' });
+      useUserStore.setState({ version: '5.0.7', service: 'ModelContextGateway' });
       mockApiResponse('/health', 'Service Unavailable', 503, 'Service Unavailable');
 
       await useUserStore.getState().loadVersion();
 
-      expect(useUserStore.getState().version).toBe('5.0.6');
+      expect(useUserStore.getState().version).toBe('5.0.7');
       expect(useUserStore.getState().service).toBe('ModelContextGateway');
       expect(consoleSpy).toHaveBeenCalled();
       consoleSpy.mockRestore();

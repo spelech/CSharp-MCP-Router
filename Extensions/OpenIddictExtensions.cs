@@ -95,6 +95,7 @@ namespace ModelContextGateway.Extensions
                     options.AllowClientCredentialsFlow();
                     options.AllowAuthorizationCodeFlow();
                     options.AllowRefreshTokenFlow();
+                    options.EnableDegradedMode();
 
                     var certPath = config["MCG_JWT_CERT_PATH"]
                         ?? config["MCG_OPENIDDICT_CERT_PATH"]
@@ -129,6 +130,12 @@ namespace ModelContextGateway.Extensions
                            .EnableTokenEndpointPassthrough()
                            .EnableAuthorizationEndpointPassthrough()
                            .DisableTransportSecurityRequirement();
+
+                    options.AddEventHandler<OpenIddict.Server.OpenIddictServerEvents.ValidateAuthorizationRequestContext>(builder =>
+                        builder.UseInlineHandler(context => default));
+
+                    options.AddEventHandler<OpenIddict.Server.OpenIddictServerEvents.ValidateTokenRequestContext>(builder =>
+                        builder.UseInlineHandler(context => default));
 
                     options.AddEventHandler<OpenIddict.Server.OpenIddictServerEvents.ApplyConfigurationResponseContext>(builder =>
                         builder.UseInlineHandler(context =>

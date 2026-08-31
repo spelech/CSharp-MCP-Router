@@ -160,14 +160,35 @@ namespace ModelContextGateway.Components.Clients
             var request = HttpContext.GetOpenIddictServerRequest() ??
                 throw new InvalidOperationException("The OpenID Connect request cannot be retrieved.");
 
-            // Attempt to authenticate the user using either OIDC Headers or AppKey
+            // Attempt to authenticate the user using either OIDC Headers, AppKey, or standard auth
             var result = await HttpContext.AuthenticateAsync("OidcHeader");
             if (!result.Succeeded || result.Principal == null)
             {
                 result = await HttpContext.AuthenticateAsync("AppKey");
             }
-
             if (!result.Succeeded || result.Principal == null)
+            {
+                result = await HttpContext.AuthenticateAsync();
+            }
+
+            var principal = (result.Succeeded && result.Principal != null) ? result.Principal : User;
+            var config = HttpContext.RequestServices.GetService<Microsoft.Extensions.Configuration.IConfiguration>();
+
+            if (principal?.Identity?.IsAuthenticated != true)
+            {
+                if (config != null && SecurityValidationHelper.IsStandaloneAdminNetwork(HttpContext.Connection.RemoteIpAddress, config))
+                {
+                    if (!SecurityValidationHelper.HasExternalIdp(config, HttpContext))
+                    {
+                        var standaloneIdentity = new ClaimsIdentity("Standalone");
+                        standaloneIdentity.AddClaim(new Claim(ClaimTypes.Name, "admin"));
+                        standaloneIdentity.AddClaim(new Claim(ClaimTypes.Role, "Administrator"));
+                        principal = new ClaimsPrincipal(standaloneIdentity);
+                    }
+                }
+            }
+
+            if (principal?.Identity?.IsAuthenticated != true)
             {
                 return Content("<html><body><div style='font-family:sans-serif; text-align:center; padding-top: 50px;'><h1>Access Denied</h1><p>Please authenticate through your SSO portal or provide valid proxy headers to access this consent screen.</p></div></body></html>", "text/html");
             }
@@ -179,7 +200,7 @@ namespace ModelContextGateway.Components.Clients
             }
 
             var clientName = await GetDisplayNameAsync(application) ?? request.ClientId!;
-            var username = result.Principal.Identity?.Name ?? "Unknown";
+            var username = principal.Identity?.Name ?? "Unknown";
 
             // Handle Form Post (Accept/Deny)
             if (HttpMethods.IsPost(HttpContext.Request.Method))
@@ -191,8 +212,12 @@ namespace ModelContextGateway.Components.Clients
                 }
 
                 // Accept
-                var identity = new ClaimsIdentity(result.Principal.Claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-                identity.AddClaim(OpenIddictConstants.Claims.Subject, username);
+                var claims = principal.Claims.ToList();
+                if (!claims.Any(c => c.Type == OpenIddictConstants.Claims.Subject))
+                {
+                    claims.Add(new Claim(OpenIddictConstants.Claims.Subject, username));
+                }
+                var identity = new ClaimsIdentity(claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
                 identity.SetDestinations(static claim => new[] { OpenIddictConstants.Destinations.AccessToken });
 
                 return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
