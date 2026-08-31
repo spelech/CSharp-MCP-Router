@@ -141,6 +141,8 @@ namespace ModelContextGateway.Tests
             Assert.True(root.TryGetProperty("result", out var resultProp));
             Assert.True(resultProp.TryGetProperty("protocolVersion", out var protoProp));
             Assert.Equal("2026-07-28", protoProp.GetString());
+            Assert.True(resultProp.TryGetProperty("capabilities", out var capsProp));
+            Assert.True(capsProp.TryGetProperty("extensions", out _));
             Assert.True(resultProp.TryGetProperty("serverInfo", out var serverInfoProp));
             Assert.True(serverInfoProp.TryGetProperty("name", out var nameProp));
             Assert.Equal("Model-Context-Gateway-Admin", nameProp.GetString());

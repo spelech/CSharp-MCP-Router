@@ -10,6 +10,7 @@ This document summarizes the internal architecture, security mechanisms, design 
 
 ### 1. Performance & Latency Requirements
 - **Sub-millisecond Routing Decision**: The gateway annotates request metadata based on headers (`Mcp-Method` and `Mcp-Name` compliant with the MCP 2026-07-28 Spec) without having to read or buffer the request body if present, enabling downstream components to inspect annotated metadata. Routing is ultimately body/path based.
+- **MCP 2026-07-28 Spec Deprecation Tracking**: Roots (`roots/list`), Sampling (`sampling/createMessage`), Logging (`notifications/message`, `logging/setLevel`), and HTTP+SSE transport (`/sse`) are reclassified/deprecated with migration path to Streamable HTTP. Runtime deprecation warnings (`[Deprecated Spec MCP 2026-07-28]`) are logged while retaining backward compatibility.
 - **Concurrent Request Handling**: Highly thread-safe design. The router manages simultaneous SSE client channels, background health probes, and on-demand semantic search requests using thread-safe state wrappers (`ConcurrentDictionary` and thread-safe locks).
 - **Background Startup Warming**: Embedding models, backend connection channels, and configuration caches are preloaded asynchronously during server initialization (`ClientSession.BackendInitializer.cs`). This prevents first-request latency spikes (cold starts).
 
