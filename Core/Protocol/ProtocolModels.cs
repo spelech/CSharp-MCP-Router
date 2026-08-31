@@ -157,4 +157,41 @@ namespace ModelContextGateway.Core.Protocol
         [JsonPropertyName("version")]
         public string Version { get; set; } = GatewayMetadata.Version;
     }
+
+    // Multi Round-Trip Requests (MRTR) Models
+    public class McpInputRequiredResult
+    {
+        [JsonPropertyName("resultType")]
+        public string ResultType { get; set; } = "input_required";
+
+        [JsonPropertyName("inputRequests")]
+        public List<McpInputRequest> InputRequests { get; set; } = new();
+    }
+
+    public class McpInputRequest
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = string.Empty;
+
+        [JsonPropertyName("type")]
+        public string Type { get; set; } = "text";
+
+        [JsonPropertyName("message")]
+        public string? Message { get; set; }
+
+        [JsonPropertyName("required")]
+        public bool Required { get; set; } = true;
+
+        [JsonPropertyName("schema")]
+        public JsonElement? Schema { get; set; }
+    }
+
+    public class McpInputResponse
+    {
+        [JsonPropertyName("id")]
+        public string Id { get; set; } = string.Empty;
+
+        [JsonPropertyName("value")]
+        public object? Value { get; set; }
+    }
 }
