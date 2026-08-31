@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **147 Requirements Verified** across **346 Test Proofs** (118 Functional Capabilities, 29 Safety Guardrails).
+> **Catalog Statistics:** **150 Requirements Verified** across **349 Test Proofs** (121 Functional Capabilities, 29 Safety Guardrails).
 
 ---
 
@@ -14,7 +14,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **3** | 3 | 0 | 20 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 44 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **38** | 38 | 0 | 39 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **41** | 41 | 0 | 42 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **38** | 29 | 9 | 65 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **17** | 15 | 2 | 67 proofs |
@@ -514,6 +514,24 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L147`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L147) (`ListToolsAsync_ReturnsTenConsolidatedTools`)
+
+### `[MCP-MRTR-01]` McpInputRequiredResult serializes and deserializes according to MCP 2026-07-28 spec with resultType input_required.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs#L9`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs#L9) (`Test_MrtrModels_Serialization`)
+
+### `[MCP-MRTR-02]` execute_tool forwards inputResponses to target tool params during request retry.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs#L41`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs#L41) (`Test_ExecuteTool_ForwardsInputResponses`)
+
+### `[MCP-MRTR-03]` Direct tool call returns InputRequiredResult intact when backend requires additional input.
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs#L113`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs#L113) (`Test_DirectToolCall_ReturnsInputRequiredResult`)
 
 ### `[AUTH-107]` RegisterClient successfully handles DCR requests when open DCR is enabled.
 * **Category:** `SEC` (Secrets Providers & Encryption)
@@ -1206,6 +1224,9 @@
 | `MCP-ADMIN-TOOL-MANAGE-SETTINGS` | Positive | `MCP` | AdminMcpServer executes manage_settings get and update actions. | [`AdminMcpServerTests.cs:L511`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L511) | Backend xUnit |
 | `MCP-ADMIN-TOOL-MANAGE-SYSTEM` | Positive | `MCP` | AdminMcpServer executes manage_system diagnostics, get_logs, clear_logs, and query_audit actions. | [`AdminMcpServerTests.cs:L591`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L591) | Backend xUnit |
 | `MCP-ADMIN-TOOLS-LIST-COUNT` | Positive | `MCP` | AdminMcpServer tools/list returns all 10 consolidated tools with complete JSON schemas. | [`AdminMcpServerTests.cs:L147`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L147) | Backend xUnit |
+| `MCP-MRTR-01` | Positive | `MCP` | McpInputRequiredResult serializes and deserializes according to MCP 2026-07-28 spec with resultType input_required. | [`MrtrTests.cs:L9`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs#L9) | Backend xUnit |
+| `MCP-MRTR-02` | Positive | `MCP` | execute_tool forwards inputResponses to target tool params during request retry. | [`MrtrTests.cs:L41`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs#L41) | Backend xUnit |
+| `MCP-MRTR-03` | Positive | `MCP` | Direct tool call returns InputRequiredResult intact when backend requires additional input. | [`MrtrTests.cs:L113`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/MrtrTests.cs#L113) | Backend xUnit |
 | `AUTH-106` | **Guardrail** | `SEC` | Exchange throws InvalidOperationException when request is null. | [`AuthorizationControllerTests.cs:L19`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L19) | Backend xUnit |
 | `AUTH-107` | Positive | `SEC` | RegisterClient successfully handles DCR requests when open DCR is enabled. | [`AuthorizationControllerTests.cs:L36`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L36) | Backend xUnit |
 | `AUTH-108` | **Guardrail** | `SEC` | Authorize throws InvalidOperationException when OIDC request is null. | [`AuthorizationControllerTests.cs:L77`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L77) | Backend xUnit |

@@ -153,7 +153,7 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                    result = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -200,7 +200,7 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                    result = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -234,7 +234,7 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     jsonrpc = "2.0",
                                     id = id != null ? (object)id : null,
-                                    result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                    result = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res)
                                 };
                                 httpContext.Response.Headers.ContentType = "application/json";
                                 await httpContext.Response.WriteAsJsonAsync(response);
@@ -921,7 +921,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                result = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -950,7 +950,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                result = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
@@ -1023,7 +1023,7 @@ namespace ModelContextGateway.Components.Capabilities
                             {
                                 jsonrpc = "2.0",
                                 id = id != null ? (object)id : null,
-                                result = res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res
+                                result = res is JsonRpcResponse rpcResp ? (object?)rpcResp.Result : (res is JsonElement je && je.TryGetProperty("result", out var r) ? (object)r : res)
                             };
                             await session.WriteMessageAsync(response);
                             return Results.Accepted();
