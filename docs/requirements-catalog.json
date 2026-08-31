@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T04:19:20.4061051Z",
-    "totalRequirements": 146,
-    "positiveCount": 117,
+    "generatedAt": "2026-08-31T04:25:22.9033450Z",
+    "totalRequirements": 147,
+    "positiveCount": 118,
     "guardrailCount": 29,
-    "totalProofs": 339
+    "totalProofs": 344
   },
   "requirements": [
     {
@@ -1636,6 +1636,50 @@
           "lineNumber": 385,
           "testName": "Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly",
           "details": "Verifies that all 5 MCP capability methods enforce caller role authorizations consistently."
+        }
+      ]
+    },
+    {
+      "id": "MCP-08",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer returns MethodNotFound (-32601) for ping request per MCP 2026-07-28 deprecations",
+      "proofCount": 5,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
+          "lineNumber": 9,
+          "testName": "AdminMcpServer_ProcessRequestAsync_Ping_ReturnsMethodNotFound",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
+          "lineNumber": 50,
+          "testName": "McpLogLevelHelper_ExtractPerRequestLogLevel_ParamsMeta",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
+          "lineNumber": 71,
+          "testName": "McpLogLevelHelper_ExtractPerRequestLogLevel_TopLevelMeta",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
+          "lineNumber": 89,
+          "testName": "McpLogLevelHelper_ExtractPerRequestLogLevel_ReturnsNull_WhenMissing",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs",
+          "lineNumber": 107,
+          "testName": "McpLogLevelHelper_ShouldEmitLogNotification_EvaluatesCorrectly",
+          "details": null
         }
       ]
     },

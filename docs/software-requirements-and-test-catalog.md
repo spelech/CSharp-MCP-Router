@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **146 Requirements Verified** across **339 Test Proofs** (117 Functional Capabilities, 29 Safety Guardrails).
+> **Catalog Statistics:** **147 Requirements Verified** across **344 Test Proofs** (118 Functional Capabilities, 29 Safety Guardrails).
 
 ---
 
@@ -14,7 +14,7 @@
 | **`DB`** | Multi-Database Persistence & Migrations | **3** | 3 | 0 | 20 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 40 proofs |
-| **`MCP`** | Model Context Protocol Engine & Tool Routing | **37** | 37 | 0 | 38 proofs |
+| **`MCP`** | Model Context Protocol Engine & Tool Routing | **38** | 38 | 0 | 43 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **38** | 29 | 9 | 65 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 9 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **17** | 15 | 2 | 65 proofs |
@@ -298,6 +298,16 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) (`Pairwise_AllCapabilities_UnderCallerRoles_EvaluateCorrectly`)
+
+### `[MCP-08]` AdminMcpServer returns MethodNotFound (-32601) for ping request per MCP 2026-07-28 deprecations
+* **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (5):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L9`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L9) (`AdminMcpServer_ProcessRequestAsync_Ping_ReturnsMethodNotFound`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L50`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L50) (`McpLogLevelHelper_ExtractPerRequestLogLevel_ParamsMeta`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L71`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L71) (`McpLogLevelHelper_ExtractPerRequestLogLevel_TopLevelMeta`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L89`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L89) (`McpLogLevelHelper_ExtractPerRequestLogLevel_ReturnsNull_WhenMissing`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L107`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L107) (`McpLogLevelHelper_ShouldEmitLogNotification_EvaluatesCorrectly`)
 
 ### `[MCP-ADMIN-DISCOVER-HANDSHAKE]` AdminMcpServer server/discover RPC advertises supported protocol versions, capabilities, and identity.
 * **Category:** `MCP` (Model Context Protocol Engine & Tool Routing)
@@ -1158,6 +1168,7 @@
 | `MCP-ADMIN-TOOL-TEST-CALL-ERROR` | **Guardrail** | `GUARD` | AdminMcpServer test_tool_call propagates downstream backend errors with visibility. | [`AdminMcpServerTests.cs:L666`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L666) | Backend xUnit |
 | `MCP-01` | Positive | `MCP` | Meta-mode execute_tool strictly enforces target tool authorization policies | [`PairwiseIntegrationMatrixTests.cs:L567`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L567) | Backend xUnit |
 | `MCP-02` | Positive | `MCP` | All MCP protocol capabilities enforce caller role authorizations consistently | [`PairwiseIntegrationMatrixTests.cs:L385`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L385) | Backend xUnit |
+| `MCP-08` | Positive | `MCP` | AdminMcpServer returns MethodNotFound (-32601) for ping request per MCP 2026-07-28 deprecations | [`PerRequestLogLevelAndDeprecatedProtocolTests.cs:L9`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PerRequestLogLevelAndDeprecatedProtocolTests.cs#L9) | Backend xUnit |
 | `MCP-ADMIN-DISCOVER-HANDSHAKE` | Positive | `MCP` | AdminMcpServer server/discover RPC advertises supported protocol versions, capabilities, and identity. | [`AdminMcpServerTests.cs:L195`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs#L195) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-CALL-TOOL` | Positive | `MCP` | Admin endpoint /admin/message executes tools/call for manage_system diagnostics. | [`AdminEndpointsTests.cs:L296`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs#L296) | Backend xUnit |
 | `MCP-ADMIN-ENDPOINT-HEAD-REQUEST` | Positive | `MCP` | Admin endpoint /admin handles HEAD request returning text/event-stream headers. | [`AdminEndpointsTests.cs:L214`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs#L214) | Backend xUnit |

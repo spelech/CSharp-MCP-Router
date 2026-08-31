@@ -255,10 +255,6 @@ namespace ModelContextGateway.Core.Routing
                         response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new { }));
                         break;
 
-                    case "ping":
-                        response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new { }));
-                        break;
-
                     case "tools/list":
                         var tools = await ListToolsAsync();
                         response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new { tools }));

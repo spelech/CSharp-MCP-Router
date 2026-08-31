@@ -7,6 +7,7 @@ namespace ModelContextGateway.Tests
     public class PerRequestLogLevelAndDeprecatedProtocolTests
     {
         [Fact]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "AdminMcpServer returns MethodNotFound (-32601) for ping request per MCP 2026-07-28 deprecations")]
         public async Task AdminMcpServer_ProcessRequestAsync_Ping_ReturnsMethodNotFound()
         {
             var mockServerRepo = new Mock<IServerRepository>();
@@ -47,6 +48,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "McpLogLevelHelper extracts per-request logLevel from params _meta")]
         public void McpLogLevelHelper_ExtractPerRequestLogLevel_ParamsMeta()
         {
             var json = @"{
@@ -67,6 +69,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "McpLogLevelHelper extracts per-request logLevel from top-level _meta")]
         public void McpLogLevelHelper_ExtractPerRequestLogLevel_TopLevelMeta()
         {
             var json = @"{
@@ -84,6 +87,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "McpLogLevelHelper returns null when logLevel is missing in request")]
         public void McpLogLevelHelper_ExtractPerRequestLogLevel_ReturnsNull_WhenMissing()
         {
             var json = @"{
@@ -101,6 +105,7 @@ namespace ModelContextGateway.Tests
         }
 
         [Theory]
+        [Requirement("MCP-08", "MCP", RequirementType.Positive, "McpLogLevelHelper evaluates log notification emission against requested level correctly")]
         [InlineData(null, "info", false)]
         [InlineData("", "info", false)]
         [InlineData("info", "debug", false)]
