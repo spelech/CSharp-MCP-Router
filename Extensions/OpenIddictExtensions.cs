@@ -108,6 +108,7 @@ namespace ModelContextGateway.Extensions
                         "prompts:read"
                     );
                     options.DisableScopeValidation();
+                    options.DisableResourceValidation();
 
                     var certPath = config["MCG_JWT_CERT_PATH"]
                         ?? config["MCG_OPENIDDICT_CERT_PATH"]
