@@ -13,7 +13,7 @@ export interface UserStore {
 
 export const useUserStore = create<UserStore>((set) => ({
   user: null,
-  version: '5.5.2', // fallback default
+  version: '5.5.3', // fallback default
   service: 'ModelContextGateway',
   isLoadingUser: false,
   loadUser: async () => {
