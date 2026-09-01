@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-01T20:44:30.3141773Z",
+    "generatedAt": "2026-09-01T20:56:06.5758858Z",
     "totalRequirements": 184,
-    "positiveCount": 154,
-    "guardrailCount": 30,
-    "totalProofs": 831
+    "positiveCount": 153,
+    "guardrailCount": 31,
+    "totalProofs": 833
   },
   "requirements": [
     {
@@ -5117,9 +5117,9 @@
     {
       "id": "SEC-01",
       "category": "SEC",
-      "type": "Positive",
+      "type": "Negative",
       "description": "SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY.",
-      "proofCount": 13,
+      "proofCount": 15,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -5154,6 +5154,20 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs",
           "lineNumber": 72,
           "testName": "SymmetricEncryptionHelper_EncryptsAndDecryptsCorrectly",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs",
+          "lineNumber": 146,
+          "testName": "Cors_RejectsWildcardAndInvalidOrigins_AndLogsWarning",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs",
+          "lineNumber": 181,
+          "testName": "Cors_AllInvalidOrigins_FallsBackToDefaultAndLogsWarning",
           "details": null
         },
         {
