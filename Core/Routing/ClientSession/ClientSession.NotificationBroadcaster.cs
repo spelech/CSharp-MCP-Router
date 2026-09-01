@@ -6,10 +6,15 @@ namespace ModelContextGateway.Core.Routing
     {
         public async Task WriteMessageAsync(object message)
         {
+            if (_sessionId == "global-stateless-session" || _clientResponse == null)
+            {
+                return;
+            }
+
             await _writeLock.WaitAsync();
             try
             {
-                if (_clientResponse.HttpContext.RequestAborted.IsCancellationRequested)
+                if (_clientResponse.HttpContext?.RequestAborted.IsCancellationRequested == true)
                 {
                     return;
                 }

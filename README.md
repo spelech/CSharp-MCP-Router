@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.5.0-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.5.1-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -237,11 +237,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.5.1`** | 2026-08-31 | fix(routing): Prevent SSE notification writes to stateless POST requests on global session (`WriteMessageAsync`), eliminating `Headers are read-only` exceptions during direct Streamable HTTP tool calls. |
 | **`v5.5.0`** | 2026-08-31 | feat(mcp): MCP 2026-07-28 Spec Middleware Encapsulation & Transport Normalization. Replaces dual-spec naming with unified `McpSpecMiddleware`, centralizing MCP 2026-07-28 specification inspection (`Mcp-Method`, `Mcp-Name`, `Mcp-Session-Id`, `MCP-Protocol-Version`) and backwards-compatible JSON-RPC body parsing across all MCP endpoints (`/sse`, `/mcp`, `/admin`, `/admin/sse`, `/mcg-admin`, `/mcg-admin/sse`, `/{targetServerId}`, `/message`, `/admin/message`); enables direct Streamable HTTP POST handling and notification recognition (`202 Accepted`) on `/admin` and target proxy endpoints; restores seamless compatibility for both stateless HTTP direct clients (Google Antigravity) and stateful 2-way SSE clients (OpenCode); and updates SRS test catalog with annotated proofs (`MCP-21`). |
 | **`v5.4.2`** | 2026-08-31 | fix(testbench): Test Lab & Semantic Search Robustness, Local ONNX Redirect Handling, and API Aliases. Resolves ONNX local embedding model download crashes caused by HuggingFace HTTP 302 Found redirects; implements fail-safe keyword search fallback (`SearchTools`) in `SemanticSearchService` whenever embedding generation fails; maps standard testbench route aliases (`POST /api/test/call-tool`, `POST /api/test/get-prompt`, `POST /api/test/read-resource`); adds automatic downstream server resolution and tool/prompt unnamespacing (e.g. `contextcortex__manage_adr` -> `manage_adr`); and updates `TestBenchView` with typed API client layer. |
 | **`v5.4.1`** | 2026-08-31 | fix(oauth): Dynamic Client Registration (RFC 7591) deduplication, client reuse, and automatic cleanup. Adds idempotent DCR client reuse in `AuthorizationController.RegisterClient` to reuse existing dynamic client IDs on repeated registrations (e.g. Google Antigravity, IDE agents); introduces `CleanupDcrClientsAsync` to prune duplicate DCR records across SQLite, MySQL, and MSSQL; adds automated startup cleanup; exposes `POST /api/clients/cleanup`; and adds "Clean Up DCR" Web UI action. |
 | **`v5.4.0`** | 2026-08-31 | feat(homelab): Single-User & Home-Lab Setup with Granular AppKeys & Zero-Config Defaults. Adds auto-generated persistent self-signed PFX certs (`.openiddict.pfx`) eliminating OpenSSL requirements in standalone mode; introduces `MCG_CLIENT_APP_KEYS` multi-key environment variable seeding and auto-generation of default client keys (`.client.key`); defaults enterprise auth and secret providers to disabled; streamlines standalone SQLite RBAC evaluation; and introduces dedicated homelab Docker Compose and `.env` templates with comprehensive guide (`docs/single-user-and-homelab-guide.md`). |
-| **`v5.3.1`** | 2026-08-31 | chore(reqs): Comprehensive living requirements and SRS test catalog sweep across 50+ C# backend xUnit suites (`ModelContextGateway.Tests`), TypeScript frontend Vitest suites (`frontend/src/test`), and Playwright E2E suites (`frontend/e2e`), expanding verified requirement proofs to 174 requirements across 804 proofs. |
 ---
 
 ## 🧪 Code Coverage & Quality Gates
