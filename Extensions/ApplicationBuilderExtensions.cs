@@ -87,7 +87,7 @@ namespace ModelContextGateway.Extensions
             app.UseMiddleware<ModelContextGateway.Middleware.McpAuthorizationSpecMiddleware>();
             app.UseAuthentication();
             app.UseAuthorization();
-            app.UseMiddleware<ModelContextGateway.Middleware.McpDualSpecMiddleware>();
+            app.UseMiddleware<ModelContextGateway.Middleware.McpSpecMiddleware>();
             app.MapControllers();
 
             app.UseDefaultFiles();

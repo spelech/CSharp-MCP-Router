@@ -106,66 +106,42 @@ namespace ModelContextGateway.Components.Capabilities
             [FromServices] CompositeIdentityProvider identityProvider,
             ILogger<Program> logger)
         {
-            httpContext.Response.Headers.ContentType = "text/event-stream";
-            httpContext.Response.Headers.CacheControl = "no-cache";
-            httpContext.Response.Headers.Connection = "keep-alive";
-
             if (httpContext.Request.Method == "HEAD")
             {
+                httpContext.Response.Headers.ContentType = "text/event-stream";
+                httpContext.Response.Headers.CacheControl = "no-cache";
+                httpContext.Response.Headers.Connection = "keep-alive";
                 return;
             }
 
             var identity = await identityProvider.ResolveIdentityAsync(httpContext);
             var callerUsername = identity?.Username ?? httpContext.User?.Identity?.Name ?? "admin";
 
-            string requestBody = string.Empty;
-            string method = string.Empty;
-            JsonElement? id = null;
+            var method = httpContext.Items.TryGetValue("MCP_METHOD", out var mObj) ? mObj as string : null;
+            var isNotification = httpContext.Items.TryGetValue("MCP_IS_NOTIFICATION", out var notifObj) && notifObj is bool b && b;
+            var rawBody = httpContext.Items.TryGetValue("MCP_RAW_BODY", out var rawObj) ? rawObj as string ?? string.Empty : string.Empty;
+            var id = httpContext.Items.TryGetValue("MCP_REQ_ID", out var idObj) ? idObj : null;
 
-            if (httpContext.Request.Method == "POST")
+            // 1. Direct Streamable HTTP JSON-RPC POST handling
+            if (httpContext.Request.Method == "POST" && !string.IsNullOrEmpty(method))
             {
+                if (isNotification)
+                {
+                    httpContext.Response.StatusCode = 202;
+                    return;
+                }
+
                 try
                 {
-                    httpContext.Request.EnableBuffering();
-                    using var reader = new StreamReader(httpContext.Request.Body, leaveOpen: true);
-                    requestBody = await reader.ReadToEndAsync();
-                    httpContext.Request.Body.Position = 0;
+                    var jsonRpcReq = !string.IsNullOrWhiteSpace(rawBody)
+                        ? JsonSerializer.Deserialize<JsonRpcRequest>(rawBody)
+                        : null;
 
-                    if (!string.IsNullOrWhiteSpace(requestBody))
+                    jsonRpcReq ??= new JsonRpcRequest
                     {
-                        using var doc = JsonDocument.Parse(requestBody);
-                        var root = doc.RootElement;
-                        if (root.TryGetProperty("method", out var methodProp))
-                        {
-                            method = methodProp.GetString() ?? string.Empty;
-                        }
-                        if (root.TryGetProperty("id", out var idProp))
-                        {
-                            id = idProp.Clone();
-                        }
-                        logger.LogDebug("[JSON-RPC Admin Client -> Gateway] Method: {Method}", method?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
-                    }
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Failed to parse POST body for /admin endpoint");
-                }
-            }
-
-            bool isSseAccept = httpContext.Request.Headers.Accept.ToString().Contains("text/event-stream");
-            bool isInitializeOrDiscover = method == "initialize" || method == "server/discover";
-
-            // Direct JSON response for non-SSE POST requests
-            if (httpContext.Request.Method == "POST" && !isSseAccept && !string.IsNullOrEmpty(method) && !isInitializeOrDiscover)
-            {
-                try
-                {
-                    var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
-                        ?? new JsonRpcRequest
-                        {
-                            Method = method ?? string.Empty,
-                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null
-                        };
+                        Method = method,
+                        Id = id
+                    };
 
                     var result = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
                     httpContext.Response.Headers.ContentType = "application/json";
@@ -179,13 +155,14 @@ namespace ModelContextGateway.Components.Capabilities
                     await httpContext.Response.WriteAsJsonAsync(new
                     {
                         jsonrpc = "2.0",
-                        id = id != null ? (object)id : null,
+                        id = id,
                         error = new { code = -32603, message = "An unexpected error occurred." }
                     });
                     return;
                 }
             }
 
+            // 2. Stateful SSE Stream Setup (GET /admin/sse)
             var sessionId = Guid.NewGuid().ToString("N");
             logger.LogInformation("New Admin SSE connection ({Method}). SessionId: {SessionId}, User: {User}",
                 httpContext.Request.Method, sessionId, System.Net.WebUtility.UrlEncode(callerUsername));
@@ -200,31 +177,15 @@ namespace ModelContextGateway.Components.Capabilities
             var endpointPrefix = httpContext.Request.Path.Value?.StartsWith("/mcg-admin", StringComparison.OrdinalIgnoreCase) == true ? "/mcg-admin" : "/admin";
             var absoluteUrl = $"{scheme}://{host}{endpointPrefix}/message?sessionId={sessionId}";
 
+            httpContext.Response.Headers.ContentType = "text/event-stream";
+            httpContext.Response.Headers.CacheControl = "no-cache";
+            httpContext.Response.Headers.Connection = "keep-alive";
+
             await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
             await httpContext.Response.Body.FlushAsync();
 
             var sseSession = new AdminSseSession(sessionId, httpContext.Response, callerUsername ?? "anonymous");
             RegisterSession(sseSession);
-
-            if (httpContext.Request.Method == "POST" && isInitializeOrDiscover)
-            {
-                try
-                {
-                    var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
-                        ?? new JsonRpcRequest
-                        {
-                            Method = method ?? string.Empty,
-                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : (object)id.Value.GetString()!) : null
-                        };
-
-                    var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername!);
-                    await sseSession.WriteMessageAsync(rpcResponse);
-                }
-                catch (Exception ex)
-                {
-                    logger.LogError(ex, "Failed to process initial message in POST /admin SessionId: {SessionId}", sessionId);
-                }
-            }
 
             try
             {
@@ -276,41 +237,41 @@ namespace ModelContextGateway.Components.Capabilities
                 return Results.NotFound(new { error = "Session not found." });
             }
 
-            using var reader = new StreamReader(httpContext.Request.Body);
-            var body = await reader.ReadToEndAsync();
+            var method = httpContext.Items.TryGetValue("MCP_METHOD", out var mObj) ? mObj as string : null;
+            var isNotification = httpContext.Items.TryGetValue("MCP_IS_NOTIFICATION", out var notifObj) && notifObj is bool b && b;
+            var rawBody = httpContext.Items.TryGetValue("MCP_RAW_BODY", out var rawObj) ? rawObj as string ?? string.Empty : string.Empty;
+            var id = httpContext.Items.TryGetValue("MCP_REQ_ID", out var idObj) ? idObj : null;
 
-            if (string.IsNullOrWhiteSpace(body))
+            if (string.IsNullOrWhiteSpace(rawBody) && string.IsNullOrEmpty(method))
+            {
+                using var reader = new StreamReader(httpContext.Request.Body);
+                rawBody = await reader.ReadToEndAsync();
+            }
+
+            if (string.IsNullOrWhiteSpace(rawBody) && string.IsNullOrEmpty(method))
             {
                 return Results.BadRequest(new { error = "Request body cannot be empty." });
             }
 
-
             try
             {
-                using var doc = JsonDocument.Parse(body);
-                var root = doc.RootElement;
-
-                if (!root.TryGetProperty("method", out var methodProp))
+                if (isNotification || method?.StartsWith("notifications/") == true)
                 {
-                    return Results.BadRequest(new { error = "Invalid JSON-RPC: missing 'method' property." });
+                    return Results.Accepted();
                 }
 
-                var method = methodProp.GetString() ?? string.Empty;
-                logger.LogDebug("[JSON-RPC Admin Client -> Gateway] Method: {Method}", method?.Replace(Environment.NewLine, "")?.Replace("\n", "")?.Replace("\r", ""));
-                var id = root.TryGetProperty("id", out var idProp) ? idProp.Clone() : (JsonElement?)null;
                 var identity = await identityProvider.ResolveIdentityAsync(httpContext);
                 var callerUsername = identity?.Username ?? session.CallerUsername ?? "admin";
 
-                var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(body);
-                if (jsonRpcReq == null)
+                var jsonRpcReq = !string.IsNullOrWhiteSpace(rawBody)
+                    ? JsonSerializer.Deserialize<JsonRpcRequest>(rawBody)
+                    : null;
+
+                jsonRpcReq ??= new JsonRpcRequest
                 {
-                    jsonRpcReq = new JsonRpcRequest
-                    {
-                        Method = method ?? string.Empty,
-                        Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null,
-                        Params = root.TryGetProperty("params", out var p) ? p.Clone() : null
-                    };
-                }
+                    Method = method ?? string.Empty,
+                    Id = id
+                };
 
                 var response = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
                 await session.WriteMessageAsync(response);

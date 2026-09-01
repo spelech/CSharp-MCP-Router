@@ -1113,102 +1113,58 @@ namespace ModelContextGateway.Components.Capabilities
                 return;
             }
 
-            var adminMcpServer = httpContext.RequestServices.GetRequiredService<AdminMcpServer>();
-            var callerUsername = identity.Username ?? "admin";
-
-            if (httpContext.Request.Method == "POST")
+            if (targetServerId == "router-admin" || targetServerId == "admin")
             {
-                httpContext.Request.EnableBuffering();
-                using var reader = new StreamReader(httpContext.Request.Body, leaveOpen: true);
-                var requestBody = await reader.ReadToEndAsync();
-                httpContext.Request.Body.Position = 0;
+                var adminMcpServer = httpContext.RequestServices.GetRequiredService<AdminMcpServer>();
+                var logger = httpContext.RequestServices.GetRequiredService<ILogger<Program>>();
+                var callerUsername = identity?.Username ?? httpContext.User?.Identity?.Name ?? "admin";
 
-                bool isSseAccept = httpContext.Request.Headers.Accept.ToString().Contains("text/event-stream");
-                string method = string.Empty;
-                JsonElement? id = null;
+                var method = httpContext.Items.TryGetValue("MCP_METHOD", out var mObj) ? mObj as string : null;
+                var isNotification = httpContext.Items.TryGetValue("MCP_IS_NOTIFICATION", out var notifObj) && notifObj is bool b && b;
+                var rawBody = httpContext.Items.TryGetValue("MCP_RAW_BODY", out var rawObj) ? rawObj as string ?? string.Empty : string.Empty;
+                var id = httpContext.Items.TryGetValue("MCP_REQ_ID", out var idObj) ? idObj : null;
 
-                if (!string.IsNullOrWhiteSpace(requestBody))
+                // 1. Direct Streamable HTTP JSON-RPC POST handling
+                if (httpContext.Request.Method == "POST" && !string.IsNullOrEmpty(method))
                 {
+                    if (isNotification)
+                    {
+                        httpContext.Response.StatusCode = 202;
+                        return;
+                    }
+
                     try
                     {
-                        using var doc = JsonDocument.Parse(requestBody);
-                        var root = doc.RootElement;
-                        if (root.TryGetProperty("method", out var methodProp))
+                        var jsonRpcReq = !string.IsNullOrWhiteSpace(rawBody)
+                            ? JsonSerializer.Deserialize<JsonRpcRequest>(rawBody)
+                            : null;
+
+                        jsonRpcReq ??= new JsonRpcRequest
                         {
-                            method = methodProp.GetString() ?? string.Empty;
-                        }
-                        if (root.TryGetProperty("id", out var idProp))
-                        {
-                            id = idProp.Clone();
-                        }
+                            Method = method,
+                            Id = id
+                        };
+
+                        var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
+                        httpContext.Response.Headers.ContentType = "application/json";
+                        await httpContext.Response.WriteAsJsonAsync(rpcResponse);
+                        return;
                     }
-                    catch { }
-                }
-
-                bool isInitializeOrDiscover = method == "initialize" || method == "server/discover";
-
-                if (!isSseAccept && !string.IsNullOrEmpty(method) && !isInitializeOrDiscover)
-                {
-                    var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
-                        ?? new JsonRpcRequest
-                        {
-                            Method = method,
-                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null
-                        };
-                    var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
-                    httpContext.Response.Headers.ContentType = "application/json";
-                    await httpContext.Response.WriteAsJsonAsync(rpcResponse);
-                    return;
-                }
-
-                httpContext.Response.Headers.ContentType = "text/event-stream";
-                httpContext.Response.Headers.CacheControl = "no-cache";
-                httpContext.Response.Headers.Connection = "keep-alive";
-
-                var sessionId = Guid.NewGuid().ToString("N");
-                var scheme = httpContext.Request.Headers["X-Forwarded-Proto"].ToString();
-                if (string.IsNullOrEmpty(scheme))
-                {
-                    scheme = httpContext.Request.Scheme;
-                }
-
-                var host = httpContext.Request.Host.Value;
-                var absoluteUrl = $"{scheme}://{host}/admin/message?sessionId={sessionId}";
-                await httpContext.Response.WriteAsync($"event: endpoint\ndata: {absoluteUrl}\n\n");
-                await httpContext.Response.Body.FlushAsync();
-
-                var sseSession = new AdminSseSession(sessionId, httpContext.Response, callerUsername);
-                AdminEndpoints.RegisterSession(sseSession);
-
-                if (isInitializeOrDiscover)
-                {
-                    var jsonRpcReq = JsonSerializer.Deserialize<JsonRpcRequest>(requestBody)
-                        ?? new JsonRpcRequest
-                        {
-                            Method = method,
-                            Id = id != null ? (id.Value.ValueKind == JsonValueKind.Number ? (object)id.Value.GetInt64() : id.Value.GetString()) : null
-                        };
-                    var rpcResponse = await adminMcpServer.ProcessRequestAsync(jsonRpcReq, callerUsername);
-                    await sseSession.WriteMessageAsync(rpcResponse);
-                }
-
-                try
-                {
-                    while (!httpContext.RequestAborted.IsCancellationRequested)
+                    catch (Exception ex)
                     {
-                        await Task.Delay(15000, httpContext.RequestAborted);
-                        await httpContext.Response.WriteAsync(":ping\n\n");
-                        await httpContext.Response.Body.FlushAsync();
+                        logger.LogError(ex, "Error processing target admin request: {Method}", method);
+                        httpContext.Response.Headers.ContentType = "application/json";
+                        await httpContext.Response.WriteAsJsonAsync(new
+                        {
+                            jsonrpc = "2.0",
+                            id = id,
+                            error = new { code = -32603, message = "An unexpected error occurred." }
+                        });
+                        return;
                     }
                 }
-                catch (OperationCanceledException) { }
-                finally
-                {
-                    AdminEndpoints.UnregisterSession(sessionId);
-                }
-            }
-            else
-            {
+
+                // 2. Stateful SSE Stream Setup
                 httpContext.Response.Headers.ContentType = "text/event-stream";
                 httpContext.Response.Headers.CacheControl = "no-cache";
                 httpContext.Response.Headers.Connection = "keep-alive";
