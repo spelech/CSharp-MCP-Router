@@ -81,7 +81,8 @@ namespace ModelContextGateway.Core.Routing
             }
             catch (Exception ex)
             {
-                logger?.LogWarning(ex, "Failed to generate embedding for query '{Query}', falling back to keyword search.", query);
+                var sanitizedQuery = query.Replace(Environment.NewLine, "").Replace("\n", "").Replace("\r", "");
+                logger?.LogWarning(ex, "Failed to generate embedding for query '{Query}', falling back to keyword search.", sanitizedQuery);
             }
 
             if (queryVector == null)
