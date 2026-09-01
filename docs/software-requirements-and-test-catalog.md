@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **184 Requirements Verified** across **831 Test Proofs** (154 Functional Capabilities, 30 Safety Guardrails).
+> **Catalog Statistics:** **184 Requirements Verified** across **833 Test Proofs** (153 Functional Capabilities, 31 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 134 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **52** | 51 | 1 | 163 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **38** | 30 | 8 | 127 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **38** | 29 | 9 | 129 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 29 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **26** | 23 | 3 | 132 proofs |
 
@@ -889,24 +889,6 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L435`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L435) (`RegisterClient_DynamicScopes_AddedToPermissions`)
 
-### `[SEC-01]` SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY.
-* **Category:** `SEC` (Secrets Providers & Encryption)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (13):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) (`SqliteDatabase_IsEncrypted_WithSQLCipher`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L70`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L70) (`SaveSecretProvider_EncryptsConfigJson_AtRestInDatabase`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L99`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L99) (`SaveAuthProvider_EncryptsConfigJson_AtRestInDatabase`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L218`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L218) (`ProvidersController_MaskPreserving_PreservesExistingDecryptedSecret_WhenMaskSubmitted`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L72`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L72) (`SymmetricEncryptionHelper_EncryptsAndDecryptsCorrectly`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L14`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L14) (`EnsureVaultClientAsync_CreatesClient_WithAppRoleCredentials`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L35) (`EnsureVaultClientAsync_LoadsFromSecretRepo_WhenConfigJsonHasAppRole`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L87`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L87) (`ReloadConfigAsync_ClearsClient_ForcesRecreation`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L52`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L52) (`DbEncryptionKey_Warning_Detection_Works_Correctly`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L70`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L70) (`Startup_MigratesLegacyKeysToHashedKeys`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L19`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L19) (`renders provider inputs and submits updated configuration`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L90`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L90) (`handles Test Vault connection button with success and failure responses`)
-  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-sse-vault.spec.ts#L8`](file:////containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-sse-vault.spec.ts#L8) (`should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search`)
-
 ### `[SEC-02]` VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Positive Feature Capability
@@ -1702,6 +1684,26 @@
 * **Verification Proofs (1):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L516`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L516) (`RegisterClient_WhenClosedRegistration_UnauthorizedUser_ReturnsForbidden`)
 
+### `[SEC-01]` SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY.
+* **Category:** `SEC` (Secrets Providers & Encryption)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (15):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) (`SqliteDatabase_IsEncrypted_WithSQLCipher`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L70`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L70) (`SaveSecretProvider_EncryptsConfigJson_AtRestInDatabase`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L99`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L99) (`SaveAuthProvider_EncryptsConfigJson_AtRestInDatabase`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L218`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L218) (`ProvidersController_MaskPreserving_PreservesExistingDecryptedSecret_WhenMaskSubmitted`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L72`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L72) (`SymmetricEncryptionHelper_EncryptsAndDecryptsCorrectly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs#L146`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs#L146) (`Cors_RejectsWildcardAndInvalidOrigins_AndLogsWarning`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs#L181`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs#L181) (`Cors_AllInvalidOrigins_FallsBackToDefaultAndLogsWarning`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L14`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L14) (`EnsureVaultClientAsync_CreatesClient_WithAppRoleCredentials`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L35) (`EnsureVaultClientAsync_LoadsFromSecretRepo_WhenConfigJsonHasAppRole`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L87`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L87) (`ReloadConfigAsync_ClearsClient_ForcesRecreation`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L52`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L52) (`DbEncryptionKey_Warning_Detection_Works_Correctly`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L70`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseSeederServiceTests.cs#L70) (`Startup_MigratesLegacyKeysToHashedKeys`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L19`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L19) (`renders provider inputs and submits updated configuration`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L90`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/SecretProvidersTab.test.tsx#L90) (`handles Test Vault connection button with success and failure responses`)
+  - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-sse-vault.spec.ts#L8`](file:////containers/dev/csharp-mcp-router/frontend/e2e/full-ui-flow-sse-vault.spec.ts#L8) (`should register SSE server with Vault provider (Mount/Path/Field), verify badge, and run semantic search`)
+
 ### `[SEC-05]` Audit queries support filtering by user, server, and pagination while recording query access in audit log.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -1915,7 +1917,7 @@
 | `AUTH-115` | Positive | `SEC` | RegisterClient dynamically binds requested scopes to OpenIddict application descriptor permissions. | [`AuthorizationControllerTests.cs:L435`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L435) | Backend xUnit |
 | `AUTH-116` | **Guardrail** | `SEC` | Exchange rejects client_credentials grant attempts by public clients with UnauthorizedClient error. | [`AuthorizationControllerTests.cs:L475`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L475) | Backend xUnit |
 | `AUTH-117` | **Guardrail** | `SEC` | RegisterClient returns 403 Forbidden with access_denied when open client registration is disabled and caller is unauthorized. | [`AuthorizationControllerTests.cs:L516`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L516) | Backend xUnit |
-| `SEC-01` | Positive | `SEC` | SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY. | [`DatabaseEncryptionTests.cs:L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) | Backend xUnit |
+| `SEC-01` | **Guardrail** | `SEC` | SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY. | [`DatabaseEncryptionTests.cs:L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) | Backend xUnit |
 | `SEC-02` | Positive | `SEC` | VaultSecretRetriever dynamically loads, applies, and reloads Vault configurations from database repository. | [`ProviderSettingsEncryptionTests.cs:L294`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L294) | Backend xUnit |
 | `SEC-03` | Positive | `SEC` | EnvironmentSecretRetriever retrieves configured environment variable value. | [`SecretRetrieverTests.cs:L5`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecretRetrieverTests.cs#L5) | Backend xUnit |
 | `SEC-04` | Positive | `SEC` | WindowsRegistrySecretRetriever handles non-Windows platforms gracefully and returns null. | [`SecretRetrieverTests.cs:L34`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SecretRetrieverTests.cs#L34) | Backend xUnit |

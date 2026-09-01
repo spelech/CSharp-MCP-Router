@@ -209,20 +209,50 @@ namespace ModelContextGateway.Extensions
                         ?? Environment.GetEnvironmentVariable("MCG_CORS_ALLOWED_ORIGINS")
                         ?? Environment.GetEnvironmentVariable("CORS_ALLOWED_ORIGINS");
 
+                    var validOrigins = new List<string>();
+
                     if (!string.IsNullOrWhiteSpace(allowedOriginsValue))
                     {
-                        var origins = allowedOriginsValue
+                        var rawOrigins = allowedOriginsValue
                             .Split(new[] { ',', ';', ' ' }, StringSplitOptions.RemoveEmptyEntries)
                             .Select(o => o.Trim())
-                            .ToArray();
+                            .Where(o => !string.IsNullOrEmpty(o));
 
-                        policy.WithOrigins(origins)
+                        foreach (var rawOrigin in rawOrigins)
+                        {
+                            if (rawOrigin == "*")
+                            {
+                                LogBuffer.Add(LogLevel.Warning, "ModelContextGateway.CORS", "Wildcard origin '*' is not allowed in MCG_CORS_ALLOWED_ORIGINS and was rejected.", null);
+                                continue;
+                            }
+
+                            if (Uri.TryCreate(rawOrigin, UriKind.Absolute, out var uri)
+                                && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
+                                && uri.GetLeftPart(UriPartial.Authority) == rawOrigin)
+                            {
+                                validOrigins.Add(rawOrigin);
+                            }
+                            else
+                            {
+                                LogBuffer.Add(LogLevel.Warning, "ModelContextGateway.CORS", $"Invalid CORS origin '{rawOrigin}' ignored. Origins must be well-formed HTTP/HTTPS URIs without paths or wildcards.", null);
+                            }
+                        }
+                    }
+
+                    if (validOrigins.Count > 0)
+                    {
+                        policy.WithOrigins(validOrigins.ToArray())
                               .AllowAnyMethod()
                               .AllowAnyHeader()
                               .AllowCredentials();
                     }
                     else
                     {
+                        if (!string.IsNullOrWhiteSpace(allowedOriginsValue))
+                        {
+                            LogBuffer.Add(LogLevel.Warning, "ModelContextGateway.CORS", "No valid CORS origins supplied in configuration. Falling back to default environment CORS configuration.", null);
+                        }
+
                         if (builder.Environment.EnvironmentName == "Development" || builder.Environment.EnvironmentName == "Dev")
                         {
                             policy.WithOrigins("http://localhost:3000", "http://localhost:5000", "https://localhost:5001")

@@ -142,5 +142,69 @@ namespace ModelContextGateway.Tests
             defaultPolicy!.Origins.Should().Contain("https://allowed-fallback.com");
             defaultPolicy.Origins.Should().NotContain("http://localhost:3000");
         }
+
+        [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Negative, "CORS origins validation")]
+        public void Cors_RejectsWildcardAndInvalidOrigins_AndLogsWarning()
+        {
+            // Arrange
+            ModelContextGateway.Infrastructure.Logging.LogBuffer.Clear();
+            var builder = WebApplication.CreateBuilder();
+            builder.Environment.EnvironmentName = "Development";
+
+            var inMemoryConfig = GetBaseConfig();
+            inMemoryConfig["CORS_ALLOWED_ORIGINS"] = "*, invalid-uri, ftp://invalid-scheme.com, https://valid.com, https://another-valid.org/path";
+            builder.Configuration.AddInMemoryCollection(inMemoryConfig);
+
+            // Act
+            builder.AddModelContextGatewayServices();
+            var app = builder.Build();
+
+            // Assert
+            var corsOptions = app.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
+            var defaultPolicy = corsOptions.GetPolicy(corsOptions.DefaultPolicyName);
+
+            defaultPolicy.Should().NotBeNull();
+            defaultPolicy!.Origins.Should().Contain("https://valid.com");
+            defaultPolicy.Origins.Should().NotContain("*");
+            defaultPolicy.Origins.Should().NotContain("invalid-uri");
+            defaultPolicy.Origins.Should().NotContain("ftp://invalid-scheme.com");
+            defaultPolicy.Origins.Should().NotContain("https://another-valid.org/path");
+
+            var logs = ModelContextGateway.Infrastructure.Logging.LogBuffer.GetLogs();
+            logs.Should().Contain(l => l.Message.Contains("Wildcard origin '*' is not allowed"));
+            logs.Should().Contain(l => l.Message.Contains("Invalid CORS origin 'invalid-uri' ignored"));
+            logs.Should().Contain(l => l.Message.Contains("Invalid CORS origin 'ftp://invalid-scheme.com' ignored"));
+            logs.Should().Contain(l => l.Message.Contains("Invalid CORS origin 'https://another-valid.org/path' ignored"));
+        }
+
+        [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Negative, "CORS origins validation")]
+        public void Cors_AllInvalidOrigins_FallsBackToDefaultAndLogsWarning()
+        {
+            // Arrange
+            ModelContextGateway.Infrastructure.Logging.LogBuffer.Clear();
+            var builder = WebApplication.CreateBuilder();
+            builder.Environment.EnvironmentName = "Development";
+
+            var inMemoryConfig = GetBaseConfig();
+            inMemoryConfig["CORS_ALLOWED_ORIGINS"] = "*, invalid-uri";
+            builder.Configuration.AddInMemoryCollection(inMemoryConfig);
+
+            // Act
+            builder.AddModelContextGatewayServices();
+            var app = builder.Build();
+
+            // Assert
+            var corsOptions = app.Services.GetRequiredService<IOptions<CorsOptions>>().Value;
+            var defaultPolicy = corsOptions.GetPolicy(corsOptions.DefaultPolicyName);
+
+            defaultPolicy.Should().NotBeNull();
+            // In Development mode, fallback allows localhost origins
+            defaultPolicy!.Origins.Should().Contain("http://localhost:3000");
+
+            var logs = ModelContextGateway.Infrastructure.Logging.LogBuffer.GetLogs();
+            logs.Should().Contain(l => l.Message.Contains("No valid CORS origins supplied in configuration. Falling back to default environment CORS configuration."));
+        }
     }
 }
