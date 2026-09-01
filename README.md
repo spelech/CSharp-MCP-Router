@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.6.5-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.6.6-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -237,11 +237,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.6.6`** | 2026-09-02 | chore(refactor): Fixed empty catch block during Dapper type handler registration in `Models/Models.cs` by guarding with an `Interlocked.Exchange` initialization pattern. |
 | **`v5.6.5`** | 2026-09-02 | 🧪 Testing: Implemented `ILdapConnection` and `ILdapConnectionFactory` abstractions in `LdapActiveDirectoryService` and added fail-closed negative unit tests for connection failures. |
 | **`v5.6.4`** | 2026-09-02 | perf(routing): Optimized `SemanticSearchService` string parsing by hoisting `.ToLower()` and token splits outside outer tool loops. |
 | **`v5.6.3`** | 2026-09-02 | 🔒 Security: Validate `AllowedOrigins` in CORS configuration, strictly rejecting wildcard `*` origins and malformed URIs with security warnings while maintaining safe environment fallbacks. |
 | **`v5.6.2`** | 2026-09-02 | 🧹 Code Health: Improve exception handling in `SseTransport.cs` by logging timeouts and exceptions when waiting for SSE endpoint URL. |
-| **`v5.6.1`** | 2026-09-02 | chore(refactor): Fixed empty catch blocks during StdioTransport disposal by properly logging debug and warning exceptions instead of silently swallowing them. |
 | **`v5.5.4`** | 2026-09-01 | chore(refactor): Comprehensive Code Health, Performance Optimizations & Security Hardening across Core and Infrastructure. Refactors nested control flows with clean guard clauses and early returns across `SseTransport`, `StdioTransport`, `VaultSecretRetriever`, `DbKeyHelper`, `JsonRpcStateManager`, `AppKeyAuthenticationHandler`, `TrustedProxyHelper`, and `AuditLogger`; parameterizes server listing and admin SQL queries to ensure safe execution; replaces hardcoded `Console.WriteLine` outputs with dependency-injected/optional `ILogger` calls in `DbKeyHelper` and `SymmetricEncryptionHelper`; optimizes string interpolation in `PromptRoutingManager` via `StringBuilder`; replaces slow `Math.Pow` with direct multiplication in ONNX vector magnitude normalization (`OnnxEmbeddingService`); eliminates unnecessary `.ToList()` allocations during `JsonObject` iteration (`ProviderConfigSecurityHelper`); fixes N+1 queries in `DatabaseSeederService` via cross-compatible `IN` clauses; and caches `JsonSerializerOptions` in `McpIntegrationTests` for improved test suite throughput. |
 | **`v5.5.3`** | 2026-08-31 | perf(docker): Fixed N+1 query issue in Docker Auto Discovery by batching container disabling updates in a single IN clause, improving scalability when many stopped containers are detected. |
 | **`v5.5.0`** | 2026-08-31 | feat(mcp): MCP 2026-07-28 Spec Middleware Encapsulation & Transport Normalization. Replaces dual-spec naming with unified `McpSpecMiddleware`, centralizing MCP 2026-07-28 specification inspection (`Mcp-Method`, `Mcp-Name`, `Mcp-Session-Id`, `MCP-Protocol-Version`) and backwards-compatible JSON-RPC body parsing across all MCP endpoints (`/sse`, `/mcp`, `/admin`, `/admin/sse`, `/mcg-admin`, `/mcg-admin/sse`, `/{targetServerId}`, `/message`, `/admin/message`); enables direct Streamable HTTP POST handling and notification recognition (`202 Accepted`) on `/admin` and target proxy endpoints; restores seamless compatibility for both stateless HTTP direct clients (Google Antigravity) and stateful 2-way SSE clients (OpenCode); and updates SRS test catalog with annotated proofs (`MCP-21`). |
