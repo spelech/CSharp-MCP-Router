@@ -32,32 +32,32 @@ namespace ModelContextGateway.Middleware
         {
         }
 
-        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        private string? ExtractTokenFromHeaders()
         {
-            string? token = null;
             string authHeader = Request.Headers.Authorization.ToString();
             if (!string.IsNullOrEmpty(authHeader) && authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
             {
-                token = authHeader.Substring("Bearer ".Length).Trim();
+                return authHeader.Substring("Bearer ".Length).Trim();
             }
 
-            if (string.IsNullOrEmpty(token))
+            var xAppKey = Request.Headers["X-App-Key"].ToString();
+            if (!string.IsNullOrEmpty(xAppKey))
             {
-                var xAppKey = Request.Headers["X-App-Key"].ToString();
-                if (!string.IsNullOrEmpty(xAppKey))
-                {
-                    token = xAppKey.Trim();
-                }
-                else
-                {
-                    var xApiKey = Request.Headers["X-Api-Key"].ToString();
-                    if (!string.IsNullOrEmpty(xApiKey))
-                    {
-                        token = xApiKey.Trim();
-                    }
-                }
+                return xAppKey.Trim();
             }
 
+            var xApiKey = Request.Headers["X-Api-Key"].ToString();
+            if (!string.IsNullOrEmpty(xApiKey))
+            {
+                return xApiKey.Trim();
+            }
+
+            return null;
+        }
+
+        protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
+        {
+            var token = ExtractTokenFromHeaders();
             if (string.IsNullOrEmpty(token) || !token.StartsWith("mcp-"))
             {
                 return AuthenticateResult.NoResult();
@@ -119,36 +119,7 @@ namespace ModelContextGateway.Middleware
                     new Claim(ClaimTypes.Role, "McpClient")
                 };
 
-                bool isAdminAppKey = false;
-                bool isSystemKey = string.Equals(appKey.KeyType, "system", StringComparison.OrdinalIgnoreCase);
-
-                if (isSystemKey && !string.IsNullOrWhiteSpace(appKey.ScopesJson))
-                {
-                    try
-                    {
-                        var parsedScopes = JsonSerializer.Deserialize<List<string>>(appKey.ScopesJson);
-                        if (parsedScopes != null && parsedScopes.Any(s =>
-                            string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
-                        {
-                            isAdminAppKey = true;
-                        }
-                    }
-                    catch
-                    {
-                        var scopeParts = appKey.ScopesJson.Split(new[] { ',', '[', ']', '"', ' ' }, StringSplitOptions.RemoveEmptyEntries);
-                        if (scopeParts.Any(s =>
-                            string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
-                        {
-                            isAdminAppKey = true;
-                        }
-                    }
-                }
-
-                if (isAdminAppKey)
+                if (IsAdminKey(appKey))
                 {
                     claims.Add(new Claim(ClaimTypes.Role, "Administrator"));
                     claims.Add(new Claim("Scope", "admin"));
@@ -177,6 +148,44 @@ namespace ModelContextGateway.Middleware
                 Logger.LogError(ex, "Error validating App Key.");
                 return AuthenticateResult.Fail("Error validating App Key.");
             }
+        }
+
+        private static bool IsAdminKey(AppKey appKey)
+        {
+            if (!string.Equals(appKey.KeyType, "system", StringComparison.OrdinalIgnoreCase))
+            {
+                return false;
+            }
+
+            if (string.IsNullOrWhiteSpace(appKey.ScopesJson))
+            {
+                return false;
+            }
+
+            try
+            {
+                var parsedScopes = JsonSerializer.Deserialize<List<string>>(appKey.ScopesJson);
+                if (parsedScopes != null && parsedScopes.Any(s =>
+                    string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                var scopeParts = appKey.ScopesJson.Split(new[] { ',', '[', ']', '"', ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                if (scopeParts.Any(s =>
+                    string.Equals(s, "admin", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(s, "all", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(s, "*", StringComparison.OrdinalIgnoreCase)))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         public static string ExtractKeyPrefix(string token)
