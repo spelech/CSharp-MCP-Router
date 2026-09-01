@@ -366,5 +366,87 @@ namespace ModelContextGateway.Tests
             var text = content[0].GetProperty("text").GetString();
             Assert.Contains("activeSessions", text);
         }
+
+        [Fact]
+        [Requirement("MCP-21", "MCP", RequirementType.Positive, "Admin endpoint handles direct Streamable HTTP POST tools/list request returning JSON even with Accept text/event-stream header.")]
+        public async Task AdminEndpoint_DirectPost_ToolsList_ReturnsJson_EvenWithSseAcceptHeader()
+        {
+            var client = CreateAdminClient();
+
+            var req = new
+            {
+                jsonrpc = "2.0",
+                id = "list-tools-req",
+                method = "tools/list"
+            };
+
+            using var postReq = new HttpRequestMessage(HttpMethod.Post, "/admin/sse");
+            postReq.Headers.Add("Accept", "text/event-stream, application/json");
+            postReq.Content = new StringContent(JsonSerializer.Serialize(req), Encoding.UTF8, "application/json");
+
+            var res = await client.SendAsync(postReq);
+            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+            Assert.Equal("application/json", res.Content.Headers.ContentType?.MediaType);
+
+            var json = await res.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            Assert.Equal("2.0", root.GetProperty("jsonrpc").GetString());
+            Assert.Equal("list-tools-req", root.GetProperty("id").GetString());
+            Assert.True(root.GetProperty("result").TryGetProperty("tools", out var tools));
+            Assert.Equal(10, tools.GetArrayLength());
+        }
+
+        [Fact]
+        [Requirement("MCP-21", "MCP", RequirementType.Positive, "Admin endpoint handles notifications/initialized returning 202 Accepted without opening a stream.")]
+        public async Task AdminEndpoint_DirectPost_Notification_ReturnsAccepted()
+        {
+            var client = CreateAdminClient();
+
+            var req = new
+            {
+                jsonrpc = "2.0",
+                method = "notifications/initialized"
+            };
+
+            using var postReq = new HttpRequestMessage(HttpMethod.Post, "/admin/sse");
+            postReq.Headers.Add("Accept", "text/event-stream, application/json");
+            postReq.Content = new StringContent(JsonSerializer.Serialize(req), Encoding.UTF8, "application/json");
+
+            var res = await client.SendAsync(postReq);
+            Assert.Equal(HttpStatusCode.Accepted, res.StatusCode);
+        }
+
+        [Fact]
+        [Requirement("MCP-21", "MCP", RequirementType.Positive, "Target proxy endpoint /router-admin handles direct Streamable HTTP POST tools/list.")]
+        public async Task TargetAdminEndpoint_DirectPost_ToolsList_ReturnsJson()
+        {
+            var client = CreateAdminClient();
+
+            var req = new
+            {
+                jsonrpc = "2.0",
+                id = "target-tools-req",
+                method = "tools/list"
+            };
+
+            using var postReq = new HttpRequestMessage(HttpMethod.Post, "/router-admin");
+            postReq.Headers.Add("Accept", "text/event-stream, application/json");
+            postReq.Content = new StringContent(JsonSerializer.Serialize(req), Encoding.UTF8, "application/json");
+
+            var res = await client.SendAsync(postReq);
+            Assert.Equal(HttpStatusCode.OK, res.StatusCode);
+            Assert.Equal("application/json", res.Content.Headers.ContentType?.MediaType);
+
+            var json = await res.Content.ReadAsStringAsync();
+            using var doc = JsonDocument.Parse(json);
+            var root = doc.RootElement;
+
+            Assert.Equal("2.0", root.GetProperty("jsonrpc").GetString());
+            Assert.Equal("target-tools-req", root.GetProperty("id").GetString());
+            Assert.True(root.GetProperty("result").TryGetProperty("tools", out var tools));
+            Assert.Equal(10, tools.GetArrayLength());
+        }
     }
 }
