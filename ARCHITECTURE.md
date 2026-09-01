@@ -32,7 +32,7 @@ This document summarizes the internal architecture, security mechanisms, design 
 ```mermaid
 graph TD
     Client["Client App / LLM Agent (Cursor, Claude, Antigravity, OpenClaw)"]
-    Middleware["McpDualSpecMiddleware<br>(2026-07-28 Spec Headers & Body Fallback)"]
+    Middleware["McpSpecMiddleware<br>(2026-07-28 Spec Headers & Body Fallback)"]
     Identity["CompositeIdentityProvider<br>(Active Directory LDAP & OIDC / Reverse Proxy Headers)"]
     AuthEvaluator["sp_EvaluateUserAccess<br>(Provider-Specific Group SIDs / Roles)"]
     Secrets["CompositeSecretRetriever<br>(Vault KV v2, Windows Registry DPAPI, Env)"]
@@ -90,7 +90,7 @@ sequenceDiagram
     participant Downstream as MCP Backend
 
     Client->>Router: GET /sse (Default Meta-Mode)
-    Router->>Router: Execute McpDualSpecMiddleware Auth Checks
+    Router->>Router: Execute McpSpecMiddleware Auth Checks
     Router->>SessionMgr: Create & Register ClientSession
     SessionMgr-->>Router: Session Token Generated
     Router->>BackendConn: Warm & Connect Backend SSE streams (Concurrent)

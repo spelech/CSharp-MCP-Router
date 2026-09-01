@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-01T03:22:45.4042695Z",
+    "generatedAt": "2026-09-01T04:28:46.5087219Z",
     "totalRequirements": 181,
     "positiveCount": 152,
     "guardrailCount": 29,
-    "totalProofs": 817
+    "totalProofs": 823
   },
   "requirements": [
     {
@@ -4084,21 +4084,63 @@
       "id": "MCP-21",
       "category": "MCP",
       "type": "Positive",
-      "description": "McpDualSpecMiddleware extracts Mcp-Method, Mcp-Name, and MCP-Protocol-Version request headers per MCP 2026-07-28 spec.",
-      "proofCount": 2,
+      "description": "Admin endpoint handles direct Streamable HTTP POST tools/list request returning JSON even with Accept text/event-stream header.",
+      "proofCount": 8,
       "proofs": [
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
-          "lineNumber": 8,
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
+          "lineNumber": 370,
+          "testName": "AdminEndpoint_DirectPost_ToolsList_ReturnsJson_EvenWithSseAcceptHeader",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
+          "lineNumber": 401,
+          "testName": "AdminEndpoint_DirectPost_Notification_ReturnsAccepted",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminEndpointsTests.cs",
+          "lineNumber": 421,
+          "testName": "TargetAdminEndpoint_DirectPost_ToolsList_ReturnsJson",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
+          "lineNumber": 9,
           "testName": "Middleware_Parses_2026_Spec_Headers",
           "details": null
         },
         {
           "suite": "Backend xUnit",
-          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpDualSpecMiddlewareTests.cs",
-          "lineNumber": 34,
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
+          "lineNumber": 37,
           "testName": "Middleware_Falls_Back_To_Json_Body_When_Headers_Missing",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
+          "lineNumber": 65,
+          "testName": "Middleware_Matches_Admin_And_Target_Proxy_Paths",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
+          "lineNumber": 87,
+          "testName": "Middleware_Detects_Notifications_Correctly",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
+          "lineNumber": 104,
+          "testName": "Middleware_Skips_Non_Mcp_Paths",
           "details": null
         }
       ]

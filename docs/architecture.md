@@ -118,7 +118,7 @@ The router architecture is partitioned into seven layers:
 ```
 ┌─────────────────────────────────────────────────────────────────────────────────────────────────┐
 │                                 LAYER 1: INGRESS & EDGE SECURITY                                │
-│   Reverse Proxy (Caddy/Nginx) ──► McpDualSpecMiddleware ──► McpAuthorizationSpecMiddleware     │
+│   Reverse Proxy (Caddy/Nginx) ──► McpSpecMiddleware ──► McpAuthorizationSpecMiddleware     │
 └────────────────────────────────────────────────┬────────────────────────────────────────────────┘
                                                  │
 ┌────────────────────────────────────────────────▼────────────────────────────────────────────────┐
@@ -167,7 +167,7 @@ graph TD
 
     subgraph Edge ["Layer 1: Ingress & Edge Security"]
         Proxy["Reverse Proxy (Caddy / TinyAuth)"]
-        DualSpec["McpDualSpecMiddleware<br>(2026-07-28 Spec & Legacy Body Fallback)"]
+        DualSpec["McpSpecMiddleware<br>(2026-07-28 Spec & Legacy Body Fallback)"]
         AuthSpec["McpAuthorizationSpecMiddleware<br>(WWW-Authenticate Challenges)"]
     end
 
@@ -636,7 +636,7 @@ The router multiplexes client requests across backend connections while ensuring
 sequenceDiagram
     autonumber
     actor Client as MCP Client (IDE / Agent)
-    participant Edge as McpDualSpecMiddleware
+    participant Edge as McpSpecMiddleware
     participant Proxy as ProxyEndpoints (/sse, /message)
     participant SessionMgr as SessionManager
     participant Session as ClientSession
@@ -698,7 +698,7 @@ sequenceDiagram
 sequenceDiagram
     autonumber
     actor Client as Single-Shot Client / Webhook
-    participant Edge as McpDualSpecMiddleware
+    participant Edge as McpSpecMiddleware
     participant Proxy as ProxyEndpoints (/sse POST or /{serverId})
     participant SessionMgr as SessionManager
     participant Session as ClientSession (Global Stateless)
