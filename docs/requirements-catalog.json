@@ -1,6 +1,6 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-01T04:28:46.5087219Z",
+    "generatedAt": "2026-09-01T04:50:26.3132544Z",
     "totalRequirements": 181,
     "positiveCount": 152,
     "guardrailCount": 29,
@@ -4111,35 +4111,35 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
-          "lineNumber": 9,
+          "lineNumber": 8,
           "testName": "Middleware_Parses_2026_Spec_Headers",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
-          "lineNumber": 37,
+          "lineNumber": 36,
           "testName": "Middleware_Falls_Back_To_Json_Body_When_Headers_Missing",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
-          "lineNumber": 65,
+          "lineNumber": 64,
           "testName": "Middleware_Matches_Admin_And_Target_Proxy_Paths",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
-          "lineNumber": 87,
+          "lineNumber": 86,
           "testName": "Middleware_Detects_Notifications_Correctly",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
-          "lineNumber": 104,
+          "lineNumber": 103,
           "testName": "Middleware_Skips_Non_Mcp_Paths",
           "details": null
         }

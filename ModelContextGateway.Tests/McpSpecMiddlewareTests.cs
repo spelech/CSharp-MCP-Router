@@ -1,6 +1,5 @@
 using System.Text;
 using Microsoft.AspNetCore.Http;
-using ModelContextGateway.Tests.Attributes;
 
 namespace ModelContextGateway.Tests
 {
