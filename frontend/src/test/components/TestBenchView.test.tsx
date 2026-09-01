@@ -123,7 +123,7 @@ describe('TestBenchView Component', () => {
     fireEvent.submit(forms[0]);
 
     await waitFor(() => {
-      expect(api.apiRequest).toHaveBeenCalledWith('/api/test/call-tool', expect.anything());
+      expect(api.apiRequest).toHaveBeenCalledWith('/api/test/call', expect.anything());
     });
   });
 
@@ -157,7 +157,7 @@ describe('TestBenchView Component', () => {
     fireEvent.submit(forms[0]);
 
     await waitFor(() => {
-      expect(api.apiRequest).toHaveBeenCalledWith('/api/test/get-prompt', expect.anything());
+      expect(api.apiRequest).toHaveBeenCalledWith('/api/test/prompts/get', expect.anything());
     });
   });
 
@@ -191,7 +191,7 @@ describe('TestBenchView Component', () => {
     fireEvent.submit(forms[0]);
 
     await waitFor(() => {
-      expect(api.apiRequest).toHaveBeenCalledWith('/api/test/read-resource', expect.anything());
+      expect(api.apiRequest).toHaveBeenCalledWith('/api/test/resources/read', expect.anything());
     });
   });
 });

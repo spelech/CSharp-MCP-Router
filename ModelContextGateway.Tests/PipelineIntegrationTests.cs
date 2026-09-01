@@ -195,29 +195,38 @@ namespace ModelContextGateway.Tests
             var testToolsRes = await client.GetAsync("/api/test/tools?serverId=plex");
             Assert.True((int)testToolsRes.StatusCode < 600);
 
-            // /api/test/call
+            // /api/test/call & /api/test/call-tool
             var testCallRes = await client.PostAsJsonAsync("/api/test/call", new { serverId = "custom", toolName = "plex_get_sessions", arguments = new { } });
             Assert.True((int)testCallRes.StatusCode < 600);
 
+            var testCallToolRes = await client.PostAsJsonAsync("/api/test/call-tool", new { name = "custom__plex_get_sessions", arguments = new { } });
+            Assert.True((int)testCallToolRes.StatusCode < 600);
+
             // /api/test/semantic-search
             var semRes = await client.PostAsJsonAsync("/api/test/semantic-search", new { query = "docker" });
-            Assert.True((int)semRes.StatusCode < 600);
+            Assert.Equal(HttpStatusCode.OK, semRes.StatusCode);
 
             // /api/test/prompts
             var promptsRes = await client.GetAsync("/api/test/prompts?serverId=plex");
             Assert.True((int)promptsRes.StatusCode < 600);
 
-            // /api/test/prompts/get
+            // /api/test/prompts/get & /api/test/get-prompt
             var promptGetRes = await client.PostAsJsonAsync("/api/test/prompts/get", new { serverId = "router", promptName = "router__diagnose_failure", arguments = new { } });
             Assert.True((int)promptGetRes.StatusCode < 600);
+
+            var promptGetAliasRes = await client.PostAsJsonAsync("/api/test/get-prompt", new { name = "router__diagnose_failure", arguments = new { } });
+            Assert.True((int)promptGetAliasRes.StatusCode < 600);
 
             // /api/test/resources
             var resourcesRes = await client.GetAsync("/api/test/resources?serverId=plex");
             Assert.True((int)resourcesRes.StatusCode < 600);
 
-            // /api/test/resources/read
+            // /api/test/resources/read & /api/test/read-resource
             var resReadRes = await client.PostAsJsonAsync("/api/test/resources/read", new { uri = "router://status" });
             Assert.True((int)resReadRes.StatusCode < 600);
+
+            var resReadAliasRes = await client.PostAsJsonAsync("/api/test/read-resource", new { uri = "router://status" });
+            Assert.True((int)resReadAliasRes.StatusCode < 600);
 
             // /api/custom-files CRUD
             var getFilesRes = await client.GetAsync("/api/custom-files");

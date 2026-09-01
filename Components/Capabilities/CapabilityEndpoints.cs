@@ -263,7 +263,7 @@ namespace ModelContextGateway.Components.Capabilities
             });
 
             // 3. Test Call API
-            api.MapPost("/api/test/call", async (
+            Delegate handleTestCall = async (
                 [FromBody] TestCallModel model,
                 [FromServices] IDbConnectionFactory dbFactory,
                 [FromServices] HttpClient httpClient,
@@ -273,20 +273,36 @@ namespace ModelContextGateway.Components.Capabilities
             {
                 var username = httpContext.User?.Identity?.Name ?? "unknown";
                 var secretRetriever = httpContext.RequestServices.GetService<CompositeSecretRetriever>();
-                using var dbConn = dbFactory.CreateConnection();
-                var server = await dbConn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @Id", new { Id = model.ServerId });
-                if (server == null && model.ServerId != "custom")
+                var toolName = model.ResolvedToolName;
+                var serverId = model.ServerId;
+
+                // If serverId is missing or "custom", check if toolName contains server prefix "serverId__tool"
+                if ((string.IsNullOrEmpty(serverId) || serverId == "custom") && toolName.Contains("__"))
                 {
-                    var msg = $"Server {model.ServerId} not found";
-                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments }), false, msg);
+                    var parts = toolName.Split("__", 2);
+                    serverId = parts[0];
+                }
+
+                using var dbConn = dbFactory.CreateConnection();
+                var server = await dbConn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @Id", new { Id = serverId });
+                if (server == null && serverId != "custom")
+                {
+                    var msg = $"Server {serverId} not found";
+                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", toolName, JsonSerializer.Serialize(new { serverId, arguments = model.Arguments }), false, msg);
                     return Results.NotFound(msg);
                 }
 
                 if (server == null)
                 {
                     var msg = "Server not found";
-                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments }), false, msg);
+                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", toolName, JsonSerializer.Serialize(new { serverId, arguments = model.Arguments }), false, msg);
                     return Results.NotFound();
+                }
+
+                var targetToolName = toolName;
+                if (!string.IsNullOrEmpty(serverId) && targetToolName.StartsWith(serverId + "__"))
+                {
+                    targetToolName = targetToolName.Substring(serverId.Length + 2);
                 }
 
                 try
@@ -312,25 +328,28 @@ namespace ModelContextGateway.Components.Capabilities
                         method = "tools/call",
                         @params = new
                         {
-                            name = model.ToolName,
-                            arguments = model.Arguments
+                            name = targetToolName,
+                            arguments = model.Arguments.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : model.Arguments
                         }
                     };
                     var targetBody = JsonSerializer.Serialize(targetPayload);
                     var result = await conn.SendRequestAsync("tools/call", targetBody);
 
-                    var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
-                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, true);
+                    var details = JsonSerializer.Serialize(new { serverId, toolName = targetToolName, arguments = model.Arguments });
+                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", toolName, details, true);
 
                     return Results.Ok(result);
                 }
                 catch (Exception ex)
                 {
-                    var details = JsonSerializer.Serialize(new { serverId = model.ServerId, arguments = model.Arguments });
-                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", model.ToolName, details, false, ex.Message);
+                    var details = JsonSerializer.Serialize(new { serverId, toolName = targetToolName, arguments = model.Arguments });
+                    await auditLogger.LogAdminActionAsync(username, "testbench.tools/call", toolName, details, false, ex.Message);
                     return Results.Problem("An unexpected error occurred.");
                 }
-            });
+            };
+
+            api.MapPost("/api/test/call", handleTestCall);
+            api.MapPost("/api/test/call-tool", handleTestCall);
 
             // 4. Test Semantic Search API
             api.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
@@ -700,7 +719,7 @@ namespace ModelContextGateway.Components.Capabilities
             });
 
             // 3b. Test Prompt Get API
-            api.MapPost("/api/test/prompts/get", async ([FromBody] TestPromptGetModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
+            Delegate handleTestPromptGet = async ([FromBody] TestPromptGetModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<CompositeSecretRetriever>();
                 using var connDb = dbFactory.CreateConnection();
@@ -708,14 +727,27 @@ namespace ModelContextGateway.Components.Capabilities
                 var servers = rawServers.ToList();
                 var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
 
+                var promptName = model.ResolvedPromptName;
                 var serverId = model.ServerId;
+
+                if ((string.IsNullOrEmpty(serverId) || serverId == "custom") && promptName.Contains("__"))
+                {
+                    var parts = promptName.Split("__", 2);
+                    serverId = parts[0];
+                }
+
                 if (serverId != "router" && !servers.Any(s => s.Id == serverId))
                 {
                     return Results.NotFound($"Server {serverId} not found");
                 }
 
+                var targetPromptName = promptName;
+                if (!string.IsNullOrEmpty(serverId) && targetPromptName.StartsWith(serverId + "__"))
+                {
+                    targetPromptName = targetPromptName.Substring(serverId.Length + 2);
+                }
+
                 var routing = new PromptRoutingManager();
-                var promptName = model.PromptName;
 
                 Func<string, string, string, string> rewriteRequestJson = (json, key, value) =>
                 {
@@ -750,7 +782,7 @@ namespace ModelContextGateway.Components.Capabilities
                     method = "prompts/get",
                     @params = new
                     {
-                        name = promptName,
+                        name = targetPromptName,
                         arguments = model.Arguments.ValueKind == JsonValueKind.Undefined ? (object)new Dictionary<string, object>() : model.Arguments
                     }
                 };
@@ -758,7 +790,7 @@ namespace ModelContextGateway.Components.Capabilities
 
                 if (serverId == "router")
                 {
-                    var res = await routing.GetPromptAsync(promptName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
+                    var res = await routing.GetPromptAsync(targetPromptName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
                     return Results.Ok(res);
                 }
 
@@ -776,12 +808,15 @@ namespace ModelContextGateway.Components.Capabilities
                 await conn.SendNotificationAsync("notifications/initialized", "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}");
                 backendConnections[targetServer.Id] = conn;
 
-                var promptRes = await routing.GetPromptAsync(promptName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
+                var promptRes = await routing.GetPromptAsync(targetPromptName, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson);
                 return Results.Ok(promptRes);
-            });
+            };
+
+            api.MapPost("/api/test/prompts/get", handleTestPromptGet);
+            api.MapPost("/api/test/get-prompt", handleTestPromptGet);
 
             // 3c. Test Resource Read API
-            api.MapPost("/api/test/resources/read", async ([FromBody] TestResourceReadModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            Delegate handleTestResourceRead = async ([FromBody] TestResourceReadModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<CompositeSecretRetriever>();
                 using var connDb = dbFactory.CreateConnection();
@@ -811,10 +846,15 @@ namespace ModelContextGateway.Components.Capabilities
                     return Results.Ok(localRes);
                 }
 
-                string serverId = "";
-                if (Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) && parsedUri.Scheme == "mcp")
+                string serverId = model.ServerId;
+                if (string.IsNullOrEmpty(serverId) && Uri.TryCreate(uri, UriKind.Absolute, out var parsedUri) && parsedUri.Scheme == "mcp")
                 {
                     serverId = parsedUri.Host;
+                }
+
+                if (string.IsNullOrEmpty(serverId) && servers.Count == 1)
+                {
+                    serverId = servers[0].Id;
                 }
 
                 if (string.IsNullOrEmpty(serverId) || !servers.Any(s => s.Id == serverId))
@@ -838,7 +878,10 @@ namespace ModelContextGateway.Components.Capabilities
 
                 var res = await routing.ReadResourceAsync(uri, body, backendConnections, () => Task.CompletedTask, rewriteRequestJson, sessionManager);
                 return Results.Ok(res);
-            });
+            };
+
+            api.MapPost("/api/test/resources/read", handleTestResourceRead);
+            api.MapPost("/api/test/read-resource", handleTestResourceRead);
 
             // --- Custom Files Management APIs ---
 

@@ -74,13 +74,26 @@ namespace ModelContextGateway.Core.Routing
                 }));
             }
 
-            var queryVector = await embeddingService.GetEmbeddingAsync(query);
+            float[]? queryVector = null;
+            try
+            {
+                queryVector = await embeddingService.GetEmbeddingAsync(query);
+            }
+            catch (Exception ex)
+            {
+                logger?.LogWarning(ex, "Failed to generate embedding for query '{Query}', falling back to keyword search.", query);
+            }
+
+            if (queryVector == null)
+            {
+                return SearchTools(query, tools);
+            }
 
             var scoredTools = new List<(object Tool, double Score)>();
 
             foreach (var item in toolItems)
             {
-                if (!_embeddingsCache.TryGetValue(item.TextToEmbed, out var toolVector))
+                if (!_embeddingsCache.TryGetValue(item.TextToEmbed, out var toolVector) || toolVector == null)
                 {
                     continue;
                 }
@@ -134,7 +147,10 @@ namespace ModelContextGateway.Core.Routing
                 scoredTools.Add((item.Tool, finalScore));
             }
 
-
+            if (scoredTools.Count == 0)
+            {
+                return SearchTools(query, tools);
+            }
 
             return scoredTools
                 .OrderByDescending(x => x.Score)

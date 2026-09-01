@@ -7,7 +7,6 @@ namespace ModelContextGateway.Core.Routing
     public class OnnxEmbeddingService : IEmbeddingService
     {
         private readonly ILogger<OnnxEmbeddingService> _logger;
-        private readonly HttpClient _httpClient;
         private RouterSettings _settings;
         private string _modelDir = "";
         private string _modelPath = "";
@@ -19,7 +18,7 @@ namespace ModelContextGateway.Core.Routing
 
         public OnnxEmbeddingService(HttpClient httpClient, RouterSettings settings, ILogger<OnnxEmbeddingService> logger)
         {
-            _httpClient = httpClient;
+            _ = httpClient;
             _logger = logger;
             _settings = settings;
             SetupPaths();
@@ -64,7 +63,9 @@ namespace ModelContextGateway.Core.Routing
             if (!File.Exists(_modelPath))
             {
                 _logger.LogInformation("Downloading local ONNX embedding model (all-MiniLM-L6-v2) from Hugging Face...");
-                var response = await _httpClient.GetAsync("https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx");
+                using var handler = new SocketsHttpHandler { AllowAutoRedirect = true };
+                using var downloadClient = new HttpClient(handler) { Timeout = TimeSpan.FromMinutes(5) };
+                var response = await downloadClient.GetAsync("https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx");
                 response.EnsureSuccessStatusCode();
                 using var fs = new FileStream(_modelPath, FileMode.Create, FileAccess.Write, FileShare.None);
                 await response.Content.CopyToAsync(fs);
@@ -75,7 +76,9 @@ namespace ModelContextGateway.Core.Routing
             if (!File.Exists(_vocabPath))
             {
                 _logger.LogInformation("Downloading model vocabulary file from Hugging Face...");
-                var response = await _httpClient.GetAsync("https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/vocab.txt");
+                using var handler = new SocketsHttpHandler { AllowAutoRedirect = true };
+                using var downloadClient = new HttpClient(handler) { Timeout = TimeSpan.FromMinutes(2) };
+                var response = await downloadClient.GetAsync("https://huggingface.co/Xenova/all-MiniLM-L6-v2/resolve/main/vocab.txt");
                 response.EnsureSuccessStatusCode();
                 using var fs = new FileStream(_vocabPath, FileMode.Create, FileAccess.Write, FileShare.None);
                 await response.Content.CopyToAsync(fs);
@@ -84,11 +87,11 @@ namespace ModelContextGateway.Core.Routing
 
             lock (_initLock)
             {
-                if (_session == null)
+                if (_session == null && File.Exists(_modelPath))
                 {
                     _session = new InferenceSession(_modelPath);
                 }
-                if (_tokenizer == null)
+                if (_tokenizer == null && File.Exists(_vocabPath))
                 {
                     _tokenizer = BertTokenizer.Create(_vocabPath);
                 }
@@ -99,7 +102,12 @@ namespace ModelContextGateway.Core.Routing
         {
             await EnsureInitializedAsync();
 
-            var tokens = _tokenizer!.EncodeToIds(text);
+            if (_tokenizer == null || _session == null)
+            {
+                return new float[384];
+            }
+
+            var tokens = _tokenizer.EncodeToIds(text);
 
             int seqLength = tokens.Count;
             if (seqLength == 0)

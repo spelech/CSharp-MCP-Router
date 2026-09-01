@@ -29,7 +29,17 @@ import {
   deleteCustomFileApi,
   uploadBrandingLogo,
 } from '../../api/settingsApi';
-import { fetchTestToolsApi, fetchTestPromptsApi, fetchTestResourcesApi, fetchLogsApi, clearLogsApi } from '../../api/testbenchApi';
+import {
+  fetchTestToolsApi,
+  fetchTestPromptsApi,
+  fetchTestResourcesApi,
+  fetchLogsApi,
+  clearLogsApi,
+  executeToolApi,
+  getPromptApi,
+  readResourceApi,
+  semanticSearchApi
+} from '../../api/testbenchApi';
 
 describe('Typed API Client Layer', () => {
   describe('serverApi', () => {
@@ -254,6 +264,22 @@ describe('Typed API Client Layer', () => {
       expect(logs).toEqual([]);
 
       await clearLogsApi();
+
+      mockApiResponse('/api/test/call', { result: 'tool_output' });
+      const toolRes = await executeToolApi('srv1', 'tool1', { arg: 'val' });
+      expect(toolRes.result).toBe('tool_output');
+
+      mockApiResponse('/api/test/prompts/get', { prompt: 'prompt_output' });
+      const promptRes = await getPromptApi('srv1', 'prompt1', { p: 1 });
+      expect(promptRes.prompt).toBe('prompt_output');
+
+      mockApiResponse('/api/test/resources/read', { content: 'res_output' });
+      const resResult = await readResourceApi('srv1', 'mcp://srv1/res');
+      expect(resResult.content).toBe('res_output');
+
+      mockApiResponse('/api/test/semantic-search', [{ name: 'tool1', score: 0.9 }]);
+      const searchRes = await semanticSearchApi('query');
+      expect(searchRes).toHaveLength(1);
     });
   });
 });

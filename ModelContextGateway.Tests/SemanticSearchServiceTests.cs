@@ -1,4 +1,5 @@
 using System.Text.Json;
+using Moq;
 
 namespace ModelContextGateway.Tests
 {
@@ -72,6 +73,25 @@ namespace ModelContextGateway.Tests
 
             var queryRes = SemanticSearchService.SearchTools("restart", tools);
             Assert.NotEmpty(queryRes);
+        }
+
+        [Fact]
+        [Requirement("MCP-12", "MCP", RequirementType.Positive, "SemanticSearchService falls back to keyword matching when embedding provider throws exceptions.")]
+        public async Task SearchToolsSemanticAsync_FallsBackToKeyword_WhenEmbeddingServiceThrows()
+        {
+            var failingEmbedding = new Mock<IEmbeddingService>();
+            failingEmbedding.Setup(e => e.GetEmbeddingAsync(It.IsAny<string>()))
+                .ThrowsAsync(new HttpRequestException("HTTP 302 Found"));
+
+            var tools = new List<object>
+            {
+                new Dictionary<string, object> { { "name", "docker__list_containers" }, { "description", "List running Docker containers" } },
+                new Dictionary<string, object> { { "name", "plex__search" }, { "description", "Search media in Plex" } }
+            };
+
+            var results = await SemanticSearchService.SearchToolsSemanticAsync("docker containers", tools, failingEmbedding.Object);
+            Assert.NotEmpty(results);
+            Assert.Equal("docker__list_containers", ((Dictionary<string, object>)results[0])["name"]);
         }
     }
 }

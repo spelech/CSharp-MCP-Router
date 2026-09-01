@@ -1,5 +1,5 @@
 import React from 'react';
-import { apiRequest } from '../../shared/api/api';
+import { executeToolApi, getPromptApi, readResourceApi, semanticSearchApi } from '../../api/testbenchApi';
 import { showToast } from '../../stores/useToastStore';
 import { useTestBenchState } from './useTestBenchState';
 
@@ -109,13 +109,7 @@ export const TestBenchView: React.FC = () => {
     setConsoleResponse('Executing tool...');
 
     try {
-      const result = await apiRequest('/api/test/call-tool', {
-        method: 'POST',
-        body: {
-          name: selectedToolName,
-          arguments: parsedArgs
-        }
-      });
+      const result = await executeToolApi(selectedToolServer, selectedToolName, parsedArgs);
       setConsoleResponse(JSON.stringify(result, null, 2));
     } catch (err: any) {
       setConsoleResponse(`Error: ${err.message}`);
@@ -159,13 +153,7 @@ export const TestBenchView: React.FC = () => {
     setConsoleResponse('Fetching prompt...');
 
     try {
-      const result = await apiRequest('/api/test/get-prompt', {
-        method: 'POST',
-        body: {
-          name: selectedPromptName,
-          arguments: promptArguments
-        }
-      });
+      const result = await getPromptApi(selectedPromptServer, selectedPromptName, promptArguments);
       setConsoleResponse(JSON.stringify(result, null, 2));
     } catch (err: any) {
       setConsoleResponse(`Error: ${err.message}`);
@@ -204,12 +192,7 @@ export const TestBenchView: React.FC = () => {
     setConsoleResponse('Reading resource...');
 
     try {
-      const result = await apiRequest('/api/test/read-resource', {
-        method: 'POST',
-        body: {
-          uri: selectedResourceUri
-        }
-      });
+      const result = await readResourceApi(selectedResourceServer, selectedResourceUri);
       setConsoleResponse(JSON.stringify(result, null, 2));
     } catch (err: any) {
       setConsoleResponse(`Error: ${err.message}`);
@@ -223,10 +206,7 @@ export const TestBenchView: React.FC = () => {
 
     setIsSearchingSemantic(true);
     try {
-      const results = await apiRequest<any[]>('/api/test/semantic-search', {
-        method: 'POST',
-        body: { query: semanticQuery.trim() }
-      });
+      const results = await semanticSearchApi(semanticQuery.trim());
       setSemanticResults(results || []);
     } catch (err: any) {
       showToast(`Semantic search failed: ${err.message}`, 'error');

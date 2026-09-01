@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-01T03:11:17.8303004Z",
+    "generatedAt": "2026-09-01T03:22:45.4042695Z",
     "totalRequirements": 181,
     "positiveCount": 152,
     "guardrailCount": 29,
-    "totalProofs": 816
+    "totalProofs": 817
   },
   "requirements": [
     {
@@ -161,21 +161,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 295,
+          "lineNumber": 304,
           "testName": "Pipeline_Permissions_Policy_And_Mapping_CRUD",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 339,
+          "lineNumber": 348,
           "testName": "Pipeline_GET_Clients_Returns200",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 348,
+          "lineNumber": 357,
           "testName": "Pipeline_GET_Permissions_Policies_Returns200",
           "details": null
         },
@@ -534,21 +534,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 310,
+          "lineNumber": 319,
           "testName": "Pipeline_AppKey_Create_And_Revoke",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 393,
+          "lineNumber": 402,
           "testName": "Pipeline_GET_AppKeys_Returns200",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 402,
+          "lineNumber": 411,
           "testName": "Pipeline_GET_AppKeysLimits_Returns200",
           "details": null
         },
@@ -837,14 +837,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 357,
+          "lineNumber": 366,
           "testName": "Pipeline_GET_Permissions_Mappings_Returns200",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 375,
+          "lineNumber": 384,
           "testName": "Pipeline_GET_Providers_Auth_Returns200",
           "details": null
         },
@@ -3346,35 +3346,35 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 267,
+          "lineNumber": 276,
           "testName": "Pipeline_Server_CRUD_Endpoints",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 321,
+          "lineNumber": 330,
           "testName": "Pipeline_GET_Version_Returns200",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 330,
+          "lineNumber": 339,
           "testName": "Pipeline_GET_Servers_Returns200",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 420,
+          "lineNumber": 429,
           "testName": "Pipeline_GET_Stats_Returns200",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 429,
+          "lineNumber": 438,
           "testName": "Pipeline_GET_Health_Returns200",
           "details": null
         },
@@ -3906,7 +3906,7 @@
       "category": "MCP",
       "type": "Positive",
       "description": "DynamicEmbeddingService retrieves and persists embedding provider configurations in Settings table.",
-      "proofCount": 18,
+      "proofCount": 19,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -3981,15 +3981,22 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SemanticSearchServiceTests.cs",
-          "lineNumber": 41,
+          "lineNumber": 42,
           "testName": "SearchToolsSemanticAsync_ScoresAndRanksTools",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SemanticSearchServiceTests.cs",
-          "lineNumber": 60,
+          "lineNumber": 61,
           "testName": "SearchTools_KeywordMatching_WorksCorrectly",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SemanticSearchServiceTests.cs",
+          "lineNumber": 78,
+          "testName": "SearchToolsSemanticAsync_FallsBackToKeyword_WhenEmbeddingServiceThrows",
           "details": null
         },
         {
@@ -5232,7 +5239,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 366,
+          "lineNumber": 375,
           "testName": "Pipeline_GET_Providers_Secret_Returns200",
           "details": null
         },
@@ -5469,14 +5476,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 384,
+          "lineNumber": 393,
           "testName": "Pipeline_GET_Audit_Returns200",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 411,
+          "lineNumber": 420,
           "testName": "Pipeline_GET_Logs_Returns200",
           "details": null
         },
@@ -5835,7 +5842,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 472,
+          "lineNumber": 481,
           "testName": "Pipeline_POST_MasterKey_RejectsWhenExternalKeySource",
           "details": null
         }
@@ -6571,35 +6578,35 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts",
-          "lineNumber": 64,
+          "lineNumber": 74,
           "testName": "calls client and appkey endpoints correctly",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts",
-          "lineNumber": 115,
+          "lineNumber": 125,
           "testName": "calls user quota endpoints correctly",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts",
-          "lineNumber": 144,
+          "lineNumber": 154,
           "testName": "calls policies and mappings endpoints correctly",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts",
-          "lineNumber": 171,
+          "lineNumber": 181,
           "testName": "calls settings, providers, custom files, approvals endpoints correctly",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts",
-          "lineNumber": 227,
+          "lineNumber": 237,
           "testName": "calls testbench tool, prompt, resource, log endpoints correctly",
           "details": null
         },
@@ -6768,7 +6775,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 244,
+          "lineNumber": 253,
           "testName": "Pipeline_Settings_Branding_ReadWrite",
           "details": null
         },
@@ -6798,7 +6805,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs",
-          "lineNumber": 438,
+          "lineNumber": 447,
           "testName": "Branding_Logo_Upload_And_Retrieval_Works",
           "details": null
         }

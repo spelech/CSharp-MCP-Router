@@ -24,3 +24,45 @@ export async function fetchLogsApi(): Promise<LogEntry[]> {
 export async function clearLogsApi(): Promise<void> {
   await apiRequest('/api/logs', { method: 'DELETE' });
 }
+
+export async function executeToolApi(serverId: string, toolName: string, args: Record<string, any>): Promise<any> {
+  return await apiRequest('/api/test/call', {
+    method: 'POST',
+    body: {
+      serverId,
+      toolName,
+      name: toolName,
+      arguments: args
+    }
+  });
+}
+
+export async function getPromptApi(serverId: string, promptName: string, args: Record<string, any>): Promise<any> {
+  return await apiRequest('/api/test/prompts/get', {
+    method: 'POST',
+    body: {
+      serverId,
+      promptName,
+      name: promptName,
+      arguments: args
+    }
+  });
+}
+
+export async function readResourceApi(serverId: string, uri: string): Promise<any> {
+  return await apiRequest('/api/test/resources/read', {
+    method: 'POST',
+    body: {
+      serverId,
+      uri
+    }
+  });
+}
+
+export async function semanticSearchApi(query: string): Promise<any[]> {
+  const data = await apiRequest<any[]>('/api/test/semantic-search', {
+    method: 'POST',
+    body: { query }
+  });
+  return data || [];
+}
