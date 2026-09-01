@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.6.5`** | 2026-09-02 | 🧪 Testing: Implemented `ILdapConnection` and `ILdapConnectionFactory` abstractions in `LdapActiveDirectoryService` and added fail-closed negative unit tests for connection failures. |
 | **`v5.6.4`** | 2026-09-02 | perf(routing): Optimized `SemanticSearchService` string parsing by hoisting `.ToLower()` and token splits outside outer tool loops. |
 | **`v5.6.3`** | 2026-09-02 | 🔒 Security: Validate `AllowedOrigins` in CORS configuration, strictly rejecting wildcard `*` origins and malformed URIs with security warnings while maintaining safe environment fallbacks. |
 | **`v5.6.2`** | 2026-09-02 | 🧹 Code Health: Improve exception handling in `SseTransport.cs` by logging timeouts and exceptions when waiting for SSE endpoint URL. |

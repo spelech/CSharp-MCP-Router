@@ -128,5 +128,29 @@ namespace ModelContextGateway.Tests
             var identity = await provider.ResolveIdentityAsync(httpContext);
             Assert.NotNull(identity);
         }
+
+        [Fact]
+        [Requirement("AUTH-01", "AUTH", RequirementType.Negative, "LdapActiveDirectoryService fails closed with SecurityException when LDAP connection throws an exception.")]
+        public async Task ResolveUserSidsAsync_ThrowsSecurityException_OnConnectionFailure()
+        {
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "Ldap:Server", "ldap.internal" },
+                { "Ldap:Port", "636" },
+                { "Ldap:UseSsl", "true" }
+            }).Build();
+
+            var mockConnection = new Mock<ILdapConnection>();
+            mockConnection.Setup(c => c.Bind()).Throws(new System.DirectoryServices.Protocols.LdapException("Mock LDAP Bind Failure"));
+
+            var mockFactory = new Mock<ILdapConnectionFactory>();
+            mockFactory.Setup(f => f.CreateConnection(It.IsAny<string>(), It.IsAny<int>(), It.IsAny<System.Net.NetworkCredential>(), It.IsAny<System.DirectoryServices.Protocols.AuthType>()))
+                       .Returns(mockConnection.Object);
+
+            var service = new LdapActiveDirectoryService(config, NullLogger<LdapActiveDirectoryService>.Instance, null, null, mockFactory.Object);
+
+            var ex = await Assert.ThrowsAsync<System.Security.SecurityException>(() => service.ResolveUserSidsAsync("alice"));
+            Assert.Contains("Fail-closed policy active", ex.Message);
+        }
     }
 }

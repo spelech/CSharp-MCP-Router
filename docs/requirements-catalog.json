@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-01T21:01:19.4402514Z",
+    "generatedAt": "2026-09-01T21:08:02.6802628Z",
     "totalRequirements": 184,
     "positiveCount": 153,
     "guardrailCount": 31,
-    "totalProofs": 833
+    "totalProofs": 834
   },
   "requirements": [
     {
@@ -44,7 +44,7 @@
       "category": "AUTH",
       "type": "Negative",
       "description": "AdminPolicy allows principal with configured Admin Group Name (e.g., full_admin)",
-      "proofCount": 47,
+      "proofCount": 48,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -247,6 +247,13 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs",
           "lineNumber": 114,
           "testName": "DeletePolicy_DeletesSuccessfully",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/LdapActiveDirectoryServiceTests.cs",
+          "lineNumber": 132,
+          "testName": "ResolveUserSidsAsync_ThrowsSecurityException_OnConnectionFailure",
           "details": null
         },
         {

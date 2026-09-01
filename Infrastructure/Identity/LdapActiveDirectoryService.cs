@@ -12,17 +12,20 @@ namespace ModelContextGateway.Infrastructure.Identity
         private readonly ILogger<LdapActiveDirectoryService> _logger;
         private readonly IMemoryCache? _cache;
         private readonly IAuthProviderRepository? _authRepo;
+        private readonly ILdapConnectionFactory _connectionFactory;
 
         public LdapActiveDirectoryService(
             IConfiguration config,
             ILogger<LdapActiveDirectoryService> logger,
             IMemoryCache? cache = null,
-            IAuthProviderRepository? authRepo = null)
+            IAuthProviderRepository? authRepo = null,
+            ILdapConnectionFactory? connectionFactory = null)
         {
             _config = config;
             _logger = logger;
             _cache = cache;
             _authRepo = authRepo;
+            _connectionFactory = connectionFactory ?? new LdapConnectionFactory();
         }
 
         public void Reload()
@@ -147,16 +150,14 @@ namespace ModelContextGateway.Infrastructure.Identity
 
             try
             {
-                var identifier = new LdapDirectoryIdentifier(server, port);
                 NetworkCredential? credential = null;
                 if (!string.IsNullOrEmpty(bindDn) && !string.IsNullOrEmpty(bindPassword))
                 {
                     credential = new NetworkCredential(bindDn, bindPassword);
                 }
 
-                using var connection = new LdapConnection(identifier, credential, AuthType.Basic);
-                connection.SessionOptions.ProtocolVersion = 3;
-                connection.SessionOptions.SecureSocketLayer = true;
+                using var connection = _connectionFactory.CreateConnection(server, port, credential, AuthType.Basic);
+                connection.SetSessionOptions(3, true);
                 connection.Bind();
 
                 var sanitizedUsername = EscapeLdapFilter(username);
