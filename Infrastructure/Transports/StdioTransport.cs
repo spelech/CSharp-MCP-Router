@@ -548,7 +548,10 @@ namespace ModelContextGateway.Infrastructure.Transports
             {
                 _cts.Cancel();
             }
-            catch { }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Cancellation token already canceled or disposed during StdioTransport disposal");
+            }
 
             HandleProcessExit();
 
@@ -570,7 +573,10 @@ namespace ModelContextGateway.Infrastructure.Transports
                 {
                     Task.WhenAll(readerTasks).Wait(TimeSpan.FromMilliseconds(1500));
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogDebug(ex, "Reader tasks did not complete cleanly during StdioTransport disposal");
+                }
             }
 
             if (_process != null)
@@ -583,12 +589,30 @@ namespace ModelContextGateway.Infrastructure.Transports
                     }
                     _process.Dispose();
                 }
-                catch { }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to clean up process resources during StdioTransport disposal");
+                }
                 _process = null;
             }
 
-            try { _writeLock.Dispose(); } catch { }
-            try { _cts.Dispose(); } catch { }
+            try
+            {
+                _writeLock.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to clean up process resources during StdioTransport disposal");
+            }
+
+            try
+            {
+                _cts.Dispose();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed to clean up process resources during StdioTransport disposal");
+            }
         }
     }
 }
