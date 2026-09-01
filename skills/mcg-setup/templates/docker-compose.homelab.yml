@@ -1,0 +1,37 @@
+services:
+  mcg:
+    image: ghcr.io/spelech/model-context-gateway:latest
+    container_name: mcg
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      # Optional: Admin Key for autonomous AI agents (e.g. Antigravity) & Web management
+      # If omitted, auto-generated to ./data/.admin.key on first boot
+      - MCG_ADMIN_AUTH_KEY=${MCG_ADMIN_AUTH_KEY:-}
+
+      # Optional: Pre-configured Client AppKeys with granular scopes for AI IDEs
+      # Format: token[:Name[:scope1;scope2...]]
+      # If omitted, auto-generated global key is written to ./data/.client.key on first boot
+      - MCG_CLIENT_APP_KEYS=${MCG_CLIENT_APP_KEYS:-}
+
+      # Optional: Master Encryption Key (AES-256-GCM)
+      # If omitted, auto-generated and safely persisted to ./data/.master.key on first boot
+      - MCG_MASTER_KEY=${MCG_MASTER_KEY:-}
+
+      # Subnets trusted for Standalone Web UI access (Local loopback + optional LAN subnet)
+      - STANDALONE_ALLOWED_NETWORKS=${STANDALONE_ALLOWED_NETWORKS:-127.0.0.1,::1,192.168.0.0/16,10.0.0.0/8,172.16.0.0/12}
+
+      # Web UI & CORS Allowed Origins
+      - CORS_ALLOWED_ORIGINS=${CORS_ALLOWED_ORIGINS:-http://localhost:3000,http://localhost:8080}
+    volumes:
+      # Persistent storage for SQLite database (mcg.db), keys, and logs
+      - ./data:/app/data
+      # Optional: Mount Docker socket for automatic MCP container discovery (labeled mcp.enabled=true)
+      - /var/run/docker.sock:/var/run/docker.sock
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 5s

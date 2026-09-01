@@ -123,13 +123,63 @@ namespace ModelContextGateway.Extensions
                         ?? Environment.GetEnvironmentVariable("MCG_OPENIDDICT_CERT_PASSWORD")
                         ?? Environment.GetEnvironmentVariable("OPENIDDICT_CERT_PASSWORD");
 
+                    var autoCert = config["OpenIddict:AutoGenerateCertificate"]
+                        ?? config["MCG_AUTO_CERT"]
+                        ?? Environment.GetEnvironmentVariable("OPENIDDICT_AUTO_CERT")
+                        ?? Environment.GetEnvironmentVariable("MCG_AUTO_CERT");
+                    var useDevCerts = config["OpenIddict:UseDevelopmentCertificate"]
+                        ?? Environment.GetEnvironmentVariable("OPENIDDICT_DEV_CERTS");
+
                     if (!string.IsNullOrEmpty(certPath) && System.IO.File.Exists(certPath))
                     {
                         var cert = System.Security.Cryptography.X509Certificates.X509CertificateLoader.LoadPkcs12FromFile(
                             certPath, certPass, System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.MachineKeySet);
                         options.AddSigningCertificate(cert).AddEncryptionCertificate(cert);
                     }
-                    else if (env.EnvironmentName == Environments.Production)
+                    else if (string.Equals(autoCert, "true", StringComparison.OrdinalIgnoreCase))
+                    {
+                        string dataDir = DbKeyHelper.ResolveDataDirectory(config);
+                        string autoPfxPath = System.IO.Path.Combine(dataDir, ".openiddict.pfx");
+
+                        if (System.IO.File.Exists(autoPfxPath))
+                        {
+                            try
+                            {
+                                var cert = System.Security.Cryptography.X509Certificates.X509CertificateLoader.LoadPkcs12FromFile(
+                                    autoPfxPath, null, System.Security.Cryptography.X509Certificates.X509KeyStorageFlags.MachineKeySet);
+                                options.AddSigningCertificate(cert).AddEncryptionCertificate(cert);
+                            }
+                            catch
+                            {
+                                options.AddDevelopmentEncryptionCertificate()
+                                       .AddDevelopmentSigningCertificate();
+                            }
+                        }
+                        else
+                        {
+                            try
+                            {
+                                System.IO.Directory.CreateDirectory(dataDir);
+                                using var rsa = System.Security.Cryptography.RSA.Create(2048);
+                                var certReq = new System.Security.Cryptography.X509Certificates.CertificateRequest(
+                                    "CN=mcg-standalone", rsa, System.Security.Cryptography.HashAlgorithmName.SHA256, System.Security.Cryptography.RSASignaturePadding.Pkcs1);
+                                var selfSignedCert = certReq.CreateSelfSigned(DateTimeOffset.UtcNow.AddDays(-1), DateTimeOffset.UtcNow.AddYears(10));
+                                var pfxBytes = selfSignedCert.Export(System.Security.Cryptography.X509Certificates.X509ContentType.Pfx);
+                                System.IO.File.WriteAllBytes(autoPfxPath, pfxBytes);
+                                if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+                                {
+                                    try { System.IO.File.SetUnixFileMode(autoPfxPath, UnixFileMode.UserRead | UnixFileMode.UserWrite); } catch { }
+                                }
+                                options.AddSigningCertificate(selfSignedCert).AddEncryptionCertificate(selfSignedCert);
+                            }
+                            catch
+                            {
+                                options.AddDevelopmentEncryptionCertificate()
+                                       .AddDevelopmentSigningCertificate();
+                            }
+                        }
+                    }
+                    else if (env.EnvironmentName == Environments.Production && !string.Equals(useDevCerts, "true", StringComparison.OrdinalIgnoreCase))
                     {
                         throw new InvalidOperationException("OpenIddict:CertificatePath must be configured in Production environment.");
                     }

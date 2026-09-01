@@ -1386,13 +1386,13 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 conn.Execute("INSERT INTO Settings (Id, GlobalMaxKeys, UserMaxKeys) VALUES ('default', 0, 0);");
             }
 
-            // Populate default SecretProviders safely and provider-agnostically
+            // Populate default SecretProviders safely and provider-agnostically (external providers disabled by default)
             var secretProviders = new[]
             {
-                new { ProviderName = "Vault", DisplayName = "HashiCorp Vault (KV v2)", IsEnabled = 1 },
-                new { ProviderName = "WindowsRegistry", DisplayName = "Windows Registry (DPAPI)", IsEnabled = 1 },
                 new { ProviderName = "Environment", DisplayName = "Container Environment", IsEnabled = 1 },
-                new { ProviderName = "TokenExchange", DisplayName = "OAuth2 / OIDC Token Exchange (OBO)", IsEnabled = 1 }
+                new { ProviderName = "Vault", DisplayName = "HashiCorp Vault (KV v2)", IsEnabled = 0 },
+                new { ProviderName = "WindowsRegistry", DisplayName = "Windows Registry (DPAPI)", IsEnabled = 0 },
+                new { ProviderName = "TokenExchange", DisplayName = "OAuth2 / OIDC Token Exchange (OBO)", IsEnabled = 0 }
             };
 
             foreach (var sp in secretProviders)
@@ -1404,12 +1404,12 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 }
             }
 
-            // Populate default AuthProviderConfigs safely and provider-agnostically
+            // Populate default AuthProviderConfigs safely and provider-agnostically (enterprise providers disabled by default in standalone mode)
             var authProviders = new[]
             {
-                new { ProviderName = "ActiveDirectory", DisplayName = "Active Directory", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 },
-                new { ProviderName = "HeaderAuth", DisplayName = "Configurable Reverse Proxy Header Auth", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 },
-                new { ProviderName = "PocketID", DisplayName = "PocketID OIDC", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 }
+                new { ProviderName = "ActiveDirectory", DisplayName = "Active Directory", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 0 },
+                new { ProviderName = "HeaderAuth", DisplayName = "Configurable Reverse Proxy Header Auth", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 0 },
+                new { ProviderName = "PocketID", DisplayName = "PocketID OIDC", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 0 }
             };
 
             foreach (var ap in authProviders)

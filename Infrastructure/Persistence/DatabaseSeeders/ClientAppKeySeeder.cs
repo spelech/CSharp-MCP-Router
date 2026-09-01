@@ -178,6 +178,145 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
                         logger.LogInformation("Seeded auto-generated high-entropy Admin AppKey for 'admin' (Prefix: {Prefix}, Key written to .admin.key).", keyPrefix);
                     }
                 }
+
+                // Seed Client AppKeys from environment (MCG_CLIENT_APP_KEYS / MCG_CLIENT_KEYS / MCG_DEFAULT_CLIENT_KEY) or auto-generate default .client.key
+                try
+                {
+                    var customClientKeys = configuration["MCG_CLIENT_APP_KEYS"]
+                        ?? configuration["MCG_CLIENT_KEYS"]
+                        ?? configuration["MCG_APP_KEYS"]
+                        ?? configuration["MCG_DEFAULT_CLIENT_KEY"]
+                        ?? Environment.GetEnvironmentVariable("MCG_CLIENT_APP_KEYS")
+                        ?? Environment.GetEnvironmentVariable("MCG_CLIENT_KEYS")
+                        ?? Environment.GetEnvironmentVariable("MCG_APP_KEYS")
+                        ?? Environment.GetEnvironmentVariable("MCG_DEFAULT_CLIENT_KEY");
+
+                    if (!string.IsNullOrWhiteSpace(customClientKeys))
+                    {
+                        var keyEntries = customClientKeys.Split(new[] { ',', '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                        foreach (var rawEntry in keyEntries)
+                        {
+                            if (string.IsNullOrWhiteSpace(rawEntry))
+                            {
+                                continue;
+                            }
+
+                            // Format: token[:Name[:scope1;scope2...]]
+                            var parts = rawEntry.Split(':', 3);
+                            var token = parts[0].Trim();
+                            if (string.IsNullOrWhiteSpace(token))
+                            {
+                                continue;
+                            }
+
+                            var keyPrefix = AppKeyAuthenticationHandler.ExtractKeyPrefix(token);
+                            var keyName = parts.Length > 1 && !string.IsNullOrWhiteSpace(parts[1]) ? parts[1].Trim() : $"Configured Client Key ({keyPrefix})";
+                            var scopesList = new List<string> { "all" };
+                            if (parts.Length > 2 && !string.IsNullOrWhiteSpace(parts[2]))
+                            {
+                                scopesList = parts[2].Split(new[] { ';', '|', ',' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).ToList();
+                                if (scopesList.Count == 0)
+                                {
+                                    scopesList.Add("all");
+                                }
+                            }
+
+                            using var sha256 = SHA256.Create();
+                            var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(token));
+                            var hashedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
+                            var scopesJson = System.Text.Json.JsonSerializer.Serialize(scopesList);
+
+                            var existingKey = conn.QueryFirstOrDefault<AppKey>(
+                                "SELECT * FROM AppKeys WHERE KeyPrefix = @KeyPrefix;",
+                                new { KeyPrefix = keyPrefix });
+
+                            if (existingKey == null)
+                            {
+                                var clientKey = new AppKey
+                                {
+                                    Id = Guid.NewGuid().ToString("N"),
+                                    Name = keyName,
+                                    Username = "user",
+                                    OwnerSid = string.Empty,
+                                    KeyType = "personal",
+                                    KeyPrefix = keyPrefix,
+                                    EncryptedKey = hashedKey,
+                                    ScopesJson = scopesJson,
+                                    ExpiresAt = null,
+                                    CreatedAt = DateTime.UtcNow
+                                };
+
+                                SaveAppKeyToDb(conn, dbFactory.ProviderName, clientKey);
+                                logger.LogInformation("Seeded custom Client AppKey '{Name}' from environment configuration (Prefix: {Prefix}, Scopes: {Scopes}).", keyName, keyPrefix, scopesJson);
+                            }
+                            else if (!string.Equals(existingKey.EncryptedKey, hashedKey, StringComparison.OrdinalIgnoreCase))
+                            {
+                                conn.Execute(
+                                    "UPDATE AppKeys SET EncryptedKey = @EncryptedKey, ScopesJson = @ScopesJson, Name = @Name WHERE Id = @Id;",
+                                    new { EncryptedKey = hashedKey, ScopesJson = scopesJson, Name = keyName, existingKey.Id });
+                                logger.LogInformation("Updated Client AppKey '{Name}' hash from environment configuration (Prefix: {Prefix}).", keyName, keyPrefix);
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // Check if ANY client AppKey (non-system / non-admin) already exists in the database
+                        var existingClientKey = conn.QueryFirstOrDefault<string>(
+                            "SELECT Id FROM AppKeys WHERE KeyType = 'personal' OR (ScopesJson NOT LIKE '%admin%' AND KeyType != 'system');");
+
+                        if (string.IsNullOrEmpty(existingClientKey))
+                        {
+                            const string base62Chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+                            var selector = RandomNumberGenerator.GetString(base62Chars, 8);
+                            var secret = RandomNumberGenerator.GetString(base62Chars, 16);
+                            var keyPrefix = $"mcp-glb-{selector}";
+                            var generatedPlaintextKey = $"{keyPrefix}-{secret}";
+
+                            using var sha256 = SHA256.Create();
+                            var hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(generatedPlaintextKey));
+                            var hashedKey = Convert.ToHexString(hashBytes).ToLowerInvariant();
+
+                            var defaultClientKey = new AppKey
+                            {
+                                Id = Guid.NewGuid().ToString("N"),
+                                Name = "Auto-Generated Default Client Key",
+                                Username = "user",
+                                OwnerSid = string.Empty,
+                                KeyType = "personal",
+                                KeyPrefix = keyPrefix,
+                                EncryptedKey = hashedKey,
+                                ScopesJson = "[\"all\"]",
+                                ExpiresAt = null,
+                                CreatedAt = DateTime.UtcNow
+                            };
+
+                            SaveAppKeyToDb(conn, dbFactory.ProviderName, defaultClientKey);
+
+                            // Persist to .client.key file in data directory for AI IDE and client tool connection
+                            try
+                            {
+                                string dataDir = DbKeyHelper.ResolveDataDirectory(configuration);
+                                Directory.CreateDirectory(dataDir);
+                                string clientKeyPath = Path.Combine(dataDir, ".client.key");
+                                File.WriteAllText(clientKeyPath, generatedPlaintextKey);
+                                if (OperatingSystem.IsLinux() || OperatingSystem.IsMacOS())
+                                {
+                                    try { File.SetUnixFileMode(clientKeyPath, UnixFileMode.UserRead | UnixFileMode.UserWrite); } catch { }
+                                }
+                            }
+                            catch (Exception exFile)
+                            {
+                                logger.LogWarning(exFile, "Could not write .client.key file to data directory.");
+                            }
+
+                            logger.LogInformation("Seeded auto-generated high-entropy Client AppKey for 'user' (Prefix: {Prefix}, Key written to .client.key).", keyPrefix);
+                        }
+                    }
+                }
+                catch (Exception exSeedClientKey)
+                {
+                    logger.LogWarning(exSeedClientKey, "Default Client AppKey seeder warning");
+                }
             }
             catch (Exception exSeedKey)
             {
