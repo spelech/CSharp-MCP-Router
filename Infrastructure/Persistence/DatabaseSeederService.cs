@@ -1404,12 +1404,12 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 }
             }
 
-            // Populate default AuthProviderConfigs safely and provider-agnostically (enterprise providers disabled by default in standalone mode)
+            // Populate default AuthProviderConfigs safely and provider-agnostically (Active Directory disabled by default)
             var authProviders = new[]
             {
                 new { ProviderName = "ActiveDirectory", DisplayName = "Active Directory", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 0 },
-                new { ProviderName = "HeaderAuth", DisplayName = "Configurable Reverse Proxy Header Auth", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 0 },
-                new { ProviderName = "PocketID", DisplayName = "PocketID OIDC", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 0 }
+                new { ProviderName = "HeaderAuth", DisplayName = "Configurable Reverse Proxy Header Auth", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 },
+                new { ProviderName = "PocketID", DisplayName = "PocketID OIDC", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 }
             };
 
             foreach (var ap in authProviders)

@@ -236,10 +236,10 @@ namespace ModelContextGateway.Tests
             Assert.Equal(0, adAuth.IsEnabled);
 
             Assert.NotNull(headerAuth);
-            Assert.Equal(0, headerAuth.IsEnabled);
+            Assert.Equal(1, headerAuth.IsEnabled);
 
             Assert.NotNull(pocketIdAuth);
-            Assert.Equal(0, pocketIdAuth.IsEnabled);
+            Assert.Equal(1, pocketIdAuth.IsEnabled);
 
             // 2. Verify SecretProviders defaults (Vault, WindowsRegistry, TokenExchange disabled by default; Environment enabled)
             var secretProviders = conn.Query<ProviderRow>("SELECT ProviderName, IsEnabled FROM SecretProviders").ToList();
