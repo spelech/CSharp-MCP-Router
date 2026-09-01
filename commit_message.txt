@@ -1,0 +1,6 @@
+chore(refactor): Fix empty catch blocks in StdioTransport
+
+🎯 **What:** Replaced the empty catch block during JSON parsing in `StdioTransport.cs` with proper `JsonNode` parsing and warning logs. Added logging for task cancellation and exceptions in cleanup logic.
+💡 **Why:** Silently swallowing JSON parsing or mutation exceptions risks data loss or misleading bugs. Logging and failing gracefully improves diagnosability and maintainability.
+✅ **Verification:** Verified through `StdioTransport_SendRequestAsync_LogsWarningOnInvalidJson` test and full suite run.
+✨ **Result:** Safe parsing of JSON payloads, improved debuggability of the Stdio transport cleanup, and compliance with the `TRANS-01` requirement.
