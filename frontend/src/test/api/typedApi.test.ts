@@ -12,7 +12,7 @@ import {
   deleteServerApi,
   inspectServerApi,
 } from '../../api/serverApi';
-import { fetchClientsApi, registerClientApi, deleteClientApi } from '../../api/clientApi';
+import { fetchClientsApi, registerClientApi, deleteClientApi, cleanupClientsApi } from '../../api/clientApi';
 import { fetchAppKeysApi, fetchAppKeyLimitsApi, createAppKeyApi, revokeAppKeyApi } from '../../api/appKeyApi';
 import { fetchUserQuotasApi, setUserQuotaApi, deleteUserQuotaApi } from '../../api/userQuotaApi';
 import { fetchPoliciesApi, savePolicyApi, deletePolicyApi, fetchMappingsApi, saveMappingApi, deleteMappingApi } from '../../api/securityApi';
@@ -91,6 +91,10 @@ describe('Typed API Client Layer', () => {
         30
       );
       await deleteClientApi('c1');
+
+      mockApiResponse(/\/api\/clients\/cleanup/, { cleanedCount: 2, message: 'Cleaned up 2' });
+      const cleanupRes = await cleanupClientsApi(30);
+      expect(cleanupRes.cleanedCount).toBe(2);
 
       const appKeys = await fetchAppKeysApi();
       expect(appKeys).toHaveLength(1);

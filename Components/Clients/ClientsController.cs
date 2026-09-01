@@ -259,6 +259,38 @@ namespace ModelContextGateway.Components.Clients
             }
         }
 
+        [HttpPost("cleanup")]
+        public async Task<IActionResult> CleanupClients([FromQuery] int retentionDays = 30)
+        {
+            var username = User?.Identity?.Name ?? "unknown";
+            try
+            {
+                try
+                {
+                    var compositeProvider = HttpContext?.RequestServices?.GetService<CompositeIdentityProvider>();
+                    if (compositeProvider != null && HttpContext != null)
+                    {
+                        var identity = await compositeProvider.ResolveIdentityAsync(HttpContext);
+                        if (identity != null)
+                        {
+                            username = identity.Username;
+                        }
+                    }
+                }
+                catch { }
+
+                var count = await _oauthClientRepo.CleanupDcrClientsAsync(retentionDays);
+                await _auditLogger.LogAdminActionAsync(username, "client.cleanup", "dcr", JsonSerializer.Serialize(new { cleanedCount = count, retentionDays }), true);
+                return Ok(new { cleanedCount = count, message = $"Cleaned up {count} stale or duplicate client registrations." });
+            }
+            catch (Exception ex)
+            {
+                HttpContext?.RequestServices?.GetService<Microsoft.Extensions.Logging.ILoggerFactory>()?.CreateLogger(GetType().Name)?.LogError(ex, "An unexpected error occurred.");
+                await _auditLogger.LogAdminActionAsync(username, "client.cleanup", "dcr", "", false, ex.Message);
+                return StatusCode(500, new { error = "An unexpected error occurred." });
+            }
+        }
+
         public class CreateClientModel
         {
             public string DisplayName { get; set; } = string.Empty;

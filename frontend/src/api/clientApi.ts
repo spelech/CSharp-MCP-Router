@@ -30,3 +30,9 @@ export async function registerClientApi(
 export async function deleteClientApi(id: string): Promise<void> {
   await apiRequest(`/api/clients/${id}`, { method: 'DELETE' });
 }
+
+export async function cleanupClientsApi(retentionDays = 30): Promise<{ cleanedCount: number; message: string }> {
+  return await apiRequest<{ cleanedCount: number; message: string }>(`/api/clients/cleanup?retentionDays=${retentionDays}`, {
+    method: 'POST'
+  });
+}

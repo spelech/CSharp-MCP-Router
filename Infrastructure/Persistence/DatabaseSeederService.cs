@@ -59,6 +59,24 @@ namespace ModelContextGateway.Infrastructure.Persistence
             ClientAppKeySeeder.SeedDefaultClientsAndKeys(dbFactory, logger, configuration);
             CatalogDatabaseSeeder.SeedCatalogServers(dbFactory, logger);
 
+            // 6. Automatically prune duplicate/stale DCR client registrations
+            try
+            {
+                var oauthRepo = scope.ServiceProvider.GetService<IOAuthClientRepository>();
+                if (oauthRepo != null)
+                {
+                    var cleanedCount = oauthRepo.CleanupDcrClientsAsync().GetAwaiter().GetResult();
+                    if (cleanedCount > 0)
+                    {
+                        logger.LogInformation("Cleaned up {Count} duplicate/stale dynamic OAuth client registrations during initialization.", cleanedCount);
+                    }
+                }
+            }
+            catch (Exception exCleanup)
+            {
+                logger.LogWarning(exCleanup, "Dynamic client cleanup during seeding encountered a non-fatal warning.");
+            }
+
             try
             {
                 var embeddingSvc = scope.ServiceProvider.GetService<DynamicEmbeddingService>();

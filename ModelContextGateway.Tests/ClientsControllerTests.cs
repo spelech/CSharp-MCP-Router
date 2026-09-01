@@ -329,6 +329,41 @@ namespace ModelContextGateway.Tests
             var statusResult = result.Should().BeOfType<ObjectResult>().Subject;
             statusResult.StatusCode.Should().Be(500);
         }
+
+        [Fact]
+        [Requirement("AUTH-119", "SEC", RequirementType.Positive, "CleanupClients endpoint triggers DCR pruning and returns total cleaned client count.")]
+        public async Task CleanupClients_CallsRepoAndReturnsCleanedCount()
+        {
+            var (_, dbFactory, _) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var mockRepo = new Mock<IOAuthClientRepository>();
+            mockRepo.Setup(c => c.CleanupDcrClientsAsync(30))
+                .ReturnsAsync(7);
+
+            var controller = new ClientsController(mockRepo.Object, mockAudit.Object, dbFactory);
+            var result = await controller.CleanupClients(30);
+
+            var okResult = result.Should().BeOfType<OkObjectResult>().Subject;
+            var doc = JsonDocument.Parse(JsonSerializer.Serialize(okResult.Value));
+            doc.RootElement.GetProperty("cleanedCount").GetInt32().Should().Be(7);
+            mockRepo.Verify(c => c.CleanupDcrClientsAsync(30), Times.Once);
+        }
+
+        [Fact]
+        [Requirement("GUARD-01", "GUARD", RequirementType.Negative, "CleanupClients returns 500 when repository throws.")]
+        public async Task CleanupClients_Returns500_WhenOAuthClientRepositoryThrows()
+        {
+            var (_, dbFactory, _) = CreateDbEnvironment();
+            var mockAudit = new Mock<IAuditLogger>();
+            var mockRepo = new Mock<IOAuthClientRepository>();
+            mockRepo.Setup(c => c.CleanupDcrClientsAsync(It.IsAny<int>()))
+                .ThrowsAsync(new Exception("Database locked"));
+
+            var controller = new ClientsController(mockRepo.Object, mockAudit.Object, dbFactory);
+            var result = await controller.CleanupClients(30);
+            var statusResult = result.Should().BeOfType<ObjectResult>().Subject;
+            statusResult.StatusCode.Should().Be(500);
+        }
     }
 }
 

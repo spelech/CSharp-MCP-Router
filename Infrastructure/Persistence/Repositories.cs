@@ -45,8 +45,10 @@ namespace ModelContextGateway.Infrastructure.Persistence
     {
         Task<IEnumerable<OAuthClient>> GetOAuthClientsAsync();
         Task<OAuthClient?> GetOAuthClientByIdAsync(string clientId);
+        Task<OAuthClient?> FindDcrClientAsync(string clientName, string clientType);
         Task SaveOAuthClientAsync(OAuthClient client);
         Task<bool> DeleteOAuthClientAsync(string clientId);
+        Task<int> CleanupDcrClientsAsync(int retentionDays = 30);
     }
 
     public interface ISecretProviderRepository
@@ -928,6 +930,105 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 );
                 return affected > 0 || affected == -1;
             }
+        }
+
+        public async Task<OAuthClient?> FindDcrClientAsync(string clientName, string clientType)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            var provider = _dbFactory.ProviderName.ToLowerInvariant();
+
+            if (provider == "sqlite" || provider == "mysql")
+            {
+                return await conn.QueryFirstOrDefaultAsync<OAuthClient>(@"
+                    SELECT ClientId, ClientSecretHash, ClientName, ClientType,
+                           RedirectUrisJson, GrantTypesJson, ScopesJson,
+                           OwnerSid, CreatedBy, ExpiresAt, CreatedAt
+                    FROM OAuthClients
+                    WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
+                      AND ClientName = @ClientName
+                      AND ClientType = @ClientType
+                    ORDER BY CreatedAt DESC
+                    LIMIT 1;",
+                    new { ClientName = clientName, ClientType = clientType });
+            }
+            else
+            {
+                return await conn.QueryFirstOrDefaultAsync<OAuthClient>(@"
+                    SELECT TOP 1 ClientId, ClientSecretHash, ClientName, ClientType,
+                           RedirectUrisJson, GrantTypesJson, ScopesJson,
+                           OwnerSid, CreatedBy, ExpiresAt, CreatedAt
+                    FROM [dbo].[OAuthClients]
+                    WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
+                      AND ClientName = @ClientName
+                      AND ClientType = @ClientType
+                    ORDER BY CreatedAt DESC;",
+                    new { ClientName = clientName, ClientType = clientType });
+            }
+        }
+
+        public async Task<int> CleanupDcrClientsAsync(int retentionDays = 30)
+        {
+            using var conn = _dbFactory.CreateConnection();
+            var provider = _dbFactory.ProviderName.ToLowerInvariant();
+            int cleaned = 0;
+
+            if (provider == "sqlite")
+            {
+                // 1. Prune duplicate DCR registrations keeping the newest record per (ClientName, ClientType)
+                cleaned += await conn.ExecuteAsync(@"
+                    DELETE FROM OAuthClients
+                    WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
+                      AND ClientId IN (
+                          SELECT ClientId FROM (
+                              SELECT ClientId, ROW_NUMBER() OVER (PARTITION BY ClientName, ClientType ORDER BY CreatedAt DESC) as rn
+                              FROM OAuthClients
+                              WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
+                          ) WHERE rn > 1
+                      );");
+
+                // 2. Delete expired DCR clients
+                cleaned += await conn.ExecuteAsync(@"
+                    DELETE FROM OAuthClients
+                    WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
+                      AND ExpiresAt IS NOT NULL
+                      AND ExpiresAt != ''
+                      AND datetime(ExpiresAt) < datetime('now');");
+            }
+            else if (provider == "mysql")
+            {
+                cleaned += await conn.ExecuteAsync(@"
+                    DELETE c FROM OAuthClients c
+                    INNER JOIN (
+                        SELECT ClientId, ROW_NUMBER() OVER (PARTITION BY ClientName, ClientType ORDER BY CreatedAt DESC) as rn
+                        FROM OAuthClients
+                        WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
+                    ) dupes ON c.ClientId = dupes.ClientId
+                    WHERE dupes.rn > 1;");
+
+                cleaned += await conn.ExecuteAsync(@"
+                    DELETE FROM OAuthClients
+                    WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
+                      AND ExpiresAt IS NOT NULL
+                      AND ExpiresAt < NOW();");
+            }
+            else // mssql
+            {
+                cleaned += await conn.ExecuteAsync(@"
+                    WITH CTE AS (
+                        SELECT ClientId, ROW_NUMBER() OVER (PARTITION BY ClientName, ClientType ORDER BY CreatedAt DESC) as rn
+                        FROM [dbo].[OAuthClients]
+                        WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
+                    )
+                    DELETE FROM [dbo].[OAuthClients] WHERE ClientId IN (SELECT ClientId FROM CTE WHERE rn > 1);");
+
+                cleaned += await conn.ExecuteAsync(@"
+                    DELETE FROM [dbo].[OAuthClients]
+                    WHERE (CreatedBy = 'dcr' OR CreatedBy = '' OR CreatedBy IS NULL)
+                      AND ExpiresAt IS NOT NULL
+                      AND ExpiresAt < SYSUTCDATETIME();");
+            }
+
+            return cleaned;
         }
 
         // ==========================================

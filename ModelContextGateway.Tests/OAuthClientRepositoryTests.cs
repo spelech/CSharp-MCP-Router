@@ -210,5 +210,103 @@ namespace ModelContextGateway.Tests
             var result = await _repo.GetOAuthClientByIdAsync("nonexistent-client");
             Assert.Null(result);
         }
+
+        [Fact]
+        [Requirement("AUTH-118", "AUTH", RequirementType.Positive, "FindDcrClientAsync resolves existing DCR client matching client name and type.")]
+        public async Task FindDcrClient_ReturnsMatchingClient()
+        {
+            var client = new OAuthClient
+            {
+                ClientId = "dcr-client-find",
+                ClientName = "Google Antigravity",
+                ClientType = "public",
+                CreatedBy = "dcr",
+                CreatedAt = DateTime.UtcNow
+            };
+
+            await _repo.SaveOAuthClientAsync(client);
+
+            var found = await _repo.FindDcrClientAsync("Google Antigravity", "public");
+            Assert.NotNull(found);
+            Assert.Equal("dcr-client-find", found.ClientId);
+
+            var notFound = await _repo.FindDcrClientAsync("NonExistentApp", "public");
+            Assert.Null(notFound);
+        }
+
+        [Fact]
+        [Requirement("AUTH-119", "AUTH", RequirementType.Positive, "CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers.")]
+        public async Task CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients()
+        {
+            // Seed 3 duplicate DCR entries for "Google Antigravity"
+            var c1 = new OAuthClient
+            {
+                ClientId = "dcr-old-1",
+                ClientName = "Google Antigravity",
+                ClientType = "public",
+                CreatedBy = "dcr",
+                CreatedAt = DateTime.UtcNow.AddHours(-3)
+            };
+            var c2 = new OAuthClient
+            {
+                ClientId = "dcr-old-2",
+                ClientName = "Google Antigravity",
+                ClientType = "public",
+                CreatedBy = "dcr",
+                CreatedAt = DateTime.UtcNow.AddHours(-2)
+            };
+            var c3 = new OAuthClient
+            {
+                ClientId = "dcr-latest",
+                ClientName = "Google Antigravity",
+                ClientType = "public",
+                CreatedBy = "dcr",
+                CreatedAt = DateTime.UtcNow.AddMinutes(-5)
+            };
+
+            // Seed an expired DCR client
+            var expired = new OAuthClient
+            {
+                ClientId = "dcr-expired",
+                ClientName = "Ephemeral Bot",
+                ClientType = "confidential",
+                CreatedBy = "dcr",
+                ExpiresAt = DateTime.UtcNow.AddDays(-1),
+                CreatedAt = DateTime.UtcNow.AddDays(-2)
+            };
+
+            // Seed a manual admin client (should NOT be pruned)
+            var manual = new OAuthClient
+            {
+                ClientId = "manual-client",
+                ClientName = "Admin Integration",
+                ClientType = "confidential",
+                CreatedBy = "admin",
+                CreatedAt = DateTime.UtcNow.AddDays(-10)
+            };
+
+            await _repo.SaveOAuthClientAsync(c1);
+            await _repo.SaveOAuthClientAsync(c2);
+            await _repo.SaveOAuthClientAsync(c3);
+            await _repo.SaveOAuthClientAsync(expired);
+            await _repo.SaveOAuthClientAsync(manual);
+
+            var cleaned = await _repo.CleanupDcrClientsAsync(30);
+            Assert.True(cleaned >= 3); // 2 duplicates of Google Antigravity + 1 expired client
+
+            // Verify newest Google Antigravity is kept
+            var latest = await _repo.GetOAuthClientByIdAsync("dcr-latest");
+            Assert.NotNull(latest);
+
+            // Verify older duplicates are deleted
+            Assert.Null(await _repo.GetOAuthClientByIdAsync("dcr-old-1"));
+            Assert.Null(await _repo.GetOAuthClientByIdAsync("dcr-old-2"));
+
+            // Verify expired client is deleted
+            Assert.Null(await _repo.GetOAuthClientByIdAsync("dcr-expired"));
+
+            // Verify manual admin client is preserved
+            Assert.NotNull(await _repo.GetOAuthClientByIdAsync("manual-client"));
+        }
     }
 }

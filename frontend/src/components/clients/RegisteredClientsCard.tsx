@@ -3,7 +3,7 @@ import { useClientStore } from '../../stores/useClientStore';
 import { showToast } from '../../stores/useToastStore';
 
 export const RegisteredClientsCard: React.FC = () => {
-  const { clients, fetchClients, deleteClient, openAddClientModal } = useClientStore();
+  const { clients, fetchClients, deleteClient, cleanupClients, openAddClientModal } = useClientStore();
 
   useEffect(() => {
     fetchClients();
@@ -20,9 +20,14 @@ export const RegisteredClientsCard: React.FC = () => {
         <h2>
           <i className="fa-solid fa-desktop"></i> Dynamic Client Registration (RFC 7591)
         </h2>
-        <button className="btn btn-primary btn-sm" id="btn-add-client" onClick={openAddClientModal}>
-          <i className="fa-solid fa-plus"></i> Register Client
-        </button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button className="btn btn-secondary btn-sm" id="btn-cleanup-clients" onClick={() => cleanupClients()} title="Prune duplicate and stale dynamic client registrations">
+            <i className="fa-solid fa-broom"></i> Clean Up DCR
+          </button>
+          <button className="btn btn-primary btn-sm" id="btn-add-client" onClick={openAddClientModal}>
+            <i className="fa-solid fa-plus"></i> Register Client
+          </button>
+        </div>
       </div>
 
       <div className="table-container">

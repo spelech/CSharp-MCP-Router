@@ -552,5 +552,62 @@ namespace ModelContextGateway.Tests
             var doc = JsonDocument.Parse(jsonText);
             Assert.Equal("access_denied", doc.RootElement.GetProperty("error").GetString());
         }
+
+        [Fact]
+        [Requirement("AUTH-118", "SEC", RequirementType.Positive, "RegisterClient deduplicates and reuses existing dynamic client registrations for matching client name and type without accumulating redundant records.")]
+        public async Task RegisterClient_DuplicateDcrRequest_ReusesExistingClientIdAndUpdatesRecord()
+        {
+            var existingClient = new OAuthClient
+            {
+                ClientId = "existing-dcr-client-guid",
+                ClientName = "Google Antigravity",
+                ClientType = "public",
+                RedirectUrisJson = "[\"https://antigravity.google/oauth-callback\"]",
+                GrantTypesJson = "[\"authorization_code\",\"refresh_token\"]",
+                ScopesJson = "[\"mcp_client\"]",
+                CreatedBy = "dcr",
+                CreatedAt = DateTime.UtcNow.AddMinutes(-30)
+            };
+
+            var mockOAuthRepo = new Mock<IOAuthClientRepository>();
+            mockOAuthRepo.Setup(r => r.FindDcrClientAsync("Google Antigravity", "public"))
+                         .ReturnsAsync(existingClient);
+
+            var mockAudit = new Mock<ModelContextGateway.Infrastructure.Logging.IAuditLogger>();
+
+            var mockLoggerFactory = new Mock<ILoggerFactory>();
+            mockLoggerFactory.Setup(x => x.CreateLogger(It.IsAny<string>())).Returns(new Mock<ILogger>().Object);
+            var mockServiceProvider = new Mock<IServiceProvider>();
+
+            var embeddingServiceMock = new Mock<DynamicEmbeddingService>(new HttpClient(), mockLoggerFactory.Object, mockServiceProvider.Object);
+            embeddingServiceMock.Setup(m => m.GetSettings()).Returns(new RouterSettings { AllowOpenClientRegistration = true });
+
+            var mockAuthService = new Mock<IAuthorizationService>();
+
+            var services = new ServiceCollection();
+            services.AddSingleton(embeddingServiceMock.Object);
+            services.AddSingleton(mockAuthService.Object);
+            var serviceProvider = services.BuildServiceProvider();
+
+            var httpContext = new DefaultHttpContext { RequestServices = serviceProvider };
+
+            var controller = new AuthorizationController(mockOAuthRepo.Object, mockAudit.Object)
+            {
+                ControllerContext = new ControllerContext { HttpContext = httpContext }
+            };
+
+            var json = JsonDocument.Parse("{\"client_name\":\"Google Antigravity\",\"token_endpoint_auth_method\":\"none\",\"redirect_uris\":[\"https://antigravity.google/oauth-callback\"]}").RootElement;
+            var result = await controller.RegisterClient(json) as ObjectResult;
+
+            Assert.NotNull(result);
+            Assert.Equal(201, result.StatusCode);
+
+            var jsonText = JsonSerializer.Serialize(result.Value);
+            var doc = JsonDocument.Parse(jsonText);
+            Assert.Equal("existing-dcr-client-guid", doc.RootElement.GetProperty("client_id").GetString());
+
+            // Verify SaveOAuthClientAsync was called with the reused ClientId
+            mockOAuthRepo.Verify(m => m.SaveOAuthClientAsync(It.Is<OAuthClient>(c => c.ClientId == "existing-dcr-client-guid" && c.ClientName == "Google Antigravity")), Times.Once);
+        }
     }
 }

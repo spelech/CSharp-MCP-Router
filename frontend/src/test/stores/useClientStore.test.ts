@@ -209,6 +209,54 @@ describe('useClientStore', () => {
     });
   });
 
+  describe('cleanupClients', () => {
+    /**
+     * @requirement UI-31
+     * @category UI
+     * @type PositiveFeature
+     * @description Prompts confirmation and cleans up stale/duplicate DCR clients when confirmed.
+     */
+    it('prompts confirmation and calls cleanupClientsApi when confirmed', async () => {
+      let cleanupCalled = false;
+      mockApiResponse(/\/api\/clients\/cleanup/, () => {
+        cleanupCalled = true;
+        return { cleanedCount: 5, message: 'Cleaned up 5 stale or duplicate client registrations.' };
+      });
+      mockApiResponse('/api/clients', []);
+
+      const cleanupPromise = useClientStore.getState().cleanupClients(30);
+
+      expect(useConfirmStore.getState().isOpen).toBe(true);
+      expect(useConfirmStore.getState().options.title).toBe('Clean Up DCR Clients');
+
+      useConfirmStore.getState().handleConfirm();
+      await cleanupPromise;
+
+      expect(cleanupCalled).toBe(true);
+      expect(useToastStore.getState().toasts.some((t) => t.message.includes('Cleaned up 5'))).toBe(true);
+    });
+
+    /**
+     * @requirement UI-31
+     * @category UI
+     * @type FailClosedGuardrail
+     * @description Cancels DCR cleanup when user cancels confirmation modal.
+     */
+    it('cancels DCR cleanup when user cancels confirmation modal', async () => {
+      let cleanupCalled = false;
+      mockApiResponse(/\/api\/clients\/cleanup/, () => {
+        cleanupCalled = true;
+        return { cleanedCount: 0, message: '' };
+      });
+
+      const cleanupPromise = useClientStore.getState().cleanupClients(30);
+      useConfirmStore.getState().handleCancel();
+      await cleanupPromise;
+
+      expect(cleanupCalled).toBe(false);
+    });
+  });
+
   describe('modal state', () => {
     /**
      * @requirement AUTH-02

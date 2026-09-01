@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { showToast } from './useToastStore';
 import { confirmAction } from './useConfirmStore';
 import { RegisteredClient, NewClientResult } from '../shared/types';
-import { fetchClientsApi, registerClientApi, deleteClientApi } from '../api/clientApi';
+import { fetchClientsApi, registerClientApi, deleteClientApi, cleanupClientsApi } from '../api/clientApi';
 
 export type { RegisteredClient, NewClientResult };
 
@@ -22,6 +22,7 @@ interface ClientStore {
     expiresInDays?: number
   ) => Promise<void>;
   deleteClient: (id: string, name: string) => Promise<void>;
+  cleanupClients: (retentionDays?: number) => Promise<void>;
 
   openAddClientModal: () => void;
   closeClientModal: () => void;
@@ -70,6 +71,23 @@ export const useClientStore = create<ClientStore>((set, get) => ({
       get().fetchClients();
     } catch (e: any) {
       showToast(`Error deleting client: ${e.message}`, 'error');
+    }
+  },
+
+  cleanupClients: async (retentionDays = 30) => {
+    const confirmed = await confirmAction({
+      title: 'Clean Up DCR Clients',
+      message: 'Prune duplicate and expired dynamic client registrations (RFC 7591) while preserving active configurations?',
+      confirmText: 'Clean Up',
+      danger: false
+    });
+    if (!confirmed) return;
+    try {
+      const res = await cleanupClientsApi(retentionDays);
+      showToast(res.cleanedCount > 0 ? `Cleaned up ${res.cleanedCount} stale / duplicate DCR registrations` : 'All dynamic client registrations are clean', 'success');
+      get().fetchClients();
+    } catch (e: any) {
+      showToast(`Error cleaning up clients: ${e.message}`, 'error');
     }
   },
 

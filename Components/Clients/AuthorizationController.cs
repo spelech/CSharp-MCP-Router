@@ -284,7 +284,6 @@ namespace ModelContextGateway.Components.Clients
             }
 
             var clientName = metadata.TryGetProperty("client_name", out var cn) ? cn.GetString() : "Unknown Client";
-            var clientId = Guid.NewGuid().ToString("N");
 
             var redirectUrisList = new List<string>();
             if (metadata.TryGetProperty("redirect_uris", out var rUris) && rUris.ValueKind == JsonValueKind.Array)
@@ -369,66 +368,88 @@ namespace ModelContextGateway.Components.Clients
             string? clientSecret = isPublic ? null : Convert.ToHexString(RandomNumberGenerator.GetBytes(32)).ToLowerInvariant();
             string clientSecretHash = clientSecret != null ? Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(clientSecret))).ToLowerInvariant() : "";
 
+            // DCR Idempotency / Reuse: If a dynamic client registration already exists for this client name and type,
+            // reuse the existing client ID and update metadata instead of accumulating unbounded duplicate records.
+            OAuthClient? existingDcrClient = null;
+            if (_oauthClientRepo != null && !string.IsNullOrWhiteSpace(clientName))
+            {
+                existingDcrClient = await _oauthClientRepo.FindDcrClientAsync(clientName, clientType);
+            }
+
+            var clientId = existingDcrClient?.ClientId ?? Guid.NewGuid().ToString("N");
+
             try
             {
                 if (_applicationManager != null)
                 {
-                    var descriptor = new OpenIddictApplicationDescriptor
+                    var existingApp = await _applicationManager.FindByClientIdAsync(clientId);
+                    if (existingApp == null)
                     {
-                        ClientId = clientId,
-                        ClientSecret = clientSecret,
-                        DisplayName = clientName,
-                        ClientType = isPublic ? OpenIddictConstants.ClientTypes.Public : OpenIddictConstants.ClientTypes.Confidential,
-                        Permissions =
+                        var descriptor = new OpenIddictApplicationDescriptor
                         {
-                            OpenIddictConstants.Permissions.Endpoints.Token,
-                            OpenIddictConstants.Permissions.Endpoints.Authorization,
-                            OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
-                            OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                            OpenIddictConstants.Permissions.ResponseTypes.Code
-                        }
-                    };
+                            ClientId = clientId,
+                            ClientSecret = clientSecret,
+                            DisplayName = clientName,
+                            ClientType = isPublic ? OpenIddictConstants.ClientTypes.Public : OpenIddictConstants.ClientTypes.Confidential,
+                            Permissions =
+                            {
+                                OpenIddictConstants.Permissions.Endpoints.Token,
+                                OpenIddictConstants.Permissions.Endpoints.Authorization,
+                                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+                                OpenIddictConstants.Permissions.ResponseTypes.Code
+                            }
+                        };
 
-                    if (isPublic)
-                    {
-                        descriptor.Requirements.Add(OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange);
-                    }
-                    else
-                    {
-                        descriptor.Permissions.Add(OpenIddictConstants.Permissions.GrantTypes.ClientCredentials);
-                    }
-
-                    // Dynamically register all requested scopes in OpenIddict application permissions
-                    foreach (var s in scopesList)
-                    {
-                        descriptor.Permissions.Add(OpenIddictConstants.Permissions.Prefixes.Scope + s);
-                    }
-
-                    foreach (var uriStr in redirectUrisList)
-                    {
-                        if (Uri.TryCreate(uriStr, UriKind.Absolute, out var parsedUri))
+                        if (isPublic)
                         {
-                            descriptor.RedirectUris.Add(parsedUri);
+                            descriptor.Requirements.Add(OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange);
                         }
+                        else
+                        {
+                            descriptor.Permissions.Add(OpenIddictConstants.Permissions.GrantTypes.ClientCredentials);
+                        }
+
+                        // Dynamically register all requested scopes in OpenIddict application permissions
+                        foreach (var s in scopesList)
+                        {
+                            descriptor.Permissions.Add(OpenIddictConstants.Permissions.Prefixes.Scope + s);
+                        }
+
+                        foreach (var uriStr in redirectUrisList)
+                        {
+                            if (Uri.TryCreate(uriStr, UriKind.Absolute, out var parsedUri))
+                            {
+                                descriptor.RedirectUris.Add(parsedUri);
+                            }
+                        }
+                        await _applicationManager.CreateAsync(descriptor);
                     }
-                    await _applicationManager.CreateAsync(descriptor);
                 }
 
                 if (_oauthClientRepo != null)
                 {
-                    var oauthClient = new OAuthClient
+                    var oauthClient = existingDcrClient ?? new OAuthClient
                     {
                         ClientId = clientId,
-                        ClientSecretHash = clientSecretHash,
-                        ClientName = clientName ?? "Unknown Client",
-                        ClientType = clientType,
-                        RedirectUrisJson = JsonSerializer.Serialize(redirectUrisList),
-                        GrantTypesJson = JsonSerializer.Serialize(grantTypesList),
-                        ScopesJson = JsonSerializer.Serialize(scopesList),
-                        CreatedBy = User?.Identity?.Name ?? "dcr",
-                        CreatedAt = DateTime.UtcNow
+                        CreatedBy = User?.Identity?.Name ?? "dcr"
                     };
+
+                    oauthClient.ClientSecretHash = clientSecretHash;
+                    oauthClient.ClientName = clientName ?? "Unknown Client";
+                    oauthClient.ClientType = clientType;
+                    oauthClient.RedirectUrisJson = JsonSerializer.Serialize(redirectUrisList);
+                    oauthClient.GrantTypesJson = JsonSerializer.Serialize(grantTypesList);
+                    oauthClient.ScopesJson = JsonSerializer.Serialize(scopesList);
+                    oauthClient.CreatedAt = DateTime.UtcNow;
+
                     await _oauthClientRepo.SaveOAuthClientAsync(oauthClient);
+
+                    // Proactively trigger background pruning of historical duplicate DCR records
+                    _ = Task.Run(async () =>
+                    {
+                        try { await _oauthClientRepo.CleanupDcrClientsAsync(); } catch { }
+                    });
                 }
 
                 var username = User?.Identity?.Name ?? "unknown";

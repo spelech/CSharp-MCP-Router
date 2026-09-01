@@ -250,6 +250,12 @@ Machine clients registered dynamically or manually are provisioned with `OwnerSi
 * **Expiration**: Clients can be provisioned with an optional `ExpiresAt` UTC timestamp. Requests to authenticate expired clients are rejected with HTTP 400 `invalid_client`.
 * **Instant Revocation**: Administrators can instantly delete registered clients via the Web UI (**App Keys & Security > Registered Clients**) or via `DELETE /api/clients/{clientId}`. Revocation terminates subsequent token issuances immediately.
 
+### 4. Idempotency, Client Reuse & Automated Cleanup
+Autonomous AI clients and IDE agents (such as Google Antigravity, VS Code, Cursor) periodically reconnect and re-evaluate registration discovery metadata. To prevent unbounded record accumulation in the `OAuthClients` table:
+* **Idempotent Client Reuse**: If an incoming DCR request matches an existing dynamic client's `ClientName` and `ClientType` (where `CreatedBy = 'dcr'`), the gateway reuses the existing `ClientId`, updates registration timestamps and scope/redirect metadata, and returns the existing registration rather than creating orphan duplicates.
+* **Automated Startup Pruning**: During startup database migrations and background maintenance (`DatabaseSeederService`), the gateway automatically prunes stale duplicate DCR records across SQLite, MySQL, and MSSQL, preserving only the most recent configuration.
+* **Administrative Cleanup**: Operators can trigger immediate DCR client cleanup via the Web UI button (**Clean Up DCR**) or the API endpoint `POST /api/clients/cleanup?retentionDays=30`.
+
 ---
 
 ## 🖥️ 7. Web UI Management

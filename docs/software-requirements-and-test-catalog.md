@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **179 Requirements Verified** across **809 Test Proofs** (151 Functional Capabilities, 28 Safety Guardrails).
+> **Catalog Statistics:** **181 Requirements Verified** across **816 Test Proofs** (152 Functional Capabilities, 29 Safety Guardrails).
 
 ---
 
@@ -9,15 +9,15 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **39** | 37 | 2 | 205 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **41** | 39 | 2 | 209 proofs |
 | **`CORE`** | CORE | **1** | 1 | 0 | 2 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **3** | 3 | 0 | 31 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
-| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 133 proofs |
+| **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 134 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **49** | 49 | 0 | 149 proofs |
 | **`SEC`** | Secrets Providers & Encryption | **38** | 30 | 8 | 127 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 28 proofs |
-| **`UI`** | Dashboard, Test Bench & Settings UI | **26** | 24 | 2 | 130 proofs |
+| **`UI`** | Dashboard, Test Bench & Settings UI | **26** | 23 | 3 | 132 proofs |
 
 ---
 
@@ -68,17 +68,17 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L57`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L57) (`handles fetch error gracefully without crashing`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L123`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L123) (`handles register error with toast and propagates error`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L195`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L195) (`handles delete failure with error toast`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L213`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L213) (`opens and closes add client modal and resets created result`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L268`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L268) (`initializes with default state`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L340`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L340) (`loads app key limits`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L354`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L354) (`handles fetch error gracefully without crashing`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L418`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L418) (`handles create key error with toast and throws`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L493`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L493) (`handles revoke failure with error toast`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L511`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L511) (`loads user quotas and updates store`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L529`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L529) (`handles fetchUserQuotas error gracefully without crashing`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L568`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L568) (`handles setUserQuota error with toast and throws`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L639`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L639) (`handles deleteUserQuota failure with error toast`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L657`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L657) (`opens and closes create modal and clears result`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L261`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L261) (`opens and closes add client modal and resets created result`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L316`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L316) (`initializes with default state`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L388`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L388) (`loads app key limits`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L402`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L402) (`handles fetch error gracefully without crashing`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L466`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L466) (`handles create key error with toast and throws`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L541`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L541) (`handles revoke failure with error toast`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L559`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L559) (`loads user quotas and updates store`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L577`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L577) (`handles fetchUserQuotas error gracefully without crashing`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L616`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L616) (`handles setUserQuota error with toast and throws`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L687`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L687) (`handles deleteUserQuota failure with error toast`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L705`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L705) (`opens and closes create modal and clears result`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientSetupGuide.test.tsx#L51`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ClientSetupGuide.test.tsx#L51) (`switches between format tabs (Standard, VS Code, Generic SSE)`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientSetupGuide.test.tsx#L78`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ClientSetupGuide.test.tsx#L78) (`switches server scope from all servers to individual server`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientSetupGuide.test.tsx#L97`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ClientSetupGuide.test.tsx#L97) (`updates domain when LAN or custom is chosen`)
@@ -166,6 +166,20 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L51`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L51) (`GetClients_ReturnsOk_WithClientsAndMappedProperties`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L238`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L238) (`GetClients_NeverLeaksRawBearerSecretOrHash`)
 
+### `[AUTH-118]` FindDcrClientAsync resolves existing DCR client matching client name and type.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) (`FindDcrClient_ReturnsMatchingClient`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs#L556) (`RegisterClient_DuplicateDcrRequest_ReusesExistingClientIdAndUpdatesRecord`)
+
+### `[AUTH-119]` CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers.
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (2):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) (`CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L333`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L333) (`CleanupClients_CallsRepoAndReturnsCleanedCount`)
+
 ### `[AUTH-14]` Tool execution catches 401 Unauthorized from downstream target servers and returns interactive auth remediation.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
@@ -183,31 +197,31 @@
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L35) (`Homelab_ZeroConfigStartup_SeedsAdminAndClientKeys_AndPersistsFiles`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L30`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L30) (`Homelab_ZeroConfigStartup_SeedsAdminAndClientKeys_AndPersistsFiles`)
 
 ### `[AUTH-36]` Pre-configured MCG_CLIENT_APP_KEYS seeds functional individualized client keys with custom scopes
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L103`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L103) (`Homelab_PreConfiguredClientKeys_SeedsIndividualizedScopedKeys`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L98`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L98) (`Homelab_PreConfiguredClientKeys_SeedsIndividualizedScopedKeys`)
 
 ### `[AUTH-37]` AppKeys with server and category scopes enforce precise tool execution boundaries
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L173`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L173) (`AppKey_ScopeExtraction_ExtractsSemanticPrefixes`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L168`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L168) (`AppKey_ScopeExtraction_ExtractsSemanticPrefixes`)
 
 ### `[AUTH-38]` LAN CIDR network configuration allows standalone web dashboard access from local subnet
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L188`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L188) (`Standalone_LanCidr_GrantsAdminAccessToLocalSubnet`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L183`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L183) (`Standalone_LanCidr_GrantsAdminAccessToLocalSubnet`)
 
 ### `[AUTH-39]` Zero-config startup defaults enterprise auth providers and secret providers to disabled
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
 * **Type:** Positive Feature Capability
 * **Verification Proofs (1):**
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L216`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L216) (`ZeroConfig_Startup_DefaultsEnterpriseProviders_ToDisabled`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L211`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L211) (`ZeroConfig_Startup_DefaultsEnterpriseProviders_ToDisabled`)
 
 ### `[AUTH-APPKEY-ADMIN-SCOPE-ALLOW]` AppKeys with admin scope grant Administrator role and pass AdminPolicy.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -246,7 +260,7 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (6):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L125`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L125) (`GetAppKeys_NonAdmin_ReturnsOnlyPersonalKeys_ForCurrentUser`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L303`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L303) (`loads app keys and updates store`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L351`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L351) (`loads app keys and updates store`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L81`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L81) (`renders role-adaptive UI for non-admin user`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L34`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L34) (`renders role-adapted My App Keys view for non-admin user`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L79`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L79) (`renders keys list, copies config snippet, and revokes key`)
@@ -257,7 +271,7 @@
 * **Type:** Positive Feature Capability
 * **Verification Proofs (6):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L223`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L223) (`CreateAppKey_CustomQuotaOverride_AllowsHigherLimit`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L546`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L546) (`sets user quota override and refreshes quota list`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L594`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L594) (`sets user quota override and refreshes quota list`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L6`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L6) (`renders GeneralTab with security default quota inputs and triggers save`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L71`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTab.test.tsx#L71) (`updates form state when settings prop changes`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L222`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeysCard.test.tsx#L222) (`manages custom user quotas in admin quotas tab`)
@@ -301,8 +315,8 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L151`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L151) (`SystemAppKeys_RequireAdmin_AndSeparateFromPersonalKeys`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L311`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L311) (`PersonalAppKey_WithAllScope_DoesNotGrantAdministratorRole`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L364`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L364) (`SystemAppKey_WithAdminScope_GrantsAdministratorRole`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L287`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L287) (`switches keyTypeTab between personal and system`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L321`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L321) (`fetches system-filtered app keys via query parameters`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L335`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L335) (`switches keyTypeTab between personal and system`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L369`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L369) (`fetches system-filtered app keys via query parameters`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L15`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L15) (`renders header, navigation tabs, and default overview dashboard for admin user`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L36`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/App.test.tsx#L36) (`switches between tabs on navigation click`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L31`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L31) (`allows admin to select key type and create system app key`)
@@ -1162,10 +1176,10 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L90`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L90) (`uses body::before and body::after pseudo-elements for ambient gradients and removes background-decor DOM nodes`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L117`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/LayoutCentering.test.tsx#L117) (`defines focus-visible outline indicators for interactive focus styling`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L64`](file:////containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L64) (`calls client and appkey endpoints correctly`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L111`](file:////containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L111) (`calls user quota endpoints correctly`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L140`](file:////containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L140) (`calls policies and mappings endpoints correctly`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L167`](file:////containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L167) (`calls settings, providers, custom files, approvals endpoints correctly`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L223`](file:////containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L223) (`calls testbench tool, prompt, resource, log endpoints correctly`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L115`](file:////containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L115) (`calls user quota endpoints correctly`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L144`](file:////containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L144) (`calls policies and mappings endpoints correctly`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L171`](file:////containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L171) (`calls settings, providers, custom files, approvals endpoints correctly`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L227`](file:////containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts#L227) (`calls testbench tool, prompt, resource, log endpoints correctly`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42`](file:////containers/dev/csharp-mcp-router/frontend/e2e/prompts-resources-customfiles.spec.ts#L42) (`should navigate to Custom Files and Prompts in Settings view`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L23`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L23) (`should display aggregate statistics cards`)
   - [Playwright E2E] [`/containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L37`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L37) (`should filter servers using search input`)
@@ -1314,16 +1328,6 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx#L55`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx#L55) (`submits registration form with parsed scopes array and OAuth metadata`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx#L94`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx#L94) (`renders one-time secret display result card with copy buttons when createdClientResult is populated`)
 
-### `[UI-31]` Fetches registered OAuth clients and updates store state.
-* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
-* **Type:** Positive Feature Capability
-* **Verification Proofs (5):**
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L37`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L37) (`fetches registered clients and updates state`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L42`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L42) (`renders header, register button, and calls fetchClients on mount`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L67`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L67) (`renders empty state when no registered clients exist`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L84`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L84) (`renders rich client columns and handles client ID copy`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L130`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L130) (`triggers deleteClient when Delete button is clicked`)
-
 ### `[UI-32]` Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Positive Feature Capability
@@ -1394,7 +1398,7 @@
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
 * **Verification Proofs (9):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L191`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L191) (`CreateAppKey_NonAdmin_CreatesPersonalKey_UpToDefaultQuota`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L373`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L373) (`creates category-scoped key, captures one-time plaintext key, and refreshes`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L421`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L421) (`creates category-scoped key, captures one-time plaintext key, and refreshes`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L19`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L19) (`renders nothing when isCreateModalOpen is false`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L61`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L61) (`locks key type to personal key for non-admin and shows quota feedback`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L115`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/AppKeyModal.test.tsx#L115) (`handles scope serialization for server scope and target username for admin`)
@@ -1424,7 +1428,7 @@
 ### `[GUARD-01]` ResourceRoutingManager throws KeyNotFoundException when reading an unregistered resource URI.
 * **Category:** `GUARD` (Universal Safety & Fail-Closed Guardrails)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (42):**
+* **Verification Proofs (43):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L67`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ResourceRoutingManagerTests.cs#L67) (`ReadResourceAsync_ThrowsKeyNotFound_WhenResourceNotRegistered`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L468) (`Pairwise_NullOrEmptyTarget_FailsClosed_ReturnsFalse`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PairwiseIntegrationMatrixTests.cs#L490) (`Pairwise_CorruptedAppKeyScopesJson_FailsClosed_ReturnsFalse`)
@@ -1461,6 +1465,7 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L283) (`CreateClient_ReturnsBadRequest_WhenCategoryScopeEmpty`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L300) (`CreateClient_Returns500_WhenOAuthClientRepositoryThrows`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L317`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L317) (`DeleteClient_Returns500_WhenOAuthClientRepositoryThrows`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L352`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs#L352) (`CleanupClients_Returns500_WhenOAuthClientRepositoryThrows`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L58`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L58) (`SavePolicy_ReturnsBadRequest_WhenTargetIdMissing`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L69`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L69) (`SavePolicy_ReturnsBadRequest_WhenRequiredGroupMissing`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L160`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PermissionsControllerTests.cs#L160) (`SaveMapping_ReturnsBadRequest_WhenExternalIdMissing`)
@@ -1700,6 +1705,18 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L88`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L88) (`updates dashboardIcon and live preview when a logo image file is uploaded`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L141`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/GeneralTabLogoUpload.test.tsx#L141) (`saves settings with the updated logo URL when form is submitted after upload`)
 
+### `[UI-31]` Fetches registered OAuth clients and updates store state.
+* **Category:** `UI` (Dashboard, Test Bench & Settings UI)
+* **Type:** Negative / Safety Guardrail (Fail-Closed)
+* **Verification Proofs (7):**
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L37`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L37) (`fetches registered clients and updates state`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L213`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L213) (`prompts confirmation and calls cleanupClientsApi when confirmed`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L239`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L239) (`cancels DCR cleanup when user cancels confirmation modal`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L42`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L42) (`renders header, register button, and calls fetchClients on mount`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L73`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L73) (`renders empty state when no registered clients exist`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L90`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L90) (`renders rich client columns and handles client ID copy`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L136`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx#L136) (`triggers deleteClient when Delete button is clicked`)
+
 ### `[UI-CONFIRM-MODAL]` Centralized promise-based confirmation store resolves true on confirmation and false on cancellation.
 * **Category:** `UI` (Dashboard, Test Bench & Settings UI)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
@@ -1713,10 +1730,10 @@
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L287`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/usePolicyStore.test.ts#L287) (`does not delete custom file when confirm is cancelled`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L141`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L141) (`prompts confirmation and deletes client when confirmed`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L170`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L170) (`cancels deletion when user denies confirmation`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L439`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L439) (`confirms and revokes AppKey and refreshes list`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L468`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L468) (`cancels revocation when confirm is rejected`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L584`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L584) (`prompts confirmation modal and resets user quota when confirmed`)
-  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L614`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L614) (`cancels quota reset when user denies confirmation`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L487`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L487) (`confirms and revokes AppKey and refreshes list`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L516`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L516) (`cancels revocation when confirm is rejected`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L632`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L632) (`prompts confirmation modal and resets user quota when confirmed`)
+  - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L662`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L662) (`cancels quota reset when user denies confirmation`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L269`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L269) (`prompts window.confirm and deletes server when confirmed`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L298`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useServerStore.test.ts#L298) (`does not send delete request when confirm is cancelled`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/components/ConfirmModal.test.tsx#L6`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ConfirmModal.test.tsx#L6) (`renders nothing when closed`)
@@ -1750,13 +1767,15 @@
 | `AUTH-06` | Positive | `AUTH` | Transports use passThroughToken when AllowPassThroughAuth is true | [`TransportsAuthShapeTests.cs:L208`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TransportsAuthShapeTests.cs#L208) | Backend xUnit |
 | `AUTH-101` | Positive | `AUTH` | HTTP transport injects X-Forwarded-User header based on connected user identity. | [`IdentityHeaderTests.cs:L9`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/IdentityHeaderTests.cs#L9) | Backend xUnit |
 | `AUTH-110` | Positive | `AUTH` | CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0. | [`AppKeysControllerTests.cs:L343`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L343) | Backend xUnit |
+| `AUTH-118` | Positive | `AUTH` | FindDcrClientAsync resolves existing DCR client matching client name and type. | [`OAuthClientRepositoryTests.cs:L214`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L214) | Backend xUnit |
+| `AUTH-119` | Positive | `AUTH` | CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers. | [`OAuthClientRepositoryTests.cs:L237`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs#L237) | Backend xUnit |
 | `AUTH-14` | Positive | `AUTH` | Tool execution catches 401 Unauthorized from downstream target servers and returns interactive auth remediation. | [`ToolRoutingManagerTests.cs:L173`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L173) | Backend xUnit |
 | `AUTH-15` | Positive | `AUTH` | OpenIddict initializes ephemeral development signing certificates in Development environment. | [`OpenIddictProductionTests.cs:L30`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L30) | Backend xUnit |
-| `AUTH-35` | Positive | `AUTH` | Single-user homelab startup initializes SQLite, auto-generates Admin and Client AppKeys without PFX certificate requirements | [`SingleUserHomelabTests.cs:L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L35) | Backend xUnit |
-| `AUTH-36` | Positive | `AUTH` | Pre-configured MCG_CLIENT_APP_KEYS seeds functional individualized client keys with custom scopes | [`SingleUserHomelabTests.cs:L103`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L103) | Backend xUnit |
-| `AUTH-37` | Positive | `AUTH` | AppKeys with server and category scopes enforce precise tool execution boundaries | [`SingleUserHomelabTests.cs:L173`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L173) | Backend xUnit |
-| `AUTH-38` | Positive | `AUTH` | LAN CIDR network configuration allows standalone web dashboard access from local subnet | [`SingleUserHomelabTests.cs:L188`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L188) | Backend xUnit |
-| `AUTH-39` | Positive | `AUTH` | Zero-config startup defaults enterprise auth providers and secret providers to disabled | [`SingleUserHomelabTests.cs:L216`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L216) | Backend xUnit |
+| `AUTH-35` | Positive | `AUTH` | Single-user homelab startup initializes SQLite, auto-generates Admin and Client AppKeys without PFX certificate requirements | [`SingleUserHomelabTests.cs:L30`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L30) | Backend xUnit |
+| `AUTH-36` | Positive | `AUTH` | Pre-configured MCG_CLIENT_APP_KEYS seeds functional individualized client keys with custom scopes | [`SingleUserHomelabTests.cs:L98`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L98) | Backend xUnit |
+| `AUTH-37` | Positive | `AUTH` | AppKeys with server and category scopes enforce precise tool execution boundaries | [`SingleUserHomelabTests.cs:L168`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L168) | Backend xUnit |
+| `AUTH-38` | Positive | `AUTH` | LAN CIDR network configuration allows standalone web dashboard access from local subnet | [`SingleUserHomelabTests.cs:L183`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L183) | Backend xUnit |
+| `AUTH-39` | Positive | `AUTH` | Zero-config startup defaults enterprise auth providers and secret providers to disabled | [`SingleUserHomelabTests.cs:L211`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L211) | Backend xUnit |
 | `AUTH-APPKEY-ADMIN-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with admin scope grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L79`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L79) | Backend xUnit |
 | `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L255`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L255) | Backend xUnit |
 | `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L140`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L140) | Backend xUnit |
@@ -1915,7 +1934,7 @@
 | `UI-124` | Positive | `UI` | Renders main dashboard navigation tabs and layout headers | [`dashboard.spec.ts:L1`](file:////containers/dev/csharp-mcp-router/frontend/e2e/dashboard.spec.ts#L1) | Playwright E2E |
 | `UI-128` | Positive | `UI` | should navigate to Test Bench view and render tester cards | [`testbench.spec.ts:L1`](file:////containers/dev/csharp-mcp-router/frontend/e2e/testbench.spec.ts#L1) | Playwright E2E |
 | `UI-30` | Positive | `UI` | Renders client registration form with inputs for name, client type, redirect URIs, grant types, scopes, and expiration. | [`ClientModal.test.tsx:L27`](file:////containers/dev/csharp-mcp-router/frontend/src/test/components/ClientModal.test.tsx#L27) | Frontend Vitest |
-| `UI-31` | Positive | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
+| `UI-31` | **Guardrail** | `UI` | Fetches registered OAuth clients and updates store state. | [`useClientStore.test.ts:L37`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L37) | Frontend Vitest |
 | `UI-32` | Positive | `UI` | Registers OAuth client with extended metadata (redirect URIs, grant types, client type, expiration) and captures one-time credentials. | [`useClientStore.test.ts:L76`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts#L76) | Frontend Vitest |
 | `UI-CONFIRM-MODAL` | **Guardrail** | `UI` | Centralized promise-based confirmation store resolves true on confirmation and false on cancellation. | [`useConfirmStore.test.ts:L4`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useConfirmStore.test.ts#L4) | Frontend Vitest |
 | `UI-TOAST-TRANSITION` | **Guardrail** | `UI` | Displays error toast notification when saving invalid JSON credentials for user-provided server. | [`MyMcpServers.test.tsx:L23`](file:////containers/dev/csharp-mcp-router/frontend/src/test/pages/MyMcpServers.test.tsx#L23) | Frontend Vitest |

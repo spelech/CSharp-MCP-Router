@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-01T02:30:29.7204119Z",
-    "totalRequirements": 179,
-    "positiveCount": 151,
-    "guardrailCount": 28,
-    "totalProofs": 809
+    "generatedAt": "2026-09-01T03:11:17.8303004Z",
+    "totalRequirements": 181,
+    "positiveCount": 152,
+    "guardrailCount": 29,
+    "totalProofs": 816
   },
   "requirements": [
     {
@@ -590,77 +590,77 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 213,
+          "lineNumber": 261,
           "testName": "opens and closes add client modal and resets created result",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 268,
+          "lineNumber": 316,
           "testName": "initializes with default state",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 340,
+          "lineNumber": 388,
           "testName": "loads app key limits",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 354,
+          "lineNumber": 402,
           "testName": "handles fetch error gracefully without crashing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 418,
+          "lineNumber": 466,
           "testName": "handles create key error with toast and throws",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 493,
+          "lineNumber": 541,
           "testName": "handles revoke failure with error toast",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 511,
+          "lineNumber": 559,
           "testName": "loads user quotas and updates store",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 529,
+          "lineNumber": 577,
           "testName": "handles fetchUserQuotas error gracefully without crashing",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 568,
+          "lineNumber": 616,
           "testName": "handles setUserQuota error with toast and throws",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 639,
+          "lineNumber": 687,
           "testName": "handles deleteUserQuota failure with error toast",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 657,
+          "lineNumber": 705,
           "testName": "opens and closes create modal and clears result",
           "details": null
         },
@@ -1113,6 +1113,52 @@
       ]
     },
     {
+      "id": "AUTH-118",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "FindDcrClientAsync resolves existing DCR client matching client name and type.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 214,
+          "testName": "FindDcrClient_ReturnsMatchingClient",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AuthorizationControllerTests.cs",
+          "lineNumber": 556,
+          "testName": "RegisterClient_DuplicateDcrRequest_ReusesExistingClientIdAndUpdatesRecord",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-119",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "CleanupDcrClientsAsync prunes duplicate and expired dynamic client registrations across all database providers.",
+      "proofCount": 2,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OAuthClientRepositoryTests.cs",
+          "lineNumber": 237,
+          "testName": "CleanupDcrClients_PrunesDuplicateRegistrations_AndExpiredClients",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 333,
+          "testName": "CleanupClients_CallsRepoAndReturnsCleanedCount",
+          "details": null
+        }
+      ]
+    },
+    {
       "id": "AUTH-14",
       "category": "AUTH",
       "type": "Positive",
@@ -1161,7 +1207,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
-          "lineNumber": 35,
+          "lineNumber": 30,
           "testName": "Homelab_ZeroConfigStartup_SeedsAdminAndClientKeys_AndPersistsFiles",
           "details": null
         }
@@ -1177,7 +1223,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
-          "lineNumber": 103,
+          "lineNumber": 98,
           "testName": "Homelab_PreConfiguredClientKeys_SeedsIndividualizedScopedKeys",
           "details": null
         }
@@ -1193,7 +1239,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
-          "lineNumber": 173,
+          "lineNumber": 168,
           "testName": "AppKey_ScopeExtraction_ExtractsSemanticPrefixes",
           "details": null
         }
@@ -1209,7 +1255,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
-          "lineNumber": 188,
+          "lineNumber": 183,
           "testName": "Standalone_LanCidr_GrantsAdminAccessToLocalSubnet",
           "details": null
         }
@@ -1225,7 +1271,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
-          "lineNumber": 216,
+          "lineNumber": 211,
           "testName": "ZeroConfig_Startup_DefaultsEnterpriseProviders_ToDisabled",
           "details": null
         }
@@ -1342,7 +1388,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 373,
+          "lineNumber": 421,
           "testName": "creates category-scoped key, captures one-time plaintext key, and refreshes",
           "details": null
         },
@@ -1414,7 +1460,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 303,
+          "lineNumber": 351,
           "testName": "loads app keys and updates store",
           "details": null
         },
@@ -1465,7 +1511,7 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 546,
+          "lineNumber": 594,
           "testName": "sets user quota override and refreshes quota list",
           "details": null
         },
@@ -1617,14 +1663,14 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 287,
+          "lineNumber": 335,
           "testName": "switches keyTypeTab between personal and system",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 321,
+          "lineNumber": 369,
           "testName": "fetches system-filtered app keys via query parameters",
           "details": null
         },
@@ -2177,7 +2223,7 @@
       "category": "GUARD",
       "type": "Negative",
       "description": "ResourceRoutingManager throws KeyNotFoundException when reading an unregistered resource URI.",
-      "proofCount": 42,
+      "proofCount": 43,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -2429,6 +2475,13 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
           "lineNumber": 317,
           "testName": "DeleteClient_Returns500_WhenOAuthClientRepositoryThrows",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ClientsControllerTests.cs",
+          "lineNumber": 352,
+          "testName": "CleanupClients_Returns500_WhenOAuthClientRepositoryThrows",
           "details": null
         },
         {
@@ -6525,28 +6578,28 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts",
-          "lineNumber": 111,
+          "lineNumber": 115,
           "testName": "calls user quota endpoints correctly",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts",
-          "lineNumber": 140,
+          "lineNumber": 144,
           "testName": "calls policies and mappings endpoints correctly",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts",
-          "lineNumber": 167,
+          "lineNumber": 171,
           "testName": "calls settings, providers, custom files, approvals endpoints correctly",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/api/typedApi.test.ts",
-          "lineNumber": 223,
+          "lineNumber": 227,
           "testName": "calls testbench tool, prompt, resource, log endpoints correctly",
           "details": null
         },
@@ -7038,15 +7091,29 @@
     {
       "id": "UI-31",
       "category": "UI",
-      "type": "Positive",
+      "type": "Negative",
       "description": "Fetches registered OAuth clients and updates store state.",
-      "proofCount": 5,
+      "proofCount": 7,
       "proofs": [
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
           "lineNumber": 37,
           "testName": "fetches registered clients and updates state",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 213,
+          "testName": "prompts confirmation and calls cleanupClientsApi when confirmed",
+          "details": null
+        },
+        {
+          "suite": "Frontend Vitest",
+          "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
+          "lineNumber": 239,
+          "testName": "cancels DCR cleanup when user cancels confirmation modal",
           "details": null
         },
         {
@@ -7059,21 +7126,21 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
-          "lineNumber": 67,
+          "lineNumber": 73,
           "testName": "renders empty state when no registered clients exist",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
-          "lineNumber": 84,
+          "lineNumber": 90,
           "testName": "renders rich client columns and handles client ID copy",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/components/RegisteredClientsCard.test.tsx",
-          "lineNumber": 130,
+          "lineNumber": 136,
           "testName": "triggers deleteClient when Delete button is clicked",
           "details": null
         }
@@ -7168,28 +7235,28 @@
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 439,
+          "lineNumber": 487,
           "testName": "confirms and revokes AppKey and refreshes list",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 468,
+          "lineNumber": 516,
           "testName": "cancels revocation when confirm is rejected",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 584,
+          "lineNumber": 632,
           "testName": "prompts confirmation modal and resets user quota when confirmed",
           "details": null
         },
         {
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/stores/useClientStore.test.ts",
-          "lineNumber": 614,
+          "lineNumber": 662,
           "testName": "cancels quota reset when user denies confirmation",
           "details": null
         },

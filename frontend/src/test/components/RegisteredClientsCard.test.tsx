@@ -48,9 +48,11 @@ describe('RegisteredClientsCard component', () => {
   it('renders header, register button, and calls fetchClients on mount', () => {
     const fetchSpy = vi.fn();
     const openModalSpy = vi.fn();
+    const cleanupSpy = vi.fn();
     useClientStore.setState({
       clients: [],
       fetchClients: fetchSpy,
+      cleanupClients: cleanupSpy,
       openAddClientModal: openModalSpy
     });
 
@@ -58,10 +60,14 @@ describe('RegisteredClientsCard component', () => {
 
     expect(screen.getByText(/Dynamic Client Registration \(RFC 7591\)/i)).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /register client/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /clean up dcr/i })).toBeInTheDocument();
     expect(fetchSpy).toHaveBeenCalled();
 
     fireEvent.click(screen.getByRole('button', { name: /register client/i }));
     expect(openModalSpy).toHaveBeenCalled();
+
+    fireEvent.click(screen.getByRole('button', { name: /clean up dcr/i }));
+    expect(cleanupSpy).toHaveBeenCalled();
   });
 
   /**
