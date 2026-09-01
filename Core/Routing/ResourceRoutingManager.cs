@@ -94,6 +94,8 @@ namespace ModelContextGateway.Core.Routing
             {
                 resourcesDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "resources");
             }
+            resourcesDir = Path.GetFullPath(resourcesDir);
+
             if (Directory.Exists(resourcesDir))
             {
                 foreach (var file in Directory.GetFiles(resourcesDir))
@@ -267,7 +269,13 @@ namespace ModelContextGateway.Core.Routing
                 {
                     resourcesDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "resources");
                 }
-                var filePath = Path.Combine(resourcesDir, filename);
+                resourcesDir = Path.GetFullPath(resourcesDir);
+                var filePath = Path.GetFullPath(Path.Combine(resourcesDir, filename));
+
+                if (!filePath.StartsWith(resourcesDir, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new KeyNotFoundException($"Local resource file '{filename}' was not found in data/resources/.");
+                }
 
                 if (File.Exists(filePath))
                 {
