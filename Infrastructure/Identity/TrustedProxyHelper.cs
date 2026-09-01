@@ -35,34 +35,32 @@ namespace ModelContextGateway.Infrastructure.Identity
 
             // 2. Validate X-Forwarded-For chain if present
             var xffHeader = context.Request.Headers["X-Forwarded-For"].FirstOrDefault();
-            if (!string.IsNullOrWhiteSpace(xffHeader))
+            if (string.IsNullOrWhiteSpace(xffHeader))
             {
-                var chainIps = xffHeader.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                for (int i = chainIps.Length - 1; i > 0; i--)
+                return true;
+            }
+
+            var chainIps = xffHeader.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            for (int i = chainIps.Length - 1; i > 0; i--)
+            {
+                var hopIpStr = chainIps[i];
+                if (!IPAddress.TryParse(hopIpStr, out var hopIp))
                 {
-                    var hopIpStr = chainIps[i];
-                    if (IPAddress.TryParse(hopIpStr, out var hopIp))
-                    {
-                        var normHop = hopIp.IsIPv4MappedToIPv6 ? hopIp.MapToIPv4() : hopIp;
-                        if (trustedProxies.Count > 0)
-                        {
-                            if (!IsIpTrusted(normHop, trustedProxies))
-                            {
-                                return false;
-                            }
-                        }
-                        else
-                        {
-                            if (!IPAddress.IsLoopback(normHop) && !IsDockerContainerSubnet(normHop))
-                            {
-                                return false;
-                            }
-                        }
-                    }
-                    else
+                    return false;
+                }
+
+                var normHop = hopIp.IsIPv4MappedToIPv6 ? hopIp.MapToIPv4() : hopIp;
+
+                if (trustedProxies.Count > 0)
+                {
+                    if (!IsIpTrusted(normHop, trustedProxies))
                     {
                         return false;
                     }
+                }
+                else if (!IPAddress.IsLoopback(normHop) && !IsDockerContainerSubnet(normHop))
+                {
+                    return false;
                 }
             }
 
