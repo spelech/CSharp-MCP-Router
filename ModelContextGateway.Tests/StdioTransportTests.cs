@@ -47,6 +47,26 @@ namespace ModelContextGateway.Tests
         /// Verifies that STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls.
         /// </summary>
         [Fact]
+        [Requirement("TRANS-01", "StdioTransport parses JSON payload without throwing unhandled exceptions", Type = RequirementType.Positive, Category = "TRANS")]
+        public async Task StdioTransport_SendRequestAsync_LogsWarningOnInvalidJson()
+        {
+            var server = new McpServer
+            {
+                Id = "stdio-test",
+                Url = "node \"./mock_stdio.js\"",
+                Type = "stdio",
+                Enabled = true
+            };
+            var loggerMock = new Mock<ILogger<StdioTransport>>();
+            var stateManager = new JsonRpcStateManager();
+
+            using var transport = new StdioTransport(server, loggerMock.Object, stateManager);
+            var res = await transport.SendRequestAsync("test", "{ invalid json");
+
+            Assert.Equal(-32001, res.Error?.Code);
+        }
+
+        [Fact]
         [Requirement("TRANS-03", "STDIO transport spawns subprocess, handles JSON-RPC initialization and executes tool calls", Type = RequirementType.Positive, Category = "TRANS")]
         public async Task StdioTransport_ShouldInitializeAndCallToolSuccessfully()
         {
