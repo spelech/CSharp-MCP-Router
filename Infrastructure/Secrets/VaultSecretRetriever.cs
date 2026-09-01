@@ -36,6 +36,94 @@ namespace ModelContextGateway.Infrastructure.Secrets
             _vaultClientFactory = vaultClientFactory;
         }
 
+        private record VaultDbConfig(
+            bool IsEnabled,
+            string? Address,
+            string? Token,
+            string? RoleId,
+            string? SecretId,
+            string? MountPath);
+
+        private async Task<VaultDbConfig?> TryLoadDbConfigAsync()
+        {
+            if (_secretRepo == null)
+            {
+                return null;
+            }
+
+            try
+            {
+                var dbProviders = await _secretRepo.GetSecretProvidersAsync();
+                var vaultDb = dbProviders?.FirstOrDefault(p =>
+                    string.Equals(p.ProviderName, "Vault", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(p.ProviderName, "HashiCorpVault", StringComparison.OrdinalIgnoreCase));
+
+                if (vaultDb != null)
+                {
+                    if (!vaultDb.IsEnabled)
+                    {
+                        return new VaultDbConfig(false, null, null, null, null, null);
+                    }
+
+                    return ParseConfigJson(vaultDb.ConfigJson);
+                }
+            }
+            catch
+            {
+                // Fall back to static configuration if DB read encounters transient issues
+            }
+
+            return null;
+        }
+
+        private VaultDbConfig ParseConfigJson(string? configJson)
+        {
+            string? address = null;
+            string? token = null;
+            string? roleId = null;
+            string? secretId = null;
+            string? mountPath = null;
+
+            if (!string.IsNullOrWhiteSpace(configJson))
+            {
+                using var doc = JsonDocument.Parse(configJson);
+                var root = doc.RootElement;
+
+                if (root.TryGetProperty("address", out var aProp) ||
+                    root.TryGetProperty("url", out aProp) ||
+                    root.TryGetProperty("vault_addr", out aProp))
+                {
+                    address = aProp.GetString();
+                }
+                if (root.TryGetProperty("token", out var tProp) ||
+                    root.TryGetProperty("vault_token", out tProp))
+                {
+                    token = tProp.GetString();
+                }
+                if (root.TryGetProperty("roleId", out var rProp) ||
+                    root.TryGetProperty("role_id", out rProp))
+                {
+                    roleId = rProp.GetString();
+                }
+                if (root.TryGetProperty("secretId", out var sProp) ||
+                    root.TryGetProperty("secret_id", out sProp))
+                {
+                    secretId = sProp.GetString();
+                }
+                if (root.TryGetProperty("mountPath", out var mProp) ||
+                    root.TryGetProperty("mount", out mProp))
+                {
+                    var m = mProp.GetString();
+                    if (!string.IsNullOrWhiteSpace(m))
+                    {
+                        mountPath = m;
+                    }
+                }
+            }
+
+            return new VaultDbConfig(true, address, token, roleId, secretId, mountPath);
+        }
+
         public async Task ReloadConfigAsync()
         {
             await _semaphore.WaitAsync();
@@ -70,73 +158,20 @@ namespace ModelContextGateway.Infrastructure.Secrets
                     return _vaultClient;
                 }
 
-                string? address = null;
-                string? roleId = null;
-                string? secretId = null;
-                string? token = null;
-                string mountPath = "secret";
-
                 // 1. Try to load enabled provider configuration from database repository
-                if (_secretRepo != null)
+                var dbConfig = await TryLoadDbConfigAsync();
+
+                if (dbConfig != null && !dbConfig.IsEnabled)
                 {
-                    try
-                    {
-                        var dbProviders = await _secretRepo.GetSecretProvidersAsync();
-                        var vaultDb = dbProviders?.FirstOrDefault(p =>
-                            string.Equals(p.ProviderName, "Vault", StringComparison.OrdinalIgnoreCase) ||
-                            string.Equals(p.ProviderName, "HashiCorpVault", StringComparison.OrdinalIgnoreCase));
-
-                        if (vaultDb != null)
-                        {
-                            if (!vaultDb.IsEnabled)
-                            {
-                                _vaultClient = null;
-                                return null;
-                            }
-
-                            if (!string.IsNullOrWhiteSpace(vaultDb.ConfigJson))
-                            {
-                                using var doc = JsonDocument.Parse(vaultDb.ConfigJson);
-                                var root = doc.RootElement;
-
-                                if (root.TryGetProperty("address", out var aProp) ||
-                                    root.TryGetProperty("url", out aProp) ||
-                                    root.TryGetProperty("vault_addr", out aProp))
-                                {
-                                    address = aProp.GetString();
-                                }
-                                if (root.TryGetProperty("token", out var tProp) ||
-                                    root.TryGetProperty("vault_token", out tProp))
-                                {
-                                    token = tProp.GetString();
-                                }
-                                if (root.TryGetProperty("roleId", out var rProp) ||
-                                    root.TryGetProperty("role_id", out rProp))
-                                {
-                                    roleId = rProp.GetString();
-                                }
-                                if (root.TryGetProperty("secretId", out var sProp) ||
-                                    root.TryGetProperty("secret_id", out sProp))
-                                {
-                                    secretId = sProp.GetString();
-                                }
-                                if (root.TryGetProperty("mountPath", out var mProp) ||
-                                    root.TryGetProperty("mount", out mProp))
-                                {
-                                    var m = mProp.GetString();
-                                    if (!string.IsNullOrWhiteSpace(m))
-                                    {
-                                        mountPath = m;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    catch
-                    {
-                        // Fall back to static configuration if DB read encounters transient issues
-                    }
+                    _vaultClient = null;
+                    return null;
                 }
+
+                string? address = dbConfig?.Address;
+                string? roleId = dbConfig?.RoleId;
+                string? secretId = dbConfig?.SecretId;
+                string? token = dbConfig?.Token;
+                string mountPath = dbConfig?.MountPath ?? "secret";
 
                 // 2. Fall back to static IConfiguration / Environment variables
                 address ??= _config["MCG_VAULT_ADDR"] ?? _config["Vault:Address"] ?? _config["VAULT_ADDR"] ?? Environment.GetEnvironmentVariable("MCG_VAULT_ADDR") ?? Environment.GetEnvironmentVariable("VAULT_ADDR");
