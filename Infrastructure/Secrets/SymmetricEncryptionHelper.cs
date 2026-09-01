@@ -117,7 +117,7 @@ namespace ModelContextGateway.Infrastructure.Secrets
             return string.Empty;
         }
 
-        public static bool TryDecrypt(string ciphertext, IConfiguration config, out string plaintext)
+        public static bool TryDecrypt(string ciphertext, IConfiguration config, out string plaintext, ILogger? logger = null)
         {
             plaintext = ciphertext;
             if (string.IsNullOrEmpty(ciphertext))
@@ -156,14 +156,17 @@ namespace ModelContextGateway.Infrastructure.Secrets
                 }
             }
 
-            System.Console.WriteLine($"[SymmetricEncryptionHelper] WARNING: Decryption failed for payload. Key tag mismatch or payload corrupted.");
+            if (logger != null)
+            {
+                logger.LogWarning("[SymmetricEncryptionHelper] WARNING: Decryption failed for payload. Key tag mismatch or payload corrupted.");
+            }
             plaintext = ciphertext; // preserve original ciphertext
             return false;
         }
 
-        public static string Decrypt(string ciphertext, IConfiguration config)
+        public static string Decrypt(string ciphertext, IConfiguration config, ILogger? logger = null)
         {
-            if (TryDecrypt(ciphertext, config, out var plaintext))
+            if (TryDecrypt(ciphertext, config, out var plaintext, logger))
             {
                 return plaintext;
             }
