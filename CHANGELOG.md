@@ -8,6 +8,7 @@ For summary details and quick references, see [README.md](README.md).
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.6.8`** | 2026-09-02 | 🧪 Testing: Added error handling unit test coverage for `TokenExchangeSecretRetriever` verifying malformed and missing responses. |
 | **`v5.6.7`** | 2026-09-02 | 🧪 Testing: Added failure and error path unit test coverage for `DbKeyHelper.ResolveDbEncryptionKey` ensuring robust master key resolution resilience. |
 | **`v5.6.6`** | 2026-09-02 | chore(refactor): Fixed empty catch block during Dapper type handler registration in `Models/Models.cs` by guarding with an `Interlocked.Exchange` initialization pattern. |
 | **`v5.6.5`** | 2026-09-02 | 🧪 Testing: Implemented `ILdapConnection` and `ILdapConnectionFactory` abstractions in `LdapActiveDirectoryService` and added fail-closed negative unit tests for connection failures. |

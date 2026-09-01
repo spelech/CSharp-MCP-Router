@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **184 Requirements Verified** across **835 Test Proofs** (152 Functional Capabilities, 32 Safety Guardrails).
+> **Catalog Statistics:** **184 Requirements Verified** across **837 Test Proofs** (152 Functional Capabilities, 32 Safety Guardrails).
 
 ---
 
@@ -15,7 +15,7 @@
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
 | **`GUARD`** | Universal Safety & Fail-Closed Guardrails | **16** | 0 | 16 | 134 proofs |
 | **`MCP`** | Model Context Protocol Engine & Tool Routing | **52** | 51 | 1 | 163 proofs |
-| **`SEC`** | Secrets Providers & Encryption | **38** | 29 | 9 | 129 proofs |
+| **`SEC`** | Secrets Providers & Encryption | **38** | 29 | 9 | 131 proofs |
 | **`TRANS`** | Transports (SSE, HTTP, STDIO, Proxy) | **3** | 3 | 0 | 29 proofs |
 | **`UI`** | Dashboard, Test Bench & Settings UI | **26** | 23 | 3 | 132 proofs |
 
@@ -892,7 +892,7 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs#L429`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StdioTransportTests.cs#L429) (`StdioTransport_ShouldSanitizeAndMaskSecretsInLogs`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L375`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/PipelineIntegrationTests.cs#L375) (`Pipeline_GET_Providers_Secret_Returns200`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L37`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L37) (`GetSecretAsync_MintsTokenViaTokenExchange_AndCachesResponse`)
-  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L127`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L127) (`CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L190`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L190) (`CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useProviderStore.test.ts#L41`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useProviderStore.test.ts#L41) (`successfully loads auth and secret providers`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useProviderStore.test.ts#L131`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useProviderStore.test.ts#L131) (`saves secret provider preserving Vault token and mount path`)
   - [Frontend Vitest] [`/containers/dev/csharp-mcp-router/frontend/src/test/stores/useProviderStore.test.ts#L170`](file:////containers/dev/csharp-mcp-router/frontend/src/test/stores/useProviderStore.test.ts#L170) (`saves Windows Registry and Environment secret providers correctly`)
@@ -1689,7 +1689,7 @@
 ### `[SEC-01]` SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY.
 * **Category:** `SEC` (Secrets Providers & Encryption)
 * **Type:** Negative / Safety Guardrail (Fail-Closed)
-* **Verification Proofs (15):**
+* **Verification Proofs (17):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DatabaseEncryptionTests.cs#L8) (`SqliteDatabase_IsEncrypted_WithSQLCipher`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L70`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L70) (`SaveSecretProvider_EncryptsConfigJson_AtRestInDatabase`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L99`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ProviderSettingsEncryptionTests.cs#L99) (`SaveAuthProvider_EncryptsConfigJson_AtRestInDatabase`)
@@ -1697,6 +1697,8 @@
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L72`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeyAuthenticationTests.cs#L72) (`SymmetricEncryptionHelper_EncryptsAndDecryptsCorrectly`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs#L146`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs#L146) (`Cors_RejectsWildcardAndInvalidOrigins_AndLogsWarning`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs#L181`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs#L181) (`Cors_AllInvalidOrigins_FallsBackToDefaultAndLogsWarning`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L127`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L127) (`GetSecretAsync_ThrowsHttpRequestException_WhenHttpClientFails`)
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L165`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs#L165) (`GetSecretAsync_ThrowsJsonException_WhenResponseIsInvalidJson`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L14`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L14) (`EnsureVaultClientAsync_CreatesClient_WithAppRoleCredentials`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L35) (`EnsureVaultClientAsync_LoadsFromSecretRepo_WhenConfigJsonHasAppRole`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L87`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/VaultAppRoleAndRenewalTests.cs#L87) (`ReloadConfigAsync_ClearsClient_ForcesRecreation`)

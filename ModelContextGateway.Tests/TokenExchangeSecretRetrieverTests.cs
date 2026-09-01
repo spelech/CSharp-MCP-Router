@@ -125,6 +125,69 @@ namespace ModelContextGateway.Tests
         }
 
         [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Negative, "TokenExchangeSecretRetriever fails closed when HttpClient throws an exception during token exchange.")]
+        public async Task GetSecretAsync_ThrowsHttpRequestException_WhenHttpClientFails()
+        {
+            var handlerMock = new Mock<HttpMessageHandler>(MockBehavior.Strict);
+            handlerMock
+                .Protected()
+                .Setup<Task<HttpResponseMessage>>(
+                    "SendAsync",
+                    ItExpr.IsAny<HttpRequestMessage>(),
+                    ItExpr.IsAny<CancellationToken>()
+                )
+                .ThrowsAsync(new HttpRequestException("Network error"));
+
+            var httpClient = new HttpClient(handlerMock.Object);
+            var factoryMock = new Mock<IHttpClientFactory>();
+            factoryMock.Setup(f => f.CreateClient(It.IsAny<string>())).Returns(httpClient);
+
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Identity:TokenExchange:TokenEndpoint"] = "https://identity.local/oauth/token",
+                ["Identity:TokenExchange:ClientId"] = "client123"
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var retriever = new TokenExchangeSecretRetriever(
+                factoryMock.Object,
+                null,
+                null,
+                null,
+                null,
+                config,
+                null
+            );
+
+            await Assert.ThrowsAsync<HttpRequestException>(() => retriever.GetSecretAsync("", ""));
+        }
+
+        [Fact]
+        [Requirement("SEC-01", "SEC", RequirementType.Negative, "TokenExchangeSecretRetriever fails closed with JsonException when response from token endpoint is invalid JSON.")]
+        public async Task GetSecretAsync_ThrowsJsonException_WhenResponseIsInvalidJson()
+        {
+            var factoryMock = CreateMockHttpClientFactory(HttpStatusCode.OK, "invalid json payload");
+            var configDict = new Dictionary<string, string?>
+            {
+                ["Identity:TokenExchange:TokenEndpoint"] = "https://identity.local/oauth/token",
+                ["Identity:TokenExchange:ClientId"] = "client123"
+            };
+            var config = new ConfigurationBuilder().AddInMemoryCollection(configDict).Build();
+
+            var retriever = new TokenExchangeSecretRetriever(
+                factoryMock.Object,
+                null,
+                null,
+                null,
+                null,
+                config,
+                null
+            );
+
+            await Assert.ThrowsAnyAsync<System.Text.Json.JsonException>(() => retriever.GetSecretAsync("", ""));
+        }
+
+        [Fact]
         [Requirement("SEC-02", "SEC", RequirementType.Positive, "CompositeSecretRetriever routes OBO, PocketID, and OAuth2 provider aliases to TokenExchange provider.")]
         public async Task CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever()
         {
