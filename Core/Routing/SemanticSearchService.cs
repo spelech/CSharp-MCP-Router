@@ -167,14 +167,15 @@ namespace ModelContextGateway.Core.Routing
                 return tools;
             }
 
-            var queryWords = query.ToLower()
+            var queryLower = query.ToLower();
+            var queryWords = queryLower
                 .Split(new[] { ' ', ',', '.', ';', ':', '-', '_', '/' }, StringSplitOptions.RemoveEmptyEntries)
                 .Where(w => w.Length > 2)
                 .ToList();
 
             if (queryWords.Count == 0)
             {
-                queryWords = query.ToLower()
+                queryWords = queryLower
                     .Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries)
                     .ToList();
             }
@@ -205,28 +206,31 @@ namespace ModelContextGateway.Core.Routing
                                   type.GetProperty("Description")?.GetValue(tool)?.ToString() ?? "";
                 }
 
-                var fullText = (name + " " + description).ToLower();
+                var nameLower = name.ToLower();
+                var descriptionLower = description.ToLower();
+                var fullText = nameLower + " " + descriptionLower;
+
                 double score = 0;
                 int matches = 0;
 
-                if (fullText.Contains(query.ToLower()))
+                if (fullText.Contains(queryLower))
                 {
                     score += 10.0;
                 }
 
-                if (name.ToLower().Contains(query.ToLower()))
+                if (nameLower.Contains(queryLower))
                 {
                     score += 5.0;
                 }
 
                 foreach (var word in queryWords)
                 {
-                    if (name.ToLower().Contains(word))
+                    if (nameLower.Contains(word))
                     {
                         score += 3.0;
                         matches++;
                     }
-                    else if (description.ToLower().Contains(word))
+                    else if (descriptionLower.Contains(word))
                     {
                         score += 1.0;
                         matches++;

@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.6.3-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.6.4-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -237,6 +237,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.6.4`** | 2026-09-02 | perf(routing): Optimized `SemanticSearchService` string parsing by hoisting `.ToLower()` and token splits outside outer tool loops. |
 | **`v5.6.3`** | 2026-09-02 | 🔒 Security: Validate `AllowedOrigins` in CORS configuration, strictly rejecting wildcard `*` origins and malformed URIs with security warnings while maintaining safe environment fallbacks. |
 | **`v5.6.2`** | 2026-09-02 | 🧹 Code Health: Improve exception handling in `SseTransport.cs` by logging timeouts and exceptions when waiting for SSE endpoint URL. |
 | **`v5.6.1`** | 2026-09-02 | chore(refactor): Fixed empty catch blocks during StdioTransport disposal by properly logging debug and warning exceptions instead of silently swallowing them. |
