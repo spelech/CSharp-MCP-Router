@@ -49,7 +49,7 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
 
                         if (!isHashed)
                         {
-                            var decrypted = DecryptLegacyAppKey(key.EncryptedKey, configuration);
+                            var decrypted = DecryptLegacyAppKey(key.EncryptedKey, configuration, logger);
                             if (string.IsNullOrEmpty(decrypted))
                             {
                                 logger.LogError($"AppKey Hashing Migration: Failed to decrypt legacy AppKey '{key.Name}' (Id: {key.Id}). Skipping migration for this key to prevent corruption.");
@@ -365,7 +365,7 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
             }
         }
 
-        private static string DecryptLegacyAppKey(string ciphertext, IConfiguration configuration)
+        private static string DecryptLegacyAppKey(string ciphertext, IConfiguration configuration, ILogger logger)
         {
             if (string.IsNullOrEmpty(ciphertext))
             {
@@ -382,7 +382,7 @@ namespace ModelContextGateway.Infrastructure.Persistence.DatabaseSeeders
 
                 var secretString = configuration["MCG_SECRET"]
                     ?? configuration["MCG_MASTER_KEY"]
-                    ?? DbKeyHelper.ResolveDbEncryptionKey(configuration);
+                    ?? DbKeyHelper.ResolveDbEncryptionKey(configuration, logger);
 
                 byte[] keyBytes;
                 using (var sha256 = SHA256.Create())
