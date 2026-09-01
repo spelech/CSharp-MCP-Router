@@ -139,7 +139,7 @@ namespace ModelContextGateway.Core.Routing
             for (int i = 0; i < hiddenDim; i++)
             {
                 averageVector[i] /= chunkCount;
-                sumSquare += Math.Pow(averageVector[i], 2);
+                sumSquare += (double)averageVector[i] * averageVector[i];
             }
 
             double magnitude = Math.Sqrt(sumSquare);
@@ -199,7 +199,7 @@ namespace ModelContextGateway.Core.Routing
             double sumSquare = 0.0;
             for (int i = 0; i < hiddenDim; i++)
             {
-                sumSquare += Math.Pow(pooled[i], 2);
+                sumSquare += (double)pooled[i] * pooled[i];
             }
             double magnitude = Math.Sqrt(sumSquare);
 
