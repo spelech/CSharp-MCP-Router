@@ -245,8 +245,7 @@ The data tier comprises 12 core tables governing servers, tool registries, multi
 
 For comprehensive guides covering each individual subsystem in depth, refer to the technical specification library:
 
-| Specification Document | Focus Area |
-| :--- | :--- |
+| [**`docs/single-user-and-homelab-guide.md`**](docs/single-user-and-homelab-guide.md) | **Single-User & Home-Lab Setup, Granular AppKeys & Envelope Encryption** |
 | [**`docs/architecture.md`**](docs/architecture.md) | **Master Architectural Specification & Comprehensive Deep-Dive** |
 | [**`docs/data-model.md`**](docs/data-model.md) | **Canonical Data Model & Database Entity-Relationship Diagram (ERD)** |
 | [**`docs/transports.md`**](docs/transports.md) | Downstream Transports, Concurrency & Subprocess STDIO Lifecycle |
@@ -261,7 +260,7 @@ For comprehensive guides covering each individual subsystem in depth, refer to t
 
 ---
 
-*Last Updated: Release `v5.3.0`*
+*Last Updated: Release `v5.4.0`*
 
 ### Transport Execution Flow
 

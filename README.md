@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.3.1-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.4.0-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -237,11 +237,11 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.4.0`** | 2026-08-31 | feat(homelab): Single-User & Home-Lab Setup with Granular AppKeys & Zero-Config Defaults. Adds auto-generated persistent self-signed PFX certs (`.openiddict.pfx`) eliminating OpenSSL requirements in standalone mode; introduces `MCG_CLIENT_APP_KEYS` multi-key environment variable seeding and auto-generation of default client keys (`.client.key`); defaults enterprise auth and secret providers to disabled; streamlines standalone SQLite RBAC evaluation; and introduces dedicated homelab Docker Compose and `.env` templates with comprehensive guide (`docs/single-user-and-homelab-guide.md`). |
 | **`v5.3.1`** | 2026-08-31 | chore(reqs): Comprehensive living requirements and SRS test catalog sweep across 50+ C# backend xUnit suites (`ModelContextGateway.Tests`), TypeScript frontend Vitest suites (`frontend/src/test`), and Playwright E2E suites (`frontend/e2e`), expanding verified requirement proofs to 174 requirements across 804 proofs. |
 | **`v5.3.0`** | 2026-08-31 | feat(mcp): Full MCP 2026-07-28 Alignment & RFC 7591 / OAuth 2.1 Enforcement. Enforces `resultType` across all responses, implements Multi Round-Trip Requests (MRTR), Cacheable Results (`ttlMs`, `cacheScope`), spec error codes (`-32602`, `-32020`..`-32022`), `Mcp-Method` & `Mcp-Name` header enforcement, `server/discover` RPC, and DCR `application_type` validation. |
 | **`v5.2.1`** | 2026-08-30 | feat(oauth): MCP Authorization Specification (2026-07-28) & RFC 7591 compliance; OpenIddict global scope registration & dynamic scope permissions eliminating `invalid_scope` (`ID2052`) errors; RFC 7591 public client DCR with PKCE (`token_endpoint_auth_method: "none"` / native apps); structured RFC 7591 error formatting; and canonical RFC 9728 `authorization_servers` discovery |
 | **`v5.1.0`** | 2026-08-30 | feat(oauth): dedicated `OAuthClients` persistence isolation for RFC 7591 Dynamic Client Registration (DCR) and manual OAuth applications across SQLite, MSSQL, and MySQL; SHA-256 one-way client secret hashing; rich metadata support (`redirect_uris`, `grant_types`, `scopes`, `client_type`); and enhanced Web UI management card and modal |
-| **`v5.0.7`** | 2026-08-30 | fix(oauth): enable OpenIddict server degraded mode (`EnableDegradedMode()`) to support custom credential and SQLite stores without default EF Core provider requirements, and enhance `/oauth/authorize` authentication handling |
 ---
 
 ## 🧪 Code Coverage & Quality Gates

@@ -285,19 +285,25 @@ namespace ModelContextGateway.Core.Routing
 
                 if (dbFactory.ProviderName == "sqlite")
                 {
-                    // Check if there are any policies for the targets first to default-allow (inverted to fail closed)
-                    const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds;";
-                    int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetIds = targetKeys.ToArray() });
-                    if (policyCount == 0)
-                    {
-                        return false;
-                    }
-
                     // Check if there's an explicit deny for any of the user's groups
                     const string denySql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds AND RequiredGroup IN @GroupNames AND IsAllowed = 0;";
                     int denyCount = await conn.ExecuteScalarAsync<int>(denySql, new { TargetIds = targetKeys.ToArray(), GroupNames = allUserGroups.ToArray() });
                     if (denyCount > 0)
                     {
+                        return false;
+                    }
+
+                    // Check if there are any policies for the targets first to default-allow (inverted to fail closed)
+                    const string countSql = "SELECT COUNT(*) FROM AccessPolicies WHERE TargetId IN @TargetIds;";
+                    int policyCount = await conn.ExecuteScalarAsync<int>(countSql, new { TargetIds = targetKeys.ToArray() });
+                    if (policyCount == 0)
+                    {
+                        // When an AppKey was validated against its scopes, allow by default unless explicitly denied
+                        bool isAppKeyUsed = contextToUse?.Items.TryGetValue("AppKeyUsed", out var aku) == true && aku is bool bAku && bAku;
+                        if (isAppKeyUsed)
+                        {
+                            return true;
+                        }
                         return false;
                     }
 

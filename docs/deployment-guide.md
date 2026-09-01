@@ -29,15 +29,18 @@ When no environment variables or configuration files are provided:
 
 | Subsystem | Automatic Safe Default |
 | :--- | :--- |
-| **🗄️ Database** | • Defaults to `DB_PROVIDER=sqlite`.<br>• Automatically creates `./data/mcg.db`.<br>• Runs schema migrations and seeds baseline tables (`Servers`, `Settings`, `AppKeys`, `AccessPolicies`, `GroupMappings`, `SecretProviders`, `AuthProviderConfigs`, `AuditLogs`). |
-| **🔒 Secret Storage** | • Uses the **Built-in Master Secret Provider** (AES-256-GCM).<br>• All backend server credentials are encrypted in SQLite using your resolved master key (no external Vault or DPAPI needed). |
-| **👤 Authentication** | • Detects that no external Identity Provider (LDAP or OIDC forward-auth) is active.<br>• **Standalone Mode** engages automatically.<br>• Local loopback (`127.0.0.1`, `::1`) is trusted as `Administrator` for Web UI access without requiring an SSO login. |
-| **🔑 Admin AppKey** | • Seeds a default system Admin AppKey into the database: `mcp-adm-` or configured `MCG_ADMIN_AUTH_KEY` / `MCG_ADMIN_KEY`.<br>• Has username `admin` and scope `["all", "admin"]`.<br>• Enables remote AI coding agents and CLI scripts to authenticate to `/admin` and `/admin/sse` immediately. |
+| **🗄️ Database** | • Defaults to `DB_PROVIDER=sqlite`.<br>• Automatically creates `./data/mcg.db`.<br>• Runs schema migrations and seeds baseline tables (`Servers`, `Settings`, `AppKeys`, `AccessPolicies`, `GroupMappings`, `SecretProviders`, `AuthProviderConfigs`, `AuditLogs`).<br>• Enterprise auth providers (ActiveDirectory, HeaderAuth, PocketID) and external secret providers (Vault, WindowsRegistry) are set to **`IsEnabled = 0` (Disabled)** by default for clean standalone operation. |
+| **🔒 Secret Storage** | • Uses the **Built-in Database Secret Provider** (AES-256-GCM Envelope Encryption).<br>• All backend server credentials are encrypted in SQLite using your resolved master key (`./data/.master.key` - no external Vault or DPAPI needed). |
+| **👤 Authentication** | • Detects that no external Identity Provider (LDAP or OIDC forward-auth) is active.<br>• **Standalone Mode** engages automatically.<br>• Local loopback (`127.0.0.1`, `::1`) and configured subnets (`STANDALONE_ALLOWED_NETWORKS`) are trusted as `Administrator` for Web UI access without requiring an SSO login. |
+| **🔑 Admin & Client AppKeys** | • Auto-generates both an Admin AppKey (`./data/.admin.key` / `mcp-adm-`) and a default Client AppKey (`./data/.client.key` / `mcp-glb-`).<br>• Supports multi-key pre-seeding with granular scopes via `MCG_CLIENT_APP_KEYS`.<br>• Enables remote AI coding agents (Claude, Cursor, Cline) to connect immediately without manual configuration. |
 | **🐳 Docker Discovery** | • If `-v /var/run/docker.sock:/var/run/docker.sock` is mounted, background discovery immediately registers containers labeled `mcp.enabled=true`. |
+
+> [!TIP]
+> **Single-User & Home-Lab Setup**: For a dedicated walkthrough on single-user, homelab, and local AI development, see the [**Single-User & Home-Lab Setup Guide (`docs/single-user-and-homelab-guide.md`)**](single-user-and-homelab-guide.md).
 
 ### 3. Immediate Live Endpoints
 * **Dashboard Web UI**: `http://localhost:8080/` (Full administrative dashboard)
-* **Health Probe**: `http://localhost:8080/health` (`{"status":"healthy","service":"ModelContextGateway","version":"5.0.0"}`)
+* **Health Probe**: `http://localhost:8080/health` (`{"status":"healthy","service":"ModelContextGateway","version":"5.4.0"}`)
 * **Meta-Mode MCP Gateway**: `http://localhost:8080/sse` (Exposes `search_tools` and `execute_tool`)
 * **Admin MCP Server**: `http://localhost:8080/admin/sse` (or `POST /admin` for direct JSON-RPC tool dispatch, or `GET /mcg-admin/sse`)
 

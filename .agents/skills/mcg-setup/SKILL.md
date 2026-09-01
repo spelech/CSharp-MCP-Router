@@ -123,10 +123,14 @@ Explain the trade-offs between static environment variable configuration and dyn
 
 Select the identity and network access tier based on deployment scope:
 
-### Option A: Personal / Home-Lab (Standalone Mode)
-- **Database**: SQLite (`./data/mcg.db`).
-- **Network Restriction**: Restrict admin UI and admin tools to local loopback or local LAN CIDR subnets using `Admin:StandaloneAllowedNetworks`.
-- **Authentication**: Admin AppKey (`Authorization: Bearer mcp-...` or `X-App-Key` header) for external agent access, local IP network trust for Web UI.
+### Option A: Personal / Home-Lab (Standalone Mode & Granular AppKeys)
+- **Zero-Config Safe Defaults**: SQLite database (`./data/mcg.db`) with built-in AES-256-GCM envelope encryption (`./data/.master.key`). Enterprise providers (Active Directory, LDAP, HeaderAuth, Vault) are disabled by default.
+- **Auto-Generated & Scoped AppKeys**:
+  - Auto-generates `./data/.admin.key` (Admin MCP server `/admin/sse` & settings management) and `./data/.client.key` (Global tool calling key for AI IDEs).
+  - Supports multiple individualized AppKeys with custom granular scopes (`all`, `server:<name>`, `category:<group>`, `tool:<id>`) declared via `MCG_CLIENT_APP_KEYS` or generated in the Web UI.
+- **Zero OpenSSL / Certificate Overhead**: Standalone mode auto-generates `.openiddict.pfx` or uses development signing certs without manual OpenSSL commands.
+- **Network Restriction**: Restrict admin UI to loopback or local LAN CIDR subnets using `STANDALONE_ALLOWED_NETWORKS` (`Admin:StandaloneAllowedNetworks`). Example: `STANDALONE_ALLOWED_NETWORKS=127.0.0.1,::1,192.168.0.0/16,10.0.0.0/8`.
+- **Deployment Template**: Use [templates/docker-compose.homelab.yml](templates/docker-compose.homelab.yml) for copy-paste Docker Compose scaffolding and see the Single-User & Home-Lab Setup Guide (`docs/single-user-and-homelab-guide.md`).
 
 ### Option B: Enterprise Mode
 - **Database**: Microsoft SQL Server (`mssql`), MySQL (`mysql`), or SQLite (`sqlite`).

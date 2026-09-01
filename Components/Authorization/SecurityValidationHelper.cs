@@ -430,7 +430,11 @@ namespace ModelContextGateway.Components.Authorization
                 }
             }
 
-            var singleVal = config?["Admin:StandaloneAllowedNetworks"];
+            var singleVal = config?["Admin:StandaloneAllowedNetworks"]
+                ?? config?["STANDALONE_ALLOWED_NETWORKS"]
+                ?? config?["STANDALONE_ALLOWED_NETWORK"]
+                ?? Environment.GetEnvironmentVariable("STANDALONE_ALLOWED_NETWORKS")
+                ?? Environment.GetEnvironmentVariable("STANDALONE_ALLOWED_NETWORK");
             if (!string.IsNullOrWhiteSpace(singleVal))
             {
                 var split = singleVal.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
