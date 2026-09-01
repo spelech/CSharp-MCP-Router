@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-08-31T16:47:49.7190691Z",
-    "totalRequirements": 174,
-    "positiveCount": 146,
+    "generatedAt": "2026-09-01T02:30:29.7204119Z",
+    "totalRequirements": 179,
+    "positiveCount": 151,
     "guardrailCount": 28,
-    "totalProofs": 804
+    "totalProofs": 809
   },
   "requirements": [
     {
@@ -1147,6 +1147,86 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OpenIddictProductionTests.cs",
           "lineNumber": 46,
           "testName": "Production_WithValidPfx_Boots",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-35",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Single-user homelab startup initializes SQLite, auto-generates Admin and Client AppKeys without PFX certificate requirements",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
+          "lineNumber": 35,
+          "testName": "Homelab_ZeroConfigStartup_SeedsAdminAndClientKeys_AndPersistsFiles",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-36",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Pre-configured MCG_CLIENT_APP_KEYS seeds functional individualized client keys with custom scopes",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
+          "lineNumber": 103,
+          "testName": "Homelab_PreConfiguredClientKeys_SeedsIndividualizedScopedKeys",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-37",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "AppKeys with server and category scopes enforce precise tool execution boundaries",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
+          "lineNumber": 173,
+          "testName": "AppKey_ScopeExtraction_ExtractsSemanticPrefixes",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-38",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "LAN CIDR network configuration allows standalone web dashboard access from local subnet",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
+          "lineNumber": 188,
+          "testName": "Standalone_LanCidr_GrantsAdminAccessToLocalSubnet",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "AUTH-39",
+      "category": "AUTH",
+      "type": "Positive",
+      "description": "Zero-config startup defaults enterprise auth providers and secret providers to disabled",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs",
+          "lineNumber": 216,
+          "testName": "ZeroConfig_Startup_DefaultsEnterpriseProviders_ToDisabled",
           "details": null
         }
       ]

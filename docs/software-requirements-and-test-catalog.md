@@ -1,7 +1,7 @@
 # Software Requirements Specification (SRS) & Test Verification Catalog
 
 > **Automated Verification Document:** Generated via `dotnet run --project scripts/CatalogGenerator`
-> **Catalog Statistics:** **174 Requirements Verified** across **804 Test Proofs** (146 Functional Capabilities, 28 Safety Guardrails).
+> **Catalog Statistics:** **179 Requirements Verified** across **809 Test Proofs** (151 Functional Capabilities, 28 Safety Guardrails).
 
 ---
 
@@ -9,7 +9,7 @@
 
 | Category | Domain | Total Requirements | Positive Features | Guardrails / Fail-Closed | Verification Proofs |
 | :--- | :--- | :---: | :---: | :---: | :---: |
-| **`AUTH`** | Authentication, RBAC & Identity | **34** | 32 | 2 | 200 proofs |
+| **`AUTH`** | Authentication, RBAC & Identity | **39** | 37 | 2 | 205 proofs |
 | **`CORE`** | CORE | **1** | 1 | 0 | 2 proofs |
 | **`DB`** | Multi-Database Persistence & Migrations | **3** | 3 | 0 | 31 proofs |
 | **`DOC`** | DOC | **4** | 4 | 0 | 4 proofs |
@@ -178,6 +178,36 @@
 * **Verification Proofs (2):**
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L30`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L30) (`Development_WithNoCert_BootsOnDevCerts`)
   - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L46`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L46) (`Production_WithValidPfx_Boots`)
+
+### `[AUTH-35]` Single-user homelab startup initializes SQLite, auto-generates Admin and Client AppKeys without PFX certificate requirements
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L35) (`Homelab_ZeroConfigStartup_SeedsAdminAndClientKeys_AndPersistsFiles`)
+
+### `[AUTH-36]` Pre-configured MCG_CLIENT_APP_KEYS seeds functional individualized client keys with custom scopes
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L103`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L103) (`Homelab_PreConfiguredClientKeys_SeedsIndividualizedScopedKeys`)
+
+### `[AUTH-37]` AppKeys with server and category scopes enforce precise tool execution boundaries
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L173`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L173) (`AppKey_ScopeExtraction_ExtractsSemanticPrefixes`)
+
+### `[AUTH-38]` LAN CIDR network configuration allows standalone web dashboard access from local subnet
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L188`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L188) (`Standalone_LanCidr_GrantsAdminAccessToLocalSubnet`)
+
+### `[AUTH-39]` Zero-config startup defaults enterprise auth providers and secret providers to disabled
+* **Category:** `AUTH` (Authentication, RBAC & Identity)
+* **Type:** Positive Feature Capability
+* **Verification Proofs (1):**
+  - [Backend xUnit] [`/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L216`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L216) (`ZeroConfig_Startup_DefaultsEnterpriseProviders_ToDisabled`)
 
 ### `[AUTH-APPKEY-ADMIN-SCOPE-ALLOW]` AppKeys with admin scope grant Administrator role and pass AdminPolicy.
 * **Category:** `AUTH` (Authentication, RBAC & Identity)
@@ -1722,6 +1752,11 @@
 | `AUTH-110` | Positive | `AUTH` | CreateAppKey allows creating unlimited AppKeys when UserMaxKeys is set to 0. | [`AppKeysControllerTests.cs:L343`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AppKeysControllerTests.cs#L343) | Backend xUnit |
 | `AUTH-14` | Positive | `AUTH` | Tool execution catches 401 Unauthorized from downstream target servers and returns interactive auth remediation. | [`ToolRoutingManagerTests.cs:L173`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs#L173) | Backend xUnit |
 | `AUTH-15` | Positive | `AUTH` | OpenIddict initializes ephemeral development signing certificates in Development environment. | [`OpenIddictProductionTests.cs:L30`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/OpenIddictProductionTests.cs#L30) | Backend xUnit |
+| `AUTH-35` | Positive | `AUTH` | Single-user homelab startup initializes SQLite, auto-generates Admin and Client AppKeys without PFX certificate requirements | [`SingleUserHomelabTests.cs:L35`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L35) | Backend xUnit |
+| `AUTH-36` | Positive | `AUTH` | Pre-configured MCG_CLIENT_APP_KEYS seeds functional individualized client keys with custom scopes | [`SingleUserHomelabTests.cs:L103`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L103) | Backend xUnit |
+| `AUTH-37` | Positive | `AUTH` | AppKeys with server and category scopes enforce precise tool execution boundaries | [`SingleUserHomelabTests.cs:L173`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L173) | Backend xUnit |
+| `AUTH-38` | Positive | `AUTH` | LAN CIDR network configuration allows standalone web dashboard access from local subnet | [`SingleUserHomelabTests.cs:L188`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L188) | Backend xUnit |
+| `AUTH-39` | Positive | `AUTH` | Zero-config startup defaults enterprise auth providers and secret providers to disabled | [`SingleUserHomelabTests.cs:L216`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/SingleUserHomelabTests.cs#L216) | Backend xUnit |
 | `AUTH-APPKEY-ADMIN-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with admin scope grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L79`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L79) | Backend xUnit |
 | `AUTH-APPKEY-ITEMS-SCOPE-ALLOW` | Positive | `AUTH` | SecurityValidationHelper recognizes admin scopes in HttpContext.Items. | [`StandaloneAdminAuthTests.cs:L255`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L255) | Backend xUnit |
 | `AUTH-APPKEY-WILDCARD-SCOPE-ALLOW` | Positive | `AUTH` | AppKeys with wildcard scope '*' grant Administrator role and pass AdminPolicy. | [`StandaloneAdminAuthTests.cs:L140`](file:////containers/dev/csharp-mcp-router/ModelContextGateway.Tests/StandaloneAdminAuthTests.cs#L140) | Backend xUnit |
