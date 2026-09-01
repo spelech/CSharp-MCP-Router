@@ -112,11 +112,11 @@ namespace ModelContextGateway.Infrastructure.Transports
             var sanitized = PiiSanitizer.SanitizePayload(text);
             if (!string.IsNullOrEmpty(_resolvedSecret) && _resolvedSecret.Length > 2)
             {
-                sanitized = sanitized.Replace(_resolvedSecret, "[REDACTED]");
+                sanitized = string.Join("[REDACTED]", sanitized.Split(new[] { _resolvedSecret }, StringSplitOptions.None));
             }
             if (!string.IsNullOrEmpty(_server.ApiKey) && _server.ApiKey.Length > 2)
             {
-                sanitized = sanitized.Replace(_server.ApiKey, "[REDACTED]");
+                sanitized = string.Join("[REDACTED]", sanitized.Split(new[] { _server.ApiKey }, StringSplitOptions.None));
             }
             return sanitized;
         }
@@ -268,6 +268,37 @@ namespace ModelContextGateway.Infrastructure.Transports
             }
         }
 
+        private async Task ProcessMessageAsync(string line, Func<JsonRpcMessage, Task> onMessageReceived)
+        {
+            try
+            {
+                var message = JsonSerializer.Deserialize<JsonRpcMessage>(line, _jsonOptions);
+                if (message == null)
+                {
+                    return;
+                }
+
+                if (message is JsonRpcResponse response && response.Id != null)
+                {
+                    var idStr = response.Id.ToString();
+                    if (idStr != null)
+                    {
+                        _stateManager.TryCompleteRequest(idStr, response);
+                    }
+                }
+
+                if (message is not JsonRpcResponse)
+                {
+                    _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, SanitizeLogOutput(line));
+                }
+                await onMessageReceived(message);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to parse STDIO message data: {Data}", SanitizeLogOutput(line));
+            }
+        }
+
         public void StartReader(Func<JsonRpcMessage, Task> onMessageReceived)
         {
             _readerTask = Task.Run(async () =>
@@ -301,31 +332,7 @@ namespace ModelContextGateway.Infrastructure.Transports
                             continue;
                         }
 
-                        try
-                        {
-                            var message = JsonSerializer.Deserialize<JsonRpcMessage>(line, _jsonOptions);
-                            if (message != null)
-                            {
-                                if (message is JsonRpcResponse response && response.Id != null)
-                                {
-                                    var idStr = response.Id.ToString();
-                                    if (idStr != null)
-                                    {
-                                        _stateManager.TryCompleteRequest(idStr, response);
-                                    }
-                                }
-
-                                if (message is not JsonRpcResponse)
-                                {
-                                    _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, SanitizeLogOutput(line));
-                                }
-                                await onMessageReceived(message);
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogError(ex, "Failed to parse STDIO message data: {Data}", SanitizeLogOutput(line));
-                        }
+                        await ProcessMessageAsync(line, onMessageReceived);
                     }
                 }
                 catch (OperationCanceledException)
