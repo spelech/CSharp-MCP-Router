@@ -65,5 +65,52 @@ namespace ModelContextGateway.Tests
             var transport = new SseTransport(server, new HttpClient(), NullLogger.Instance, stateManager, secretRetriever: null);
             await Assert.ThrowsAsync<InvalidOperationException>(() => transport.ResolveTokenAsync());
         }
+
+        /// <summary>
+        /// Verifies that SSE transport handles wait cancellations safely during SendRequestAsync without throwing.
+        /// </summary>
+        [Fact]
+        [Requirement("TRANS-01", "SSE transport safely handles WaitAsync cancellations in SendRequestAsync", Type = RequirementType.Positive, Category = "TRANS")]
+        public async Task SendRequestAsync_HandlesWaitCancellationSafely()
+        {
+            var server = new McpServer
+            {
+                Id = "test-s1",
+                Url = "http://localhost:8080/sse",
+                SecretProvider = "None"
+            };
+
+            var stateManager = new JsonRpcStateManager();
+            var transport = new SseTransport(server, new HttpClient(), NullLogger.Instance, stateManager);
+
+            // This will try to wait 5 seconds for the endpoint to be set, then timeout and return a Not Connected error.
+            var response = await transport.SendRequestAsync("test-method", "{\"jsonrpc\":\"2.0\",\"id\":\"1\",\"method\":\"test-method\"}");
+
+            Assert.NotNull(response.Error);
+            Assert.Equal(-32001, response.Error.Code);
+            Assert.Equal("Not connected", response.Error.Message);
+        }
+
+        /// <summary>
+        /// Verifies that SSE transport handles wait cancellations safely during CallMethodAsync without throwing.
+        /// </summary>
+        [Fact]
+        [Requirement("TRANS-01", "SSE transport safely handles WaitAsync cancellations in CallMethodAsync", Type = RequirementType.Positive, Category = "TRANS")]
+        public async Task CallMethodAsync_HandlesWaitCancellationSafely()
+        {
+            var server = new McpServer
+            {
+                Id = "test-s1",
+                Url = "http://localhost:8080/sse",
+                SecretProvider = "None"
+            };
+
+            var stateManager = new JsonRpcStateManager();
+            var transport = new SseTransport(server, new HttpClient(), NullLogger.Instance, stateManager);
+
+            // This will try to wait 5 seconds for the endpoint to be set, then timeout and throw InvalidOperationException.
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(() => transport.CallMethodAsync("test-method", new { }));
+            Assert.Contains("has not sent its endpoint event yet", ex.Message);
+        }
     }
 }

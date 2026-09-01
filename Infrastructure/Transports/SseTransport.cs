@@ -412,7 +412,14 @@ namespace ModelContextGateway.Infrastructure.Transports
                 {
                     await _endpointTcs.Task.WaitAsync(ctsTimeout.Token);
                 }
-                catch { }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogDebug("Wait for SSE endpoint canceled or timed out.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to wait for SSE endpoint in SendRequestAsync");
+                }
             }
 
             if (_messageUrl == null)
@@ -538,7 +545,14 @@ namespace ModelContextGateway.Infrastructure.Transports
                 {
                     await _endpointTcs.Task.WaitAsync(ctsTimeout.Token);
                 }
-                catch { }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogDebug("Wait for SSE endpoint canceled or timed out.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to wait for SSE endpoint in CallMethodAsync");
+                }
             }
 
             if (_messageUrl == null)
