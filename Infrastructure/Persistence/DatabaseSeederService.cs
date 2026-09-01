@@ -29,7 +29,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
 
             logger.LogInformation("Initializing database via Dapper ({Provider})...", provider);
 
-            var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
+            var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration, logger);
             if (string.IsNullOrEmpty(configuration["MCG_MASTER_KEY"])
                 && string.IsNullOrEmpty(configuration["MCG_SECRET"])
                 && string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"]))
