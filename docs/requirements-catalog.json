@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-01T21:21:25.6668599Z",
+    "generatedAt": "2026-09-01T21:26:11.5066058Z",
     "totalRequirements": 184,
     "positiveCount": 152,
     "guardrailCount": 32,
-    "totalProofs": 835
+    "totalProofs": 837
   },
   "requirements": [
     {
@@ -5133,7 +5133,7 @@
       "category": "SEC",
       "type": "Negative",
       "description": "SQLite database is encrypted at rest using SQLCipher with DB_ENCRYPTION_KEY.",
-      "proofCount": 15,
+      "proofCount": 17,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -5182,6 +5182,20 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/CorsTests.cs",
           "lineNumber": 181,
           "testName": "Cors_AllInvalidOrigins_FallsBackToDefaultAndLogsWarning",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
+          "lineNumber": 127,
+          "testName": "GetSecretAsync_ThrowsHttpRequestException_WhenHttpClientFails",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
+          "lineNumber": 165,
+          "testName": "GetSecretAsync_ThrowsJsonException_WhenResponseIsInvalidJson",
           "details": null
         },
         {
@@ -5399,7 +5413,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/TokenExchangeSecretRetrieverTests.cs",
-          "lineNumber": 127,
+          "lineNumber": 190,
           "testName": "CompositeSecretRetriever_RoutesOboAndPocketIdAliases_ToTokenExchangeRetriever",
           "details": null
         },
