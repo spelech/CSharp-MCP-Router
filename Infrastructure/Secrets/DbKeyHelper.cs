@@ -118,16 +118,20 @@ namespace ModelContextGateway.Infrastructure.Secrets
 
                 foreach (var dPath in defaultDockerSecretPaths)
                 {
-                    if (File.Exists(dPath))
+                    if (!File.Exists(dPath))
                     {
-                        var dSecret = File.ReadAllText(dPath).Trim();
-                        if (!string.IsNullOrWhiteSpace(dSecret))
-                        {
-                            _cachedKey = dSecret;
-                            ActiveKeySource = MasterKeySource.SecretFile;
-                            return _cachedKey;
-                        }
+                        continue;
                     }
+
+                    var dSecret = File.ReadAllText(dPath).Trim();
+                    if (string.IsNullOrWhiteSpace(dSecret))
+                    {
+                        continue;
+                    }
+
+                    _cachedKey = dSecret;
+                    ActiveKeySource = MasterKeySource.SecretFile;
+                    return _cachedKey;
                 }
 
                 // 5. Persistent Keyfile in Data Directory (./data/.master.key)
@@ -245,28 +249,30 @@ namespace ModelContextGateway.Infrastructure.Secrets
             try
             {
                 var secretData = client.V1.Secrets.KeyValue.V2.ReadSecretAsync(path: vaultPath, mountPoint: mountPoint).GetAwaiter().GetResult();
-                if (secretData?.Data?.Data != null)
+                if (secretData?.Data?.Data == null)
                 {
-                    if (secretData.Data.Data.TryGetValue(keyName, out var val) && val != null)
-                    {
-                        return val.ToString()?.Trim();
-                    }
+                    return null;
+                }
 
-                    foreach (var fallback in new[] { "master_key", "master-key", "key", "value", "secret" })
-                    {
-                        if (secretData.Data.Data.TryGetValue(fallback, out var fVal) && fVal != null)
-                        {
-                            return fVal.ToString()?.Trim();
-                        }
-                    }
+                if (secretData.Data.Data.TryGetValue(keyName, out var val) && val != null)
+                {
+                    return val.ToString()?.Trim();
+                }
 
-                    if (secretData.Data.Data.Count == 1)
+                foreach (var fallback in new[] { "master_key", "master-key", "key", "value", "secret" })
+                {
+                    if (secretData.Data.Data.TryGetValue(fallback, out var fVal) && fVal != null)
                     {
-                        var singleVal = secretData.Data.Data.Values.FirstOrDefault();
-                        if (singleVal != null)
-                        {
-                            return singleVal.ToString()?.Trim();
-                        }
+                        return fVal.ToString()?.Trim();
+                    }
+                }
+
+                if (secretData.Data.Data.Count == 1)
+                {
+                    var singleVal = secretData.Data.Data.Values.FirstOrDefault();
+                    if (singleVal != null)
+                    {
+                        return singleVal.ToString()?.Trim();
                     }
                 }
 
