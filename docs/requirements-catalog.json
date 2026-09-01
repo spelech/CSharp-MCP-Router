@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-01T06:28:20.2938638Z",
-    "totalRequirements": 181,
-    "positiveCount": 152,
-    "guardrailCount": 29,
-    "totalProofs": 823
+    "generatedAt": "2026-09-01T15:58:43.1535502Z",
+    "totalRequirements": 184,
+    "positiveCount": 154,
+    "guardrailCount": 30,
+    "totalProofs": 830
   },
   "requirements": [
     {
@@ -4141,6 +4141,82 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
           "lineNumber": 103,
           "testName": "Middleware_Skips_Non_Mcp_Paths",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-22",
+      "category": "MCP",
+      "type": "Negative",
+      "description": "AdminMcpServer ProcessRequestAsync handles server/discover request returning supported versions and subscriptions capability.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 682,
+          "testName": "ProcessRequestAsync_Handles_Server_Discover",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
+          "lineNumber": 124,
+          "testName": "Middleware_Extracts_Stateless_Capabilities_And_ClientInfo_In_Meta",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
+          "lineNumber": 162,
+          "testName": "Middleware_Rejects_Unsupported_Protocol_Version_With_32021_Error",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-23",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "AdminMcpServer HandleInitializeAsync includes subscriptions capability in capabilities object.",
+      "proofCount": 3,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 651,
+          "testName": "HandleInitializeAsync_Advertises_Subscriptions_Capability",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/AdminMcpServerTests.cs",
+          "lineNumber": 663,
+          "testName": "ProcessRequestAsync_Handles_Subscriptions_Listen",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
+          "lineNumber": 194,
+          "testName": "Middleware_Parses_Subscriptions_Listen_Request",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-24",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "McpSpecMiddleware extracts OpenTelemetry W3C traceparent, tracestate, and baggage from headers and _meta.",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
+          "lineNumber": 219,
+          "testName": "Middleware_Extracts_Trace_Context_From_Headers_And_Meta",
           "details": null
         }
       ]
