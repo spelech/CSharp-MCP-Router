@@ -94,6 +94,8 @@ namespace ModelContextGateway.Core.Routing
             {
                 resourcesDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "resources");
             }
+            resourcesDir = Path.GetFullPath(resourcesDir);
+
             if (Directory.Exists(resourcesDir))
             {
                 foreach (var file in Directory.GetFiles(resourcesDir))
@@ -262,12 +264,27 @@ namespace ModelContextGateway.Core.Routing
                 var filename = uri.Substring("router://resources/".Length);
                 filename = Path.GetFileName(filename);
 
+                // Sanitize filename to ensure no slashes or malicious characters remain
+                var invalidChars = Path.GetInvalidFileNameChars().Concat(new[] { '/', '\\' }).ToArray();
+                filename = new string(filename.Where(c => !invalidChars.Contains(c)).ToArray());
+
+                if (string.IsNullOrEmpty(filename) || filename == "." || filename == "..")
+                {
+                    throw new KeyNotFoundException("Invalid resource file name.");
+                }
+
                 var resourcesDir = Path.Combine(AppContext.BaseDirectory, "data", "resources");
                 if (!Directory.Exists(resourcesDir))
                 {
                     resourcesDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "resources");
                 }
-                var filePath = Path.Combine(resourcesDir, filename);
+                resourcesDir = Path.GetFullPath(resourcesDir);
+                var filePath = Path.GetFullPath(Path.Combine(resourcesDir, filename));
+
+                if (!filePath.StartsWith(resourcesDir, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new KeyNotFoundException($"Local resource file '{filename}' was not found in data/resources/.");
+                }
 
                 if (File.Exists(filePath))
                 {
