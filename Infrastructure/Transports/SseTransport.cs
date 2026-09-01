@@ -178,6 +178,56 @@ namespace ModelContextGateway.Infrastructure.Transports
             _logger.LogInformation("Connecting to backend {ServerId} SSE stream at {Url}...", _server.Id, _server.Url);
         }
 
+        private async Task ProcessEventDataAsync(string? currentEvent, string data, Func<JsonRpcMessage, Task> onMessageReceived)
+        {
+            if (currentEvent == "endpoint")
+            {
+                string url;
+                if (Uri.IsWellFormedUriString(data, UriKind.Absolute))
+                {
+                    url = data;
+                }
+                else
+                {
+                    var baseUri = new Uri(_server.Url);
+                    url = new Uri(baseUri, data).ToString();
+                }
+
+                _messageUrl = url;
+                _endpointTcs.TrySetResult(url);
+                _stateManager.MarkConnected();
+                return;
+            }
+
+            if (currentEvent == "message")
+            {
+                await ProcessMessageEventAsync(data, onMessageReceived);
+            }
+        }
+
+        private async Task ProcessMessageEventAsync(string data, Func<JsonRpcMessage, Task> onMessageReceived)
+        {
+            try
+            {
+                var responseObj = JsonSerializer.Deserialize<JsonRpcMessage>(data, _jsonOptions);
+                if (responseObj == null)
+                {
+                    return;
+                }
+
+                if (responseObj is not JsonRpcResponse)
+                {
+                    _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(data));
+                }
+
+                await onMessageReceived(responseObj);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to parse SSE message data: {Data}", data);
+            }
+        }
+
         public void StartReader(Func<JsonRpcMessage, Task> onMessageReceived)
         {
             _ = Task.Run(async () =>
@@ -253,47 +303,17 @@ namespace ModelContextGateway.Infrastructure.Transports
                             if (line.StartsWith("event:"))
                             {
                                 currentEvent = line.Substring(6).Trim();
+                                continue;
                             }
-                            else if (line.StartsWith("data:"))
+
+                            if (line.StartsWith("data:"))
                             {
                                 var data = line.Substring(5).Trim();
-                                if (currentEvent == "endpoint")
-                                {
-                                    string url;
-                                    if (Uri.IsWellFormedUriString(data, UriKind.Absolute))
-                                    {
-                                        url = data;
-                                    }
-                                    else
-                                    {
-                                        var baseUri = new Uri(_server.Url);
-                                        url = new Uri(baseUri, data).ToString();
-                                    }
-                                    _messageUrl = url;
-                                    _endpointTcs.TrySetResult(url);
-                                    _stateManager.MarkConnected();
-                                }
-                                else if (currentEvent == "message")
-                                {
-                                    try
-                                    {
-                                        var responseObj = JsonSerializer.Deserialize<JsonRpcMessage>(data, _jsonOptions);
-                                        if (responseObj != null)
-                                        {
-                                            if (responseObj is not JsonRpcResponse)
-                                            {
-                                                _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(data));
-                                            }
-                                            await onMessageReceived(responseObj);
-                                        }
-                                    }
-                                    catch (Exception ex)
-                                    {
-                                        _logger.LogError(ex, "Failed to parse SSE message data: {Data}", data);
-                                    }
-                                }
+                                await ProcessEventDataAsync(currentEvent, data, onMessageReceived);
+                                continue;
                             }
-                            else if (string.IsNullOrEmpty(line))
+
+                            if (string.IsNullOrEmpty(line))
                             {
                                 currentEvent = null;
                             }
