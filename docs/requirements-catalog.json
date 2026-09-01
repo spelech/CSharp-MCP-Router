@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-01T21:16:01.9455393Z",
+    "generatedAt": "2026-09-01T21:21:25.6668599Z",
     "totalRequirements": 184,
-    "positiveCount": 153,
-    "guardrailCount": 31,
-    "totalProofs": 834
+    "positiveCount": 152,
+    "guardrailCount": 32,
+    "totalProofs": 835
   },
   "requirements": [
     {
@@ -1872,9 +1872,9 @@
     {
       "id": "DB-01",
       "category": "DB",
-      "type": "Positive",
+      "type": "Negative",
       "description": "SQLite auto-migration seamlessly upgrades legacy schema, encrypts plaintext secrets, and preserves data",
-      "proofCount": 17,
+      "proofCount": 18,
       "proofs": [
         {
           "suite": "Backend xUnit",
@@ -1951,6 +1951,13 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbConnectionFactoryTests.cs",
           "lineNumber": 46,
           "testName": "Factory_Creates_MsSql_Connection_When_Configured",
+          "details": null
+        },
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/DbKeyHelperTests.cs",
+          "lineNumber": 334,
+          "testName": "ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenAutoGenerationFails",
           "details": null
         },
         {

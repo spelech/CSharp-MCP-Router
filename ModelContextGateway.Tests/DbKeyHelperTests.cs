@@ -330,5 +330,51 @@ namespace ModelContextGateway.Tests
             Assert.Equal(manualKey, resolvedKey);
             Assert.Equal(MasterKeySource.Configured, DbKeyHelper.ActiveKeySource);
         }
+
+        [Fact]
+        [Requirement("DB-01", "DB", RequirementType.Negative, "ResolveDbEncryptionKey wraps file persistence errors in InvalidOperationException")]
+        public void ResolveDbEncryptionKey_ThrowsInvalidOperationException_WhenAutoGenerationFails()
+        {
+            DbKeyHelper.ResetCache();
+
+            // On Windows, read-only on directories doesn't prevent file creation.
+            // But we can simulate a failure by using an invalid path character or standard UnauthorizedAccessException.
+            // On Linux/macOS, we can remove write permissions.
+
+            string uncreatableDir;
+            if (OperatingSystem.IsWindows())
+            {
+                // In Windows, a path with invalid characters or trying to use a reserved name
+                // or just relying on a file with the same name as the directory could work.
+                // Creating a file where a directory is expected will cause Directory.CreateDirectory to fail.
+                uncreatableDir = Path.Combine(_tempDataDir, "file_blocking_dir");
+                File.WriteAllText(uncreatableDir, "blocking");
+            }
+            else
+            {
+                uncreatableDir = Path.Combine(_tempDataDir, "readonly_dir");
+                Directory.CreateDirectory(uncreatableDir);
+                File.SetUnixFileMode(uncreatableDir, UnixFileMode.UserRead | UnixFileMode.UserExecute);
+            }
+
+            var config = new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?>
+            {
+                { "DATA_DIR", uncreatableDir }
+            }).Build();
+
+            try
+            {
+                var exception = Assert.Throws<InvalidOperationException>(() => DbKeyHelper.ResolveDbEncryptionKey(config));
+                Assert.Contains("failed to persist auto-generated key", exception.Message);
+            }
+            finally
+            {
+                if (!OperatingSystem.IsWindows())
+                {
+                    // Restore permissions so it can be cleaned up
+                    File.SetUnixFileMode(uncreatableDir, UnixFileMode.UserRead | UnixFileMode.UserWrite | UnixFileMode.UserExecute);
+                }
+            }
+        }
     }
 }
