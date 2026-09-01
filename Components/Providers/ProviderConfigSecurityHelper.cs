@@ -73,9 +73,10 @@ namespace ModelContextGateway.Components.Providers
         {
             if (node is JsonObject obj)
             {
-                var properties = obj.ToList();
-                foreach (var (propName, propVal) in properties)
+                foreach (var kvp in obj)
                 {
+                    var propName = kvp.Key;
+                    var propVal = kvp.Value;
                     if (propVal == null)
                     {
                         continue;
@@ -157,8 +158,10 @@ namespace ModelContextGateway.Components.Providers
 
         private static void MergeObjects(JsonObject incoming, JsonObject existing)
         {
-            foreach (var (propName, propVal) in incoming.ToList())
+            foreach (var kvp in incoming)
             {
+                var propName = kvp.Key;
+                var propVal = kvp.Value;
                 if (propVal is JsonValue val && val.TryGetValue<string>(out var strVal) && strVal == MaskValue)
                 {
                     if (existing.TryGetPropertyValue(propName, out var existingVal) && existingVal is JsonValue existVal && existVal.TryGetValue<string>(out var existStr))
