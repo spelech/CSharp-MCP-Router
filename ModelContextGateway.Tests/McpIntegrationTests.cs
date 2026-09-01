@@ -30,6 +30,11 @@ namespace ModelContextGateway.Tests
 
     public class McpIntegrationTests : IDisposable
     {
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        {
+            Converters = { new JsonRpcMessageConverter() }
+        };
+
         private readonly Microsoft.Data.Sqlite.SqliteConnection _connection;
         private readonly IDbConnectionFactory _dbFactory;
 
@@ -270,14 +275,9 @@ namespace ModelContextGateway.Tests
         [Requirement("MCP-01", "MCP", RequirementType.Positive, "Polymorphic JSON-RPC message deserializer accurately instantiates request, response, and notification subclasses.")]
         public void PolymorphicDeserialization_Correctly_Deserializes_JsonRpcMessage_Subclasses()
         {
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new JsonRpcMessageConverter() }
-            };
-
             // Request JSON
             var requestJson = "{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":123,\"params\":{}}";
-            var msgReq = JsonSerializer.Deserialize<JsonRpcMessage>(requestJson, options);
+            var msgReq = JsonSerializer.Deserialize<JsonRpcMessage>(requestJson, _jsonOptions);
             msgReq.Should().BeOfType<JsonRpcRequest>();
             var req = msgReq as JsonRpcRequest;
             req!.Method.Should().Be("tools/list");
@@ -285,14 +285,14 @@ namespace ModelContextGateway.Tests
 
             // Notification JSON
             var notificationJson = "{\"jsonrpc\":\"2.0\",\"method\":\"notifications/initialized\"}";
-            var msgNotif = JsonSerializer.Deserialize<JsonRpcMessage>(notificationJson, options);
+            var msgNotif = JsonSerializer.Deserialize<JsonRpcMessage>(notificationJson, _jsonOptions);
             msgNotif.Should().BeOfType<JsonRpcNotification>();
             var notif = msgNotif as JsonRpcNotification;
             notif!.Method.Should().Be("notifications/initialized");
 
             // Response JSON
             var responseJson = "{\"jsonrpc\":\"2.0\",\"id\":123,\"result\":{\"success\":true}}";
-            var msgResp = JsonSerializer.Deserialize<JsonRpcMessage>(responseJson, options);
+            var msgResp = JsonSerializer.Deserialize<JsonRpcMessage>(responseJson, _jsonOptions);
             msgResp.Should().BeOfType<JsonRpcResponse>();
             var resp = msgResp as JsonRpcResponse;
             resp!.Id?.ToString().Should().Be("123");
@@ -303,18 +303,13 @@ namespace ModelContextGateway.Tests
         [Requirement("MCP-01", "MCP", RequirementType.Positive, "Deserializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow.")]
         public void Deserializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow()
         {
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new JsonRpcMessageConverter() }
-            };
-
             var plainJson = "{\"jsonrpc\":\"2.0\"}";
 
             // Act & Assert
-            var action = () => JsonSerializer.Deserialize<JsonRpcMessage>(plainJson, options);
+            var action = () => JsonSerializer.Deserialize<JsonRpcMessage>(plainJson, _jsonOptions);
             action.Should().NotThrow();
 
-            var msg = JsonSerializer.Deserialize<JsonRpcMessage>(plainJson, options);
+            var msg = JsonSerializer.Deserialize<JsonRpcMessage>(plainJson, _jsonOptions);
             msg.Should().NotBeNull();
             msg.Should().BeOfType<JsonRpcMessage>();
             msg!.JsonRpc.Should().Be("2.0");
@@ -324,18 +319,13 @@ namespace ModelContextGateway.Tests
         [Requirement("MCP-01", "MCP", RequirementType.Positive, "Serializing plain JsonRpcMessage does not cause recursive converter invocation or stack overflow.")]
         public void Serializing_Plain_JsonRpcMessage_Does_Not_Cause_StackOverflow()
         {
-            var options = new JsonSerializerOptions
-            {
-                Converters = { new JsonRpcMessageConverter() }
-            };
-
             var msg = new JsonRpcMessage { JsonRpc = "2.0" };
 
             // Act & Assert
-            var action = () => JsonSerializer.Serialize(msg, options);
+            var action = () => JsonSerializer.Serialize(msg, _jsonOptions);
             action.Should().NotThrow();
 
-            var json = JsonSerializer.Serialize(msg, options);
+            var json = JsonSerializer.Serialize(msg, _jsonOptions);
             json.Should().Contain("\"jsonrpc\":\"2.0\"");
         }
 

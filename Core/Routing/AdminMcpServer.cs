@@ -562,7 +562,7 @@ namespace ModelContextGateway.Core.Routing
                 case "list":
                     {
                         using var conn = _dbFactory.CreateConnection();
-                        var keys = await conn.QueryAsync<dynamic>("SELECT Id, Name, Username, KeyPrefix, ScopesJson, ExpiresAt, CreatedAt FROM AppKeys");
+                        var keys = await conn.QueryAsync<dynamic>("SELECT * FROM AppKeys");
 
                         return keys.Select(k =>
                         {
@@ -651,7 +651,7 @@ namespace ModelContextGateway.Core.Routing
                 case "list":
                     {
                         using var conn = _dbFactory.CreateConnection();
-                        const string sql = "SELECT Id, TargetId, RequiredGroup, IsAllowed FROM AccessPolicies;";
+                        const string sql = "SELECT * FROM AccessPolicies;";
                         var policies = (await conn.QueryAsync<McpAccessPolicy>(sql)).ToList();
                         return policies;
                     }
@@ -736,7 +736,7 @@ namespace ModelContextGateway.Core.Routing
                 case "list":
                     {
                         using var conn = _dbFactory.CreateConnection();
-                        const string sql = "SELECT Id, ExternalId, InternalGroup FROM GroupMappings;";
+                        const string sql = "SELECT * FROM GroupMappings;";
                         var mappings = (await conn.QueryAsync<GroupMapping>(sql)).ToList();
                         return mappings;
                     }

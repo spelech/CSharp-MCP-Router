@@ -94,6 +94,8 @@ namespace ModelContextGateway.Core.Routing
             {
                 resourcesDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "resources");
             }
+            resourcesDir = Path.GetFullPath(resourcesDir);
+
             if (Directory.Exists(resourcesDir))
             {
                 foreach (var file in Directory.GetFiles(resourcesDir))
@@ -260,14 +262,28 @@ namespace ModelContextGateway.Core.Routing
             if (uri.StartsWith("router://resources/"))
             {
                 var filename = uri.Substring("router://resources/".Length);
-                filename = Path.GetFileName(filename);
+
+                // Prevent path traversal vulnerabilities by enforcing valid filenames
+                if (string.IsNullOrWhiteSpace(filename) ||
+                    filename.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0 ||
+                    filename.Contains("..") || filename.Contains("/") || filename.Contains("\\"))
+                {
+                    throw new KeyNotFoundException($"Invalid resource file name: '{filename}'.");
+                }
 
                 var resourcesDir = Path.Combine(AppContext.BaseDirectory, "data", "resources");
                 if (!Directory.Exists(resourcesDir))
                 {
                     resourcesDir = Path.Combine(Directory.GetCurrentDirectory(), "data", "resources");
                 }
-                var filePath = Path.Combine(resourcesDir, filename);
+                resourcesDir = Path.GetFullPath(resourcesDir);
+                var filePath = Path.GetFullPath(Path.Combine(resourcesDir, filename));
+
+                // Final safety check to ensure it stays within bounds
+                if (!filePath.StartsWith(resourcesDir + Path.DirectorySeparatorChar, StringComparison.OrdinalIgnoreCase))
+                {
+                    throw new KeyNotFoundException($"Local resource file '{filename}' was not found in data/resources/.");
+                }
 
                 if (File.Exists(filePath))
                 {
@@ -288,7 +304,9 @@ namespace ModelContextGateway.Core.Routing
                             mimeType = "text/html";
                         }
 
-                        var text = File.ReadAllText(filePath);
+                        using var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+                        using var reader = new StreamReader(stream);
+                        var text = reader.ReadToEnd();
                         return new
                         {
                             contents = new[] {
