@@ -281,14 +281,21 @@ namespace ModelContextGateway.Components.Servers
             }
 
             var activeIds = discoveredServers.Select(s => s.Id).ToHashSet();
+            var idsToDisable = new List<string>();
+
             foreach (var existing in existingMap.Values)
             {
                 if (existing.AutoDiscovered && !activeIds.Contains(existing.Id) && existing.Enabled)
                 {
                     logger.LogInformation("Auto-discovered MCP server container stopped/removed. Disabling: '{DisplayName}' ({Id})", existing.DisplayName, existing.Id);
-                    conn.Execute(@"UPDATE Servers SET Enabled = 0 WHERE Id = @Id", new { existing.Id });
-                    changed = true;
+                    idsToDisable.Add(existing.Id);
                 }
+            }
+
+            if (idsToDisable.Count > 0)
+            {
+                conn.Execute(@"UPDATE Servers SET Enabled = 0 WHERE Id IN @Ids", new { Ids = idsToDisable });
+                changed = true;
             }
 
             if (changed)
