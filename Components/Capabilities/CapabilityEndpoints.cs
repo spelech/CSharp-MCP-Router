@@ -167,11 +167,10 @@ namespace ModelContextGateway.Components.Capabilities
                 });
             }).AllowAnonymous();
 
-            api.MapGet("/api/test/tools", async (string? serverId, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapGet("/api/test/tools", async (string? serverId, [FromServices] IServerRepository serverRepo, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<CompositeSecretRetriever>();
-                using var connDb = dbFactory.CreateConnection();
-                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var rawServers = await serverRepo.GetEnabledServersAsync();
                 var servers = rawServers.ToList();
 
                 if (!string.IsNullOrWhiteSpace(serverId))
@@ -265,7 +264,7 @@ namespace ModelContextGateway.Components.Capabilities
             // 3. Test Call API
             Delegate handleTestCall = async (
                 [FromBody] TestCallModel model,
-                [FromServices] IDbConnectionFactory dbFactory,
+                [FromServices] IServerRepository serverRepo,
                 [FromServices] HttpClient httpClient,
                 [FromServices] IAuditLogger auditLogger,
                 ILogger<Program> logger,
@@ -283,8 +282,7 @@ namespace ModelContextGateway.Components.Capabilities
                     serverId = parts[0];
                 }
 
-                using var dbConn = dbFactory.CreateConnection();
-                var server = await dbConn.QueryFirstOrDefaultAsync<McpServer>("SELECT * FROM Servers WHERE Id = @Id", new { Id = serverId });
+                var server = await serverRepo.GetServerByIdAsync(serverId ?? "");
                 if (server == null && serverId != "custom")
                 {
                     var msg = $"Server {serverId} not found";
@@ -352,11 +350,10 @@ namespace ModelContextGateway.Components.Capabilities
             api.MapPost("/api/test/call-tool", handleTestCall);
 
             // 4. Test Semantic Search API
-            api.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapPost("/api/test/semantic-search", async ([FromBody] SearchModel model, [FromServices] IServerRepository serverRepo, [FromServices] HttpClient httpClient, [FromServices] IEmbeddingService embeddingService, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<CompositeSecretRetriever>();
-                using var connDb = dbFactory.CreateConnection();
-                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var rawServers = await serverRepo.GetEnabledServersAsync();
                 var servers = rawServers.ToList();
                 var allTools = new List<object>();
                 var missingServers = new List<McpServer>();
@@ -437,11 +434,10 @@ namespace ModelContextGateway.Components.Capabilities
             });
 
             // 2b. Test Prompts List API
-            api.MapGet("/api/test/prompts", async (string? serverId, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapGet("/api/test/prompts", async (string? serverId, [FromServices] IServerRepository serverRepo, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<CompositeSecretRetriever>();
-                using var connDb = dbFactory.CreateConnection();
-                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var rawServers = await serverRepo.GetEnabledServersAsync();
                 var servers = rawServers.ToList();
 
                 if (!string.IsNullOrWhiteSpace(serverId))
@@ -548,11 +544,10 @@ namespace ModelContextGateway.Components.Capabilities
             });
 
             // 2c. Test Resources List API
-            api.MapGet("/api/test/resources", async (string? serverId, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            api.MapGet("/api/test/resources", async (string? serverId, [FromServices] IServerRepository serverRepo, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<CompositeSecretRetriever>();
-                using var connDb = dbFactory.CreateConnection();
-                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var rawServers = await serverRepo.GetEnabledServersAsync();
                 var servers = rawServers.ToList();
 
                 if (!string.IsNullOrWhiteSpace(serverId))
@@ -719,11 +714,10 @@ namespace ModelContextGateway.Components.Capabilities
             });
 
             // 3b. Test Prompt Get API
-            Delegate handleTestPromptGet = async ([FromBody] TestPromptGetModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
+            Delegate handleTestPromptGet = async ([FromBody] TestPromptGetModel model, [FromServices] IServerRepository serverRepo, [FromServices] HttpClient httpClient, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<CompositeSecretRetriever>();
-                using var connDb = dbFactory.CreateConnection();
-                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var rawServers = await serverRepo.GetEnabledServersAsync();
                 var servers = rawServers.ToList();
                 var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
 
@@ -816,11 +810,10 @@ namespace ModelContextGateway.Components.Capabilities
             api.MapPost("/api/test/get-prompt", handleTestPromptGet);
 
             // 3c. Test Resource Read API
-            Delegate handleTestResourceRead = async ([FromBody] TestResourceReadModel model, [FromServices] IDbConnectionFactory dbFactory, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
+            Delegate handleTestResourceRead = async ([FromBody] TestResourceReadModel model, [FromServices] IServerRepository serverRepo, [FromServices] HttpClient httpClient, [FromServices] SessionManager sessionManager, ILogger<Program> logger, HttpContext httpContext) =>
             {
                 var secretRetriever = httpContext.RequestServices.GetService<CompositeSecretRetriever>();
-                using var connDb = dbFactory.CreateConnection();
-                var rawServers = await connDb.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1");
+                var rawServers = await serverRepo.GetEnabledServersAsync();
                 var servers = rawServers.ToList();
                 var backendConnections = new System.Collections.Concurrent.ConcurrentDictionary<string, BackendConnection>();
 

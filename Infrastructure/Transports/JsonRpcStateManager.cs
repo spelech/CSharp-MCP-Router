@@ -109,23 +109,24 @@ namespace ModelContextGateway.Infrastructure.Transports
         {
             lock (_lock)
             {
-                if (PendingRequests.TryRemove(id, out var tcs))
+                if (!PendingRequests.TryRemove(id, out var tcs))
                 {
-                    if (tcs is PendingRequestTcs tracked && response != null)
-                    {
-                        response.Id = tracked.OriginalId;
-                    }
-                    if (response != null)
-                    {
-                        tcs.TrySetResult(response);
-                    }
-                    else
-                    {
-                        tcs.TrySetCanceled();
-                    }
+                    return false;
+                }
+
+                if (response == null)
+                {
+                    tcs.TrySetCanceled();
                     return true;
                 }
-                return false;
+
+                if (tcs is PendingRequestTcs tracked)
+                {
+                    response.Id = tracked.OriginalId;
+                }
+
+                tcs.TrySetResult(response);
+                return true;
             }
         }
 

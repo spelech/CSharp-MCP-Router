@@ -1,4 +1,5 @@
 using System.Collections.Concurrent;
+using System.Text;
 using System.Text.Json;
 
 namespace ModelContextGateway.Core.Routing
@@ -215,6 +216,13 @@ namespace ModelContextGateway.Core.Routing
                         var compiledMessages = new List<object>();
                         if (fileRoot.TryGetProperty("messages", out var messagesProp) && messagesProp.ValueKind == JsonValueKind.Array)
                         {
+                            // Cache formatted argument placeholders to prevent string concatenation in the message loop
+                            var formattedArgs = new List<KeyValuePair<string, string>>(args.Count);
+                            foreach (var arg in args)
+                            {
+                                formattedArgs.Add(new KeyValuePair<string, string>("{{" + arg.Key + "}}", arg.Value));
+                            }
+
                             foreach (var msg in messagesProp.EnumerateArray())
                             {
                                 var role = msg.GetProperty("role").GetString() ?? "user";
@@ -226,9 +234,14 @@ namespace ModelContextGateway.Core.Routing
                                     var msgText = contentObj.GetProperty("text").GetString() ?? "";
 
                                     // Interpolate arguments in msgText
-                                    foreach (var arg in args)
+                                    if (msgText.Contains("{{"))
                                     {
-                                        msgText = msgText.Replace("{{" + arg.Key + "}}", arg.Value);
+                                        var sb = new StringBuilder(msgText);
+                                        foreach (var arg in formattedArgs)
+                                        {
+                                            sb.Replace(arg.Key, arg.Value);
+                                        }
+                                        msgText = sb.ToString();
                                     }
 
                                     compiledMessages.Add(new

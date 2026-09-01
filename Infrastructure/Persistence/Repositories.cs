@@ -153,7 +153,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
         public async Task<IEnumerable<McpServer>> GetEnabledServersAsync()
         {
             using var conn = _dbFactory.CreateConnection();
-            return await conn.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = 1;");
+            return await conn.QueryAsync<McpServer>("SELECT * FROM Servers WHERE Enabled = @Enabled;", new { Enabled = 1 });
         }
 
         public async Task<McpServer?> GetServerByIdAsync(string id)

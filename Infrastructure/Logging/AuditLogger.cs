@@ -70,33 +70,34 @@ namespace ModelContextGateway.Infrastructure.Logging
                     ErrorMessage = errorMessage
                 };
 
-                if (_dbFactory.ProviderName == "sqlite")
+                switch (_dbFactory.ProviderName)
                 {
-                    const string sql = @"
-                        INSERT INTO AuditLogs (RequestId, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, ExecutionTimeMs, StatusCode, RequestPayload, ResponsePayload, ErrorMessage, Timestamp)
-                        VALUES (@RequestId, @UserPrincipalName, @UserSid, @ServerCodeName, @ItemName, @RequestMethod, @ExecutionTimeMs, @StatusCode, @RequestPayload, @ResponsePayload, @ErrorMessage, CURRENT_TIMESTAMP);";
-                    await conn.ExecuteAsync(sql, parameters);
-                }
-                else if (_dbFactory.ProviderName == "mysql")
-                {
-                    await conn.ExecuteAsync("sp_InsertAuditLog", new
-                    {
-                        p_RequestId = requestId,
-                        p_UserPrincipalName = userPrincipalName,
-                        p_UserSid = userSid,
-                        p_ServerCodeName = serverCodeName,
-                        p_ItemName = itemName,
-                        p_RequestMethod = requestMethod,
-                        p_ExecutionTimeMs = executionTimeMs,
-                        p_StatusCode = statusCode,
-                        p_RequestPayload = cleanRequest,
-                        p_ResponsePayload = cleanResponse,
-                        p_ErrorMessage = errorMessage
-                    }, commandType: CommandType.StoredProcedure);
-                }
-                else
-                {
-                    await conn.ExecuteAsync("sp_InsertAuditLog", parameters, commandType: CommandType.StoredProcedure);
+                    case "sqlite":
+                        const string sql = @"
+                            INSERT INTO AuditLogs (RequestId, UserPrincipalName, UserSid, ServerCodeName, ItemName, RequestMethod, ExecutionTimeMs, StatusCode, RequestPayload, ResponsePayload, ErrorMessage, Timestamp)
+                            VALUES (@RequestId, @UserPrincipalName, @UserSid, @ServerCodeName, @ItemName, @RequestMethod, @ExecutionTimeMs, @StatusCode, @RequestPayload, @ResponsePayload, @ErrorMessage, CURRENT_TIMESTAMP);";
+                        await conn.ExecuteAsync(sql, parameters);
+                        break;
+                    case "mysql":
+                        var mysqlParams = new
+                        {
+                            p_RequestId = requestId,
+                            p_UserPrincipalName = userPrincipalName,
+                            p_UserSid = userSid,
+                            p_ServerCodeName = serverCodeName,
+                            p_ItemName = itemName,
+                            p_RequestMethod = requestMethod,
+                            p_ExecutionTimeMs = executionTimeMs,
+                            p_StatusCode = statusCode,
+                            p_RequestPayload = cleanRequest,
+                            p_ResponsePayload = cleanResponse,
+                            p_ErrorMessage = errorMessage
+                        };
+                        await conn.ExecuteAsync("sp_InsertAuditLog", mysqlParams, commandType: CommandType.StoredProcedure);
+                        break;
+                    default:
+                        await conn.ExecuteAsync("sp_InsertAuditLog", parameters, commandType: CommandType.StoredProcedure);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -129,16 +130,17 @@ namespace ModelContextGateway.Infrastructure.Logging
                     ErrorMessage = errorMessage
                 };
 
-                if (_dbFactory.ProviderName == "sqlite")
+                switch (_dbFactory.ProviderName)
                 {
-                    const string sql = @"
-                        INSERT INTO AdminAuditLogs (Id, Username, Action, Target, Details, Success, ErrorMessage, Timestamp)
-                        VALUES (@Id, @Username, @Action, @Target, @Details, @Success, @ErrorMessage, CURRENT_TIMESTAMP);";
-                    await conn.ExecuteAsync(sql, parameters);
-                }
-                else
-                {
-                    await conn.ExecuteAsync("sp_InsertAdminAuditLog", parameters, commandType: CommandType.StoredProcedure);
+                    case "sqlite":
+                        const string sql = @"
+                            INSERT INTO AdminAuditLogs (Id, Username, Action, Target, Details, Success, ErrorMessage, Timestamp)
+                            VALUES (@Id, @Username, @Action, @Target, @Details, @Success, @ErrorMessage, CURRENT_TIMESTAMP);";
+                        await conn.ExecuteAsync(sql, parameters);
+                        break;
+                    default:
+                        await conn.ExecuteAsync("sp_InsertAdminAuditLog", parameters, commandType: CommandType.StoredProcedure);
+                        break;
                 }
             }
             catch (Exception ex)

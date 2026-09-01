@@ -26,7 +26,7 @@ namespace ModelContextGateway.Components.Authorization
             try
             {
                 using var conn = _dbFactory.CreateConnection();
-                const string sql = "SELECT Id, TargetId, RequiredGroup, IsAllowed FROM AccessPolicies;";
+                const string sql = "SELECT * FROM AccessPolicies;";
                 var policies = await conn.QueryAsync<McpAccessPolicy>(sql);
                 return Ok(policies);
             }
@@ -134,7 +134,7 @@ namespace ModelContextGateway.Components.Authorization
             try
             {
                 using var conn = _dbFactory.CreateConnection();
-                const string sql = "SELECT Id, ExternalId, InternalGroup FROM GroupMappings;";
+                const string sql = "SELECT * FROM GroupMappings;";
                 var mappings = await conn.QueryAsync<GroupMapping>(sql);
                 return Ok(mappings);
             }

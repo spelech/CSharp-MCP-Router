@@ -29,7 +29,7 @@ namespace ModelContextGateway.Infrastructure.Persistence
 
             logger.LogInformation("Initializing database via Dapper ({Provider})...", provider);
 
-            var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration);
+            var encryptionKey = DbKeyHelper.ResolveDbEncryptionKey(configuration, logger);
             if (string.IsNullOrEmpty(configuration["MCG_MASTER_KEY"])
                 && string.IsNullOrEmpty(configuration["MCG_SECRET"])
                 && string.IsNullOrEmpty(configuration["DB_ENCRYPTION_KEY"]))
@@ -1413,12 +1413,17 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 new { ProviderName = "TokenExchange", DisplayName = "OAuth2 / OIDC Token Exchange (OBO)", IsEnabled = 0 }
             };
 
+            var existingSecretProviders = conn.Query<string>(
+                "SELECT ProviderName FROM SecretProviders WHERE ProviderName IN @Names",
+                new { Names = secretProviders.Select(p => p.ProviderName).ToArray() }
+            ).ToHashSet();
+
             foreach (var sp in secretProviders)
             {
-                var exists = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM SecretProviders WHERE ProviderName = @ProviderName", new { sp.ProviderName });
-                if (exists == 0)
+                if (!existingSecretProviders.Contains(sp.ProviderName))
                 {
                     conn.Execute("INSERT INTO SecretProviders (ProviderName, DisplayName, IsEnabled) VALUES (@ProviderName, @DisplayName, @IsEnabled)", sp);
+                    existingSecretProviders.Add(sp.ProviderName);
                 }
             }
 
@@ -1430,12 +1435,17 @@ namespace ModelContextGateway.Infrastructure.Persistence
                 new { ProviderName = "PocketID", DisplayName = "PocketID OIDC", UserHeader = "Remote-User", GroupsHeader = "Remote-Groups", IsEnabled = 1 }
             };
 
+            var existingAuthProviders = conn.Query<string>(
+                "SELECT ProviderName FROM AuthProviderConfigs WHERE ProviderName IN @Names",
+                new { Names = authProviders.Select(p => p.ProviderName).ToArray() }
+            ).ToHashSet();
+
             foreach (var ap in authProviders)
             {
-                var exists = conn.ExecuteScalar<int>("SELECT COUNT(*) FROM AuthProviderConfigs WHERE ProviderName = @ProviderName", new { ap.ProviderName });
-                if (exists == 0)
+                if (!existingAuthProviders.Contains(ap.ProviderName))
                 {
                     conn.Execute("INSERT INTO AuthProviderConfigs (ProviderName, DisplayName, UserHeader, GroupsHeader, IsEnabled) VALUES (@ProviderName, @DisplayName, @UserHeader, @GroupsHeader, @IsEnabled)", ap);
+                    existingAuthProviders.Add(ap.ProviderName);
                 }
             }
         }
