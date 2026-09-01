@@ -48,6 +48,32 @@ namespace ModelContextGateway.Core.Routing
             {
                 paramsObj[paramKey] = newValue;
             }
+
+            var currentActivity = System.Diagnostics.Activity.Current;
+            if (currentActivity != null && !string.IsNullOrEmpty(currentActivity.Id))
+            {
+                if (!obj.TryGetPropertyValue("_meta", out var metaNode) || metaNode is not System.Text.Json.Nodes.JsonObject)
+                {
+                    var metaObj = new System.Text.Json.Nodes.JsonObject();
+                    metaObj["traceparent"] = currentActivity.Id;
+                    if (!string.IsNullOrEmpty(currentActivity.TraceStateString))
+                    {
+                        metaObj["tracestate"] = currentActivity.TraceStateString;
+                    }
+                    obj["_meta"] = metaObj;
+                }
+                else if (metaNode is System.Text.Json.Nodes.JsonObject existingMeta)
+                {
+                    if (existingMeta["traceparent"] == null)
+                    {
+                        existingMeta["traceparent"] = currentActivity.Id;
+                    }
+                    if (existingMeta["tracestate"] == null && !string.IsNullOrEmpty(currentActivity.TraceStateString))
+                    {
+                        existingMeta["tracestate"] = currentActivity.TraceStateString;
+                    }
+                }
+            }
         }
     }
 }

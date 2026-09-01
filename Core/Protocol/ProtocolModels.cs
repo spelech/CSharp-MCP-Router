@@ -101,6 +101,9 @@ namespace ModelContextGateway.Core.Protocol
 
         [JsonPropertyName("params")]
         public JsonElement? Params { get; set; }
+
+        [JsonPropertyName("_meta")]
+        public JsonElement? Meta { get; set; }
     }
 
     public class JsonRpcNotification : JsonRpcMessage
@@ -110,6 +113,9 @@ namespace ModelContextGateway.Core.Protocol
 
         [JsonPropertyName("params")]
         public JsonElement? Params { get; set; }
+
+        [JsonPropertyName("_meta")]
+        public JsonElement? Meta { get; set; }
     }
 
     public class JsonRpcResponse : JsonRpcMessage
@@ -122,6 +128,9 @@ namespace ModelContextGateway.Core.Protocol
 
         [JsonPropertyName("error")]
         public JsonRpcError? Error { get; set; }
+
+        [JsonPropertyName("_meta")]
+        public JsonElement? Meta { get; set; }
     }
 
     public class JsonRpcError
@@ -215,6 +224,81 @@ namespace ModelContextGateway.Core.Protocol
             }
 
             return result;
+        }
+    }
+
+    public static class TraceContextHelper
+    {
+        public static readonly System.Diagnostics.ActivitySource ActivitySource = new("ModelContextGateway", GatewayMetadata.Version);
+
+        public static void ExtractAndApplyTraceContext(Microsoft.AspNetCore.Http.HttpContext context, JsonElement? metaElement)
+        {
+            string? traceparent = context.Request.Headers["traceparent"].FirstOrDefault();
+            string? tracestate = context.Request.Headers["tracestate"].FirstOrDefault();
+            string? baggage = context.Request.Headers["baggage"].FirstOrDefault();
+
+            if (metaElement.HasValue && metaElement.Value.ValueKind == JsonValueKind.Object)
+            {
+                var metaObj = metaElement.Value;
+                if (string.IsNullOrEmpty(traceparent) && metaObj.TryGetProperty("traceparent", out var tpProp))
+                {
+                    traceparent = tpProp.GetString();
+                }
+                if (string.IsNullOrEmpty(tracestate) && metaObj.TryGetProperty("tracestate", out var tsProp))
+                {
+                    tracestate = tsProp.GetString();
+                }
+                if (string.IsNullOrEmpty(baggage) && metaObj.TryGetProperty("baggage", out var bgProp))
+                {
+                    baggage = bgProp.GetString();
+                }
+                if (metaObj.TryGetProperty("io.modelcontextprotocol/trace", out var traceObj) && traceObj.ValueKind == JsonValueKind.Object)
+                {
+                    if (string.IsNullOrEmpty(traceparent) && traceObj.TryGetProperty("traceparent", out var otpProp))
+                    {
+                        traceparent = otpProp.GetString();
+                    }
+                    if (string.IsNullOrEmpty(tracestate) && traceObj.TryGetProperty("tracestate", out var otsProp))
+                    {
+                        tracestate = otsProp.GetString();
+                    }
+                    if (string.IsNullOrEmpty(baggage) && traceObj.TryGetProperty("baggage", out var obgProp))
+                    {
+                        baggage = obgProp.GetString();
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(traceparent))
+            {
+                context.Items["MCP_TRACE_PARENT"] = traceparent;
+                if (System.Diagnostics.ActivityContext.TryParse(traceparent, tracestate, out var parentContext))
+                {
+                    var activity = ActivitySource.StartActivity("McpRequest", System.Diagnostics.ActivityKind.Server, parentContext);
+                    if (activity != null)
+                    {
+                        if (!string.IsNullOrEmpty(baggage))
+                        {
+                            foreach (var pair in baggage.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                            {
+                                var parts = pair.Split('=', 2);
+                                if (parts.Length == 2)
+                                {
+                                    activity.AddBaggage(Uri.UnescapeDataString(parts[0]), Uri.UnescapeDataString(parts[1]));
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            if (!string.IsNullOrEmpty(tracestate))
+            {
+                context.Items["MCP_TRACE_STATE"] = tracestate;
+            }
+            if (!string.IsNullOrEmpty(baggage))
+            {
+                context.Items["MCP_BAGGAGE"] = baggage;
+            }
         }
     }
 }

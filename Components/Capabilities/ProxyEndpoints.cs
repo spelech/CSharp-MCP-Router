@@ -254,6 +254,22 @@ namespace ModelContextGateway.Components.Capabilities
                             await httpContext.Response.WriteAsJsonAsync(response);
                             return;
                         }
+                        else if (method == "subscriptions/listen")
+                        {
+                            var response = new
+                            {
+                                jsonrpc = "2.0",
+                                id = id != null ? (object)id : null,
+                                result = ProtocolHelper.EnsureResultType(new
+                                {
+                                    status = "listening",
+                                    subscriptions = new { }
+                                })
+                            };
+                            httpContext.Response.Headers.ContentType = "application/json";
+                            await httpContext.Response.WriteAsJsonAsync(response);
+                            return;
+                        }
                         else if (method == "roots/list")
                         {
                             var response = new
@@ -346,7 +362,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { listChanged = true },
+                                    subscriptions = new { }
                                 },
                                 serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             })
@@ -364,12 +381,13 @@ namespace ModelContextGateway.Components.Capabilities
                             id = id != null ? (object)id : null,
                             result = ProtocolHelper.EnsureResultType(new
                             {
-                                supportedVersions = new[] { "2026-07-28" },
+                                supportedVersions = GatewayMetadata.SupportedProtocolVersions,
                                 capabilities = new
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { listChanged = true },
+                                    subscriptions = new { }
                                 },
                                 serverInfo = new { name = "ModelContextGateway", version = AppVersion }
                             })
@@ -723,12 +741,13 @@ namespace ModelContextGateway.Components.Capabilities
                             id = id != null ? (object)id : null,
                             result = ProtocolHelper.EnsureResultType(new
                             {
-                                supportedVersions = new[] { "2026-07-28" },
+                                supportedVersions = GatewayMetadata.SupportedProtocolVersions,
                                 capabilities = new
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { listChanged = true },
+                                    subscriptions = new { }
                                 },
                                 serverInfo = new { name = serverName, version = AppVersion }
                             })
@@ -743,7 +762,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { listChanged = true },
+                                    subscriptions = new { }
                                 },
                                 serverInfo = new { name = serverName, version = AppVersion }
                             })
@@ -839,7 +859,8 @@ namespace ModelContextGateway.Components.Capabilities
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { listChanged = true },
+                                    subscriptions = new { }
                                 },
                                 serverInfo = new
                                 {
@@ -861,12 +882,13 @@ namespace ModelContextGateway.Components.Capabilities
                             id = id != null ? (object)id : null,
                             result = ProtocolHelper.EnsureResultType(new
                             {
-                                supportedVersions = new[] { "2026-07-28" },
+                                supportedVersions = GatewayMetadata.SupportedProtocolVersions,
                                 capabilities = new
                                 {
                                     tools = new { listChanged = true },
                                     prompts = new { listChanged = true },
-                                    resources = new { subscribe = false, listChanged = true }
+                                    resources = new { listChanged = true },
+                                    subscriptions = new { }
                                 },
                                 serverInfo = new
                                 {
@@ -962,6 +984,21 @@ namespace ModelContextGateway.Components.Capabilities
                             jsonrpc = "2.0",
                             id = id != null ? (object)id : null,
                             result = ProtocolHelper.EnsureResultType(res)
+                        };
+                        await session.WriteMessageAsync(response);
+                        return Results.Accepted();
+                    }
+                    else if (method == "subscriptions/listen")
+                    {
+                        var response = new
+                        {
+                            jsonrpc = "2.0",
+                            id = id != null ? (object)id : null,
+                            result = ProtocolHelper.EnsureResultType(new
+                            {
+                                status = "listening",
+                                subscriptions = new { }
+                            })
                         };
                         await session.WriteMessageAsync(response);
                         return Results.Accepted();

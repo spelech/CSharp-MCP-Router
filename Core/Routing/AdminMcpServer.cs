@@ -92,7 +92,8 @@ namespace ModelContextGateway.Core.Routing
                 protocolVersion = negotiatedVersion,
                 capabilities = new
                 {
-                    tools = new { listChanged = false }
+                    tools = new { listChanged = false },
+                    subscriptions = new { }
                 },
                 serverInfo = new
                 {
@@ -211,6 +212,32 @@ namespace ModelContextGateway.Core.Routing
                     case "initialize":
                         var initResult = await HandleInitializeAsync(request.Params);
                         response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(initResult));
+                        break;
+
+                    case "server/discover":
+                        response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new
+                        {
+                            supportedVersions = GatewayMetadata.SupportedProtocolVersions,
+                            capabilities = new
+                            {
+                                tools = new { listChanged = false },
+                                subscriptions = new { }
+                            },
+                            serverInfo = new
+                            {
+                                name = GatewayMetadata.AdminServerName,
+                                version = GatewayMetadata.Version
+                            },
+                            instructions = "In-process virtual Admin MCP Server for managing the Model Context Gateway configuration, servers, clients, policies, providers, settings, and diagnostics."
+                        }));
+                        break;
+
+                    case "subscriptions/listen":
+                        response.Result = JsonSerializer.SerializeToElement(ProtocolHelper.EnsureResultType(new
+                        {
+                            status = "listening",
+                            subscriptions = new { }
+                        }));
                         break;
 
                     case "notifications/initialized":

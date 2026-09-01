@@ -1,9 +1,11 @@
+using System.Text.Json;
 using System.Text.Json.Nodes;
 
 namespace ModelContextGateway.Middleware
 {
     /// <summary>
-    /// Implements MCP 2026-07-28 Spec-Compliant Header Annotation, Protocol Negotiation, and Legacy Body Fallback.
+    /// Implements MCP 2026-07-28 Spec-Compliant Header Annotation, Protocol Negotiation,
+    /// Stateless Capabilities, Trace Context Extraction, and Legacy Body Fallback.
     /// Inspects Mcp-Method, Mcp-Name, Mcp-Session-Id, and MCP-Protocol-Version HTTP headers or JSON-RPC request bodies,
     /// storing parsed metadata in HttpContext.Items for downstream endpoint execution.
     /// </summary>
@@ -25,6 +27,8 @@ namespace ModelContextGateway.Middleware
                 string rawBody = string.Empty;
                 object? id = null;
                 JsonNode? paramsNode = null;
+                JsonNode? metaNode = null;
+                string? requestedVersion = null;
 
                 // 1. Primary: Parse 2026-07-28 Specification Headers
                 if (context.Request.Headers.TryGetValue("Mcp-Method", out var methodHeader))
@@ -39,6 +43,11 @@ namespace ModelContextGateway.Middleware
                 if (context.Request.Headers.TryGetValue("Mcp-Session-Id", out var sessionHeader))
                 {
                     context.Items["MCP_SESSION_ID"] = sessionHeader.ToString();
+                }
+
+                if (context.Request.Headers.TryGetValue("MCP-Protocol-Version", out var protoHeader))
+                {
+                    requestedVersion = protoHeader.ToString();
                 }
 
                 // 2. Body Inspection (for Streamable HTTP POSTs and Legacy MCP Clients)
@@ -85,6 +94,33 @@ namespace ModelContextGateway.Middleware
                                     paramsNode = pNode;
                                 }
 
+                                if (obj.TryGetPropertyValue("_meta", out var mObjNode) && mObjNode != null)
+                                {
+                                    metaNode = mObjNode;
+
+                                    if (string.IsNullOrEmpty(requestedVersion))
+                                    {
+                                        if (metaNode["io.modelcontextprotocol/protocolVersion"] != null)
+                                        {
+                                            requestedVersion = metaNode["io.modelcontextprotocol/protocolVersion"]?.ToString();
+                                        }
+                                        else if (metaNode["protocolVersion"] != null)
+                                        {
+                                            requestedVersion = metaNode["protocolVersion"]?.ToString();
+                                        }
+                                    }
+
+                                    if (metaNode["io.modelcontextprotocol/clientInfo"] != null)
+                                    {
+                                        context.Items["MCP_CLIENT_INFO"] = metaNode["io.modelcontextprotocol/clientInfo"]?.ToString();
+                                    }
+
+                                    if (metaNode["io.modelcontextprotocol/clientCapabilities"] != null)
+                                    {
+                                        context.Items["MCP_CLIENT_CAPABILITIES"] = metaNode["io.modelcontextprotocol/clientCapabilities"]?.ToString();
+                                    }
+                                }
+
                                 if (string.IsNullOrEmpty(itemName) && !string.IsNullOrEmpty(method))
                                 {
                                     itemName = method switch
@@ -104,6 +140,36 @@ namespace ModelContextGateway.Middleware
                     }
                 }
 
+                // 3. OpenTelemetry / W3C Trace Context Extraction
+                JsonElement? metaJsonElement = null;
+                if (metaNode != null)
+                {
+                    try
+                    {
+                        metaJsonElement = JsonSerializer.Deserialize<JsonElement>(metaNode.ToJsonString());
+                    }
+                    catch { }
+                }
+                TraceContextHelper.ExtractAndApplyTraceContext(context, metaJsonElement);
+
+                // 4. Protocol Version Validation
+                if (!string.IsNullOrEmpty(requestedVersion) && !GatewayMetadata.IsSupportedProtocolVersion(requestedVersion))
+                {
+                    context.Response.StatusCode = 400;
+                    context.Response.Headers.ContentType = "application/json";
+                    await context.Response.WriteAsJsonAsync(new
+                    {
+                        jsonrpc = "2.0",
+                        id = id,
+                        error = new
+                        {
+                            code = -32021,
+                            message = $"Unsupported protocol version: '{requestedVersion}'. Supported versions: {string.Join(", ", GatewayMetadata.SupportedProtocolVersions)}"
+                        }
+                    });
+                    return;
+                }
+
                 if (!string.IsNullOrEmpty(method))
                 {
                     bool isNotification = method.StartsWith("notifications/") || id == null;
@@ -113,7 +179,11 @@ namespace ModelContextGateway.Middleware
                     context.Items["MCP_RAW_BODY"] = rawBody;
                     context.Items["MCP_REQ_ID"] = id;
                     context.Items["MCP_IS_NOTIFICATION"] = isNotification;
-                    context.Items["MCP_SPEC_VERSION"] = context.Request.Headers["MCP-Protocol-Version"].FirstOrDefault() ?? "2026-07-28";
+                    context.Items["MCP_SPEC_VERSION"] = requestedVersion ?? GatewayMetadata.ProtocolVersion;
+                    if (metaNode != null)
+                    {
+                        context.Items["MCP_META"] = metaNode.ToJsonString();
+                    }
                 }
             }
 

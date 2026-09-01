@@ -176,6 +176,25 @@ namespace ModelContextGateway.Infrastructure.Transports
             {
                 request.Headers.TryAddWithoutValidation("X-Forwarded-User", _forwardedUser);
             }
+
+            // OpenTelemetry / W3C Trace Context Propagation
+            var currentActivity = System.Diagnostics.Activity.Current;
+            if (currentActivity != null)
+            {
+                if (!string.IsNullOrEmpty(currentActivity.Id) && !request.Headers.Contains("traceparent"))
+                {
+                    request.Headers.TryAddWithoutValidation("traceparent", currentActivity.Id);
+                }
+                if (!string.IsNullOrEmpty(currentActivity.TraceStateString) && !request.Headers.Contains("tracestate"))
+                {
+                    request.Headers.TryAddWithoutValidation("tracestate", currentActivity.TraceStateString);
+                }
+                if (currentActivity.Baggage.Any() && !request.Headers.Contains("baggage"))
+                {
+                    var baggageHeader = string.Join(",", currentActivity.Baggage.Select(b => $"{Uri.EscapeDataString(b.Key)}={Uri.EscapeDataString(b.Value ?? "")}"));
+                    request.Headers.TryAddWithoutValidation("baggage", baggageHeader);
+                }
+            }
         }
 
         public Task ConnectAsync()

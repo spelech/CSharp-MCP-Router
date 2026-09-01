@@ -647,5 +647,57 @@ namespace ModelContextGateway.Tests
             var text = doc.RootElement.GetProperty("content")[0].GetProperty("text").GetString()!;
             Assert.Contains("non-existent-server", text);
         }
+
+        [Fact]
+        [Requirement("MCP-23", "MCP", RequirementType.Positive, "AdminMcpServer HandleInitializeAsync includes subscriptions capability in capabilities object.")]
+        public async Task HandleInitializeAsync_Advertises_Subscriptions_Capability()
+        {
+            var initRes = await _adminMcpServer.HandleInitializeAsync(null);
+            var json = JsonSerializer.Serialize(initRes);
+            using var doc = JsonDocument.Parse(json);
+
+            Assert.True(doc.RootElement.TryGetProperty("capabilities", out var caps));
+            Assert.True(caps.TryGetProperty("subscriptions", out _));
+        }
+
+        [Fact]
+        [Requirement("MCP-23", "MCP", RequirementType.Positive, "AdminMcpServer ProcessRequestAsync handles subscriptions/listen request with listening status.")]
+        public async Task ProcessRequestAsync_Handles_Subscriptions_Listen()
+        {
+            var request = new JsonRpcRequest
+            {
+                Id = "listen-req-1",
+                Method = "subscriptions/listen"
+            };
+
+            var response = await _adminMcpServer.ProcessRequestAsync(request, "admin_user");
+            Assert.Null(response.Error);
+            Assert.NotNull(response.Result);
+
+            var json = JsonSerializer.Serialize(response.Result);
+            using var doc = JsonDocument.Parse(json);
+            Assert.Equal("listening", doc.RootElement.GetProperty("status").GetString());
+        }
+
+        [Fact]
+        [Requirement("MCP-22", "MCP", RequirementType.Positive, "AdminMcpServer ProcessRequestAsync handles server/discover request returning supported versions and subscriptions capability.")]
+        public async Task ProcessRequestAsync_Handles_Server_Discover()
+        {
+            var request = new JsonRpcRequest
+            {
+                Id = "discover-req-1",
+                Method = "server/discover"
+            };
+
+            var response = await _adminMcpServer.ProcessRequestAsync(request, "admin_user");
+            Assert.Null(response.Error);
+            Assert.NotNull(response.Result);
+
+            var json = JsonSerializer.Serialize(response.Result);
+            using var doc = JsonDocument.Parse(json);
+            Assert.True(doc.RootElement.TryGetProperty("supportedVersions", out var versions));
+            Assert.Contains("2026-07-28", versions.EnumerateArray().Select(v => v.GetString()));
+            Assert.True(doc.RootElement.GetProperty("capabilities").TryGetProperty("subscriptions", out _));
+        }
     }
 }

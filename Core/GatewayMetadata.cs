@@ -23,12 +23,34 @@ namespace ModelContextGateway.Core
         /// <summary>
         /// Supported Model Context Protocol specification version.
         /// </summary>
-        public const string ProtocolVersion = "2024-11-05";
+        public const string ProtocolVersion = "2026-07-28";
+
+        /// <summary>
+        /// Legacy Model Context Protocol specification version.
+        /// </summary>
+        public const string LegacyProtocolVersion = "2024-11-05";
+
+        /// <summary>
+        /// List of supported protocol versions.
+        /// </summary>
+        public static readonly string[] SupportedProtocolVersions = new[] { "2026-07-28", "2024-11-05", "2024-10-07" };
+
+        /// <summary>
+        /// Checks whether a protocol version string is supported by the gateway.
+        /// </summary>
+        public static bool IsSupportedProtocolVersion(string? version)
+        {
+            if (string.IsNullOrWhiteSpace(version))
+            {
+                return true;
+            }
+            return SupportedProtocolVersions.Any(v => string.Equals(v, version.Trim(), StringComparison.OrdinalIgnoreCase));
+        }
 
         /// <summary>
         /// Canonical semantic version dynamically resolved from the executing assembly.
         /// </summary>
-        public static string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "5.0.7";
+        public static string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString(3) ?? "5.6.0";
 
         /// <summary>
         /// Builds a standard JSON-RPC 2.0 initialize request payload with dynamic versioning.
