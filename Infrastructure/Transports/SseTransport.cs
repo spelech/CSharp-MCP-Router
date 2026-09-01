@@ -412,7 +412,14 @@ namespace ModelContextGateway.Infrastructure.Transports
                 {
                     await _endpointTcs.Task.WaitAsync(ctsTimeout.Token);
                 }
-                catch { }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogDebug("Timeout waiting for SSE endpoint URL.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Exception waiting for SSE endpoint URL.");
+                }
             }
 
             if (_messageUrl == null)
@@ -538,7 +545,14 @@ namespace ModelContextGateway.Infrastructure.Transports
                 {
                     await _endpointTcs.Task.WaitAsync(ctsTimeout.Token);
                 }
-                catch { }
+                catch (OperationCanceledException)
+                {
+                    _logger.LogDebug("Timeout waiting for SSE endpoint URL.");
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Exception waiting for SSE endpoint URL.");
+                }
             }
 
             if (_messageUrl == null)
