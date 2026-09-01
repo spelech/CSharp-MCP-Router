@@ -83,10 +83,8 @@ namespace ModelContextGateway.Components.Capabilities
                     var activeSession = sessionManager.GetSession(globalSessionId);
                     if (activeSession == null)
                     {
-                        logger.LogWarning("Global session not found for stateless request: {Method}", method);
-                        httpContext.Response.StatusCode = 404;
-                        await httpContext.Response.WriteAsJsonAsync(new { error = "Session not found." });
-                        return;
+                        bool isMetaMode = httpContext.Request.Query["meta"] != "false";
+                        activeSession = await sessionManager.CreateSessionAsync(globalSessionId, httpContext.Response, targetServerId: null, isMetaMode);
                     }
 
                     sessionManager.IncrementTotalRequests();
