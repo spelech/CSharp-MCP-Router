@@ -168,7 +168,23 @@ namespace ModelContextGateway.Components.Clients
                 }
 
                 var identity = new ClaimsIdentity(result.Principal.Claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-                identity.SetDestinations(static claim => new[] { OpenIddictConstants.Destinations.AccessToken });
+                var scopes = result.Principal.GetScopes();
+                if (scopes.Any())
+                {
+                    identity.SetScopes(scopes);
+                }
+                var resources = result.Principal.GetResources();
+                if (resources.Any())
+                {
+                    identity.SetResources(resources);
+                }
+
+                identity.SetDestinations(static claim => claim.Type switch
+                {
+                    OpenIddictConstants.Claims.Subject or OpenIddictConstants.Claims.Name or OpenIddictConstants.Claims.Email or ClaimTypes.Name or ClaimTypes.Email =>
+                        new[] { OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken },
+                    _ => new[] { OpenIddictConstants.Destinations.AccessToken }
+                });
 
                 return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             }
@@ -244,7 +260,23 @@ namespace ModelContextGateway.Components.Clients
                     claims.Add(new Claim(OpenIddictConstants.Claims.Subject, username));
                 }
                 var identity = new ClaimsIdentity(claims, OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
-                identity.SetDestinations(static claim => new[] { OpenIddictConstants.Destinations.AccessToken });
+                var requestedScopes = request.GetScopes();
+                if (requestedScopes.Any())
+                {
+                    identity.SetScopes(requestedScopes);
+                }
+                var requestedResources = request.GetResources();
+                if (requestedResources.Any())
+                {
+                    identity.SetResources(requestedResources);
+                }
+
+                identity.SetDestinations(static claim => claim.Type switch
+                {
+                    OpenIddictConstants.Claims.Subject or OpenIddictConstants.Claims.Name or OpenIddictConstants.Claims.Email or ClaimTypes.Name or ClaimTypes.Email =>
+                        new[] { OpenIddictConstants.Destinations.AccessToken, OpenIddictConstants.Destinations.IdentityToken },
+                    _ => new[] { OpenIddictConstants.Destinations.AccessToken }
+                });
 
                 return SignIn(new ClaimsPrincipal(identity), OpenIddictServerAspNetCoreDefaults.AuthenticationScheme);
             }

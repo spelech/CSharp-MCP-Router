@@ -17,9 +17,9 @@ describe('ConsentView Component', () => {
    * @requirement AUTH-109
    * @category AUTH
    * @type PositiveFeature
-   * @description ConsentView properly renders the client name from query string and builds correct form action.
+   * @description ConsentView properly renders the client name from query string and builds correct form action with hidden inputs.
    */
-  it('renders client name from query string and sets form action', () => {
+  it('renders client name from query string and sets form action and hidden inputs', () => {
     const { container } = render(<ConsentView />);
     
     expect(screen.getByText(/Authorize Access/i)).toBeInTheDocument();
@@ -27,5 +27,9 @@ describe('ConsentView Component', () => {
     
     const form = container.querySelector('form');
     expect(form?.getAttribute('action')).toBe('/connect/authorize?client_id=123&client_name=Slack%20App');
+    
+    const clientIdInput = container.querySelector('input[name="client_id"]') as HTMLInputElement;
+    expect(clientIdInput).toBeInTheDocument();
+    expect(clientIdInput?.value).toBe('123');
   });
 });
