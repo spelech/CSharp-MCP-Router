@@ -94,19 +94,18 @@ namespace ModelContextGateway.Core.Routing
 
             foreach (var item in toolItems)
             {
-                if (!_embeddingsCache.TryGetValue(item.TextToEmbed, out var toolVector) || toolVector == null)
+                double vectorScore = 0;
+                if (_embeddingsCache.TryGetValue(item.TextToEmbed, out var toolVector) && toolVector != null)
                 {
-                    continue;
+                    vectorScore = embeddingService.CosineSimilarity(queryVector, toolVector);
                 }
-
-                double vectorScore = embeddingService.CosineSimilarity(queryVector, toolVector);
 
                 // Strong hybrid keyword boosting
                 double keywordBoost = 0;
                 var queryLower = query.ToLower();
                 var queryWords = queryLower
                     .Split(new[] { ' ', ',', '.', ';', ':', '-', '_', '/' }, StringSplitOptions.RemoveEmptyEntries)
-                    .Where(w => w.Length > 2)
+                    .Where(w => w.Length >= 2)
                     .ToList();
 
                 var nameLower = item.Name.ToLower();
@@ -145,7 +144,10 @@ namespace ModelContextGateway.Core.Routing
                 }
 
                 double finalScore = vectorScore + keywordBoost;
-                scoredTools.Add((item.Tool, finalScore));
+                if (vectorScore > 0 || keywordBoost > 0)
+                {
+                    scoredTools.Add((item.Tool, finalScore));
+                }
             }
 
             if (scoredTools.Count == 0)
@@ -170,7 +172,7 @@ namespace ModelContextGateway.Core.Routing
             var queryLower = query.ToLower();
             var queryWords = queryLower
                 .Split(new[] { ' ', ',', '.', ';', ':', '-', '_', '/' }, StringSplitOptions.RemoveEmptyEntries)
-                .Where(w => w.Length > 2)
+                .Where(w => w.Length >= 2)
                 .ToList();
 
             if (queryWords.Count == 0)

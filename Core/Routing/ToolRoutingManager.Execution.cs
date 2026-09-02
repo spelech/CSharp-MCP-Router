@@ -80,6 +80,40 @@ namespace ModelContextGateway.Core.Routing
                     tools.AddRange(_cachedTools);
                 }
 
+                // Cold-start fallback 1: Seed from SessionManager's global server cache
+                if (tools.Count == 0 && sessionManager != null)
+                {
+                    var globalCached = sessionManager.GetAllCachedTools();
+                    if (globalCached.Count > 0)
+                    {
+                        lock (_cacheLock)
+                        {
+                            _cachedTools.Clear();
+                            _cachedTools.AddRange(globalCached);
+                            _isCachePopulated = true;
+                        }
+                        tools.AddRange(globalCached);
+                    }
+                }
+
+                // Cold-start fallback 2: On-demand populate if still empty and backends exist
+                if (tools.Count == 0 && backendConnections.Any())
+                {
+                    try
+                    {
+                        await PopulateToolsCacheAsync("{\"jsonrpc\":\"2.0\",\"method\":\"tools/list\",\"id\":\"ondemand-list\"}", backendConnections, logger, servers, sessionManager);
+                        lock (_cacheLock)
+                        {
+                            tools.Clear();
+                            tools.AddRange(_cachedTools);
+                        }
+                    }
+                    catch (Exception exPop)
+                    {
+                        logger.LogWarning(exPop, "On-demand tools cache population failed during search_tools");
+                    }
+                }
+
                 if (filterAuthorizedToolsAsync != null)
                 {
                     tools = await filterAuthorizedToolsAsync(tools);

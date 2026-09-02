@@ -1,6 +1,6 @@
 # Model Context Gateway (MCG)
 
-![Version](https://img.shields.io/badge/version-v5.6.9-orange?style=for-the-badge)
+![Version](https://img.shields.io/badge/version-v5.7.0-orange?style=for-the-badge)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue?style=for-the-badge&logo=githubpages&logoColor=white)](https://spelech.github.io/model-context-gateway/)
 ![.NET 10.0](https://img.shields.io/badge/.NET-10.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
 ![MCP Spec](https://img.shields.io/badge/MCP%20Spec-2026--07--28-0052CC?style=for-the-badge)
@@ -237,6 +237,7 @@ For complete release history and version logs, see [**CHANGELOG.md**](CHANGELOG.
 
 | Version | Release Date | Summary of Key Changes |
 | :--- | :--- | :--- |
+| **`v5.7.0`** | 2026-09-02 | feat(transports): FastMCP / Streamable HTTP SSE Streaming Resolution, Meta-Mode Cold-Start Cache Recovery, and Downstream Protocol Test Suite. Fixed SSE multi-line and notification truncation in `HttpTransport.SendRequestAsync` allowing full accumulation of multi-event streams from FastMCP backends (Home Assistant MCP) and skipping intermediate notifications before the JSON-RPC response; added global server cache fallback and on-demand cache population in `search_tools` resolving cold-start empty tool listings; relaxed semantic search keyword filtering to preserve 2-character domain tokens (`ha`, `on`, `tv`, `ac`); and added comprehensive test coverage for downstream streaming protocols and tool routing (`TRANS-04`, `TRANS-05`, `TRANS-06`, `MCP-25`). |
 | **`v5.6.9`** | 2026-09-02 | fix(oauth): Enhanced OAuth 2.0 / OpenID Connect authorization code and token exchange scope, resource, and claim destination propagation for DCR clients (Google Gemini / Spark), and aligned reverse proxy routing rules for interactive consent screens. |
 | **`v5.6.8`** | 2026-09-02 | 🧪 Testing: Added error handling unit test coverage for `TokenExchangeSecretRetriever` verifying malformed and missing responses. |
 | **`v5.6.7`** | 2026-09-02 | 🧪 Testing: Added failure and error path unit test coverage for `DbKeyHelper.ResolveDbEncryptionKey` ensuring robust master key resolution resilience. |

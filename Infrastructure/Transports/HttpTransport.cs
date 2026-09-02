@@ -297,24 +297,69 @@ namespace ModelContextGateway.Infrastructure.Transports
             }
 
             string responseBody = string.Empty;
-            using (var stream = await resp.Content.ReadAsStreamAsync(linked.Token))
-            using (var reader = new StreamReader(stream))
+            var mediaType = resp.Content.Headers.ContentType?.MediaType?.ToLowerInvariant();
+            if (mediaType == "text/event-stream")
             {
+                using var stream = await resp.Content.ReadAsStreamAsync(linked.Token);
+                using var reader = new StreamReader(stream);
+                var currentDataLines = new List<string>();
                 string? line;
                 while ((line = await reader.ReadLineAsync(linked.Token)) != null)
                 {
                     var trimmed = line.Trim();
                     if (trimmed.StartsWith("data:"))
                     {
-                        responseBody = trimmed.Substring(5).Trim();
-                        break;
+                        currentDataLines.Add(trimmed.Substring(5).Trim());
                     }
-                    else if (trimmed.StartsWith("{"))
+                    else if (string.IsNullOrEmpty(trimmed) && currentDataLines.Count > 0)
                     {
-                        responseBody = trimmed;
-                        break;
+                        var eventJson = string.Join("\n", currentDataLines);
+                        currentDataLines.Clear();
+
+                        try
+                        {
+                            using var doc = JsonDocument.Parse(eventJson);
+                            var root = doc.RootElement;
+                            // Check if this event is a JSON-RPC response (has "result", "error", or an "id" without a notification "method")
+                            if (root.TryGetProperty("result", out _) ||
+                                root.TryGetProperty("error", out _) ||
+                                (root.TryGetProperty("id", out _) && !root.TryGetProperty("method", out _)))
+                            {
+                                responseBody = eventJson;
+                                break;
+                            }
+                        }
+                        catch
+                        {
+                            // Incomplete or non-JSON event payload; keep reading
+                        }
                     }
                 }
+
+                // If EOF reached without a trailing blank line, check buffered lines
+                if (string.IsNullOrEmpty(responseBody) && currentDataLines.Count > 0)
+                {
+                    var eventJson = string.Join("\n", currentDataLines);
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(eventJson);
+                        var root = doc.RootElement;
+                        if (root.TryGetProperty("result", out _) ||
+                            root.TryGetProperty("error", out _) ||
+                            (root.TryGetProperty("id", out _) && !root.TryGetProperty("method", out _)))
+                        {
+                            responseBody = eventJson;
+                        }
+                    }
+                    catch
+                    {
+                        responseBody = eventJson;
+                    }
+                }
+            }
+            else
+            {
+                responseBody = await resp.Content.ReadAsStringAsync(linked.Token);
             }
 
             _logger.LogDebug("[JSON-RPC Backend {ServerId} -> Gateway] {Payload}", _server.Id, PiiSanitizer.SanitizePayload(responseBody));

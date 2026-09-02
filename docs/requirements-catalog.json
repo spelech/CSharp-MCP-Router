@@ -1,10 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-09-02T03:57:41.9171093Z",
-    "totalRequirements": 184,
-    "positiveCount": 152,
+    "generatedAt": "2026-09-02T04:27:33.2683494Z",
+    "totalRequirements": 188,
+    "positiveCount": 156,
     "guardrailCount": 32,
-    "totalProofs": 837
+    "totalProofs": 841
   },
   "requirements": [
     {
@@ -1175,7 +1175,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 173,
+          "lineNumber": 174,
           "testName": "ExecuteTargetToolAsync_Catches401_AndReturnsAuthPrompt",
           "details": null
         }
@@ -2431,21 +2431,21 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 93,
+          "lineNumber": 94,
           "testName": "CallToolAsync_ExecuteTool_ReturnsError_WhenNameMissing",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 120,
+          "lineNumber": 121,
           "testName": "CallToolAsync_ReturnsCancellationError_WhenCancelled",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 149,
+          "lineNumber": 150,
           "testName": "CallToolAsync_ThrowsKeyNotFound_WhenToolNotInRoutingTable",
           "details": null
         },
@@ -3712,14 +3712,14 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 34,
+          "lineNumber": 35,
           "testName": "ListToolsAsync_ReturnsMetaTools_InMetaMode",
           "details": null
         },
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 55,
+          "lineNumber": 56,
           "testName": "InvalidateCache_ClearsPopulatedState",
           "details": null
         },
@@ -4030,7 +4030,7 @@
         {
           "suite": "Backend xUnit",
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
-          "lineNumber": 64,
+          "lineNumber": 65,
           "testName": "CallToolAsync_SearchTools_ReturnsSemanticResults",
           "details": null
         },
@@ -4231,6 +4231,22 @@
           "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/McpSpecMiddlewareTests.cs",
           "lineNumber": 219,
           "testName": "Middleware_Extracts_Trace_Context_From_Headers_And_Meta",
+          "details": null
+        }
+      ]
+    },
+    {
+      "id": "MCP-25",
+      "category": "MCP",
+      "type": "Positive",
+      "description": "ToolRoutingManager falls back to SessionManager global server tools cache during cold-start search_tools execution",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/ToolRoutingManagerTests.cs",
+          "lineNumber": 182,
+          "testName": "CallToolAsync_SearchTools_FallsBackToGlobalSessionManagerCache_WhenLocalCacheEmpty",
           "details": null
         }
       ]
@@ -4941,7 +4957,7 @@
           "suite": "Frontend Vitest",
           "filePath": "/containers/dev/csharp-mcp-router/frontend/src/test/pages/ConsentView.test.tsx",
           "lineNumber": 16,
-          "testName": "renders client name from query string and sets form action",
+          "testName": "renders client name from query string and sets form action and hidden inputs",
           "details": null
         },
         {
@@ -6361,6 +6377,54 @@
           "lineNumber": 472,
           "testName": "StdioTransport_ShouldDrainReaderStreamsToEOF_WhenProcessExitsImmediately",
           "details": "Verifies that STDIO transport drains buffered stdout/stderr streams to EOF when process exits rapidly."
+        }
+      ]
+    },
+    {
+      "id": "TRANS-04",
+      "category": "TRANS",
+      "type": "Positive",
+      "description": "HTTP stateless transport correctly accumulates multi-line SSE streams and skips intermediate notification events",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs",
+          "lineNumber": 72,
+          "testName": "SendRequestAsync_ParsesSseStreamWithIntermediateNotifications",
+          "details": "Verifies that HTTP transport correctly parses FastMCP SSE streams containing intermediate notification events before the response."
+        }
+      ]
+    },
+    {
+      "id": "TRANS-05",
+      "category": "TRANS",
+      "type": "Positive",
+      "description": "HTTP stateless transport reads entire multi-line and formatted JSON response bodies without premature truncation",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs",
+          "lineNumber": 109,
+          "testName": "SendRequestAsync_ParsesFormattedMultiLineJsonPayload",
+          "details": "Verifies that HTTP transport parses indented / multi-line formatted JSON bodies without truncation."
+        }
+      ]
+    },
+    {
+      "id": "TRANS-06",
+      "category": "TRANS",
+      "type": "Positive",
+      "description": "HTTP stateless transport joins multi-line SSE data fields into complete JSON payloads",
+      "proofCount": 1,
+      "proofs": [
+        {
+          "suite": "Backend xUnit",
+          "filePath": "/containers/dev/csharp-mcp-router/ModelContextGateway.Tests/HttpTransportTests.cs",
+          "lineNumber": 146,
+          "testName": "SendRequestAsync_ParsesMultiLineDataLinesInSse",
+          "details": "Verifies that HTTP transport joins multi-line SSE data fields into a complete JSON payload."
         }
       ]
     },

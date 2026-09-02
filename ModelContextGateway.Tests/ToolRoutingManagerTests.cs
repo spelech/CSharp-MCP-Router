@@ -1,6 +1,7 @@
 using System.Collections.Concurrent;
 using Dapper;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 
@@ -178,5 +179,59 @@ namespace ModelContextGateway.Tests
             Assert.True(true);
         }
 
+        [Fact]
+        [Requirement("MCP-25", "ToolRoutingManager falls back to SessionManager global server tools cache during cold-start search_tools execution", Type = RequirementType.Positive, Category = "MCP")]
+        public async Task CallToolAsync_SearchTools_FallsBackToGlobalSessionManagerCache_WhenLocalCacheEmpty()
+        {
+            var manager = new ToolRoutingManager();
+            var (conn, dbFactory) = CreateDbFactory();
+            var connections = new ConcurrentDictionary<string, BackendConnection>();
+            var servers = new List<McpServer>
+            {
+                new McpServer { Id = "ha", Enabled = true, Url = "http://ha:8086/mcp", Type = "http" }
+            };
+
+            var services = new Microsoft.Extensions.DependencyInjection.ServiceCollection().BuildServiceProvider();
+            var mockFactory = new Mock<IHttpClientFactory>();
+            var sessionManager = new SessionManager(services, mockFactory.Object, NullLogger<SessionManager>.Instance);
+
+            var globalTools = new List<object>
+            {
+                new Dictionary<string, object>
+                {
+                    ["name"] = "ha__ha_call_service",
+                    ["description"] = "[ha] Execute Home Assistant services to control lights and switches"
+                },
+                new Dictionary<string, object>
+                {
+                    ["name"] = "ha__ha_search",
+                    ["description"] = "[ha] Search for entities (lights, sensors, nightstand) by name"
+                }
+            };
+            sessionManager.SetServerToolsCache("ha", globalTools);
+
+            var mockEmbedding = new Mock<IEmbeddingService>();
+            mockEmbedding.Setup(e => e.GetEmbeddingAsync(It.IsAny<string>())).ReturnsAsync(new float[384]);
+            mockEmbedding.Setup(e => e.CosineSimilarity(It.IsAny<float[]>(), It.IsAny<float[]>())).Returns(0.85);
+
+            var body = "{\"params\":{\"arguments\":{\"query\":\"nightstand light\"}}}";
+            var result = await manager.CallToolAsync(
+                "search_tools",
+                body,
+                dbFactory,
+                connections,
+                servers,
+                NullLogger.Instance,
+                new HttpClient(),
+                mockEmbedding.Object,
+                () => Task.CompletedTask,
+                (b, k, v) => b,
+                sessionManager: sessionManager
+            );
+
+            Assert.NotNull(result);
+            var resultJson = System.Text.Json.JsonSerializer.Serialize(result);
+            Assert.Contains("ha__ha_search", resultJson);
+        }
     }
 }

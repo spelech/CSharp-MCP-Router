@@ -15,6 +15,16 @@ namespace ModelContextGateway.Core.Routing
             return tools;
         }
 
+        public List<object> GetAllCachedTools()
+        {
+            var all = new List<object>();
+            foreach (var kvp in _serverToolsCache)
+            {
+                all.AddRange(kvp.Value);
+            }
+            return all;
+        }
+
         public void SetServerToolsCache(string serverId, List<object> tools)
         {
             _serverToolsCache[serverId] = tools;
