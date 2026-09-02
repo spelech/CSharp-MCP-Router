@@ -453,40 +453,60 @@ namespace ModelContextGateway.Core.Routing
             {
                 var identity = await ResolveUserIdentityAsync(httpContext);
 
+                var effectiveItemName = itemName;
+                if (itemName == "execute_tool" && !string.IsNullOrEmpty(payload))
+                {
+                    try
+                    {
+                        using var doc = JsonDocument.Parse(payload);
+                        if (doc.RootElement.TryGetProperty("params", out var pProp) &&
+                            pProp.TryGetProperty("arguments", out var aProp) &&
+                            aProp.TryGetProperty("name", out var nProp))
+                        {
+                            var target = nProp.GetString();
+                            if (!string.IsNullOrEmpty(target))
+                            {
+                                effectiveItemName = target;
+                            }
+                        }
+                    }
+                    catch { }
+                }
+
                 string serverId;
-                if (itemName.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
+                if (effectiveItemName.StartsWith("mcp://", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (Uri.TryCreate(itemName, UriKind.Absolute, out var parsedUri))
+                    if (Uri.TryCreate(effectiveItemName, UriKind.Absolute, out var parsedUri))
                     {
                         serverId = parsedUri.Host;
                     }
                     else
                     {
-                        serverId = itemName.Substring("mcp://".Length).Split('/')[0];
+                        serverId = effectiveItemName.Substring("mcp://".Length).Split('/')[0];
                     }
                 }
-                else if (itemName.StartsWith("logs://", StringComparison.OrdinalIgnoreCase))
+                else if (effectiveItemName.StartsWith("logs://", StringComparison.OrdinalIgnoreCase))
                 {
-                    if (Uri.TryCreate(itemName, UriKind.Absolute, out var parsedUri))
+                    if (Uri.TryCreate(effectiveItemName, UriKind.Absolute, out var parsedUri))
                     {
                         serverId = parsedUri.Host;
                     }
                     else
                     {
-                        serverId = itemName.Substring("logs://".Length).Split('/')[0];
+                        serverId = effectiveItemName.Substring("logs://".Length).Split('/')[0];
                     }
                 }
-                else if (itemName.StartsWith("router://", StringComparison.OrdinalIgnoreCase))
+                else if (effectiveItemName.StartsWith("router://", StringComparison.OrdinalIgnoreCase))
                 {
                     serverId = "router";
                 }
-                else if (itemName.Contains("__"))
+                else if (effectiveItemName.Contains("__"))
                 {
-                    serverId = itemName.Split("__", 2)[0];
+                    serverId = effectiveItemName.Split("__", 2)[0];
                 }
                 else
                 {
-                    serverId = itemName;
+                    serverId = effectiveItemName;
                 }
 
                 // Try to extract requestId from request payload
@@ -517,7 +537,7 @@ namespace ModelContextGateway.Core.Routing
                     identity.Username,
                     identity.AllSids.Count > 0 ? string.Join(";", identity.AllSids) : "",
                     serverId,
-                    itemName,
+                    effectiveItemName,
                     requestMethod,
                     (int)executionTimeMs,
                     statusCode,
